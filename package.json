@@ -1,1 +1,15 @@
-{"name":"p-n-p","version":"1.0.0","private":true,"scripts":{"validate:all":"node scripts/validation/validate.js"}}
+{
+  "name": "p-n-p",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:answers": "node scripts/generators/build_answer_pages.js",
+    "build:local": "node scripts/generators/build_local_pages.js",
+    "build:seasonal": "node scripts/generators/build_seasonal_pages.js",
+    "build:hubs": "node scripts/generators/build_hubs.js",
+    "build:sitemap": "node scripts/generators/update_sitemap.js",
+    "build:all": "npm run build:answers && npm run build:local && npm run build:seasonal && npm run build:hubs && npm run build:sitemap",
+    "publish:queue": "node scripts/generators/publish_from_queue.js",
+    "validate:all": "node scripts/validation/validate.js"
+  }
+}

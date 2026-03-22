@@ -1,0 +1,52 @@
+{
+  "brandName": "Porch & Party",
+  "domain": "https://porchandparty901.com",
+  "quoteUrl": "https://forms.gle/vHjfKtRRAnGV3HxFA",
+  "services": {
+    "porch": {
+      "name": "Seasonal Porch Decorating",
+      "slug": "/services/porch-decorating.html",
+      "price": "$350+",
+      "summary": "Seasonal porch installs for fall, Halloween, Christmas, and other moments when a home should feel finished, warm, and welcoming.",
+      "includes": [
+        "Design direction based on season and home style",
+        "On-site styling and installation",
+        "Visual layering for a more polished front-entry look"
+      ],
+      "notes": [
+        "Optional take-down is available for an additional fee.",
+        "Final pricing depends on scale, material choice, and setup complexity."
+      ]
+    },
+    "celebration": {
+      "name": "Celebration Setups",
+      "slug": "/services/celebration-setups.html",
+      "price": "$300+",
+      "summary": "Home and hotel-room setups for birthdays, surprises, romantic occasions, and personal celebrations that need a stronger visual touch.",
+      "includes": [
+        "Decor styling for home or hotel settings",
+        "Setup based on event type, age group, and tone",
+        "Visual details designed to feel polished and photo-ready"
+      ],
+      "notes": [
+        "Final pricing depends on setup size, location, and design complexity.",
+        "Hotel setups and private-home setups are quoted by scope."
+      ]
+    },
+    "grazing": {
+      "name": "Grazing Tables & Styled Setups",
+      "slug": "/services/grazing-and-event-styling.html",
+      "price": "$250+",
+      "summary": "Styling for grazing tables, showers, retreats, and event setups that need a cleaner, warmer, and more elevated presentation.",
+      "includes": [
+        "Table styling and visual layout",
+        "Decor coordination for grazing or hosting presentation",
+        "Setup designed for small events, showers, and professional gatherings"
+      ],
+      "notes": [
+        "Base pricing covers styling only.",
+        "Food is not included by default and can be sourced for an additional fee."
+      ]
+    }
+  }
+}
