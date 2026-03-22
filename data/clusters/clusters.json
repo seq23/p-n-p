@@ -1,6 +1,11 @@
 {
+  "authority": "authority_page",
   "faq": "answer_page",
-  "seasonal": "seasonal_page",
   "local": "local_page",
-  "hub": "hub_page"
+  "seasonal": "seasonal_page",
+  "guides": "guide_page",
+  "comparisons": "comparison_page",
+  "events": "event_type_page",
+  "corporate": "corporate_page",
+  "hubs": "hub_page"
 }

@@ -1,8 +1,48 @@
 [
   {
+    "slug": "party-planner-memphis",
+    "folder": "authority",
+    "path": "/authority/party-planner-memphis.html"
+  },
+  {
+    "slug": "event-decorator-memphis",
+    "folder": "authority",
+    "path": "/authority/event-decorator-memphis.html"
+  },
+  {
+    "slug": "hotel-room-decorations-memphis",
+    "folder": "local",
+    "path": "/local/hotel-room-decorations-memphis.html"
+  },
+  {
+    "slug": "birthday-decorations-at-home-memphis",
+    "folder": "local",
+    "path": "/local/birthday-decorations-at-home-memphis.html"
+  },
+  {
+    "slug": "grazing-tables-memphis",
+    "folder": "local",
+    "path": "/local/grazing-tables-memphis.html"
+  },
+  {
+    "slug": "romantic-room-decorations-memphis",
+    "folder": "local",
+    "path": "/local/romantic-room-decorations-memphis.html"
+  },
+  {
     "slug": "how-much-does-hotel-room-decor-cost-in-memphis",
     "folder": "faq",
     "path": "/faq/how-much-does-hotel-room-decor-cost-in-memphis.html"
+  },
+  {
+    "slug": "how-much-does-birthday-decoration-at-home-cost",
+    "folder": "faq",
+    "path": "/faq/how-much-does-birthday-decoration-at-home-cost.html"
+  },
+  {
+    "slug": "how-much-does-grazing-tables-cost",
+    "folder": "faq",
+    "path": "/faq/how-much-does-grazing-tables-cost.html"
   },
   {
     "slug": "do-party-decorators-come-to-your-house",
@@ -20,6 +60,31 @@
     "path": "/faq/how-far-in-advance-should-i-book-party-decor.html"
   },
   {
+    "slug": "how-long-does-it-take-to-set-up-party-decor",
+    "folder": "faq",
+    "path": "/faq/how-long-does-it-take-to-set-up-party-decor.html"
+  },
+  {
+    "slug": "last-minute-birthday-setup-ideas-memphis",
+    "folder": "guides",
+    "path": "/guides/last-minute-birthday-setup-ideas-memphis.html"
+  },
+  {
+    "slug": "how-to-decorate-a-hotel-room-for-a-romantic-surprise",
+    "folder": "guides",
+    "path": "/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html"
+  },
+  {
+    "slug": "diy-vs-hiring-party-decorator",
+    "folder": "comparisons",
+    "path": "/comparisons/diy-vs-hiring-party-decorator.html"
+  },
+  {
+    "slug": "balloon-garland-vs-full-birthday-setup",
+    "folder": "comparisons",
+    "path": "/comparisons/balloon-garland-vs-full-birthday-setup.html"
+  },
+  {
     "slug": "halloween-porch-decorating-memphis",
     "folder": "seasonal",
     "path": "/seasonal/halloween-porch-decorating-memphis.html"
@@ -30,19 +95,34 @@
     "path": "/seasonal/christmas-porch-decorating-memphis.html"
   },
   {
-    "slug": "hotel-room-decorations-memphis",
-    "folder": "local",
-    "path": "/local/hotel-room-decorations-memphis.html"
+    "slug": "baby-shower-decorations-memphis",
+    "folder": "events",
+    "path": "/events/baby-shower-decorations-memphis.html"
   },
   {
-    "slug": "birthday-decorations-at-home-memphis",
-    "folder": "local",
-    "path": "/local/birthday-decorations-at-home-memphis.html"
+    "slug": "bridal-shower-decorations-memphis",
+    "folder": "events",
+    "path": "/events/bridal-shower-decorations-memphis.html"
   },
   {
-    "slug": "grazing-tables-memphis",
-    "folder": "local",
-    "path": "/local/grazing-tables-memphis.html"
+    "slug": "proposal-room-setup-memphis",
+    "folder": "events",
+    "path": "/events/proposal-room-setup-memphis.html"
+  },
+  {
+    "slug": "anniversary-room-decorations-memphis",
+    "folder": "events",
+    "path": "/events/anniversary-room-decorations-memphis.html"
+  },
+  {
+    "slug": "corporate-event-decor-memphis",
+    "folder": "corporate",
+    "path": "/corporate/corporate-event-decor-memphis.html"
+  },
+  {
+    "slug": "corporate-grazing-tables-memphis",
+    "folder": "corporate",
+    "path": "/corporate/corporate-grazing-tables-memphis.html"
   },
   {
     "slug": "memphis-celebration-setups",
