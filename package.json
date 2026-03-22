@@ -1,0 +1,1 @@
+{"name":"p-n-p","version":"1.0.0","private":true,"scripts":{"validate:all":"node scripts/validation/validate.js"}}
