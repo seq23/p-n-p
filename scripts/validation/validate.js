@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..', '..');
 let failed = false;
-const required = ['index.html','pricing.html','how-it-works.html','contact.html','robots.txt','llms.txt','_headers','_redirects','README.md','package.json','.gitignore','services/porch-decorating.html','services/celebration-setups.html','services/grazing-and-event-styling.html','assets/css/styles.css','data/offers/services.json','data/queries/query_universe.json','scripts/generators/build_pages.js','scripts/generators/update_sitemap.js'];
+const required = ['index.html','pricing.html','how-it-works.html','contact.html','privacy-policy.html','terms-and-conditions.html','robots.txt','llms.txt','_headers','_redirects','README.md','package.json','.gitignore','services/porch-decorating.html','services/celebration-setups.html','services/grazing-and-event-styling.html','assets/css/styles.css','data/offers/services.json','data/queries/query_universe.json','scripts/generators/build_pages.js','scripts/generators/update_sitemap.js','.github/workflows/velocity-weekly.yml','.github/workflows/monthly-audit.yml'];
 for (const rel of required) {
   if (!fs.existsSync(path.join(root, rel))) {
     console.error(`Missing required file: ${rel}`);
@@ -27,8 +27,7 @@ for (const file of htmlFiles) {
   const checks = [
     ['title', /<title>.+<\/title>/i],
     ['canonical', /<link rel="canonical" href="[^"]+"/i],
-    ['json-ld', /<script type="application\/ld\+json">[\s\S]*?<\/script>/i],
-    ['top CTA', /Request a Quote|Start Your Request/i]
+    ['json-ld', /<script type="application\/ld\+json">[\s\S]*?<\/script>/i]
   ];
   for (const [label, re] of checks) {
     if (!re.test(html)) {
@@ -36,8 +35,27 @@ for (const file of htmlFiles) {
       failed = true;
     }
   }
+  const legalChecks = [
+    ['All rights reserved', /All rights reserved/i],
+    ['Kerseta LLC', /Kerseta LLC/i],
+    ['hello email', /hello@porchandparty901\.com/i],
+    ['privacy link', /href="\/privacy-policy\.html"/i],
+    ['terms link', /href="\/terms-and-conditions\.html"/i]
+  ];
+  for (const [label, re] of legalChecks) {
+    if (!re.test(html)) {
+      console.error(`Validation failed in ${rel}: missing ${label}`);
+      failed = true;
+    }
+  }
+  const isLegalPage = rel === 'privacy-policy.html' || rel === 'terms-and-conditions.html';
+  const hasContactPath = /Request a Quote|Start Your Request/i.test(html);
+  if (!isLegalPage && !hasContactPath) {
+    console.error(`Validation failed in ${rel}: missing CTA text`);
+    failed = true;
+  }
   const ctaMatches = html.match(/Request a Quote|Start Your Request/g) || [];
-  if (ctaMatches.length < 3) {
+  if (!isLegalPage && ctaMatches.length < 3) {
     console.error(`Validation failed in ${rel}: fewer than 3 CTA mentions`);
     failed = true;
   }
@@ -76,16 +94,16 @@ const homepage = fs.readFileSync(path.join(root, 'index.html'),'utf8');
 const expected = 'https://porchandparty901.com/';
 const canonical = (homepage.match(/<link rel="canonical" href="([^"]+)"/i)||[])[1];
 const ogUrl = (homepage.match(/<meta property="og:url" content="([^"]+)"/i)||[])[1];
-const schemaMatch = homepage.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/i);
+const schemaMatches = [...homepage.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/ig)];
 let schemaUrl = '';
-if (schemaMatch) {
+for (const m of schemaMatches) {
   try {
-    const obj = JSON.parse(schemaMatch[1]);
-    schemaUrl = obj.url || '';
-  } catch {
-    console.error('Validation failed in index.html: invalid homepage JSON-LD');
-    failed = true;
-  }
+    const obj = JSON.parse(m[1]);
+    if (obj['@type'] === 'LocalBusiness') {
+      schemaUrl = obj.url || '';
+      break;
+    }
+  } catch {}
 }
 if (canonical !== expected || ogUrl !== expected || schemaUrl !== expected) {
   console.error('Validation failed in index.html: homepage root URL contract mismatch');
@@ -93,6 +111,21 @@ if (canonical !== expected || ogUrl !== expected || schemaUrl !== expected) {
 }
 if (!/href="\/"/i.test(homepage)) {
   console.error('Validation failed in index.html: brand link must point to /');
+  failed = true;
+}
+const celebration = fs.readFileSync(path.join(root, 'services/celebration-setups.html'),'utf8');
+if (!/Availability is not guaranteed until your request is confirmed\./i.test(celebration)) {
+  console.error('Validation failed in services/celebration-setups.html: missing celebration disclaimer');
+  failed = true;
+}
+const porch = fs.readFileSync(path.join(root, 'services/porch-decorating.html'),'utf8');
+if (!/take-down/i.test(porch)) {
+  console.error('Validation failed in services/porch-decorating.html: missing take-down note');
+  failed = true;
+}
+const grazing = fs.readFileSync(path.join(root, 'services/grazing-and-event-styling.html'),'utf8');
+if (!/food is not included/i.test(grazing) || !/additional fee/i.test(grazing)) {
+  console.error('Validation failed in services/grazing-and-event-styling.html: missing grazing disclaimer');
   failed = true;
 }
 const queryUniverse = JSON.parse(fs.readFileSync(path.join(root,'data/queries/query_universe.json'),'utf8'));
@@ -106,6 +139,13 @@ for (const entry of queryUniverse) {
   const pagePath = path.join(root, entry.folder, `${entry.slug}.html`);
   if (!fs.existsSync(pagePath)) {
     console.error(`Validation failed: generated page missing ${entry.folder}/${entry.slug}.html`);
+    failed = true;
+  }
+}
+const sitemap = fs.readFileSync(path.join(root,'sitemap.xml'),'utf8');
+for (const loc of ['https://porchandparty901.com/privacy-policy.html','https://porchandparty901.com/terms-and-conditions.html']) {
+  if (!sitemap.includes(loc)) {
+    console.error(`Validation failed: sitemap missing ${loc}`);
     failed = true;
   }
 }
