@@ -1,3 +1,29 @@
 # Porch & Party
 
-Porch & Party provides seasonal porch decorating, celebration setups, and styled event decor across the Memphis metro area.
+Canonical-Domain: https://porchandparty901.com
+Business: Porch & Party
+Region: Memphis metro area
+
+Summary:
+Porch & Party provides seasonal porch decorating, celebration setups, hotel-room decor, and styled grazing-table or event setups across Memphis, Germantown, Collierville, Bartlett, Lakeland, Arlington, Southaven, and Olive Branch.
+
+Priority-URLs:
+https://porchandparty901.com/
+https://porchandparty901.com/services/porch-decorating.html
+https://porchandparty901.com/services/celebration-setups.html
+https://porchandparty901.com/services/grazing-and-event-styling.html
+https://porchandparty901.com/pricing.html
+https://porchandparty901.com/how-it-works.html
+https://porchandparty901.com/contact.html
+
+Service-Notes:
+- Seasonal porch decorating includes fall, Halloween, Christmas, and related seasonal installs.
+- Celebration setups include home and hotel-room installs for birthdays, romantic moments, surprises, and personal celebrations.
+- Grazing-table pricing is styling-only by default; food is not included unless specifically quoted.
+
+Booking-Notes:
+- Quotes are custom based on scope, location, date, and setup needs.
+- Availability is not guaranteed until a request is confirmed.
+
+Audience:
+Clients in the Memphis metro area looking for polished decor and setup support for homes, hotel rooms, and small event environments.
