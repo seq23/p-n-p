@@ -1,0 +1,20 @@
+{
+  "id": "halloween-porch-decorating-memphis",
+  "query": "Is take-down included?",
+  "direct_answer": "Porch & Party offers Halloween porch decorating in Memphis for clients who want the front of the home to feel seasonal, welcoming, and visually strong without handling the install themselves.",
+  "service": "Seasonal Porch Decorating",
+  "service_key": "porch",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Bartlett, TN"
+  ],
+  "canonical_page": "/seasonal/halloween-porch-decorating-memphis.html",
+  "answer_page": "/answers/halloween-porch-decorating-memphis.html",
+  "json_url": "/answers/halloween-porch-decorating-memphis.json",
+  "best_for": "This page is for Memphis-area homeowners who want a polished Halloween look without turning the entry into a cluttered DIY project.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "corporate-event-decor-memphis",
+  "query": "Does corporate event decor have to be elaborate to feel polished?",
+  "direct_answer": "Porch & Party provides corporate event decor in Memphis for businesses that want a cleaner, more intentional visual setup for hosted gatherings, retreats, and internal or client-facing events.",
+  "service": "Grazing Tables & Styled Setups",
+  "service_key": "grazing",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Arlington, TN"
+  ],
+  "canonical_page": "/corporate/corporate-event-decor-memphis.html",
+  "answer_page": "/answers/corporate-event-decor-memphis.html",
+  "json_url": "/answers/corporate-event-decor-memphis.json",
+  "best_for": "This page is for Memphis-area teams and organizers who need the room to look more finished and event-ready without hiring a massive event production vendor.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

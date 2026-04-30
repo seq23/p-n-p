@@ -1,0 +1,20 @@
+{
+  "id": "christmas-porch-decorating-memphis",
+  "query": "Can the setup be customized?",
+  "direct_answer": "Porch & Party offers Christmas porch decorating in Memphis for clients who want a holiday-ready entry without managing the setup, styling, and visual details themselves.",
+  "service": "Seasonal Porch Decorating",
+  "service_key": "porch",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Collierville, TN",
+    "Lakeland, TN"
+  ],
+  "canonical_page": "/seasonal/christmas-porch-decorating-memphis.html",
+  "answer_page": "/answers/christmas-porch-decorating-memphis.html",
+  "json_url": "/answers/christmas-porch-decorating-memphis.json",
+  "best_for": "This is for Memphis-area homeowners who want the front porch to look festive, cohesive, and clean for the holiday season.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

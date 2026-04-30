@@ -1,0 +1,20 @@
+{
+  "id": "how-far-in-advance-should-i-book-party-decor",
+  "query": "What should be booked earliest?",
+  "direct_answer": "Earlier is better, especially for seasonal porch installs, weekends, hotel surprises, and dates tied to birthdays or milestone events. Porch & Party can still review shorter-notice requests, but availability is never guaranteed until confirmed.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "informational",
+  "cities": [
+    "Memphis, TN",
+    "Arlington, TN",
+    "Olive Branch, MS"
+  ],
+  "canonical_page": "/faq/how-far-in-advance-should-i-book-party-decor.html",
+  "answer_page": "/answers/how-far-in-advance-should-i-book-party-decor.html",
+  "json_url": "/answers/how-far-in-advance-should-i-book-party-decor.json",
+  "best_for": "This page is for buyers who are trying to decide whether they are planning early, already late, or still have enough time to get a styled setup done well.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

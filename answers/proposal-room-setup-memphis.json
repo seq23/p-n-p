@@ -1,0 +1,20 @@
+{
+  "id": "proposal-room-setup-memphis",
+  "query": "Can proposal setups work outside of hotels?",
+  "direct_answer": "Porch & Party provides proposal room setups in Memphis for clients who want the space styled before the moment happens, whether the setting is a hotel, home, or another private space.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Olive Branch, MS"
+  ],
+  "canonical_page": "/events/proposal-room-setup-memphis.html",
+  "answer_page": "/answers/proposal-room-setup-memphis.html",
+  "json_url": "/answers/proposal-room-setup-memphis.json",
+  "best_for": "This page is for Memphis-area clients planning a proposal and wanting the room or setup area prepared in advance without handling the decor themselves.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

@@ -1,0 +1,1350 @@
+{
+  "updated": "2026-04-29",
+  "scope": "Memphis metro only",
+  "rows": [
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Memphis, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Seasonal Porch Decorating for birthday in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Memphis, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Seasonal Porch Decorating for anniversary in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Memphis, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Seasonal Porch Decorating for proposal in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Memphis, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Seasonal Porch Decorating for romantic surprise in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Memphis, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Seasonal Porch Decorating for baby shower in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Memphis, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Seasonal Porch Decorating for bridal shower in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Memphis, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Seasonal Porch Decorating for corporate appreciation in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Memphis, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Seasonal Porch Decorating for holiday party in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Germantown, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Seasonal Porch Decorating for birthday in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Germantown, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Seasonal Porch Decorating for anniversary in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Germantown, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Seasonal Porch Decorating for proposal in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Germantown, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Seasonal Porch Decorating for romantic surprise in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Germantown, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Seasonal Porch Decorating for baby shower in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Germantown, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Seasonal Porch Decorating for bridal shower in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Germantown, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Seasonal Porch Decorating for corporate appreciation in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Germantown, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Seasonal Porch Decorating for holiday party in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Collierville, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Seasonal Porch Decorating for birthday in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Collierville, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Seasonal Porch Decorating for anniversary in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Collierville, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Seasonal Porch Decorating for proposal in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Collierville, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Seasonal Porch Decorating for romantic surprise in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Collierville, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Seasonal Porch Decorating for baby shower in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Collierville, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Seasonal Porch Decorating for bridal shower in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Collierville, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Seasonal Porch Decorating for corporate appreciation in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Collierville, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Seasonal Porch Decorating for holiday party in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Bartlett, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Seasonal Porch Decorating for birthday in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Bartlett, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Seasonal Porch Decorating for anniversary in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Bartlett, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Seasonal Porch Decorating for proposal in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Bartlett, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Seasonal Porch Decorating for romantic surprise in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Bartlett, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Seasonal Porch Decorating for baby shower in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Bartlett, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Seasonal Porch Decorating for bridal shower in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Bartlett, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Seasonal Porch Decorating for corporate appreciation in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Bartlett, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Seasonal Porch Decorating for holiday party in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Lakeland, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Seasonal Porch Decorating for birthday in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Lakeland, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Seasonal Porch Decorating for anniversary in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Lakeland, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Seasonal Porch Decorating for proposal in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Lakeland, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Seasonal Porch Decorating for romantic surprise in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Lakeland, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Seasonal Porch Decorating for baby shower in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Lakeland, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Seasonal Porch Decorating for bridal shower in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Lakeland, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Seasonal Porch Decorating for corporate appreciation in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Lakeland, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Seasonal Porch Decorating for holiday party in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Arlington, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Seasonal Porch Decorating for birthday in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Arlington, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Seasonal Porch Decorating for anniversary in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Arlington, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Seasonal Porch Decorating for proposal in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Arlington, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Seasonal Porch Decorating for romantic surprise in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Arlington, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Seasonal Porch Decorating for baby shower in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Arlington, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Seasonal Porch Decorating for bridal shower in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Arlington, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Seasonal Porch Decorating for corporate appreciation in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Arlington, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Seasonal Porch Decorating for holiday party in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Southaven, MS",
+      "occasion": "birthday",
+      "intent_phrase": "Seasonal Porch Decorating for birthday in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Southaven, MS",
+      "occasion": "anniversary",
+      "intent_phrase": "Seasonal Porch Decorating for anniversary in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Southaven, MS",
+      "occasion": "proposal",
+      "intent_phrase": "Seasonal Porch Decorating for proposal in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Southaven, MS",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Seasonal Porch Decorating for romantic surprise in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Southaven, MS",
+      "occasion": "baby shower",
+      "intent_phrase": "Seasonal Porch Decorating for baby shower in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Southaven, MS",
+      "occasion": "bridal shower",
+      "intent_phrase": "Seasonal Porch Decorating for bridal shower in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Southaven, MS",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Seasonal Porch Decorating for corporate appreciation in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Southaven, MS",
+      "occasion": "holiday party",
+      "intent_phrase": "Seasonal Porch Decorating for holiday party in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Olive Branch, MS",
+      "occasion": "birthday",
+      "intent_phrase": "Seasonal Porch Decorating for birthday in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Olive Branch, MS",
+      "occasion": "anniversary",
+      "intent_phrase": "Seasonal Porch Decorating for anniversary in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Olive Branch, MS",
+      "occasion": "proposal",
+      "intent_phrase": "Seasonal Porch Decorating for proposal in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Olive Branch, MS",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Seasonal Porch Decorating for romantic surprise in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Olive Branch, MS",
+      "occasion": "baby shower",
+      "intent_phrase": "Seasonal Porch Decorating for baby shower in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Olive Branch, MS",
+      "occasion": "bridal shower",
+      "intent_phrase": "Seasonal Porch Decorating for bridal shower in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Olive Branch, MS",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Seasonal Porch Decorating for corporate appreciation in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Seasonal Porch Decorating",
+      "city": "Olive Branch, MS",
+      "occasion": "holiday party",
+      "intent_phrase": "Seasonal Porch Decorating for holiday party in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Memphis, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Celebration Setups for birthday in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Memphis, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Celebration Setups for anniversary in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Memphis, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Celebration Setups for proposal in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Memphis, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Celebration Setups for romantic surprise in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Memphis, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Celebration Setups for baby shower in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Memphis, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Celebration Setups for bridal shower in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Memphis, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Celebration Setups for corporate appreciation in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Memphis, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Celebration Setups for holiday party in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Germantown, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Celebration Setups for birthday in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Germantown, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Celebration Setups for anniversary in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Germantown, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Celebration Setups for proposal in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Germantown, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Celebration Setups for romantic surprise in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Germantown, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Celebration Setups for baby shower in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Germantown, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Celebration Setups for bridal shower in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Germantown, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Celebration Setups for corporate appreciation in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Germantown, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Celebration Setups for holiday party in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Collierville, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Celebration Setups for birthday in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Collierville, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Celebration Setups for anniversary in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Collierville, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Celebration Setups for proposal in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Collierville, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Celebration Setups for romantic surprise in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Collierville, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Celebration Setups for baby shower in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Collierville, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Celebration Setups for bridal shower in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Collierville, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Celebration Setups for corporate appreciation in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Collierville, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Celebration Setups for holiday party in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Bartlett, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Celebration Setups for birthday in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Bartlett, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Celebration Setups for anniversary in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Bartlett, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Celebration Setups for proposal in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Bartlett, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Celebration Setups for romantic surprise in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Bartlett, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Celebration Setups for baby shower in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Bartlett, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Celebration Setups for bridal shower in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Bartlett, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Celebration Setups for corporate appreciation in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Bartlett, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Celebration Setups for holiday party in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Lakeland, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Celebration Setups for birthday in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Lakeland, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Celebration Setups for anniversary in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Lakeland, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Celebration Setups for proposal in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Lakeland, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Celebration Setups for romantic surprise in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Lakeland, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Celebration Setups for baby shower in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Lakeland, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Celebration Setups for bridal shower in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Lakeland, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Celebration Setups for corporate appreciation in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Lakeland, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Celebration Setups for holiday party in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Arlington, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Celebration Setups for birthday in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Arlington, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Celebration Setups for anniversary in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Arlington, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Celebration Setups for proposal in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Arlington, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Celebration Setups for romantic surprise in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Arlington, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Celebration Setups for baby shower in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Arlington, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Celebration Setups for bridal shower in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Arlington, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Celebration Setups for corporate appreciation in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Arlington, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Celebration Setups for holiday party in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Southaven, MS",
+      "occasion": "birthday",
+      "intent_phrase": "Celebration Setups for birthday in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Southaven, MS",
+      "occasion": "anniversary",
+      "intent_phrase": "Celebration Setups for anniversary in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Southaven, MS",
+      "occasion": "proposal",
+      "intent_phrase": "Celebration Setups for proposal in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Southaven, MS",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Celebration Setups for romantic surprise in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Southaven, MS",
+      "occasion": "baby shower",
+      "intent_phrase": "Celebration Setups for baby shower in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Southaven, MS",
+      "occasion": "bridal shower",
+      "intent_phrase": "Celebration Setups for bridal shower in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Southaven, MS",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Celebration Setups for corporate appreciation in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Southaven, MS",
+      "occasion": "holiday party",
+      "intent_phrase": "Celebration Setups for holiday party in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "birthday",
+      "intent_phrase": "Celebration Setups for birthday in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "anniversary",
+      "intent_phrase": "Celebration Setups for anniversary in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "proposal",
+      "intent_phrase": "Celebration Setups for proposal in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Celebration Setups for romantic surprise in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "baby shower",
+      "intent_phrase": "Celebration Setups for baby shower in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "bridal shower",
+      "intent_phrase": "Celebration Setups for bridal shower in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Celebration Setups for corporate appreciation in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Celebration Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "holiday party",
+      "intent_phrase": "Celebration Setups for holiday party in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Memphis, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Grazing Tables & Styled Setups for birthday in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Memphis, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Grazing Tables & Styled Setups for anniversary in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Memphis, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Grazing Tables & Styled Setups for proposal in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Memphis, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Grazing Tables & Styled Setups for romantic surprise in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Memphis, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for baby shower in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Memphis, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for bridal shower in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Memphis, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Grazing Tables & Styled Setups for corporate appreciation in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Memphis, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Grazing Tables & Styled Setups for holiday party in Memphis, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Germantown, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Grazing Tables & Styled Setups for birthday in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Germantown, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Grazing Tables & Styled Setups for anniversary in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Germantown, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Grazing Tables & Styled Setups for proposal in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Germantown, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Grazing Tables & Styled Setups for romantic surprise in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Germantown, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for baby shower in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Germantown, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for bridal shower in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Germantown, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Grazing Tables & Styled Setups for corporate appreciation in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Germantown, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Grazing Tables & Styled Setups for holiday party in Germantown, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Collierville, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Grazing Tables & Styled Setups for birthday in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Collierville, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Grazing Tables & Styled Setups for anniversary in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Collierville, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Grazing Tables & Styled Setups for proposal in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Collierville, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Grazing Tables & Styled Setups for romantic surprise in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Collierville, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for baby shower in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Collierville, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for bridal shower in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Collierville, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Grazing Tables & Styled Setups for corporate appreciation in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Collierville, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Grazing Tables & Styled Setups for holiday party in Collierville, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Bartlett, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Grazing Tables & Styled Setups for birthday in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Bartlett, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Grazing Tables & Styled Setups for anniversary in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Bartlett, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Grazing Tables & Styled Setups for proposal in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Bartlett, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Grazing Tables & Styled Setups for romantic surprise in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Bartlett, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for baby shower in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Bartlett, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for bridal shower in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Bartlett, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Grazing Tables & Styled Setups for corporate appreciation in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Bartlett, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Grazing Tables & Styled Setups for holiday party in Bartlett, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Lakeland, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Grazing Tables & Styled Setups for birthday in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Lakeland, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Grazing Tables & Styled Setups for anniversary in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Lakeland, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Grazing Tables & Styled Setups for proposal in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Lakeland, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Grazing Tables & Styled Setups for romantic surprise in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Lakeland, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for baby shower in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Lakeland, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for bridal shower in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Lakeland, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Grazing Tables & Styled Setups for corporate appreciation in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Lakeland, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Grazing Tables & Styled Setups for holiday party in Lakeland, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Arlington, TN",
+      "occasion": "birthday",
+      "intent_phrase": "Grazing Tables & Styled Setups for birthday in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Arlington, TN",
+      "occasion": "anniversary",
+      "intent_phrase": "Grazing Tables & Styled Setups for anniversary in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Arlington, TN",
+      "occasion": "proposal",
+      "intent_phrase": "Grazing Tables & Styled Setups for proposal in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Arlington, TN",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Grazing Tables & Styled Setups for romantic surprise in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Arlington, TN",
+      "occasion": "baby shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for baby shower in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Arlington, TN",
+      "occasion": "bridal shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for bridal shower in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Arlington, TN",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Grazing Tables & Styled Setups for corporate appreciation in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Arlington, TN",
+      "occasion": "holiday party",
+      "intent_phrase": "Grazing Tables & Styled Setups for holiday party in Arlington, TN",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Southaven, MS",
+      "occasion": "birthday",
+      "intent_phrase": "Grazing Tables & Styled Setups for birthday in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Southaven, MS",
+      "occasion": "anniversary",
+      "intent_phrase": "Grazing Tables & Styled Setups for anniversary in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Southaven, MS",
+      "occasion": "proposal",
+      "intent_phrase": "Grazing Tables & Styled Setups for proposal in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Southaven, MS",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Grazing Tables & Styled Setups for romantic surprise in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Southaven, MS",
+      "occasion": "baby shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for baby shower in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Southaven, MS",
+      "occasion": "bridal shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for bridal shower in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Southaven, MS",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Grazing Tables & Styled Setups for corporate appreciation in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Southaven, MS",
+      "occasion": "holiday party",
+      "intent_phrase": "Grazing Tables & Styled Setups for holiday party in Southaven, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "birthday",
+      "intent_phrase": "Grazing Tables & Styled Setups for birthday in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "anniversary",
+      "intent_phrase": "Grazing Tables & Styled Setups for anniversary in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "proposal",
+      "intent_phrase": "Grazing Tables & Styled Setups for proposal in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "romantic surprise",
+      "intent_phrase": "Grazing Tables & Styled Setups for romantic surprise in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "baby shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for baby shower in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "bridal shower",
+      "intent_phrase": "Grazing Tables & Styled Setups for bridal shower in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "corporate appreciation",
+      "intent_phrase": "Grazing Tables & Styled Setups for corporate appreciation in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    },
+    {
+      "service": "Grazing Tables & Styled Setups",
+      "city": "Olive Branch, MS",
+      "occasion": "holiday party",
+      "intent_phrase": "Grazing Tables & Styled Setups for holiday party in Olive Branch, MS",
+      "recommended_surface": "clustered answer card, not standalone spam page"
+    }
+  ]
+}

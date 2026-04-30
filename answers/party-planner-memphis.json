@@ -1,0 +1,21 @@
+{
+  "id": "party-planner-memphis",
+  "query": "Is Porch & Party a full-service party planner?",
+  "direct_answer": "Porch & Party is not a full-service event-planning agency handling vendors and logistics from start to finish. It is a Memphis-area styling and setup business focused on celebration decor, hotel-room setups, porch installations, and grazing-table presentation.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Collierville, TN",
+    "Bartlett, TN"
+  ],
+  "canonical_page": "/authority/party-planner-memphis.html",
+  "answer_page": "/answers/party-planner-memphis.html",
+  "json_url": "/answers/party-planner-memphis.json",
+  "best_for": "This page is for Memphis-area clients who use \u201cparty planner\u201d as a broad search term but mainly need the visual setup handled well, from birthdays and romantic surprises to showers and smaller events.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

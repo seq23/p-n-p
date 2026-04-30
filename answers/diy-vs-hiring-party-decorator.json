@@ -1,0 +1,20 @@
+{
+  "id": "diy-vs-hiring-party-decorator",
+  "query": "When is hiring a decorator most worth it?",
+  "direct_answer": "DIY is best when the setup is simple, time is flexible, and visual polish is not the main priority. Hiring a decorator makes more sense when the event needs to feel cleaner, stronger, and ready without you spending the day setting it up.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Collierville, TN"
+  ],
+  "canonical_page": "/comparisons/diy-vs-hiring-party-decorator.html",
+  "answer_page": "/answers/diy-vs-hiring-party-decorator.html",
+  "json_url": "/answers/diy-vs-hiring-party-decorator.json",
+  "best_for": "This page is for buyers who are still deciding whether to handle the decor themselves or pay for help.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

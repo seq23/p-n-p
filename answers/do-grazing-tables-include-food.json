@@ -1,0 +1,20 @@
+{
+  "id": "do-grazing-tables-include-food",
+  "query": "Can food be added later?",
+  "direct_answer": "No. Porch & Party grazing-table starting pricing covers styling only. Food is not included by default, but food sourcing can be requested for an additional fee.",
+  "service": "Grazing Tables & Styled Setups",
+  "service_key": "grazing",
+  "intent": "informational",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Arlington, TN"
+  ],
+  "canonical_page": "/faq/do-grazing-tables-include-food.html",
+  "answer_page": "/answers/do-grazing-tables-include-food.html",
+  "json_url": "/answers/do-grazing-tables-include-food.json",
+  "best_for": "This page is for hosts and organizers who need to know whether the visible grazing-table price includes food before they submit a quote request.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

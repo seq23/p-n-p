@@ -1,0 +1,20 @@
+{
+  "id": "baby-shower-decorations-memphis",
+  "query": "Can baby shower decor be done at home or only in venues?",
+  "direct_answer": "Porch & Party provides baby shower decorations in Memphis for hosts who want the space to feel polished, photo-ready, and emotionally aligned with the event.",
+  "service": "Grazing Tables & Styled Setups",
+  "service_key": "grazing",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Collierville, TN"
+  ],
+  "canonical_page": "/events/baby-shower-decorations-memphis.html",
+  "answer_page": "/answers/baby-shower-decorations-memphis.html",
+  "json_url": "/answers/baby-shower-decorations-memphis.json",
+  "best_for": "This page is for Memphis-area hosts planning a shower at home, in a venue, or in a private event space and wanting stronger decor support.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

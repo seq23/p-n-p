@@ -1,0 +1,20 @@
+{
+  "id": "how-much-does-hotel-room-decor-cost-in-memphis",
+  "query": "What usually pushes the price up?",
+  "direct_answer": "For Porch & Party, hotel-room celebration setups start at $300+. Smaller installs may stay close to that floor, while fuller setups increase based on materials, complexity, timing, and room access.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "informational",
+  "cities": [
+    "Memphis, TN",
+    "Southaven, MS",
+    "Olive Branch, MS"
+  ],
+  "canonical_page": "/faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+  "answer_page": "/answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
+  "json_url": "/answers/how-much-does-hotel-room-decor-cost-in-memphis.json",
+  "best_for": "This is for clients trying to understand whether a hotel-room setup fits their budget before they submit the quote form.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

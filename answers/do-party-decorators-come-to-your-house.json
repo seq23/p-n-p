@@ -1,0 +1,20 @@
+{
+  "id": "do-party-decorators-come-to-your-house",
+  "query": "Do home setups cost less than venue setups?",
+  "direct_answer": "Yes. Porch & Party comes to homes in Memphis and the surrounding service area for birthday setups, celebration styling, and other decor-focused requests that fit its setup scope.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "informational",
+  "cities": [
+    "Memphis, TN",
+    "Bartlett, TN",
+    "Lakeland, TN"
+  ],
+  "canonical_page": "/faq/do-party-decorators-come-to-your-house.html",
+  "answer_page": "/answers/do-party-decorators-come-to-your-house.html",
+  "json_url": "/answers/do-party-decorators-come-to-your-house.json",
+  "best_for": "This page is for people who want a home celebration handled professionally but are not sure whether decorators actually travel to private homes.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "how-to-decorate-a-hotel-room-for-a-romantic-surprise",
+  "query": "When does it make sense to hire someone instead of doing it yourself?",
+  "direct_answer": "To decorate a hotel room for a romantic surprise, focus on one strong mood, keep the decor controlled, and plan around room access and timing. If the setup needs to be ready before arrival, hiring a local decorator can remove a lot of friction.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "informational",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Southaven, MS"
+  ],
+  "canonical_page": "/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+  "answer_page": "/answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+  "json_url": "/answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.json",
+  "best_for": "This page is for someone planning a romantic surprise and trying to decide what actually matters in the room versus what just creates clutter.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "hotel-room-decorations-memphis",
+  "query": "What occasions fit hotel-room decor best?",
+  "direct_answer": "Porch & Party provides hotel room decoration setups in Memphis for clients planning birthdays, romantic surprises, anniversaries, and personal celebrations that need a stronger visual experience.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Southaven, MS",
+    "Olive Branch, MS"
+  ],
+  "canonical_page": "/local/hotel-room-decorations-memphis.html",
+  "answer_page": "/answers/hotel-room-decorations-memphis.html",
+  "json_url": "/answers/hotel-room-decorations-memphis.json",
+  "best_for": "This page is for Memphis-area clients who want a hotel room styled before arrival and need a clear path to pricing and availability.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

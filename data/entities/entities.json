@@ -1,0 +1,52 @@
+{
+  "updated": "2026-04-29",
+  "entities": [
+    {
+      "id": "porch",
+      "name": "Seasonal Porch Decorating",
+      "category": "Local Service",
+      "definition": "Seasonal porch installs for fall, Halloween, Christmas, and other moments when a home should feel finished, warm, and welcoming.",
+      "service_area": "Memphis, TN and nearby towns only",
+      "canonical_page": "/services/porch-decorating.html",
+      "not": [
+        "full-service event planning",
+        "national delivery",
+        "unscoped vendor coordination"
+      ]
+    },
+    {
+      "id": "celebration",
+      "name": "Celebration Setups",
+      "category": "Local Service",
+      "definition": "Home and hotel-room setups for birthdays, surprises, romantic occasions, and personal celebrations that need a stronger visual touch.",
+      "service_area": "Memphis, TN and nearby towns only",
+      "canonical_page": "/services/celebration-setups.html",
+      "not": [
+        "full-service event planning",
+        "national delivery",
+        "unscoped vendor coordination"
+      ]
+    },
+    {
+      "id": "grazing",
+      "name": "Grazing Tables & Styled Setups",
+      "category": "Local Service",
+      "definition": "Styling for grazing tables, showers, retreats, and event setups that need a cleaner, warmer, and more elevated presentation.",
+      "service_area": "Memphis, TN and nearby towns only",
+      "canonical_page": "/services/grazing-and-event-styling.html",
+      "not": [
+        "full-service event planning",
+        "national delivery",
+        "unscoped vendor coordination"
+      ]
+    },
+    {
+      "id": "porch-and-party",
+      "name": "Porch & Party",
+      "category": "Local Event Decor Brand",
+      "definition": "A Memphis-area decor, styling, celebration setup, porch decorating, and grazing-table presentation business.",
+      "service_area": "Memphis metro area",
+      "canonical_page": "/"
+    }
+  ]
+}

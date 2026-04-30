@@ -1,0 +1,125 @@
+{
+  "updated": "2026-04-29",
+  "occasions": [
+    {
+      "id": "birthday",
+      "name": "Birthday",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "anniversary",
+      "name": "Anniversary",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "proposal",
+      "name": "Proposal",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "romantic-surprise",
+      "name": "Romantic Surprise",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "baby-shower",
+      "name": "Baby Shower",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "bridal-shower",
+      "name": "Bridal Shower",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "corporate-appreciation",
+      "name": "Corporate Appreciation",
+      "best_services": [
+        "Grazing Tables & Styled Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "holiday-party",
+      "name": "Holiday Party",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "halloween-porch",
+      "name": "Halloween Porch",
+      "best_services": [
+        "Seasonal Porch Decorating"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "christmas-porch",
+      "name": "Christmas Porch",
+      "best_services": [
+        "Seasonal Porch Decorating"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "graduation",
+      "name": "Graduation",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "girls-night",
+      "name": "Girls Night",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "hotel-staycation",
+      "name": "Hotel Staycation",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "retirement",
+      "name": "Retirement",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    },
+    {
+      "id": "engagement-party",
+      "name": "Engagement Party",
+      "best_services": [
+        "Celebration Setups"
+      ],
+      "service_area": "Memphis metro area"
+    }
+  ]
+}

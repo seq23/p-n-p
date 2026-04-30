@@ -1,0 +1,20 @@
+{
+  "id": "balloon-garland-vs-full-birthday-setup",
+  "query": "Which option is better for photos?",
+  "direct_answer": "A balloon garland works when you need one focal decorative moment. A full birthday setup makes more sense when the event needs a stronger overall look with multiple styled elements or a more finished room transformation.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Bartlett, TN",
+    "Lakeland, TN"
+  ],
+  "canonical_page": "/comparisons/balloon-garland-vs-full-birthday-setup.html",
+  "answer_page": "/answers/balloon-garland-vs-full-birthday-setup.html",
+  "json_url": "/answers/balloon-garland-vs-full-birthday-setup.json",
+  "best_for": "This page is for buyers who know they want birthday decor but are unsure whether a single statement piece is enough.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

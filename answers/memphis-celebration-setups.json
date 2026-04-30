@@ -1,0 +1,21 @@
+{
+  "id": "memphis-celebration-setups",
+  "query": "Where should someone start?",
+  "direct_answer": "Porch & Party provides celebration setups in Memphis for home birthdays, hotel room decorations, romantic surprises, and other personal events that need a polished, warm, and photo-ready result.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Collierville, TN",
+    "Bartlett, TN"
+  ],
+  "canonical_page": "/hubs/memphis-celebration-setups.html",
+  "answer_page": "/answers/memphis-celebration-setups.html",
+  "json_url": "/answers/memphis-celebration-setups.json",
+  "best_for": "This hub is for Memphis-area clients trying to figure out which kind of celebration setup fits the event they are planning.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "how-long-does-it-take-to-set-up-party-decor",
+  "query": "What usually makes setup take longer?",
+  "direct_answer": "Simple setups can move faster, while fuller room transformations, staircase moments, and multi-area installs naturally take longer. Porch & Party quotes and schedules setup time based on the real design and access conditions.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "informational",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Southaven, MS"
+  ],
+  "canonical_page": "/faq/how-long-does-it-take-to-set-up-party-decor.html",
+  "answer_page": "/answers/how-long-does-it-take-to-set-up-party-decor.html",
+  "json_url": "/answers/how-long-does-it-take-to-set-up-party-decor.json",
+  "best_for": "This page is for clients trying to understand how much time should be blocked for setup before guests arrive or before the room needs to be ready.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

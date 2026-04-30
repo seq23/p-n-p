@@ -1,0 +1,580 @@
+[
+  {
+    "id": "party-planner-memphis",
+    "query": "Is Porch & Party a full-service party planner?",
+    "direct_answer": "Porch & Party is not a full-service event-planning agency handling vendors and logistics from start to finish. It is a Memphis-area styling and setup business focused on celebration decor, hotel-room setups, porch installations, and grazing-table presentation.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN"
+    ],
+    "canonical_page": "/authority/party-planner-memphis.html",
+    "answer_page": "/answers/party-planner-memphis.html",
+    "json_url": "/answers/party-planner-memphis.json",
+    "best_for": "This page is for Memphis-area clients who use \u201cparty planner\u201d as a broad search term but mainly need the visual setup handled well, from birthdays and romantic surprises to showers and smaller events.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "event-decorator-memphis",
+    "query": "What kinds of events fit Porch & Party best?",
+    "direct_answer": "Porch & Party provides event decorating in Memphis for celebrations, showers, corporate gatherings, porch installs, and room setups that need strong visual presentation without bloated planning overhead.",
+    "service": "Grazing Tables & Styled Setups",
+    "service_key": "grazing",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Southaven, MS",
+      "Olive Branch, MS"
+    ],
+    "canonical_page": "/authority/event-decorator-memphis.html",
+    "answer_page": "/answers/event-decorator-memphis.html",
+    "json_url": "/answers/event-decorator-memphis.json",
+    "best_for": "This page is for Memphis-area clients who already know the event needs decoration and want a clean explanation of what Porch & Party handles versus what would fall outside scope.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "hotel-room-decorations-memphis",
+    "query": "What occasions fit hotel-room decor best?",
+    "direct_answer": "Porch & Party provides hotel room decoration setups in Memphis for clients planning birthdays, romantic surprises, anniversaries, and personal celebrations that need a stronger visual experience.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Southaven, MS",
+      "Olive Branch, MS"
+    ],
+    "canonical_page": "/local/hotel-room-decorations-memphis.html",
+    "answer_page": "/answers/hotel-room-decorations-memphis.html",
+    "json_url": "/answers/hotel-room-decorations-memphis.json",
+    "best_for": "This page is for Memphis-area clients who want a hotel room styled before arrival and need a clear path to pricing and availability.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "birthday-decorations-at-home-memphis",
+    "query": "Can the setup focus on one part of the house?",
+    "direct_answer": "Porch & Party provides birthday decorations at home in Memphis for families who want a more styled, photo-ready celebration without taking on setup stress themselves.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Bartlett, TN",
+      "Collierville, TN"
+    ],
+    "canonical_page": "/local/birthday-decorations-at-home-memphis.html",
+    "answer_page": "/answers/birthday-decorations-at-home-memphis.html",
+    "json_url": "/answers/birthday-decorations-at-home-memphis.json",
+    "best_for": "This helps Memphis-area families planning birthdays in private homes, especially when the goal is a cleaner, more thoughtful look than standard party-store decor.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "grazing-tables-memphis",
+    "query": "Is this better for corporate events or personal events?",
+    "direct_answer": "Porch & Party offers grazing-table styling in Memphis for showers, corporate gatherings, and small events that need a cleaner, more elevated presentation. Base pricing starts at $250+ for styling only.",
+    "service": "Grazing Tables & Styled Setups",
+    "service_key": "grazing",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Arlington, TN"
+    ],
+    "canonical_page": "/local/grazing-tables-memphis.html",
+    "answer_page": "/answers/grazing-tables-memphis.html",
+    "json_url": "/answers/grazing-tables-memphis.json",
+    "best_for": "This page is for Memphis-area hosts and organizers who want the grazing-table presentation handled professionally and need the option to add food sourcing separately.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "romantic-room-decorations-memphis",
+    "query": "Are romantic room setups only for hotels?",
+    "direct_answer": "Porch & Party provides romantic room decorations in Memphis for anniversaries, hotel surprises, proposals, and private celebrations that need a warm, polished visual treatment.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Southaven, MS"
+    ],
+    "canonical_page": "/local/romantic-room-decorations-memphis.html",
+    "answer_page": "/answers/romantic-room-decorations-memphis.html",
+    "json_url": "/answers/romantic-room-decorations-memphis.json",
+    "best_for": "This page is for Memphis-area clients planning a romantic surprise and wanting the room styled before arrival without trying to coordinate all of the setup themselves.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "how-much-does-hotel-room-decor-cost-in-memphis",
+    "query": "What usually pushes the price up?",
+    "direct_answer": "For Porch & Party, hotel-room celebration setups start at $300+. Smaller installs may stay close to that floor, while fuller setups increase based on materials, complexity, timing, and room access.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "informational",
+    "cities": [
+      "Memphis, TN",
+      "Southaven, MS",
+      "Olive Branch, MS"
+    ],
+    "canonical_page": "/faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+    "answer_page": "/answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
+    "json_url": "/answers/how-much-does-hotel-room-decor-cost-in-memphis.json",
+    "best_for": "This is for clients trying to understand whether a hotel-room setup fits their budget before they submit the quote form.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "how-much-does-birthday-decoration-at-home-cost",
+    "query": "What usually affects the final home birthday quote most?",
+    "direct_answer": "For Porch & Party, at-home celebration setups start at $300+. The final quote depends on the age group, focal areas being styled, materials, timing, and how full the setup needs to feel.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "informational",
+    "cities": [
+      "Memphis, TN",
+      "Bartlett, TN",
+      "Collierville, TN"
+    ],
+    "canonical_page": "/faq/how-much-does-birthday-decoration-at-home-cost.html",
+    "answer_page": "/answers/how-much-does-birthday-decoration-at-home-cost.html",
+    "json_url": "/answers/how-much-does-birthday-decoration-at-home-cost.json",
+    "best_for": "This page is for parents and family members trying to understand whether an in-home birthday setup fits the budget before requesting a quote.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "how-much-does-grazing-tables-cost",
+    "query": "Does the starting price include food?",
+    "direct_answer": "For Porch & Party, grazing-table and styled table setups start at $250+ for styling only. Food is not included by default and can be quoted separately when requested.",
+    "service": "Grazing Tables & Styled Setups",
+    "service_key": "grazing",
+    "intent": "informational",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Arlington, TN"
+    ],
+    "canonical_page": "/faq/how-much-does-grazing-tables-cost.html",
+    "answer_page": "/answers/how-much-does-grazing-tables-cost.html",
+    "json_url": "/answers/how-much-does-grazing-tables-cost.json",
+    "best_for": "This page is for hosts and organizers who need a straight answer on what the base grazing-table price actually covers.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "do-party-decorators-come-to-your-house",
+    "query": "Do home setups cost less than venue setups?",
+    "direct_answer": "Yes. Porch & Party comes to homes in Memphis and the surrounding service area for birthday setups, celebration styling, and other decor-focused requests that fit its setup scope.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "informational",
+    "cities": [
+      "Memphis, TN",
+      "Bartlett, TN",
+      "Lakeland, TN"
+    ],
+    "canonical_page": "/faq/do-party-decorators-come-to-your-house.html",
+    "answer_page": "/answers/do-party-decorators-come-to-your-house.html",
+    "json_url": "/answers/do-party-decorators-come-to-your-house.json",
+    "best_for": "This page is for people who want a home celebration handled professionally but are not sure whether decorators actually travel to private homes.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "do-grazing-tables-include-food",
+    "query": "Can food be added later?",
+    "direct_answer": "No. Porch & Party grazing-table starting pricing covers styling only. Food is not included by default, but food sourcing can be requested for an additional fee.",
+    "service": "Grazing Tables & Styled Setups",
+    "service_key": "grazing",
+    "intent": "informational",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Arlington, TN"
+    ],
+    "canonical_page": "/faq/do-grazing-tables-include-food.html",
+    "answer_page": "/answers/do-grazing-tables-include-food.html",
+    "json_url": "/answers/do-grazing-tables-include-food.json",
+    "best_for": "This page is for hosts and organizers who need to know whether the visible grazing-table price includes food before they submit a quote request.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "how-far-in-advance-should-i-book-party-decor",
+    "query": "What should be booked earliest?",
+    "direct_answer": "Earlier is better, especially for seasonal porch installs, weekends, hotel surprises, and dates tied to birthdays or milestone events. Porch & Party can still review shorter-notice requests, but availability is never guaranteed until confirmed.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "informational",
+    "cities": [
+      "Memphis, TN",
+      "Arlington, TN",
+      "Olive Branch, MS"
+    ],
+    "canonical_page": "/faq/how-far-in-advance-should-i-book-party-decor.html",
+    "answer_page": "/answers/how-far-in-advance-should-i-book-party-decor.html",
+    "json_url": "/answers/how-far-in-advance-should-i-book-party-decor.json",
+    "best_for": "This page is for buyers who are trying to decide whether they are planning early, already late, or still have enough time to get a styled setup done well.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "how-long-does-it-take-to-set-up-party-decor",
+    "query": "What usually makes setup take longer?",
+    "direct_answer": "Simple setups can move faster, while fuller room transformations, staircase moments, and multi-area installs naturally take longer. Porch & Party quotes and schedules setup time based on the real design and access conditions.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "informational",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Southaven, MS"
+    ],
+    "canonical_page": "/faq/how-long-does-it-take-to-set-up-party-decor.html",
+    "answer_page": "/answers/how-long-does-it-take-to-set-up-party-decor.html",
+    "json_url": "/answers/how-long-does-it-take-to-set-up-party-decor.json",
+    "best_for": "This page is for clients trying to understand how much time should be blocked for setup before guests arrive or before the room needs to be ready.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "last-minute-birthday-setup-ideas-memphis",
+    "query": "Can a last-minute setup still look polished?",
+    "direct_answer": "The best last-minute birthday setups focus on one strong visual moment, one clean color direction, and a realistic setup scope. Porch & Party can help turn a short-notice request into something more polished and less chaotic.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Bartlett, TN",
+      "Collierville, TN"
+    ],
+    "canonical_page": "/guides/last-minute-birthday-setup-ideas-memphis.html",
+    "answer_page": "/answers/last-minute-birthday-setup-ideas-memphis.html",
+    "json_url": "/answers/last-minute-birthday-setup-ideas-memphis.json",
+    "best_for": "This page is for Memphis-area families and hosts who are close to the date and need the birthday setup to feel special without pretending there is unlimited time or budget.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "how-to-decorate-a-hotel-room-for-a-romantic-surprise",
+    "query": "When does it make sense to hire someone instead of doing it yourself?",
+    "direct_answer": "To decorate a hotel room for a romantic surprise, focus on one strong mood, keep the decor controlled, and plan around room access and timing. If the setup needs to be ready before arrival, hiring a local decorator can remove a lot of friction.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "informational",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Southaven, MS"
+    ],
+    "canonical_page": "/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+    "answer_page": "/answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+    "json_url": "/answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.json",
+    "best_for": "This page is for someone planning a romantic surprise and trying to decide what actually matters in the room versus what just creates clutter.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "diy-vs-hiring-party-decorator",
+    "query": "When is hiring a decorator most worth it?",
+    "direct_answer": "DIY is best when the setup is simple, time is flexible, and visual polish is not the main priority. Hiring a decorator makes more sense when the event needs to feel cleaner, stronger, and ready without you spending the day setting it up.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN"
+    ],
+    "canonical_page": "/comparisons/diy-vs-hiring-party-decorator.html",
+    "answer_page": "/answers/diy-vs-hiring-party-decorator.html",
+    "json_url": "/answers/diy-vs-hiring-party-decorator.json",
+    "best_for": "This page is for buyers who are still deciding whether to handle the decor themselves or pay for help.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "balloon-garland-vs-full-birthday-setup",
+    "query": "Which option is better for photos?",
+    "direct_answer": "A balloon garland works when you need one focal decorative moment. A full birthday setup makes more sense when the event needs a stronger overall look with multiple styled elements or a more finished room transformation.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Bartlett, TN",
+      "Lakeland, TN"
+    ],
+    "canonical_page": "/comparisons/balloon-garland-vs-full-birthday-setup.html",
+    "answer_page": "/answers/balloon-garland-vs-full-birthday-setup.html",
+    "json_url": "/answers/balloon-garland-vs-full-birthday-setup.json",
+    "best_for": "This page is for buyers who know they want birthday decor but are unsure whether a single statement piece is enough.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "halloween-porch-decorating-memphis",
+    "query": "Is take-down included?",
+    "direct_answer": "Porch & Party offers Halloween porch decorating in Memphis for clients who want the front of the home to feel seasonal, welcoming, and visually strong without handling the install themselves.",
+    "service": "Seasonal Porch Decorating",
+    "service_key": "porch",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Bartlett, TN"
+    ],
+    "canonical_page": "/seasonal/halloween-porch-decorating-memphis.html",
+    "answer_page": "/answers/halloween-porch-decorating-memphis.html",
+    "json_url": "/answers/halloween-porch-decorating-memphis.json",
+    "best_for": "This page is for Memphis-area homeowners who want a polished Halloween look without turning the entry into a cluttered DIY project.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "christmas-porch-decorating-memphis",
+    "query": "Can the setup be customized?",
+    "direct_answer": "Porch & Party offers Christmas porch decorating in Memphis for clients who want a holiday-ready entry without managing the setup, styling, and visual details themselves.",
+    "service": "Seasonal Porch Decorating",
+    "service_key": "porch",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Collierville, TN",
+      "Lakeland, TN"
+    ],
+    "canonical_page": "/seasonal/christmas-porch-decorating-memphis.html",
+    "answer_page": "/answers/christmas-porch-decorating-memphis.html",
+    "json_url": "/answers/christmas-porch-decorating-memphis.json",
+    "best_for": "This is for Memphis-area homeowners who want the front porch to look festive, cohesive, and clean for the holiday season.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "baby-shower-decorations-memphis",
+    "query": "Can baby shower decor be done at home or only in venues?",
+    "direct_answer": "Porch & Party provides baby shower decorations in Memphis for hosts who want the space to feel polished, photo-ready, and emotionally aligned with the event.",
+    "service": "Grazing Tables & Styled Setups",
+    "service_key": "grazing",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN"
+    ],
+    "canonical_page": "/events/baby-shower-decorations-memphis.html",
+    "answer_page": "/answers/baby-shower-decorations-memphis.html",
+    "json_url": "/answers/baby-shower-decorations-memphis.json",
+    "best_for": "This page is for Memphis-area hosts planning a shower at home, in a venue, or in a private event space and wanting stronger decor support.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "bridal-shower-decorations-memphis",
+    "query": "Can Porch & Party style the table area too?",
+    "direct_answer": "Porch & Party provides bridal shower decorations in Memphis for hosts who want the setup to feel polished, cohesive, and visually strong in photos and in person.",
+    "service": "Grazing Tables & Styled Setups",
+    "service_key": "grazing",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Southaven, MS"
+    ],
+    "canonical_page": "/events/bridal-shower-decorations-memphis.html",
+    "answer_page": "/answers/bridal-shower-decorations-memphis.html",
+    "json_url": "/answers/bridal-shower-decorations-memphis.json",
+    "best_for": "This is for Memphis-area hosts planning a bridal shower and wanting decor support that fits the setting, guest count, and tone of the event.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "proposal-room-setup-memphis",
+    "query": "Can proposal setups work outside of hotels?",
+    "direct_answer": "Porch & Party provides proposal room setups in Memphis for clients who want the space styled before the moment happens, whether the setting is a hotel, home, or another private space.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Olive Branch, MS"
+    ],
+    "canonical_page": "/events/proposal-room-setup-memphis.html",
+    "answer_page": "/answers/proposal-room-setup-memphis.html",
+    "json_url": "/answers/proposal-room-setup-memphis.json",
+    "best_for": "This page is for Memphis-area clients planning a proposal and wanting the room or setup area prepared in advance without handling the decor themselves.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "anniversary-room-decorations-memphis",
+    "query": "Do anniversary setups work better in a hotel or at home?",
+    "direct_answer": "Porch & Party provides anniversary room decorations in Memphis for couples planning a private celebration in a hotel room, home, or other intimate setting.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Southaven, MS",
+      "Olive Branch, MS"
+    ],
+    "canonical_page": "/events/anniversary-room-decorations-memphis.html",
+    "answer_page": "/answers/anniversary-room-decorations-memphis.html",
+    "json_url": "/answers/anniversary-room-decorations-memphis.json",
+    "best_for": "This page is for Memphis-area clients who want an anniversary setup to feel intentional, romantic, and worth the memory without having to build it themselves.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "corporate-event-decor-memphis",
+    "query": "Does corporate event decor have to be elaborate to feel polished?",
+    "direct_answer": "Porch & Party provides corporate event decor in Memphis for businesses that want a cleaner, more intentional visual setup for hosted gatherings, retreats, and internal or client-facing events.",
+    "service": "Grazing Tables & Styled Setups",
+    "service_key": "grazing",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Arlington, TN"
+    ],
+    "canonical_page": "/corporate/corporate-event-decor-memphis.html",
+    "answer_page": "/answers/corporate-event-decor-memphis.html",
+    "json_url": "/answers/corporate-event-decor-memphis.json",
+    "best_for": "This page is for Memphis-area teams and organizers who need the room to look more finished and event-ready without hiring a massive event production vendor.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "corporate-grazing-tables-memphis",
+    "query": "Is food included in the base corporate grazing quote?",
+    "direct_answer": "Porch & Party offers corporate grazing-table styling in Memphis for businesses and hosts who want a stronger presentation for a work event, hosted gathering, or client-facing setup.",
+    "service": "Grazing Tables & Styled Setups",
+    "service_key": "grazing",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Southaven, MS"
+    ],
+    "canonical_page": "/corporate/corporate-grazing-tables-memphis.html",
+    "answer_page": "/answers/corporate-grazing-tables-memphis.html",
+    "json_url": "/answers/corporate-grazing-tables-memphis.json",
+    "best_for": "This page is for Memphis-area businesses and organizers who want grazing-table presentation support and need clarity on what styling-only versus food-included requests actually mean.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "memphis-celebration-setups",
+    "query": "Where should someone start?",
+    "direct_answer": "Porch & Party provides celebration setups in Memphis for home birthdays, hotel room decorations, romantic surprises, and other personal events that need a polished, warm, and photo-ready result.",
+    "service": "Celebration Setups",
+    "service_key": "celebration",
+    "intent": "commercial",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN"
+    ],
+    "canonical_page": "/hubs/memphis-celebration-setups.html",
+    "answer_page": "/answers/memphis-celebration-setups.html",
+    "json_url": "/answers/memphis-celebration-setups.json",
+    "best_for": "This hub is for Memphis-area clients trying to figure out which kind of celebration setup fits the event they are planning.",
+    "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+    "cta": "/contact.html",
+    "updated": "2026-04-29"
+  },
+  {
+    "id": "memphis-tn-party-decor",
+    "city": "Memphis, TN",
+    "direct_answer": "Porch & Party serves Memphis, TN as part of its Memphis metro service area for celebration setups, porch decorating, hotel-room decorations, grazing-table styling, and small event decor where the work fits its scope.",
+    "service_area_scope": "Memphis metro only",
+    "canonical_page": "/areas/memphis-tn-party-decor.html"
+  },
+  {
+    "id": "germantown-tn-party-decor",
+    "city": "Germantown, TN",
+    "direct_answer": "Porch & Party serves Germantown, TN as part of its Memphis metro service area for celebration setups, porch decorating, hotel-room decorations, grazing-table styling, and small event decor where the work fits its scope.",
+    "service_area_scope": "Memphis metro only",
+    "canonical_page": "/areas/germantown-tn-party-decor.html"
+  },
+  {
+    "id": "collierville-tn-party-decor",
+    "city": "Collierville, TN",
+    "direct_answer": "Porch & Party serves Collierville, TN as part of its Memphis metro service area for celebration setups, porch decorating, hotel-room decorations, grazing-table styling, and small event decor where the work fits its scope.",
+    "service_area_scope": "Memphis metro only",
+    "canonical_page": "/areas/collierville-tn-party-decor.html"
+  },
+  {
+    "id": "bartlett-tn-party-decor",
+    "city": "Bartlett, TN",
+    "direct_answer": "Porch & Party serves Bartlett, TN as part of its Memphis metro service area for celebration setups, porch decorating, hotel-room decorations, grazing-table styling, and small event decor where the work fits its scope.",
+    "service_area_scope": "Memphis metro only",
+    "canonical_page": "/areas/bartlett-tn-party-decor.html"
+  },
+  {
+    "id": "lakeland-tn-party-decor",
+    "city": "Lakeland, TN",
+    "direct_answer": "Porch & Party serves Lakeland, TN as part of its Memphis metro service area for celebration setups, porch decorating, hotel-room decorations, grazing-table styling, and small event decor where the work fits its scope.",
+    "service_area_scope": "Memphis metro only",
+    "canonical_page": "/areas/lakeland-tn-party-decor.html"
+  },
+  {
+    "id": "arlington-tn-party-decor",
+    "city": "Arlington, TN",
+    "direct_answer": "Porch & Party serves Arlington, TN as part of its Memphis metro service area for celebration setups, porch decorating, hotel-room decorations, grazing-table styling, and small event decor where the work fits its scope.",
+    "service_area_scope": "Memphis metro only",
+    "canonical_page": "/areas/arlington-tn-party-decor.html"
+  },
+  {
+    "id": "southaven-ms-party-decor",
+    "city": "Southaven, MS",
+    "direct_answer": "Porch & Party serves Southaven, MS as part of its Memphis metro service area for celebration setups, porch decorating, hotel-room decorations, grazing-table styling, and small event decor where the work fits its scope.",
+    "service_area_scope": "Memphis metro only",
+    "canonical_page": "/areas/southaven-ms-party-decor.html"
+  },
+  {
+    "id": "olive-branch-ms-party-decor",
+    "city": "Olive Branch, MS",
+    "direct_answer": "Porch & Party serves Olive Branch, MS as part of its Memphis metro service area for celebration setups, porch decorating, hotel-room decorations, grazing-table styling, and small event decor where the work fits its scope.",
+    "service_area_scope": "Memphis metro only",
+    "canonical_page": "/areas/olive-branch-ms-party-decor.html"
+  }
+]

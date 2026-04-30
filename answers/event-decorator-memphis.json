@@ -1,0 +1,20 @@
+{
+  "id": "event-decorator-memphis",
+  "query": "What kinds of events fit Porch & Party best?",
+  "direct_answer": "Porch & Party provides event decorating in Memphis for celebrations, showers, corporate gatherings, porch installs, and room setups that need strong visual presentation without bloated planning overhead.",
+  "service": "Grazing Tables & Styled Setups",
+  "service_key": "grazing",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Southaven, MS",
+    "Olive Branch, MS"
+  ],
+  "canonical_page": "/authority/event-decorator-memphis.html",
+  "answer_page": "/answers/event-decorator-memphis.html",
+  "json_url": "/answers/event-decorator-memphis.json",
+  "best_for": "This page is for Memphis-area clients who already know the event needs decoration and want a clean explanation of what Porch & Party handles versus what would fall outside scope.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

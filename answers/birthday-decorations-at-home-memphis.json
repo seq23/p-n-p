@@ -1,0 +1,20 @@
+{
+  "id": "birthday-decorations-at-home-memphis",
+  "query": "Can the setup focus on one part of the house?",
+  "direct_answer": "Porch & Party provides birthday decorations at home in Memphis for families who want a more styled, photo-ready celebration without taking on setup stress themselves.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Bartlett, TN",
+    "Collierville, TN"
+  ],
+  "canonical_page": "/local/birthday-decorations-at-home-memphis.html",
+  "answer_page": "/answers/birthday-decorations-at-home-memphis.html",
+  "json_url": "/answers/birthday-decorations-at-home-memphis.json",
+  "best_for": "This helps Memphis-area families planning birthdays in private homes, especially when the goal is a cleaner, more thoughtful look than standard party-store decor.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

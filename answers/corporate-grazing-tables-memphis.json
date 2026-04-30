@@ -1,0 +1,20 @@
+{
+  "id": "corporate-grazing-tables-memphis",
+  "query": "Is food included in the base corporate grazing quote?",
+  "direct_answer": "Porch & Party offers corporate grazing-table styling in Memphis for businesses and hosts who want a stronger presentation for a work event, hosted gathering, or client-facing setup.",
+  "service": "Grazing Tables & Styled Setups",
+  "service_key": "grazing",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Southaven, MS"
+  ],
+  "canonical_page": "/corporate/corporate-grazing-tables-memphis.html",
+  "answer_page": "/answers/corporate-grazing-tables-memphis.html",
+  "json_url": "/answers/corporate-grazing-tables-memphis.json",
+  "best_for": "This page is for Memphis-area businesses and organizers who want grazing-table presentation support and need clarity on what styling-only versus food-included requests actually mean.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

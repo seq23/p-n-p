@@ -1,0 +1,20 @@
+{
+  "id": "romantic-room-decorations-memphis",
+  "query": "Are romantic room setups only for hotels?",
+  "direct_answer": "Porch & Party provides romantic room decorations in Memphis for anniversaries, hotel surprises, proposals, and private celebrations that need a warm, polished visual treatment.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Southaven, MS"
+  ],
+  "canonical_page": "/local/romantic-room-decorations-memphis.html",
+  "answer_page": "/answers/romantic-room-decorations-memphis.html",
+  "json_url": "/answers/romantic-room-decorations-memphis.json",
+  "best_for": "This page is for Memphis-area clients planning a romantic surprise and wanting the room styled before arrival without trying to coordinate all of the setup themselves.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

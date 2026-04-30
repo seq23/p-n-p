@@ -1,0 +1,20 @@
+{
+  "id": "last-minute-birthday-setup-ideas-memphis",
+  "query": "Can a last-minute setup still look polished?",
+  "direct_answer": "The best last-minute birthday setups focus on one strong visual moment, one clean color direction, and a realistic setup scope. Porch & Party can help turn a short-notice request into something more polished and less chaotic.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Bartlett, TN",
+    "Collierville, TN"
+  ],
+  "canonical_page": "/guides/last-minute-birthday-setup-ideas-memphis.html",
+  "answer_page": "/answers/last-minute-birthday-setup-ideas-memphis.html",
+  "json_url": "/answers/last-minute-birthday-setup-ideas-memphis.json",
+  "best_for": "This page is for Memphis-area families and hosts who are close to the date and need the birthday setup to feel special without pretending there is unlimited time or budget.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "how-much-does-birthday-decoration-at-home-cost",
+  "query": "What usually affects the final home birthday quote most?",
+  "direct_answer": "For Porch & Party, at-home celebration setups start at $300+. The final quote depends on the age group, focal areas being styled, materials, timing, and how full the setup needs to feel.",
+  "service": "Celebration Setups",
+  "service_key": "celebration",
+  "intent": "informational",
+  "cities": [
+    "Memphis, TN",
+    "Bartlett, TN",
+    "Collierville, TN"
+  ],
+  "canonical_page": "/faq/how-much-does-birthday-decoration-at-home-cost.html",
+  "answer_page": "/answers/how-much-does-birthday-decoration-at-home-cost.html",
+  "json_url": "/answers/how-much-does-birthday-decoration-at-home-cost.json",
+  "best_for": "This page is for parents and family members trying to understand whether an in-home birthday setup fits the budget before requesting a quote.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}

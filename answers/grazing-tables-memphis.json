@@ -1,0 +1,20 @@
+{
+  "id": "grazing-tables-memphis",
+  "query": "Is this better for corporate events or personal events?",
+  "direct_answer": "Porch & Party offers grazing-table styling in Memphis for showers, corporate gatherings, and small events that need a cleaner, more elevated presentation. Base pricing starts at $250+ for styling only.",
+  "service": "Grazing Tables & Styled Setups",
+  "service_key": "grazing",
+  "intent": "commercial",
+  "cities": [
+    "Memphis, TN",
+    "Germantown, TN",
+    "Arlington, TN"
+  ],
+  "canonical_page": "/local/grazing-tables-memphis.html",
+  "answer_page": "/answers/grazing-tables-memphis.html",
+  "json_url": "/answers/grazing-tables-memphis.json",
+  "best_for": "This page is for Memphis-area hosts and organizers who want the grazing-table presentation handled professionally and need the option to add food sourcing separately.",
+  "not_for": "Requests outside the Memphis metro service area, full-service vendor coordination, or services Porch & Party does not offer by default.",
+  "cta": "/contact.html",
+  "updated": "2026-04-29"
+}
