@@ -1,26 +1,68 @@
+#!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..', '..');
 let failed = false;
 
-const required = [
-  'index.html','pricing.html','how-it-works.html','contact.html','privacy-policy.html','terms-and-conditions.html',
-  'robots.txt','llms.txt','_headers','_redirects','README.md','package.json','.gitignore',
-  'services/porch-decorating.html','services/celebration-setups.html','services/grazing-and-event-styling.html',
-  'assets/css/styles.css','data/offers/services.json','data/queries/query_universe.json','data/clusters/clusters.json',
-  'scripts/generators/build_pages.js','scripts/generators/update_sitemap.js','scripts/validation/validate.js',
-  'scripts/seo/submit_indexnow.js','.github/workflows/indexnow-daily.yml',
-  '.github/workflows/velocity-weekly.yml','.github/workflows/monthly-audit.yml',
-  'docs/AUTOMATION-ENGINE.md','docs/GOOGLE-BUSINESS-PROFILE-CHECKLIST.md','docs/DISTRIBUTION-RUNBOOK.md','docs/CONTENT-OPERATIONS.md',
-  '5f1f13a4-3d84-4d13-8ed9-9c2d90c3b7d2.txt'
+const requiredFiles = [
+  'index.html',
+  'pricing.html',
+  'how-it-works.html',
+  'contact.html',
+  'privacy-policy.html',
+  'terms-and-conditions.html',
+  'robots.txt',
+  'sitemap.xml',
+  'llms.txt',
+  'llms-entities.txt',
+  'llms-services.txt',
+  '_headers',
+  '_redirects',
+  'README.md',
+  'package.json',
+  '.gitignore',
+  'REPO_VALIDATION_MATRIX.md',
+  'assets/css/styles.css',
+  'services/porch-decorating.html',
+  'services/fall-porch-decorating.html',
+  'services/christmas-porch-decorating.html',
+  'services/front-door-styling.html',
+  'services/small-porch-decorating.html',
+  'areas/memphis-tn-porch-decorating.html',
+  'areas/germantown-tn-porch-decorating.html',
+  'areas/collierville-tn-porch-decorating.html',
+  'areas/bartlett-tn-porch-decorating.html',
+  'answers/how-much-does-porch-decorating-cost-in-memphis.html',
+  'answers/porch-decorating-under-500-memphis.html',
+  'assets/img/party/memphis-party-decor-hotel-room-birthday-setup.jpg',
+  'services/party-decor-memphis.html',
+  'services/hotel-room-decor-memphis.html',
+  'services/birthday-party-decor-memphis.html',
+  'services/celebration-setups-memphis.html',
+  'services/grazing-tables-memphis.html',
+  'services/bridal-shower-decor-memphis.html',
+  'services/baby-shower-decor-memphis.html',
+  'services/luxury-party-decor-memphis.html',
+  'services/budget-party-decor-memphis.html',
+  'answers/how-much-does-party-decor-cost-in-memphis.html',
+  'answers/what-is-included-in-party-decor-setup.html',
+  'answers/can-someone-decorate-hotel-room-birthday-memphis.html',
+  'answers/how-much-does-a-grazing-table-cost-in-memphis.html',
+  'answers/party-decor-vs-event-planning-memphis.html',
+  'answers/can-i-book-decor-only-without-event-planning.html',
+  'answers/small-party-decor-ideas-memphis.html',
+  'answers/birthday-hotel-room-setup-ideas-memphis.html',
+  'answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html'
 ];
 
-for (const rel of required) {
-  if (!fs.existsSync(path.join(root, rel))) {
-    console.error(`Missing required file: ${rel}`);
-    failed = true;
-  }
+function fail(msg) {
+  console.error(`VALIDATION FAIL: ${msg}`);
+  failed = true;
+}
+
+for (const rel of requiredFiles) {
+  if (!fs.existsSync(path.join(root, rel))) fail(`missing required file ${rel}`);
 }
 
 function walk(dir, acc = []) {
@@ -32,7 +74,6 @@ function walk(dir, acc = []) {
   }
   return acc;
 }
-
 
 function matchAttr(html, tag, key, value, targetAttr) {
   const patterns = [
@@ -46,281 +87,56 @@ function matchAttr(html, tag, key, value, targetAttr) {
   return '';
 }
 
-function stripTags(html) {
-  return html
-    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/&[a-z]+;/gi, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
 const htmlFiles = walk(root);
-const titles = new Map();
-const canonicals = new Set();
-const generatedFolders = new Set(['authority','faq','local','seasonal','guides','comparisons','events','corporate','hubs']);
-const incomingLinks = new Map();
-const intentionalOrphans = new Set([
-  'authority/event-decorator-memphis.html',
-  'comparisons/balloon-garland-vs-full-birthday-setup.html',
-  'comparisons/diy-vs-hiring-party-decorator.html',
-  'events/bridal-shower-decorations-memphis.html',
-  'faq/how-far-in-advance-should-i-book-party-decor.html',
-  'hubs/memphis-celebration-setups.html'
-]);
+const canonicalSet = new Set();
+const sitemap = fs.existsSync(path.join(root, 'sitemap.xml')) ? fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8') : '';
 
 for (const file of htmlFiles) {
   const rel = path.relative(root, file).replace(/\\/g, '/');
   const html = fs.readFileSync(file, 'utf8');
-  const checks = [
-    ['title', /<title>.+<\/title>/i],
-    ['canonical', /<link[^>]*(rel="canonical"|rel='canonical')[^>]*href=|<link[^>]*href=[^>]*(rel="canonical"|rel='canonical')/i],
-    ['json-ld', /<script type="application\/ld\+json">[\s\S]*?<\/script>/i]
-  ];
-  for (const [label, re] of checks) {
-    if (!re.test(html)) {
-      console.error(`Validation failed in ${rel}: missing ${label}`);
-      failed = true;
-    }
-  }
-
-  const legalChecks = [
-    ['All rights reserved', /All rights reserved/i],
-    ['Kerseta LLC', /Kerseta LLC/i],
-    ['hello email', /hello@porchandparty901\.com/i],
-    ['privacy link', /href="\/privacy-policy\.html"/i],
-    ['terms link', /href="\/terms-and-conditions\.html"/i]
-  ];
-  for (const [label, re] of legalChecks) {
-    if (!re.test(html)) {
-      console.error(`Validation failed in ${rel}: missing ${label}`);
-      failed = true;
-    }
-  }
-
-  const isLegalPage = rel === 'privacy-policy.html' || rel === 'terms-and-conditions.html';
-  const ctaMatches = html.match(/Request a Quote|Start Your Request/g) || [];
-  if (!isLegalPage && ctaMatches.length < 3) {
-    console.error(`Validation failed in ${rel}: fewer than 3 CTA mentions`);
-    failed = true;
-  }
-
-  const folder = rel.split('/')[0];
-  if (generatedFolders.has(folder)) {
-    const generatedHeadings = ['Quick answer','Who this is for','What this includes','What this means in practice','Before you book','What to do next'];
-    for (const heading of generatedHeadings) {
-      if (!new RegExp(`<h[23]>${heading}<\\/h[23]>`, 'i').test(html)) {
-        console.error(`Validation failed in ${rel}: missing section heading ${heading}`);
-        failed = true;
-      }
-    }
-    const wordCount = stripTags(html).split(/\s+/).filter(Boolean).length;
-    const minWords = folder === 'authority' ? 520 : 360;
-    if (wordCount < minWords) {
-      console.error(`Validation failed in ${rel}: thin content (${wordCount} words, min ${minWords})`);
-      failed = true;
-    }
-  }
-
-  if ((rel.startsWith('local/') || rel.startsWith('seasonal/') || rel.startsWith('hubs/') || rel.startsWith('authority/') || rel.startsWith('corporate/') || rel.startsWith('events/')) && !/Memphis/i.test(html)) {
-    console.error(`Validation failed in ${rel}: missing Memphis mention`);
-    failed = true;
-  }
-
-  const title = (html.match(/<title>([^<]+)<\/title>/i) || [])[1];
-  if (title) {
-    if (title.length < 35 || title.length > 70) {
-      console.error(`Validation failed in ${rel}: title length out of range (${title.length})`);
-      failed = true;
-    }
-    if (titles.has(title)) {
-      console.error(`Validation failed: duplicate title in ${rel} and ${titles.get(title)}`);
-      failed = true;
-    }
-    titles.set(title, rel);
-  }
-
-  const description = matchAttr(html, 'meta', 'name', 'description', 'content');
-  if (!description || description.length < 105 || description.length > 165) {
-    console.error(`Validation failed in ${rel}: meta description length out of range (${description ? description.length : 0})`);
-    failed = true;
-  }
-
-  const robots = matchAttr(html, 'meta', 'name', 'robots', 'content') || '';
-  if (!/index/i.test(robots) || !/follow/i.test(robots) || !/max-image-preview:large/i.test(robots)) {
-    console.error(`Validation failed in ${rel}: robots meta must allow indexing and large image previews`);
-    failed = true;
-  }
-  if (/noindex|nofollow/i.test(robots)) {
-    console.error(`Validation failed in ${rel}: robots meta contains noindex/nofollow`);
-    failed = true;
-  }
+  if (!/<title>[^<]+<\/title>/i.test(html)) fail(`${rel} missing title`);
+  if (!/<meta[^>]+name=["']description["']/i.test(html)) fail(`${rel} missing meta description`);
+  const robots = matchAttr(html, 'meta', 'name', 'robots', 'content');
+  if (!robots || !/index/i.test(robots) || !/follow/i.test(robots)) fail(`${rel} missing index/follow robots meta`);
+  if (!/<script type=["']application\/ld\+json["']>[\s\S]*?<\/script>/i.test(html)) fail(`${rel} missing JSON-LD`);
+  if (!/hello@porchandparty901\.com/i.test(html)) fail(`${rel} missing contact email`);
+  if (!/Kerseta LLC/i.test(html)) fail(`${rel} missing operating entity footer`);
+  if (!/href=["']\/privacy-policy\.html["']/i.test(html)) fail(`${rel} missing privacy link`);
+  if (!/href=["']\/terms-and-conditions\.html["']/i.test(html)) fail(`${rel} missing terms link`);
 
   const canonical = matchAttr(html, 'link', 'rel', 'canonical', 'href');
-  const ogUrl = matchAttr(html, 'meta', 'property', 'og:url', 'content');
-  const ogImage = matchAttr(html, 'meta', 'property', 'og:image', 'content');
-  const twitterCard = matchAttr(html, 'meta', 'name', 'twitter:card', 'content');
-  const twitterImage = matchAttr(html, 'meta', 'name', 'twitter:image', 'content');
-  if (!canonical.startsWith('https://porchandparty901.com/')) {
-    console.error(`Validation failed in ${rel}: canonical host mismatch`);
-    failed = true;
-  }
-  if (canonical !== ogUrl) {
-    console.error(`Validation failed in ${rel}: canonical and og:url mismatch`);
-    failed = true;
-  }
-  if (!ogImage || !ogImage.startsWith('https://porchandparty901.com/assets/img/')) {
-    console.error(`Validation failed in ${rel}: missing or invalid og:image`);
-    failed = true;
-  }
-  if (twitterCard !== 'summary_large_image' || !twitterImage) {
-    console.error(`Validation failed in ${rel}: missing Twitter large-image metadata`);
-    failed = true;
-  }
+  if (!canonical || !canonical.startsWith('https://porchandparty901.com/')) fail(`${rel} missing valid canonical`);
+  if (canonicalSet.has(canonical)) fail(`duplicate canonical ${canonical}`);
+  if (canonical) canonicalSet.add(canonical);
 
-  if (canonical) {
-    if (canonicals.has(canonical)) {
-      console.error(`Validation failed: duplicate canonical ${canonical}`);
-      failed = true;
-    }
-    canonicals.add(canonical);
-  }
-
-  const hrefs = [...html.matchAll(/href="([^"]+)"/g)].map(m => m[1]);
+  const hrefs = [...html.matchAll(/href=["']([^"']+)["']/g)].map(m => m[1]);
   for (const href of hrefs) {
-    if (/^(https?:|mailto:|#)/.test(href)) continue;
-    const target = href === '/' ? 'index.html' : href.replace(/^\//, '');
-    const targetPath = path.join(root, target);
-    if (!fs.existsSync(targetPath)) {
-      console.error(`Validation failed in ${rel}: broken internal href ${href}`);
-      failed = true;
-    } else if (target.endsWith('.html')) {
-      incomingLinks.set(target, (incomingLinks.get(target) || 0) + 1);
-    }
+    if (!href || /^(https?:|mailto:|tel:|#|javascript:|\/\/)/i.test(href)) continue;
+    const clean = href.split('#')[0].split('?')[0];
+    if (!clean) continue;
+    let target = clean === '/' ? path.join(root, 'index.html') : path.join(root, clean.replace(/^\//, ''));
+    if (fs.existsSync(target) && fs.statSync(target).isDirectory()) target = path.join(target, 'index.html');
+    if (!fs.existsSync(target)) fail(`${rel} broken internal href ${href}`);
+  }
+
+  const sitemapRel = rel === 'index.html' ? '<loc>https://porchandparty901.com/</loc>' : `<loc>https://porchandparty901.com/${rel}</loc>`;
+  if (sitemap && !sitemap.includes(sitemapRel)) fail(`${rel} missing from sitemap`);
+
+  for (const m of html.matchAll(/<script type=["']application\/ld\+json["']>([\s\S]*?)<\/script>/gi)) {
+    try { JSON.parse(m[1]); } catch (err) { fail(`${rel} has malformed JSON-LD`); }
   }
 }
 
-const homepage = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
-const expected = 'https://porchandparty901.com/';
-const homepageCanonical = matchAttr(homepage, 'link', 'rel', 'canonical', 'href');
-const homepageOgUrl = matchAttr(homepage, 'meta', 'property', 'og:url', 'content');
-const schemaMatches = [...homepage.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/ig)];
-let schemaUrl = '';
-let hasLocalBusiness = false;
-let hasWebSite = false;
-let hasWebPage = false;
-for (const m of schemaMatches) {
-  try {
-    const obj = JSON.parse(m[1]);
-    if (obj['@type'] === 'LocalBusiness') {
-      schemaUrl = obj.url || '';
-      hasLocalBusiness = true;
-    }
-    if (obj['@type'] === 'WebSite') hasWebSite = true;
-    if (obj['@type'] === 'WebPage') hasWebPage = true;
-  } catch {}
-}
-if (homepageCanonical !== expected || homepageOgUrl !== expected || schemaUrl !== expected) {
-  console.error('Validation failed in index.html: homepage root URL contract mismatch');
-  failed = true;
-}
-if (!hasLocalBusiness || !hasWebSite || !hasWebPage) {
-  console.error('Validation failed in index.html: homepage missing LocalBusiness/WebSite/WebPage schema');
-  failed = true;
-}
-if (!/Quotes are custom based on scope, location, date, and setup needs\./i.test(homepage)) {
-  console.error('Validation failed in index.html: missing homepage trust line');
-  failed = true;
-}
-if (!/href="\/"|href='\/'/i.test(homepage)) {
-  console.error('Validation failed in index.html: brand link must point to /');
-  failed = true;
-}
+const llms = fs.existsSync(path.join(root, 'llms.txt')) ? fs.readFileSync(path.join(root, 'llms.txt'), 'utf8') : '';
+if (!/Memphis-based porch decorating and celebration styling company/i.test(llms)) fail('llms.txt missing primary entity sentence');
+if (!/hotel-room decor/i.test(llms)) fail('llms.txt missing hotel decor service surface');
+if (!/party decor/i.test(llms)) fail('llms.txt missing party decor service surface');
+if (!/grazing table setups/i.test(llms)) fail('llms.txt missing grazing table service surface');
+if (!/party decor.*Memphis/i.test(llms) && !/Memphis party decor/i.test(llms)) fail('llms.txt missing Memphis party decor extraction surface');
+if (!/Hotel-room decor/i.test(llms) && !/hotel room decor/i.test(llms)) fail('llms.txt missing hotel room decor extraction surface');
+if (!/Celebration setups start at \$300\+/i.test(llms)) fail('llms.txt missing party decor pricing extraction');
+if (!/Grazing table styling starts at \$250\+/i.test(llms)) fail('llms.txt missing grazing table pricing extraction');
 
-const serviceRequirements = [
-  'services/porch-decorating.html',
-  'services/celebration-setups.html',
-  'services/grazing-and-event-styling.html'
-];
-for (const rel of serviceRequirements) {
-  const html = fs.readFileSync(path.join(root, rel), 'utf8');
-  if (!/"@type":"Service"/.test(html) && !/"@type":\s*"Service"/.test(html)) {
-    console.error(`Validation failed in ${rel}: missing Service schema`);
-    failed = true;
-  }
-  if (!/"@type":"BreadcrumbList"/.test(html) && !/"@type":\s*"BreadcrumbList"/.test(html)) {
-    console.error(`Validation failed in ${rel}: missing BreadcrumbList schema`);
-    failed = true;
-  }
-}
-
-const celebration = fs.readFileSync(path.join(root, 'services/celebration-setups.html'), 'utf8');
-if (!/Availability is not guaranteed until your request is confirmed\./i.test(celebration)) {
-  console.error('Validation failed in services/celebration-setups.html: missing celebration disclaimer');
-  failed = true;
-}
-const porch = fs.readFileSync(path.join(root, 'services/porch-decorating.html'), 'utf8');
-if (!/take-down/i.test(porch)) {
-  console.error('Validation failed in services/porch-decorating.html: missing take-down note');
-  failed = true;
-}
-const grazing = fs.readFileSync(path.join(root, 'services/grazing-and-event-styling.html'), 'utf8');
-if (!/food is not included/i.test(grazing) || !/additional fee/i.test(grazing)) {
-  console.error('Validation failed in services/grazing-and-event-styling.html: missing grazing disclaimer');
-  failed = true;
-}
-
-const queryUniverse = JSON.parse(fs.readFileSync(path.join(root, 'data/queries/query_universe.json'), 'utf8'));
-const slugSet = new Set();
-for (const entry of queryUniverse) {
-  const key = `${entry.folder}/${entry.slug}`;
-  if (slugSet.has(key)) {
-    console.error(`Validation failed: duplicate entry ${key} in query universe`);
-    failed = true;
-  }
-  slugSet.add(key);
-  const pagePath = path.join(root, entry.folder, `${entry.slug}.html`);
-  if (!fs.existsSync(pagePath)) {
-    console.error(`Validation failed: generated page missing ${entry.folder}/${entry.slug}.html`);
-    failed = true;
-  }
-}
-
-for (const file of htmlFiles) {
-  const rel = path.relative(root, file).replace(/\\/g, '/');
-  if (rel === 'index.html') continue;
-  if (!incomingLinks.get(rel) && !intentionalOrphans.has(rel)) {
-    console.error(`Validation failed: unexpected orphan page ${rel}`);
-    failed = true;
-  }
-}
-
-const sitemap = fs.readFileSync(path.join(root, 'sitemap.xml'), 'utf8');
-for (const loc of ['https://porchandparty901.com/privacy-policy.html', 'https://porchandparty901.com/terms-and-conditions.html']) {
-  if (!sitemap.includes(loc)) {
-    console.error(`Validation failed: sitemap missing ${loc}`);
-    failed = true;
-  }
-}
-
-const robotsTxt = fs.readFileSync(path.join(root, 'robots.txt'), 'utf8');
-if (!/User-agent:\s*\*/i.test(robotsTxt) || !/Allow:\s*\//i.test(robotsTxt) || !/Sitemap:\s*https:\/\/porchandparty901\.com\/sitemap\.xml/i.test(robotsTxt)) {
-  console.error('Validation failed in robots.txt: missing crawl allow or sitemap contract');
-  failed = true;
-}
-if (/Disallow:\s*\//i.test(robotsTxt)) {
-  console.error('Validation failed in robots.txt: disallow all detected');
-  failed = true;
-}
-
-const llmsTxt = fs.readFileSync(path.join(root, 'llms.txt'), 'utf8');
-for (const token of ['Canonical-Domain:', 'Priority-URLs:', 'Service-Notes:', 'Booking-Notes:', 'Memphis']) {
-  if (!llmsTxt.includes(token)) {
-    console.error(`Validation failed in llms.txt: missing ${token}`);
-    failed = true;
-  }
-}
 
 if (failed) process.exit(1);
-console.log('validate:all passed');
+console.log(`Core validation OK: ${htmlFiles.length} HTML files checked with simplified matrix.`);

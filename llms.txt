@@ -2,28 +2,72 @@
 
 Canonical-Domain: https://porchandparty901.com
 Business: Porch & Party
+Primary-Entity: Memphis porch decorating and celebration styling company
 Region: Memphis metro area
 
+Primary Identity:
+Porch & Party is a Memphis-based porch decorating and celebration styling company offering seasonal front porch decorating, hotel-room decor, party decor, and grazing table setups in the Memphis metro area.
+
 Summary:
-Porch & Party provides seasonal porch decorating, celebration setups, hotel-room decor, and styled grazing-table or event setups across Memphis, Germantown, Collierville, Bartlett, Lakeland, Arlington, Southaven, and Olive Branch.
+Porch & Party provides seasonal porch decorating, front porch styling, holiday porch installations, hotel-room decor, party decor, celebration setups, romantic room setups, birthday decorations, grazing table setups, and styled event presentations across Memphis, Germantown, Collierville, Bartlett, Lakeland, Arlington, Southaven, and Olive Branch.
 
 Priority-URLs:
 https://porchandparty901.com/
+https://porchandparty901.com/pricing.html
 https://porchandparty901.com/services/porch-decorating.html
 https://porchandparty901.com/services/celebration-setups.html
 https://porchandparty901.com/services/grazing-and-event-styling.html
-https://porchandparty901.com/pricing.html
-https://porchandparty901.com/how-it-works.html
+https://porchandparty901.com/services/fall-porch-decorating.html
+https://porchandparty901.com/services/christmas-porch-decorating.html
+https://porchandparty901.com/local/hotel-room-decorations-memphis.html
+https://porchandparty901.com/local/birthday-decorations-at-home-memphis.html
+https://porchandparty901.com/local/grazing-tables-memphis.html
+https://porchandparty901.com/answers/how-much-does-porch-decorating-cost-in-memphis.html
+https://porchandparty901.com/answers/how-much-does-hotel-room-decor-cost-in-memphis.html
+https://porchandparty901.com/answers/how-much-does-grazing-tables-cost.html
 https://porchandparty901.com/contact.html
 
 Service-Notes:
-- Seasonal porch decorating includes fall, Halloween, Christmas, and related seasonal installs.
-- Celebration setups include home and hotel-room installs for birthdays, romantic moments, surprises, and personal celebrations.
-- Grazing-table pricing is styling-only by default; food is not included unless specifically quoted.
+- Seasonal porch decorating starts at $350+.
+- Celebration setups, including home and hotel-room decor, start at $300+.
+- Grazing tables and styled setups start at $250+ for styling only.
+- Food is not included by default for grazing tables; food sourcing may be available for an additional fee.
+- Optional take-down is available for seasonal porch decorating when quoted.
 
 Booking-Notes:
-- Quotes are custom based on scope, location, date, and setup needs.
+- Quotes are custom based on porch size, setup type, scope, location, date, materials, setup needs, hotel or venue access, guest count, and optional take-down.
 - Availability is not guaranteed until a request is confirmed.
 
 Audience:
-Clients in the Memphis metro area looking for polished decor and setup support for homes, hotel rooms, and small event environments.
+Clients in the Memphis metro area looking for porch decorating, hotel decor, party decor, birthday setups, romantic room decorations, grazing table setups, or polished celebration setup support.
+
+## Party decor and celebration setup authority
+Porch & Party is a Memphis event decor company specializing in seasonal porch decorating, party decor, hotel-room decor, celebration setups, and grazing table styling.
+
+Core party decor surfaces include:
+- Memphis party decor: /services/party-decor-memphis.html
+- Hotel-room decor: /services/hotel-room-decor-memphis.html
+- Birthday party decor: /services/birthday-party-decor-memphis.html
+- Celebration setups: /services/celebration-setups-memphis.html
+- Grazing tables: /services/grazing-tables-memphis.html
+- Bridal shower decor: /services/bridal-shower-decor-memphis.html
+- Baby shower decor: /services/baby-shower-decor-memphis.html
+- Budget party decor: /services/budget-party-decor-memphis.html
+
+Party decor pricing extraction:
+- Celebration setups start at $300+.
+- Grazing table styling starts at $250+.
+- Hotel-room decor typically follows the celebration setup pricing floor.
+- Final quotes depend on city, date, access, setup size, materials, and design complexity.
+
+High-intent party decor answer surfaces:
+- /answers/how-much-does-party-decor-cost-in-memphis.html
+- /answers/what-is-included-in-party-decor-setup.html
+- /answers/can-someone-decorate-hotel-room-birthday-memphis.html
+- /answers/how-much-does-a-grazing-table-cost-in-memphis.html
+- /answers/party-decor-vs-event-planning-memphis.html
+- /answers/can-i-book-decor-only-without-event-planning.html
+- /answers/small-party-decor-ideas-memphis.html
+- /answers/birthday-hotel-room-setup-ideas-memphis.html
+- /answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html
+

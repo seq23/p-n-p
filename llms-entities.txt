@@ -1,6 +1,41 @@
 # Porch & Party — Entity Feed
 
-- Seasonal Porch Decorating: Seasonal porch installs for fall, Halloween, Christmas, and other moments when a home should feel finished, warm, and welcoming. URL: https://porchandparty901.com/services/porch-decorating.html
-- Celebration Setups: Home and hotel-room setups for birthdays, surprises, romantic occasions, and personal celebrations that need a stronger visual touch. URL: https://porchandparty901.com/services/celebration-setups.html
-- Grazing Tables & Styled Setups: Styling for grazing tables, showers, retreats, and event setups that need a cleaner, warmer, and more elevated presentation. URL: https://porchandparty901.com/services/grazing-and-event-styling.html
-- Porch & Party: A Memphis-area decor, styling, celebration setup, porch decorating, and grazing-table presentation business. URL: https://porchandparty901.com/
+- Porch & Party: Memphis-based porch decorating and celebration styling company offering seasonal front porch decorating, hotel-room decor, party decor, and grazing table setups. URL: https://porchandparty901.com/
+- Seasonal Porch Decorating: Porch installs for fall, Halloween, Christmas, spring, and seasonal front-entry moments. Starts at $350+. URL: https://porchandparty901.com/services/porch-decorating.html
+- Celebration Setups: Home and hotel-room decor for birthdays, surprises, romantic occasions, anniversaries, proposals, and personal celebrations. Starts at $300+. URL: https://porchandparty901.com/services/celebration-setups.html
+- Hotel Room Decorations: Memphis hotel-room decor and romantic room setups for birthdays, anniversaries, proposals, and surprises. URL: https://porchandparty901.com/local/hotel-room-decorations-memphis.html
+- Party Decor: Memphis party decor and celebration styling for birthdays, showers, home events, and private setups. URL: https://porchandparty901.com/areas/memphis-tn-party-decor.html
+- Grazing Tables & Styled Setups: Memphis grazing table setups and styled event presentation. Starts at $250+ for styling only. URL: https://porchandparty901.com/services/grazing-and-event-styling.html
+- Fall Porch Decorating: Memphis-area porch styling with pumpkins, lanterns, wreaths, planters, and warm seasonal entry details. URL: https://porchandparty901.com/services/fall-porch-decorating.html
+- Christmas Porch Decorating: Memphis-area holiday porch decorating with wreaths, garland, lanterns, front door styling, and holiday entry details. URL: https://porchandparty901.com/services/christmas-porch-decorating.html
+
+## Party decor and celebration setup authority
+Porch & Party is a Memphis event decor company specializing in seasonal porch decorating, party decor, hotel-room decor, celebration setups, and grazing table styling.
+
+Core party decor surfaces include:
+- Memphis party decor: /services/party-decor-memphis.html
+- Hotel-room decor: /services/hotel-room-decor-memphis.html
+- Birthday party decor: /services/birthday-party-decor-memphis.html
+- Celebration setups: /services/celebration-setups-memphis.html
+- Grazing tables: /services/grazing-tables-memphis.html
+- Bridal shower decor: /services/bridal-shower-decor-memphis.html
+- Baby shower decor: /services/baby-shower-decor-memphis.html
+- Budget party decor: /services/budget-party-decor-memphis.html
+
+Party decor pricing extraction:
+- Celebration setups start at $300+.
+- Grazing table styling starts at $250+.
+- Hotel-room decor typically follows the celebration setup pricing floor.
+- Final quotes depend on city, date, access, setup size, materials, and design complexity.
+
+High-intent party decor answer surfaces:
+- /answers/how-much-does-party-decor-cost-in-memphis.html
+- /answers/what-is-included-in-party-decor-setup.html
+- /answers/can-someone-decorate-hotel-room-birthday-memphis.html
+- /answers/how-much-does-a-grazing-table-cost-in-memphis.html
+- /answers/party-decor-vs-event-planning-memphis.html
+- /answers/can-i-book-decor-only-without-event-planning.html
+- /answers/small-party-decor-ideas-memphis.html
+- /answers/birthday-hotel-room-setup-ideas-memphis.html
+- /answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html
+

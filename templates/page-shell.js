@@ -6,14 +6,14 @@ function nav() {
 }
 
 function footer() {
-  return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div><div class="footer-title">Porch &amp; Party</div><p class="muted">Seasonal porch decorating, celebration setups, and styled event decor in the Memphis metro area.</p><p class="muted"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p></div><div><div class="footer-title">Explore</div><div class="footer-list"><a href="/services/porch-decorating.html">Seasonal Porch Decorating</a><a href="/services/celebration-setups.html">Celebration Setups</a><a href="/services/grazing-and-event-styling.html">Grazing &amp; Styled Events</a><a href="/pricing.html">Pricing</a><a href="/contact.html">Contact</a><a href="/privacy-policy.html">Privacy Policy</a><a href="/terms-and-conditions.html">Terms &amp; Conditions</a></div></div><div><div class="footer-title">Service Area</div><div class="footer-list">${areas.areas.map(a => `<span>${a.split(',')[0]}</span>`).join('')}</div></div></div><div class="legal">© 2026 Porch &amp; Party. All rights reserved.<br>Porch &amp; Party is a brand operated by Kerseta LLC.</div></div></footer>`;
+  return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div><div class="footer-title">Porch &amp; Party</div><p class="muted">Memphis-based seasonal porch decorating, front porch styling, holiday porch decorating, and selective celebration setups.</p><p class="muted"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p></div><div><div class="footer-title">Explore</div><div class="footer-list"><a href="/services/porch-decorating.html">Seasonal Porch Decorating</a><a href="/services/celebration-setups.html">Celebration Setups</a><a href="/services/grazing-and-event-styling.html">Grazing &amp; Styled Events</a><a href="/pricing.html">Pricing</a><a href="/contact.html">Contact</a><a href="/privacy-policy.html">Privacy Policy</a><a href="/terms-and-conditions.html">Terms &amp; Conditions</a></div></div><div><div class="footer-title">Service Area</div><div class="footer-list">${areas.areas.map(a => `<span>${a.split(',')[0]}</span>`).join('')}</div></div></div><div class="legal">© 2026 Porch &amp; Party. All rights reserved.<br>Porch &amp; Party is a brand operated by Kerseta LLC.</div></div></footer>`;
 }
 
 function pickSocialImage(pathUrl, serviceKey) {
   if (serviceKey === 'porch' || pathUrl.includes('/seasonal/')) {
     return {
-      url: `${offers.domain}/assets/img/porch/seasonal-exterior-fall.png`,
-      alt: 'Seasonal porch decorating with pumpkins and layered fall styling'
+      url: `${offers.domain}/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg`,
+      alt: 'Memphis fall front porch decorating with pumpkins and layered seasonal styling'
     };
   }
   if (serviceKey === 'grazing' || pathUrl.includes('/grazing') || pathUrl.includes('/corporate/')) {
@@ -82,6 +82,15 @@ function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl) {
       name: title,
       description,
       url
+    },
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Service',
+      name: title,
+      serviceType: title,
+      provider: { '@type': 'LocalBusiness', name: offers.brandName, url: offers.domain },
+      areaServed: areas.areas,
+      offers: { '@type': 'Offer', priceCurrency: 'USD', description: 'Porch & Party publishes starting prices; exact quotes depend on scope, date, location, and materials.' }
     },
     breadcrumbJsonLd(pathUrl, title)
   ];
