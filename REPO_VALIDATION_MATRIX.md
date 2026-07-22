@@ -40,3 +40,22 @@ Validation should confirm both service families remain present in indexable surf
 | Dual service LLM surface check | `npm run validate:all` | HARD FAIL | The site may become porch-only or party-only in machine-readable extraction files | `llms.txt` keeps porch decor, party decor, hotel-room decor, celebration setup, grazing table, and pricing signals | Ranking, off-site authority, review velocity | Restore missing service family language |
 | Party service page presence | `npm run validate:all` | HARD FAIL | New party decor surfaces may be accidentally deleted | Core party decor, hotel-room decor, birthday decor, shower decor, grazing-table, budget/luxury party pages exist | Content quality, conversion performance | Restore required page or remove requirement with owner approval |
 | Visual image variety | content review | WARNING | Images may feel repetitive | Hyperlocal readable image filenames exist | Real project portfolio proof | Replace illustrative assets with real project images over time |
+
+## July 22, 2026 Local Authority Contract Upgrade
+
+This repo now has a lightweight local authority contract rather than a heavy multi-repo validation registry.
+
+| Validator / Test | Command | Severity | Production Risk | What It Proves | What It Does Not Prove | Failure Handling |
+|---|---|---:|---|---|---|---|
+| PNP phase bundle | `npm run validate:pnp-phase` | HARD FAIL for important contract breakage only | Important static, queue, manifest, service-family, or artifact-shape breakage could ship | Runs profile purity, tree hygiene, local authority contract, and core static validation | Build output freshness, provider submission, ranking, GBP strength | Fix the exact broken contract; do not demote core integrity failures |
+| Validation profile purity | `npm run validate:profile-purity` | HARD FAIL | Validation could accidentally publish, build, submit, repair, install, or mutate repo state | `validate:*` scripts and validator files are read/check-only | Whether execution commands work | Move mutating command to explicit execution script |
+| Tree hygiene | `npm run validate:tree-hygiene` | HARD FAIL | ZIP could contain dependency/runtime debris or loose receipt pollution | Root contains only public static files, repo contracts, and approved operations folders | Visual quality, search performance | Move receipts to `reports/` or docs; exclude generated runtime/dependency folders |
+| Local authority contract | `npm run validate:local-authority` | HARD FAIL | Query universe, queue, manifest, public service family, or identity contract could drift | Approved query items, queue entries, published manifest entries, HTML files, and core service surfaces align | Whether new content should be created next | Repair exact queue/manifest/source mismatch |
+
+### Execution Commands Are Not Validators
+
+- `npm run build:all` rebuilds generated pages and sitemap surfaces.
+- `npm run publish:queue` changes queue and manifest state.
+- Distribution scripts submit or inspect external surfaces.
+
+Those commands remain explicit operator/release actions. They must not be hidden inside validation profiles.

@@ -15,7 +15,11 @@
     "build:sitemap": "node scripts/generators/update_sitemap.js",
     "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/update_sitemap.js",
     "publish:queue": "node scripts/generators/publish_from_queue.js",
+    "validate:profile-purity": "node scripts/validation/validate_profile_purity.js",
+    "validate:tree-hygiene": "node scripts/validation/validate_tree_hygiene.js",
+    "validate:local-authority": "node scripts/validation/validate_local_authority_contract.js",
     "validate:all": "node scripts/validation/validate.js",
-    "validate:llm-surfaces": "node scripts/validation/validate.js"
+    "validate:llm-surfaces": "node scripts/validation/validate.js",
+    "validate:pnp-phase": "npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:all"
   }
 }

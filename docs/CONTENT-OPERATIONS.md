@@ -16,3 +16,10 @@
 - Weekly build / validate cadence
 - Monthly audit cadence
 - No daily bulk publishing
+- The queue may have zero unpublished items when every approved query-universe item has already shipped
+
+## Self-heal boundary
+- Validation may identify missing queue, manifest, sitemap, or static-file contract issues
+- Validation must not change source files
+- Safe repairs should be run as explicit operator actions after reviewing the exact failure
+- Pricing, offer scope, public claims, real-project image claims, and external provider submissions require operator review

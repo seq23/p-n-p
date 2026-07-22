@@ -10,9 +10,14 @@ Static site repo for Porch & Party at porchandparty901.com.
 ## Build commands
 - `npm run build:all`
 - `npm run validate:all`
+- `npm run validate:pnp-phase`
 
 ## Docs
 - `docs/AUTOMATION-ENGINE.md`
 - `docs/GOOGLE-BUSINESS-PROFILE-CHECKLIST.md`
 - `docs/DISTRIBUTION-RUNBOOK.md`
 - `docs/CONTENT-OPERATIONS.md`
+- `docs/day-0/START_HERE.md`
+
+## Operating contracts
+- `data/ops/pnp_local_authority_contract.json`

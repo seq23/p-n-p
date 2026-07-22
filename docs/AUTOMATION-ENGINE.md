@@ -31,9 +31,11 @@ This repo is designed to support a local discovery system for Porch & Party rath
 - weekly build / validation workflow
 - monthly audit workflow
 - no daily bulk publishing
+- current approved query universe is fully published; an empty unpublished queue is not a failure
 
 ## Rules
 - do not add pages outside the approved query universe
 - do not add thin local pages
 - keep pricing, disclaimers, and email aligned with the core site
 - keep generated pages linked back to the primary service and quote path
+- validators inspect only; build, publish, distribution, and provider submission commands stay explicit execution steps

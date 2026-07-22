@@ -1,26 +1,28 @@
 # Artifact Manifest
 
-- Artifact: p-n-p-main_BASELINE_05-23-26_e042178.zip
+- Artifact: p-n-p-main_BASELINE_07-22-26_<sha12>.zip
 - Repo: p-n-p-main
-- Packaged root: /mnt/data/pnp_img_work
-- ZIP root layout: repo files are at archive root; no wrapper folder
+- Packaged root: p-n-p-main
+- ZIP root layout: repo wrapper folder at archive root
 - Mode: full baseline snapshot
-- Date: 2026-05-23
-- SHA-style suffix: e042178
-- Source basis: latest p-n-p baseline with exact three user-selected porch images applied to homepage image asset filenames
-- Validation run on this source tree: npm run validate:all
+- Date: 2026-07-22
+- SHA-style suffix: assigned after packaging
+- Source basis: uploaded `p-n-p-main(1).zip` plus PNP local authority contract upgrade
+- Validation run on this source tree: `npm run validate:pnp-phase`
 - Packaging validation: ZIP reopened and root files verified after packaging
 - Updater target: generic v3 snapshot updater
-- Status: STRUCTURALLY CHECKED + STATIC VALIDATION PASSED — LOCAL UPDATER NOT RUN
+- Status: STRUCTURALLY CHECKED — LOCAL VALIDATION REQUIRED
 
-## Exact image replacements
+## July 22, 2026 local authority contract upgrade
 
-- Memphis homepage card source filename: `/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg`
-  - Replaced with the fall porch image matching the user's selected bottom image.
-- Collierville homepage card source filename: `/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg`
-  - Replaced with the Christmas porch image matching the user's selected top image.
-- Bartlett homepage card source filename: `/assets/img/porch/bartlett-small-front-porch-styling-under-500.jpg`
-  - Replaced with the small porch image matching the user's selected middle image.
+- Added `data/ops/pnp_local_authority_contract.json`.
+- Added `docs/day-0/START_HERE.md`.
+- Added non-mutating validators:
+  - `scripts/validation/validate_profile_purity.js`
+  - `scripts/validation/validate_tree_hygiene.js`
+  - `scripts/validation/validate_local_authority_contract.js`
+- Added `npm run validate:pnp-phase`.
+- Added `reports/PNP_LOCAL_AUTHORITY_PHASE_RECEIPT_2026-07-22.md`.
 
 ## Key included root files
 
@@ -38,4 +40,4 @@
 
 ## Notes
 
-No homepage layout, CSS, nav, copy, pricing, or UX structure was changed in this pass. Only the three existing porch image asset files were replaced under the same filenames already referenced by the homepage.
+No homepage layout, CSS, nav, copy, pricing, image assets, public offer scope, or UX structure was changed in this pass.

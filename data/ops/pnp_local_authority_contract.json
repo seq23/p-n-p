@@ -1,0 +1,89 @@
+{
+  "contract": "PNP_LOCAL_AUTHORITY_CONTRACT",
+  "version": "2026-07-22",
+  "repo": "p-n-p-main",
+  "brand": "Porch & Party",
+  "primary_domain": "https://porchandparty901.com",
+  "operating_entity": "Kerseta LLC",
+  "public_contact_email": "hello@porchandparty901.com",
+  "site_type": "static_local_service_authority_site",
+  "source_of_truth": {
+    "query_universe": "data/queries/query_universe.json",
+    "publish_queue": "data/publish_queue/publish_queue.json",
+    "published_manifest": "data/published_manifest/published_manifest.json",
+    "slug_registry": "data/slug_registry/slug_registry.json",
+    "service_matrix": "data/local_matrix/service_city_occasion_matrix.json",
+    "offers": "data/offers/services.json",
+    "service_areas": "data/service_areas/areas.json"
+  },
+  "authority_families": [
+    "seasonal_porch_decorating",
+    "party_decor",
+    "hotel_room_decor",
+    "grazing_table_styling"
+  ],
+  "cadence": {
+    "weekly": [
+      "publish_or_review_one_page_from_approved_queue",
+      "mirror_one_matching_social_caption",
+      "add_one_google_business_profile_image_if_available"
+    ],
+    "monthly": [
+      "review_top_service_pages_and_faqs",
+      "confirm_legal_contact_and_quote_paths",
+      "confirm_google_business_profile_services_match_site",
+      "decide_expand_tighten_or_retire_pages"
+    ],
+    "daily_bulk_publishing": false
+  },
+  "queue_contract": {
+    "approved_statuses": [
+      "queued",
+      "published",
+      "skipped",
+      "retired"
+    ],
+    "current_expected_mode": "fully_published_queue",
+    "published_items_must_have_html": true,
+    "published_items_must_be_in_manifest": true,
+    "manifest_items_must_have_html": true,
+    "query_universe_items_must_be_represented_in_queue": true,
+    "empty_unpublished_queue_is_allowed": true
+  },
+  "self_heal_policy": {
+    "validation_may_mutate_files": false,
+    "safe_repairs": [
+      "restore_missing_manifest_entry_for_existing_published_html",
+      "restore_missing_queue_entry_from_query_universe",
+      "restore_sitemap_after_explicit_build_sitemap_run"
+    ],
+    "unsafe_repairs_require_operator_action": [
+      "delete_or_retire_public_pages",
+      "change_offer_scope_or_pricing",
+      "replace_real_project_images",
+      "submit_to_external_providers"
+    ]
+  },
+  "external_agent_lane": {
+    "enabled": false,
+    "reason": "The current PNP source ZIP contains no external AI agent artifact drop lane. Do not invent one. If a future agent lane is added, define raw, normalized, processed, and receipt paths before enabling validation for it."
+  },
+  "hard_fail_only": [
+    "missing_required_static_files",
+    "broken_internal_links",
+    "malformed_json_or_json_ld",
+    "sitemap_drift",
+    "missing_legal_footer_or_contact_identity",
+    "missing_core_service_family_surfaces",
+    "publish_queue_manifest_contract_break",
+    "validation_profile_contains_mutating_execution_command",
+    "dependency_runtime_or_receipt_pollution_in_artifact"
+  ],
+  "warning_or_info_only": [
+    "subjective_copy_quality",
+    "visual_polish",
+    "offsite_distribution_strength",
+    "google_business_profile_strength",
+    "empty_unpublished_queue_when_all_known_items_are_published"
+  ]
+}
