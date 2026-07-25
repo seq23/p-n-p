@@ -1,0 +1,889 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-07-24T00:00:00.000Z",
+  "count": 98,
+  "pages": [
+    {
+      "route": "/answers/anniversary-room-decorations-memphis",
+      "rendered_file": "answers/anniversary-room-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "e74cf91d396f0c1628a540136bb1c4d4e6e1c9020cf91f1f5d1d1f773e95f3f5",
+      "cache_file": "data/release/frozen_accepted_outputs/e74cf91d396f0c1628a540136bb1c4d4e6e1c9020cf91f1f5d1d1f773e95f3f5.html.gz",
+      "cache_sha256": "421bb8b9713b4495768686d06678c58b255f6eeaf866284f492bcc9dde39a64d",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/baby-shower-decorations-memphis",
+      "rendered_file": "answers/baby-shower-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "d06c52486d978b4cfd7cb9e0f33377f7b2eae7917cfc9c668bed9e4e2e8528b5",
+      "cache_file": "data/release/frozen_accepted_outputs/d06c52486d978b4cfd7cb9e0f33377f7b2eae7917cfc9c668bed9e4e2e8528b5.html.gz",
+      "cache_sha256": "24a81fb473a067a5d04b91c41ff74cef5a2adfa27ac58387f8cc2e7623f1a2ab",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/balloon-garland-vs-full-birthday-setup",
+      "rendered_file": "answers/balloon-garland-vs-full-birthday-setup.html",
+      "state": "FROZEN",
+      "accepted_sha256": "ad82f785bb0f68cca2031405fe1d09f394f33214e91349bf4518c23517c1ba8a",
+      "cache_file": "data/release/frozen_accepted_outputs/ad82f785bb0f68cca2031405fe1d09f394f33214e91349bf4518c23517c1ba8a.html.gz",
+      "cache_sha256": "0d5a533382dcb52618832164ceddf51c8a290d8356b89c9f998a7cf2b36ded50",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/birthday-decorations-at-home-memphis",
+      "rendered_file": "answers/birthday-decorations-at-home-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "4b2a01e52b91415a6fe2538f0af73694193bd8d42a4107ba74f87ee574e02d77",
+      "cache_file": "data/release/frozen_accepted_outputs/4b2a01e52b91415a6fe2538f0af73694193bd8d42a4107ba74f87ee574e02d77.html.gz",
+      "cache_sha256": "963f32b712add69d149b6e51b82b9febef1dae5d6f477d7c2dcaf32c60a2f7e7",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/birthday-hotel-room-setup-ideas-memphis",
+      "rendered_file": "answers/birthday-hotel-room-setup-ideas-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "5fe51f0370ea0eff15e7197f795725c32b68f9d5c5df5356ec5a8b20501dd5fa",
+      "cache_file": "data/release/frozen_accepted_outputs/5fe51f0370ea0eff15e7197f795725c32b68f9d5c5df5356ec5a8b20501dd5fa.html.gz",
+      "cache_sha256": "e6ab02bbb35b547f72554baa918c6ee40bd23b5406ce69e1fbdc81ef343fcc94",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/bridal-shower-decorations-memphis",
+      "rendered_file": "answers/bridal-shower-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "2e163ab776b37102a4b32775e96a4970d6df87203fdf617b9e8e93d1217fcc79",
+      "cache_file": "data/release/frozen_accepted_outputs/2e163ab776b37102a4b32775e96a4970d6df87203fdf617b9e8e93d1217fcc79.html.gz",
+      "cache_sha256": "892eead3861e6a85038311123906e5fc933c8191b47e45a80095f2f1df0f9983",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/can-i-book-decor-only-without-event-planning",
+      "rendered_file": "answers/can-i-book-decor-only-without-event-planning.html",
+      "state": "FROZEN",
+      "accepted_sha256": "4f1179e022c3b68a5862ca1bb9591e80425ee94fa3296b503cee085620d9f009",
+      "cache_file": "data/release/frozen_accepted_outputs/4f1179e022c3b68a5862ca1bb9591e80425ee94fa3296b503cee085620d9f009.html.gz",
+      "cache_sha256": "5793bb07167ddca2d4534e17cb958f5674f0502a7fe82da25cd8682a3ccd69ec",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/can-someone-decorate-hotel-room-birthday-memphis",
+      "rendered_file": "answers/can-someone-decorate-hotel-room-birthday-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "f7bc0078a538255ec57571dd53400d1d1c6aa3886078db83a07b8314743677a9",
+      "cache_file": "data/release/frozen_accepted_outputs/f7bc0078a538255ec57571dd53400d1d1c6aa3886078db83a07b8314743677a9.html.gz",
+      "cache_sha256": "44ca968b371eafdc3829cb7995fbc480b0c896749539493187556a94bacccefb",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/christmas-porch-decorating-memphis",
+      "rendered_file": "answers/christmas-porch-decorating-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "2adb9c73306b327a8eeeb04054b3b8b6cd8f2d74a29a734b2f5b04b62720a75e",
+      "cache_file": "data/release/frozen_accepted_outputs/2adb9c73306b327a8eeeb04054b3b8b6cd8f2d74a29a734b2f5b04b62720a75e.html.gz",
+      "cache_sha256": "a201412584e92c3f2f31f54e442525c35c21f911b0a99754b2e68692d6747092",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/corporate-event-decor-memphis",
+      "rendered_file": "answers/corporate-event-decor-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "3eab36e434f7dc392212934b8af591e46f10f35002143089633126df42b53841",
+      "cache_file": "data/release/frozen_accepted_outputs/3eab36e434f7dc392212934b8af591e46f10f35002143089633126df42b53841.html.gz",
+      "cache_sha256": "7ab440945166ba0ed5219fdcc2932cad98980237a72f7081981aa637c91dc1d1",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/corporate-grazing-tables-memphis",
+      "rendered_file": "answers/corporate-grazing-tables-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "1fe5a1fc9f5036710e6e1179365646a8b11c4c171cf25e48d96ab7035083339d",
+      "cache_file": "data/release/frozen_accepted_outputs/1fe5a1fc9f5036710e6e1179365646a8b11c4c171cf25e48d96ab7035083339d.html.gz",
+      "cache_sha256": "4dee0109cacfaf5a4803e24d17943dfd0eb5969baa9dde6f7cb11deeba9ca339",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/diy-vs-hiring-party-decorator",
+      "rendered_file": "answers/diy-vs-hiring-party-decorator.html",
+      "state": "FROZEN",
+      "accepted_sha256": "1b6bbbdb7a278e6e393d59febe12a18bf261418b555c01d6cb4780696f63ad76",
+      "cache_file": "data/release/frozen_accepted_outputs/1b6bbbdb7a278e6e393d59febe12a18bf261418b555c01d6cb4780696f63ad76.html.gz",
+      "cache_sha256": "95d308269ac12e9105a4602f0f4bc0eeaf9770cb934a26e5c4d5f3e1fcbe9a38",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/do-grazing-tables-include-food",
+      "rendered_file": "answers/do-grazing-tables-include-food.html",
+      "state": "FROZEN",
+      "accepted_sha256": "37ed25187f28829459e550cbcc2af62d6d7421061dfa9f954989eaf1a9902d65",
+      "cache_file": "data/release/frozen_accepted_outputs/37ed25187f28829459e550cbcc2af62d6d7421061dfa9f954989eaf1a9902d65.html.gz",
+      "cache_sha256": "d0ed6463dfcbba7106c9d698938038754f6f64f9eda6ef9235b754eb20982745",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/do-party-decorators-come-to-your-house",
+      "rendered_file": "answers/do-party-decorators-come-to-your-house.html",
+      "state": "FROZEN",
+      "accepted_sha256": "c249b46bca321943c2ac521e2fd53dd9f98387ba650329315e6200015bf77276",
+      "cache_file": "data/release/frozen_accepted_outputs/c249b46bca321943c2ac521e2fd53dd9f98387ba650329315e6200015bf77276.html.gz",
+      "cache_sha256": "150c564f6a2d7a3e00af728e83ae2d69887c7aee108f1f8e7aa6fc11d30f491b",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/event-decorator-memphis",
+      "rendered_file": "answers/event-decorator-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "9db4edf3439a569feb3478355558f829c7a6d17e274b7228ffded9fa1662f869",
+      "cache_file": "data/release/frozen_accepted_outputs/9db4edf3439a569feb3478355558f829c7a6d17e274b7228ffded9fa1662f869.html.gz",
+      "cache_sha256": "e35b2978f178f3f0138dc31b875d7ab57394a65266f3a5c72802104a8477c091",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/fall-porch-decorating-ideas-southern-homes",
+      "rendered_file": "answers/fall-porch-decorating-ideas-southern-homes.html",
+      "state": "FROZEN",
+      "accepted_sha256": "04a16b773c133c59e654fbfc71b01d0804bdc294d6d49172b37081a03ed51fdd",
+      "cache_file": "data/release/frozen_accepted_outputs/04a16b773c133c59e654fbfc71b01d0804bdc294d6d49172b37081a03ed51fdd.html.gz",
+      "cache_sha256": "6f11b097587f7d57b86cf8c60ab6b5f9d50a66dfc1243a24befa8c40f1222354",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/front-porch-styling-memphis",
+      "rendered_file": "answers/front-porch-styling-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "4d34a99a13685349978f50d5a721627da725f754a6ad87346912ccec8e702090",
+      "cache_file": "data/release/frozen_accepted_outputs/4d34a99a13685349978f50d5a721627da725f754a6ad87346912ccec8e702090.html.gz",
+      "cache_sha256": "d8a386c8c73b36bc46535dd0450d1736d64429fd78b8595bd3f6ef3ca550b810",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/grazing-table-ideas-bridal-showers-birthdays-small-events",
+      "rendered_file": "answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html",
+      "state": "FROZEN",
+      "accepted_sha256": "7c774ca2c50fd48d63c1b54cc35fa0556b3876f234b56c1cf4879c57008fbc5f",
+      "cache_file": "data/release/frozen_accepted_outputs/7c774ca2c50fd48d63c1b54cc35fa0556b3876f234b56c1cf4879c57008fbc5f.html.gz",
+      "cache_sha256": "32219c050ff9c354a23e69103b71202a112bc66a4c598b0eca5c24d67405afd9",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/grazing-tables-memphis",
+      "rendered_file": "answers/grazing-tables-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "0324fe97df92449adf21869f0d237bbd2da2330ea3704100af3e7887c7d8d473",
+      "cache_file": "data/release/frozen_accepted_outputs/0324fe97df92449adf21869f0d237bbd2da2330ea3704100af3e7887c7d8d473.html.gz",
+      "cache_sha256": "46cbe2a4c64f2550b3939d23ef94d4f6551253af641c226eb75b299461677e53",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/halloween-porch-decorating-memphis",
+      "rendered_file": "answers/halloween-porch-decorating-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "d98ed2b7d4f18e271b71d710c562c5fd1f7a603cb5b485f3d8e29842c72a4407",
+      "cache_file": "data/release/frozen_accepted_outputs/d98ed2b7d4f18e271b71d710c562c5fd1f7a603cb5b485f3d8e29842c72a4407.html.gz",
+      "cache_sha256": "f71671fc9f5ab9253156fae78bc129d8329e924a6555aee3f88aad585b5b73d7",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/hotel-room-decorations-memphis",
+      "rendered_file": "answers/hotel-room-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "ab47337db8cf00c440a0d624f4c6c07c643a21d5c5300653ab818659756e2c90",
+      "cache_file": "data/release/frozen_accepted_outputs/ab47337db8cf00c440a0d624f4c6c07c643a21d5c5300653ab818659756e2c90.html.gz",
+      "cache_sha256": "e50f71a8187ead1ef825a98122c809508642aa37619d478f2bf03e6f57ccc1d8",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/how-far-in-advance-should-i-book-party-decor",
+      "rendered_file": "answers/how-far-in-advance-should-i-book-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "7210b4fdcbf4ae586f72ee971e0df11e5dda0d656b030e9d4458960269915ab9",
+      "cache_file": "data/release/frozen_accepted_outputs/7210b4fdcbf4ae586f72ee971e0df11e5dda0d656b030e9d4458960269915ab9.html.gz",
+      "cache_sha256": "0b4c866c17e8af0f1ea8a992c32a7e905b46c7a9aaf987bd96cf02d2050a383d",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/how-long-does-it-take-to-set-up-party-decor",
+      "rendered_file": "answers/how-long-does-it-take-to-set-up-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "ee2167f46ddb136bff1cecb36c5f7c61386580c90e78846aa34ea8b7f5fb8c6c",
+      "cache_file": "data/release/frozen_accepted_outputs/ee2167f46ddb136bff1cecb36c5f7c61386580c90e78846aa34ea8b7f5fb8c6c.html.gz",
+      "cache_sha256": "9282ff73f30a2775fb502cfc409beaa14acd5980191d7b39c06c968ad56bdcef",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/how-much-does-a-grazing-table-cost-in-memphis",
+      "rendered_file": "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "8aac769d2b88c54e316e7465a5e226e5043d10601b28e283e91208a3ffd6a01f",
+      "cache_file": "data/release/frozen_accepted_outputs/8aac769d2b88c54e316e7465a5e226e5043d10601b28e283e91208a3ffd6a01f.html.gz",
+      "cache_sha256": "319c3576b5749a13292e23c265a1f7badee38f98b5bd5d3747af908d836046cf",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/how-much-does-birthday-decoration-at-home-cost",
+      "rendered_file": "answers/how-much-does-birthday-decoration-at-home-cost.html",
+      "state": "FROZEN",
+      "accepted_sha256": "e9213787400d6c260f084c95f023344f2cc3300aa1cb673a0411a62aa3016bf2",
+      "cache_file": "data/release/frozen_accepted_outputs/e9213787400d6c260f084c95f023344f2cc3300aa1cb673a0411a62aa3016bf2.html.gz",
+      "cache_sha256": "175172ca33b8e0ad568f686215f8572dbf139e0e4bce5614c35e0feeeeeca103",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/how-much-does-grazing-tables-cost",
+      "rendered_file": "answers/how-much-does-grazing-tables-cost.html",
+      "state": "FROZEN",
+      "accepted_sha256": "223ad5b737db7eb0b929e2ced3039b4367f05952615a6807078cb75707751328",
+      "cache_file": "data/release/frozen_accepted_outputs/223ad5b737db7eb0b929e2ced3039b4367f05952615a6807078cb75707751328.html.gz",
+      "cache_sha256": "77f08c2221f475141482aa509dce629e0b16615eba218b74de4cf8dde2d3e66b",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/how-much-does-hotel-room-decor-cost-in-memphis",
+      "rendered_file": "answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "0afc29678e708de046ab45d6fdc02f85db4180e2bffe75206ebb77832428939a",
+      "cache_file": "data/release/frozen_accepted_outputs/0afc29678e708de046ab45d6fdc02f85db4180e2bffe75206ebb77832428939a.html.gz",
+      "cache_sha256": "7527b1e62096e581b6736c59f187181be67f5d9dbcc2dda9f72cd73541ea053d",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/how-much-does-party-decor-cost-in-memphis",
+      "rendered_file": "answers/how-much-does-party-decor-cost-in-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "082a68f31c7bd24026597c251852a24dd7410b9c2e199e34a1e71df5e657a61f",
+      "cache_file": "data/release/frozen_accepted_outputs/082a68f31c7bd24026597c251852a24dd7410b9c2e199e34a1e71df5e657a61f.html.gz",
+      "cache_sha256": "c433f6179d0d053f79460182d2eb7b6c9748a006880290f2d457af4d3800fde9",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/how-much-does-porch-decorating-cost-in-memphis",
+      "rendered_file": "answers/how-much-does-porch-decorating-cost-in-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "f76724e8f8a60e29566c96522e62ab334d02504da81e1c300e5c4c8b6a6448bf",
+      "cache_file": "data/release/frozen_accepted_outputs/f76724e8f8a60e29566c96522e62ab334d02504da81e1c300e5c4c8b6a6448bf.html.gz",
+      "cache_sha256": "306ede16af2b54657b344a65050cbf7697bb3423032e62fa486a37217e29f3ca",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise",
+      "rendered_file": "answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+      "state": "FROZEN",
+      "accepted_sha256": "3d06f72841433fbe3bde9079f4168d27430c3fef1c64973828be994e806f6837",
+      "cache_file": "data/release/frozen_accepted_outputs/3d06f72841433fbe3bde9079f4168d27430c3fef1c64973828be994e806f6837.html.gz",
+      "cache_sha256": "cd1dd987a0ca1fc6d4d4c3d81de87ca4fbb400810c7528279aee67d13e6b3872",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/index",
+      "rendered_file": "answers/index.html",
+      "state": "FROZEN",
+      "accepted_sha256": "0b1d001a121e793f0017b96cd625b071ef0d19533ac774ef6c17d56415af44d9",
+      "cache_file": "data/release/frozen_accepted_outputs/0b1d001a121e793f0017b96cd625b071ef0d19533ac774ef6c17d56415af44d9.html.gz",
+      "cache_sha256": "a740befa1fc594050b62f41ea840e9129f0309331df37ba4eccec142bfa167fc",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/last-minute-birthday-setup-ideas-memphis",
+      "rendered_file": "answers/last-minute-birthday-setup-ideas-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "17382817d20abc2086774f6fad2e8ea4bd8ec732efe890d533ce84b67ae7e8f0",
+      "cache_file": "data/release/frozen_accepted_outputs/17382817d20abc2086774f6fad2e8ea4bd8ec732efe890d533ce84b67ae7e8f0.html.gz",
+      "cache_sha256": "672883c1bb2586de3e840b6bed8382e7aa92c21028354b6adfaf4cb9441ed08b",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/memphis-celebration-setups",
+      "rendered_file": "answers/memphis-celebration-setups.html",
+      "state": "FROZEN",
+      "accepted_sha256": "54003b2811ad35196372d4ca4d3edb57bd5b229150f67f9bd25fd33cee20cd6c",
+      "cache_file": "data/release/frozen_accepted_outputs/54003b2811ad35196372d4ca4d3edb57bd5b229150f67f9bd25fd33cee20cd6c.html.gz",
+      "cache_sha256": "01bf2fa6ec05488546bc430a43a115e0ccb4e4ae2b9474106e8610c9dffe76f2",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/party-decor-vs-event-planning-memphis",
+      "rendered_file": "answers/party-decor-vs-event-planning-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "7244d91f508fb6c3b41b7e66cadc250a5f7cb146c5da5e4f59d64f261096f08b",
+      "cache_file": "data/release/frozen_accepted_outputs/7244d91f508fb6c3b41b7e66cadc250a5f7cb146c5da5e4f59d64f261096f08b.html.gz",
+      "cache_sha256": "a8aaa26c294e83b2bb7b334447f808f9c69c49ac668eff054650ff2823527fbf",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/party-planner-memphis",
+      "rendered_file": "answers/party-planner-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "3c4768fd25d01ebfbe0f16d7b9ec716fdfc6156b2ab51b18b4d09f7902ed9c85",
+      "cache_file": "data/release/frozen_accepted_outputs/3c4768fd25d01ebfbe0f16d7b9ec716fdfc6156b2ab51b18b4d09f7902ed9c85.html.gz",
+      "cache_sha256": "c767df88de0b3349eebefb469df1c26631c43732cd55c44f98bc43dc8d569278",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/porch-decorating-under-500-memphis",
+      "rendered_file": "answers/porch-decorating-under-500-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "8f9ff1e94a94efa6bc671ad00765356e150d9530cbc923162536e9a2c750b048",
+      "cache_file": "data/release/frozen_accepted_outputs/8f9ff1e94a94efa6bc671ad00765356e150d9530cbc923162536e9a2c750b048.html.gz",
+      "cache_sha256": "37c6353715ce61465cbc22aa5ed69862581252835ecdaf09a6998e344ab8b57b",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/proposal-room-setup-memphis",
+      "rendered_file": "answers/proposal-room-setup-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "f1156e59283d174fba4fd14f035ee6cf41d2f5f23e98f575bbb3ce5d80d294e7",
+      "cache_file": "data/release/frozen_accepted_outputs/f1156e59283d174fba4fd14f035ee6cf41d2f5f23e98f575bbb3ce5d80d294e7.html.gz",
+      "cache_sha256": "d866747a947e0cd0ce7e2f22599e3efabdc54ef8361550e18f7de5de18b2c063",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/romantic-room-decorations-memphis",
+      "rendered_file": "answers/romantic-room-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "ebbea99c93a6ea3eeac7e722719af46a7bbea84b8708bf4ec46694eb693c1360",
+      "cache_file": "data/release/frozen_accepted_outputs/ebbea99c93a6ea3eeac7e722719af46a7bbea84b8708bf4ec46694eb693c1360.html.gz",
+      "cache_sha256": "27484a4b7f3fe589f72dba4dadc5804fad847ff88a2d624dfb1ad836a068d142",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/small-party-decor-ideas-memphis",
+      "rendered_file": "answers/small-party-decor-ideas-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "c596a4b21e859e6f11e2337419e4ac7821b0551b639119dde13e8db7e9c334c8",
+      "cache_file": "data/release/frozen_accepted_outputs/c596a4b21e859e6f11e2337419e4ac7821b0551b639119dde13e8db7e9c334c8.html.gz",
+      "cache_sha256": "9382672e6d75817d1b49d8819f8de2a133ad5311d7ec7f4917e04b299bcb4e8e",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/small-porch-styling-ideas-memphis",
+      "rendered_file": "answers/small-porch-styling-ideas-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "02f9ee4fc7d6da6a470c7ab7eabe229c42b67dc14f75232873b7acb95a8dba6a",
+      "cache_file": "data/release/frozen_accepted_outputs/02f9ee4fc7d6da6a470c7ab7eabe229c42b67dc14f75232873b7acb95a8dba6a.html.gz",
+      "cache_sha256": "c22601bbb2c9a99db571c51afbe1999115d9b7ad425666bbb54170a15e8cdc08",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/answers/what-is-included-in-party-decor-setup",
+      "rendered_file": "answers/what-is-included-in-party-decor-setup.html",
+      "state": "FROZEN",
+      "accepted_sha256": "7fec5dae3d0ca96cea4192f89267505ef89e7025adb8ec610cb8eb824d41fc86",
+      "cache_file": "data/release/frozen_accepted_outputs/7fec5dae3d0ca96cea4192f89267505ef89e7025adb8ec610cb8eb824d41fc86.html.gz",
+      "cache_sha256": "4468654c8afe32bb1879235d9c380c449467b9d87538e9df8b81612184cd3ee1",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/arlington-tn-party-decor",
+      "rendered_file": "areas/arlington-tn-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "2bef4863edba13dfbad69773f84ddb9d76477eca39850028783ca952896fdf63",
+      "cache_file": "data/release/frozen_accepted_outputs/2bef4863edba13dfbad69773f84ddb9d76477eca39850028783ca952896fdf63.html.gz",
+      "cache_sha256": "da15bad1f3e8b12c2b0663e3760046cc11ee8961306a2f6bbf5a8ab71b0e6be7",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/arlington-tn-porch-decorating",
+      "rendered_file": "areas/arlington-tn-porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "9dcf5821fd5d8e8e12234e8d8864c464c9a079a9b2b19d820dfedcbedb4ec50d",
+      "cache_file": "data/release/frozen_accepted_outputs/9dcf5821fd5d8e8e12234e8d8864c464c9a079a9b2b19d820dfedcbedb4ec50d.html.gz",
+      "cache_sha256": "a8ab971f0a2b05226ab13505416c1a5e55b09e5b45387c8d43d8eb6396c8aa8c",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/bartlett-tn-party-decor",
+      "rendered_file": "areas/bartlett-tn-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "9ee81dca2ab7c6da6963cb4c9749a5677e2c8717922e96aaa9f85e016a3998b9",
+      "cache_file": "data/release/frozen_accepted_outputs/9ee81dca2ab7c6da6963cb4c9749a5677e2c8717922e96aaa9f85e016a3998b9.html.gz",
+      "cache_sha256": "52f634d2c4b3e2a6516254e7fc28a61d9faf0bedf27da87a62263a57a2afe271",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/bartlett-tn-porch-decorating",
+      "rendered_file": "areas/bartlett-tn-porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "84e137197dd17c9ecdf26ea7b78618b9bc6a9f9dadf9e12b67f78f235e9b9446",
+      "cache_file": "data/release/frozen_accepted_outputs/84e137197dd17c9ecdf26ea7b78618b9bc6a9f9dadf9e12b67f78f235e9b9446.html.gz",
+      "cache_sha256": "a6c3015e8ddb10d01953fcac7f2b4b834fd9775032699f3867ad1e90786717bb",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/collierville-tn-party-decor",
+      "rendered_file": "areas/collierville-tn-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "4c355e9e6161a2b877ba073cd7a0444ecf46a9c47f735e087c9800fcf1b24260",
+      "cache_file": "data/release/frozen_accepted_outputs/4c355e9e6161a2b877ba073cd7a0444ecf46a9c47f735e087c9800fcf1b24260.html.gz",
+      "cache_sha256": "5c627944f82d5cc83f2e4ab6a515c3f141ec8e56f3f498560a9a78cfc26f98d1",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/collierville-tn-porch-decorating",
+      "rendered_file": "areas/collierville-tn-porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "d29c92fd34cb59a2db7d334e6b0c0cdb78798812248031946fe124e4a8c8a457",
+      "cache_file": "data/release/frozen_accepted_outputs/d29c92fd34cb59a2db7d334e6b0c0cdb78798812248031946fe124e4a8c8a457.html.gz",
+      "cache_sha256": "e9e9ecebd32f6ef5266986913a64fdc8a6e9e3e5adb35657cd947386317e35d7",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/east-memphis-tn-porch-styling",
+      "rendered_file": "areas/east-memphis-tn-porch-styling.html",
+      "state": "FROZEN",
+      "accepted_sha256": "6bd36f8e5d9b4df52901f4854a80d11baffd1483ee177b8ff24b134bc3b1897c",
+      "cache_file": "data/release/frozen_accepted_outputs/6bd36f8e5d9b4df52901f4854a80d11baffd1483ee177b8ff24b134bc3b1897c.html.gz",
+      "cache_sha256": "ddb41fce41ff5b18086ffbcd2ffac79f9a569e0b04fe1e8c4bc58d403287c784",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/germantown-tn-party-decor",
+      "rendered_file": "areas/germantown-tn-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "850769c1b749d831d3754ace6d931ced454431076a83dc53043f392ac1eabe0f",
+      "cache_file": "data/release/frozen_accepted_outputs/850769c1b749d831d3754ace6d931ced454431076a83dc53043f392ac1eabe0f.html.gz",
+      "cache_sha256": "71bcc9b06f2331ecd6df1fd5a38c1fbe5a05783f06e1a37748c8770a7a9aeeff",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/germantown-tn-porch-decorating",
+      "rendered_file": "areas/germantown-tn-porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "8b157cb62a481e44727aa7700485cc23b06427e1d80ada44af3e1b4a47c9dcfc",
+      "cache_file": "data/release/frozen_accepted_outputs/8b157cb62a481e44727aa7700485cc23b06427e1d80ada44af3e1b4a47c9dcfc.html.gz",
+      "cache_sha256": "bf6ec0655f7b20c91d218cbe22bf358088ae9cc5adefe77a1c46e792b18d7386",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/lakeland-tn-party-decor",
+      "rendered_file": "areas/lakeland-tn-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "9deec084136d30894dffc55a8d7b378e0e602de62ca6b518342c1769fb619ff7",
+      "cache_file": "data/release/frozen_accepted_outputs/9deec084136d30894dffc55a8d7b378e0e602de62ca6b518342c1769fb619ff7.html.gz",
+      "cache_sha256": "7d527100b8369fc3a09c1e9bc8b7d2ca73e3efa06f27f66b3cf77858e9c9fcb7",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/lakeland-tn-porch-decorating",
+      "rendered_file": "areas/lakeland-tn-porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "2c680a818e35b99277dfdab536ff9567f1fdcedbee3fcedcaf7147860761cb75",
+      "cache_file": "data/release/frozen_accepted_outputs/2c680a818e35b99277dfdab536ff9567f1fdcedbee3fcedcaf7147860761cb75.html.gz",
+      "cache_sha256": "5c9b74984d81c566c5f24fc36ee7c1eca2a5f1addb8d2e84d275df67c1b3b426",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/memphis-tn-party-decor",
+      "rendered_file": "areas/memphis-tn-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "83d12955243e36226a5e0f7251b2f6c8446700922459ce435c7064780307d4c5",
+      "cache_file": "data/release/frozen_accepted_outputs/83d12955243e36226a5e0f7251b2f6c8446700922459ce435c7064780307d4c5.html.gz",
+      "cache_sha256": "bb90210b04febb04f7451c1f68b3f534393f2686d5fc4930ca2fd482595e1192",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/memphis-tn-porch-decorating",
+      "rendered_file": "areas/memphis-tn-porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "43a37595c0d422b2f84229af8414ac126df68cc80ebe88a8e015ce39431e5c6f",
+      "cache_file": "data/release/frozen_accepted_outputs/43a37595c0d422b2f84229af8414ac126df68cc80ebe88a8e015ce39431e5c6f.html.gz",
+      "cache_sha256": "ecb7343c8538a007c190232b35096023265a85e6dc10fd23831adc67edc3f562",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/olive-branch-ms-party-decor",
+      "rendered_file": "areas/olive-branch-ms-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "451697864b6a76701c6d7614cc98c773c4e7a3672c3d998bb77c3f281b6a53c2",
+      "cache_file": "data/release/frozen_accepted_outputs/451697864b6a76701c6d7614cc98c773c4e7a3672c3d998bb77c3f281b6a53c2.html.gz",
+      "cache_sha256": "05ccdb0223daf04e96a183b95bdd87154b9c3cda8804166c065e25d1d007a420",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/areas/southaven-ms-party-decor",
+      "rendered_file": "areas/southaven-ms-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "f99e1952f4c5d52811b8b6d862fa2463bf3dfd6f9c258d5143721ce218328635",
+      "cache_file": "data/release/frozen_accepted_outputs/f99e1952f4c5d52811b8b6d862fa2463bf3dfd6f9c258d5143721ce218328635.html.gz",
+      "cache_sha256": "a33de54c2e1f9c96587502b236138d034ca1f9938754e725db6c8dfa7d0faa63",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/authority/event-decorator-memphis",
+      "rendered_file": "authority/event-decorator-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "5ab32093d42d03eab25d6f449794d5474b71d983d7d0f5cf7c5dcd874e2e5c15",
+      "cache_file": "data/release/frozen_accepted_outputs/5ab32093d42d03eab25d6f449794d5474b71d983d7d0f5cf7c5dcd874e2e5c15.html.gz",
+      "cache_sha256": "f9d50fcb754a5fa153882c84e5343932f640530fc5fae66dd98f084ef461fb6b",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/authority/party-planner-memphis",
+      "rendered_file": "authority/party-planner-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "65d82284002f8ba9ea78bfd7f6ccd33d8597d5709901b9eb1835ea63d1723e00",
+      "cache_file": "data/release/frozen_accepted_outputs/65d82284002f8ba9ea78bfd7f6ccd33d8597d5709901b9eb1835ea63d1723e00.html.gz",
+      "cache_sha256": "6e43fec2a3afa76348c74770bb35129c7a513af9ca68526e083618bf8fc781df",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/comparisons/balloon-garland-vs-full-birthday-setup",
+      "rendered_file": "comparisons/balloon-garland-vs-full-birthday-setup.html",
+      "state": "FROZEN",
+      "accepted_sha256": "60888d06e4e0bd3bac15642fe59583df05660c13f8989eba0b7004da3647b4d4",
+      "cache_file": "data/release/frozen_accepted_outputs/60888d06e4e0bd3bac15642fe59583df05660c13f8989eba0b7004da3647b4d4.html.gz",
+      "cache_sha256": "3bc6bf1f7a72500993c67f53189cffb99da5eeb78afde9d0eedef75e1196063c",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/comparisons/diy-vs-hiring-party-decorator",
+      "rendered_file": "comparisons/diy-vs-hiring-party-decorator.html",
+      "state": "FROZEN",
+      "accepted_sha256": "dd5811586d02ec2d97773136463046f1c527c51cf0590195244a72968966ff5e",
+      "cache_file": "data/release/frozen_accepted_outputs/dd5811586d02ec2d97773136463046f1c527c51cf0590195244a72968966ff5e.html.gz",
+      "cache_sha256": "75d541216bc45fcfca81587bb914aea9e020b373cefc035cd729993b098d2974",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/corporate/corporate-event-decor-memphis",
+      "rendered_file": "corporate/corporate-event-decor-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "f32f6c73c9711ae6089a5339d89f40f6c0e64ede0bb07725f6a56ca7de6ebfc4",
+      "cache_file": "data/release/frozen_accepted_outputs/f32f6c73c9711ae6089a5339d89f40f6c0e64ede0bb07725f6a56ca7de6ebfc4.html.gz",
+      "cache_sha256": "300ec6cb77cb649a1ee28a2875fbfaf0d3841ac192d35ed6dc0c9217192deca6",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/corporate/corporate-grazing-tables-memphis",
+      "rendered_file": "corporate/corporate-grazing-tables-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "2abcf49236c5cdcc34259fbeb32ecf59d396d5bbd3704fa4266ad262c0933b0a",
+      "cache_file": "data/release/frozen_accepted_outputs/2abcf49236c5cdcc34259fbeb32ecf59d396d5bbd3704fa4266ad262c0933b0a.html.gz",
+      "cache_sha256": "f52ef1c7998dc44fcddff572fb7160f4f1056e1c91b9b2dfd576c855a6448295",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/events/anniversary-room-decorations-memphis",
+      "rendered_file": "events/anniversary-room-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "42fbbbd270e175241dc02c13331e86e0387692009752638520ef688a1bbce5fb",
+      "cache_file": "data/release/frozen_accepted_outputs/42fbbbd270e175241dc02c13331e86e0387692009752638520ef688a1bbce5fb.html.gz",
+      "cache_sha256": "e549b10e69e1360fa75931a5b177ab4afe7accc74b1138ba7e86674e169d61cc",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/events/baby-shower-decorations-memphis",
+      "rendered_file": "events/baby-shower-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "bd5c9496d49d5f1a04f1f19b549f0aab11c1c2766adaeec178e02f238d03a8d4",
+      "cache_file": "data/release/frozen_accepted_outputs/bd5c9496d49d5f1a04f1f19b549f0aab11c1c2766adaeec178e02f238d03a8d4.html.gz",
+      "cache_sha256": "06e64de8e6cfa9ce13d8a2552bd834c7c086537e455c9206e7c41aed1011c1ac",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/events/bridal-shower-decorations-memphis",
+      "rendered_file": "events/bridal-shower-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "5a8175a42204472257d5b1f0085111fad97af5043d0c82b39ee9c46445e87df1",
+      "cache_file": "data/release/frozen_accepted_outputs/5a8175a42204472257d5b1f0085111fad97af5043d0c82b39ee9c46445e87df1.html.gz",
+      "cache_sha256": "98370b81a92f8dcb3b0f65f52bacfa135c4bfb64eccf8b1e10864ca52354e9c2",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/events/proposal-room-setup-memphis",
+      "rendered_file": "events/proposal-room-setup-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "5bb64a47e9b663f0f99a3ec045d2e93bb524833915f1a6a39e196779569b03b7",
+      "cache_file": "data/release/frozen_accepted_outputs/5bb64a47e9b663f0f99a3ec045d2e93bb524833915f1a6a39e196779569b03b7.html.gz",
+      "cache_sha256": "c951887349aeeb1c3f0de0b82ed1def1713beb8bb56884034187857699425f2d",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/faq/do-grazing-tables-include-food",
+      "rendered_file": "faq/do-grazing-tables-include-food.html",
+      "state": "FROZEN",
+      "accepted_sha256": "a9fdc97a4392797a9f2265154b7ac5994c251c2f628de1a3af2dd6cf7c146426",
+      "cache_file": "data/release/frozen_accepted_outputs/a9fdc97a4392797a9f2265154b7ac5994c251c2f628de1a3af2dd6cf7c146426.html.gz",
+      "cache_sha256": "d166c653207a830f6e5e96d37aaf8f9dccac04dce703f937d89dccf411db249e",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/faq/do-party-decorators-come-to-your-house",
+      "rendered_file": "faq/do-party-decorators-come-to-your-house.html",
+      "state": "FROZEN",
+      "accepted_sha256": "6b5bb869aaec3746cb3eecfc592ab989539e2f991234378e89c34a85044437c4",
+      "cache_file": "data/release/frozen_accepted_outputs/6b5bb869aaec3746cb3eecfc592ab989539e2f991234378e89c34a85044437c4.html.gz",
+      "cache_sha256": "68ce3ec23c9ead4194f6b8839fa9d72c819c914dce4f75335d73bd07189ab05d",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/faq/how-far-in-advance-should-i-book-party-decor",
+      "rendered_file": "faq/how-far-in-advance-should-i-book-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "ab30095931c2a76d1154017fef231625a71b34d30ebb1a7f916e64b6b0b4100c",
+      "cache_file": "data/release/frozen_accepted_outputs/ab30095931c2a76d1154017fef231625a71b34d30ebb1a7f916e64b6b0b4100c.html.gz",
+      "cache_sha256": "1a0131eb1eb7f5a97dbc06df468743a06fada45820f43fab00572a97ecd3e4f8",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/faq/how-long-does-it-take-to-set-up-party-decor",
+      "rendered_file": "faq/how-long-does-it-take-to-set-up-party-decor.html",
+      "state": "FROZEN",
+      "accepted_sha256": "851d1ac542f5408a9f4f9763a51a783c62070dd613f5c37ac9887f50432cbefb",
+      "cache_file": "data/release/frozen_accepted_outputs/851d1ac542f5408a9f4f9763a51a783c62070dd613f5c37ac9887f50432cbefb.html.gz",
+      "cache_sha256": "603cb4b72fc7bf4a0f7a5e753bc1b8f5f983e4864ca35803efe688ba773064f6",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/faq/how-much-does-birthday-decoration-at-home-cost",
+      "rendered_file": "faq/how-much-does-birthday-decoration-at-home-cost.html",
+      "state": "FROZEN",
+      "accepted_sha256": "2798edd71605a16c252a9b057145f77900bcfbd86754fdca589680fb903de4d0",
+      "cache_file": "data/release/frozen_accepted_outputs/2798edd71605a16c252a9b057145f77900bcfbd86754fdca589680fb903de4d0.html.gz",
+      "cache_sha256": "8de2ebea803d1127b1ef47c0f990b3c54c4cb7dd1533b4d62070a7e08006997f",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/faq/how-much-does-grazing-tables-cost",
+      "rendered_file": "faq/how-much-does-grazing-tables-cost.html",
+      "state": "FROZEN",
+      "accepted_sha256": "ce6f5a1e14650b428096b68008d76d694d90a09c87bd6ffbe5bc0163be53703a",
+      "cache_file": "data/release/frozen_accepted_outputs/ce6f5a1e14650b428096b68008d76d694d90a09c87bd6ffbe5bc0163be53703a.html.gz",
+      "cache_sha256": "b37d333e7a59efc25ed5523301c58e646577f2890e43c5ce8960f0c82e698692",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/faq/how-much-does-hotel-room-decor-cost-in-memphis",
+      "rendered_file": "faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "794c78347d910710351439bdd8e414f03af7a6d45fa58c964c916b1b7f1b4c60",
+      "cache_file": "data/release/frozen_accepted_outputs/794c78347d910710351439bdd8e414f03af7a6d45fa58c964c916b1b7f1b4c60.html.gz",
+      "cache_sha256": "8313b23716b9524adadd65c88bfb6b23efa95799e4fb23bdcedd2576d22ee171",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise",
+      "rendered_file": "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+      "state": "FROZEN",
+      "accepted_sha256": "43feb9eaedc790e38a5ff1421138a9d854961b11ed45ebb3b1ae5a03acb0b427",
+      "cache_file": "data/release/frozen_accepted_outputs/43feb9eaedc790e38a5ff1421138a9d854961b11ed45ebb3b1ae5a03acb0b427.html.gz",
+      "cache_sha256": "798de3fde1cfb1cba9dd0b08e38513a5e21c2675d2203bb734833594edcfb94b",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/guides/last-minute-birthday-setup-ideas-memphis",
+      "rendered_file": "guides/last-minute-birthday-setup-ideas-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "886cc93f016529973132c3203d6f3df2ea70e4b177a49a0e46cab4a004879d95",
+      "cache_file": "data/release/frozen_accepted_outputs/886cc93f016529973132c3203d6f3df2ea70e4b177a49a0e46cab4a004879d95.html.gz",
+      "cache_sha256": "d5c6e2a1e8143f7bd31457298558c77e204a34077679d5399153acf6ebd678d3",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/hubs/memphis-celebration-setups",
+      "rendered_file": "hubs/memphis-celebration-setups.html",
+      "state": "FROZEN",
+      "accepted_sha256": "783dfc04d6ef0553ee0e0bb79ecbab38e6efc27c3149b1170ff08bf4e49d767e",
+      "cache_file": "data/release/frozen_accepted_outputs/783dfc04d6ef0553ee0e0bb79ecbab38e6efc27c3149b1170ff08bf4e49d767e.html.gz",
+      "cache_sha256": "2049715ba214d21672a28395768dd689cd6c82e2cf1cbf23fb565ff185acf135",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/local/birthday-decorations-at-home-memphis",
+      "rendered_file": "local/birthday-decorations-at-home-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "c93cf48b527d7ca667be99b1087e89db00ce457888cf6bf2ed9531849207246c",
+      "cache_file": "data/release/frozen_accepted_outputs/c93cf48b527d7ca667be99b1087e89db00ce457888cf6bf2ed9531849207246c.html.gz",
+      "cache_sha256": "0f1ba688b937b1b94ccd846479319441974b2d0ed2f2b3d122d099c6e4929618",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/local/grazing-tables-memphis",
+      "rendered_file": "local/grazing-tables-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "0a0d50994b5bbfb49b1465b84c87492d411005d9a750056fc781b8db7477c95a",
+      "cache_file": "data/release/frozen_accepted_outputs/0a0d50994b5bbfb49b1465b84c87492d411005d9a750056fc781b8db7477c95a.html.gz",
+      "cache_sha256": "7b83f2b839eb5becaf688ba5637b6f45ee524d6544073bb4b992b425749e8743",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/local/hotel-room-decorations-memphis",
+      "rendered_file": "local/hotel-room-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "c0e6911b8be512328997b984205cdbdcfcb8e133ac596d5d189f271e97c2ad01",
+      "cache_file": "data/release/frozen_accepted_outputs/c0e6911b8be512328997b984205cdbdcfcb8e133ac596d5d189f271e97c2ad01.html.gz",
+      "cache_sha256": "4c288833f30083dd78e11e1216cb3ea61b9372af88efecd1ef891660d4abe75b",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/local/romantic-room-decorations-memphis",
+      "rendered_file": "local/romantic-room-decorations-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "844888bb8cd8b5eb4c43e49ca4b897932f32ff20b8d17e60f12ad8e60bc1f34d",
+      "cache_file": "data/release/frozen_accepted_outputs/844888bb8cd8b5eb4c43e49ca4b897932f32ff20b8d17e60f12ad8e60bc1f34d.html.gz",
+      "cache_sha256": "8f8939010cf51e10c3edd70a8540783c15bfbaedebe2cc7e7c16344d753d1cb9",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/seasonal/christmas-porch-decorating-memphis",
+      "rendered_file": "seasonal/christmas-porch-decorating-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "08113aa017fbf3e2c12fd70e4bd6937c708d5eb2cf7952046e3bfaeefcc09999",
+      "cache_file": "data/release/frozen_accepted_outputs/08113aa017fbf3e2c12fd70e4bd6937c708d5eb2cf7952046e3bfaeefcc09999.html.gz",
+      "cache_sha256": "0cbe1e0bc335d2f4c9052a07a90980755299d95cc296f23bdb6286d5c2581648",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/seasonal/halloween-porch-decorating-memphis",
+      "rendered_file": "seasonal/halloween-porch-decorating-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "9b05af4812acc33fd9722e5d1b541f629325c9e458cd1d6386afc24594c9b8dd",
+      "cache_file": "data/release/frozen_accepted_outputs/9b05af4812acc33fd9722e5d1b541f629325c9e458cd1d6386afc24594c9b8dd.html.gz",
+      "cache_sha256": "9d757a642b5aee41dfa5d75614aedf37a3a905823bafeec38cf9fbe985f61140",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/baby-shower-decor-memphis",
+      "rendered_file": "services/baby-shower-decor-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "85eb4be18ed596d68f28dab6bd02e6ec9960cb7122d821b686f763461333e3c4",
+      "cache_file": "data/release/frozen_accepted_outputs/85eb4be18ed596d68f28dab6bd02e6ec9960cb7122d821b686f763461333e3c4.html.gz",
+      "cache_sha256": "e5d776468fe20b7e09576a0e884e85e65c7df518a6f69ed573120546901da77a",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/birthday-party-decor-memphis",
+      "rendered_file": "services/birthday-party-decor-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "b1160a8a1675d5314be7c15b251301d736a20e9fe6de4b7fdcd830fc10e16138",
+      "cache_file": "data/release/frozen_accepted_outputs/b1160a8a1675d5314be7c15b251301d736a20e9fe6de4b7fdcd830fc10e16138.html.gz",
+      "cache_sha256": "372a96e7d399dceae8791e07ba06cde31375bf89e33080abe7bc81519e7b02ef",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/bridal-shower-decor-memphis",
+      "rendered_file": "services/bridal-shower-decor-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "bcca897ae58dbdbab272a6b90e1b61128c303144bb6504c01ebb417c9a5c82d3",
+      "cache_file": "data/release/frozen_accepted_outputs/bcca897ae58dbdbab272a6b90e1b61128c303144bb6504c01ebb417c9a5c82d3.html.gz",
+      "cache_sha256": "f69991e7c8f8ec005612aaff78ad74784e44ea1ef6d5f0dea7009bb07e667712",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/budget-party-decor-memphis",
+      "rendered_file": "services/budget-party-decor-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "991e121264785a8b0512bd7249b4a6b3988099d00c2fa3221d2027577cfdd98c",
+      "cache_file": "data/release/frozen_accepted_outputs/991e121264785a8b0512bd7249b4a6b3988099d00c2fa3221d2027577cfdd98c.html.gz",
+      "cache_sha256": "89c32e428065f709fffb7644fce81f32f6fba838adb9699e019ec5d1aef2f1e4",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/celebration-setups",
+      "rendered_file": "services/celebration-setups.html",
+      "state": "FROZEN",
+      "accepted_sha256": "06e16f9b448ff29ca72d44c4de31e8af74bd59d613051735fef85743ea94fa32",
+      "cache_file": "data/release/frozen_accepted_outputs/06e16f9b448ff29ca72d44c4de31e8af74bd59d613051735fef85743ea94fa32.html.gz",
+      "cache_sha256": "fc3d4e83ad5098749365571255a9130284f7a488f8966c9a636d97041c698385",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/celebration-setups-memphis",
+      "rendered_file": "services/celebration-setups-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "a01739d1a910fdd80e9dc30bf39ca919a362dc6a11e2630ad7fab2c371e7b7b1",
+      "cache_file": "data/release/frozen_accepted_outputs/a01739d1a910fdd80e9dc30bf39ca919a362dc6a11e2630ad7fab2c371e7b7b1.html.gz",
+      "cache_sha256": "33740e83b4aa4bad16292c32ec50d288b50a89c628ec7093dd2e514f7d3b58a9",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/christmas-porch-decorating",
+      "rendered_file": "services/christmas-porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "79d19dc7675f4d0fc85f570d0c528ef4ade9001bd3a3ba59426e6f820ef357f4",
+      "cache_file": "data/release/frozen_accepted_outputs/79d19dc7675f4d0fc85f570d0c528ef4ade9001bd3a3ba59426e6f820ef357f4.html.gz",
+      "cache_sha256": "059f4bd303e252aec768d56ba67d4c66a002b07b608b68f3f64c78462e0736dd",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/fall-porch-decorating",
+      "rendered_file": "services/fall-porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "5100341cc5e368662007e3fb01fc9d19702019b719008894ba3b624c240b7d1c",
+      "cache_file": "data/release/frozen_accepted_outputs/5100341cc5e368662007e3fb01fc9d19702019b719008894ba3b624c240b7d1c.html.gz",
+      "cache_sha256": "43b6b888888d0367a37d5df49d527e9f743163e67a585a57ad85e3868f07fab8",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/front-door-styling",
+      "rendered_file": "services/front-door-styling.html",
+      "state": "FROZEN",
+      "accepted_sha256": "83790b7433dc2d57306da0171c16c57798676211b1a22c176d1ccb8f9ba1cc2f",
+      "cache_file": "data/release/frozen_accepted_outputs/83790b7433dc2d57306da0171c16c57798676211b1a22c176d1ccb8f9ba1cc2f.html.gz",
+      "cache_sha256": "eba60883159dbf288e8b786c03decf39071f5fc4530e960357563b3ff062be9d",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/grazing-and-event-styling",
+      "rendered_file": "services/grazing-and-event-styling.html",
+      "state": "FROZEN",
+      "accepted_sha256": "3e3d6ae0644a7a3bb7ff4b4cf745a4bb1cc61b701b7435d807c1e256c0d79d15",
+      "cache_file": "data/release/frozen_accepted_outputs/3e3d6ae0644a7a3bb7ff4b4cf745a4bb1cc61b701b7435d807c1e256c0d79d15.html.gz",
+      "cache_sha256": "cc3e574ea375d5d6df5ebaa9391867107d7ab35d4813b4677da6cd1bc200f9b4",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/grazing-tables-memphis",
+      "rendered_file": "services/grazing-tables-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "96c2fd06b78b99ef3370ee8b4e8db24cedf9e8ede788e17d7b54062105dd9c23",
+      "cache_file": "data/release/frozen_accepted_outputs/96c2fd06b78b99ef3370ee8b4e8db24cedf9e8ede788e17d7b54062105dd9c23.html.gz",
+      "cache_sha256": "fd8b361cf8347c93c33a055bce4e4996769386c252cf0453417e8d14dcf056c2",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/hotel-room-decor-memphis",
+      "rendered_file": "services/hotel-room-decor-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "7ef03872b83096740e0944eb9f076fa747e701ab010cf5fee0cfb76d4ea061a7",
+      "cache_file": "data/release/frozen_accepted_outputs/7ef03872b83096740e0944eb9f076fa747e701ab010cf5fee0cfb76d4ea061a7.html.gz",
+      "cache_sha256": "7c0bc1805d68b61b28e9aa5ff4c9dfb8b38a1771bba52e59a1f4f18d61768286",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/luxury-party-decor-memphis",
+      "rendered_file": "services/luxury-party-decor-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "e3800ac90484ea9bbbc3aceb5c4682babe6821e5709e4d99aa7b4847f689363a",
+      "cache_file": "data/release/frozen_accepted_outputs/e3800ac90484ea9bbbc3aceb5c4682babe6821e5709e4d99aa7b4847f689363a.html.gz",
+      "cache_sha256": "0b55084398faeb52daa590c006d701835e59cba912f589413382d46a61ba0b14",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/party-decor-memphis",
+      "rendered_file": "services/party-decor-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "77797f1a98c23b954a9e5169b09520a6170d2c591585b5b2191dcb27dcf189e0",
+      "cache_file": "data/release/frozen_accepted_outputs/77797f1a98c23b954a9e5169b09520a6170d2c591585b5b2191dcb27dcf189e0.html.gz",
+      "cache_sha256": "c5744c047c3bfedd19608f37554dc7c65133f98e885e070567115a5545b08b23",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/porch-decorating",
+      "rendered_file": "services/porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "ab24e0755b4e699dd2c14b2cb888c7be03c9125947efaadaf67fffa72fe64abf",
+      "cache_file": "data/release/frozen_accepted_outputs/ab24e0755b4e699dd2c14b2cb888c7be03c9125947efaadaf67fffa72fe64abf.html.gz",
+      "cache_sha256": "05496829d32c4a3f6379129742736ce9ba18d8b6fe9983e04ca254335311761e",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/small-porch-decorating",
+      "rendered_file": "services/small-porch-decorating.html",
+      "state": "FROZEN",
+      "accepted_sha256": "f62aca7f95f9566add368277bba8536dd89cf522f18d9ad9a6186258e70cabaa",
+      "cache_file": "data/release/frozen_accepted_outputs/f62aca7f95f9566add368277bba8536dd89cf522f18d9ad9a6186258e70cabaa.html.gz",
+      "cache_sha256": "26ecdcd12ed210b09d370dfe6fc243fd3fd224dc8033f2f8cfe4fef56ee3fe98",
+      "accepted_at": "2026-07-24"
+    }
+  ]
+}

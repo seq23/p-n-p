@@ -1,6 +1,6 @@
 {
   "contract": "PNP_LOCAL_AUTHORITY_CONTRACT",
-  "version": "2026-07-22",
+  "version": "2026-07-24",
   "repo": "p-n-p-main",
   "brand": "Porch & Party",
   "primary_domain": "https://porchandparty901.com",
@@ -14,7 +14,12 @@
     "slug_registry": "data/slug_registry/slug_registry.json",
     "service_matrix": "data/local_matrix/service_city_occasion_matrix.json",
     "offers": "data/offers/services.json",
-    "service_areas": "data/service_areas/areas.json"
+    "service_areas": "data/service_areas/areas.json",
+    "authority_scale": "data/authority_scale/fanout_100k/index.json",
+    "candidate_backlog": "data/authority_scale/candidate_backlog.json",
+    "admission_registry": "data/content/page_admission_registry.json",
+    "freeze_registry": "data/release/frozen_output_registry.json",
+    "citation_scoreboard": "data/authority_scale/citation_yield_scoreboard.json"
   },
   "authority_families": [
     "seasonal_porch_decorating",
@@ -23,10 +28,17 @@
     "grazing_table_styling"
   ],
   "cadence": {
+    "daily": [
+      "refresh_operational_fanout_window",
+      "score_new_vs_existing_page_opportunities",
+      "evaluate_evidence_gated_velocity",
+      "publish_only_qualified_queued_pages_within_remaining_daily_ceiling",
+      "validate_freeze_and_distribution_contracts"
+    ],
     "weekly": [
-      "publish_or_review_one_page_from_approved_queue",
-      "mirror_one_matching_social_caption",
-      "add_one_google_business_profile_image_if_available"
+      "review_query_and_page_family_yield",
+      "prefer_existing_page_improvement_when_intent_already_covered",
+      "review_indexation_distribution_and_citation_evidence"
     ],
     "monthly": [
       "review_top_service_pages_and_faqs",
@@ -34,7 +46,8 @@
       "confirm_google_business_profile_services_match_site",
       "decide_expand_tighten_or_retire_pages"
     ],
-    "daily_bulk_publishing": false
+    "daily_bulk_publishing": false,
+    "daily_new_url_ceiling_mode": "evidence_gated_not_quota"
   },
   "queue_contract": {
     "approved_statuses": [
@@ -43,7 +56,7 @@
       "skipped",
       "retired"
     ],
-    "current_expected_mode": "fully_published_queue",
+    "current_expected_mode": "fully_published_queue_until_new_candidates_are_explicitly_enriched_and_queued",
     "published_items_must_have_html": true,
     "published_items_must_be_in_manifest": true,
     "manifest_items_must_have_html": true,
@@ -55,7 +68,9 @@
     "safe_repairs": [
       "restore_missing_manifest_entry_for_existing_published_html",
       "restore_missing_queue_entry_from_query_universe",
-      "restore_sitemap_after_explicit_build_sitemap_run"
+      "restore_sitemap_after_explicit_build_sitemap_run",
+      "rebuild_authority_scale_planning_artifacts",
+      "rebuild_distribution_artifacts"
     ],
     "unsafe_repairs_require_operator_action": [
       "delete_or_retire_public_pages",
@@ -85,5 +100,24 @@
     "offsite_distribution_strength",
     "google_business_profile_strength",
     "empty_unpublished_queue_when_all_known_items_are_published"
-  ]
+  ],
+  "authority_scale": {
+    "objective": "maximize_probability_of_100k_verified_external_citations_within_180_days_or_less_as_a_stretch_target_not_a_guarantee",
+    "fanout_reference_runway": 100000,
+    "fanout_is_page_quota": false,
+    "twin_agent_enabled": false,
+    "twin_scope_note": "Twin Agent exists only in Velocity and Spry. P-n-P uses generalized page-quality lessons only.",
+    "starting_new_url_ceiling_per_day": 3,
+    "scale_tiers": [
+      3,
+      5,
+      10,
+      15,
+      25,
+      50
+    ],
+    "unified_new_url_budget": true,
+    "improve_before_duplicate_new_url": true,
+    "service_area_truth_source": "data/service_areas/areas.json"
+  }
 }

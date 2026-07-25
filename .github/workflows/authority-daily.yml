@@ -1,0 +1,57 @@
+name: Daily Authority Cycle
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 15 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pnp-authority-daily
+  cancel-in-progress: false
+
+jobs:
+  authority-cycle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Run governed authority cycle
+        run: |
+          export AUTHORITY_RUN_DATE="$(date -u +%F)"
+          npm run authority:scale:fanout
+          npm run authority:improvements:build
+          npm run authority:yield:build
+          npm run authority:publish
+          npm run build:sitemap
+          npm run authority:scale:admit
+          npm run authority:scale:freeze
+          npm run authority:territories:build
+          npm run distribution:prepare
+          npm run validate:release
+
+      - name: Commit governed changes if any
+        run: |
+          git config user.name "pnp-authority-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No governed authority changes to commit."
+          else
+            git commit -m "chore: run governed authority cycle"
+            git push
+          fi

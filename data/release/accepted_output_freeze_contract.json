@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "effective_date": "2026-07-24",
+  "mode": "STATIC_HTML_ACCEPTED_ROUTES",
+  "source_registry": "data/content/page_admission_registry.json",
+  "source_array": "admissions",
+  "route_field": "route",
+  "status_field": "status",
+  "accepted_statuses": ["admitted", "ADMITTED"],
+  "route_resolution": ["{route}.html", "{route}/index.html"],
+  "frozen_registry": "data/release/frozen_output_registry.json",
+  "cache_dir": "data/release/frozen_accepted_outputs",
+  "active_mutation_scope": "data/release/active_mutation_scope.json",
+  "normal_build_may_mutate_frozen": false,
+  "repair_policy": "EXACT_ROUTE_THAW_VALIDATE_REFREEZE",
+  "new_routes": "UNFROZEN_UNTIL_ADMITTED_AND_SUCCESSFULLY_FROZEN",
+  "truth_boundary": "Freeze protects accepted public authority output. It does not certify external citation performance."
+}

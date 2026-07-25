@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "standard": "PORTFOLIO_100K_SURFACING_TRUTH_CONTRACT",
+  "effective_date": "2026-07-24",
+  "metrics": {
+    "fanout_opportunities": "Deterministic planning opportunities in the fanout corpus; not pages or citations.",
+    "admitted_pages": "Public authority pages that passed repo admission and are governed outputs.",
+    "published_pages": "Public URLs present in the generated/public site tree.",
+    "indexed_pages": "URLs with direct indexation evidence from an external search provider.",
+    "search_visibility": "Observed search impressions or ranking visibility with provider evidence.",
+    "llm_surfacing": "Observed LLM mention or answer surfacing; not necessarily a linked citation.",
+    "external_reference": "Observed external backlink or reference with evidence.",
+    "verified_citation": "Observed external citation event with provider, URL/query context, timestamp, and evidence."
+  },
+  "truth_rules": [
+    "100K is a target, not a guarantee.",
+    "Never convert fanout count, page count, indexation, impressions, LLM mentions, or backlinks into verified citations.",
+    "Verified citation claims require stored evidence."
+  ]
+}

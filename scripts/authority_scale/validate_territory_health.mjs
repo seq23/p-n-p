@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+import fs from 'node:fs';const d=JSON.parse(fs.readFileSync('data/authority_scale/territory_health.json','utf8')),errors=[];const req=['seasonal_porch_decorating','party_decor','hotel_room_decor','grazing_table_styling'];for(const k of req){if(!d.territories?.[k])errors.push(`missing:${k}`);else if(d.territories[k].public_surface_count<5)errors.push(`thin:${k}:${d.territories[k].public_surface_count}`);}console.log(JSON.stringify({ok:!errors.length,territories:d.territories,errors},null,2));if(errors.length)process.exit(1);

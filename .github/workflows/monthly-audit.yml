@@ -1,8 +1,13 @@
-name: monthly-audit
+name: Monthly Authority Audit
+
 on:
   workflow_dispatch:
   schedule:
     - cron: "0 15 1 * *"
+
+permissions:
+  contents: read
+
 jobs:
   audit:
     runs-on: ubuntu-latest
@@ -11,6 +16,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm install
-      - run: npm run build:all
-      - run: npm run validate:all
+          cache: npm
+      - run: npm ci
+      - name: Rebuild deterministic authority evidence
+        run: |
+          export AUTHORITY_RUN_DATE="$(date -u +%F)"
+          npm run authority:scale:fanout
+          npm run authority:improvements:build
+          npm run authority:yield:build
+          npm run authority:territories:build
+          npm run build:sitemap
+          npm run authority:scale:admit
+          npm run authority:scale:status
+          npm run distribution:prepare
+      - name: Run canonical release validation
+        run: npm run validate:release

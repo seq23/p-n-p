@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "effective_date": "2026-07-24",
+  "mode": "DYNAMIC_SAFETY_CEILING_NOT_QUOTA",
+  "scheduled_runs_per_day": 1,
+  "daily_ceiling": {
+    "new_pages": 3,
+    "repairs": 12,
+    "route_mutations": 20
+  },
+  "scale_tiers": [3, 5, 10, 15, 25, 50],
+  "current_default_new_page_ceiling_per_day": 3,
+  "upshift_requires": [
+    "qualified_distinct_backlog",
+    "service_area_truth",
+    "validation_health",
+    "low_semantic_duplicate_rate",
+    "distribution_health",
+    "indexation_capacity",
+    "observed_surfacing_yield"
+  ],
+  "downshift_on": [
+    "validator_failure",
+    "duplicate_intent_spike",
+    "thin_content_risk",
+    "service_area_truth_failure",
+    "distribution_failure",
+    "indexation_backlog"
+  ],
+  "automatic_safety_law": "Unknown or incomplete evidence always holds the current tier. Scale tiers are ceilings, never quotas."
+}

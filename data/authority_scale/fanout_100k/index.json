@@ -1,0 +1,216 @@
+{
+  "schema_version": "1.0",
+  "repo": "p-n-p",
+  "standard": "MAXIMUM_FANOUT_PLUS_100K_SURFACING_ACCELERATION",
+  "generated_at": "2026-07-24T00:00:00.000Z",
+  "capacity_policy": "NO_ARBITRARY_UPPER_CEILING_ON_LEGITIMATE_OPPORTUNITY_DISCOVERY",
+  "theoretical_combinations": "25920000",
+  "materialized_reference_runway": 100000,
+  "page_quota": false,
+  "truth_boundary": "Fanout records are planning intelligence only. They are not public pages, local presence claims, rankings, traffic, LLM mentions, references, or verified citations. Geography is limited to the declared service-area file.",
+  "compression": "gzip_jsonl",
+  "shard_count": 20,
+  "aggregate_sha256": "316ddeb821971bacd91052caee00b714c7d5aa1e4384c61be5dcc5cdc00aa2ae",
+  "shards": [
+    {
+      "part": 1,
+      "path": "data/authority_scale/fanout_100k/part-00001.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149398,
+      "uncompressed_bytes": 2551808,
+      "sha256": "3ca6402607fc94f77bd7f3cf2652828595b267d6082aba58651230dcfff5e220",
+      "first_id": "pnp_fanout_000001_7ab4b66d3b",
+      "last_id": "pnp_fanout_005000_168d9d2eb8"
+    },
+    {
+      "part": 2,
+      "path": "data/authority_scale/fanout_100k/part-00002.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149347,
+      "uncompressed_bytes": 2550250,
+      "sha256": "7d3bddebbb3ae2269b7d0deef22a4038a471c7d4eef677fe843f5d6c68ec5cfb",
+      "first_id": "pnp_fanout_005001_5a5975288d",
+      "last_id": "pnp_fanout_010000_91d4cc5abd"
+    },
+    {
+      "part": 3,
+      "path": "data/authority_scale/fanout_100k/part-00003.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149351,
+      "uncompressed_bytes": 2552604,
+      "sha256": "fba13e9715dce5a9df13daa82eb2f2a12af5a282d1a4223ab60d02d3717d1616",
+      "first_id": "pnp_fanout_010001_dab1bdff5c",
+      "last_id": "pnp_fanout_015000_a9579d6749"
+    },
+    {
+      "part": 4,
+      "path": "data/authority_scale/fanout_100k/part-00004.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149435,
+      "uncompressed_bytes": 2552665,
+      "sha256": "567e8607233eb9cf72a02382360bc23f40a4258bf971e569523cb892bb2e75e5",
+      "first_id": "pnp_fanout_015001_5a20fd9bec",
+      "last_id": "pnp_fanout_020000_5562a48d2d"
+    },
+    {
+      "part": 5,
+      "path": "data/authority_scale/fanout_100k/part-00005.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149515,
+      "uncompressed_bytes": 2556336,
+      "sha256": "b35d30e488721db4d28b28ccd55425dac72669a1ccb2db51e7c25e09e6595a59",
+      "first_id": "pnp_fanout_020001_e757cf96ea",
+      "last_id": "pnp_fanout_025000_d3dbb16a62"
+    },
+    {
+      "part": 6,
+      "path": "data/authority_scale/fanout_100k/part-00006.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149452,
+      "uncompressed_bytes": 2558046,
+      "sha256": "28d90723de6944a6068e0fd6134924ca7d3cccfb842f183db58bd9ad11b97026",
+      "first_id": "pnp_fanout_025001_94b2fd1d6c",
+      "last_id": "pnp_fanout_030000_cc02203116"
+    },
+    {
+      "part": 7,
+      "path": "data/authority_scale/fanout_100k/part-00007.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149416,
+      "uncompressed_bytes": 2552980,
+      "sha256": "97a516474b874470d0e712efb8319268f18aaaee298dca264e3ff95907cd00fd",
+      "first_id": "pnp_fanout_030001_fc44edc2a0",
+      "last_id": "pnp_fanout_035000_7486c58383"
+    },
+    {
+      "part": 8,
+      "path": "data/authority_scale/fanout_100k/part-00008.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149534,
+      "uncompressed_bytes": 2549910,
+      "sha256": "c62b38b153d8bba0b160c3281b33f631281a76d4c50b44acef45102567daf8ba",
+      "first_id": "pnp_fanout_035001_2dbf97aa36",
+      "last_id": "pnp_fanout_040000_d8f045d4db"
+    },
+    {
+      "part": 9,
+      "path": "data/authority_scale/fanout_100k/part-00009.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149438,
+      "uncompressed_bytes": 2552272,
+      "sha256": "1c429c9946ce0b55b9cb62c25c44d7d23555cc2b3c781ff0b04bf145e004bd4e",
+      "first_id": "pnp_fanout_040001_f220276a21",
+      "last_id": "pnp_fanout_045000_3a3b324ea9"
+    },
+    {
+      "part": 10,
+      "path": "data/authority_scale/fanout_100k/part-00010.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149498,
+      "uncompressed_bytes": 2553083,
+      "sha256": "af20e15b0ba807a6f145ecde8d1b036746f4e41a5d271abb7a68ced58f09234b",
+      "first_id": "pnp_fanout_045001_d780245506",
+      "last_id": "pnp_fanout_050000_f62dc4db37"
+    },
+    {
+      "part": 11,
+      "path": "data/authority_scale/fanout_100k/part-00011.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149431,
+      "uncompressed_bytes": 2555442,
+      "sha256": "d6df5b34a7614f80d99d61f68ff0877cb03c964b88649f7e3243e37f93e6efa4",
+      "first_id": "pnp_fanout_050001_e951918c44",
+      "last_id": "pnp_fanout_055000_679c4ed6e6"
+    },
+    {
+      "part": 12,
+      "path": "data/authority_scale/fanout_100k/part-00012.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149461,
+      "uncompressed_bytes": 2558544,
+      "sha256": "498d467ec11624e91e16dea652d89a1fd4420a94bd4359bae31aecf183118ac6",
+      "first_id": "pnp_fanout_055001_f1c75fab85",
+      "last_id": "pnp_fanout_060000_d29ec614fe"
+    },
+    {
+      "part": 13,
+      "path": "data/authority_scale/fanout_100k/part-00013.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149313,
+      "uncompressed_bytes": 2553776,
+      "sha256": "bcaaa667a12037e4cc18269a5bc54922ceed4af16de61f7544c2ac7d89991431",
+      "first_id": "pnp_fanout_060001_17020bba87",
+      "last_id": "pnp_fanout_065000_58075eba57"
+    },
+    {
+      "part": 14,
+      "path": "data/authority_scale/fanout_100k/part-00014.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149470,
+      "uncompressed_bytes": 2549348,
+      "sha256": "adc06b9f17cf0e30784d57ea34daa0f82a77819e99d82e34fba090f126f7c5fb",
+      "first_id": "pnp_fanout_065001_0fecb6a53c",
+      "last_id": "pnp_fanout_070000_8ea4286a7c"
+    },
+    {
+      "part": 15,
+      "path": "data/authority_scale/fanout_100k/part-00015.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149531,
+      "uncompressed_bytes": 2552347,
+      "sha256": "02d79947dbf562ce83e7dcb0e3af3ccc6b901d88c0495fe027b8788cb9e25375",
+      "first_id": "pnp_fanout_070001_b0af2c5e79",
+      "last_id": "pnp_fanout_075000_b877887dba"
+    },
+    {
+      "part": 16,
+      "path": "data/authority_scale/fanout_100k/part-00016.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149460,
+      "uncompressed_bytes": 2552550,
+      "sha256": "9ba99c8fd4edb5933571b5b97a4c15b4753ad24b317e14b5b455eb05a7b20efc",
+      "first_id": "pnp_fanout_075001_71a2f3e4a2",
+      "last_id": "pnp_fanout_080000_d015123e28"
+    },
+    {
+      "part": 17,
+      "path": "data/authority_scale/fanout_100k/part-00017.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149454,
+      "uncompressed_bytes": 2555549,
+      "sha256": "699d5cd1a6dd70f0a57e1f4c0f2e55fe66a53cca13f2e30b180fc92bc4c2fe62",
+      "first_id": "pnp_fanout_080001_c9ff3fddce",
+      "last_id": "pnp_fanout_085000_a9ea6a81e7"
+    },
+    {
+      "part": 18,
+      "path": "data/authority_scale/fanout_100k/part-00018.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149502,
+      "uncompressed_bytes": 2558471,
+      "sha256": "4806c238716dd18968bf286670a96509a0d0ca07f1533fd9a890753958cdc961",
+      "first_id": "pnp_fanout_085001_0adc8dd9d5",
+      "last_id": "pnp_fanout_090000_0067fa4942"
+    },
+    {
+      "part": 19,
+      "path": "data/authority_scale/fanout_100k/part-00019.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149438,
+      "uncompressed_bytes": 2554254,
+      "sha256": "51b09622af15ea317a0144097202de42c4ca0d6546189e845f700e60dde7b023",
+      "first_id": "pnp_fanout_090001_5b6cd6d462",
+      "last_id": "pnp_fanout_095000_5951b3ac3c"
+    },
+    {
+      "part": 20,
+      "path": "data/authority_scale/fanout_100k/part-00020.jsonl.gz",
+      "record_count": 5000,
+      "compressed_bytes": 149348,
+      "uncompressed_bytes": 2549479,
+      "sha256": "6621219d37ce771865882e62a74f445712101bb041b7b98b722e371d4dd7bc54",
+      "first_id": "pnp_fanout_095001_52e00a5798",
+      "last_id": "pnp_fanout_100000_7cc2722e36"
+    }
+  ]
+}

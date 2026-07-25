@@ -1,0 +1,19 @@
+#!/usr/bin/env node
+import fs from 'node:fs'; import path from 'node:path'; import zlib from 'node:zlib'; import crypto from 'node:crypto';
+const ROOT=process.cwd(); const c=JSON.parse(fs.readFileSync(path.join(ROOT,'data/release/accepted_output_freeze_contract.json'),'utf8'));
+const regPath=path.join(ROOT,c.frozen_registry), cacheDir=path.join(ROOT,c.cache_dir), scopePath=path.join(ROOT,c.active_mutation_scope);
+const sha=b=>crypto.createHash('sha256').update(b).digest('hex');
+const admissions=()=>JSON.parse(fs.readFileSync(path.join(ROOT,c.source_registry),'utf8')).admissions.filter(x=>(c.accepted_statuses||[]).includes(x[c.status_field]));
+const load=()=>fs.existsSync(regPath)?JSON.parse(fs.readFileSync(regPath,'utf8')):{pages:[]};
+const scope=()=>new Set((fs.existsSync(scopePath)?JSON.parse(fs.readFileSync(scopePath,'utf8')).routes:[]).map(String));
+function freeze(){fs.mkdirSync(cacheDir,{recursive:true});const old=new Map((load().pages||[]).map(x=>[x.route,x]));const allowed=scope();const drift=[];
+  for(const [route,p] of old){if(!fs.existsSync(path.join(ROOT,p.rendered_file)))continue;const cur=sha(fs.readFileSync(path.join(ROOT,p.rendered_file)));if(cur!==p.accepted_sha256&&!allowed.has(route))drift.push({route,before:p.accepted_sha256,after:cur});}
+  if(drift.length){console.error(JSON.stringify({error:'UNSCOPED_FROZEN_OUTPUT_DRIFT',count:drift.length,sample:drift.slice(0,20)},null,2));process.exit(1);}
+  const pages=[];for(const a of admissions()){if(!fs.existsSync(path.join(ROOT,a.rendered_file)))throw new Error(`Missing admitted file ${a.rendered_file}`);const raw=fs.readFileSync(path.join(ROOT,a.rendered_file)), h=sha(raw), gz=zlib.gzipSync(raw,{level:9,mtime:0});const cache=`${c.cache_dir}/${h}.html.gz`;if(!fs.existsSync(path.join(ROOT,cache)))fs.writeFileSync(path.join(ROOT,cache),gz);pages.push({route:a.route,rendered_file:a.rendered_file,state:'FROZEN',accepted_sha256:h,cache_file:cache,cache_sha256:sha(fs.readFileSync(path.join(ROOT,cache))),accepted_at:'2026-07-24'});}
+  const keep=new Set(pages.map(x=>x.cache_file));for(const n of fs.readdirSync(cacheDir)){const rel=`${c.cache_dir}/${n}`;if(n.endsWith('.html.gz')&&!keep.has(rel))fs.rmSync(path.join(ROOT,rel),{force:true});}
+  fs.writeFileSync(regPath,JSON.stringify({schema_version:'1.0',generated_at:'2026-07-24T00:00:00.000Z',count:pages.length,pages:pages.sort((a,b)=>a.route.localeCompare(b.route))},null,2)+'\n');console.log(`PNP FREEZE: ${pages.length} authority routes frozen`);
+}
+function status(){const r=load(),allowed=scope(),drift=[],missing=[];for(const p of r.pages||[]){const f=path.join(ROOT,p.rendered_file);if(!fs.existsSync(f)){missing.push(p.route);continue;}const cur=sha(fs.readFileSync(f));if(cur!==p.accepted_sha256&&!allowed.has(p.route))drift.push(p.route);}const a=admissions();const frozen=new Set((r.pages||[]).map(x=>x.route));const unfrozen=a.filter(x=>!frozen.has(x.route)).map(x=>x.route);const out={ok:!drift.length&&!missing.length&&!unfrozen.length,admitted:a.length,frozen:(r.pages||[]).length,unscoped_drift:drift.length,missing_files:missing.length,admitted_not_frozen:unfrozen.length,sample:{drift:drift.slice(0,10),missing:missing.slice(0,10),unfrozen:unfrozen.slice(0,10)}};console.log(JSON.stringify(out,null,2));if(!out.ok)process.exit(1);}
+function prepareScope(){const routes=process.argv.slice(3);fs.writeFileSync(scopePath,JSON.stringify({schema_version:'1.0',routes},null,2)+'\n');console.log(`PNP MUTATION SCOPE: ${routes.length}`);}
+function clearScope(){fs.writeFileSync(scopePath,JSON.stringify({schema_version:'1.0',routes:[]},null,2)+'\n');console.log('PNP MUTATION SCOPE CLEARED');}
+const cmd=process.argv[2]||'status'; if(cmd==='freeze')freeze(); else if(cmd==='status')status(); else if(cmd==='prepare-scope')prepareScope(); else if(cmd==='clear-scope')clearScope(); else throw new Error(`Unknown command ${cmd}`);

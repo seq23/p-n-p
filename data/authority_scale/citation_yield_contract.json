@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "effective_date": "2026-07-24",
+  "repo_id": "p-n-p",
+  "objective": {
+    "stretch_target": 100000,
+    "window_days": 180,
+    "metric": "verified_external_citation",
+    "target_is_guarantee": false
+  },
+  "twin_agent": {
+    "enabled": false,
+    "reason": "Twin Agent is authorized only for local-guides-citation-velocity and sprylabs-hpc-site. P-n-P uses generalized page-quality lessons only."
+  },
+  "event_types": [
+    "search_visibility",
+    "search_click",
+    "llm_mention_without_citation",
+    "llm_linked_citation",
+    "external_backlink_or_reference",
+    "verified_external_citation"
+  ],
+  "publication_budget": {
+    "unified_new_url_budget": true,
+    "current_starting_ceiling_per_day": 3,
+    "scale_tiers": [3, 5, 10, 15, 25, 50],
+    "new_url_and_format_rule": "Every newly published authority URL counts against the same daily ceiling regardless of page format."
+  },
+  "page_quality_patterns": [
+    "answer_first_opening",
+    "exact_intent_headings",
+    "named_framework_when_real_and_useful",
+    "extractable_comparison_or_decision_structure",
+    "step_by_step_procedure_when_applicable",
+    "meaningful_persona_or_use_case_depth",
+    "structured_faq_or_checklist_when_applicable",
+    "improve_existing_url_before_duplicate_new_url",
+    "service_area_truth_and_no_city_stuffing"
+  ],
+  "truth_boundary": "The 100K objective is a stretch target. Fanout, published pages, indexation, impressions, LLM mentions, and backlinks are not verified citations."
+}

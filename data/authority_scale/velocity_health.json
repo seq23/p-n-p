@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "as_of": null,
+  "validation_status": "UNKNOWN",
+  "semantic_duplicate_status": "UNKNOWN",
+  "distribution_status": "UNKNOWN",
+  "indexation_status": "UNKNOWN",
+  "observed_yield_trend": "UNKNOWN",
+  "source_claim_status": "NOT_APPLICABLE",
+  "minimum_yield_events_for_upshift": 10
+}
