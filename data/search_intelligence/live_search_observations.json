@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.0",
+  "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
+  "stage": "live_search_observation",
+  "generated_at": "2026-08-07T00:00:00.000Z",
+  "provider_state": "UNAVAILABLE",
+  "provider_states": [
+    {
+      "provider": "grounded_search",
+      "provider_id": "google_genai_grounded_search",
+      "state": "UNAVAILABLE",
+      "reason": "CREDENTIAL_NOT_PRESENT_IN_ENVIRONMENT",
+      "required_env": [
+        "GEMINI_API_KEY"
+      ],
+      "evidence": "No value found for GEMINI_API_KEY in the execution environment."
+    }
+  ],
+  "overall_status": "UNAVAILABLE",
+  "status_is_healthy": false,
+  "observation_kind": "grounded_search_observation",
+  "is_literal_serp_rank": false,
+  "allowance": {
+    "mode": "FREE_TIER_ONLY_BY_DEFAULT",
+    "declared_free_tier_daily_call_budget": 40,
+    "requested_budget": null,
+    "effective_daily_call_budget": 40,
+    "paid_spend_opted_in": false,
+    "cost_mode": "ZERO_INCREMENTAL_COST",
+    "note": "With the default budget inside the provider free allowance, the observation lane runs at zero incremental cost. Exceeding the allowance is refused, not billed."
+  },
+  "budget": {
+    "effective_daily_call_budget": 40,
+    "eligible_targets": 120,
+    "calls_attempted": 0,
+    "calls_made": 0,
+    "call_failures": 0,
+    "skipped_for_budget": 0,
+    "budget_disposition": "NOT_RUN_PROVIDER_UNAVAILABLE",
+    "cost_mode": "ZERO_INCREMENTAL_COST"
+  },
+  "observation_count": 0,
+  "observed_count": 0,
+  "own_domain_referenced_count": 0,
+  "unavailable_note": "No grounded-search credential (GEMINI_API_KEY) was present. Zero observations were produced. This is UNAVAILABLE, not OK.",
+  "truth_boundaries": [
+    "A grounded search observation is not a Google SERP rank.",
+    "A grounded search observation is not proof of indexation, ranking, or citation.",
+    "Preparing a repair candidate is not a publication.",
+    "A passing structural validator does not mean the providers were reachable.",
+    "Only Google Search Console may state own-site Google impressions, clicks, CTR, average position, or indexation.",
+    "Competitor observations describe what a grounded search response referenced. They are not competitor rankings."
+  ],
+  "observations": []
+}

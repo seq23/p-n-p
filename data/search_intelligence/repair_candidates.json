@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
+  "stage": "bounded_repair_preparation",
+  "generated_at": "2026-08-07T00:00:00.000Z",
+  "mode": "PREPARE_ONLY",
+  "provider_state": "UNAVAILABLE",
+  "overall_status": "UNAVAILABLE",
+  "status_is_healthy": false,
+  "publishes": false,
+  "mutates_publishing_cadence": false,
+  "cadence_note": "This stage prepares candidates only. Publication remains governed by the existing evidence-gated daily ceiling and approval rules. The search lane is not part of authority:cycle.",
+  "current_publishing_ceiling_per_day": 3,
+  "current_velocity_decision": "HOLD",
+  "eligible_diagnoses": 0,
+  "candidate_count": 0,
+  "truncated_candidates": 0,
+  "truncation_note": null,
+  "unavailable_note": "Provider truth was UNAVAILABLE for this run, so evidence-backed repair candidates could not be produced from live provider data. An empty candidate list here does not mean the site is healthy.",
+  "bounded_repair_rule": "Emit the smallest bounded repair that the diagnosis evidence actually supports. Prefer improving one existing intent-matched route over proposing a new URL.",
+  "candidates": []
+}

@@ -19,7 +19,12 @@
     "candidate_backlog": "data/authority_scale/candidate_backlog.json",
     "admission_registry": "data/content/page_admission_registry.json",
     "freeze_registry": "data/release/frozen_output_registry.json",
-    "citation_scoreboard": "data/authority_scale/citation_yield_scoreboard.json"
+    "citation_scoreboard": "data/authority_scale/citation_yield_scoreboard.json",
+    "search_intelligence_contract": "data/search_intelligence/search_intelligence_contract.json",
+    "search_target_query_set": "data/search_intelligence/target_query_set.json",
+    "search_provider_truth": "data/search_intelligence/gsc_truth.json",
+    "search_diagnosis": "data/search_intelligence/search_diagnosis.json",
+    "search_repair_candidates": "data/search_intelligence/repair_candidates.json"
   },
   "authority_families": [
     "seasonal_porch_decorating",
@@ -92,7 +97,12 @@
     "missing_core_service_family_surfaces",
     "publish_queue_manifest_contract_break",
     "validation_profile_contains_mutating_execution_command",
-    "dependency_runtime_or_receipt_pollution_in_artifact"
+    "dependency_runtime_or_receipt_pollution_in_artifact",
+    "grounded_search_observation_represented_as_literal_serp_rank",
+    "own_site_google_performance_asserted_without_search_console_basis",
+    "degraded_or_unavailable_provider_reported_as_green",
+    "search_intelligence_lane_mutates_publishing_state_or_cadence",
+    "search_observation_exceeds_declared_free_provider_allowance"
   ],
   "warning_or_info_only": [
     "subjective_copy_quality",
@@ -119,5 +129,26 @@
     "unified_new_url_budget": true,
     "improve_before_duplicate_new_url": true,
     "service_area_truth_source": "data/service_areas/areas.json"
+  },
+  "search_intelligence": {
+    "enabled": true,
+    "contract": "data/search_intelligence/search_intelligence_contract.json",
+    "lane_mode": "READ_AND_PREPARE_ONLY",
+    "own_site_google_performance_authority": "google_search_console",
+    "grounded_observation_is_literal_serp_rank": false,
+    "publishes": false,
+    "mutates_publishing_cadence": false,
+    "included_in_authority_cycle": false,
+    "writable_paths": [
+      "data/search_intelligence/",
+      "data/authority_scale/observed_surfacing_ledger.json",
+      "data/authority_scale/citation_yield_observations.json"
+    ],
+    "provider_truth_note": "Provider unavailable or degraded state is reported as UNAVAILABLE/DEGRADED with evidence. It never produces a green or OK result, and zero findings never means healthy.",
+    "release_validator": "npm run validate:search-intelligence",
+    "proof_commands": [
+      "npm run search:selftest",
+      "npm run search:selftest:loop"
+    ]
   }
 }

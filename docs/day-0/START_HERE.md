@@ -36,6 +36,29 @@ Hard failures are limited to important breakage: broken files, links, metadata, 
 - Do not place build or publish commands inside validation scripts.
 - If the queue is empty because all approved items are already published, that is not a failure.
 
+## Checking How The Site Is Doing In Search
+
+Run:
+
+```bash
+npm run search:status
+```
+
+Read the provider lines at the top first.
+
+- `UNAVAILABLE` means nothing was measured. That is not the same as "fine".
+- `OK` means the provider actually answered.
+
+To collect real Google numbers, dispatch the **Search Intelligence Cycle** workflow
+in GitHub Actions. The Google Search Console credentials already live there. It
+reads only; it never publishes, never submits, and never changes how often the site
+publishes.
+
+The loop can suggest fixes. It cannot apply them. Every suggestion is marked
+`PREPARED_NOT_APPLIED` and still has to go through the normal publishing rules.
+
+Full guide: `docs/SEARCH-INTELLIGENCE.md`.
+
 ## External AI Agent Runs
 
 This repo does not currently have an external AI agent artifact lane.

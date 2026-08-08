@@ -1,0 +1,134 @@
+{
+  "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
+  "schema_version": "1.0",
+  "effective_date": "2026-08-07",
+  "repo_id": "p-n-p",
+  "primary_domain": "porchandparty901.com",
+  "purpose": "Closed-loop search intelligence: target queries -> live search observation -> competitor comparison -> real provider truth -> diagnosis -> smallest bounded repair candidate -> existing approval and publishing rules -> repair preparation -> same-query retest -> before/after evidence -> authority feedback.",
+  "hard_rules": {
+    "R1_ZERO_COST_OBSERVATION_LANE": "A live-search observation lane must exist and must be able to operate at zero incremental cost whenever the configured provider allowance permits. The observer may never exceed the declared free allowance; it records SKIPPED_BUDGET_EXHAUSTED instead of spending.",
+    "R2_NO_RANK_CONFLATION": "Gemini or any other grounded/generative search observation must NEVER be represented as literal Google SERP rank. Grounded observations carry observation_kind=grounded_search_observation and is_literal_serp_rank=false, and may not carry rank or position fields.",
+    "R3_GSC_IS_OWN_SITE_AUTHORITY": "Google Search Console is the only authority for actual own-site Google performance (impressions, clicks, CTR, average position, indexation). No other source may assert own-site Google performance.",
+    "R4_NO_SILENT_GREEN": "Provider unavailable or degraded state must never silently produce green/OK. Every artifact carries provider_state and overall_status, and overall_status may not be a healthy value while any required provider is UNAVAILABLE or DEGRADED.",
+    "R5_NO_CADENCE_CHANGE": "Search intelligence must never change the repo's existing publishing cadence. The search lane is read-and-prepare only. It may not write publishing, queue, manifest, velocity, freeze, admission, or sitemap state, and it is not part of authority:cycle."
+  },
+  "own_site_google_performance_authority": "google_search_console",
+  "protected_publishing_paths": [
+    "data/publish_queue/",
+    "data/published_manifest/",
+    "data/slug_registry/",
+    "data/release/",
+    "data/content/page_admission_registry.json",
+    "data/authority_scale/velocity_governor.json",
+    "data/authority_scale/velocity_decision.json",
+    "data/authority_scale/velocity_health.json",
+    "data/queries/query_universe.json",
+    "sitemap.xml"
+  ],
+  "search_lane_writable_paths": [
+    "data/search_intelligence/"
+  ],
+  "r5_scan_exclusions": {
+    "files": [
+      "scripts/search_intelligence/selftest_search_intelligence.mjs"
+    ],
+    "reason": "Hostile-fixture self-tests contain protected-path strings on purpose, and write only into an isolated OS temp sandbox. Excluded files must be named selftest_*.mjs and must exist. The R5 scan is still proven live by the R5_lane_script_writes_publish_queue fixture, which uses a non-selftest filename."
+  },
+  "authority_feedback_writable_paths": [
+    "data/authority_scale/observed_surfacing_ledger.json",
+    "data/authority_scale/citation_yield_observations.json"
+  ],
+  "providers": {
+    "grounded_search": {
+      "provider_id": "google_genai_grounded_search",
+      "role": "live_search_observation",
+      "produces": "grounded_search_observation",
+      "produces_literal_serp_rank": false,
+      "credential_env": "GEMINI_API_KEY",
+      "model_env": "SEARCH_INTELLIGENCE_GROUNDING_MODEL",
+      "default_model": "gemini-2.5-flash",
+      "endpoint": "https://generativelanguage.googleapis.com/v1beta/models",
+      "allowance": {
+        "mode": "FREE_TIER_ONLY_BY_DEFAULT",
+        "free_tier_daily_call_budget": 40,
+        "budget_env": "SEARCH_INTELLIGENCE_DAILY_CALL_BUDGET",
+        "paid_spend_requires_explicit_opt_in": true,
+        "opt_in_env": "SEARCH_INTELLIGENCE_ALLOW_PAID_SPEND",
+        "zero_incremental_cost_note": "With the default budget inside the provider free allowance, the observation lane runs at zero incremental cost. Exceeding the allowance is refused, not billed."
+      }
+    },
+    "search_console": {
+      "provider_id": "google_search_console",
+      "role": "own_site_google_performance_truth",
+      "produces": "gsc_search_analytics_row",
+      "authoritative_for": [
+        "impressions",
+        "clicks",
+        "ctr",
+        "average_position",
+        "indexation_state"
+      ],
+      "credential_env": "GSC_SERVICE_ACCOUNT_JSON",
+      "credential_file_env": "GSC_SERVICE_ACCOUNT_FILE",
+      "site_url_env": "GSC_SITE_URL",
+      "scope": "https://www.googleapis.com/auth/webmasters.readonly",
+      "collector": "distribution_scripts/gsc_search_analytics.py",
+      "export_path": "data/search_intelligence/gsc_search_analytics_export.json",
+      "cost_note": "Google Search Console API is free for the verified property owner."
+    }
+  },
+  "provider_states": [
+    "OK",
+    "DEGRADED",
+    "UNAVAILABLE"
+  ],
+  "overall_statuses": {
+    "healthy": [
+      "OK"
+    ],
+    "not_healthy": [
+      "DEGRADED",
+      "UNAVAILABLE",
+      "NOT_RUN"
+    ]
+  },
+  "diagnosis_confidence_levels": [
+    "EVIDENCE_BACKED",
+    "PARTIAL_EVIDENCE",
+    "INSUFFICIENT_EVIDENCE"
+  ],
+  "repair_preparation": {
+    "mode": "PREPARE_ONLY",
+    "publishes": false,
+    "mutates_queue": false,
+    "routes_through": [
+      "data/authority_scale/page_improvement_plan.json",
+      "data/authority_scale/candidate_backlog.json",
+      "npm run authority:publish"
+    ],
+    "bounded_repair_rule": "Emit the smallest bounded repair that the diagnosis evidence actually supports. Prefer improving one existing intent-matched route over proposing a new URL.",
+    "max_repair_candidates_per_run": 25
+  },
+  "target_query_set": {
+    "sources": [
+      "data/queries/query_universe.json",
+      "data/authority_scale/candidate_backlog.json",
+      "data/content/page_admission_registry.json"
+    ],
+    "max_targets": 120,
+    "geography_truth_source": "data/service_areas/areas.json"
+  },
+  "kpi_mapping": {
+    "grounded_search_observation": "llm_surfacing",
+    "gsc_impression_row": "search_visibility",
+    "gsc_indexed_url": "indexed_page"
+  },
+  "truth_boundaries": [
+    "A grounded search observation is not a Google SERP rank.",
+    "A grounded search observation is not proof of indexation, ranking, or citation.",
+    "Preparing a repair candidate is not a publication.",
+    "A passing structural validator does not mean the providers were reachable.",
+    "Only Google Search Console may state own-site Google impressions, clicks, CTR, average position, or indexation.",
+    "Competitor observations describe what a grounded search response referenced. They are not competitor rankings."
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "schema_version": "1.0",
+  "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
+  "stage": "competitor_comparison",
+  "generated_at": "2026-08-07T00:00:00.000Z",
+  "source_observation_artifact": "data/search_intelligence/live_search_observations.json",
+  "provider_state": "UNAVAILABLE",
+  "overall_status": "UNAVAILABLE",
+  "status_is_healthy": false,
+  "own_domain": "porchandparty901.com",
+  "observed_query_count": 0,
+  "queries_with_own_domain_referenced": 0,
+  "queries_with_only_competitors_referenced": 0,
+  "competitor_count": 0,
+  "unavailable_note": "Zero successful observations were available, so no competitor comparison could be produced. This is not a clean competitive result.",
+  "truth_boundary": "Competitor comparison reflects domains referenced in grounded search responses. It is not Google SERP rank and not market share.",
+  "competitors": [],
+  "per_query": []
+}
