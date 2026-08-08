@@ -13,6 +13,7 @@ Reinforce the site, services, and entity understanding outside the repo without 
 2. Confirm legal pages, contact path, and form link still work.
 3. Confirm GBP service areas and services still match the site.
 4. Review whether any page should be expanded, tightened, or retired.
+5. Run `npm run search:intelligence` for a non-publishing baseline when search/provider truth review is needed. Treat unavailable providers as unavailable, not healthy.
 
 ## Content reinforcement themes
 - Seasonal porch installs
@@ -27,3 +28,4 @@ Reinforce the site, services, and entity understanding outside the repo without 
 - Use hello@porchandparty901.com as the public email
 - Do not describe the business as full-service event planning unless the offer actually changes
 - Keep pricing language consistent with the site: starting at, custom quote, scope-based pricing
+- Do not treat live-search observations, grounded search output, page count, indexing, impressions, or LLM mentions as verified citations.

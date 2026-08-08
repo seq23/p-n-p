@@ -36,12 +36,14 @@
     "validate:yield": "node scripts/authority_scale/validate_citation_yield_feedback.mjs",
     "validate:authority-scale": "node scripts/authority_scale/validate_authority_scale.mjs && npm run authority:scale:status",
     "validate:distribution-contract": "node scripts/authority_scale/validate_distribution_contract.mjs",
-    "validate:release": "npm run validate:pnp-phase && npm run validate:max-fanout && npm run validate:authority-scale && npm run validate:kpi-truth && npm run validate:yield && npm run validate:page-quality && npm run validate:improvements && npm run validate:territories && npm run validate:distribution-contract",
+    "validate:release": "npm run validate:pnp-phase && npm run validate:max-fanout && npm run validate:authority-scale && npm run validate:kpi-truth && npm run validate:yield && npm run validate:page-quality && npm run validate:improvements && npm run validate:territories && npm run validate:distribution-contract && npm run validate:search-intelligence",
     "authority:cycle": "npm run authority:scale:fanout && npm run authority:improvements:build && npm run authority:yield:build && npm run authority:publish && npm run build:sitemap && npm run authority:scale:admit && npm run authority:scale:freeze && npm run authority:territories:build && npm run distribution:prepare && npm run validate:release",
     "authority:territories:build": "node scripts/authority_scale/build_territory_health.mjs",
     "validate:page-quality": "node scripts/authority_scale/validate_page_quality_contract.mjs",
     "validate:territories": "node scripts/authority_scale/validate_territory_health.mjs",
     "authority:improvements:build": "node scripts/authority_scale/build_improvement_plan.mjs",
-    "validate:improvements": "node scripts/authority_scale/validate_improvement_plan.mjs"
+    "validate:improvements": "node scripts/authority_scale/validate_improvement_plan.mjs",
+    "search:intelligence": "node scripts/search_intelligence/build_search_intelligence_snapshot.mjs",
+    "validate:search-intelligence": "node scripts/search_intelligence/validate_search_intelligence.mjs"
   }
 }

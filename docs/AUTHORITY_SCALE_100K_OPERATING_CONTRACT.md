@@ -34,5 +34,12 @@ Geography is limited to `data/service_areas/areas.json`. The authority engine ma
 - `npm run validate:release` — canonical release validation.
 - `npm run authority:scale:status` — freeze/admission status.
 - `npm run distribution:prepare` — deterministic IndexNow/GSC input preparation; does not contact providers.
+- `npm run search:intelligence` — non-publishing search-intelligence baseline snapshot. Live search observation and GSC truth run only when credentials and explicit live flags are present; unavailable or degraded providers are recorded as such.
 
 External distribution runs only through the distribution workflow or an explicitly configured local invocation.
+
+## Search intelligence truth boundary
+
+The search-intelligence lane does not alter publishing cadence, queue admission, or accepted-output freeze state. It prepares observation, diagnosis, bounded repair candidates, and same-query retest evidence for existing approval and publishing rules.
+
+Google Search Console is the authority for own-site Google performance when credentials are configured. Bing/live-search observations and Gemini/search grounding, if later configured, are observation lanes only and must not be represented as literal Google SERP rank.

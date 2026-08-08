@@ -1,0 +1,701 @@
+{
+  "schema_version": "1.0",
+  "repo_id": "p-n-p",
+  "generated_at": "2026-08-08T00:00:00.000Z",
+  "authority_goal": "maximize probability of verified external citation events without conflating owned surfaces, search visibility, LLM surfacing, or citations",
+  "hard_rules": {
+    "live_search_observation_lane": "supported_with_provider_key_and_explicit_live_flag",
+    "grounded_search_not_literal_google_rank": true,
+    "gsc_authority_for_google_own_site_performance": true,
+    "degraded_provider_never_green": true,
+    "publishing_cadence_change": false
+  },
+  "query_limit": 25,
+  "target_query_set": [
+    {
+      "query": "Party planner in Memphis",
+      "source": "query_universe",
+      "expected_route": "/authority/party-planner-memphis.html",
+      "intent": "commercial",
+      "service_key": "celebration"
+    },
+    {
+      "query": "Event decorator in Memphis",
+      "source": "query_universe",
+      "expected_route": "/authority/event-decorator-memphis.html",
+      "intent": "commercial",
+      "service_key": "grazing"
+    },
+    {
+      "query": "Hotel room decorations in Memphis",
+      "source": "query_universe",
+      "expected_route": "/local/hotel-room-decorations-memphis.html",
+      "intent": "commercial",
+      "service_key": "celebration"
+    },
+    {
+      "query": "Birthday decorations at home in Memphis",
+      "source": "query_universe",
+      "expected_route": "/local/birthday-decorations-at-home-memphis.html",
+      "intent": "commercial",
+      "service_key": "celebration"
+    },
+    {
+      "query": "Grazing tables in Memphis",
+      "source": "query_universe",
+      "expected_route": "/local/grazing-tables-memphis.html",
+      "intent": "commercial",
+      "service_key": "grazing"
+    },
+    {
+      "query": "Romantic room decorations in Memphis",
+      "source": "query_universe",
+      "expected_route": "/local/romantic-room-decorations-memphis.html",
+      "intent": "commercial",
+      "service_key": "celebration"
+    },
+    {
+      "query": "How much does hotel room decor cost in Memphis?",
+      "source": "query_universe",
+      "expected_route": "/faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "intent": "informational",
+      "service_key": "celebration"
+    },
+    {
+      "query": "How much does birthday decoration at home cost?",
+      "source": "query_universe",
+      "expected_route": "/faq/how-much-does-birthday-decoration-at-home-cost.html",
+      "intent": "informational",
+      "service_key": "celebration"
+    },
+    {
+      "query": "How much do grazing tables cost?",
+      "source": "query_universe",
+      "expected_route": "/faq/how-much-does-grazing-tables-cost.html",
+      "intent": "informational",
+      "service_key": "grazing"
+    },
+    {
+      "query": "Do party decorators come to your house?",
+      "source": "query_universe",
+      "expected_route": "/faq/do-party-decorators-come-to-your-house.html",
+      "intent": "informational",
+      "service_key": "celebration"
+    },
+    {
+      "query": "Do grazing tables include food?",
+      "source": "query_universe",
+      "expected_route": "/faq/do-grazing-tables-include-food.html",
+      "intent": "informational",
+      "service_key": "grazing"
+    },
+    {
+      "query": "How far in advance should I book party decor?",
+      "source": "query_universe",
+      "expected_route": "/faq/how-far-in-advance-should-i-book-party-decor.html",
+      "intent": "informational",
+      "service_key": "celebration"
+    },
+    {
+      "query": "How long does it take to set up party decor?",
+      "source": "query_universe",
+      "expected_route": "/faq/how-long-does-it-take-to-set-up-party-decor.html",
+      "intent": "informational",
+      "service_key": "celebration"
+    },
+    {
+      "query": "Last-minute birthday setup ideas in Memphis",
+      "source": "query_universe",
+      "expected_route": "/guides/last-minute-birthday-setup-ideas-memphis.html",
+      "intent": "commercial",
+      "service_key": "celebration"
+    },
+    {
+      "query": "How to decorate a hotel room for a romantic surprise",
+      "source": "query_universe",
+      "expected_route": "/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+      "intent": "informational",
+      "service_key": "celebration"
+    },
+    {
+      "query": "DIY vs hiring a party decorator",
+      "source": "query_universe",
+      "expected_route": "/comparisons/diy-vs-hiring-party-decorator.html",
+      "intent": "commercial",
+      "service_key": "celebration"
+    },
+    {
+      "query": "Balloon garland vs full birthday setup",
+      "source": "query_universe",
+      "expected_route": "/comparisons/balloon-garland-vs-full-birthday-setup.html",
+      "intent": "commercial",
+      "service_key": "celebration"
+    },
+    {
+      "query": "Halloween porch decorating in Memphis",
+      "source": "query_universe",
+      "expected_route": "/seasonal/halloween-porch-decorating-memphis.html",
+      "intent": "commercial",
+      "service_key": "porch"
+    },
+    {
+      "query": "Christmas porch decorating in Memphis",
+      "source": "query_universe",
+      "expected_route": "/seasonal/christmas-porch-decorating-memphis.html",
+      "intent": "commercial",
+      "service_key": "porch"
+    },
+    {
+      "query": "Baby shower decorations in Memphis",
+      "source": "query_universe",
+      "expected_route": "/events/baby-shower-decorations-memphis.html",
+      "intent": "commercial",
+      "service_key": "grazing"
+    },
+    {
+      "query": "Bridal shower decorations in Memphis",
+      "source": "query_universe",
+      "expected_route": "/events/bridal-shower-decorations-memphis.html",
+      "intent": "commercial",
+      "service_key": "grazing"
+    },
+    {
+      "query": "Proposal room setup in Memphis",
+      "source": "query_universe",
+      "expected_route": "/events/proposal-room-setup-memphis.html",
+      "intent": "commercial",
+      "service_key": "celebration"
+    },
+    {
+      "query": "Anniversary room decorations in Memphis",
+      "source": "query_universe",
+      "expected_route": "/events/anniversary-room-decorations-memphis.html",
+      "intent": "commercial",
+      "service_key": "celebration"
+    },
+    {
+      "query": "Corporate event decor in Memphis",
+      "source": "query_universe",
+      "expected_route": "/corporate/corporate-event-decor-memphis.html",
+      "intent": "commercial",
+      "service_key": "grazing"
+    },
+    {
+      "query": "Corporate grazing tables in Memphis",
+      "source": "query_universe",
+      "expected_route": "/corporate/corporate-grazing-tables-memphis.html",
+      "intent": "commercial",
+      "service_key": "grazing"
+    }
+  ],
+  "provider_truth": {
+    "schema_version": "1.0",
+    "generated_at": "2026-08-08T00:00:00.000Z",
+    "providers": {
+      "live_search_observation": {
+        "status": "UNAVAILABLE",
+        "provider": "bing_web_search",
+        "truth_boundary": "Bing live-search observation is not literal Google SERP rank."
+      },
+      "google_search_console": {
+        "provider": "google_search_console",
+        "status": "UNAVAILABLE",
+        "evidence": "GSC_SITE_URL plus GSC_SERVICE_ACCOUNT_FILE or GSC_SERVICE_ACCOUNT_JSON are required for real GSC truth.",
+        "source_file": null
+      },
+      "gemini_grounding": {
+        "status": "UNAVAILABLE",
+        "evidence": "No Gemini/search grounding integration is configured in this repo.",
+        "truth_boundary": "Grounded search observations must never be represented as literal Google SERP rank."
+      }
+    }
+  },
+  "observations": [
+    {
+      "query": "Party planner in Memphis",
+      "expected_route": "/authority/party-planner-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/authority/party-planner-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Event decorator in Memphis",
+      "expected_route": "/authority/event-decorator-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/authority/event-decorator-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Hotel room decorations in Memphis",
+      "expected_route": "/local/hotel-room-decorations-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/local/hotel-room-decorations-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Birthday decorations at home in Memphis",
+      "expected_route": "/local/birthday-decorations-at-home-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/local/birthday-decorations-at-home-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Grazing tables in Memphis",
+      "expected_route": "/local/grazing-tables-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/local/grazing-tables-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Romantic room decorations in Memphis",
+      "expected_route": "/local/romantic-room-decorations-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/local/romantic-room-decorations-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "How much does hotel room decor cost in Memphis?",
+      "expected_route": "/faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "How much does birthday decoration at home cost?",
+      "expected_route": "/faq/how-much-does-birthday-decoration-at-home-cost.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/faq/how-much-does-birthday-decoration-at-home-cost.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "How much do grazing tables cost?",
+      "expected_route": "/faq/how-much-does-grazing-tables-cost.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/faq/how-much-does-grazing-tables-cost.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Do party decorators come to your house?",
+      "expected_route": "/faq/do-party-decorators-come-to-your-house.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/faq/do-party-decorators-come-to-your-house.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Do grazing tables include food?",
+      "expected_route": "/faq/do-grazing-tables-include-food.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/faq/do-grazing-tables-include-food.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "How far in advance should I book party decor?",
+      "expected_route": "/faq/how-far-in-advance-should-i-book-party-decor.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/faq/how-far-in-advance-should-i-book-party-decor.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "How long does it take to set up party decor?",
+      "expected_route": "/faq/how-long-does-it-take-to-set-up-party-decor.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/faq/how-long-does-it-take-to-set-up-party-decor.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Last-minute birthday setup ideas in Memphis",
+      "expected_route": "/guides/last-minute-birthday-setup-ideas-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/guides/last-minute-birthday-setup-ideas-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "How to decorate a hotel room for a romantic surprise",
+      "expected_route": "/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "DIY vs hiring a party decorator",
+      "expected_route": "/comparisons/diy-vs-hiring-party-decorator.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/comparisons/diy-vs-hiring-party-decorator.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Balloon garland vs full birthday setup",
+      "expected_route": "/comparisons/balloon-garland-vs-full-birthday-setup.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/comparisons/balloon-garland-vs-full-birthday-setup.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Halloween porch decorating in Memphis",
+      "expected_route": "/seasonal/halloween-porch-decorating-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/seasonal/halloween-porch-decorating-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Christmas porch decorating in Memphis",
+      "expected_route": "/seasonal/christmas-porch-decorating-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/seasonal/christmas-porch-decorating-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Baby shower decorations in Memphis",
+      "expected_route": "/events/baby-shower-decorations-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/events/baby-shower-decorations-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Bridal shower decorations in Memphis",
+      "expected_route": "/events/bridal-shower-decorations-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/events/bridal-shower-decorations-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Proposal room setup in Memphis",
+      "expected_route": "/events/proposal-room-setup-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/events/proposal-room-setup-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Anniversary room decorations in Memphis",
+      "expected_route": "/events/anniversary-room-decorations-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/events/anniversary-room-decorations-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Corporate event decor in Memphis",
+      "expected_route": "/corporate/corporate-event-decor-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/corporate/corporate-event-decor-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    },
+    {
+      "query": "Corporate grazing tables in Memphis",
+      "expected_route": "/corporate/corporate-grazing-tables-memphis.html",
+      "expected_url_in_sitemap": true,
+      "observation_type": "live_search_observation_not_google_rank",
+      "bing_status": "UNAVAILABLE",
+      "bing_evidence": "No Bing Search API key was available.",
+      "own_site_observed_in_bing_results": false,
+      "own_site_bing_positions": [],
+      "competitor_comparison": [],
+      "diagnosis": "No own-site live observation available; use GSC truth when configured and prepare only bounded page-quality repair candidates.",
+      "bounded_repair_candidate": {
+        "status": "PREPARED_NOT_PUBLISHED",
+        "route": "/corporate/corporate-grazing-tables-memphis.html",
+        "action": "Improve extractable answer, comparison/checklist structure, and authority/source clarity on the existing route if GSC or live observations justify it.",
+        "publishing_cadence_change": false
+      },
+      "same_query_retest_required_after_repair": true
+    }
+  ],
+  "repair_loop": "target query -> live observation/GSC truth -> competitor comparison -> diagnosis -> bounded repair candidate -> existing approval/publishing rules -> same-query retest -> before/after evidence comparison",
+  "authority_feedback_fields": [
+    "source_quality",
+    "claim_level_citations",
+    "authority_gap_analysis",
+    "citation_footprint",
+    "entity_source_coverage",
+    "llm_search_surfacing_observations",
+    "decision_useful_authority"
+  ],
+  "truth_boundary": "This snapshot is planning and observation evidence. It is not proof of Google rank, indexing, citation, or provider health unless a provider section is AVAILABLE with evidence."
+}

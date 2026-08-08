@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-08-08T00:00:00.000Z",
+  "providers": {
+    "live_search_observation": {
+      "status": "UNAVAILABLE",
+      "provider": "bing_web_search",
+      "truth_boundary": "Bing live-search observation is not literal Google SERP rank."
+    },
+    "google_search_console": {
+      "provider": "google_search_console",
+      "status": "UNAVAILABLE",
+      "evidence": "GSC_SITE_URL plus GSC_SERVICE_ACCOUNT_FILE or GSC_SERVICE_ACCOUNT_JSON are required for real GSC truth.",
+      "source_file": null
+    },
+    "gemini_grounding": {
+      "status": "UNAVAILABLE",
+      "evidence": "No Gemini/search grounding integration is configured in this repo.",
+      "truth_boundary": "Grounded search observations must never be represented as literal Google SERP rank."
+    }
+  }
+}
