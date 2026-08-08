@@ -1,0 +1,26 @@
+{
+  "schema_version": "1.0",
+  "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
+  "stage": "before_after_evidence_comparison",
+  "generated_at": "2026-08-07T00:00:00.000Z",
+  "before_label": "baseline",
+  "after_label": "after-repair",
+  "before_snapshot_present": true,
+  "after_snapshot_present": false,
+  "missing_snapshots": [
+    "after-repair"
+  ],
+  "provider_state": "UNAVAILABLE",
+  "overall_status": "UNAVAILABLE",
+  "status_is_healthy": false,
+  "compared_target_count": 0,
+  "comparable_target_count": 0,
+  "improved_count": 0,
+  "regressed_count": 0,
+  "mixed_count": 0,
+  "no_measured_change_count": 0,
+  "not_comparable_count": 0,
+  "unavailable_note": "Missing retest snapshot(s): after-repair. Capture both before and after snapshots with an available provider before claiming any change.",
+  "truth_boundary": "This comparison can only demonstrate change between two evidence-backed measurements of the same queries. Absence of evidence is never reported as improvement or as no change.",
+  "comparisons": []
+}

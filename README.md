@@ -17,6 +17,7 @@ Static site repo for Porch & Party at porchandparty901.com.
 - `docs/GOOGLE-BUSINESS-PROFILE-CHECKLIST.md`
 - `docs/DISTRIBUTION-RUNBOOK.md`
 - `docs/CONTENT-OPERATIONS.md`
+- `docs/SEARCH-INTELLIGENCE.md`
 - `docs/day-0/START_HERE.md`
 
 ## Operating contracts
@@ -44,3 +45,28 @@ npm run authority:cycle
 npm run validate:release
 npm run authority:scale:status
 ```
+
+## Search Intelligence — 2026-08-07
+
+A closed search-intelligence loop runs alongside the authority engine: target
+queries → live grounded observation → competitor comparison → real Google Search
+Console truth → diagnosis → smallest bounded repair candidate → existing approval
+and publishing rules → same-query retest → before/after evidence → authority
+feedback.
+
+- Google Search Console is the only authority for own-site Google performance.
+- Grounded/generative search observation is never reported as a Google SERP rank.
+- The observation lane is governed by a free-tier allowance and refuses to spend
+  past it, so it runs at zero incremental cost by default.
+- An unavailable or degraded provider always reports `UNAVAILABLE`/`DEGRADED`. It
+  never produces a green result, and zero findings never means "healthy".
+- The lane publishes nothing, is not part of `authority:cycle`, and does not change
+  the publishing cadence.
+
+```bash
+npm run search:cycle     # read-and-prepare loop
+npm run search:status    # provider truth state first
+npm run search:proof     # hostile-fixture + end-to-end loop self-tests
+```
+
+See `docs/SEARCH-INTELLIGENCE.md`.

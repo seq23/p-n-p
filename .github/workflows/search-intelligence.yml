@@ -1,0 +1,161 @@
+name: Search Intelligence Cycle
+
+# Manual dispatch only, by design.
+#
+# This workflow is the only place the closed search-intelligence loop can obtain
+# REAL provider truth, because the Google Search Console credentials live here as
+# repository secrets. It is deliberately not scheduled: the repo's publishing
+# cadence is owned by authority-daily.yml and must not change because search
+# intelligence exists.
+#
+# This workflow does not publish, does not mutate the publish queue, and does not
+# commit by default. Set commit_evidence=true to persist collected evidence to the
+# branch it ran on.
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: "GSC window start (YYYY-MM-DD)"
+        required: true
+      end_date:
+        description: "GSC window end (YYYY-MM-DD)"
+        required: true
+      retest_label:
+        description: "Retest snapshot label (e.g. baseline, after-repair)"
+        required: true
+        default: baseline
+      run_grounded_observation:
+        description: "Run the grounded search observation lane (requires GEMINI_API_KEY secret)"
+        type: boolean
+        default: false
+      commit_evidence:
+        description: "Commit collected search evidence to this branch"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pnp-search-intelligence-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  search-intelligence:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Prove the search-intelligence controls actually fail when they should
+        run: npm run search:proof
+
+      - name: Build target query set
+        run: npm run search:targets
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Google API client
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib
+
+      - name: Collect real Google Search Console truth
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+        run: |
+          if [ -z "$GSC_SERVICE_ACCOUNT_JSON" ] || [ -z "$GSC_SITE_URL" ]; then
+            echo "GSC secrets are not configured. Skipping collection; the lane will report UNAVAILABLE."
+            exit 0
+          fi
+          printf '%s' "$GSC_SERVICE_ACCOUNT_JSON" > gsc-service-account.json
+          python3 distribution_scripts/gsc_search_analytics.py \
+            gsc-service-account.json \
+            "$GSC_SITE_URL" \
+            "${{ inputs.start_date }}" \
+            "${{ inputs.end_date }}" \
+            data/search_intelligence/gsc_search_analytics_export.json
+
+      - name: Run grounded search observation
+        if: ${{ inputs.run_grounded_observation }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: npm run search:observe
+
+      - name: Compare competitors
+        run: npm run search:competitors
+
+      - name: Ingest provider truth
+        env:
+          GSC_SERVICE_ACCOUNT_FILE: gsc-service-account.json
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+        run: npm run search:truth
+
+      - name: Diagnose and prepare bounded repair candidates
+        run: |
+          npm run search:diagnose
+          npm run search:repair:prepare
+
+      - name: Capture same-query retest snapshot
+        run: npm run search:retest -- "${{ inputs.retest_label }}"
+
+      - name: Compare before/after evidence
+        run: npm run search:evidence:compare -- baseline after-repair || true
+
+      - name: Apply authority feedback from evidence-backed observations
+        run: npm run search:feedback -- --write
+
+      - name: Validate search-intelligence truth contract
+        run: npm run validate:search-intelligence
+
+      - name: Report status
+        if: always()
+        run: npm run search:status
+
+      - name: Remove provider credentials from the workspace
+        if: always()
+        run: rm -f gsc-service-account.json
+
+      - name: Commit collected evidence
+        if: ${{ inputs.commit_evidence }}
+        run: |
+          git config user.name "pnp-search-intelligence-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/search_intelligence data/authority_scale/observed_surfacing_ledger.json data/authority_scale/citation_yield_observations.json
+          if git diff --cached --quiet; then
+            echo "No search-intelligence evidence changes to commit."
+          else
+            git commit -m "chore: record search-intelligence evidence"
+            git push
+          fi
+
+      - name: Upload search-intelligence evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pnp-search-intelligence-${{ github.run_id }}
+          path: |
+            data/search_intelligence/target_query_set.json
+            data/search_intelligence/live_search_observations.json
+            data/search_intelligence/competitor_comparison.json
+            data/search_intelligence/gsc_truth.json
+            data/search_intelligence/search_diagnosis.json
+            data/search_intelligence/repair_candidates.json
+            data/search_intelligence/retest_snapshots.json
+            data/search_intelligence/before_after_evidence.json
+            data/search_intelligence/authority_feedback_receipt.json
+          if-no-files-found: warn

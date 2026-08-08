@@ -1,0 +1,35 @@
+{
+  "schema_version": "1.0",
+  "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
+  "stage": "authority_feedback",
+  "generated_at": "2026-08-07T00:00:00.000Z",
+  "mode": "DRY_RUN",
+  "provider_states": {
+    "grounded_search": "UNAVAILABLE",
+    "search_console": "UNAVAILABLE"
+  },
+  "provider_state": "UNAVAILABLE",
+  "overall_status": "UNAVAILABLE",
+  "status_is_healthy": false,
+  "kpi_mapping": {
+    "grounded_search_observation": "llm_surfacing",
+    "gsc_impression_row": "search_visibility",
+    "gsc_indexed_url": "indexed_page"
+  },
+  "surfacing_ledger": {
+    "path": "data/authority_scale/observed_surfacing_ledger.json",
+    "existing_events": 0,
+    "new_events": 0,
+    "new_event_metrics": []
+  },
+  "yield_ledger": {
+    "path": "data/authority_scale/citation_yield_observations.json",
+    "existing_events": 0,
+    "new_events": 0,
+    "new_event_types": []
+  },
+  "verified_citations_created": 0,
+  "verified_citation_note": "This stage never creates verified_external_citation or verified_citation events. Those require independent external evidence.",
+  "unavailable_note": "No provider was fully available (grounded_search=UNAVAILABLE, search_console=UNAVAILABLE). Zero events were written. An empty ledger is not evidence of zero surfacing.",
+  "next_command_after_write": "npm run authority:yield:build && npm run validate:kpi-truth && npm run validate:yield"
+}
