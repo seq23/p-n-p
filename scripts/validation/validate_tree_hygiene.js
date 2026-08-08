@@ -6,6 +6,7 @@ const root = path.resolve(__dirname, '..', '..');
 
 const allowedRootFiles = new Set([
   '.gitignore',
+  'AGENTS.md',
   'ARTIFACT_MANIFEST.md',
   'README.md',
   'REPO_VALIDATION_MATRIX.md',
