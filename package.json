@@ -65,6 +65,7 @@
     "selfheal": "node scripts/selfheal/heal_until_clean.mjs",
     "selfheal:dry": "node scripts/selfheal/heal_until_clean.mjs --dry-run",
     "queries:ingest": "python3 scripts/queries/ingest_gsc_evidence.py",
-    "validate:content-pattern": "node scripts/validators/validate_content_pattern_contract.js"
+    "validate:content-pattern": "node scripts/validators/validate_content_pattern_contract.js",
+    "build:404": "PAGES_OUT_DIR=. node scripts/build_404.js"
   }
 }

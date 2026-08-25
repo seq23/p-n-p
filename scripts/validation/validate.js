@@ -97,7 +97,10 @@ for (const file of htmlFiles) {
   if (!/<title>[^<]+<\/title>/i.test(html)) fail(`${rel} missing title`);
   if (!/<meta[^>]+name=["']description["']/i.test(html)) fail(`${rel} missing meta description`);
   const robots = matchAttr(html, 'meta', 'name', 'robots', 'content');
-  if (!robots || !/index/i.test(robots) || !/follow/i.test(robots)) fail(`${rel} missing index/follow robots meta`);
+  // A deliberately noindex page (the 404 surface) still owes every quality check
+  // below, but demanding it be indexable and sitemapped would be contradictory.
+  const noindex = /noindex/i.test(robots || '');
+  if (!noindex && (!robots || !/index/i.test(robots) || !/follow/i.test(robots))) fail(`${rel} missing index/follow robots meta`);
   if (!/<script type=["']application\/ld\+json["']>[\s\S]*?<\/script>/i.test(html)) fail(`${rel} missing JSON-LD`);
   if (!/hello@porchandparty901\.com/i.test(html)) fail(`${rel} missing contact email`);
   if (!/Kerseta LLC/i.test(html)) fail(`${rel} missing operating entity footer`);
@@ -120,7 +123,8 @@ for (const file of htmlFiles) {
   }
 
   const sitemapRel = rel === 'index.html' ? '<loc>https://porchandparty901.com/</loc>' : `<loc>https://porchandparty901.com/${rel}</loc>`;
-  if (sitemap && !sitemap.includes(sitemapRel)) fail(`${rel} missing from sitemap`);
+  if (!noindex && sitemap && !sitemap.includes(sitemapRel)) fail(`${rel} missing from sitemap`);
+  if (noindex && sitemap && sitemap.includes(sitemapRel)) fail(`${rel} is noindex but listed in sitemap`);
 
   for (const m of html.matchAll(/<script type=["']application\/ld\+json["']>([\s\S]*?)<\/script>/gi)) {
     try { JSON.parse(m[1]); } catch (err) { fail(`${rel} has malformed JSON-LD`); }

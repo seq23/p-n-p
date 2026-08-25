@@ -40,6 +40,9 @@ const SKIP_DIRS = new Set([
 // Legal and transactional surfaces. The quote form answers no search query, and
 // holding a privacy policy to a direct-answer contract measures nothing.
 const SKIP_FILES = new Set([
+  // Not an answer surface: it exists so Cloudflare Pages returns a real 404
+  // instead of falling back to index.html under a 200.
+  '404.html',
   'contact.html', 'privacy-policy.html', 'terms-and-conditions.html',
 ]);
 

@@ -6,6 +6,10 @@ const root = path.resolve(__dirname, '..', '..');
 
 const allowedRootFiles = new Set([
   '.gitignore',
+  // Cloudflare Pages serves this for unmatched paths. Without it Pages
+  // falls back to index.html under a 200, so every nonexistent URL became
+  // an indexable duplicate of the homepage.
+  '404.html',
   'AGENTS.md',
   'ARTIFACT_MANIFEST.md',
   'README.md',
