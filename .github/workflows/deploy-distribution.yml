@@ -28,17 +28,10 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Build validated distribution inputs
-        run: |
-          npm run authority:improvements:build
-          npm run authority:yield:build
-          npm run build:sitemap
-          npm run authority:scale:admit
-          npm run authority:scale:freeze
-          npm run authority:territories:build
-          npm run distribution:prepare
-          npm run validate:release
-
+      # Python and the GSC client move ahead of the build so measured query
+      # evidence can be ingested BEFORE anything is validated. The credential
+      # file written here is still the one the distribution step reads later in
+      # this same job.
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -56,6 +49,31 @@ jobs:
           if [ -n "$GSC_SERVICE_ACCOUNT_JSON" ]; then
             printf '%s' "$GSC_SERVICE_ACCOUNT_JSON" > gsc-service-account.json
           fi
+
+      # Real measured demand, not modelled guesses. Without credentials this is a
+      # no-op that leaves the evidence file untouched; with credentials that fail
+      # it exits non-zero rather than publishing against a stale atlas.
+      # It ingests evidence only - it does not admit, publish, or change the
+      # publishing cadence, which stays owned by authority-daily.yml.
+      - name: Ingest measured Search Console queries
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+        run: |
+          npm run queries:ingest
+          npm run atlas:build
+
+      - name: Build validated distribution inputs
+        run: |
+          npm run authority:improvements:build
+          npm run authority:yield:build
+          npm run build:sitemap
+          npm run authority:scale:admit
+          npm run authority:scale:freeze
+          npm run authority:territories:build
+          npm run distribution:prepare
+          npm run validate:query-atlas
+          npm run validate:release
 
       - name: Run validated distribution
         env:

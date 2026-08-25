@@ -1,0 +1,141 @@
+{
+  "schema_version": "1.0",
+  "repo_id": "p-n-p",
+  "purpose": "Machine-readable decomposition of this repo's own validation so failures are attributable to a named validator, and so a repair that genuinely fixes a validator's defect can be declared next to it.",
+  "canonical_full_validation": "npm run validate:release",
+  "profiles": {
+    "release": "Every leaf validator reached by `npm run validate:release`, plus the query-atlas gate that guards the evidence the atlas publishes against.",
+    "core": "The page-level matrix only. Fast pass for content edits."
+  },
+  "repair_policy": "repair_command may only be declared when the command regenerates the exact artifact whose defect the validator detects. A repair is never declared to make an unrelated failure disappear; validators whose failures require human judgement are left with no repair and are reported by name.",
+  "validators": [
+    {
+      "id": "profile-purity",
+      "command": "npm run validate:profile-purity",
+      "detects": "Content or configuration that does not belong to the Porch & Party operating profile.",
+      "profiles": ["release", "core"]
+    },
+    {
+      "id": "tree-hygiene",
+      "command": "npm run validate:tree-hygiene",
+      "detects": "Stray, orphaned or non-canonical files in the published tree.",
+      "profiles": ["release", "core"]
+    },
+    {
+      "id": "local-authority-contract",
+      "command": "npm run validate:local-authority",
+      "detects": "Violations of data/ops/pnp_local_authority_contract.json.",
+      "profiles": ["release"]
+    },
+    {
+      "id": "no-internal-instruction-leak",
+      "command": "npm run validate:no-instruction-leak",
+      "detects": "Internal agent/prompt instructions leaking into published HTML.",
+      "profiles": ["release", "core"],
+      "evidence": "reports/validation/internal-instruction-leak.json"
+    },
+    {
+      "id": "no-empty-table-cells",
+      "command": "npm run validate:no-empty-cells",
+      "detects": "Empty table cells in published HTML.",
+      "profiles": ["release", "core"],
+      "evidence": "reports/validation/empty-table-cells.json"
+    },
+    {
+      "id": "core-html-matrix",
+      "command": "npm run validate:all",
+      "detects": "Required files, canonicals, entity footers, legal links, internal hrefs, JSON-LD wellformedness and llms.txt extraction surfaces across every published page.",
+      "profiles": ["release", "core"],
+      "repair_command": null,
+      "no_repair_reason": "Composite page-level matrix. Its failures (missing canonical, broken href, missing footer, malformed JSON-LD) are authored defects with no single regenerator. The one derived-artifact defect it also covers - sitemap desync - is attributed precisely by the sitemap-coverage validator below, which does carry a repair."
+    },
+    {
+      "id": "sitemap-coverage",
+      "command": "node scripts/validation/validate_sitemap_coverage.js",
+      "detects": "sitemap.xml out of sync with the published HTML tree in either direction.",
+      "profiles": ["release", "core"],
+      "repair_command": "npm run build:sitemap",
+      "repair_rationale": "scripts/generators/update_sitemap.js rewrites sitemap.xml by walking the same HTML tree this validator walks. It is the regenerator of the exact artifact whose staleness is the defect."
+    },
+    {
+      "id": "max-fanout",
+      "command": "npm run validate:max-fanout",
+      "detects": "Corruption or absence of the 100k opportunity reserve: missing shards, sha256 mismatch, duplicate ids/queries, undeclared geography, wrong disposition, wrong record count.",
+      "profiles": ["release"],
+      "repair_command": "npm run authority:scale:fanout",
+      "repair_rationale": "build_max_fanout.mjs writes data/authority_scale/fanout_100k/ and its index.json - the exact shard corpus and manifest this validator hashes and counts. Regeneration is deterministic under AUTHORITY_RUN_DATE."
+    },
+    {
+      "id": "authority-scale",
+      "command": "npm run validate:authority-scale",
+      "detects": "Violations of the authority-scale governance contract across the admission registry, operational window, velocity governor/decision and the accepted-output freeze.",
+      "profiles": ["release"],
+      "repair_command": null,
+      "no_repair_reason": "Spans artifacts owned by several different actions, two of which (authority:scale:freeze, authority:publish) are governance decisions with publishing side effects rather than regenerations. Running them to clear a validation failure would be a cadence change disguised as a repair."
+    },
+    {
+      "id": "kpi-truth",
+      "command": "npm run validate:kpi-truth",
+      "detects": "KPI claims not backed by the observed surfacing ledger.",
+      "profiles": ["release"],
+      "repair_command": null,
+      "no_repair_reason": "The ledger is measured evidence. Nothing in the repo may generate it, and generating it would be fabrication."
+    },
+    {
+      "id": "citation-yield-feedback",
+      "command": "npm run validate:yield",
+      "detects": "Scoreboard counts that disagree with the citation-yield observation ledger, and a velocity decision that disagrees with velocity health (upshift or ceiling change while health is UNKNOWN).",
+      "profiles": ["release"],
+      "repair_command": "npm run authority:yield:build",
+      "repair_rationale": "build_citation_yield_feedback.mjs recomputes the scoreboard directly from the observation ledger (fixing scoreboard_truth), and evaluate_velocity.mjs recomputes the velocity decision from velocity health under its stated safety law - unknown always holds, only explicit failure downshifts (fixing upshift_on_unknown / changed_on_unknown). Both are derivations of the exact artifacts the validator compares; neither invents observations."
+    },
+    {
+      "id": "page-quality-contract",
+      "command": "npm run validate:page-quality",
+      "detects": "Published pages that do not meet the citation-yield page quality patterns.",
+      "profiles": ["release"],
+      "repair_command": null,
+      "no_repair_reason": "Fails on page substance. No generator in this repo rewrites page substance, and none should do so unattended."
+    },
+    {
+      "id": "improvement-plan",
+      "command": "npm run validate:improvements",
+      "detects": "data/authority_scale/page_improvement_plan.json missing, thin (<10 route plans), or carrying plans with no recommended improvements.",
+      "profiles": ["release"],
+      "repair_command": "npm run authority:improvements:build",
+      "repair_rationale": "build_improvement_plan.mjs writes that exact file from the candidate backlog. If the plan is genuinely thin after rebuild the validator stays red, which is the correct outcome."
+    },
+    {
+      "id": "territory-health",
+      "command": "npm run validate:territories",
+      "detects": "data/authority_scale/territory_health.json missing a required territory or reporting a thin public surface count.",
+      "profiles": ["release"],
+      "repair_command": "npm run authority:territories:build",
+      "repair_rationale": "build_territory_health.mjs writes that exact file by counting the live public surfaces. A territory that is genuinely thin stays red after the rebuild - the repair refreshes the measurement, it cannot fake it."
+    },
+    {
+      "id": "distribution-contract",
+      "command": "npm run validate:distribution-contract",
+      "detects": "Missing .build distribution artifacts, or an IndexNow batch that does not match sitemap.xml exactly.",
+      "profiles": ["release"],
+      "repair_command": "npm run distribution:prepare",
+      "repair_rationale": "build_distribution_artifacts.mjs writes .build/indexnow-batch.txt, .build/indexnow-priority.txt and .build/distribution-manifest.json, deriving the batch from sitemap.xml. batch_sitemap_mismatch is precisely the staleness this command clears."
+    },
+    {
+      "id": "search-intelligence-contract",
+      "command": "npm run validate:search-intelligence",
+      "detects": "Violations of R1-R5 of the search-intelligence truth contract, including silent green on a degraded provider and any lane write to a protected publishing path.",
+      "profiles": ["release"],
+      "repair_command": null,
+      "no_repair_reason": "The only writable artifact in the lane (authority_feedback_receipt.json) comes from `search:feedback --write`, which applies authority feedback derived from live provider truth. Running it unattended to clear a red validator would manufacture feedback state with no provider reachable - exactly what R4 forbids."
+    },
+    {
+      "id": "query-atlas",
+      "command": "npm run validate:query-atlas",
+      "detects": "Query evidence missing a tier or source_type, a publishable atlas entry on a non-publishable tier or with no volume, and a query_atlas.json that is absent or stale against the evidence file.",
+      "profiles": ["release", "core"],
+      "repair_command": "npm run atlas:build",
+      "repair_rationale": "build_query_atlas.mjs writes data/authority_scale/query_atlas.json from data/queries/evidence/evidence_queries.json. The validator's own failure text says 'run the atlas build first'. This is the pairing that closes the loop after queries:ingest writes new measured T1 evidence."
+    }
+  ]
+}
