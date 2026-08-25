@@ -42,6 +42,13 @@
       "evidence": "reports/validation/empty-table-cells.json"
     },
     {
+      "id": "content-pattern-contract",
+      "command": "npm run validate:content-pattern",
+      "detects": "Published pages missing the blocks an answer engine needs to quote and act on them: a direct answer, an h1 that carries the query, tables without empty cells, and one quote-request conversion path. Coverage for checklist, comparison table, concrete numbers, named sources, FAQ and JSON-LD is measured and reported.",
+      "profiles": ["release", "core"],
+      "evidence": "reports/validation/content-pattern-contract.json"
+    },
+    {
       "id": "core-html-matrix",
       "command": "npm run validate:all",
       "detects": "Required files, canonicals, entity footers, legal links, internal hrefs, JSON-LD wellformedness and llms.txt extraction surfaces across every published page.",
