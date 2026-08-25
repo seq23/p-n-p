@@ -1,0 +1,162 @@
+{
+  "schema_version": "1.0",
+  "profile": "release",
+  "generated_at": "2026-08-25T21:57:01.427Z",
+  "total": 17,
+  "failed": 0,
+  "results": [
+    {
+      "id": "profile-purity",
+      "command": "npm run validate:profile-purity",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 130,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "tree-hygiene",
+      "command": "npm run validate:tree-hygiene",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 127,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "local-authority-contract",
+      "command": "npm run validate:local-authority",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 127,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "no-internal-instruction-leak",
+      "command": "npm run validate:no-instruction-leak",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 134,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "no-empty-table-cells",
+      "command": "npm run validate:no-empty-cells",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 132,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "core-html-matrix",
+      "command": "npm run validate:all",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 146,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "sitemap-coverage",
+      "command": "node scripts/validation/validate_sitemap_coverage.js",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 43,
+      "repair_command": "npm run build:sitemap",
+      "output_tail": null
+    },
+    {
+      "id": "max-fanout",
+      "command": "npm run validate:max-fanout",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 296,
+      "repair_command": "npm run authority:scale:fanout",
+      "output_tail": null
+    },
+    {
+      "id": "authority-scale",
+      "command": "npm run validate:authority-scale",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 264,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "kpi-truth",
+      "command": "npm run validate:kpi-truth",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 127,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "citation-yield-feedback",
+      "command": "npm run validate:yield",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 134,
+      "repair_command": "npm run authority:yield:build",
+      "output_tail": null
+    },
+    {
+      "id": "page-quality-contract",
+      "command": "npm run validate:page-quality",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 127,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "improvement-plan",
+      "command": "npm run validate:improvements",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 130,
+      "repair_command": "npm run authority:improvements:build",
+      "output_tail": null
+    },
+    {
+      "id": "territory-health",
+      "command": "npm run validate:territories",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 127,
+      "repair_command": "npm run authority:territories:build",
+      "output_tail": null
+    },
+    {
+      "id": "distribution-contract",
+      "command": "npm run validate:distribution-contract",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 131,
+      "repair_command": "npm run distribution:prepare",
+      "output_tail": null
+    },
+    {
+      "id": "search-intelligence-contract",
+      "command": "npm run validate:search-intelligence",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 138,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "query-atlas",
+      "command": "npm run validate:query-atlas",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 128,
+      "repair_command": "npm run atlas:build",
+      "output_tail": null
+    }
+  ]
+}
