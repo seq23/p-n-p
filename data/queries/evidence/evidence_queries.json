@@ -1,0 +1,64 @@
+{
+  "schema_version": "1.0",
+  "note": "Evidence-backed queries only. evidence_tier is required. T4 (synthetic fanout) is never stored here - it is a hypothesis reserve and is not publishable.",
+  "tiers": {
+    "T1": "GSC-measured",
+    "T2a": "Bing/Keyword Planner measured",
+    "T2b": "Semrush modeled",
+    "T3": "real phrasing, no volume"
+  },
+  "source": "portfolio-search-packet.zip / query_universe_T2b.json",
+  "owned_domains": [
+    "porchandparty901.com"
+  ],
+  "queries": [
+    {
+      "query": "event rentals memphis",
+      "evidence_tier": "T2b",
+      "source_type": "semrush_keyword_magic",
+      "volume": 70,
+      "keyword_difficulty": 15,
+      "weak_incumbent_score": 0.85,
+      "intent": "commercial",
+      "intent_method": "derived_from_modifier_syntax_and_cpc",
+      "serp_features": [],
+      "vertical": "local-events",
+      "target_domain": "porchandparty901.com",
+      "cpc_usd": 0.5,
+      "paid_competition": 0.24,
+      "competitor_ranking_url": "NO_DATA"
+    },
+    {
+      "query": "event venue memphis",
+      "evidence_tier": "T2b",
+      "source_type": "semrush_keyword_magic",
+      "volume": 30,
+      "keyword_difficulty": 23,
+      "weak_incumbent_score": 0.77,
+      "intent": "informational",
+      "intent_method": "derived_from_modifier_syntax_and_cpc",
+      "serp_features": [],
+      "vertical": "local-events",
+      "target_domain": "porchandparty901.com",
+      "cpc_usd": 0.75,
+      "paid_competition": 0.49,
+      "competitor_ranking_url": "NO_DATA"
+    },
+    {
+      "query": "tent rental memphis",
+      "evidence_tier": "T2b",
+      "source_type": "semrush_keyword_magic",
+      "volume": 90,
+      "keyword_difficulty": 25,
+      "weak_incumbent_score": 0.75,
+      "intent": "commercial",
+      "intent_method": "derived_from_modifier_syntax_and_cpc",
+      "serp_features": [],
+      "vertical": "local-events",
+      "target_domain": "porchandparty901.com",
+      "cpc_usd": 1.11,
+      "paid_competition": 0.99,
+      "competitor_ranking_url": "NO_DATA"
+    }
+  ]
+}

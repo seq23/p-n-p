@@ -57,6 +57,8 @@
     "validate:page-quality": "node scripts/authority_scale/validate_page_quality_contract.mjs",
     "validate:territories": "node scripts/authority_scale/validate_territory_health.mjs",
     "authority:improvements:build": "node scripts/authority_scale/build_improvement_plan.mjs",
-    "validate:improvements": "node scripts/authority_scale/validate_improvement_plan.mjs"
+    "validate:improvements": "node scripts/authority_scale/validate_improvement_plan.mjs",
+    "atlas:build": "node scripts/atlas/build_query_atlas.mjs",
+    "validate:query-atlas": "node scripts/atlas/validate_query_atlas.mjs"
   }
 }

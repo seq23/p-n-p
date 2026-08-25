@@ -1,0 +1,132 @@
+{
+  "schema_version": "1.0",
+  "taxonomy_source": "fanout_dimensions",
+  "policy": "Full taxonomy coverage is an index, not a publishing queue. Pages may only be generated against evidence_tier T1-T3. T4 synthetic permutations are a hypothesis reserve consulted when a cluster has no evidence, and never publish on their own.",
+  "evidence_weights": {
+    "T1": 1,
+    "T2a": 0.8,
+    "T2b": 0.6,
+    "T3": 0.35
+  },
+  "taxonomy": {
+    "topics": 36,
+    "audiences": 10,
+    "modifiers": 10,
+    "formats": 9,
+    "materialized_reserve": 0,
+    "reserve_path": "data/authority_scale/fanout_100k"
+  },
+  "coverage": {
+    "clusters_total": 36,
+    "clusters_with_evidence": 2,
+    "clusters_reserve_only": 35,
+    "reserve_only_clusters": [
+      "seasonal-porch-decorating",
+      "front-porch-styling",
+      "fall-porch-decorating",
+      "halloween-porch-decorating",
+      "christmas-porch-decorating",
+      "spring-porch-decorating",
+      "holiday-front-door-styling",
+      "small-porch-decorating",
+      "porch-decorating-installation",
+      "porch-decorating-take-down",
+      "party-decor",
+      "birthday-party-decor",
+      "birthday-room-setup",
+      "hotel-room-decor",
+      "romantic-room-setup",
+      "anniversary-room-decor",
+      "proposal-room-setup",
+      "baby-shower-decor",
+      "bridal-shower-decor",
+      "celebration-setup",
+      "balloon-and-backdrop-styling",
+      "small-event-decor",
+      "luxury-party-decor",
+      "budget-conscious-party-decor",
+      "grazing-table-styling",
+      "grazing-table-setup",
+      "styled-food-table-presentation",
+      "corporate-event-decor",
+      "corporate-grazing-table",
+      "retreat-event-styling",
+      "hosting-setup",
+      "party-decorator",
+      "decor-only-event-support",
+      "surprise-celebration-setup",
+      "photo-ready-event-styling"
+    ]
+  },
+  "evidence_backed_count": 3,
+  "unmatched_count": 0,
+  "unmatched": [],
+  "queries": [
+    {
+      "query": "tent rental memphis",
+      "evidence_tier": "T2b",
+      "source_type": "semrush_keyword_magic",
+      "volume": 90,
+      "keyword_difficulty": 25,
+      "weak_incumbent_score": 0.75,
+      "intent": "commercial",
+      "intent_method": "derived_from_modifier_syntax_and_cpc",
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": null,
+        "topic_confidence": 0,
+        "audience": null,
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "tent-rental"
+      },
+      "rank_score": 40.5,
+      "publishable": true
+    },
+    {
+      "query": "event rentals memphis",
+      "evidence_tier": "T2b",
+      "source_type": "semrush_keyword_magic",
+      "volume": 70,
+      "keyword_difficulty": 15,
+      "weak_incumbent_score": 0.85,
+      "intent": "commercial",
+      "intent_method": "derived_from_modifier_syntax_and_cpc",
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "event decorator",
+        "topic_confidence": 0.431,
+        "audience": "event hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "event-decorator"
+      },
+      "rank_score": 35.7,
+      "publishable": true
+    },
+    {
+      "query": "event venue memphis",
+      "evidence_tier": "T2b",
+      "source_type": "semrush_keyword_magic",
+      "volume": 30,
+      "keyword_difficulty": 23,
+      "weak_incumbent_score": 0.77,
+      "intent": "informational",
+      "intent_method": "derived_from_modifier_syntax_and_cpc",
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "event decorator",
+        "topic_confidence": 0.431,
+        "audience": "event hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "event-decorator"
+      },
+      "rank_score": 13.86,
+      "publishable": true
+    }
+  ]
+}
