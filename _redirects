@@ -1,2 +1,20 @@
 /services  /services/porch-decorating.html  302
 /quote     /contact.html  302
+
+# Cloudflare Pages deploys this repository root, and Pages has no exclude list
+# for a root deploy, so the source tree was reachable on the live domain
+# (README.md, package.json, AGENTS.md and scripts/ all served as raw text).
+# A root dist/ is forbidden by validate_tree_hygiene, so these rules 404 the
+# non-public paths instead of restructuring the site out of the repo root.
+/README.md               /404.html  404
+/package.json            /404.html  404
+/package-lock.json       /404.html  404
+/AGENTS.md               /404.html  404
+/ARTIFACT_MANIFEST.md    /404.html  404
+/REPO_VALIDATION_MATRIX.md /404.html 404
+/scripts/*               /404.html  404
+/distribution_scripts/*  /404.html  404
+/data/*                  /404.html  404
+/docs/*                  /404.html  404
+/reports/*               /404.html  404
+/tests/*                 /404.html  404
