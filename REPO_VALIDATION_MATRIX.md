@@ -16,6 +16,8 @@ This is the required structural/repository release gate. It does not claim live 
 | KPI truth | `npm run validate:kpi-truth` | HARD FAIL | Indexation, visibility, LLM surfacing, references, and verified citations remain separate evidence-backed metrics |
 | Citation/yield contract | `npm run validate:yield` | HARD FAIL | 100K/180-day target remains a non-guaranteed objective; Twin scope is correct; UNKNOWN evidence cannot upshift velocity |
 | Page-quality contract | `npm run validate:page-quality` | HARD FAIL | Governed query entries have answer-first, substantive, internally linked content fields rather than thin page shells |
+| No internal instruction leak | `npm run validate:no-instruction-leak` | HARD FAIL | No published page renders external-agent build directives (`FILEPATH:`, `\|\| CURRENT/MISSING/EDIT:`, citation-ready update text) as reader-facing copy |
+| No empty table cells | `npm run validate:no-empty-cells` | HARD FAIL | No published page ships a table with empty `<td>`/`<th>` cells, so table columns stay aligned with their headers for extraction |
 | Twin-learning transfer plan | `npm run validate:improvements` | HARD FAIL | Existing pages are prioritized for evidence-driven improvements without installing Twin infrastructure |
 | Territory health | `npm run validate:territories` | HARD FAIL | Porch, party, hotel-room, and grazing authority territories each retain meaningful public surface depth |
 | Distribution contract | `npm run validate:distribution-contract` | HARD FAIL | Sitemap, priority/batch submission inputs, validated workflow ordering, and evidence upload wiring remain aligned |
