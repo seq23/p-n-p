@@ -70,6 +70,7 @@
     "clarity:install": "node scripts/install_clarity.js",
     "cadence:headroom": "node scripts/cadence/publish_headroom.mjs",
     "validate:operator-doc-currency": "node scripts/validation/validate_operator_doc_currency.mjs docs",
-    "cadence:gate": "node scripts/cadence_gate.js"
+    "cadence:gate": "node scripts/cadence_gate.js",
+    "citation:probe": "node scripts/llm_citation_probe.mjs"
   }
 }
