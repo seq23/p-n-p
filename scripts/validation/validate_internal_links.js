@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const ROOT = path.resolve(__dirname, __dirname.endsWith('validation') ? '../..' : '..');
-const SKIP = new Set(['node_modules', '.git']);
+const SKIP = new Set(['.pages-output', 'node_modules', '.git']);
 function walk(dir, out=[]) {
   for (const name of fs.readdirSync(dir)) {
     if (SKIP.has(name)) continue;

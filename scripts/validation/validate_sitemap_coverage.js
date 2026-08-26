@@ -6,7 +6,7 @@ const SITEMAP = path.join(ROOT, 'sitemap.xml');
 if (!fs.existsSync(SITEMAP)) { console.error('Missing sitemap.xml'); process.exit(1); }
 function walk(dir, out=[]) {
   for (const name of fs.readdirSync(dir)) {
-    if (['node_modules','.git'].includes(name)) continue;
+    if (['.pages-output', 'node_modules','.git'].includes(name)) continue;
     const full = path.join(dir, name);
     const stat = fs.statSync(full);
     if (stat.isDirectory()) walk(full, out);

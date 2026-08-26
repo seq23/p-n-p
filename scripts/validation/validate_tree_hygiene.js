@@ -34,6 +34,11 @@ const allowedRootFiles = new Set([
 ]);
 
 const allowedRootDirs = new Set([
+  // Gitignored Cloudflare Pages deploy output. Pages published the repo root,
+  // which served README.md, package.json, AGENTS.md and scripts/ as raw text
+  // on the live domain; scripts/assemble_pages_output.js builds a copy that
+  // contains only the public site, and Pages publishes that instead.
+  '.pages-output',
   '.build',
   '.github',
   'answers',

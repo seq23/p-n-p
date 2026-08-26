@@ -67,7 +67,7 @@ for (const rel of requiredFiles) {
 
 function walk(dir, acc = []) {
   for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (['node_modules', '.git'].includes(item.name)) continue;
+    if (['.pages-output', 'node_modules', '.git'].includes(item.name)) continue;
     const full = path.join(dir, item.name);
     if (item.isDirectory()) walk(full, acc);
     else if (item.isFile() && item.name.endsWith('.html')) acc.push(full);
