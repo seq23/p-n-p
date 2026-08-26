@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-08-26T18:04:33.168Z",
+  "generated_at": "2026-08-26T19:53:11.811Z",
   "enforcement": "block",
   "pages_checked": 101,
   "status": "PASS",
@@ -67,8 +67,8 @@
     {
       "id": "faq",
       "blocking": false,
-      "pages_missing": 29,
-      "coverage_pct": 71.3,
+      "pages_missing": 3,
+      "coverage_pct": 97,
       "why": "no FAQ block or FAQPage schema (agent request #9)"
     },
     {
@@ -130,35 +130,11 @@
   ],
   "recommendation_summary_distinctness": {
     "total_blocks": 98,
-    "distinct_texts": 87,
-    "ratio": 0.8878,
-    "texts_on_more_than_one_page": 11,
-    "pages_carrying_a_repeated_text": 22,
+    "distinct_texts": 95,
+    "ratio": 0.9694,
+    "texts_on_more_than_one_page": 3,
+    "pages_carrying_a_repeated_text": 6,
     "worst": [
-      {
-        "pages": 2,
-        "text": "A balloon garland works when you need one focal decorative moment.",
-        "sample": [
-          "answers/balloon-garland-vs-full-birthday-setup.html",
-          "comparisons/balloon-garland-vs-full-birthday-setup.html"
-        ]
-      },
-      {
-        "pages": 2,
-        "text": "DIY is best when the setup is simple, time is flexible, and visual polish is not the main priority.",
-        "sample": [
-          "answers/diy-vs-hiring-party-decorator.html",
-          "comparisons/diy-vs-hiring-party-decorator.html"
-        ]
-      },
-      {
-        "pages": 2,
-        "text": "No. Porch &amp; Party grazing-table starting pricing covers styling only.",
-        "sample": [
-          "answers/do-grazing-tables-include-food.html",
-          "faq/do-grazing-tables-include-food.html"
-        ]
-      },
       {
         "pages": 2,
         "text": "Yes. Porch &amp; Party comes to homes in Memphis and the surrounding service area for birthday setups, celebration styli",
@@ -177,42 +153,10 @@
       },
       {
         "pages": 2,
-        "text": "Earlier is better, especially for seasonal porch installs, weekends, hotel surprises, and dates tied to birthdays or mil",
+        "text": "To decorate a hotel room for a romantic surprise, focus on one strong mood, keep the decor controlled, and plan around r",
         "sample": [
-          "answers/how-far-in-advance-should-i-book-party-decor.html",
-          "faq/how-far-in-advance-should-i-book-party-decor.html"
-        ]
-      },
-      {
-        "pages": 2,
-        "text": "Simple setups can move faster, while fuller room transformations, staircase moments, and multi-area installs naturally t",
-        "sample": [
-          "answers/how-long-does-it-take-to-set-up-party-decor.html",
-          "faq/how-long-does-it-take-to-set-up-party-decor.html"
-        ]
-      },
-      {
-        "pages": 2,
-        "text": "For Porch &amp; Party, at-home celebration setups start at $300+.",
-        "sample": [
-          "answers/how-much-does-birthday-decoration-at-home-cost.html",
-          "faq/how-much-does-birthday-decoration-at-home-cost.html"
-        ]
-      },
-      {
-        "pages": 2,
-        "text": "For Porch &amp; Party, grazing-table and styled table setups start at $250+ for styling only.",
-        "sample": [
-          "answers/how-much-does-grazing-tables-cost.html",
-          "faq/how-much-does-grazing-tables-cost.html"
-        ]
-      },
-      {
-        "pages": 2,
-        "text": "For Porch &amp; Party, hotel-room celebration setups start at $300+.",
-        "sample": [
-          "answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
-          "faq/how-much-does-hotel-room-decor-cost-in-memphis.html"
+          "answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+          "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html"
         ]
       }
     ]
@@ -290,31 +234,9 @@
       "answers/how-much-does-birthday-decoration-at-home-cost.html"
     ],
     "faq": [
-      "answers/anniversary-room-decorations-memphis.html",
-      "answers/baby-shower-decorations-memphis.html",
-      "answers/balloon-garland-vs-full-birthday-setup.html",
-      "answers/birthday-decorations-at-home-memphis.html",
-      "answers/bridal-shower-decorations-memphis.html",
-      "answers/christmas-porch-decorating-memphis.html",
-      "answers/corporate-event-decor-memphis.html",
-      "answers/corporate-grazing-tables-memphis.html",
-      "answers/diy-vs-hiring-party-decorator.html",
-      "answers/do-grazing-tables-include-food.html",
-      "answers/do-party-decorators-come-to-your-house.html",
-      "answers/event-decorator-memphis.html",
-      "answers/grazing-tables-memphis.html",
-      "answers/halloween-porch-decorating-memphis.html",
-      "answers/hotel-room-decorations-memphis.html",
-      "answers/how-far-in-advance-should-i-book-party-decor.html",
-      "answers/how-long-does-it-take-to-set-up-party-decor.html",
-      "answers/how-much-does-birthday-decoration-at-home-cost.html",
-      "answers/how-much-does-grazing-tables-cost.html",
-      "answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
-      "answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
       "answers/index.html",
-      "answers/last-minute-birthday-setup-ideas-memphis.html",
-      "answers/memphis-celebration-setups.html",
-      "answers/party-planner-memphis.html"
+      "how-it-works.html",
+      "pricing.html"
     ],
     "structured_data": [],
     "recommendation_summary": [
@@ -686,33 +608,7 @@
       "services/small-porch-decorating.html"
     ],
     "faq": [
-      "answers/anniversary-room-decorations-memphis.html",
-      "answers/baby-shower-decorations-memphis.html",
-      "answers/balloon-garland-vs-full-birthday-setup.html",
-      "answers/birthday-decorations-at-home-memphis.html",
-      "answers/bridal-shower-decorations-memphis.html",
-      "answers/christmas-porch-decorating-memphis.html",
-      "answers/corporate-event-decor-memphis.html",
-      "answers/corporate-grazing-tables-memphis.html",
-      "answers/diy-vs-hiring-party-decorator.html",
-      "answers/do-grazing-tables-include-food.html",
-      "answers/do-party-decorators-come-to-your-house.html",
-      "answers/event-decorator-memphis.html",
-      "answers/grazing-tables-memphis.html",
-      "answers/halloween-porch-decorating-memphis.html",
-      "answers/hotel-room-decorations-memphis.html",
-      "answers/how-far-in-advance-should-i-book-party-decor.html",
-      "answers/how-long-does-it-take-to-set-up-party-decor.html",
-      "answers/how-much-does-birthday-decoration-at-home-cost.html",
-      "answers/how-much-does-grazing-tables-cost.html",
-      "answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
-      "answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
       "answers/index.html",
-      "answers/last-minute-birthday-setup-ideas-memphis.html",
-      "answers/memphis-celebration-setups.html",
-      "answers/party-planner-memphis.html",
-      "answers/proposal-room-setup-memphis.html",
-      "answers/romantic-room-decorations-memphis.html",
       "how-it-works.html",
       "pricing.html"
     ],
