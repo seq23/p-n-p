@@ -205,13 +205,21 @@ function renderPage(entry) {
     <section class="section section-soft">
       <div class="container content-grid">
         <div class="content-stack">
-          <div class="info-panel">
-            <h2>Quick answer</h2>
-            <p>${entry.quickAnswer}</p>
-          </div>
-          <div class="info-panel">
-            <h2>Who this is for</h2>
-            <p>${entry.forWho}</p>
+          <!-- recommendation_summary is the most-requested block in the agent
+               data: asked for on every recommendation, on every run. It folds
+               the former "Quick answer" and "Who this is for" panels into one
+               extractable block rather than adding a third - a summary that
+               repeats what sits directly beneath it is duplication, not a
+               summary. Placed first so it falls inside the opening third of the
+               page, where most AI Overview citations are drawn from. -->
+          <div class="info-panel recommendation-summary" data-content-block="recommendation_summary" id="recommendation-summary">
+            <h2>What this page recommends</h2>
+            <p class="recommendation-summary__answer">${entry.quickAnswer}</p>
+            <ul class="recommendation-summary__points">
+              <li><strong>Best for:</strong> ${entry.forWho}</li>
+              <li><strong>Service area:</strong> ${cityList} and the greater Memphis metro area.</li>
+              <li><strong>Next step:</strong> <a href="/contact.html">Request a Quote</a></li>
+            </ul>
           </div>
           <div class="info-panel">
             <h2>What this includes</h2>

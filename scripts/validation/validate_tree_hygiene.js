@@ -59,7 +59,10 @@ const allowedRootDirs = new Set([
   'scripts',
   'seasonal',
   'services',
-  'templates'
+    'templates',
+    // Holds the content-pattern contract derived from the agent recommendation
+    // corpus. Read by the generators, so it belongs in the tree.
+    '.clarity'
 ]);
 
 const forbiddenNames = new Set([
