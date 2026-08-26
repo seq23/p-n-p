@@ -103,6 +103,51 @@ if (ledgerExists) {
 }
 const newUrls = [...urls.keys()].filter((u) => !known.has(u));
 
+// A section index is not a publication, for the same reason the paragraph above
+// says a changed page is not a published one. The weekly cap exists because
+// publishing faster than the library can be refreshed pushes the tail past the
+// 13-week threshold. A section index is regenerated from the pages it lists,
+// introduces no subject matter of its own, and so consumes none of the refresh
+// capacity the cap is protecting.
+//
+// The classification is not invented here. It is read from whichever registry
+// the repo already keeps: data/cadence/section_indexes.json, written by the
+// generator that emits the pages, or the page_intent field that
+// data/routes/route_manifest.json already records for every route. A reviewer
+// can see exactly which URLs are exempt by reading that file. An unreadable or
+// absent registry exempts nothing.
+//
+// Section indexes stay inside urls.size, so staleness, the ceiling and the
+// lastmod checks below all still count them: they are pages a crawler fetches
+// either way. Only the publication cadence cap ignores them, and they are
+// reported as a warning rather than passing silently.
+function sectionIndexPaths() {
+  const out = new Set();
+  const norm = (p) => String(p || '').replace(/\/index\.html$/, '').replace(/\/+$/, '') || '/';
+  const registry = path.join(ROOT, 'data/cadence/section_indexes.json');
+  if (fs.existsSync(registry)) {
+    try { for (const r of JSON.parse(fs.readFileSync(registry, 'utf8')).routes || []) out.add(norm(r)); }
+    catch { /* an unreadable registry exempts nothing */ }
+  }
+  const manifest = path.join(ROOT, 'data/routes/route_manifest.json');
+  if (fs.existsSync(manifest)) {
+    try {
+      for (const r of JSON.parse(fs.readFileSync(manifest, 'utf8')).routes || []) {
+        if (r.page_intent === 'section_index') out.add(norm(r.path));
+      }
+    } catch { /* same */ }
+  }
+  return out;
+}
+const sectionIndexes = sectionIndexPaths();
+const isSectionIndex = (u) => {
+  try {
+    return sectionIndexes.has(new URL(u).pathname.replace(/\/index\.html$/, '').replace(/\/+$/, '') || '/');
+  } catch { return false; }
+};
+const newSectionIndexes = newUrls.filter(isSectionIndex);
+const newPublications = newUrls.filter((u) => !isSectionIndex(u));
+
 const dated = [...urls.entries()].filter(([, d]) => d);
 const undated = [...urls.entries()].filter(([, d]) => !d);
 const ages = dated.map(([, d]) => ageDays(d));
@@ -115,8 +160,11 @@ const ceiling = policy.refresh_capacity_per_week * Math.floor(policy.refresh_win
 const blocking = [];
 const warnings = [];
 
-if (ledgerExists && newUrls.length > policy.new_pages_per_week) {
-  blocking.push(`weekly_cap: ${newUrls.length} URLs are new since the last run, cap is ${policy.new_pages_per_week} per week`);
+if (ledgerExists && newPublications.length > policy.new_pages_per_week) {
+  blocking.push(`weekly_cap: ${newPublications.length} URLs are new since the last run, cap is ${policy.new_pages_per_week} per week`);
+}
+if (ledgerExists && newSectionIndexes.length) {
+  warnings.push(`new_section_indexes: ${newSectionIndexes.length} navigation index route(s) are new since the last run and sit outside the publication cap (${newSectionIndexes.join(', ')})`);
 }
 if (stalePct > policy.stale_tolerance_pct) {
   blocking.push(`refresh_debt: ${stale} of ${dated.length} pages (${stalePct.toFixed(0)}%) are older than ${policy.refresh_window_days} days, tolerance is ${policy.stale_tolerance_pct}%`);
@@ -153,6 +201,8 @@ const report = {
   fresh_within_30d: fresh30,
   lastmod_within_7d: publishedThisWeek,
   new_since_last_run: ledgerExists ? newUrls.length : null,
+  new_publications_since_last_run: ledgerExists ? newPublications.length : null,
+  new_section_indexes_since_last_run: ledgerExists ? newSectionIndexes : null,
   ledger_initialised: ledgerExists,
   maintainable_ceiling: ceiling,
   policy: { ...policy, _source: undefined },

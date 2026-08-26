@@ -1,14 +1,22 @@
 {
   "generated_at": "2026-08-26",
   "policy_source": "data/cadence/policy.json",
-  "urls": 104,
-  "dated": 104,
+  "urls": 109,
+  "dated": 109,
   "undated": 0,
   "stale_over_window": 0,
   "stale_pct": 0,
-  "fresh_within_30d": 104,
-  "lastmod_within_7d": 104,
-  "new_since_last_run": 0,
+  "fresh_within_30d": 109,
+  "lastmod_within_7d": 109,
+  "new_since_last_run": 5,
+  "new_publications_since_last_run": 0,
+  "new_section_indexes_since_last_run": [
+    "https://porchandparty901.com/areas/index.html",
+    "https://porchandparty901.com/events/index.html",
+    "https://porchandparty901.com/faq/index.html",
+    "https://porchandparty901.com/local/index.html",
+    "https://porchandparty901.com/services/index.html"
+  ],
   "ledger_initialised": true,
   "maintainable_ceiling": 104,
   "policy": {
@@ -22,7 +30,9 @@
   },
   "blocking": [],
   "warnings": [
-    "uniform_lastmod: 104 of 104 pages share a lastmod inside 7 days - that is a date bump pattern, not a refresh, and it makes the freshness signal meaningless"
+    "new_section_indexes: 5 navigation index route(s) are new since the last run and sit outside the publication cap (https://porchandparty901.com/areas/index.html, https://porchandparty901.com/events/index.html, https://porchandparty901.com/faq/index.html, https://porchandparty901.com/local/index.html, https://porchandparty901.com/services/index.html)",
+    "library_over_ceiling: 109 pages against a ceiling of 104 (8 substantive refreshes per week held inside 91 days). 5 pages cannot be kept current at this capacity.",
+    "uniform_lastmod: 109 of 109 pages share a lastmod inside 7 days - that is a date bump pattern, not a refresh, and it makes the freshness signal meaningless"
   ],
   "status": "CLEAR"
 }

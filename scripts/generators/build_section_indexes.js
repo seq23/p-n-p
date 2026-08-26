@@ -406,9 +406,11 @@ ${faqHtml}
 
 const written = [];
 const skipped = [];
+const routes = [];
 for (const section of SECTIONS) {
   const pages = pagesIn(section.dir);
   if (pages.length < MIN_PAGES) { skipped.push(`${section.dir} (${pages.length} pages)`); continue; }
+  routes.push(`/${section.dir}/index.html`);
   const html = render(section, section.group(pages));
   const out = path.join(ROOT, section.dir, 'index.html');
   const before = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : null;
@@ -416,6 +418,20 @@ for (const section of SECTIONS) {
   if (CHECK) { console.error(`would rewrite ${section.dir}/index.html`); process.exitCode = 1; continue; }
   fs.writeFileSync(out, html);
   written.push(`${section.dir}/index.html (${pages.length} pages)`);
+}
+
+// Record which routes are section indexes rather than publications, so
+// scripts/cadence_gate.js can tell the two apart. The generator is the only
+// thing that knows, and writing it here keeps the list from drifting away from
+// what was actually built.
+if (!CHECK) {
+  const registry = path.join(ROOT, 'data/cadence/section_indexes.json');
+  fs.mkdirSync(path.dirname(registry), { recursive: true });
+  fs.writeFileSync(registry, JSON.stringify({
+    _why: 'Routes emitted by scripts/generators/build_section_indexes.js. A section index is regenerated from the pages it lists, so it consumes none of the refresh capacity the publication cap protects. It is still counted in library size, staleness and the ceiling.',
+    generated_by: 'scripts/generators/build_section_indexes.js',
+    routes: routes.slice().sort(),
+  }, null, 2) + '\n');
 }
 
 console.log(`Section indexes: ${written.length} built`);
