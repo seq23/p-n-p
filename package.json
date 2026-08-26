@@ -68,6 +68,7 @@
     "validate:content-pattern": "node scripts/validators/validate_content_pattern_contract.js",
     "build:404": "PAGES_OUT_DIR=. node scripts/build_404.js",
     "clarity:install": "node scripts/install_clarity.js",
-    "cadence:headroom": "node scripts/cadence/publish_headroom.mjs"
+    "cadence:headroom": "node scripts/cadence/publish_headroom.mjs",
+    "validate:operator-doc-currency": "node scripts/validation/validate_operator_doc_currency.mjs docs"
   }
 }
