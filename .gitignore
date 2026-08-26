@@ -6,3 +6,8 @@ tmp/
 
 # Cloudflare Pages deploy output, assembled by scripts/assemble_pages_output.js
 .pages-output/
+
+# Build output. `npm run distribution:prepare` regenerates it immediately
+# before every consumer (validate:release) in all three workflows that read
+# it, and the self-heal registry declares it as the repair command.
+.build/
