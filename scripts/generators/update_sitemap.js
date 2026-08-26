@@ -24,7 +24,24 @@ const htmlFiles = walk(root)
   .filter((abs) => !isNoindex(abs))
   .map(f => path.relative(root, f).replace(/\\/g, '/'))
   .sort();
-const body = htmlFiles.map(rel => `  <url><loc>${domain}/${rel === 'index.html' ? '' : rel}</loc></url>`).join('\n');
+// lastmod comes from the file's own last commit, not from build time. Stamping
+// every URL with today would tell a crawler the whole site changed on every
+// deploy, which is the date-bump pattern that makes a freshness signal
+// worthless. Without any lastmod at all - which is what this emitted before - a
+// crawler cannot tell what changed, and recency is the strongest single
+// correlate of being cited by an answer engine.
+const { execFileSync } = require('child_process');
+function lastCommitDate(rel) {
+  try {
+    const out = execFileSync('git', ['log', '-1', '--format=%cs', '--', rel], { cwd: root, encoding: 'utf8' }).trim();
+    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : '';
+  } catch { return ''; }
+}
+const body = htmlFiles.map(rel => {
+  const loc = `${domain}/${rel === 'index.html' ? '' : rel}`;
+  const mod = lastCommitDate(rel);
+  return `  <url><loc>${loc}</loc>${mod ? `<lastmod>${mod}</lastmod>` : ''}</url>`;
+}).join('\n');
 const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 fs.writeFileSync(path.join(root, 'sitemap.xml'), xml);
 console.log(`Updated sitemap with ${htmlFiles.length} HTML files.`);
