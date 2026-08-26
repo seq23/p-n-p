@@ -303,4 +303,8 @@ function renderPage(entry) {
 </html>`;
 }
 
-module.exports = { renderPage };
+// nav() and footer() are exported so scripts/generators/build_section_indexes.js
+// renders the section index pages inside the same header and footer as every
+// other generated page, rather than keeping a second copy of that markup that
+// could drift.
+module.exports = { renderPage, nav, footer };
