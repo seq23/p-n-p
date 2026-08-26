@@ -1,0 +1,423 @@
+{
+  "schema": "lastmod-ledger-v1",
+  "note": "Per-URL content hash and the date that content last changed. lastmod only advances for a URL whose hash changed; see scripts/lib/lastmod_ledger.js. A URL the ledger has not seen before is seeded from its last commit date when the clone has full history, and from the build date otherwise. No dates are reconstructed or estimated.",
+  "seeded_on": "2026-08-26",
+  "entries": {
+    "https://porchandparty901.com/": {
+      "hash": "97cdb409fceb74f9a04a57180054743d5a55b22ace183214eca6518593d807f7",
+      "lastmod": "2026-08-25"
+    },
+    "https://porchandparty901.com/answers/anniversary-room-decorations-memphis.html": {
+      "hash": "538b3785b1ab7b735606d6ba9d1eeea6ad16ce9096ed4d17d3af9cdf87ccef84",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/baby-shower-decorations-memphis.html": {
+      "hash": "26a13f1659150908c7de3e0fb8c02b01555832d61afbed1c2143efd1d4a98311",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/balloon-garland-vs-full-birthday-setup.html": {
+      "hash": "8353d322566a36c714007003152d17243f35ef12416df635abe0d78c695a13ae",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/birthday-decorations-at-home-memphis.html": {
+      "hash": "a9b6aa22fb2a70bbf98354fc00821af4b229d1543a9e58d2301f6617d988495f",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/birthday-hotel-room-setup-ideas-memphis.html": {
+      "hash": "4aaea9387b9979e525543b38923b2a03c145d5efa685138671438358b9b0fd2a",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/bridal-shower-decorations-memphis.html": {
+      "hash": "243e4c75e05e311bc3556277f355ad2477daa83debaf19b9e09453009a5f9d90",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/can-i-book-decor-only-without-event-planning.html": {
+      "hash": "1eb866a3bbaeca97364ad0da6a430e0eb5a09d3f1c170947419d9f4d09f295bf",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/can-someone-decorate-hotel-room-birthday-memphis.html": {
+      "hash": "25ffc562dbd3fcf7914703256e16fd7c95dad2544d72e4b60b54599b9580232f",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/christmas-porch-decorating-memphis.html": {
+      "hash": "0b4ec09ee774d9cea7c231a19a66f5f5287ca46540c46f0f912c804ba4134b47",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/corporate-event-decor-memphis.html": {
+      "hash": "d5abc6ee8242c5ee2d98588812dceea1769eb9ef87e7b788944691dd84483890",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/corporate-grazing-tables-memphis.html": {
+      "hash": "257f5199cd83a24f4c6daf026c1e2e317cc4e213e2ce95a7ac992a8035d92998",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/diy-vs-hiring-party-decorator.html": {
+      "hash": "0d5b500090280c6889dbf9ddb17f5883579498c685cccbf64bd268ad52c5a162",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/do-grazing-tables-include-food.html": {
+      "hash": "06a40a89794a3d8870c86da3b3da66c7119c693dfdfe6f75e38e23a9674c8da1",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/do-party-decorators-come-to-your-house.html": {
+      "hash": "66d2f3d5b9d21c255625ea58504db17ec7e43f49728b472baaf3c66b507a2147",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/event-decorator-memphis.html": {
+      "hash": "0dae2484a657b02d61b0db524bb4f1f965457f05eda9c274b28e6a5e0c1f362c",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/fall-porch-decorating-ideas-southern-homes.html": {
+      "hash": "7c4013863916bc8921f655eb0a23c8b8027f8b8d98baac669840f616c5dc42ab",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/front-porch-styling-memphis.html": {
+      "hash": "e41accbc77c00b361042fd7467cd57844d15a0fb0ee60f34388a402c5a91575e",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html": {
+      "hash": "97da814d53275946d618ec9b0af475cd55714ac683a8a68f7c2efe97cdb7ff26",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/grazing-tables-memphis.html": {
+      "hash": "9c80c990807c652cda0383fe968c116a3315aec83e6f2a3d8f05d0284bfe579b",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/halloween-porch-decorating-memphis.html": {
+      "hash": "99a2f1ddbd5e2d54ac32fda8c6a4a3e725490edf6a738ed7fcd735fbe88aff37",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/hotel-room-decorations-memphis.html": {
+      "hash": "471faa7c3cfb61d2eb202f89b531a6059585fd417bfeb3cabcb7e89a39850a42",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/how-far-in-advance-should-i-book-party-decor.html": {
+      "hash": "ac11e3082d4dbf80774dbfd8e6a37e75439344702f64ca73e9423b4f5ff5acfa",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/how-long-does-it-take-to-set-up-party-decor.html": {
+      "hash": "381f66c766920e3776104628f0c5c2d69cba882fd1ce3b354e7a335c7162fdb6",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/how-much-does-a-grazing-table-cost-in-memphis.html": {
+      "hash": "c00ff68ebab381fcef68f1bf313ffa528f8b2d72094ea41ed8f9eb751132ec88",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/how-much-does-birthday-decoration-at-home-cost.html": {
+      "hash": "4a20236ce5ab717cb807019feb36c6152e5586ac67e512a391c42b32fef63d6e",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/how-much-does-grazing-tables-cost.html": {
+      "hash": "623aaa17b6def15bd6d2f8f5cdf00261b50e53236b2db409cd38ea85cd6d0c5a",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/how-much-does-hotel-room-decor-cost-in-memphis.html": {
+      "hash": "0c6a9b2f49c4e4f966abf6f72b768d72b4115cc769f19b24900944f19f0b2696",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/how-much-does-party-decor-cost-in-memphis.html": {
+      "hash": "21899586f86b3e38b632209c8422bc29e50ea9d1a284fe8c2b9bb268140fb0b5",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/how-much-does-porch-decorating-cost-in-memphis.html": {
+      "hash": "c4dabdbc9c401bfea1c45c397981f7928dc78a82e408d5981c0dc0750f5ed962",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html": {
+      "hash": "262f21bfde4badedc704ccdc32154255f1d1518ade915619a6878bafbcf564d7",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/index.html": {
+      "hash": "85ad35f6742937447d88eefc76970b24dfc83e4f4c2e42a426baf68c8baad981",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/last-minute-birthday-setup-ideas-memphis.html": {
+      "hash": "ad8e8b0f9ce95e5aca68eac4fec531f52c33ab9b125f16f0fdd6309dc0a2f7e2",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/memphis-celebration-setups.html": {
+      "hash": "a97a493aaf781f1a6a3e1eaa38065028d7cc0582c2b6db4e38364dbe3295f28b",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/party-decor-vs-event-planning-memphis.html": {
+      "hash": "b3f1df15dda1726ffaca910902a006e02ae54a8d821afb19163ab2ed3719c15d",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/party-planner-memphis.html": {
+      "hash": "26184e85ff8e57cbc12f3b7b326b5eb91e36d866d30913361efc9972691b1a7b",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/porch-decorating-under-500-memphis.html": {
+      "hash": "4ea42c1e98e757f8782c777cc994b836cf477d7df5125760ce24369d5d92ae6c",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/proposal-room-setup-memphis.html": {
+      "hash": "6f5e40d439579141247b812f5853e5db78414a6135057892bb862efb4eff9462",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/romantic-room-decorations-memphis.html": {
+      "hash": "826808939bfdff3b1f3a33bbf9e8c77b1fd90ac28235a39da8fa8189a9d6f885",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/small-party-decor-ideas-memphis.html": {
+      "hash": "a9353271d555d56dd33eca7c976022c08d797f2c56f397985a674cb3ed175d91",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/small-porch-styling-ideas-memphis.html": {
+      "hash": "2ec9ffb0058d989d0be82b75d25433893626da7458f2048413a018ff78991d4d",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/answers/what-is-included-in-party-decor-setup.html": {
+      "hash": "1954db35239cdc12161326ae8a192e2ded0a3f83b10becde3857dad5e7079d02",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/arlington-tn-party-decor.html": {
+      "hash": "db46e222b66d056d548c5c9d302864e541bdee05dbffdc0d7729dedb1709b586",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/arlington-tn-porch-decorating.html": {
+      "hash": "0271a5edf1f635bc60ae256dab1a7d7145e3b80d1291e3ee7aefbb43db006e43",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/bartlett-tn-party-decor.html": {
+      "hash": "01a38d1f8b686e0c07c439ffad936f7a4829eb84c938e74a488309f943a2ca81",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/bartlett-tn-porch-decorating.html": {
+      "hash": "7da7641861ffd559e7f6a45a779950e3796aeb518484178786fff7b2670ac875",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/collierville-tn-party-decor.html": {
+      "hash": "142e4fb4ca99fa29c6e09f547ce9608a1a9bef6f4047491d9f65745c2baae458",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/collierville-tn-porch-decorating.html": {
+      "hash": "670dc35d275bf0e143eaa0698e88db1f0f6081e7e5fe44eb0282f21e6b738e83",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/east-memphis-tn-porch-styling.html": {
+      "hash": "0e7ab4ec2130fb5f5fc7936a09f8cf91cc461511e407327aed98ae82659c4469",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/germantown-tn-party-decor.html": {
+      "hash": "4507678d742f4358e8ce780141f0571c84f9f1e64a9ed51d524b7f145f54051e",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/germantown-tn-porch-decorating.html": {
+      "hash": "c2688bcd747f293a098ec949cbb0326e2654e1c1b7b7de629f0825cba2055367",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/lakeland-tn-party-decor.html": {
+      "hash": "6673fe6ad1f49a0d7df622b6076b14c99f0fa95fe201d822e7e794441159e3d7",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/lakeland-tn-porch-decorating.html": {
+      "hash": "39681c78e92d907e2f79128bae382c28aedd5773683141a52f1eb95babc7fb7c",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/memphis-tn-party-decor.html": {
+      "hash": "4e519cad4bfed6b8f51b1e28ea1b6c419a202ba87960f0429ff3260519fb415a",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/memphis-tn-porch-decorating.html": {
+      "hash": "72db94a0d338526dd64091bc87e9ce381e45865f3054abd70b5b079f779dfb09",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/olive-branch-ms-party-decor.html": {
+      "hash": "9429366119d76a9e2b4dac8cab5f3989a9859b0a741eb4670863200e0d71ab7c",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/areas/southaven-ms-party-decor.html": {
+      "hash": "1c14987d610853880ef0e856bfc948f3d7899202c42868c0790dbbd0169e0944",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/authority/event-decorator-memphis.html": {
+      "hash": "a195a488bd5f0be8ab45d79ecda35cd0c0b682d173cdd6413071b50fd0b0dfe4",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/authority/party-planner-memphis.html": {
+      "hash": "d10f6356c3d268f30084e22d6593f10b8a856dfba5b07873a5f7f9a6a7b29dda",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/comparisons/balloon-garland-vs-full-birthday-setup.html": {
+      "hash": "8d052d9b6f31a6b573effe82bab899a0b6977c058f84df14c54283d9fa6feb1a",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/comparisons/diy-vs-hiring-party-decorator.html": {
+      "hash": "87b7493ab7293917a32e4d708e3c1345fccb479b8c40c7f9887521628462e48c",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/contact.html": {
+      "hash": "508a0480b89b5a045bb89ccd477f024b46077f4146e136d94c3f1edbdca47308",
+      "lastmod": "2026-08-25"
+    },
+    "https://porchandparty901.com/corporate/corporate-event-decor-memphis.html": {
+      "hash": "4a6a9d41b076572ddfe7e720460aece71f845c70532655d0709f36d9da734f84",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/corporate/corporate-grazing-tables-memphis.html": {
+      "hash": "45f849555e9a6420d356a5dcfc7a59dd18178f498579f5174014b29d7bd9052a",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/events/anniversary-room-decorations-memphis.html": {
+      "hash": "8d1031576ecf540c008391a395e779a47110be7e34349f4aa7560dcda8ebefd7",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/events/baby-shower-decorations-memphis.html": {
+      "hash": "3dbc5a58430f6041650835e910441ba6889f7c84a472123cdc5bb23a06e710df",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/events/bridal-shower-decorations-memphis.html": {
+      "hash": "fc92c3a16bc81df33c473ae4d3363044224dcc71f0c370e7b53f3085558adacf",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/events/proposal-room-setup-memphis.html": {
+      "hash": "080a1f118b40662cac6c02af9acffa4b256c42d661f32d0c3ecb496b1248cabf",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/faq/do-grazing-tables-include-food.html": {
+      "hash": "bc6d073a108f5501480906bad14c7ff5cf14f2de14df6053bd3cab2a5fa21352",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/faq/do-party-decorators-come-to-your-house.html": {
+      "hash": "87e1cc94dfa7ecf319ef811493d3775d526ff2b0fb18f3e2eaa4c942194bb0e2",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/faq/how-far-in-advance-should-i-book-party-decor.html": {
+      "hash": "01cdd9594642b45b60e548bcc8ca419c0ec84e042c341818c3af649fef2043f8",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/faq/how-long-does-it-take-to-set-up-party-decor.html": {
+      "hash": "519c2309b42a868f12114b4a71c23d5c8ffa4fce4020fdae43940e598d0c2414",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/faq/how-much-does-birthday-decoration-at-home-cost.html": {
+      "hash": "872acf6692762e9927b7378d9474641d8a8cc3651e5043b3c0f04a258648aee3",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/faq/how-much-does-grazing-tables-cost.html": {
+      "hash": "3946444dc805c8d66444c8b899002986bec1e24f46f98f9740f3ad69bedbb19f",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/faq/how-much-does-hotel-room-decor-cost-in-memphis.html": {
+      "hash": "3fa1151193c28a2246bab8d6c7bc07201e1c94d4563e85c6ea0284c29a157c9e",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html": {
+      "hash": "27dedf4ca8298dbb3e0065885f489cc32d013d6793fc54eb0e038ae434f33fa7",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/guides/last-minute-birthday-setup-ideas-memphis.html": {
+      "hash": "e3e4e0e5da930165a108359531c9ea83a91286febdea801363584ca45d7b2988",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/how-it-works.html": {
+      "hash": "d14d9d251942d322546614d60cc300a5ca622e3b539dc56d0d594aa3f4c37706",
+      "lastmod": "2026-08-25"
+    },
+    "https://porchandparty901.com/hubs/memphis-celebration-setups.html": {
+      "hash": "c500f07728c63e1e2fd908ec9aee28bac956c5c403e7a00e518246f0f86605c6",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/local/birthday-decorations-at-home-memphis.html": {
+      "hash": "bef3ff6a0a5761eb7ff273424fd1e3e73def64eb990e3685df16dbf2991306d3",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/local/grazing-tables-memphis.html": {
+      "hash": "8ebd6138ae4cc90533e84fd6dfcc028272bb62a9fc3ba110d4482635643ca258",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/local/hotel-room-decorations-memphis.html": {
+      "hash": "45c9a7608e102b4f40e6dfd14fb2bb599d9b55bb653b6d8105065e00f7868d2d",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/local/romantic-room-decorations-memphis.html": {
+      "hash": "ca603bb2da715704d0b7796a12a240c90060c87ff4deca153ad805e2132173a6",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/pricing.html": {
+      "hash": "64364522fcaeb8f3326adea7bffe1ce9ad2a959b768363f42210fe3c358cf758",
+      "lastmod": "2026-08-25"
+    },
+    "https://porchandparty901.com/privacy-policy.html": {
+      "hash": "c4d1132077abf5dfea06dc2204b14ceb45bb8e5f215b2ea3eaa5ad9e844b9ed5",
+      "lastmod": "2026-08-25"
+    },
+    "https://porchandparty901.com/seasonal/christmas-porch-decorating-memphis.html": {
+      "hash": "fbeab648c35bd4f3957784d75360ffe30dc96c34eba544ebb984113377898968",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/seasonal/halloween-porch-decorating-memphis.html": {
+      "hash": "50f0802e900dbfc199bebc58470199f69fb112eb62556f194da18ac6019dd635",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/baby-shower-decor-memphis.html": {
+      "hash": "bf61973cb94db92ebcb81ffa6f158e87876fd924014c8bfd4cc3aecdb9a145c9",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/birthday-party-decor-memphis.html": {
+      "hash": "a7cccfd9e9a334e60eade4733b76d8931b6ac17046b020bc708b49d9e332b603",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/bridal-shower-decor-memphis.html": {
+      "hash": "9c244987db9e74ba1ec708609be8fd51284a8e9ee808c9adae2c4e0d342a5b7c",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/budget-party-decor-memphis.html": {
+      "hash": "60a55c0e87e015e22795763b52ff98b1308513c6352cf472fd79f2c83e160c79",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/celebration-setups-memphis.html": {
+      "hash": "059ec03d68298b6565eb24992d44255e13cfb4a9bbc05e2ee40d24d5d0e0f008",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/celebration-setups.html": {
+      "hash": "16c0dcf18b56d82efe7cb64bdde0e23c803f9671dc529fe7fa2a6993b948508d",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/christmas-porch-decorating.html": {
+      "hash": "894c74f02c2f4e4c01d50c79fbcbd3f034c4965896f34f830eb83ead36828883",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/fall-porch-decorating.html": {
+      "hash": "8c93d834b7732559e502de200778db382cbd302c0267ea7029b91ccfa8e116ec",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/front-door-styling.html": {
+      "hash": "067a8117f8dad159bfbcbe8974ab3f011cbfff3e54d89a0dc4289e3af31676f1",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/grazing-and-event-styling.html": {
+      "hash": "8cfc5fe73e0fabe91c71603ed4cc556f87459aa231a5393f2b216b0e9974d3ce",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/grazing-tables-memphis.html": {
+      "hash": "c7a19f32dcabb5a053b4cf4ed4f23d37b5081083b86a907126c8d26abcc91985",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/hotel-room-decor-memphis.html": {
+      "hash": "5026be33334e87838adbf4167e9b51d84d3be76a55a656f3f0b50dca632b677a",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/luxury-party-decor-memphis.html": {
+      "hash": "5ad7d81a350611f1323ec9fd458ab34115bdec53250b75e6c2b90f83737136be",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/party-decor-memphis.html": {
+      "hash": "bdc98338d548e61c2df0c177fd952a15638b6090a73cc2ffec1c1823acde0588",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/porch-decorating.html": {
+      "hash": "3ce7f7dd15db82322b0fdf085dcce01f30f93f61840d1fe9070ef9f05fbff64a",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/services/small-porch-decorating.html": {
+      "hash": "1f69a04dcee41163346656ac0d4c65d41e24f957e8bea803e840a85b1549626e",
+      "lastmod": "2026-08-26"
+    },
+    "https://porchandparty901.com/terms-and-conditions.html": {
+      "hash": "98138c7c9196a8a3fc3f04dab4a9a30287fd22e987612f0b61b0de6e56360a59",
+      "lastmod": "2026-08-25"
+    }
+  }
+}

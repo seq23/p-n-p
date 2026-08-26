@@ -24,24 +24,53 @@ const htmlFiles = walk(root)
   .filter((abs) => !isNoindex(abs))
   .map(f => path.relative(root, f).replace(/\\/g, '/'))
   .sort();
-// lastmod comes from the file's own last commit, not from build time. Stamping
-// every URL with today would tell a crawler the whole site changed on every
-// deploy, which is the date-bump pattern that makes a freshness signal
-// worthless. Without any lastmod at all - which is what this emitted before - a
-// crawler cannot tell what changed, and recency is the strongest single
-// correlate of being cited by an answer engine.
-const { execFileSync } = require('child_process');
-function lastCommitDate(rel) {
-  try {
-    const out = execFileSync('git', ['log', '-1', '--format=%cs', '--', rel], { cwd: root, encoding: 'utf8' }).trim();
-    return /^\d{4}-\d{2}-\d{2}$/.test(out) ? out : '';
-  } catch { return ''; }
+// lastmod comes from the page's own content, not from build time and no longer
+// from `git log`. Stamping every URL with today would tell a crawler the whole
+// site changed on every deploy, which is the date-bump pattern that makes a
+// freshness signal worthless, and recency is the strongest single correlate of
+// being cited by an answer engine.
+//
+// This used to read `git log -1 --format=%cs -- <file>`, which produced exactly
+// that date bump in CI without looking like one: monthly-audit.yml and
+// deploy-distribution.yml check out with actions/checkout@v7 at its default
+// depth of 1, so there is a single commit and every file's "last commit" is
+// that commit. Confirmed with a --depth 1 clone of this repo: index.html reads
+// 2026-08-25 with full history and 2026-08-26 - the tip - when shallow. The
+// same call returns nothing where git is unavailable, and this then emitted
+// <url> with no <lastmod>, which data/cadence/policy.json treats as a blocking
+// no_freshness_signal.
+//
+// The ledger keys the date on a content hash instead, so it is the same in
+// every checkout. Git history is still consulted, but only to seed a URL never
+// recorded before, and only when the clone actually has the history.
+const ledgerLib = require('../lib/lastmod_ledger');
+const today = ledgerLib.buildDate();
+const ledger = ledgerLib.load();
+const pages = {};
+for (const rel of htmlFiles) {
+  const loc = `${domain}/${rel === 'index.html' ? '' : rel}`;
+  pages[loc] = { hash: ledgerLib.contentHash(fs.readFileSync(path.join(root, rel))), file: rel };
 }
+const lastmods = ledgerLib.resolve(pages, ledger, today);
+ledgerLib.save(ledgerLib.rebuilt(pages, ledger, today, { prune: true }));
+// Count what actually moved, not what happens to carry today's date. On the day
+// the ledger is seeded those are the same number, and reporting the second as
+// the first would overstate how much changed every time a build ran on a date
+// that already appears in the ledger.
+const before = (ledger.entries || {});
+const advanced = Object.keys(pages).filter((url) => {
+  const prev = before[url];
+  return !prev || prev.hash !== pages[url].hash;
+}).length;
 const body = htmlFiles.map(rel => {
   const loc = `${domain}/${rel === 'index.html' ? '' : rel}`;
-  const mod = lastCommitDate(rel);
+  const mod = lastmods[loc];
   return `  <url><loc>${loc}</loc>${mod ? `<lastmod>${mod}</lastmod>` : ''}</url>`;
 }).join('\n');
 const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 fs.writeFileSync(path.join(root, 'sitemap.xml'), xml);
-console.log(`Updated sitemap with ${htmlFiles.length} HTML files.`);
+console.log(
+  `Updated sitemap with ${htmlFiles.length} HTML files; ` +
+  `${advanced} lastmod advanced to ${today} (new or changed content), ` +
+  `${htmlFiles.length - advanced} held their existing date.`
+);
