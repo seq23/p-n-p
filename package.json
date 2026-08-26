@@ -13,7 +13,7 @@
     "build:corporate": "node scripts/generators/build_pages.js corporate",
     "build:hubs": "node scripts/generators/build_pages.js hubs",
     "build:sitemap": "node scripts/generators/update_sitemap.js",
-    "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/update_sitemap.js",
+    "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/update_sitemap.js && node scripts/install_clarity.js",
     "publish:queue": "node scripts/generators/publish_from_queue.js",
     "validate:profile-purity": "node scripts/validation/validate_profile_purity.js",
     "validate:tree-hygiene": "node scripts/validation/validate_tree_hygiene.js",
@@ -66,6 +66,7 @@
     "selfheal:dry": "node scripts/selfheal/heal_until_clean.mjs --dry-run",
     "queries:ingest": "python3 scripts/queries/ingest_gsc_evidence.py",
     "validate:content-pattern": "node scripts/validators/validate_content_pattern_contract.js",
-    "build:404": "PAGES_OUT_DIR=. node scripts/build_404.js"
+    "build:404": "PAGES_OUT_DIR=. node scripts/build_404.js",
+    "clarity:install": "node scripts/install_clarity.js"
   }
 }
