@@ -84,7 +84,9 @@ jobs:
         # Blocks publishing faster than the library can be kept inside the
         # 91-day window where pages stay citable. Warnings are reported
         # without failing the run.
-        run: npm run cadence:gate
+        run: |
+          npm run cadence:gate
+          npm run cadence:template-share
       - name: Run validated distribution
         env:
           GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
