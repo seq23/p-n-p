@@ -4,7 +4,11 @@ const root = path.resolve(__dirname, '..', '..');
 const domain = 'https://porchandparty901.com';
 function walk(dir, acc = []) {
   for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (item.name === 'node_modules' || item.name.startsWith('.git')) continue;
+    // .pages-output is the assembled deploy copy of this same tree. Walking it
+    // put every page into the sitemap twice, the second time under a
+    // /.pages-output/ prefix that does not exist on the live site - which the
+    // assembler then correctly refused to publish.
+    if (item.name === 'node_modules' || item.name === '.pages-output' || item.name === 'dist' || item.name.startsWith('.git')) continue;
     const full = path.join(dir, item.name);
     if (item.isDirectory()) walk(full, acc);
     else if (item.isFile() && item.name.endsWith('.html')) acc.push(full);
