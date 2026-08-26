@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-08-26T15:50:57.156Z",
+  "generated_at": "2026-08-26T16:12:53.465Z",
   "enforcement": "block",
   "pages_checked": 101,
   "status": "PASS",
@@ -81,8 +81,8 @@
     {
       "id": "recommendation_summary",
       "blocking": false,
-      "pages_missing": 18,
-      "coverage_pct": 82.2,
+      "pages_missing": 3,
+      "coverage_pct": 97,
       "why": "no recommendation summary - asked for on 913 of 913 agent recommendations, the single most requested block"
     },
     {
@@ -229,24 +229,9 @@
     ],
     "structured_data": [],
     "recommendation_summary": [
-      "corporate/corporate-event-decor-memphis.html",
-      "corporate/corporate-grazing-tables-memphis.html",
-      "events/anniversary-room-decorations-memphis.html",
-      "events/baby-shower-decorations-memphis.html",
-      "events/bridal-shower-decorations-memphis.html",
-      "events/proposal-room-setup-memphis.html",
-      "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
-      "guides/last-minute-birthday-setup-ideas-memphis.html",
       "how-it-works.html",
-      "hubs/memphis-celebration-setups.html",
       "index.html",
-      "local/birthday-decorations-at-home-memphis.html",
-      "local/grazing-tables-memphis.html",
-      "local/hotel-room-decorations-memphis.html",
-      "local/romantic-room-decorations-memphis.html",
-      "pricing.html",
-      "seasonal/christmas-porch-decorating-memphis.html",
-      "seasonal/halloween-porch-decorating-memphis.html"
+      "pricing.html"
     ],
     "definition_callout": [
       "answers/anniversary-room-decorations-memphis.html",
