@@ -80,6 +80,11 @@ jobs:
           npm run validate:query-atlas
           npm run validate:release
 
+      - name: Cadence gate
+        # Blocks publishing faster than the library can be kept inside the
+        # 91-day window where pages stay citable. Warnings are reported
+        # without failing the run.
+        run: npm run cadence:gate
       - name: Run validated distribution
         env:
           GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
