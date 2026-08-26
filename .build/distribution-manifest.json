@@ -1,10 +1,10 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-08-25T00:00:00.000Z",
+  "generated_at": "2026-07-24T00:00:00.000Z",
   "host": "porchandparty901.com",
   "sitemap": "https://porchandparty901.com/sitemap.xml",
   "priority_url_count": 63,
-  "batch_url_count": 104,
+  "batch_url_count": 208,
   "source": "validated sitemap + admitted authority registry",
   "truth_boundary": "Preparing distribution artifacts does not prove provider submission, indexing, visibility, or citation."
 }

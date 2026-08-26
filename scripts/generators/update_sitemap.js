@@ -11,7 +11,13 @@ function walk(dir, acc = []) {
   }
   return acc;
 }
+// A noindex page must never be submitted in the sitemap - Search Console reports
+// that as an error against the whole file. The 404 surface is the case that
+// surfaced it.
+const isNoindex = (abs) => /<meta[^>]+name=["']robots["'][^>]+content=["'][^"']*noindex/i
+  .test(fs.readFileSync(abs, 'utf8'));
 const htmlFiles = walk(root)
+  .filter((abs) => !isNoindex(abs))
   .map(f => path.relative(root, f).replace(/\\/g, '/'))
   .sort();
 const body = htmlFiles.map(rel => `  <url><loc>${domain}/${rel === 'index.html' ? '' : rel}</loc></url>`).join('\n');
