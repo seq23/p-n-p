@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-08-26T19:53:11.811Z",
+  "generated_at": "2026-08-26T20:00:51.513Z",
   "enforcement": "block",
   "pages_checked": 101,
   "status": "PASS",
@@ -39,8 +39,8 @@
     {
       "id": "checklist",
       "blocking": false,
-      "pages_missing": 2,
-      "coverage_pct": 98,
+      "pages_missing": 1,
+      "coverage_pct": 99,
       "why": "no checklist or numbered protocol (agent request #1, 730 occurrences)"
     },
     {
@@ -53,8 +53,8 @@
     {
       "id": "concrete_numbers",
       "blocking": false,
-      "pages_missing": 7,
-      "coverage_pct": 93.1,
+      "pages_missing": 0,
+      "coverage_pct": 100,
       "why": "no concrete cost or timeline figures (agent request #5, 365 occurrences)"
     },
     {
@@ -67,8 +67,8 @@
     {
       "id": "faq",
       "blocking": false,
-      "pages_missing": 3,
-      "coverage_pct": 97,
+      "pages_missing": 0,
+      "coverage_pct": 100,
       "why": "no FAQ block or FAQPage schema (agent request #9)"
     },
     {
@@ -137,18 +137,18 @@
     "worst": [
       {
         "pages": 2,
-        "text": "Yes. Porch &amp; Party comes to homes in Memphis and the surrounding service area for birthday setups, celebration styli",
+        "text": "A balloon garland works when you need one focal decorative moment. A full birthday setup makes more sense when the event",
         "sample": [
-          "answers/do-party-decorators-come-to-your-house.html",
-          "faq/do-party-decorators-come-to-your-house.html"
+          "answers/balloon-garland-vs-full-birthday-setup.html",
+          "comparisons/balloon-garland-vs-full-birthday-setup.html"
         ]
       },
       {
         "pages": 2,
-        "text": "Porch &amp; Party provides event decorating in Memphis for celebrations, showers, corporate gatherings, porch installs, ",
+        "text": "DIY is best when the setup is simple, time is flexible, and visual polish is not the main priority. Hiring a decorator m",
         "sample": [
-          "answers/event-decorator-memphis.html",
-          "authority/event-decorator-memphis.html"
+          "answers/diy-vs-hiring-party-decorator.html",
+          "comparisons/diy-vs-hiring-party-decorator.html"
         ]
       },
       {
@@ -167,7 +167,6 @@
     "no_empty_table_cells": [],
     "conversion_path": [],
     "checklist": [
-      "how-it-works.html",
       "pricing.html"
     ],
     "comparison_table": [
@@ -197,15 +196,7 @@
       "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
       "answers/how-much-does-birthday-decoration-at-home-cost.html"
     ],
-    "concrete_numbers": [
-      "answers/birthday-hotel-room-setup-ideas-memphis.html",
-      "answers/can-i-book-decor-only-without-event-planning.html",
-      "answers/can-someone-decorate-hotel-room-birthday-memphis.html",
-      "answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html",
-      "answers/party-decor-vs-event-planning-memphis.html",
-      "answers/small-party-decor-ideas-memphis.html",
-      "answers/what-is-included-in-party-decor-setup.html"
-    ],
+    "concrete_numbers": [],
     "named_sources": [
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
@@ -233,11 +224,7 @@
       "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
       "answers/how-much-does-birthday-decoration-at-home-cost.html"
     ],
-    "faq": [
-      "answers/index.html",
-      "how-it-works.html",
-      "pricing.html"
-    ],
+    "faq": [],
     "structured_data": [],
     "recommendation_summary": [
       "how-it-works.html",
@@ -389,7 +376,6 @@
     "no_empty_table_cells": [],
     "conversion_path": [],
     "checklist": [
-      "how-it-works.html",
       "pricing.html"
     ],
     "comparison_table": [
@@ -495,15 +481,7 @@
       "services/porch-decorating.html",
       "services/small-porch-decorating.html"
     ],
-    "concrete_numbers": [
-      "answers/birthday-hotel-room-setup-ideas-memphis.html",
-      "answers/can-i-book-decor-only-without-event-planning.html",
-      "answers/can-someone-decorate-hotel-room-birthday-memphis.html",
-      "answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html",
-      "answers/party-decor-vs-event-planning-memphis.html",
-      "answers/small-party-decor-ideas-memphis.html",
-      "answers/what-is-included-in-party-decor-setup.html"
-    ],
+    "concrete_numbers": [],
     "named_sources": [
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
@@ -607,11 +585,7 @@
       "services/porch-decorating.html",
       "services/small-porch-decorating.html"
     ],
-    "faq": [
-      "answers/index.html",
-      "how-it-works.html",
-      "pricing.html"
-    ],
+    "faq": [],
     "structured_data": [],
     "recommendation_summary": [
       "how-it-works.html",

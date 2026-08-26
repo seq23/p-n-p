@@ -295,10 +295,25 @@ if (fs.existsSync(indexPath)) {
     if (re.test(idx)) idx = idx.replace(re, `$1${rp(esc(entry.h1))}$2`);
   }
   idx = idx.replace(/&amp;amp;/g, '&amp;');
-  idx = idx.replace(/<script type="application\/ld\+json">\{"@context":"https:\/\/schema\.org","@type":"(?:LocalBusiness|BreadcrumbList)"[\s\S]*?<\/script>\n?/g, '');
+  idx = idx.replace(/<script type="application\/ld\+json">\{"@context":"https:\/\/schema\.org","@type":"(?:LocalBusiness|BreadcrumbList|FAQPage)"[\s\S]*?<\/script>\n?/g, '');
   const image = (idx.match(/<meta property="og:image" content="([^"]+)"/) || [])[1];
+  // The index is literally a list of question/answer pairs - the anchor is the
+  // question and the paragraph under it is the answer - so FAQPage describes
+  // what is on the page rather than being bolted onto it. Built from the same
+  // records the visible list is built from, so the two cannot drift.
+  const listed = cards.filter((c) => byRoute.has(c.canonical_page)
+    && fs.existsSync(path.join(ROOT, `answers/${c.id}.html`)));
   const nodes = [
     localBusinessNode(image),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: listed.map((c) => ({
+        '@type': 'Question',
+        name: byRoute.get(c.canonical_page).h1,
+        acceptedAnswer: { '@type': 'Answer', text: c.direct_answer, url: `${DOMAIN}${c.answer_page}` }
+      }))
+    },
     {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',

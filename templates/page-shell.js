@@ -74,7 +74,45 @@ function breadcrumbJsonLd(pathUrl, title) {
   };
 }
 
-function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl) {
+// The families that are genuinely written articles rather than service or
+// answer surfaces: how-to guides, head-to-head comparisons, and the seasonal
+// explainers. The rest of the tree is deliberately excluded - /faq/, /local/,
+// /answers/ and the porch idea pages are question-and-answer surfaces, where
+// FAQPage is the correct type and Article would misdescribe them, and
+// /authority/, /services/, /areas/, /events/, /corporate/ and /hubs/ are
+// service pages carrying Service and LocalBusiness.
+const ARTICLE_FOLDERS = new Set(['guides', 'comparisons', 'seasonal']);
+
+/**
+ * No datePublished or dateModified. Neither exists as a recorded fact anywhere
+ * in this repo for these pages, and the one date that does exist - the per-URL
+ * entry in data/cadence/lastmod_ledger.json - cannot be read from here: the
+ * ledger is keyed on the hash of the rendered page, so embedding it in the page
+ * would change the hash, advance the ledger, and change the page again on every
+ * single build. An Article with no date is honest; an Article with a
+ * self-perpetuating date is not.
+ */
+function articleJsonLd(url, headline, description, image, pathUrl) {
+  const folder = pathUrl.replace(/^\//, '').split('/')[0];
+  if (!ARTICLE_FOLDERS.has(folder)) return null;
+  const publisher = { '@type': 'Organization', name: offers.brandName, url: offers.domain };
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline,
+    description,
+    url,
+    image,
+    inLanguage: 'en-US',
+    articleSection: folder.charAt(0).toUpperCase() + folder.slice(1),
+    author: publisher,
+    publisher,
+    isPartOf: { '@type': 'WebSite', name: offers.brandName, url: `${offers.domain}/` },
+    about: { '@type': 'LocalBusiness', name: offers.brandName, url: `${offers.domain}/`, areaServed: areas.areas }
+  };
+}
+
+function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl, image) {
   const blocks = [
     {
       '@context': 'https://schema.org',
@@ -107,6 +145,8 @@ function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl) {
       ]
     });
   }
+  const article = articleJsonLd(url, title, description, image, pathUrl);
+  if (article) blocks.push(article);
   return blocks.map(obj => `<script type="application/ld+json">${JSON.stringify(obj)}</script>`).join('\n');
 }
 
@@ -185,7 +225,7 @@ function renderPage(entry) {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/styles.css" />
-  ${pageJsonLd(fullUrl, entry.h1, entry.description, entry.faqQuestion, entry.faqAnswer, pathUrl)}
+  ${pageJsonLd(fullUrl, entry.h1, entry.description, entry.faqQuestion, entry.faqAnswer, pathUrl, socialImage.url)}
 </head>
 <body>
   ${nav()}

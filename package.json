@@ -14,6 +14,8 @@
     "build:hubs": "node scripts/generators/build_pages.js hubs",
     "build:sitemap": "node scripts/generators/update_sitemap.js",
     "retrofit:answer-cards": "node scripts/retrofit_answer_cards.js",
+    "retrofit:thin-pages": "node scripts/retrofit_thin_pages.js",
+    "retrofit:root-pages": "node scripts/retrofit_root_pages.js",
     "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/update_sitemap.js && node scripts/install_clarity.js",
     "publish:queue": "node scripts/generators/publish_from_queue.js",
     "validate:profile-purity": "node scripts/validation/validate_profile_purity.js",
