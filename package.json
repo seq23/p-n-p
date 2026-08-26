@@ -67,6 +67,7 @@
     "queries:ingest": "python3 scripts/queries/ingest_gsc_evidence.py",
     "validate:content-pattern": "node scripts/validators/validate_content_pattern_contract.js",
     "build:404": "PAGES_OUT_DIR=. node scripts/build_404.js",
-    "clarity:install": "node scripts/install_clarity.js"
+    "clarity:install": "node scripts/install_clarity.js",
+    "cadence:headroom": "node scripts/cadence/publish_headroom.mjs"
   }
 }
