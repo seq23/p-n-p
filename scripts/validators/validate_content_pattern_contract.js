@@ -107,6 +107,14 @@ const FORBIDDEN = {
     why: 'statistic presented with no source on the page or beside it' },
 };
 
+// A breadcrumb trail is an <ol> because the steps are ordered, but it is site
+// navigation, not a protocol and not a checklist. Counting it would have moved
+// "protocol" coverage from 6.6% to 85.8% the moment breadcrumbs were added to
+// 86 pages, reporting 99 pages as having gained ordered steps when none of them
+// gained a single instruction. Chrome is stripped before those two tests.
+const withoutBreadcrumbs = (h) => String(h)
+  .replace(/<nav\b[^>]*class="[^"]*breadcrumb[^"]*"[\s\S]*?<\/nav>/gi, ' ');
+
 const CHECKS = [
   { id: 'direct_answer', blocking: true,
     test: (h) => LABELLED_ANSWER.test(h) || leadLength(h) >= MIN_LEAD_CHARS,
@@ -121,7 +129,7 @@ const CHECKS = [
     test: (h) => CONVERSION.test(h),
     why: 'no conversion path - an answer-engine citation lands with nowhere to go' },
   { id: 'checklist', blocking: false,
-    test: (h) => /<ol[\s>]|<ul[\s>]/i.test(h),
+    test: (h) => /<ol[\s>]|<ul[\s>]/i.test(withoutBreadcrumbs(h)),
     why: 'no checklist or numbered protocol (agent request #1, 730 occurrences)' },
   { id: 'comparison_table', blocking: false,
     test: (h) => /<table[\s>]/i.test(h),
@@ -156,7 +164,7 @@ const CHECKS = [
     test: (h) => /data-(?:bhpc-)?(?:agent-block|content-block)="source_block"|class="[^"]*(?:source-block|sources|citation)|<h[23][^>]*>\s*(?:Sources?|References?)/i.test(h) || /<a[^>]+href="https?:\/\//i.test(h),
     why: 'no sources block - a claim with no visible provenance is the first thing an engine discounts' },
   { id: 'protocol', blocking: false,
-    test: (h) => /data-(?:bhpc-)?(?:agent-block|content-block)="protocol"|class="[^"]*protocol|<h[23][^>]*>[^<]*(?:Protocol|Step-by-step|How to)\b/i.test(h) || /<ol[\s>]/i.test(h),
+    test: (h) => /data-(?:bhpc-)?(?:agent-block|content-block)="protocol"|class="[^"]*protocol|<h[23][^>]*>[^<]*(?:Protocol|Step-by-step|How to)\b/i.test(h) || /<ol[\s>]/i.test(withoutBreadcrumbs(h)),
     why: 'no ordered protocol - ordered steps are what gets lifted for "how do I"' },
   { id: 'cta_callout', blocking: false,
     test: (h) => /data-(?:bhpc-)?(?:agent-block|content-block)="cta_callout"|class="[^"]*(?:cta|next-step)|<h[23][^>]*>\s*Next step/i.test(h),

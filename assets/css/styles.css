@@ -77,3 +77,4 @@ li { margin-bottom: 8px; }
 .breadcrumb li + li::before { content: "/"; margin-right: 8px; color: var(--border-soft); }
 .breadcrumb a { color: var(--text-muted); }
 .breadcrumb [aria-current="page"] { color: var(--text-strong, inherit); }
+.breadcrumb-bar { padding: 22px 0 0; }

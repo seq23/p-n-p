@@ -259,8 +259,9 @@ const SOCIAL = {
 const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj)}</script>`;
 
 function breadcrumbHtml(crumb) {
-  return `<nav class="breadcrumb" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li>`
-    + `<li aria-current="page">${crumb}</li></ol></nav>`;
+  return `<div class="breadcrumb-bar"><div class="container">`
+    + `<nav class="breadcrumb" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li>`
+    + `<li aria-current="page">${crumb}</li></ol></nav></div></div>`;
 }
 
 function render(section, groups) {
@@ -350,9 +351,9 @@ function render(section, groups) {
 <body>
   ${nav()}
   <main>
+    ${breadcrumbHtml(section.crumb)}
     <section class="section">
       <div class="container">
-        ${breadcrumbHtml(section.crumb)}
         <div class="page-intro">
           <span class="eyebrow">${section.eyebrow}</span>
           <h1>${section.h1}</h1>
