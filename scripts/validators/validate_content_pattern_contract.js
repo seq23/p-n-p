@@ -207,6 +207,38 @@ for (const rel of pages) {
   }
 }
 
+// Coverage is not the goal; a page-specific recommendation is. A block that is
+// present on every page and says the same thing on most of them scores better
+// on coverage than the honest version and is worth less than nothing, so the
+// number that would catch that is measured here and printed beside the
+// coverage. templates/page-shell.js emits the summary sentence as
+// <p class="recommendation-summary__answer">, which is the text an extractor
+// would lift, so that is what gets compared.
+const RS_ANSWER = /<p class="recommendation-summary__answer">([\s\S]*?)<\/p>/i;
+function distinctness() {
+  const byText = new Map();
+  for (const rel of pages) {
+    const m = fs.readFileSync(path.join(ROOT, rel), 'utf8').match(RS_ANSWER);
+    if (!m) continue;
+    const t = text(m[1]);
+    if (!t) continue;
+    if (!byText.has(t)) byText.set(t, []);
+    byText.get(t).push(rel);
+  }
+  const total = [...byText.values()].reduce((s, v) => s + v.length, 0);
+  const repeated = [...byText.entries()].filter(([, v]) => v.length > 1)
+    .sort((a, b) => b[1].length - a[1].length);
+  return {
+    total_blocks: total,
+    distinct_texts: byText.size,
+    ratio: Number((byText.size / Math.max(total, 1)).toFixed(4)),
+    texts_on_more_than_one_page: repeated.length,
+    pages_carrying_a_repeated_text: repeated.reduce((s, [, v]) => s + v.length, 0),
+    worst: repeated.slice(0, 10).map(([t, files]) => ({ pages: files.length, text: t.slice(0, 120), sample: files.slice(0, 4) })),
+  };
+}
+const RS_DISTINCTNESS = distinctness();
+
 const summary = CHECKS.map((check) => {
   const missing = check.blocking
     ? blockingFailures.filter((f) => f.check === check.id).length
@@ -231,7 +263,11 @@ fs.writeFileSync(EVIDENCE, `${JSON.stringify({
   status: blockingFailures.length ? (ENFORCEMENT === 'block' ? 'FAIL' : 'REPORTED') : 'PASS',
   blocking_failures: blockingFailures.length,
   summary,
+  recommendation_summary_distinctness: RS_DISTINCTNESS,
   worst_gaps: Object.fromEntries(Object.entries(gaps).map(([k, v]) => [k, v.slice(0, 25)])),
+  // The whole gap list, not the first 25. The 25-item slice above is what lets a
+  // skip list sit unexamined: nobody can read past the head of it.
+  gaps_full: gaps,
   blocking_backlog: blockingFailures.slice(0, 200),
 }, null, 2)}\n`);
 
@@ -239,6 +275,14 @@ console.log(`CONTENT PATTERN CONTRACT: ${pages.length} pages checked (enforcemen
 for (const s of summary) {
   const tag = s.blocking ? 'BLOCKING' : 'gap     ';
   console.log(`  ${tag} ${s.id.padEnd(22)} coverage ${String(s.coverage_pct).padStart(5)}%  missing on ${s.pages_missing}`);
+}
+const d = RS_DISTINCTNESS;
+console.log(`  recommendation_summary: ${d.total_blocks} blocks, ${d.distinct_texts} distinct (ratio ${d.ratio})`);
+if (d.texts_on_more_than_one_page) {
+  console.log(`  note: ${d.texts_on_more_than_one_page} summary text(s) sit on ${d.pages_carrying_a_repeated_text} pages.`);
+  console.log('  Every pair here is one query published under two folders, so this is'
+    + ' duplicate page coverage to resolve in data/queries/query_universe.json, not filler.');
+  for (const w of d.worst.slice(0, 5)) console.log(`    x${w.pages} ${JSON.stringify(w.text.slice(0, 90))}`);
 }
 if (blockingFailures.length) {
   const log = ENFORCEMENT === 'block' ? console.error : console.warn;
