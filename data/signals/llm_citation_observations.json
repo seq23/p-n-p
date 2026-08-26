@@ -1,0 +1,138 @@
+{
+  "schema_version": "1.0",
+  "runs": [
+    {
+      "run_at": "2026-08-26T14:14:27.412Z",
+      "provider": "openrouter",
+      "engines": [
+        "ibm-granite/granite-4.0-h-micro",
+        "inclusionai/ling-3.0-flash",
+        "mistralai/mistral-nemo"
+      ],
+      "mode": "knowledge",
+      "queries": 3,
+      "observations": [
+        {
+          "query": "event rentals memphis",
+          "engine": "openrouter:ibm-granite/granite-4.0-h-micro",
+          "mode": "knowledge",
+          "observed_at": "2026-08-26T14:14:27.412Z",
+          "status": "observed",
+          "cited_domains": [],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event rentals memphis",
+          "engine": "openrouter:inclusionai/ling-3.0-flash",
+          "mode": "knowledge",
+          "observed_at": "2026-08-26T14:14:27.412Z",
+          "status": "observed",
+          "cited_domains": [],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event rentals memphis",
+          "engine": "openrouter:mistralai/mistral-nemo",
+          "mode": "knowledge",
+          "observed_at": "2026-08-26T14:14:27.412Z",
+          "status": "provider_error",
+          "error": "Provider returned error"
+        },
+        {
+          "query": "event venue memphis",
+          "engine": "openrouter:ibm-granite/granite-4.0-h-micro",
+          "mode": "knowledge",
+          "observed_at": "2026-08-26T14:14:27.412Z",
+          "status": "observed",
+          "cited_domains": [],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event venue memphis",
+          "engine": "openrouter:inclusionai/ling-3.0-flash",
+          "mode": "knowledge",
+          "observed_at": "2026-08-26T14:14:27.412Z",
+          "status": "observed",
+          "cited_domains": [],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event venue memphis",
+          "engine": "openrouter:mistralai/mistral-nemo",
+          "mode": "knowledge",
+          "observed_at": "2026-08-26T14:14:27.412Z",
+          "status": "observed",
+          "cited_domains": [],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "tent rental memphis",
+          "engine": "openrouter:ibm-granite/granite-4.0-h-micro",
+          "mode": "knowledge",
+          "observed_at": "2026-08-26T14:14:27.412Z",
+          "status": "observed",
+          "cited_domains": [],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "tent rental memphis",
+          "engine": "openrouter:inclusionai/ling-3.0-flash",
+          "mode": "knowledge",
+          "observed_at": "2026-08-26T14:14:27.412Z",
+          "status": "observed",
+          "cited_domains": [],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "tent rental memphis",
+          "engine": "openrouter:mistralai/mistral-nemo",
+          "mode": "knowledge",
+          "observed_at": "2026-08-26T14:14:27.412Z",
+          "status": "observed",
+          "cited_domains": [],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        }
+      ]
+    }
+  ],
+  "latest_summary": {
+    "run_at": "2026-08-26T14:14:27.412Z",
+    "provider": "openrouter",
+    "engines": [
+      "ibm-granite/granite-4.0-h-micro",
+      "inclusionai/ling-3.0-flash",
+      "mistralai/mistral-nemo"
+    ],
+    "mode": "knowledge",
+    "queries": 3,
+    "observations": 9,
+    "self_cited": 0,
+    "errored": 1,
+    "_mode_note": "knowledge: counted when the model named us unprompted, with no retrieval. Weaker than a citation and must not be reported as one.",
+    "self_cited_rate_pct": 0
+  }
+}
