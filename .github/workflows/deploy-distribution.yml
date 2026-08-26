@@ -42,12 +42,17 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib
 
+      # Written outside the workspace on purpose: a service-account key at the
+      # repository root is one stray `git add` or one deploy-directory copy away
+      # from being published, and validate:tree-hygiene correctly fails the run
+      # when it appears there - which is exactly how this surfaced.
       - name: Recreate GSC service account when configured
         env:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
         run: |
           if [ -n "$GSC_SERVICE_ACCOUNT_JSON" ]; then
-            printf '%s' "$GSC_SERVICE_ACCOUNT_JSON" > gsc-service-account.json
+            printf '%s' "$GSC_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/gsc-service-account.json"
+            chmod 600 "$RUNNER_TEMP/gsc-service-account.json"
           fi
 
       # Real measured demand, not modelled guesses. Without credentials this is a
@@ -81,8 +86,8 @@ jobs:
         run: |
           chmod +x distribution_scripts/*.sh distribution_scripts/*.py
           args=(--host porchandparty901.com --artifact-dir .build)
-          if [ -s gsc-service-account.json ] && [ -n "$GSC_SITE_URL" ]; then
-            args+=(--creds gsc-service-account.json --gsc-site "$GSC_SITE_URL")
+          if [ -s "$RUNNER_TEMP/gsc-service-account.json" ] && [ -n "$GSC_SITE_URL" ]; then
+            args+=(--creds "$RUNNER_TEMP/gsc-service-account.json" --gsc-site "$GSC_SITE_URL")
           fi
           ./distribution_scripts/deploy_distribution.sh "${args[@]}"
 
