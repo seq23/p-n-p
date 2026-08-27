@@ -117,9 +117,17 @@ for (const file of htmlFiles) {
     if (!href || /^(https?:|mailto:|tel:|#|javascript:|\/\/)/i.test(href)) continue;
     const clean = href.split('#')[0].split('?')[0];
     if (!clean) continue;
-    let target = clean === '/' ? path.join(root, 'index.html') : path.join(root, clean.replace(/^\//, ''));
-    if (fs.existsSync(target) && fs.statSync(target).isDirectory()) target = path.join(target, 'index.html');
-    if (!fs.existsSync(target)) fail(`${rel} broken internal href ${href}`);
+    // Three forms resolve, because three forms are served. Cloudflare Pages
+    // answers /foo with foo.html at 200 and answers /foo.html with a 308 to
+    // /foo - verified live with `curl -I` against porchandparty901.com. This
+    // check used to accept only the file path and the directory index, so an
+    // extensionless link to a page that exists, and that the origin serves 200,
+    // was reported as broken.
+    const base = clean === '/' ? path.join(root, 'index.html')
+      : path.join(root, clean.replace(/^\//, ''));
+    const candidates = [base, `${base}.html`, path.join(base, 'index.html')];
+    const target = candidates.find((c) => fs.existsSync(c) && !fs.statSync(c).isDirectory());
+    if (!target) fail(`${rel} broken internal href ${href}`);
   }
 
   const sitemapRel = rel === 'index.html' ? '<loc>https://porchandparty901.com/</loc>' : `<loc>https://porchandparty901.com/${rel}</loc>`;
