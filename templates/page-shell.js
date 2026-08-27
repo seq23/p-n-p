@@ -1,6 +1,9 @@
 const offers = require('../data/offers/services.json');
 const areas = require('../data/service_areas/areas.json');
 
+const fs = require('fs');
+const path = require('path');
+
 function nav() {
   return `<header class="site-header"><div class="container header-inner"><a href="/" aria-label="Porch and Party home"><span class="brand-script">Porch &amp; Party</span></a><nav class="site-nav" aria-label="Primary navigation"><a href="/services/porch-decorating.html">Porch</a><a href="/services/celebration-setups.html">Celebrations</a><a href="/services/grazing-and-event-styling.html">Grazing &amp; Events</a><a href="/pricing.html">Pricing</a><a href="/how-it-works.html">How It Works</a><a href="/contact.html" class="btn-primary">Request a Quote</a></nav></div></header>`;
 }
@@ -51,21 +54,32 @@ function breadcrumbJsonLd(pathUrl, title) {
       hubs: 'Hubs',
       services: 'Services'
     };
-    const sectionName = sectionMap[parts[0]];
+    // A section is only a real parent when it has an index page. Six sections -
+    // authority, comparisons, corporate, guides, hubs, seasonal - hold fewer
+    // than the four pages build_section_indexes.js requires before it publishes
+    // an index, so `${domain}/<section>/` answers 404 for them. Naming a 404 as
+    // position 2 of a BreadcrumbList is a claim about the site's shape that the
+    // site contradicts, so those pages get Home > This page instead.
+    const sectionName = fs.existsSync(path.join(__dirname, '..', parts[0], 'index.html'))
+      ? sectionMap[parts[0]]
+      : null;
     if (sectionName) {
       items.push({
         '@type': 'ListItem',
-        position: 2,
+        position: items.length + 1,
         name: sectionName,
         item: `${offers.domain}/${parts[0]}/`
       });
-      items.push({
-        '@type': 'ListItem',
-        position: 3,
-        name: title,
-        item: `${offers.domain}${pathUrl}`
-      });
     }
+    // The page itself is always the last crumb, whether or not its section has
+    // an index. Emitting it only in the branch that also emitted the section
+    // left the pages without one asserting a trail of just "Home".
+    items.push({
+      '@type': 'ListItem',
+      position: items.length + 1,
+      name: title,
+      item: `${offers.domain}${pathUrl}`
+    });
   }
   return {
     '@context': 'https://schema.org',
