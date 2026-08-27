@@ -1,0 +1,58 @@
+{
+  "schema_version": "1.0",
+  "purpose": "The only queries this repo may open a page for. A query with no record here has no evidence anyone searches for it. Contrast with data/authority_scale/fanout_100k/, which holds 100,000 cartesian strings and is planning intelligence, never a publishing queue.",
+  "provenance": {
+    "sources": [
+      "data/queries/evidence/evidence_queries.json (repo evidence)",
+      "Portfolio Search Packet v2, Semrush US, pulled 2026-08-24 (T2b)"
+    ],
+    "measured_fields": [
+      "volume",
+      "keyword_difficulty",
+      "cpc_usd"
+    ],
+    "derived_fields": [
+      "intent",
+      "weak_incumbent_score"
+    ]
+  },
+  "owner_seed_policy": "An owner may add a record with source_type owner_approved_seed and volume null. It must carry approved_by and approved_at.",
+  "domain": "porchandparty901.com",
+  "record_count": 3,
+  "total_measured_volume_per_month": 190,
+  "records": [
+    {
+      "query": "tent rental memphis",
+      "query_normalized": "tent rental memphis",
+      "volume": 90,
+      "keyword_difficulty": 25,
+      "weak_incumbent_score": 0.75,
+      "intent": "commercial",
+      "cpc_usd": 1.11,
+      "source_type": "semrush_keyword_magic",
+      "evidence_tier": "T2b"
+    },
+    {
+      "query": "event rentals memphis",
+      "query_normalized": "event rentals memphis",
+      "volume": 70,
+      "keyword_difficulty": 15,
+      "weak_incumbent_score": 0.85,
+      "intent": "commercial",
+      "cpc_usd": 0.5,
+      "source_type": "semrush_keyword_magic",
+      "evidence_tier": "T2b"
+    },
+    {
+      "query": "event venue memphis",
+      "query_normalized": "event venue memphis",
+      "volume": 30,
+      "keyword_difficulty": 23,
+      "weak_incumbent_score": 0.77,
+      "intent": "informational",
+      "cpc_usd": 0.75,
+      "source_type": "semrush_keyword_magic",
+      "evidence_tier": "T2b"
+    }
+  ]
+}

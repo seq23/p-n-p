@@ -46,9 +46,15 @@ const htmlFiles = walk(root)
 const ledgerLib = require('../lib/lastmod_ledger');
 const today = ledgerLib.buildDate();
 const ledger = ledgerLib.load();
+// A directory index is served at the directory, not at its index.html: the
+// live host answers /answers/index.html with a 308 to /answers/. Advertising
+// the redirecting form in a sitemap points a crawler at a URL that is not the
+// one that will be indexed, for the six section indexes this site has. Only the
+// root index.html was special-cased before.
+const canonicalPath = (rel) => rel === 'index.html' ? '' : rel.replace(/(^|\/)index\.html$/, '$1');
 const pages = {};
 for (const rel of htmlFiles) {
-  const loc = `${domain}/${rel === 'index.html' ? '' : rel}`;
+  const loc = `${domain}/${canonicalPath(rel)}`;
   pages[loc] = { hash: ledgerLib.contentHash(fs.readFileSync(path.join(root, rel))), file: rel };
 }
 const lastmods = ledgerLib.resolve(pages, ledger, today);
@@ -63,7 +69,7 @@ const advanced = Object.keys(pages).filter((url) => {
   return !prev || prev.hash !== pages[url].hash;
 }).length;
 const body = htmlFiles.map(rel => {
-  const loc = `${domain}/${rel === 'index.html' ? '' : rel}`;
+  const loc = `${domain}/${canonicalPath(rel)}`;
   const mod = lastmods[loc];
   return `  <url><loc>${loc}</loc>${mod ? `<lastmod>${mod}</lastmod>` : ''}</url>`;
 }).join('\n');
