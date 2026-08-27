@@ -280,8 +280,20 @@ function render(section, groups) {
     + `</div>`).join('\n');
 
   const listItems = groups.flatMap((g) => g.pages);
+  // The publisher node. Organization/LocalBusiness sat on 95% of this site's
+  // pages and was absent from exactly these five section indexes, because every
+  // other page gets it from templates/page-shell.js and an index is composed
+  // here. Same brand name, domain and served area as the LocalBusiness node
+  // page-shell.js already emits, read from the same two data files: no address
+  // or telephone, because this repo records neither.
+  const publisher = {
+    '@context': 'https://schema.org', '@type': 'LocalBusiness',
+    '@id': `${DOMAIN}/#business`, name: offers.brandName, url: `${DOMAIN}/`,
+    areaServed: areasData.areas
+  };
   const jsonld = [
-    { '@context': 'https://schema.org', '@type': 'CollectionPage', name: plainH1, description: section.description, url },
+    publisher,
+    { '@context': 'https://schema.org', '@type': 'CollectionPage', name: plainH1, description: section.description, url, publisher: { '@id': `${DOMAIN}/#business` } },
     {
       '@context': 'https://schema.org', '@type': 'BreadcrumbList',
       itemListElement: [
