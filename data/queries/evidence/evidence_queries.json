@@ -16,7 +16,6 @@
       "query": "event rentals memphis",
       "evidence_tier": "T2b",
       "source_type": "semrush_keyword_magic",
-      "volume": 70,
       "keyword_difficulty": 15,
       "weak_incumbent_score": 0.85,
       "intent": "commercial",
@@ -26,13 +25,14 @@
       "target_domain": "porchandparty901.com",
       "cpc_usd": 0.5,
       "paid_competition": 0.24,
-      "competitor_ranking_url": "NO_DATA"
+      "competitor_ranking_url": "NO_DATA",
+      "search_volume": 70,
+      "impressions_90d": null
     },
     {
       "query": "event venue memphis",
       "evidence_tier": "T2b",
       "source_type": "semrush_keyword_magic",
-      "volume": 30,
       "keyword_difficulty": 23,
       "weak_incumbent_score": 0.77,
       "intent": "informational",
@@ -42,13 +42,14 @@
       "target_domain": "porchandparty901.com",
       "cpc_usd": 0.75,
       "paid_competition": 0.49,
-      "competitor_ranking_url": "NO_DATA"
+      "competitor_ranking_url": "NO_DATA",
+      "search_volume": 30,
+      "impressions_90d": null
     },
     {
       "query": "tent rental memphis",
       "evidence_tier": "T2b",
       "source_type": "semrush_keyword_magic",
-      "volume": 90,
       "keyword_difficulty": 25,
       "weak_incumbent_score": 0.75,
       "intent": "commercial",
@@ -58,7 +59,9 @@
       "target_domain": "porchandparty901.com",
       "cpc_usd": 1.11,
       "paid_competition": 0.99,
-      "competitor_ranking_url": "NO_DATA"
+      "competitor_ranking_url": "NO_DATA",
+      "search_volume": 90,
+      "impressions_90d": null
     }
   ]
 }
