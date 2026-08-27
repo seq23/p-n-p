@@ -50,6 +50,24 @@ const topics = require('./lib/topics');
 const DOMAIN = 'https://porchandparty901.com';
 const WRITE = process.argv.includes('--write');
 const CHECK = process.argv.includes('--check');
+/**
+ * Restrict which files may be written, without restricting what they may link to.
+ *
+ * Adding any page shifts the related list of every page in its territory, so a
+ * full `--write` after publishing three pages wants to rewrite 89 files. 98 of
+ * this site's routes are FROZEN and `normal_build_may_mutate_frozen` is false
+ * (data/release/accepted_output_freeze_contract.json), so that write is
+ * unauthorized drift, not an improvement.
+ *
+ * `--only=<prefix>[,<prefix>...]` writes just the matching files while still
+ * computing relations against the whole published set, so a newly published page
+ * gets a correct, complete related list and the frozen pages are left exactly as
+ * they were accepted. Relinking the frozen pages to new siblings is a separate,
+ * scoped thaw-validate-refreeze operation.
+ */
+const ONLY = (process.argv.find((a) => a.startsWith('--only=')) || '').slice('--only='.length)
+  .split(',').map((s) => s.trim()).filter(Boolean);
+const writable = (rel) => !ONLY.length || ONLY.some((p) => rel === p || rel.startsWith(p));
 const MAX_RELATED = 8;
 
 const MARKER = 'data-nav="related-pages"';
@@ -220,9 +238,17 @@ const changed = [];
 const problems = [];
 let linksAdded = 0;
 
+const heldBack = [];
 for (const page of pages) {
   const abs = path.join(ROOT, page.rel);
   const before = fs.readFileSync(abs, 'utf8');
+  if (!writable(page.rel)) {
+    // Compute it anyway so the receipt reports honestly how many pages this
+    // publish left out of date, rather than silently reporting a clean run.
+    const would = block(page);
+    if (would && !before.includes(would)) heldBack.push(page.rel);
+    continue;
+  }
   const html = block(page);
   let after;
   if (BLOCK_RE.test(before)) {
@@ -258,7 +284,11 @@ const receipt = {
   status: problems.length ? 'FAIL' : 'PASS',
   written: WRITE,
   published_pages: pages.length,
+  write_scope: ONLY.length ? ONLY : 'all',
   files_changed: changed.length,
+  // Pages whose related list is now out of date because --only held them back.
+  // Named so the number is visible rather than implied.
+  pages_out_of_date_outside_write_scope: heldBack.length,
   new_link_targets: linksAdded,
   pages_without_a_topic_territory: unclassified,
   problems

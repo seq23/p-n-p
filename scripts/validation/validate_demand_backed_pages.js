@@ -90,15 +90,53 @@ if (exists(backlogRel)) {
 if (exists('data/demand/measured_demand.json')) {
   const demand = read('data/demand/measured_demand.json');
   const haystack = [...onDisk].join(' ').toLowerCase();
-  const uncovered = (demand.records || []).filter((r) => {
-    const slug = r.query.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    return !haystack.includes(slug);
-  });
+  const all = demand.records || [];
+
+  // A rejected record is evidence about what NOT to build, and reporting it as a
+  // coverage gap inverts its meaning. The three Semrush queries - tent rental,
+  // event rentals, event venue - were mapped to this domain on city adjacency,
+  // not on what the business does: it styles and installs decor and owns no
+  // rental inventory and no venue. They stay in the file so the same mapping
+  // cannot be silently re-imported, and they are counted here as deliberately
+  // declined rather than as 190/mo of missing pages.
+  const rejected = all.filter((r) => r.disposition === 'REJECTED_WRONG_BUSINESS');
+  const live = all.filter((r) => r.disposition !== 'REJECTED_WRONG_BUSINESS');
+
+  // A record may name the page that covers it. Fall back to the slugified query
+  // for records written before that field existed.
+  const covered = (r) => (r.covered_by
+    ? onDisk.has(r.covered_by)
+    : haystack.includes(r.query.toLowerCase().replace(/[^a-z0-9]+/g, '-')));
+
+  // A record that names a page which is not on disk is a broken claim, not a
+  // gap - the file says the query is covered and it is not.
+  const brokenClaims = live.filter((r) => r.covered_by && !onDisk.has(r.covered_by));
+  if (brokenClaims.length) {
+    errors.push(
+      `${brokenClaims.length} demand record(s) name a covering page that does not exist: ` +
+      brokenClaims.map((r) => `${r.query} -> ${r.covered_by}`).join('; ')
+    );
+  }
+
+  const uncovered = live.filter((r) => !covered(r));
+  const vol = (r) => (r.volume == null ? 'no volume figure' : `${r.volume}/mo KD${r.keyword_difficulty}`);
+
   notes.push(
-    `demand: ${(demand.records || []).length} measured queries worth ${demand.total_measured_volume_per_month}/mo; ` +
+    `demand: ${live.length} active queries (${demand.total_measured_volume_per_month}/mo measured); ` +
     `${uncovered.length} have no page` +
-    (uncovered.length ? `:\n    ` + uncovered.map((r) => `${r.volume}/mo KD${r.keyword_difficulty} ${r.query}`).join('\n    ') : '')
+    (uncovered.length ? `:\n    ` + uncovered.map((r) => `${vol(r)} ${r.query}`).join('\n    ') : '')
   );
+  if (rejected.length) {
+    notes.push(
+      `demand: ${rejected.length} query/queries worth ${demand.rejected_volume_per_month}/mo deliberately NOT built ` +
+      `(${demand.semrush_mapping_verdict ? demand.semrush_mapping_verdict.verdict : 'rejected'} mapping): ` +
+      rejected.map((r) => r.query).join(', ')
+    );
+  }
+  const backlog = demand.backlog_validated_not_yet_built || [];
+  if (backlog.length) {
+    notes.push(`demand: ${backlog.length} validated queries in the backlog, not yet built (daily new-page ceiling is 3)`);
+  }
 }
 
 for (const n of notes) console.log(`note: ${n}`);

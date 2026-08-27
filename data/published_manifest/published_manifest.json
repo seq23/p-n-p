@@ -128,5 +128,20 @@
     "slug": "memphis-celebration-setups",
     "folder": "hubs",
     "path": "/hubs/memphis-celebration-setups.html"
+  },
+  {
+    "slug": "how-much-does-professional-christmas-decorating-cost-in-memphis",
+    "folder": "faq",
+    "path": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html"
+  },
+  {
+    "slug": "how-much-does-a-balloon-garland-cost-in-memphis",
+    "folder": "faq",
+    "path": "/faq/how-much-does-a-balloon-garland-cost-in-memphis.html"
+  },
+  {
+    "slug": "baby-shower-planning-checklist-memphis",
+    "folder": "guides",
+    "path": "/guides/baby-shower-planning-checklist-memphis.html"
   }
 ]

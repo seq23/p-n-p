@@ -1,10 +1,11 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "purpose": "The only queries this repo may open a page for. A query with no record here has no evidence anyone searches for it. Contrast with data/authority_scale/fanout_100k/, which holds 100,000 cartesian strings and is planning intelligence, never a publishing queue.",
   "provenance": {
     "sources": [
       "data/queries/evidence/evidence_queries.json (repo evidence)",
-      "Portfolio Search Packet v2, Semrush US, pulled 2026-08-24 (T2b)"
+      "Portfolio Search Packet v2, Semrush US, pulled 2026-08-24 (T2b)",
+      "Google autocomplete (suggestqueries.google.com, client=chrome, hl=en, gl=us), probed 2026-08-27"
     ],
     "measured_fields": [
       "volume",
@@ -14,12 +15,15 @@
     "derived_fields": [
       "intent",
       "weak_incumbent_score"
+    ],
+    "unmeasured_fields": [
+      "autocomplete suggestions carry NO volume figure. A query present in autocomplete is evidence that the string is searched, not evidence of how often. No volume is inferred, estimated or invented for these records."
     ]
   },
   "owner_seed_policy": "An owner may add a record with source_type owner_approved_seed and volume null. It must carry approved_by and approved_at.",
   "domain": "porchandparty901.com",
-  "record_count": 3,
-  "total_measured_volume_per_month": 190,
+  "record_count": 6,
+  "total_measured_volume_per_month": 0,
   "records": [
     {
       "query": "tent rental memphis",
@@ -30,7 +34,11 @@
       "intent": "commercial",
       "cpc_usd": 1.11,
       "source_type": "semrush_keyword_magic",
-      "evidence_tier": "T2b"
+      "evidence_tier": "T2b",
+      "disposition": "REJECTED_WRONG_BUSINESS",
+      "rejected_at": "2026-08-27",
+      "rejected_by": "work/cover-measured-demand",
+      "rejection_reason": "Semrush mapped this query to porchandparty901.com on domain adjacency, not on what the business does. Porch & Party is a porch-decorating and celebration-styling company: it styles and installs decor. It owns no tents, no tables, no chairs, no linens and no venue, and it does not rent equipment. Ranking for this query would mean either becoming a rental company or landing the searcher on a page that cannot serve them. The local slate is also held by Mahaffey, operating in Memphis since 1924, plus national rental marketplaces. A page built for this query would be a page built to fail twice."
     },
     {
       "query": "event rentals memphis",
@@ -41,7 +49,11 @@
       "intent": "commercial",
       "cpc_usd": 0.5,
       "source_type": "semrush_keyword_magic",
-      "evidence_tier": "T2b"
+      "evidence_tier": "T2b",
+      "disposition": "REJECTED_WRONG_BUSINESS",
+      "rejected_at": "2026-08-27",
+      "rejected_by": "work/cover-measured-demand",
+      "rejection_reason": "Semrush mapped this query to porchandparty901.com on domain adjacency, not on what the business does. Porch & Party is a porch-decorating and celebration-styling company: it styles and installs decor. It owns no tents, no tables, no chairs, no linens and no venue, and it does not rent equipment. Ranking for this query would mean either becoming a rental company or landing the searcher on a page that cannot serve them. The local slate is also held by Mahaffey, operating in Memphis since 1924, plus national rental marketplaces. A page built for this query would be a page built to fail twice."
     },
     {
       "query": "event venue memphis",
@@ -52,7 +64,208 @@
       "intent": "informational",
       "cpc_usd": 0.75,
       "source_type": "semrush_keyword_magic",
-      "evidence_tier": "T2b"
+      "evidence_tier": "T2b",
+      "disposition": "REJECTED_WRONG_BUSINESS",
+      "rejected_at": "2026-08-27",
+      "rejected_by": "work/cover-measured-demand",
+      "rejection_reason": "Semrush mapped this query to porchandparty901.com on domain adjacency, not on what the business does. Porch & Party is a porch-decorating and celebration-styling company: it styles and installs decor. It owns no tents, no tables, no chairs, no linens and no venue, and it does not rent equipment. Ranking for this query would mean either becoming a rental company or landing the searcher on a page that cannot serve them. The local slate is also held by Mahaffey, operating in Memphis since 1924, plus national rental marketplaces. A page built for this query would be a page built to fail twice."
+    },
+    {
+      "query": "how much does professional christmas decorating cost",
+      "query_normalized": "how much does professional christmas decorating cost",
+      "volume": null,
+      "keyword_difficulty": null,
+      "cpc_usd": null,
+      "source_type": "google_autocomplete",
+      "evidence_tier": "T3-autocomplete",
+      "observed_at": "2026-08-27",
+      "query_shape": "cost/price",
+      "disposition": "ACCEPTED",
+      "autocomplete_evidence": [
+        "how much does professional christmas decorating cost",
+        "how much does a professional christmas tree decorator cost",
+        "professional christmas decorators cost",
+        "christmas decorating service cost",
+        "christmas decorating service cost near me",
+        "christmas decorating service cost per hour",
+        "christmas decorating cost",
+        "christmas decorating fees",
+        "how much does it cost to hire someone to decorate for christmas",
+        "hire someone to decorate house for christmas",
+        "pay someone to decorate my house for christmas",
+        "can you hire someone to decorate your house for christmas"
+      ],
+      "covered_by": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html"
+    },
+    {
+      "query": "how much does a balloon garland cost",
+      "query_normalized": "how much does a balloon garland cost",
+      "volume": null,
+      "keyword_difficulty": null,
+      "cpc_usd": null,
+      "source_type": "google_autocomplete",
+      "evidence_tier": "T3-autocomplete",
+      "observed_at": "2026-08-27",
+      "query_shape": "cost/price",
+      "disposition": "ACCEPTED",
+      "autocomplete_evidence": [
+        "how much should a balloon garland cost",
+        "how much does it cost to get a balloon garland made",
+        "how much does it cost to make a balloon garland",
+        "how much do balloon garland cost",
+        "how much balloon garland cost",
+        "how much is a balloon garland set up"
+      ],
+      "covered_by": "/faq/how-much-does-a-balloon-garland-cost-in-memphis.html"
+    },
+    {
+      "query": "baby shower planning checklist",
+      "query_normalized": "baby shower planning checklist",
+      "volume": null,
+      "keyword_difficulty": null,
+      "cpc_usd": null,
+      "source_type": "google_autocomplete",
+      "evidence_tier": "T3-autocomplete",
+      "observed_at": "2026-08-27",
+      "query_shape": "checklist/guide",
+      "disposition": "ACCEPTED",
+      "autocomplete_evidence": [
+        "baby shower planning checklist",
+        "baby shower planning checklist printable",
+        "baby shower planning checklist pdf",
+        "baby shower planning checklist template",
+        "baby shower planner checklist",
+        "baby shower planning guide",
+        "baby shower planning timeline",
+        "baby shower event planning checklist",
+        "baby shower party planning checklist",
+        "simple baby shower planning checklist",
+        "how to plan a baby shower step by step",
+        "how to start planning a baby shower"
+      ],
+      "covered_by": "/guides/baby-shower-planning-checklist-memphis.html"
     }
-  ]
+  ],
+  "disposition_policy": "A record with disposition REJECTED_WRONG_BUSINESS is evidence of what NOT to build. It stays in the file so the same wrong mapping cannot be re-imported and re-proposed, and validate:demand-backed-pages must not report it as an uncovered gap.",
+  "semrush_mapping_verdict": {
+    "verdict": "WRONG",
+    "assessed_at": "2026-08-27",
+    "packet": "Portfolio Search Packet v2, Semrush US, pulled 2026-08-24 (T2b)",
+    "queries_rejected": [
+      "tent rental memphis",
+      "event rentals memphis",
+      "event venue memphis"
+    ],
+    "measured_volume_rejected_per_month": 190,
+    "summary": "All three mapped queries are equipment-rental and venue-hire intent. This business publishes 109 pages about porch decorating, seasonal installs, party decor, hotel-room setups and grazing tables, at $250+/$300+/$350+ for styling labour. The packet matched the city, not the service."
+  },
+  "backlog_validated_not_yet_built": [
+    {
+      "query": "how much does it cost to decorate a baby shower",
+      "query_shape": "cost/price",
+      "source_type": "google_autocomplete",
+      "volume": null,
+      "observed_at": "2026-08-27",
+      "autocomplete_evidence": [
+        "how much does it cost to decorate a baby shower",
+        "how much do decorations cost for a baby shower",
+        "average cost of baby shower decorations",
+        "how much should baby shower decorations cost",
+        "how much are decorations for a baby shower"
+      ]
+    },
+    {
+      "query": "grazing table cost per person",
+      "query_shape": "cost/price",
+      "source_type": "google_autocomplete",
+      "volume": null,
+      "observed_at": "2026-08-27",
+      "autocomplete_evidence": [
+        "grazing table cost per person",
+        "grazing table cost per head",
+        "grazing table pricing per person",
+        "how much is a grazing table per person",
+        "how much does a grazing table cost per person",
+        "average cost of grazing table",
+        "how much does a grazing table for 50 people cost"
+      ]
+    },
+    {
+      "query": "average cost for party decorator",
+      "query_shape": "cost/price",
+      "source_type": "google_autocomplete",
+      "volume": null,
+      "observed_at": "2026-08-27",
+      "autocomplete_evidence": [
+        "average cost for party decorator",
+        "party decorator prices near me",
+        "party decorator price list",
+        "party decorator prices",
+        "how much do event decorators cost",
+        "how much does an event decorator cost",
+        "how much does event decor cost"
+      ]
+    },
+    {
+      "query": "bridal shower planning checklist",
+      "query_shape": "checklist/guide",
+      "source_type": "google_autocomplete",
+      "volume": null,
+      "observed_at": "2026-08-27",
+      "autocomplete_evidence": [
+        "bridal shower planning checklist",
+        "bridal shower planning checklist printable",
+        "bridal shower planning timeline",
+        "bridal shower planner checklist",
+        "when to start planning bridal shower",
+        "bridal shower party planning checklist"
+      ]
+    },
+    {
+      "query": "grazing table vs charcuterie board",
+      "query_shape": "comparison",
+      "source_type": "google_autocomplete",
+      "volume": null,
+      "observed_at": "2026-08-27",
+      "autocomplete_evidence": [
+        "difference between grazing table and charcuterie board",
+        "grazing table vs charcuterie",
+        "grazing table charcuterie board",
+        "difference between charcuterie and grazing board",
+        "grazing vs charcuterie"
+      ]
+    },
+    {
+      "query": "christmas decor memphis tn",
+      "query_shape": "geo-modified",
+      "source_type": "google_autocomplete",
+      "volume": null,
+      "observed_at": "2026-08-27",
+      "autocomplete_evidence": [
+        "christmas decor memphis tn",
+        "christmas decor memphis",
+        "christmas lighting memphis"
+      ]
+    },
+    {
+      "query": "party decorators memphis tn",
+      "query_shape": "geo-modified",
+      "source_type": "google_autocomplete",
+      "volume": null,
+      "observed_at": "2026-08-27",
+      "note": "partially covered by /services/party-decor-memphis.html",
+      "autocomplete_evidence": [
+        "party decorators memphis tn",
+        "party decorations memphis",
+        "party planner memphis tn"
+      ]
+    }
+  ],
+  "geo_expansion_finding": {
+    "assessed_at": "2026-08-27",
+    "method": "Google autocomplete probe, client=chrome, hl=en, gl=us",
+    "finding": "Suburb-level geo queries for these services return ZERO autocomplete suggestions. Probed and empty: \"porch decorating germantown\", \"event decorator collierville\", \"porch decorating cordova tn\", \"balloon garland memphis\", \"midtown memphis party\". Only city-level strings returned suggestions (\"party decorators memphis tn\", \"christmas decor memphis tn\").",
+    "implication": "Building a page per suburb per service on this evidence would be the fan-out mistake in a smaller shape - manufacturing URLs against demand that was never measured. areas/ already carries 16 suburb pages for the two services with any signal. Cordova and Midtown were the only named gaps and both probed empty, so neither was built."
+  },
+  "rejected_volume_per_month": 190
 }
