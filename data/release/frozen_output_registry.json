@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-07-24T00:00:00.000Z",
-  "count": 98,
+  "count": 106,
   "pages": [
     {
       "route": "/answers/anniversary-room-decorations-memphis",
@@ -454,6 +454,15 @@
       "accepted_at": "2026-07-24"
     },
     {
+      "route": "/areas/index",
+      "rendered_file": "areas/index.html",
+      "state": "FROZEN",
+      "accepted_sha256": "b9421db58f4233589c6ace78c7d6b752b8d64696489dbcfb4f827cf3550d32b9",
+      "cache_file": "data/release/frozen_accepted_outputs/b9421db58f4233589c6ace78c7d6b752b8d64696489dbcfb4f827cf3550d32b9.html.gz",
+      "cache_sha256": "9a5c33df128f641d352cf631128cba670a354baec724c4c3b338b3a2927b4ee9",
+      "accepted_at": "2026-07-24"
+    },
+    {
       "route": "/areas/lakeland-tn-party-decor",
       "rendered_file": "areas/lakeland-tn-party-decor.html",
       "state": "FROZEN",
@@ -589,6 +598,15 @@
       "accepted_at": "2026-07-24"
     },
     {
+      "route": "/events/index",
+      "rendered_file": "events/index.html",
+      "state": "FROZEN",
+      "accepted_sha256": "4b693ce5edbad5841e9c5c6b1000ff308e0fb433ca363959812222e94882d091",
+      "cache_file": "data/release/frozen_accepted_outputs/4b693ce5edbad5841e9c5c6b1000ff308e0fb433ca363959812222e94882d091.html.gz",
+      "cache_sha256": "939c302d446168429ce8432d99fb8717bc612e7610d1801b3020a31b5f24ee8a",
+      "accepted_at": "2026-07-24"
+    },
+    {
       "route": "/events/proposal-room-setup-memphis",
       "rendered_file": "events/proposal-room-setup-memphis.html",
       "state": "FROZEN",
@@ -634,6 +652,15 @@
       "accepted_at": "2026-07-24"
     },
     {
+      "route": "/faq/how-much-does-a-balloon-garland-cost-in-memphis",
+      "rendered_file": "faq/how-much-does-a-balloon-garland-cost-in-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "d368e447121e7926c4af076968d0898c98d807f00995e1c6929c1aa7c4c91b66",
+      "cache_file": "data/release/frozen_accepted_outputs/d368e447121e7926c4af076968d0898c98d807f00995e1c6929c1aa7c4c91b66.html.gz",
+      "cache_sha256": "da9efdc5d645bdfa746714a5f21e4309e55482f29055f9b9016bc1a9f0e7f28f",
+      "accepted_at": "2026-07-24"
+    },
+    {
       "route": "/faq/how-much-does-birthday-decoration-at-home-cost",
       "rendered_file": "faq/how-much-does-birthday-decoration-at-home-cost.html",
       "state": "FROZEN",
@@ -658,6 +685,33 @@
       "accepted_sha256": "b553a49f19d8558945f7646cf91b4bd9071da9bc9300e257821ae8724b53ec10",
       "cache_file": "data/release/frozen_accepted_outputs/b553a49f19d8558945f7646cf91b4bd9071da9bc9300e257821ae8724b53ec10.html.gz",
       "cache_sha256": "44d2b4f4a787d4fcdd02fcc5dd5bf0b1ce488f4e3a826f5441abe87edd389c98",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis",
+      "rendered_file": "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "b658ab2586d1e83f9db2d6d4ef2bdfc6f1285bb2097ae47f40d1c25ec5ea22fb",
+      "cache_file": "data/release/frozen_accepted_outputs/b658ab2586d1e83f9db2d6d4ef2bdfc6f1285bb2097ae47f40d1c25ec5ea22fb.html.gz",
+      "cache_sha256": "49a5f2674df9d46de7a898ac76a6f329e15fbf7523c240056ced15f423fbd922",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/faq/index",
+      "rendered_file": "faq/index.html",
+      "state": "FROZEN",
+      "accepted_sha256": "6ca88dda58cb8f8cdd18387d9a1327f6bba1a825eacf91bfaa60d206cb177114",
+      "cache_file": "data/release/frozen_accepted_outputs/6ca88dda58cb8f8cdd18387d9a1327f6bba1a825eacf91bfaa60d206cb177114.html.gz",
+      "cache_sha256": "9788543bdfb8757cd4098514036ff11b28b33a85387870573a1bee7f498ec4b0",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/guides/baby-shower-planning-checklist-memphis",
+      "rendered_file": "guides/baby-shower-planning-checklist-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "9c68914f14c311ba93e7c7c9f344c1a02ca5d1dffebbe611931c45a222f423b8",
+      "cache_file": "data/release/frozen_accepted_outputs/9c68914f14c311ba93e7c7c9f344c1a02ca5d1dffebbe611931c45a222f423b8.html.gz",
+      "cache_sha256": "7a2431986747ccbd02c7d01f95a041bdf75a6fe4a160f7e2f766746bc076e64e",
       "accepted_at": "2026-07-24"
     },
     {
@@ -712,6 +766,15 @@
       "accepted_sha256": "7b2699a3d3177261c07aa8e9a9f36fb0d65cc8c2106ca8d8536834b9ef59faa2",
       "cache_file": "data/release/frozen_accepted_outputs/7b2699a3d3177261c07aa8e9a9f36fb0d65cc8c2106ca8d8536834b9ef59faa2.html.gz",
       "cache_sha256": "b419792d6b177b3db42361a2dcbfc2df472da9d93cc5563890d95f9bab87a4f7",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/local/index",
+      "rendered_file": "local/index.html",
+      "state": "FROZEN",
+      "accepted_sha256": "11c75608964d8dbe3a42fbf4825a0e82e16befd1684a8463968fdc8720696683",
+      "cache_file": "data/release/frozen_accepted_outputs/11c75608964d8dbe3a42fbf4825a0e82e16befd1684a8463968fdc8720696683.html.gz",
+      "cache_sha256": "af882abb9e6f4bd3e7594ce1a5454efab382ea1dace23254f5f0c8ab9982d161",
       "accepted_at": "2026-07-24"
     },
     {
@@ -847,6 +910,15 @@
       "accepted_sha256": "5b001281e08f1667d3d7e3ffeb6829c38697fc525505b07264410c41e74defe3",
       "cache_file": "data/release/frozen_accepted_outputs/5b001281e08f1667d3d7e3ffeb6829c38697fc525505b07264410c41e74defe3.html.gz",
       "cache_sha256": "93299cc3cf9740c3885eef086912e1a06e65c53fcc20b0beeee52194412f6f3d",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/services/index",
+      "rendered_file": "services/index.html",
+      "state": "FROZEN",
+      "accepted_sha256": "70a0b3d7d271da908c794d8431978b3166a28de9cad7bc3cb5b414f038128eda",
+      "cache_file": "data/release/frozen_accepted_outputs/70a0b3d7d271da908c794d8431978b3166a28de9cad7bc3cb5b414f038128eda.html.gz",
+      "cache_sha256": "a1c067d5a0a6386c8063664885c84f4f31efe789e996e7f044c2b6fcb2e39841",
       "accepted_at": "2026-07-24"
     },
     {

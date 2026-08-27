@@ -3,7 +3,7 @@
   "generated_at": "2026-07-24T00:00:00.000Z",
   "territories": {
     "seasonal_porch_decorating": {
-      "public_surface_count": 21,
+      "public_surface_count": 23,
       "sample_routes": [
         "/answers/christmas-porch-decorating-memphis.html",
         "/answers/fall-porch-decorating-ideas-southern-homes.html",
@@ -17,19 +17,19 @@
         "/areas/collierville-tn-porch-decorating.html",
         "/areas/east-memphis-tn-porch-styling.html",
         "/areas/germantown-tn-porch-decorating.html",
+        "/areas/index.html",
         "/areas/lakeland-tn-porch-decorating.html",
         "/areas/memphis-tn-porch-decorating.html",
         "/seasonal/christmas-porch-decorating-memphis.html",
         "/seasonal/halloween-porch-decorating-memphis.html",
         "/services/christmas-porch-decorating.html",
         "/services/fall-porch-decorating.html",
-        "/services/front-door-styling.html",
-        "/services/porch-decorating.html"
+        "/services/front-door-styling.html"
       ],
       "status": "STRONG_BASELINE"
     },
     "party_decor": {
-      "public_surface_count": 50,
+      "public_surface_count": 58,
       "sample_routes": [
         "/authority/event-decorator-memphis.html",
         "/answers/baby-shower-decorations-memphis.html",
@@ -39,23 +39,23 @@
         "/answers/bridal-shower-decorations-memphis.html",
         "/answers/can-i-book-decor-only-without-event-planning.html",
         "/answers/can-someone-decorate-hotel-room-birthday-memphis.html",
+        "/answers/diy-vs-hiring-party-decorator.html",
         "/answers/do-party-decorators-come-to-your-house.html",
+        "/answers/event-decorator-memphis.html",
         "/answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html",
         "/answers/hotel-room-decorations-memphis.html",
         "/answers/how-far-in-advance-should-i-book-party-decor.html",
+        "/answers/how-long-does-it-take-to-set-up-party-decor.html",
         "/answers/how-much-does-birthday-decoration-at-home-cost.html",
         "/answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
         "/answers/how-much-does-party-decor-cost-in-memphis.html",
         "/answers/last-minute-birthday-setup-ideas-memphis.html",
-        "/answers/memphis-celebration-setups.html",
-        "/answers/party-decor-vs-event-planning-memphis.html",
-        "/answers/small-party-decor-ideas-memphis.html",
-        "/answers/what-is-included-in-party-decor-setup.html"
+        "/answers/memphis-celebration-setups.html"
       ],
       "status": "STRONG_BASELINE"
     },
     "hotel_room_decor": {
-      "public_surface_count": 33,
+      "public_surface_count": 36,
       "sample_routes": [
         "/answers/anniversary-room-decorations-memphis.html",
         "/answers/birthday-hotel-room-setup-ideas-memphis.html",
@@ -72,25 +72,28 @@
         "/areas/bartlett-tn-party-decor.html",
         "/areas/collierville-tn-party-decor.html",
         "/areas/germantown-tn-party-decor.html",
+        "/areas/index.html",
         "/areas/lakeland-tn-party-decor.html",
         "/areas/memphis-tn-party-decor.html",
         "/areas/olive-branch-ms-party-decor.html",
-        "/areas/southaven-ms-party-decor.html",
-        "/events/anniversary-room-decorations-memphis.html"
+        "/areas/southaven-ms-party-decor.html"
       ],
       "status": "STRONG_BASELINE"
     },
     "grazing_table_styling": {
-      "public_surface_count": 19,
+      "public_surface_count": 24,
       "sample_routes": [
+        "/answers/corporate-grazing-tables-memphis.html",
         "/answers/do-grazing-tables-include-food.html",
         "/answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html",
+        "/answers/grazing-tables-memphis.html",
         "/answers/how-much-does-a-grazing-table-cost-in-memphis.html",
         "/answers/how-much-does-grazing-tables-cost.html",
         "/areas/arlington-tn-party-decor.html",
         "/areas/bartlett-tn-party-decor.html",
         "/areas/collierville-tn-party-decor.html",
         "/areas/germantown-tn-party-decor.html",
+        "/areas/index.html",
         "/areas/lakeland-tn-party-decor.html",
         "/areas/memphis-tn-party-decor.html",
         "/areas/olive-branch-ms-party-decor.html",
@@ -99,9 +102,7 @@
         "/faq/do-grazing-tables-include-food.html",
         "/faq/how-much-does-grazing-tables-cost.html",
         "/local/grazing-tables-memphis.html",
-        "/services/baby-shower-decor-memphis.html",
-        "/services/grazing-and-event-styling.html",
-        "/services/grazing-tables-memphis.html"
+        "/local/index.html"
       ],
       "status": "STRONG_BASELINE"
     }

@@ -117,22 +117,84 @@
           "answer_mentions_brand": false
         }
       ]
+    },
+    {
+      "run_at": "2026-08-27T18:36:31.733Z",
+      "provider": "openrouter",
+      "engines": [
+        "ibm-granite/granite-4.0-h-micro"
+      ],
+      "mode": "grounded",
+      "queries": 3,
+      "observations": [
+        {
+          "query": "event rentals memphis",
+          "engine": "openrouter:ibm-granite/granite-4.0-h-micro",
+          "mode": "grounded",
+          "observed_at": "2026-08-27T18:36:31.733Z",
+          "status": "observed",
+          "cited_domains": [
+            "901memphiseventrentals.com",
+            "mahaffeytent.com",
+            "uniquepartyandeventrentals.com",
+            "eventfulrentalsmemphis.com",
+            "whitedoorevents.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event venue memphis",
+          "engine": "openrouter:ibm-granite/granite-4.0-h-micro",
+          "mode": "grounded",
+          "observed_at": "2026-08-27T18:36:31.733Z",
+          "status": "observed",
+          "cited_domains": [
+            "thekentmemphis.com",
+            "charloeventcenter.com",
+            "peabodymemphis.com",
+            "cadrebuilding.com",
+            "renasantconventioncenter.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "tent rental memphis",
+          "engine": "openrouter:ibm-granite/granite-4.0-h-micro",
+          "mode": "grounded",
+          "observed_at": "2026-08-27T18:36:31.733Z",
+          "status": "observed",
+          "cited_domains": [
+            "mahaffeytent.com",
+            "901memphiseventrentals.com",
+            "hicksconventions.com",
+            "affordablepartyrentals.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        }
+      ]
     }
   ],
   "latest_summary": {
-    "run_at": "2026-08-26T14:14:27.412Z",
+    "run_at": "2026-08-27T18:36:31.733Z",
     "provider": "openrouter",
     "engines": [
-      "ibm-granite/granite-4.0-h-micro",
-      "inclusionai/ling-3.0-flash",
-      "mistralai/mistral-nemo"
+      "ibm-granite/granite-4.0-h-micro"
     ],
-    "mode": "knowledge",
+    "mode": "grounded",
     "queries": 3,
-    "observations": 9,
+    "observations": 3,
     "self_cited": 0,
-    "errored": 1,
-    "_mode_note": "knowledge: counted when the model named us unprompted, with no retrieval. Weaker than a citation and must not be reported as one.",
+    "errored": 0,
+    "_mode_note": "grounded: counted when the answer was built from one of our pages",
     "self_cited_rate_pct": 0
   }
 }
