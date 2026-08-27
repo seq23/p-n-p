@@ -1,0 +1,27 @@
+{
+  "acceptances": [
+    {
+      "accepted_at": "2026-08-27",
+      "reason": "Live on porchandparty901.com: 4 publications (two FAQ answer pages on Memphis balloon-garland and Christmas-decorating cost, one baby-shower planning checklist guide, and the /answers/ route) plus 5 section-index routes that the gate already holds outside the publication cap. A red build cannot un-publish them, and this gate could not have stopped them - it rewrote its own ledger on every run, so a blocked run cleared itself on the next invocation and only a clean CI checkout ever saw the block. Accepted once, with the gate now read-only and authority-daily.yml advancing the baseline only after the gate clears, so the cap of 1 publication per week applies for real from here. This accepts the count, not the judgement: the library sits 8 pages above its maintainable ceiling of 104 and all 112 pages share a lastmod inside 7 days, which is a date-bump pattern rather than a refresh. Both warnings stand unresolved.",
+      "urls_total_after": 112,
+      "accepted_count": 9,
+      "accepted_publications": 4,
+      "accepted_section_indexes": 5,
+      "weekly_cap": 1,
+      "over_cap_by": 3,
+      "maintainable_ceiling": 104,
+      "library_over_ceiling_by": 8,
+      "accepted_urls": [
+        "https://porchandparty901.com/answers/",
+        "https://porchandparty901.com/areas/",
+        "https://porchandparty901.com/events/",
+        "https://porchandparty901.com/faq/",
+        "https://porchandparty901.com/faq/how-much-does-a-balloon-garland-cost-in-memphis.html",
+        "https://porchandparty901.com/faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
+        "https://porchandparty901.com/guides/baby-shower-planning-checklist-memphis.html",
+        "https://porchandparty901.com/local/",
+        "https://porchandparty901.com/services/"
+      ]
+    }
+  ]
+}

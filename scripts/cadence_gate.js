@@ -31,11 +31,15 @@
  * substantive refresh, and it is worth seeing rather than being rewarded by the
  * freshness rules above.
  *
+ * This script is read-only with respect to data/cadence/known_urls.json, and
+ * that is load-bearing. See the note above the report write below.
+ *
  * Usage: node cadence_gate.js [--json] [--policy path]
  */
 'use strict';
 const fs = require('fs');
 const path = require('path');
+const { sitemapUrls } = require('./cadence/sitemap_urls.js');
 
 const ROOT = process.cwd();
 const args = process.argv.slice(2);
@@ -60,33 +64,8 @@ function loadPolicy() {
   return { ...DEFAULT_POLICY, ...JSON.parse(fs.readFileSync(f, 'utf8')), _source: policyPath };
 }
 
-function sitemapUrls() {
-  const found = new Map();
-  const walk = (dir, depth = 0) => {
-    if (depth > 4) return;
-    let ents; try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
-    for (const e of ents) {
-      if (/^(node_modules|\.git|\.pages-output|coverage)$/.test(e.name)) continue;
-      const full = path.join(dir, e.name);
-      if (e.isDirectory()) walk(full, depth + 1);
-      else if (/^sitemap.*\.xml$/i.test(e.name)) {
-        const xml = fs.readFileSync(full, 'utf8');
-        for (const m of xml.matchAll(/<url>([\s\S]*?)<\/url>/g)) {
-          const loc = (m[1].match(/<loc>(.*?)<\/loc>/) || [])[1];
-          if (!loc) continue;
-          const lm = (m[1].match(/<lastmod>(\d{4}-\d{2}-\d{2})/) || [])[1] || null;
-          const prev = found.get(loc);
-          if (prev === undefined || (lm && (!prev || lm > prev))) found.set(loc, lm);
-        }
-      }
-    }
-  };
-  walk(ROOT);
-  return found;
-}
-
 const policy = loadPolicy();
-const urls = sitemapUrls();
+const urls = sitemapUrls(ROOT);
 const today = new Date(process.env.CADENCE_TODAY || new Date().toISOString().slice(0, 10));
 const ageDays = (d) => Math.floor((today - new Date(d)) / 86400000);
 
@@ -211,11 +190,14 @@ const report = {
   status: blocking.length ? 'BLOCKED' : 'CLEAR',
 };
 
-// Record the current URL set so the next run can tell new from refreshed. Written
-// whether or not the gate blocks: the ledger is a record of what exists, not a
-// reward for passing.
-fs.mkdirSync(path.dirname(ledgerPath), { recursive: true });
-fs.writeFileSync(ledgerPath, JSON.stringify({ generated_at: report_date(), urls: [...urls.keys()].sort() }, null, 2) + '\n');
+// The ledger is deliberately NOT written here. It used to be, "whether or not
+// the gate blocks", on the reasoning that it records what exists rather than
+// rewarding a pass. The effect was the opposite: the ledger is the only input
+// that distinguishes a new page from an existing one, so writing it during the
+// check consumed the evidence the check was reading. Two consecutive runs with
+// nothing changed between them returned BLOCKED then CLEAR, so the cap could
+// never hold. Advancing the baseline is now `npm run cadence:accept --
+// --reason "..."`, which records what was accepted and why. CI never runs it.
 
 fs.mkdirSync(path.join(ROOT, 'reports/cadence'), { recursive: true });
 fs.writeFileSync(path.join(ROOT, 'reports/cadence/cadence-gate.json'), JSON.stringify(report, null, 2) + '\n');
