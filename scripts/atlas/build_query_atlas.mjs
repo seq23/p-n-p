@@ -81,7 +81,12 @@ for (const q of evidence.queries || []) {
   const modifier = dims ? classify(qt, dims.modifiers) : { value: null, confidence: 0 };
   const format = dims ? classify(qt, dims.formats) : { value: null, confidence: 0 };
 
-  const volume = Number(q.volume || 0);
+  // Never rank a market search volume against this property's own impressions.
+  // They are different quantities; a shared scale silently compares them.
+  const searchVolume = Number(q.search_volume || 0);
+  const impressions = Number(q.impressions_90d || 0);
+  const band = searchVolume > 0 ? 'measured_search_volume' : (impressions > 0 ? 'own_impressions' : 'none');
+  const volume = searchVolume > 0 ? searchVolume : impressions;
   const weakIncumbent = Number(q.weak_incumbent_score ?? 0.5);
   const rank = Number((EVIDENCE_WEIGHT[tier] * Math.max(volume, 1) * weakIncumbent).toFixed(2));
 
@@ -89,7 +94,10 @@ for (const q of evidence.queries || []) {
     query: q.query,
     evidence_tier: tier,
     source_type: q.source_type || null,
-    volume,
+    search_volume: q.search_volume ?? null,
+    impressions_90d: q.impressions_90d ?? null,
+    demand_basis: band === 'none' ? 'none' : (band === 'measured_search_volume' ? 'search_volume' : 'impressions_90d'),
+    rank_band: band,
     keyword_difficulty: q.keyword_difficulty ?? null,
     weak_incumbent_score: weakIncumbent,
     intent: q.intent || null,

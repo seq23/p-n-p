@@ -66,7 +66,6 @@
       "query": "tent rental memphis",
       "evidence_tier": "T2b",
       "source_type": "semrush_keyword_magic",
-      "volume": 90,
       "keyword_difficulty": 25,
       "weak_incumbent_score": 0.75,
       "intent": "commercial",
@@ -82,13 +81,16 @@
         "semantic_cluster": "tent-rental"
       },
       "rank_score": 40.5,
-      "publishable": true
+      "publishable": true,
+      "search_volume": 90,
+      "impressions_90d": null,
+      "demand_basis": "search_volume",
+      "rank_band": "measured_search_volume"
     },
     {
       "query": "event rentals memphis",
       "evidence_tier": "T2b",
       "source_type": "semrush_keyword_magic",
-      "volume": 70,
       "keyword_difficulty": 15,
       "weak_incumbent_score": 0.85,
       "intent": "commercial",
@@ -104,13 +106,16 @@
         "semantic_cluster": "event-decorator"
       },
       "rank_score": 35.7,
-      "publishable": true
+      "publishable": true,
+      "search_volume": 70,
+      "impressions_90d": null,
+      "demand_basis": "search_volume",
+      "rank_band": "measured_search_volume"
     },
     {
       "query": "event venue memphis",
       "evidence_tier": "T2b",
       "source_type": "semrush_keyword_magic",
-      "volume": 30,
       "keyword_difficulty": 23,
       "weak_incumbent_score": 0.77,
       "intent": "informational",
@@ -126,7 +131,11 @@
         "semantic_cluster": "event-decorator"
       },
       "rank_score": 13.86,
-      "publishable": true
+      "publishable": true,
+      "search_volume": 30,
+      "impressions_90d": null,
+      "demand_basis": "search_volume",
+      "rank_band": "measured_search_volume"
     }
   ]
 }

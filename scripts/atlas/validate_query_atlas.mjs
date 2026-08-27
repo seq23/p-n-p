@@ -33,7 +33,7 @@ else {
   for (const q of atlas.queries || []) {
     if (!q.publishable) continue;
     if (!PUBLISHABLE.has(q.evidence_tier)) errors.push(`publishable entry on non-publishable tier ${q.evidence_tier}: ${q.query}`);
-    if (!q.volume && q.evidence_tier !== 'T3') errors.push(`publishable entry with no volume on tier ${q.evidence_tier}: ${q.query}`);
+    if (!q.search_volume && !q.impressions_90d && q.evidence_tier !== 'T3') errors.push(`publishable entry with neither search_volume nor impressions_90d on tier ${q.evidence_tier}: ${q.query}`);
   }
   if (!String(atlas.policy || '').includes('never publish')) errors.push('atlas policy must state that T4 permutations never publish on their own');
   if (atlas.coverage?.clusters_with_evidence === 0) errors.push('no cluster has evidence - the atlas would be a pure hypothesis pool');
