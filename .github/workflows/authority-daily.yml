@@ -54,6 +54,22 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           CITATION_PROBE_MODE: grounded
         run: node scripts/llm_citation_probe.mjs --limit 25
+      # The cadence gate runs before anything is committed, so a cycle that
+      # published faster than the cap allows fails here and its pages never
+      # land. Only a cleared gate reaches the accept step below.
+      - name: Cadence gate
+        run: npm run cadence:gate
+
+      # Advancing the baseline is what stops a read-only gate becoming a
+      # ratchet. Without this, a cycle publishing inside its cap still leaves
+      # the new URLs unaccepted, and they accumulate until the cap is crossed
+      # and the gate stays red permanently with no over-publishing behind it.
+      # This step is reachable only after the gate above has passed, so the cap
+      # still binds: an over-cap cycle fails before it can accept itself.
+      - name: Accept the cleared cycle into the cadence baseline
+        run: |
+          npm run cadence:accept -- --reason "Daily governed authority cycle for $(date -u +%F), run ${{ github.run_id }}. The cadence gate cleared before this step, so these pages are inside the weekly publication cap."
+
       - name: Commit governed changes if any
         run: |
           git config user.name "pnp-authority-bot"

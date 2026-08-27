@@ -79,6 +79,8 @@
     "cadence:template-share": "node scripts/template_share.js",
     "validate:demand-backed-pages": "node scripts/validation/validate_demand_backed_pages.js",
     "validate:retrofit-integrity": "node scripts/validators/validate_retrofit_integrity.js",
-    "validate:atlas-units": "node scripts/validators/validate_atlas_units.js"
+    "validate:atlas-units": "node scripts/validators/validate_atlas_units.js",
+    "cadence:accept": "node scripts/cadence_accept.js",
+    "validate:cadence-integrity": "node scripts/validators/validate_cadence_gate_integrity.js"
   }
 }
