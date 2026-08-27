@@ -24,7 +24,7 @@
     "validate:local-authority": "node scripts/validation/validate_local_authority_contract.js",
     "validate:all": "node scripts/validation/validate.js && npm run validate:demand-backed-pages",
     "validate:llm-surfaces": "node scripts/validation/validate.js",
-    "validate:pnp-phase": "npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:no-instruction-leak && npm run validate:no-empty-cells && npm run validate:retrofit-integrity && npm run validate:content-pattern && npm run validate:all",
+    "validate:pnp-phase": "npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:no-instruction-leak && npm run validate:no-empty-cells && npm run validate:retrofit-integrity && npm run validate:content-pattern && npm run validate:all && npm run validate:atlas-units",
     "authority:scale:fanout": "node scripts/authority_scale/build_max_fanout.mjs && node scripts/authority_scale/build_fanout_window.mjs && node scripts/authority_scale/build_candidate_backlog.mjs",
     "authority:scale:admit": "node scripts/authority_scale/build_admission_registry.mjs",
     "authority:scale:freeze": "node scripts/authority_scale/frozen_outputs.mjs freeze",
@@ -78,6 +78,7 @@
     "citation:probe": "node scripts/llm_citation_probe.mjs",
     "cadence:template-share": "node scripts/template_share.js",
     "validate:demand-backed-pages": "node scripts/validation/validate_demand_backed_pages.js",
-    "validate:retrofit-integrity": "node scripts/validators/validate_retrofit_integrity.js"
+    "validate:retrofit-integrity": "node scripts/validators/validate_retrofit_integrity.js",
+    "validate:atlas-units": "node scripts/validators/validate_atlas_units.js"
   }
 }

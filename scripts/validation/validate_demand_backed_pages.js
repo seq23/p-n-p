@@ -119,7 +119,14 @@ if (exists('data/demand/measured_demand.json')) {
   }
 
   const uncovered = live.filter((r) => !covered(r));
-  const vol = (r) => (r.volume == null ? 'no volume figure' : `${r.volume}/mo KD${r.keyword_difficulty}`);
+  // Label the unit. A bare number here used to mean either market search volume
+  // or this property's own impressions, depending on the row's source.
+  const vol = (r) =>
+    r.search_volume != null
+      ? `${r.search_volume}/mo searches KD${r.keyword_difficulty ?? '?'}`
+      : r.impressions_90d != null
+        ? `${r.impressions_90d} impressions/90d (own demand, not market volume)`
+        : 'no demand figure';
 
   notes.push(
     `demand: ${live.length} active queries (${demand.total_measured_volume_per_month}/mo measured); ` +

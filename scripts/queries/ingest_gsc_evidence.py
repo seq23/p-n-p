@@ -153,11 +153,16 @@ def main():
             "evidence_tier": "T1",
             # validate_query_atlas.mjs requires source_type on every evidence row.
             "source_type": "gsc_search_analytics",
-            # `volume` is what the atlas ranks on. Impressions are this property's
-            # own measured demand, not a market-wide estimate - a smaller and far
-            # more honest number than a modelled volume.
-            "volume": impressions,
-            "impressions": impressions,
+            # Explicit units. `volume` is never written here: it previously held BOTH
+            # a modelled monthly search volume (T2b rows) and this property's own
+            # impression count (T1 rows), and the atlas ranked on it -- so an
+            # impression count silently outranked, or was outranked by, a market
+            # volume it was never comparable to. Impressions are honest, but they
+            # are a different quantity and belong in a different field.
+            "impressions_90d": impressions,
+            # A GSC refresh measures impressions; it learns nothing new about market
+            # volume, so any previously-joined keyword-tool figure is carried forward.
+            "search_volume": (prior or {}).get("search_volume"),
             "clicks": int(r.get("clicks") or 0),
             "ctr": round(float(r.get("ctr") or 0.0), 5),
             "gsc_average_position": round(float(r.get("position") or 0.0), 2),
@@ -186,7 +191,15 @@ def main():
     # Header fields (note, tiers, source, owned_domains) are carried through
     # untouched: only `queries` and the ingest receipt are rewritten.
     doc["schema_version"] = doc.get("schema_version", "1.0")
-    doc["queries"] = sorted(by_query.values(), key=lambda q: (-int(q.get("volume") or 0), q["query"]))
+    # Sort market-volume rows above own-impression rows, then within each group.
+    doc["queries"] = sorted(
+        by_query.values(),
+        key=lambda q: (
+            0 if q.get("search_volume") else 1,
+            -int(q.get("search_volume") or q.get("impressions_90d") or 0),
+            q["query"],
+        ),
+    )
     doc["last_gsc_ingest"] = {
         "at": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds").replace("+00:00", "Z"),
         "site": site,
