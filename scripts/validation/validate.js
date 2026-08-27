@@ -130,7 +130,16 @@ for (const file of htmlFiles) {
     if (!target) fail(`${rel} broken internal href ${href}`);
   }
 
-  const sitemapRel = rel === 'index.html' ? '<loc>https://porchandparty901.com/</loc>' : `<loc>https://porchandparty901.com/${rel}</loc>`;
+  // A directory index is served at the directory, not at its index.html: the
+  // live host answers /answers/index.html with a 308 to /answers/. This check
+  // demanded the redirecting form for the six section indexes while
+  // scripts/generators/update_sitemap.js - correctly - writes the directory
+  // form, so the two contradicted each other and `validate:all` hard-failed on
+  // six pages that are in the sitemap under the URL that actually gets indexed.
+  // Canonicalise the same way the generator does, rather than special-casing
+  // the root index alone.
+  const canonicalRel = rel.replace(/(^|\/)index\.html$/, '$1');
+  const sitemapRel = `<loc>https://porchandparty901.com/${canonicalRel}</loc>`;
   if (!noindex && sitemap && !sitemap.includes(sitemapRel)) fail(`${rel} missing from sitemap`);
   if (noindex && sitemap && sitemap.includes(sitemapRel)) fail(`${rel} is noindex but listed in sitemap`);
 

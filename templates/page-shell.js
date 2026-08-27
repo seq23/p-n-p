@@ -196,11 +196,104 @@ const labels = {
   '/events/anniversary-room-decorations-memphis.html': 'Anniversary Room Decorations in Memphis',
   '/corporate/corporate-event-decor-memphis.html': 'Corporate Event Decor in Memphis',
   '/corporate/corporate-grazing-tables-memphis.html': 'Corporate Grazing Tables in Memphis',
-  '/hubs/memphis-celebration-setups.html': 'Memphis Celebration Setups'
+  '/hubs/memphis-celebration-setups.html': 'Memphis Celebration Setups',
+  // Service pages that existed but were never labelled, so a related-pages link
+  // to one rendered as a raw path. Adding a key changes no existing page: the
+  // 26 entries written before this only ever look up keys already present.
+  '/services/christmas-porch-decorating.html': 'Christmas Porch Decorating',
+  '/services/fall-porch-decorating.html': 'Fall Porch Decorating',
+  '/services/grazing-tables-memphis.html': 'Grazing Tables in Memphis',
+  '/services/baby-shower-decor-memphis.html': 'Baby Shower Decor in Memphis',
+  '/faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html': 'How Much Does Professional Christmas Decorating Cost in Memphis?',
+  '/faq/how-much-does-a-balloon-garland-cost-in-memphis.html': 'How Much Does a Balloon Garland Cost in Memphis?',
+  '/guides/baby-shower-planning-checklist-memphis.html': 'Baby Shower Planning Checklist for Memphis Hosts'
 };
 
 function relatedLinks(rels) {
   return `<div class="info-panel"><h2>Related pages</h2><ul>${rels.map(r => `<li><a href="${r}">${labels[r] || r}</a></li>`).join('')}</ul></div>`;
+}
+
+// ---------------------------------------------------------------------------
+// Optional blocks.
+//
+// Every one of these renders only when the query_universe entry supplies its
+// field, so the 26 entries written before they existed render byte-identical
+// output. That matters more than it sounds: 98 of this site's routes are FROZEN
+// (data/release/frozen_output_registry.json) and `normal_build_may_mutate_frozen`
+// is false, so a template change that altered even one existing byte would be
+// unauthorized drift.
+//
+// What they are for. The content-pattern contract measures which blocks the
+// review agent asks for, and four of them sat at 0% coverage across all 106
+// pages: comparison_table, definition_callout, named_sources, source_block,
+// with protocol at 1.9%. On a cost-shaped query those are not decoration - the
+// table of figures IS the citable artifact. A cost page with its numbers only in
+// prose gives an answer engine nothing to lift.
+// ---------------------------------------------------------------------------
+
+/** A real cost/comparison table. Every cell must be non-empty - validate:no-empty-cells hard-fails on a hole. */
+function costTable(t) {
+  if (!t || !Array.isArray(t.columns) || !Array.isArray(t.rows) || !t.rows.length) return '';
+  const head = t.columns.map(c => `<th scope="col">${c}</th>`).join('');
+  const body = t.rows.map(r => `<tr>${r.map((cell, i) => (i === 0
+    ? `<th scope="row">${cell}</th>`
+    : `<td>${cell}</td>`)).join('')}</tr>`).join('');
+  return `<div class="info-panel"><h2>${t.title}</h2><div class="table-scroll" style="overflow-x:auto;"><table><caption>${t.caption}</caption><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>${t.note ? `<p class="muted" style="margin-top:16px;">${t.note}</p>` : ''}</div>`;
+}
+
+/** An ordered protocol. Ordered because the steps are ordered; this is the block that gets lifted for "how do I". */
+function protocol(p) {
+  if (!p || !Array.isArray(p.steps) || !p.steps.length) return '';
+  return `<div class="info-panel" data-content-block="protocol"><h2>${p.title}</h2><ol>${p.steps.map(s => `<li><strong>${s.step}</strong> ${s.detail}</li>`).join('')}</ol>${p.note ? `<p class="muted" style="margin-top:16px;">${p.note}</p>` : ''}</div>`;
+}
+
+/** The sentence an answer engine lifts for "what is X". */
+function definitionCallout(d) {
+  if (!d || !d.term || !d.text) return '';
+  return `<div class="info-panel citation-definition" data-content-block="definition_callout"><p><strong>${d.term}</strong></p><p>${d.text}</p></div>`;
+}
+
+/**
+ * Named sources, with real links.
+ *
+ * Only pages that actually cite something get this block. An empty or invented
+ * source list is worse than none: the repo's standing rule is that no statistic,
+ * price, vendor, review or citation may be fabricated, and a "Sources" heading
+ * over nothing is a fabricated citation with extra steps.
+ */
+function sourceBlock(sources) {
+  if (!Array.isArray(sources) || !sources.length) return '';
+  return `<div class="info-panel source-block" data-content-block="source_block"><h2>Sources</h2><ul>${sources.map(s => `<li><a href="${s.url}" rel="nofollow noopener" target="_blank">${s.label}</a>${s.note ? ` — ${s.note}` : ''}</li>`).join('')}</ul></div>`;
+}
+
+/** Who is answering. Entity clarity is a citation factor and this site had it on no page. */
+function trustBlock(t) {
+  if (!t) return '';
+  return `<div class="info-card trust-block" data-content-block="trust_block"><h3>Who answers this</h3><p><span rel="author">${t.author}</span> — ${t.credential}</p><p class="muted">${t.basis}</p></div>`;
+}
+
+/**
+ * Make the quote click countable, at zero cost, with what is already installed.
+ *
+ * The conversion path is page -> /contact.html -> forms.gle in a new tab. The
+ * CTAs work; the buttons are not the defect. The defect is that the submission
+ * lands in Google, so there is no lead count on this side of the fence and
+ * Microsoft Clarity records the click as an anonymous rage-free click on an
+ * anchor rather than as a named outcome.
+ *
+ * Clarity is already on every page (scripts/install_clarity.js) and its custom
+ * event and custom tag APIs are free tier. This fires a named `quote_request_click`
+ * event and tags the session with the page that produced it, so Clarity can
+ * count and segment quote intent per URL. It cannot see the Google Form submit -
+ * nothing on this domain can - so what it measures is intent, not a closed lead,
+ * and it is named accordingly.
+ *
+ * `window.clarity` is defined as a queueing stub by the loader before the tag
+ * finishes downloading, so events fired early are not dropped. If the loader
+ * never ran, the guard makes this a no-op rather than a TypeError.
+ */
+function quoteEventScript() {
+  return `<script data-quote-event>(function(d,w){d.addEventListener("click",function(e){var t=e.target;var a=t&&t.closest?t.closest("[data-quote-cta]"):null;if(!a)return;if(typeof w.clarity!=="function")return;w.clarity("set","quote_intent_page",d.location.pathname);w.clarity("set","quote_intent_cta",a.getAttribute("data-quote-cta")||"unlabelled");w.clarity("event","quote_request_click")},true)})(document,window)</script>`;
 }
 
 function renderPage(entry) {
@@ -209,9 +302,19 @@ function renderPage(entry) {
   const fullUrl = `${offers.domain}${pathUrl}`;
   const cityList = entry.cities.join(', ');
   const socialImage = pickSocialImage(pathUrl, entry.serviceKey);
-  const topCta = `<div class="btn-row"><a href="/contact.html" class="btn-primary">Request a Quote</a><a href="${service.slug}" class="btn-secondary">View ${service.name}</a></div>`;
-  const midCta = `<div class="btn-row"><a href="/contact.html" class="btn-primary">Request a Quote</a></div>`;
-  const bottomCta = `<section class="section cta-band"><div class="container"><span class="eyebrow">Request a Quote</span><h2>Need a clearer next step for this setup?</h2><p>Use the Porch &amp; Party quote form to share your date, city, budget range, and setup notes. That makes it easier to respond with scope, pricing direction, and availability.</p><div class="btn-row hero-centered-cta"><a href="/contact.html" class="btn-primary">Request a Quote</a></div><p class="muted" style="margin-top: 14px;"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p></div></section>`;
+  // The CTA pattern is the one every existing page already uses - same anchor,
+  // same destination, same copy. The only addition is a data-quote-cta hook on
+  // pages that opt into conversion measurement, which changes nothing a reader
+  // sees and nothing about where the link goes. Pages that do not opt in render
+  // exactly the markup they rendered before.
+  const tag = (name) => (entry.conversionEvents ? ` data-quote-cta="${name}"` : '');
+  // An optional block that is absent must cost nothing - not even the blank
+  // indented line an empty `${...}` on its own line would leave behind. That
+  // whitespace would be drift on 98 frozen routes.
+  const opt = (block, indent = '          ') => (block ? `\n${indent}${block}` : '');
+  const topCta = `<div class="btn-row"><a href="/contact.html" class="btn-primary"${tag('top')}>Request a Quote</a><a href="${service.slug}" class="btn-secondary">View ${service.name}</a></div>`;
+  const midCta = `<div class="btn-row"><a href="/contact.html" class="btn-primary"${tag('mid')}>Request a Quote</a></div>`;
+  const bottomCta = `<section class="section cta-band"><div class="container"><span class="eyebrow">Request a Quote</span><h2>Need a clearer next step for this setup?</h2><p>Use the Porch &amp; Party quote form to share your date, city, budget range, and setup notes. That makes it easier to respond with scope, pricing direction, and availability.</p><div class="btn-row hero-centered-cta"><a href="/contact.html" class="btn-primary"${tag('band')}>Request a Quote</a></div><p class="muted" style="margin-top: 14px;"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p></div></section>`;
 
   return `<!doctype html>
 <html lang="en">
@@ -279,12 +382,12 @@ function renderPage(entry) {
             <h2>What this includes</h2>
             <ul>${entry.includes.map(i => `<li>${i}</li>`).join('')}</ul>
             <p class="muted" style="margin-top:16px;">${service.name} starts at ${service.price}. ${service.notes.join(' ')}</p>
-          </div>
+          </div>${opt(definitionCallout(entry.definition))}${opt(costTable(entry.costTable))}${opt(protocol(entry.protocol))}
           <div class="info-panel">
             <h2>What this means in practice</h2>
             <p>${entry.practical}</p>
           </div>
-          ${entry.authority ? `<div class="info-panel"><h2>Why this page exists</h2><p>${entry.authority}</p></div>` : ''}
+          ${entry.authority ? `<div class="info-panel"><h2>Why this page exists</h2><p>${entry.authority}</p></div>` : ''}${opt(sourceBlock(entry.sources))}
           ${relatedLinks(entry.related)}
           ${midCta}
         </div>
@@ -300,11 +403,11 @@ function renderPage(entry) {
           <div class="info-card">
             <h3>Before you book</h3>
             <p>${entry.beforeBook}</p>
-          </div>
+          </div>${opt(trustBlock(entry.trust))}
           <div class="info-card">
             <h3>What to do next</h3>
             <p>${entry.nextStep}</p>
-            <div class="btn-row"><a href="/contact.html" class="btn-primary">Request a Quote</a></div>
+            <div class="btn-row"><a href="/contact.html" class="btn-primary"${tag('aside')}>Request a Quote</a></div>
           </div>
         </div>
       </div>
@@ -312,7 +415,7 @@ function renderPage(entry) {
 
     ${bottomCta}
   </main>
-  ${footer()}
+  ${footer()}${entry.conversionEvents ? `\n  ${quoteEventScript()}` : ''}
 </body>
 </html>`;
 }

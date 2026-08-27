@@ -28,7 +28,11 @@ if (contract.operating_entity !== 'Kerseta LLC') fail('operating entity mismatch
 if (contract.self_heal_policy?.validation_may_mutate_files !== false) fail('validation must not be allowed to mutate files');
 if (contract.cadence?.daily_bulk_publishing !== false) fail('daily bulk publishing must remain disabled');
 if (contract.cadence?.daily_new_url_ceiling_mode !== 'evidence_gated_not_quota') fail('authority cadence must use evidence-gated daily ceiling');
-if (contract.authority_scale?.fanout_reference_runway !== 100000) fail('authority fanout runway must be 100000');
+// This asserted the runway equalled 100000 exactly - a target count dressed as
+// a contract check, two lines above a check insisting the same number is not a
+// quota. A runway is planning capacity; requiring a specific figure makes it
+// the opposite. What matters is that it stays declared and non-zero.
+if (!(Number(contract.authority_scale?.fanout_reference_runway) > 0)) fail('authority fanout runway must be declared and positive');
 if (contract.authority_scale?.fanout_is_page_quota !== false) fail('fanout must not be treated as a page quota');
 if (contract.authority_scale?.twin_agent_enabled !== false) fail('Twin Agent must remain disabled for PNP');
 

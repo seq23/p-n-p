@@ -12,6 +12,41 @@ Static site repo for Porch & Party at porchandparty901.com.
 - `npm run validate:all`
 - `npm run validate:pnp-phase`
 
+### Read this before running `build:all`
+
+**`build_pages.js` does not run last, so re-rendering an existing page reverts it.**
+
+Two passes write markup into published pages *after* the generator has produced
+them, and the generator knows nothing about either:
+
+| Pass | Writes | Losing it means |
+|---|---|---|
+| `scripts/install_clarity.js` | `<script data-clarity-loader>` | the page records no analytics sessions, silently, forever |
+| `scripts/build_related_navigation.js` | `<section data-nav="related-pages">` | the page is orphaned; orphan count is this portfolio's strongest measured correlate with being cited |
+
+Measured 2026-08-27: all 26 template pages differed from a fresh render, every
+one **smaller by 1,500–1,900 bytes**, and all 26 are among the 98 routes frozen
+in `data/release/frozen_output_registry.json`, where
+`normal_build_may_mutate_frozen` is `false`. `npm run build:all` invokes the
+generator nine times and would have stripped both blocks from every one of them
+— unauthorized drift on 26 frozen routes plus an analytics blackout.
+
+It was silent because a smaller file is still a valid file. Nothing downstream
+compares byte counts, and the retrofit passes are idempotent, so a later run
+puts the markup back and leaves no trace it was ever gone.
+
+Two guards now exist:
+
+- `build_pages.js` **refuses** the write and exits non-zero when it would drop a
+  marker that is on disk. `--force` overrides; on a frozen route that still needs
+  an active mutation scope.
+- `npm run validate:retrofit-integrity` (in `validate:pnp-phase`) hard-fails if
+  any published page has lost either block by any other route.
+
+**To change a page the generator owns:** edit its entry in
+`data/queries/query_universe.json`, render that one page, then re-run the
+retrofit passes. Do not delete the guard.
+
 ## Docs
 - `docs/AUTOMATION-ENGINE.md`
 - `docs/GOOGLE-BUSINESS-PROFILE-CHECKLIST.md`

@@ -2,9 +2,9 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-08-27T00:50:32.191Z",
+  "generated_at": "2026-08-27T15:44:49.276Z",
   "enforcement": "block",
-  "pages_checked": 106,
+  "pages_checked": 109,
   "status": "PASS",
   "blocking_failures": 0,
   "summary": [
@@ -46,8 +46,8 @@
     {
       "id": "comparison_table",
       "blocking": false,
-      "pages_missing": 106,
-      "coverage_pct": 0,
+      "pages_missing": 107,
+      "coverage_pct": 1.8,
       "why": "no comparison or cost table (agent request #2, 529 occurrences)"
     },
     {
@@ -60,7 +60,7 @@
     {
       "id": "named_sources",
       "blocking": false,
-      "pages_missing": 106,
+      "pages_missing": 109,
       "coverage_pct": 0,
       "why": "no named primary source (agent request #6, 288 occurrences)"
     },
@@ -89,28 +89,28 @@
       "id": "definition_callout",
       "blocking": false,
       "pages_missing": 106,
-      "coverage_pct": 0,
+      "coverage_pct": 2.8,
       "why": "no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\""
     },
     {
       "id": "trust_block",
       "blocking": false,
       "pages_missing": 106,
-      "coverage_pct": 0,
+      "coverage_pct": 2.8,
       "why": "no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor"
     },
     {
       "id": "source_block",
       "blocking": false,
       "pages_missing": 106,
-      "coverage_pct": 0,
+      "coverage_pct": 2.8,
       "why": "no sources block - a claim with no visible provenance is the first thing an engine discounts"
     },
     {
       "id": "protocol",
       "blocking": false,
-      "pages_missing": 104,
-      "coverage_pct": 1.9,
+      "pages_missing": 106,
+      "coverage_pct": 2.8,
       "why": "no ordered protocol - ordered steps are what gets lifted for \"how do I\""
     },
     {
@@ -123,15 +123,15 @@
     {
       "id": "prompt_template",
       "blocking": false,
-      "pages_missing": 106,
+      "pages_missing": 109,
       "coverage_pct": 0,
       "why": "no copy-ready prompt - the artifact this audience actually reuses"
     }
   ],
   "recommendation_summary_distinctness": {
-    "total_blocks": 103,
-    "distinct_texts": 100,
-    "ratio": 0.9709,
+    "total_blocks": 106,
+    "distinct_texts": 103,
+    "ratio": 0.9717,
     "texts_on_more_than_one_page": 3,
     "pages_carrying_a_repeated_text": 6,
     "worst": [
@@ -451,6 +451,7 @@
       "faq/how-much-does-grazing-tables-cost.html",
       "faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
       "faq/index.html",
+      "guides/baby-shower-planning-checklist-memphis.html",
       "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
       "guides/last-minute-birthday-setup-ideas-memphis.html",
       "how-it-works.html",
@@ -556,10 +557,13 @@
       "faq/do-party-decorators-come-to-your-house.html",
       "faq/how-far-in-advance-should-i-book-party-decor.html",
       "faq/how-long-does-it-take-to-set-up-party-decor.html",
+      "faq/how-much-does-a-balloon-garland-cost-in-memphis.html",
       "faq/how-much-does-birthday-decoration-at-home-cost.html",
       "faq/how-much-does-grazing-tables-cost.html",
       "faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
       "faq/index.html",
+      "guides/baby-shower-planning-checklist-memphis.html",
       "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
       "guides/last-minute-birthday-setup-ideas-memphis.html",
       "how-it-works.html",
@@ -995,9 +999,11 @@
       "faq/do-party-decorators-come-to-your-house.html",
       "faq/how-far-in-advance-should-i-book-party-decor.html",
       "faq/how-long-does-it-take-to-set-up-party-decor.html",
+      "faq/how-much-does-a-balloon-garland-cost-in-memphis.html",
       "faq/how-much-does-birthday-decoration-at-home-cost.html",
       "faq/how-much-does-grazing-tables-cost.html",
       "faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
       "faq/index.html",
       "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
       "guides/last-minute-birthday-setup-ideas-memphis.html",
@@ -1104,10 +1110,13 @@
       "faq/do-party-decorators-come-to-your-house.html",
       "faq/how-far-in-advance-should-i-book-party-decor.html",
       "faq/how-long-does-it-take-to-set-up-party-decor.html",
+      "faq/how-much-does-a-balloon-garland-cost-in-memphis.html",
       "faq/how-much-does-birthday-decoration-at-home-cost.html",
       "faq/how-much-does-grazing-tables-cost.html",
       "faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
       "faq/index.html",
+      "guides/baby-shower-planning-checklist-memphis.html",
       "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
       "guides/last-minute-birthday-setup-ideas-memphis.html",
       "how-it-works.html",
