@@ -52,8 +52,34 @@ function buildDate() {
   return new Date().toISOString().slice(0, 10);
 }
 
+/**
+ * The chrome the hash ignores: <head>, <script>, <style>, <nav>, <footer>,
+ * <svg>. Same list scripts/template_share.js strips before counting shingles,
+ * for the same reason - none of it is what the page says.
+ */
+const CHROME = /<(script|style|nav|footer|head|svg)\b[\s\S]*?<\/\1>/gi;
+const TAG = /<[^>]+>/g;
+
+/**
+ * What a reader actually sees on the page, normalised for comparison.
+ *
+ * Hashing the raw bytes made every mechanical edit look like new content.
+ * Adding a related-pages nav to all 109 pages would have advanced all 109
+ * lastmod values to the same build day - the uniform_lastmod pattern
+ * scripts/cadence_gate.js flags and the exact date-bump this module was written
+ * to remove, just arriving from the repo instead of from CI. Site chrome is not
+ * the page's content and must not move its freshness date; a prose edit still
+ * does, because prose is what is left after the strip.
+ */
+function visibleText(payload) {
+  const text = String(payload instanceof Buffer ? payload.toString('utf8') : payload)
+    .replace(CHROME, ' ')
+    .replace(TAG, ' ');
+  return text.split(/\s+/).filter(Boolean).join(' ');
+}
+
 function contentHash(payload) {
-  return crypto.createHash('sha256').update(payload).digest('hex');
+  return crypto.createHash('sha256').update(visibleText(payload), 'utf8').digest('hex');
 }
 
 /**
@@ -148,4 +174,4 @@ function save(ledger, ledgerPath = DEFAULT_PATH) {
   fs.renameSync(tmp, ledgerPath);
 }
 
-module.exports = { SCHEMA, DEFAULT_PATH, buildDate, contentHash, hasFullHistory, lastCommitDate, load, resolve, rebuilt, save };
+module.exports = { SCHEMA, DEFAULT_PATH, buildDate, visibleText, contentHash, hasFullHistory, lastCommitDate, load, resolve, rebuilt, save };
