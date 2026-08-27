@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "validator": "retrofit-integrity",
+  "generated_at": "2026-08-27T15:44:49.035Z",
+  "sitemap_urls": 112,
+  "pages_checked": 112,
+  "unresolved_sitemap_urls": [],
+  "status": "PASS",
+  "blocks": {
+    "clarity_tag": {
+      "marker": "data-clarity-loader",
+      "written_by": "scripts/install_clarity.js",
+      "pages_missing": 0,
+      "coverage_pct": 100
+    },
+    "related_nav": {
+      "marker": "data-nav=\"related-pages\"",
+      "written_by": "scripts/build_related_navigation.js",
+      "pages_missing": 0,
+      "coverage_pct": 100
+    }
+  },
+  "missing": []
+}
