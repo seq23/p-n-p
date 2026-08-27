@@ -158,8 +158,12 @@ for (const [rel, key] of Object.entries(SERVICE_BY_PAGE)) {
 
   // --- visible Q&A -------------------------------------------------------
   if (/<div class="faq-list">/.test(html)) {
+    // A function replacer returns its string verbatim - String.replace does not
+    // interpret "$$" in it - so rp() must NOT be applied here. Escaping anyway
+    // published the service price as "starts at $$300+" on every page that took
+    // this branch. The rp() calls below are string replacements and do need it.
     html = html.replace(/(<div class="faq-list">[\s\S]*?)(<\/div><\/div><\/section>)/,
-      (m, body, tail) => `${body}${rp(pairs.map(itemHtml).join(''))}${tail}`);
+      (m, body, tail) => `${body}${pairs.map(itemHtml).join('')}${tail}`);
   } else {
     const section = '<section class="section section-soft" data-retrofit="service-faq">'
       + '<div class="container"><div class="answer-block"><span class="eyebrow">FAQ</span>'
