@@ -369,13 +369,13 @@
     }
   ],
   "last_gsc_ingest": {
-    "at": "2026-08-28T17:18:58Z",
+    "at": "2026-08-28T22:30:02Z",
     "site": "sc-domain:porchandparty901.com",
     "window": "2026-05-28..2026-08-26",
     "rows_returned": 19,
-    "added": 19,
+    "added": 0,
     "promoted_from_modelled": 0,
-    "updated": 0,
+    "updated": 19,
     "total_queries": 22,
     "truth_boundary": "Impressions are this property's measured demand in Google Search Console. They are not market volume, not rank, and not evidence of citation."
   }
