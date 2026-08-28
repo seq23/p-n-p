@@ -28,10 +28,8 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      # Python and the GSC client move ahead of the build so measured query
-      # evidence can be ingested BEFORE anything is validated. The credential
-      # file written here is still the one the distribution step reads later in
-      # this same job.
+      # Python and the GSC client are here for the distribution step's URL
+      # inspection. The credential file written below is the one that step reads.
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -55,18 +53,24 @@ jobs:
             chmod 600 "$RUNNER_TEMP/gsc-service-account.json"
           fi
 
-      # Real measured demand, not modelled guesses. Without credentials this is a
-      # no-op that leaves the evidence file untouched; with credentials that fail
-      # it exits non-zero rather than publishing against a stale atlas.
-      # It ingests evidence only - it does not admit, publish, or change the
-      # publishing cadence, which stays owned by authority-daily.yml.
-      - name: Ingest measured Search Console queries
-        env:
-          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
-          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+      # The Search Console ingest used to run here. It worked - one run measured 19
+      # real T1 queries - but this job declares `permissions: contents: read` and has
+      # no commit step, so every measured row was discarded when the job ended and
+      # the checked-in evidence never moved off three modelled Semrush rows. Running
+      # a measurement whose result is guaranteed to be thrown away is worse than not
+      # running it, because the log makes it look like the loop is closed.
+      #
+      # The ingest now lives in authority-daily.yml, which has contents: write and
+      # commits. What belongs here instead is the gate: prove the committed atlas is
+      # the one this evidence actually produces, so a deploy can never distribute a
+      # stale or hand-edited atlas.
+      - name: Prove the committed query atlas matches its evidence
         run: |
-          npm run queries:ingest
           npm run atlas:build
+          if ! git diff --exit-code -- data/authority_scale/query_atlas.json; then
+            echo "::error::data/authority_scale/query_atlas.json is stale or hand-edited: rebuilding it from data/queries/evidence/evidence_queries.json produces a different file. Run 'npm run atlas:build' and commit the result."
+            exit 1
+          fi
 
       - name: Build validated distribution inputs
         run: |

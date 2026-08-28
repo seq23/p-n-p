@@ -24,6 +24,7 @@ import {
   PROVIDER_DEGRADED,
   PROVIDER_UNAVAILABLE
 } from './lib/si_core.mjs';
+import { openRouterWebSearch, OPENROUTER_DEFAULT_MAX_RESULTS } from '../lib/openrouter_web_search.mjs';
 
 const contract = loadContract();
 const providerCfg = contract.providers.grounded_search;
@@ -39,6 +40,11 @@ const callBudget = Math.max(0, Math.min(allowance.effective_daily_call_budget, r
 const only = (process.env.SEARCH_INTELLIGENCE_TARGET_IDS || '').split(',').map((s) => s.trim()).filter(Boolean);
 const selectable = only.length ? targetSet.targets.filter((t) => only.includes(t.target_id)) : targetSet.targets;
 const selected = selectable.slice(0, callBudget);
+// The web plugin bills per result, so the result count is an explicit cost dial.
+const MAX_RESULTS = Math.max(1, Number(
+  process.env[providerCfg.max_results_env || 'SEARCH_INTELLIGENCE_WEB_MAX_RESULTS'] ||
+  providerCfg.default_max_results || OPENROUTER_DEFAULT_MAX_RESULTS
+));
 
 function domainOf(value) {
   if (!value) return null;
@@ -52,57 +58,37 @@ function domainOf(value) {
   }
 }
 
+// This lane used to call Google's grounded-search endpoint. That path is hard-blocked
+// on this project's key - plain generateContent returns 200, the same request carrying
+// tools:[{google_search:{}}] returns 429 RESOURCE_EXHAUSTED, across every model tried -
+// so the only observation this stage could ever produce was a failure. The workflow
+// that runs it has never completed a single run.
+//
+// It now calls OpenRouter's web plugin through the same module the citation probe uses,
+// so the two lanes cannot drift and one live run proves both.
 async function groundedObserve(target, model, apiKey) {
-  const endpoint = `${providerCfg.endpoint}/${model}:generateContent`;
-  const body = {
-    contents: [
-      {
-        role: 'user',
-        parts: [
-          {
-            text:
-              `Search the web for: "${target.query}". ` +
-              'List the businesses or pages a searcher would actually be pointed to for this query, with their source links. ' +
-              'Do not guess. Only report what the search results support.'
-          }
-        ]
-      }
-    ],
-    tools: [{ google_search: {} }]
-  };
-
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json', 'x-goog-api-key': apiKey },
-    body: JSON.stringify(body)
-  });
-
-  if (!response.ok) {
-    const text = await response.text();
-    const err = new Error(`provider_http_${response.status}`);
-    err.detail = text.slice(0, 500);
-    throw err;
-  }
-
-  const payload = await response.json();
-  const candidate = (payload.candidates || [])[0] || {};
-  const grounding = candidate.groundingMetadata || {};
-  const chunks = grounding.groundingChunks || [];
+  const result = await openRouterWebSearch(
+    `Search the web for: "${target.query}". ` +
+    'List the businesses or pages a searcher would actually be pointed to for this query, with their source links. ' +
+    'Do not guess. Only report what the search results support.',
+    { apiKey, model, maxResults: MAX_RESULTS }
+  );
 
   const references = [];
-  for (const chunk of chunks) {
-    const web = chunk.web || {};
-    const domain = domainOf(web.domain) || domainOf(web.title) || domainOf(web.uri);
+  for (const annotation of result.annotations) {
+    const citation = annotation?.url_citation || {};
+    const domain = domainOf(citation.url);
     if (!domain) continue;
-    references.push({ domain, title: web.title || null, uri: web.uri || null });
+    references.push({ domain, title: citation.title || null, uri: citation.url || null });
   }
 
-  const answerText = (candidate.content?.parts || []).map((p) => p.text || '').join('\n');
   return {
     references,
-    web_search_queries: grounding.webSearchQueries || [],
-    answer_text: answerText,
-    raw_hash: sha256(payload)
+    // The web plugin does not expose the sub-queries it issued. Reporting an empty
+    // list is honest; inventing the target query back would fabricate provider detail.
+    web_search_queries: [],
+    answer_text: result.answer,
+    raw_hash: sha256(result.raw)
   };
 }
 
@@ -171,13 +157,26 @@ if (providerState.state === PROVIDER_OK && callBudget > 0) {
 const providerRan = providerState.state === PROVIDER_OK && callBudget > 0;
 const callsAttempted = providerRan ? selected.length : 0;
 const skippedForBudget = providerRan ? Math.max(0, selectable.length - selected.length) : 0;
-const effectiveState =
-  providerState.state === PROVIDER_OK && callFailures > 0 ? PROVIDER_DEGRADED : providerState.state;
+
+// A credential with no call budget produced zero observations while the provider
+// still reported OK, and OK with zero observations is exactly the silent green R4
+// forbids. Now that this provider has no free allowance, that state is the DEFAULT
+// one, so it has to be named rather than passed off as healthy.
+const noBudget = providerState.state === PROVIDER_OK && callBudget <= 0;
+const effectiveState = noBudget
+  ? PROVIDER_DEGRADED
+  : (providerState.state === PROVIDER_OK && callFailures > 0 ? PROVIDER_DEGRADED : providerState.state);
 
 const providerStates = [
   {
     ...providerState,
     state: effectiveState,
+    ...(noBudget
+      ? {
+        reason: 'NO_CALL_BUDGET_PAID_SPEND_NOT_OPTED_IN',
+        evidence: `${providerCfg.credential_env} is present but the effective daily call budget is 0. ${providerCfg.provider_id} has no free allowance (declared free_tier_daily_call_budget=${allowance.declared_free_tier_daily_call_budget}), so observations require ${providerCfg.allowance.opt_in_env}=true and ${providerCfg.allowance.budget_env} set. Zero observations were taken; this is DEGRADED, not OK.`
+      }
+      : {}),
     ...(callFailures > 0 ? { reason: 'PROVIDER_CALL_FAILURES', evidence: JSON.stringify(lastFailure) } : {})
   }
 ];
@@ -203,11 +202,13 @@ const out = {
     calls_made: callsMade,
     call_failures: callFailures,
     skipped_for_budget: skippedForBudget,
-    budget_disposition: !providerRan
-      ? 'NOT_RUN_PROVIDER_UNAVAILABLE'
-      : skippedForBudget > 0
-        ? 'SKIPPED_BUDGET_EXHAUSTED'
-        : 'WITHIN_ALLOWANCE',
+    budget_disposition: noBudget
+      ? 'NOT_RUN_NO_CALL_BUDGET'
+      : !providerRan
+        ? 'NOT_RUN_PROVIDER_UNAVAILABLE'
+        : skippedForBudget > 0
+          ? 'SKIPPED_BUDGET_EXHAUSTED'
+          : 'WITHIN_ALLOWANCE',
     cost_mode: allowance.cost_mode
   },
   observation_count: observations.length,
@@ -216,7 +217,9 @@ const out = {
   unavailable_note:
     effectiveState === PROVIDER_UNAVAILABLE
       ? `No grounded-search credential (${providerCfg.credential_env}) was present. Zero observations were produced. This is UNAVAILABLE, not OK.`
-      : null,
+      : noBudget
+        ? `${providerCfg.credential_env} was present but no call budget was authorised, so zero observations were produced. Set ${providerCfg.allowance.opt_in_env}=true and ${providerCfg.allowance.budget_env}=N to observe. This is DEGRADED, not OK.`
+        : null,
   truth_boundaries: contract.truth_boundaries,
   observations
 };

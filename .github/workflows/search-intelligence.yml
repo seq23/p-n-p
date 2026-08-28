@@ -26,9 +26,17 @@ on:
         required: true
         default: baseline
       run_grounded_observation:
-        description: "Run the grounded search observation lane (requires GEMINI_API_KEY secret)"
+        description: "Run the grounded search observation lane (requires the OPENROUTER_API_KEY secret)"
         type: boolean
         default: false
+      grounded_call_budget:
+        description: "Number of queries to observe. OpenRouter's web plugin bills per result, so this is the spend dial: 0 makes no calls and the lane reports NOT_RUN_NO_CALL_BUDGET."
+        required: false
+        default: "10"
+      grounded_max_results:
+        description: "Web results requested per query (the per-call cost multiplier)"
+        required: false
+        default: "10"
       commit_evidence:
         description: "Commit collected search evidence to this branch"
         type: boolean
@@ -90,10 +98,21 @@ jobs:
             "${{ inputs.end_date }}" \
             data/search_intelligence/gsc_search_analytics_export.json
 
+      # Repointed off Google grounded search, which is hard-blocked on this key
+      # (429 RESOURCE_EXHAUSTED on any request carrying tools:[{google_search:{}}])
+      # and is the reason this workflow had never completed a run. It now uses the
+      # same OpenRouter web-plugin call the citation probe uses.
+      #
+      # That plugin bills per result, so spend is explicit: the lane makes no calls
+      # at all unless a budget is authorised here, and it reports
+      # NOT_RUN_NO_CALL_BUDGET rather than a green zero when it is not.
       - name: Run grounded search observation
         if: ${{ inputs.run_grounded_observation }}
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          SEARCH_INTELLIGENCE_ALLOW_PAID_SPEND: "true"
+          SEARCH_INTELLIGENCE_DAILY_CALL_BUDGET: ${{ inputs.grounded_call_budget }}
+          SEARCH_INTELLIGENCE_WEB_MAX_RESULTS: ${{ inputs.grounded_max_results }}
         run: npm run search:observe
 
       - name: Compare competitors

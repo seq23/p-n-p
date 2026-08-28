@@ -18,8 +18,8 @@
   },
   "coverage": {
     "clusters_total": 36,
-    "clusters_with_evidence": 2,
-    "clusters_reserve_only": 35,
+    "clusters_with_evidence": 0,
+    "clusters_reserve_only": 36,
     "reserve_only_clusters": [
       "seasonal-porch-decorating",
       "front-porch-styling",
@@ -52,90 +52,49 @@
       "corporate-grazing-table",
       "retreat-event-styling",
       "hosting-setup",
+      "event-decorator",
       "party-decorator",
       "decor-only-event-support",
       "surprise-celebration-setup",
       "photo-ready-event-styling"
     ]
   },
-  "evidence_backed_count": 3,
-  "unmatched_count": 0,
-  "unmatched": [],
-  "queries": [
-    {
-      "query": "tent rental memphis",
-      "evidence_tier": "T2b",
-      "source_type": "semrush_keyword_magic",
-      "search_volume": 90,
-      "impressions_90d": null,
-      "demand_basis": "search_volume",
-      "rank_band": "measured_search_volume",
-      "keyword_difficulty": 25,
-      "weak_incumbent_score": 0.75,
-      "intent": "commercial",
-      "intent_method": "derived_from_modifier_syntax_and_cpc",
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": null,
-        "topic_confidence": 0,
-        "audience": null,
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "tent-rental"
-      },
-      "rank_score": 40.5,
-      "publishable": true
-    },
+  "evidence_backed_count": 0,
+  "rejected_policy": "A query whose disposition begins REJECTED_ in data/demand/measured_demand.json, or on its own evidence row, is excluded from this atlas entirely. It is recorded below so the exclusion is visible, and it is never publishable.",
+  "rejected_count": 3,
+  "rejected": [
     {
       "query": "event rentals memphis",
       "evidence_tier": "T2b",
-      "source_type": "semrush_keyword_magic",
-      "search_volume": 70,
-      "impressions_90d": null,
-      "demand_basis": "search_volume",
-      "rank_band": "measured_search_volume",
-      "keyword_difficulty": 15,
-      "weak_incumbent_score": 0.85,
-      "intent": "commercial",
-      "intent_method": "derived_from_modifier_syntax_and_cpc",
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "event decorator",
-        "topic_confidence": 0.431,
-        "audience": "event hosts",
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "event-decorator"
-      },
-      "rank_score": 35.7,
-      "publishable": true
+      "disposition": "REJECTED_WRONG_BUSINESS",
+      "rejection_reason": "Semrush mapped this query to porchandparty901.com on domain adjacency, not on what the business does. Porch & Party is a porch-decorating and celebration-styling company: it styles and installs decor. It owns no tents, no tables, no chairs, no linens and no venue, and it does not rent equipment. Ranking for this query would mean either becoming a rental company or landing the searcher on a page that cannot serve them. The local slate is also held by Mahaffey, operating in Memphis since 1924, plus national rental marketplaces. A page built for this query would be a page built to fail twice.",
+      "rejected_at": "2026-08-27",
+      "rejected_by": "work/cover-measured-demand",
+      "source": "data/demand/measured_demand.json",
+      "publishable": false
     },
     {
       "query": "event venue memphis",
       "evidence_tier": "T2b",
-      "source_type": "semrush_keyword_magic",
-      "search_volume": 30,
-      "impressions_90d": null,
-      "demand_basis": "search_volume",
-      "rank_band": "measured_search_volume",
-      "keyword_difficulty": 23,
-      "weak_incumbent_score": 0.77,
-      "intent": "informational",
-      "intent_method": "derived_from_modifier_syntax_and_cpc",
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "event decorator",
-        "topic_confidence": 0.431,
-        "audience": "event hosts",
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "event-decorator"
-      },
-      "rank_score": 13.86,
-      "publishable": true
+      "disposition": "REJECTED_WRONG_BUSINESS",
+      "rejection_reason": "Semrush mapped this query to porchandparty901.com on domain adjacency, not on what the business does. Porch & Party is a porch-decorating and celebration-styling company: it styles and installs decor. It owns no tents, no tables, no chairs, no linens and no venue, and it does not rent equipment. Ranking for this query would mean either becoming a rental company or landing the searcher on a page that cannot serve them. The local slate is also held by Mahaffey, operating in Memphis since 1924, plus national rental marketplaces. A page built for this query would be a page built to fail twice.",
+      "rejected_at": "2026-08-27",
+      "rejected_by": "work/cover-measured-demand",
+      "source": "data/demand/measured_demand.json",
+      "publishable": false
+    },
+    {
+      "query": "tent rental memphis",
+      "evidence_tier": "T2b",
+      "disposition": "REJECTED_WRONG_BUSINESS",
+      "rejection_reason": "Semrush mapped this query to porchandparty901.com on domain adjacency, not on what the business does. Porch & Party is a porch-decorating and celebration-styling company: it styles and installs decor. It owns no tents, no tables, no chairs, no linens and no venue, and it does not rent equipment. Ranking for this query would mean either becoming a rental company or landing the searcher on a page that cannot serve them. The local slate is also held by Mahaffey, operating in Memphis since 1924, plus national rental marketplaces. A page built for this query would be a page built to fail twice.",
+      "rejected_at": "2026-08-27",
+      "rejected_by": "work/cover-measured-demand",
+      "source": "data/demand/measured_demand.json",
+      "publishable": false
     }
-  ]
+  ],
+  "unmatched_count": 0,
+  "unmatched": [],
+  "queries": []
 }

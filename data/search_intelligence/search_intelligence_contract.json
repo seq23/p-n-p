@@ -40,21 +40,29 @@
   ],
   "providers": {
     "grounded_search": {
-      "provider_id": "google_genai_grounded_search",
+      "provider_id": "openrouter_web_search",
       "role": "live_search_observation",
       "produces": "grounded_search_observation",
       "produces_literal_serp_rank": false,
-      "credential_env": "GEMINI_API_KEY",
+      "credential_env": "OPENROUTER_API_KEY",
       "model_env": "SEARCH_INTELLIGENCE_GROUNDING_MODEL",
-      "default_model": "gemini-2.5-flash",
-      "endpoint": "https://generativelanguage.googleapis.com/v1beta/models",
+      "default_model": "openai/gpt-4o-mini",
+      "endpoint": "https://openrouter.ai/api/v1/chat/completions",
+      "call_shape": "POST with plugins:[{id:web,max_results:N}]; the pages the answer was built from come back as message.annotations[].url_citation.url",
+      "max_results_env": "SEARCH_INTELLIGENCE_WEB_MAX_RESULTS",
+      "default_max_results": 10,
+      "previous_provider": {
+        "provider_id": "google_genai_grounded_search",
+        "retired_on": "2026-08-28",
+        "reason": "Google grounded search is hard-blocked on this project's key. Plain generateContent returns 200; the identical request carrying tools:[{google_search:{}}] returns 429 RESOURCE_EXHAUSTED, reproduced across three models and persistent. Its declared free_tier_daily_call_budget of 40 was therefore fiction: the real free allowance for grounded calls was zero, and this lane could never produce an observation. search-intelligence.yml has never completed a single run."
+      },
       "allowance": {
-        "mode": "FREE_TIER_ONLY_BY_DEFAULT",
-        "free_tier_daily_call_budget": 40,
+        "mode": "NO_FREE_TIER_PAID_SPEND_REQUIRES_OPT_IN",
+        "free_tier_daily_call_budget": 0,
         "budget_env": "SEARCH_INTELLIGENCE_DAILY_CALL_BUDGET",
         "paid_spend_requires_explicit_opt_in": true,
         "opt_in_env": "SEARCH_INTELLIGENCE_ALLOW_PAID_SPEND",
-        "zero_incremental_cost_note": "With the default budget inside the provider free allowance, the observation lane runs at zero incremental cost. Exceeding the allowance is refused, not billed."
+        "zero_incremental_cost_note": "OpenRouter's web plugin bills per result returned, so this provider has NO free allowance and the declared free budget is 0 rather than an optimistic number. With no opt-in the lane spends nothing and makes no calls, and it reports NOT_RUN_NO_CALL_BUDGET rather than a green zero. Observations require SEARCH_INTELLIGENCE_ALLOW_PAID_SPEND=true and an explicit SEARCH_INTELLIGENCE_DAILY_CALL_BUDGET."
       }
     },
     "search_console": {
