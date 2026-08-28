@@ -1,4 +1,11 @@
 // One grounded-search call shape, shared by every lane that needs one.
+// OpenRouter bills the web plugin per REQUEST on the parallel engine, with 10
+// results included - measured at $0.00127 per call on this account, against
+// ~$0.04 on the default engine's per-result billing. Same url_citation schema,
+// so nothing downstream changes. Overridable if a deeper engine is ever wanted.
+const WEB_ENGINE = process.env.OPENROUTER_WEB_ENGINE || 'parallel';
+const WEB_MODE = process.env.OPENROUTER_WEB_MODE || 'turbo';
+
 //
 // Why not Gemini. Google's grounded search is hard-blocked on this project's key:
 // a plain generateContent returns 200, and the identical request with
@@ -66,7 +73,7 @@ export async function openRouterWebSearch(query, {
         model,
         temperature: 0,
         max_tokens: maxTokens,
-        plugins: [{ id: 'web', max_results: maxResults }],
+        plugins: [{ id: 'web', engine: WEB_ENGINE, mode: WEB_MODE, max_results: maxResults }],
         messages: [{ role: 'user', content: query }],
       }),
     });
