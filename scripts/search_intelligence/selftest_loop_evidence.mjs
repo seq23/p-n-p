@@ -80,6 +80,23 @@ assert('target_query_set_built', targets.target_count > 0, `${targets.target_cou
 const sample = targets.targets.slice(0, 6);
 const OWN = 'porchandparty901.com';
 
+const CONTRACT = JSON.parse(fs.readFileSync(
+  path.join(SANDBOX, 'data/search_intelligence/search_intelligence_contract.json'), 'utf8'));
+const GROUNDED_CFG = CONTRACT.providers.grounded_search;
+const GROUNDED_PROVIDER_ID = GROUNDED_CFG.provider_id;
+const DECLARED_FREE_BUDGET = Number(GROUNDED_CFG.allowance.free_tier_daily_call_budget || 0);
+// A provider with no free allowance can only make calls under an explicit paid opt-in,
+// so a fixture that made calls has to declare that opt-in. Where the provider does have
+// a free allowance big enough for the sample, the fixture stays on the free lane.
+const FIXTURE_PAID = DECLARED_FREE_BUDGET < sample.length;
+const FIXTURE_ALLOWANCE = {
+  mode: GROUNDED_CFG.allowance.mode,
+  declared_free_tier_daily_call_budget: DECLARED_FREE_BUDGET,
+  effective_daily_call_budget: FIXTURE_PAID ? sample.length : DECLARED_FREE_BUDGET,
+  paid_spend_opted_in: FIXTURE_PAID,
+  cost_mode: FIXTURE_PAID ? 'PAID_SPEND_OPTED_IN' : 'ZERO_INCREMENTAL_COST'
+};
+
 // -------------------------------------------- fixture grounded observations
 // Three queries reference the own domain; three reference only competitors.
 function buildObservations() {
@@ -89,28 +106,27 @@ function buildObservations() {
     stage: 'live_search_observation',
     generated_at: '2026-08-07T00:00:00.000Z',
     provider_state: 'OK',
-    provider_states: [{ provider: 'grounded_search', provider_id: 'google_genai_grounded_search', state: 'OK', reason: 'FIXTURE' }],
+    provider_states: [{ provider: 'grounded_search', provider_id: GROUNDED_PROVIDER_ID, state: 'OK', reason: 'FIXTURE' }],
     overall_status: 'OK',
     status_is_healthy: true,
     observation_kind: 'grounded_search_observation',
     is_literal_serp_rank: false,
     fixture: true,
-    allowance: {
-      mode: 'FREE_TIER_ONLY_BY_DEFAULT',
-      declared_free_tier_daily_call_budget: 40,
-      effective_daily_call_budget: 40,
-      paid_spend_opted_in: false,
-      cost_mode: 'ZERO_INCREMENTAL_COST'
-    },
+    // The fixture is a run that ACTUALLY OBSERVED, so its allowance has to be one the
+    // real provider could have produced. The grounded provider's allowance is read from
+    // the contract rather than hard-coded, because a hard-coded 40 is precisely what
+    // silently diverged when the provider changed: the fixture kept asserting a free
+    // allowance the configured provider no longer had.
+    allowance: FIXTURE_ALLOWANCE,
     budget: {
-      effective_daily_call_budget: 40,
+      effective_daily_call_budget: FIXTURE_ALLOWANCE.effective_daily_call_budget,
       eligible_targets: sample.length,
       calls_attempted: sample.length,
       calls_made: sample.length,
       call_failures: 0,
       skipped_for_budget: 0,
       budget_disposition: 'WITHIN_ALLOWANCE',
-      cost_mode: 'ZERO_INCREMENTAL_COST'
+      cost_mode: FIXTURE_ALLOWANCE.cost_mode
     },
     observation_count: sample.length,
     observed_count: sample.length,

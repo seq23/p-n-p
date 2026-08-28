@@ -39,6 +39,41 @@ else {
   if (atlas.coverage?.clusters_with_evidence === 0) errors.push('no cluster has evidence - the atlas would be a pure hypothesis pool');
 }
 
+// The wrong-business gate. data/demand/measured_demand.json is where a query is rejected
+// for this property; the atlas is what publishing reads. A rejected query reaching the
+// atlas means the repo would generate pages for a business it is not in - which is worse
+// than publishing nothing at all, so it is an error, not a warning.
+const norm = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+const demand = read('data/demand/measured_demand.json');
+if (demand) {
+  const rejectedQueries = new Map();
+  for (const r of demand.records || []) {
+    if (!String(r?.disposition || '').startsWith('REJECTED_')) continue;
+    for (const key of [r.query_normalized, r.query]) {
+      const k = norm(key);
+      if (k) rejectedQueries.set(k, r.disposition);
+    }
+  }
+  if (atlas) {
+    for (const q of atlas.queries || []) {
+      const disposition = rejectedQueries.get(norm(q.query));
+      if (disposition) errors.push(`atlas carries a query rejected for this business (${disposition}): ${q.query}`);
+      if (String(q.disposition || '').startsWith('REJECTED_')) {
+        errors.push(`atlas entry carries its own rejection disposition ${q.disposition}: ${q.query}`);
+      }
+    }
+    // Excluding a rejection silently is the same failure one step later: someone reading
+    // the atlas must be able to see what was held back and why.
+    if (rejectedQueries.size && !Array.isArray(atlas.rejected)) {
+      errors.push('measured_demand.json holds rejected queries but the atlas records no `rejected` list - the exclusion is invisible');
+    }
+    for (const r of atlas.rejected || []) {
+      if (r.publishable !== false) errors.push(`rejected atlas entry not marked publishable:false: ${r.query}`);
+      if (!r.disposition || !r.rejection_reason) errors.push(`rejected atlas entry without disposition and reason: ${r.query}`);
+    }
+  }
+}
+
 if (errors.length) {
   console.error('QUERY ATLAS VALIDATION FAIL');
   for (const e of errors) console.error(`- ${e}`);

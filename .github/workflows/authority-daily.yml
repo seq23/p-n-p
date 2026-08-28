@@ -30,6 +30,59 @@ jobs:
       - name: Install
         run: npm ci
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Google API client
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib
+
+      # Measured demand has to land HERE, in the only workflow that commits.
+      # deploy-distribution.yml ran this ingest successfully - 19 measured T1 rows -
+      # but declares `permissions: contents: read` and has no commit step, so every
+      # one of those rows was thrown away at job end and the checked-in evidence
+      # stayed at three modelled Semrush rows. Ingesting inside the committing
+      # workflow is what makes the measurement persist.
+      #
+      # No credentials: the script leaves the evidence untouched and exits 0, so a
+      # fork or a secretless run can never blank measured evidence. Credentials that
+      # fail: it exits 1 and this cycle stops rather than publishing against a stale
+      # atlas.
+      - name: Ingest measured Search Console queries
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+        run: npm run queries:ingest
+
+      - name: Rebuild the query atlas from the ingested evidence
+        run: npm run atlas:build
+
+      # Persist the measurement BEFORE the gate runs. A measurement is a fact about
+      # the world and is worth keeping even on a day the atlas it feeds is not fit to
+      # publish from; gating first would throw the measurement away exactly when it
+      # was most needed. Explicit paths only - this step commits evidence, never
+      # published pages or queue state.
+      - name: Commit the measured demand
+        run: |
+          git config user.name "pnp-authority-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add data/queries/evidence/evidence_queries.json data/authority_scale/query_atlas.json
+          if git diff --cached --quiet; then
+            echo "NAMED STOP: Search Console returned no change to measured evidence; nothing to commit."
+          else
+            git commit -m "chore: ingest measured Search Console demand"
+            git push
+          fi
+
+      # Now the gate. validate:query-atlas is what stops a query rejected for this
+      # business - the tent/venue/event-rental rows, which are the wrong business for
+      # a porch-decor and event-styling company - from reaching anything publishable.
+      - name: Gate the query atlas
+        run: npm run validate:query-atlas
+
       - name: Run governed authority cycle
         run: |
           export AUTHORITY_RUN_DATE="$(date -u +%F)"

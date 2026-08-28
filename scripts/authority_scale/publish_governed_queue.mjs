@@ -9,4 +9,20 @@ const entryMap=new Map(universe.map(x=>[`${x.folder}/${x.slug}`,x]));let publish
 function validateEntry(e){const required=['slug','folder','title','h1','description','serviceKey','intent','intro','quickAnswer','forWho','includes','practical','faqQuestion','faqAnswer','cities','related','localContext','beforeBook','nextStep'];for(const k of required)if(e[k]===undefined||e[k]===null||(Array.isArray(e[k])&&!e[k].length)||(!Array.isArray(e[k])&&String(e[k]).trim()===''))throw new Error(`Candidate ${e.folder}/${e.slug} missing ${k}`);for(const city of e.cities)if(!areas.includes(city))throw new Error(`Candidate ${e.folder}/${e.slug} uses undeclared service area ${city}`);if(String(e.quickAnswer).length<90)throw new Error(`Candidate ${e.folder}/${e.slug} quickAnswer too thin`);if(String(e.practical).length<120)throw new Error(`Candidate ${e.folder}/${e.slug} practical section too thin`);}
 for(const item of queue){if(item.status!=='queued'||published>=max)continue;const key=`${item.folder}/${item.slug}`,e=entryMap.get(key);if(!e)throw new Error(`Queued item missing query-universe entry ${key}`);validateEntry(e);const rel=`${item.folder}/${item.slug}.html`;if(fs.existsSync(path.join(ROOT,rel)))throw new Error(`Queued route already exists ${rel}; use governed repair scope instead of republishing`);fs.mkdirSync(path.dirname(path.join(ROOT,rel)),{recursive:true});fs.writeFileSync(path.join(ROOT,rel),renderPage(e));item.status='published';if(!manifest.some(m=>m.slug===item.slug&&m.folder===item.folder))manifest.push({slug:item.slug,folder:item.folder,path:`/${rel}`});if(!slugs.includes(key))slugs.push(key);published++;publishedRoutes.push(`/${item.folder}/${item.slug}`);}
 if(published){ledger.days=ledger.days||{};ledger.days[day]={new_pages:used+published,ceiling,updated_at:new Date().toISOString()};fs.writeFileSync(queuePath,JSON.stringify(queue,null,2)+'\n');fs.writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(slugPath,JSON.stringify(slugs.sort(),null,2)+'\n');fs.writeFileSync(ledgerPath,JSON.stringify(ledger,null,2)+'\n');}
-console.log(JSON.stringify({day,ceiling,already_used:used,remaining_before_run:remaining,published,published_routes:publishedRoutes},null,2));
+// Rule 0: no stage may exit 0 having done nothing. Publishing zero pages is often
+// legitimate here, but "success" with no explanation is how a create stage reports
+// green for weeks while the queue quietly stays empty. The stop is now named, and the
+// name distinguishes the three very different reasons for it: the cadence cap is
+// holding (working as designed), the queue is drained and nothing refills it (a real
+// gap in the loop, currently 29/29 published), or a candidate exists but was skipped.
+const queuedRemaining=queue.filter(x=>x.status==='queued').length;
+const statusCounts=queue.reduce((acc,x)=>{acc[x.status||'unknown']=(acc[x.status||'unknown']||0)+1;return acc;},{});
+let stop_reason=null,stop_detail=null;
+if(!published){
+  if(!queue.length){stop_reason='QUEUE_EMPTY';stop_detail='data/publish_queue/publish_queue.json holds no items at all.';}
+  else if(!queuedRemaining){stop_reason='QUEUE_EXHAUSTED_NOTHING_REFILLS_IT';stop_detail=`All ${queue.length} publish-queue items are already published (${JSON.stringify(statusCounts)}) and no stage adds new ones. This stage cannot publish until the queue is refilled from evidence-backed demand in data/authority_scale/query_atlas.json. Reported as a named stop, not as a successful publication run.`;}
+  else if(remaining<=0){stop_reason='CADENCE_CEILING_REACHED';stop_detail=`${used} of ${ceiling} new pages already published on ${day}; ${queuedRemaining} item(s) stay queued. The cap is holding, which is the intended behaviour.`;}
+  else{stop_reason='MAX_ZERO_REQUESTED';stop_detail=`${queuedRemaining} item(s) are queued with ${remaining} slot(s) of headroom, but the requested maximum was ${max}.`;}
+}
+console.log(JSON.stringify({day,ceiling,already_used:used,remaining_before_run:remaining,published,published_routes:publishedRoutes,queue_status_counts:statusCounts,queued_remaining:queuedRemaining,stop_reason,stop_detail},null,2));
+if(stop_reason)console.log(`[authority-publish] NAMED STOP ${stop_reason}: ${stop_detail}`);
