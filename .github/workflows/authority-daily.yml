@@ -12,9 +12,6 @@ concurrency:
   group: pnp-authority-daily
   cancel-in-progress: false
 
-env:
-  # across the portfolio at daily cadence. 3 still names the incumbents
-
 jobs:
   authority-cycle:
     runs-on: ubuntu-latest
