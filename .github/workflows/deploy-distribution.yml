@@ -4,6 +4,35 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # A push made by a workflow using the default GITHUB_TOKEN does not raise a
+  # `push` event. That is a GitHub rule, not a misconfiguration, and it made the
+  # `push` trigger above unreachable for every commit this repo actually
+  # automates: authority-daily.yml commits the governed cycle and the measured
+  # Search Console evidence, self-heal.yml commits validated repairs, and all of
+  # them push as pnp-authority-bot / github-actions[bot] with GITHUB_TOKEN.
+  #
+  # Confirmed on this repository, not assumed: `gh run list --commit <sha>`
+  # returns an empty list for every bot commit on main - 5489eb1, 279d4927,
+  # c61dc79 (chore: run governed authority cycle) and 21f5d7ad (chore: ingest
+  # measured Search Console demand). Zero workflow runs on four commits that each
+  # changed published pages.
+  #
+  # This lane is the only caller of distribution_scripts/deploy_distribution.sh,
+  # which is what performs IndexNow submission, sitemap submission and GSC URL
+  # inspection. So every page the daily cycle published was committed and then
+  # never announced to any search or answer engine, while the run log for the
+  # publishing workflow read green. workflow_run keys on a workflow completing
+  # rather than on a push, so it fires for bot commits.
+  #
+  # "Search Intelligence Cycle" is in the list for the same reason, and it was
+  # found by the validator rather than by reading: it pushes too, under
+  # commit_evidence, and what it commits includes the observed surfacing ledger
+  # and the citation yield observations that the atlas and the yield scoreboard
+  # are built from.
+  workflow_run:
+    workflows:
+      ["Daily Authority Cycle", "Bounded Self-Healing", "Search Intelligence Cycle"]
+    types: [completed]
 
 permissions:
   contents: read
@@ -14,6 +43,12 @@ concurrency:
 
 jobs:
   validate-and-distribute:
+    # Distribute on a push or a dispatch as before; on a workflow_run, only when
+    # the upstream cycle actually succeeded. There is no point announcing pages
+    # to IndexNow that a failed publishing run never finished writing.
+    if: >-
+      ${{ github.event_name != 'workflow_run'
+          || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

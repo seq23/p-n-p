@@ -231,6 +231,42 @@
       ],
       "repair_command": null,
       "no_repair_reason": "A broken href is either a typo or a page that was never built. Both are authored defects; a regenerator would only paper over the second."
+    },
+    {
+      "id": "workflow-lane-integrity",
+      "command": "npm run validate:workflow-lanes",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "Lane wiring, not script correctness: a dry-run step that aborts the job before the real repair runs, and a workflow that pushes with GITHUB_TOKEN (which raises no push event) without being named in the distribution lane workflow_run trigger. Both were live and both left every individual script correct.",
+      "no_repair_reason": "A broken lane is an authored wiring defect in a workflow file. There is no generator that can re-derive the intended trigger graph, and a script that edited .github/workflows/ automatically would be repairing the thing that governs it."
+    },
+    {
+      "id": "cadence-policy-authority",
+      "command": "npm run validate:cadence-policy",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "data/cadence/policy.json is the only source of the cadence rates. The gate previously carried a DEFAULT_POLICY of the pre-throttle rates (2/week, 25/week) merged UNDER the file, so a missing policy silently restored the old, looser cap and still printed CLEAR. Also asserts behaviourally that the gate exits non-zero with no policy.",
+      "no_repair_reason": "The rates are a deliberate policy decision. Regenerating them automatically would mean inventing a publication cap, which is the exact defect this validator exists to prevent."
+    },
+    {
+      "id": "evidence-openness-coverage",
+      "command": "npm run validate:evidence-openness",
+      "profiles": [
+        "release"
+      ],
+      "repair_command": "npm run queries:score-discovery-gap",
+      "purpose": "Every evidence query carries a lead-intent tier and an occupancy verdict. The scorer that derives them was invoked by nothing, so 19 of 22 rows were unscored while the observation data sat in the same repo; the GSC ingest then rebuilt rows from scratch and erased any reading that had been written. UNMEASURED is an accepted verdict; a row with no reading at all is not."
+    },
+    {
+      "id": "operator-doc-currency",
+      "command": "npm run validate:operator-doc-currency",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "Every repo path an operator doc points at still exists. The validator shipped wired to an npm script that nothing ran, so it enforced nothing - the fourth guard found in this repo reachable only from an npm alias no lane invokes.",
+      "no_repair_reason": "A stale doc reference is authored prose. Repointing it requires knowing which surface replaced the old one, which no generator can infer."
     }
   ]
 }

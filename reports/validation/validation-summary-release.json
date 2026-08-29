@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "profile": "release",
-  "generated_at": "2026-08-26T18:04:35.608Z",
-  "total": 18,
+  "generated_at": "2026-08-29T21:16:32.663Z",
+  "total": 26,
   "failed": 0,
   "results": [
     {
@@ -10,7 +10,7 @@
       "command": "npm run validate:profile-purity",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 161,
+      "duration_ms": 183,
       "repair_command": null,
       "output_tail": null
     },
@@ -19,7 +19,7 @@
       "command": "npm run validate:tree-hygiene",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 153,
+      "duration_ms": 138,
       "repair_command": null,
       "output_tail": null
     },
@@ -28,7 +28,7 @@
       "command": "npm run validate:local-authority",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 149,
+      "duration_ms": 176,
       "repair_command": null,
       "output_tail": null
     },
@@ -37,7 +37,7 @@
       "command": "npm run validate:no-instruction-leak",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 164,
+      "duration_ms": 250,
       "repair_command": null,
       "output_tail": null
     },
@@ -46,7 +46,7 @@
       "command": "npm run validate:no-empty-cells",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 159,
+      "duration_ms": 228,
       "repair_command": null,
       "output_tail": null
     },
@@ -55,7 +55,7 @@
       "command": "npm run validate:content-pattern",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 197,
+      "duration_ms": 226,
       "repair_command": null,
       "output_tail": null
     },
@@ -64,7 +64,7 @@
       "command": "npm run validate:all",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 202,
+      "duration_ms": 1124,
       "repair_command": null,
       "output_tail": null
     },
@@ -73,7 +73,7 @@
       "command": "node scripts/validation/validate_sitemap_coverage.js",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 46,
+      "duration_ms": 56,
       "repair_command": "npm run build:sitemap",
       "output_tail": null
     },
@@ -82,7 +82,7 @@
       "command": "npm run validate:max-fanout",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 547,
+      "duration_ms": 360,
       "repair_command": "npm run authority:scale:fanout",
       "output_tail": null
     },
@@ -91,7 +91,7 @@
       "command": "npm run validate:authority-scale",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 337,
+      "duration_ms": 286,
       "repair_command": null,
       "output_tail": null
     },
@@ -100,7 +100,7 @@
       "command": "npm run validate:kpi-truth",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 156,
+      "duration_ms": 155,
       "repair_command": null,
       "output_tail": null
     },
@@ -109,7 +109,7 @@
       "command": "npm run validate:yield",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 154,
+      "duration_ms": 145,
       "repair_command": "npm run authority:yield:build",
       "output_tail": null
     },
@@ -118,7 +118,7 @@
       "command": "npm run validate:page-quality",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 158,
+      "duration_ms": 145,
       "repair_command": null,
       "output_tail": null
     },
@@ -127,7 +127,7 @@
       "command": "npm run validate:improvements",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 162,
+      "duration_ms": 153,
       "repair_command": "npm run authority:improvements:build",
       "output_tail": null
     },
@@ -145,7 +145,7 @@
       "command": "npm run validate:distribution-contract",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 160,
+      "duration_ms": 152,
       "repair_command": "npm run distribution:prepare",
       "output_tail": null
     },
@@ -154,7 +154,7 @@
       "command": "npm run validate:search-intelligence",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 183,
+      "duration_ms": 167,
       "repair_command": null,
       "output_tail": null
     },
@@ -163,8 +163,80 @@
       "command": "npm run validate:query-atlas",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 159,
+      "duration_ms": 150,
       "repair_command": "npm run atlas:build",
+      "output_tail": null
+    },
+    {
+      "id": "local-scope",
+      "command": "npm run validate:local-scope",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 148,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "answer-coverage",
+      "command": "npm run validate:answer-coverage",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 138,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "no-orphan-scripts",
+      "command": "npm run validate:no-orphan-scripts",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 181,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "internal-links",
+      "command": "npm run validate:internal-links",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 171,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "workflow-lane-integrity",
+      "command": "npm run validate:workflow-lanes",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 141,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "cadence-policy-authority",
+      "command": "npm run validate:cadence-policy",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 185,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "evidence-openness-coverage",
+      "command": "npm run validate:evidence-openness",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 143,
+      "repair_command": "npm run queries:score-discovery-gap",
+      "output_tail": null
+    },
+    {
+      "id": "operator-doc-currency",
+      "command": "npm run validate:operator-doc-currency",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 146,
+      "repair_command": null,
       "output_tail": null
     }
   ]

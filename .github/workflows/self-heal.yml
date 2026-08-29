@@ -32,9 +32,35 @@ jobs:
       # already dirtied. Without it this exits 128 with "cannot pull with rebase:
       # You have unstaged changes" - but only when there is actually something
       # upstream to rebase onto, so it passes on dispatch and fails on schedule.
-      - run: git pull --rebase --autostash origin main
+      # The ref this run is on, never a hardcoded `main`.
+      #
+      # Both of these used to say `main` outright, which made the lane correct
+      # only on its schedule and actively wrong anywhere else: dispatched on a
+      # branch it rebased that branch onto main and then pushed the result to
+      # main. The first dispatch of it from a feature branch died on four
+      # conflicting report files (run 33275050208) - the harmless outcome. The
+      # harmful one was a clean rebase, which would have pushed branch content
+      # straight to main from a lane nobody was watching for that.
+      #
+      # Healing the ref it was invoked on is the behaviour that is correct in
+      # both places: identical on main, where GITHUB_REF_NAME is main, and
+      # contained everywhere else.
+      - run: git pull --rebase --autostash origin "$GITHUB_REF_NAME"
       - run: npm ci --ignore-scripts
+      # continue-on-error, and it is load-bearing. `selfheal:dry` is the SAME
+      # binary as `selfheal` with --dry-run, and it exits 1 whenever the tree is
+      # not clean - which is precisely the state in which this lane has work to
+      # do. Without this flag the job died on the report step and the repair
+      # step below never ran, so the only day self-healing could go green was a
+      # day it had nothing to heal. Reproduced by removing one <url> from
+      # sitemap.xml: `npm run selfheal:dry` prints "would repair
+      # sitemap-coverage" and exits 1.
+      #
+      # The verdict is not lost by ignoring it here: `selfheal` re-validates,
+      # and "Revalidate after repair" below is the gate that decides whether
+      # anything is committed. This step is a report, so it is allowed to be red.
       - name: Report what the loop would repair
+        continue-on-error: true
         run: npm run selfheal:dry
       - name: Apply bounded repairs
         run: npm run selfheal
@@ -51,5 +77,5 @@ jobs:
             echo "No safe repairs were needed."
           else
             git commit -m "Self-heal: apply bounded validated repairs"
-            git push origin main
+            git push origin "HEAD:$GITHUB_REF_NAME"
           fi
