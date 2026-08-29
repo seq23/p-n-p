@@ -23,11 +23,12 @@ on:
   # never announced to any search or answer engine, while the run log for the
   # publishing workflow read green. workflow_run keys on a workflow completing
   # rather than on a push, so it fires for bot commits.
-  workflow_run:
-  # "Search Intelligence Cycle" is here for the same reason, and it was found by
-  # the validator rather than by reading: it pushes too, under commit_evidence,
-  # and what it commits includes the observed surfacing ledger and the citation
-  # yield observations that the atlas and the yield scoreboard are built from.
+  #
+  # "Search Intelligence Cycle" is in the list for the same reason, and it was
+  # found by the validator rather than by reading: it pushes too, under
+  # commit_evidence, and what it commits includes the observed surfacing ledger
+  # and the citation yield observations that the atlas and the yield scoreboard
+  # are built from.
   workflow_run:
     workflows:
       ["Daily Authority Cycle", "Bounded Self-Healing", "Search Intelligence Cycle"]

@@ -43,6 +43,100 @@ const ROOT = path.resolve(__dirname, '../..');
 const WF_DIR = path.join(ROOT, '.github/workflows');
 const DISTRIBUTION_LANE = 'deploy-distribution.yml';
 
+// ------------------------------------------------------ rule 0: it must parse
+// A workflow file that GitHub cannot parse does not fail a step. It produces a
+// run with an EMPTY JOB LIST and no log at all, which reads as an ordinary red
+// X and cannot be diagnosed from the Actions UI - the only way to see the
+// reason is `gh workflow run`, which answers
+// `HTTP 422: failed to parse workflow: (Line: N, Col: M)`.
+//
+// This repo has hit that twice. First when removing the last key from an `env:`
+// mapping left the key with only a comment under it, and an empty mapping key
+// is invalid YAML (run 33196058541, `"jobs": []`). Then again while fixing the
+// distribution trigger in this very change, when an edit left `workflow_run:`
+// declared twice in the same `on:` block (run 33274799002, also 0s, also empty).
+//
+// The lane checks below are regex-based and neither of those defects tripped
+// them, because both files still CONTAINED all the right strings. So the two
+// structural faults that actually produce a 0s startup failure are checked
+// directly. This is not a YAML parser - it is the two specific shapes that have
+// cost this repo a red main, caught locally instead of in CI.
+function structuralFaults(lines) {
+  const found = [];
+  // Strip comments and blanks, but keep original line numbers for the message.
+  const sig = lines
+    .map((raw, i) => ({ n: i + 1, raw }))
+    .filter(({ raw }) => raw.trim() !== '' && !/^\s*#/.test(raw));
+
+  const seen = new Map(); // scope -> Map(key -> first line seen)
+  const stack = []; // { indent, key }
+  const seqCount = new Map();
+
+  for (let i = 0; i < sig.length; i += 1) {
+    const { n, raw } = sig[i];
+
+    // Sequence items open their own key namespace. Two steps in a list both
+    // saying `uses:` are siblings, not a redefinition, so without this every
+    // multi-step workflow reads as hundreds of duplicates.
+    const seq = raw.match(/^(\s*)-\s+(.*)$/);
+    let indent;
+    let content;
+    if (seq) {
+      indent = seq[1].length;
+      while (stack.length && stack[stack.length - 1].indent >= indent) stack.pop();
+      const ck = `${indent} ${stack.map((x) => x.key).join('.')}`;
+      const idx = (seqCount.get(ck) || 0) + 1;
+      seqCount.set(ck, idx);
+      stack.push({ indent, key: `[${idx}]` });
+      content = seq[2];
+      indent += 2; // the key sits where the text after "- " begins
+    } else {
+      indent = raw.search(/\S/);
+      content = raw.slice(indent);
+    }
+
+    const m = content.match(/^([A-Za-z_][\w.-]*)\s*:(.*)$/);
+    if (!m) continue;
+    const key = m[1];
+    const rest = m[2].trim();
+
+    while (stack.length && stack[stack.length - 1].indent >= indent) stack.pop();
+    const parentPath = stack.map((x) => x.key).join('.');
+    const scope = `${indent} ${parentPath}`;
+    if (!seen.has(scope)) seen.set(scope, new Map());
+    const inScope = seen.get(scope);
+    if (inScope.has(key)) {
+      found.push(
+        `line ${n}: \`${key}\` is already defined at line ${inScope.get(key)} in the same block`
+        + `${parentPath ? ` (under \`${parentPath}\`)` : ''}. GitHub rejects the whole file, producing a 0s run with an empty job list.`,
+      );
+    } else {
+      inScope.set(key, n);
+    }
+
+    // A mapping key with no inline value must have at least one more-indented
+    // line under it. `env:` followed only by a comment is the empty-mapping case.
+    if (rest === '') {
+      const next = sig[i + 1];
+      const childIndent = next ? next.raw.search(/\S/) : -1;
+      if (!next || childIndent <= indent) {
+        // Keys that are legitimately empty in Actions: an event name with no
+        // filters (`workflow_dispatch:`), and a step key like `with:` never is.
+        const EMPTY_OK = new Set(['workflow_dispatch', 'push', 'pull_request', 'schedule', 'release', 'issues', 'fork', 'watch']);
+        if (!EMPTY_OK.has(key)) {
+          found.push(
+            `line ${n}: \`${key}:\` opens a mapping with nothing under it${next ? '' : ' (end of file)'}. `
+            + 'An empty mapping key is invalid YAML and makes the entire workflow a startup failure with no readable log. '
+            + 'Delete the key, or give it content.',
+          );
+        }
+      }
+    }
+    if (rest === '') stack.push({ indent, key });
+  }
+  return found;
+}
+
 const errors = [];
 
 if (!fs.existsSync(WF_DIR)) {
@@ -98,8 +192,14 @@ const DRY_PATTERNS = [
 let dryStepsChecked = 0;
 let pushingLanes = 0;
 
+let structuralChecked = 0;
+
 for (const [file, { text, lines }] of wf) {
   const all = steps(lines);
+
+  // Rule 0 - the file must be parseable at all.
+  structuralChecked += 1;
+  for (const f of structuralFaults(lines)) errors.push(`${file}: ${f}`);
 
   // Rule 1 - a fail-fast dry run ahead of the real command.
   for (const step of all) {
@@ -159,6 +259,7 @@ if (errors.length) {
 }
 
 console.log(
-  `Workflow lane integrity OK (${files.length} workflow(s) scanned; ${dryStepsChecked} dry-run step(s) shadowing a real command, all continue-on-error; `
+  `Workflow lane integrity OK (${files.length} workflow(s) scanned; ${structuralChecked} checked for the duplicate-key and empty-mapping faults that cause a 0s startup failure; `
+  + `${dryStepsChecked} dry-run step(s) shadowing a real command, all continue-on-error; `
   + `${pushingLanes} pushing lane(s), each reachable from ${DISTRIBUTION_LANE})`,
 );
