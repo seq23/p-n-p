@@ -32,7 +32,20 @@ jobs:
       # already dirtied. Without it this exits 128 with "cannot pull with rebase:
       # You have unstaged changes" - but only when there is actually something
       # upstream to rebase onto, so it passes on dispatch and fails on schedule.
-      - run: git pull --rebase --autostash origin main
+      # The ref this run is on, never a hardcoded `main`.
+      #
+      # Both of these used to say `main` outright, which made the lane correct
+      # only on its schedule and actively wrong anywhere else: dispatched on a
+      # branch it rebased that branch onto main and then pushed the result to
+      # main. The first dispatch of it from a feature branch died on four
+      # conflicting report files (run 33275050208) - the harmless outcome. The
+      # harmful one was a clean rebase, which would have pushed branch content
+      # straight to main from a lane nobody was watching for that.
+      #
+      # Healing the ref it was invoked on is the behaviour that is correct in
+      # both places: identical on main, where GITHUB_REF_NAME is main, and
+      # contained everywhere else.
+      - run: git pull --rebase --autostash origin "$GITHUB_REF_NAME"
       - run: npm ci --ignore-scripts
       # continue-on-error, and it is load-bearing. `selfheal:dry` is the SAME
       # binary as `selfheal` with --dry-run, and it exits 1 whenever the tree is
@@ -64,5 +77,5 @@ jobs:
             echo "No safe repairs were needed."
           else
             git commit -m "Self-heal: apply bounded validated repairs"
-            git push origin main
+            git push origin "HEAD:$GITHUB_REF_NAME"
           fi

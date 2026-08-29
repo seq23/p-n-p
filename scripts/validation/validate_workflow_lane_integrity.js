@@ -191,6 +191,7 @@ const DRY_PATTERNS = [
 
 let dryStepsChecked = 0;
 let pushingLanes = 0;
+let branchOps = 0;
 
 let structuralChecked = 0;
 
@@ -222,6 +223,28 @@ for (const [file, { text, lines }] of wf) {
           );
         }
       }
+    }
+  }
+
+  // Rule 3 - no lane may hardcode the branch it rebases onto or pushes to.
+  //
+  // self-heal.yml said `git pull --rebase origin main` and `git push origin
+  // main` literally, so the lane was correct only on its schedule. Dispatched
+  // on any other ref it rebased that branch onto main and pushed the result
+  // BACK to main - a lane nobody watches, silently writing branch content to
+  // the default branch. The observed failure (run 33275050208, four conflicting
+  // report files) was the lucky outcome; a clean rebase was the dangerous one.
+  //
+  // A workflow must operate on the ref it was invoked on.
+  for (const step of steps(lines)) {
+    const m = step.text.match(/git\s+(?:pull|push)[^\n]*\borigin\s+["']?(main|master)\b/);
+    if (m) {
+      branchOps += 1;
+      errors.push(
+        `${file}: \`${m[0].trim()}\` hardcodes the branch "${m[1]}". A workflow dispatched on any other ref would `
+        + `then rebase onto, or push to, ${m[1]} regardless of where it was run. Use the ref it is running on `
+        + '($GITHUB_REF_NAME, or HEAD:$GITHUB_REF_NAME to push).',
+      );
     }
   }
 
@@ -261,5 +284,5 @@ if (errors.length) {
 console.log(
   `Workflow lane integrity OK (${files.length} workflow(s) scanned; ${structuralChecked} checked for the duplicate-key and empty-mapping faults that cause a 0s startup failure; `
   + `${dryStepsChecked} dry-run step(s) shadowing a real command, all continue-on-error; `
-  + `${pushingLanes} pushing lane(s), each reachable from ${DISTRIBUTION_LANE})`,
+  + `${pushingLanes} pushing lane(s), each reachable from ${DISTRIBUTION_LANE}; ${branchOps} hardcoded-branch git operation(s))`,
 );
