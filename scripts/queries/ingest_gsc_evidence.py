@@ -173,14 +173,32 @@ def main():
             "first_seen": (prior or {}).get("first_seen", today),
             "last_seen": today,
         }
+        # Carry forward every field this ingest does not itself measure, for ALL
+        # prior rows and not only promoted ones.
+        #
+        # `entry` above is rebuilt from scratch on every run, so any annotation
+        # written by another stage was dropped the moment Search Console
+        # returned that query again. score_discovery_gap.mjs writes exactly such
+        # annotations - openness_score, occupancy, lead_intent_tier and the rest
+        # - and they were being erased by the next ingest, which is the "re-run
+        # overwrites prior measurements" failure: the fields are not recoverable
+        # from GSC, so the reading was gone rather than merely refreshed.
+        #
+        # Deliberately not a named list of fields to preserve: a second list of
+        # the scorer's keys kept here would drift the first time the scorer
+        # gained one. setdefault preserves anything unknown while every key the
+        # ingest measured above still wins.
+        if prior:
+            for k, v in prior.items():
+                entry.setdefault(k, v)
+
         if prior and prior.get("evidence_tier") == "T1":
             updated += 1
         elif prior:
-            # A measured query outranks a modelled one; keep the modelled fields
-            # that T1 does not supply (keyword_difficulty, intent/intent_method,
-            # weak_incumbent_score) rather than discarding them.
-            for k, v in prior.items():
-                entry.setdefault(k, v)
+            # A measured query outranks a modelled one. The modelled fields that
+            # T1 does not supply (keyword_difficulty, intent/intent_method,
+            # weak_incumbent_score) are already carried over by the loop above,
+            # which now applies to every prior row rather than only this branch.
             entry["evidence_tier"] = "T1"
             entry["superseded_tier"] = prior.get("evidence_tier")
             promoted += 1

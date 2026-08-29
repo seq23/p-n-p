@@ -49,19 +49,59 @@ const policyPath = (() => {
   return i >= 0 ? args[i + 1] : 'data/cadence/policy.json';
 })();
 
-const DEFAULT_POLICY = {
-  refresh_window_days: 91,      // the 13-week threshold
-  high_value_window_days: 30,
-  stale_tolerance_pct: 20,
-  new_pages_per_week: 2,
-  refresh_capacity_per_week: 25,
-  require_lastmod: true,
-};
+// There is deliberately NO default rate here.
+//
+// This file used to carry a DEFAULT_POLICY of new_pages_per_week: 2 and
+// refresh_capacity_per_week: 25 - the rates this repo published at before the
+// cadence was throttled to 1 and 8. Those literals were a restatement of a rate
+// that had since changed, and the merge order (`{...DEFAULT_POLICY, ...file}`)
+// meant they were invisible right up until the moment they mattered: with
+// data/cadence/policy.json absent or mistyped after --policy, the gate did not
+// fail. It printed "CADENCE GATE CLEAR ... ceiling 325" and exited 0, having
+// silently swapped a cap of 1/week for 2/week and a maintainable ceiling of 104
+// for 325. A guard whose failure mode is to permit three times as much as the
+// policy allows, while reporting success, is worse than no guard.
+//
+// Every threshold is now read from the policy file and nowhere else. The one
+// number that IS derived - the maintainable ceiling - is computed at runtime as
+// refresh_capacity_per_week x whole weeks in refresh_window_days, so a change to
+// either rate moves it automatically instead of leaving a stale literal behind.
+// A missing or incomplete policy is a hard stop, not a substitution.
+const REQUIRED_POLICY_KEYS = [
+  'refresh_window_days',
+  'high_value_window_days',
+  'stale_tolerance_pct',
+  'new_pages_per_week',
+  'refresh_capacity_per_week',
+  'require_lastmod',
+];
 
 function loadPolicy() {
   const f = path.join(ROOT, policyPath);
-  if (!fs.existsSync(f)) return { ...DEFAULT_POLICY, _source: 'defaults' };
-  return { ...DEFAULT_POLICY, ...JSON.parse(fs.readFileSync(f, 'utf8')), _source: policyPath };
+  if (!fs.existsSync(f)) {
+    console.error(
+      `CADENCE GATE FAILED: no cadence policy at ${policyPath}. The gate will not invent a publication cap - `
+      + 'a substituted default is how a throttled cadence silently reverts to an older, looser rate. '
+      + 'Restore the policy file or pass --policy <path>.',
+    );
+    process.exit(1);
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(fs.readFileSync(f, 'utf8'));
+  } catch (err) {
+    console.error(`CADENCE GATE FAILED: ${policyPath} is not valid JSON (${err.message}).`);
+    process.exit(1);
+  }
+  const missing = REQUIRED_POLICY_KEYS.filter((k) => parsed[k] === undefined || parsed[k] === null);
+  if (missing.length) {
+    console.error(
+      `CADENCE GATE FAILED: ${policyPath} is missing required rate(s): ${missing.join(', ')}. `
+      + 'Every threshold this gate enforces must come from the policy, so a partial policy cannot be topped up with defaults.',
+    );
+    process.exit(1);
+  }
+  return { ...parsed, _source: policyPath };
 }
 
 const policy = loadPolicy();

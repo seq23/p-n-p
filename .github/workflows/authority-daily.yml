@@ -57,6 +57,16 @@ jobs:
           GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
         run: npm run queries:ingest
 
+      # The scorer shipped and no lane ran it, so 19 of the 22 observed evidence
+      # rows sat with no openness reading at all - the repo held the observation
+      # data the score is derived from and simply never derived it. Running it
+      # here, immediately after the ingest, is also what makes the ingest's
+      # rebuild safe: fresh rows are annotated in the same job that measured
+      # them, so the annotation and the measurement are committed together by
+      # the step below.
+      - name: Score the ingested queries for openness and lead intent
+        run: npm run queries:score-discovery-gap
+
       - name: Rebuild the query atlas from the ingested evidence
         run: npm run atlas:build
 
