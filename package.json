@@ -22,7 +22,7 @@
     "validate:profile-purity": "node scripts/validation/validate_profile_purity.js",
     "validate:tree-hygiene": "node scripts/validation/validate_tree_hygiene.js",
     "validate:local-authority": "node scripts/validation/validate_local_authority_contract.js",
-    "validate:all": "node scripts/validation/validate.js && npm run validate:demand-backed-pages",
+    "validate:all": "node scripts/validation/validate.js && npm run validate:demand-backed-pages && npm run validate:local-scope && npm run validate:answer-coverage && npm run validate:internal-links && npm run validate:no-orphan-scripts",
     "validate:llm-surfaces": "node scripts/validation/validate.js",
     "validate:pnp-phase": "npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:no-instruction-leak && npm run validate:no-empty-cells && npm run validate:retrofit-integrity && npm run validate:content-pattern && npm run validate:all && npm run validate:atlas-units",
     "authority:scale:fanout": "node scripts/authority_scale/build_max_fanout.mjs && node scripts/authority_scale/build_fanout_window.mjs && node scripts/authority_scale/build_candidate_backlog.mjs",
@@ -81,6 +81,16 @@
     "validate:retrofit-integrity": "node scripts/validators/validate_retrofit_integrity.js",
     "validate:atlas-units": "node scripts/validators/validate_atlas_units.js",
     "cadence:accept": "node scripts/cadence_accept.js",
-    "validate:cadence-integrity": "node scripts/validators/validate_cadence_gate_integrity.js"
+    "validate:cadence-integrity": "node scripts/validators/validate_cadence_gate_integrity.js",
+    "validate:local-scope": "node scripts/validation/validate_local_scope.js",
+    "validate:answer-coverage": "node scripts/validation/validate_answer_coverage.js",
+    "validate:internal-links": "node scripts/validation/validate_internal_links.js",
+    "validate:no-orphan-scripts": "node scripts/validation/validate_no_orphan_scripts.js",
+    "validate:sitemap-coverage": "node scripts/validation/validate_sitemap_coverage.js",
+    "analysis:link-graph": "node scripts/analysis/link_graph.js",
+    "pages:assemble": "node scripts/assemble_pages_output.js",
+    "queries:score-discovery-gap": "node scripts/queries/score_discovery_gap.mjs",
+    "oneshot:rekey-lastmod-ledger": "node scripts/rekey_lastmod_ledger.js",
+    "oneshot:repair-breadcrumb-parents": "node scripts/repair_breadcrumb_parents.js"
   }
 }

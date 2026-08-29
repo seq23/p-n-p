@@ -13,46 +13,66 @@
       "id": "profile-purity",
       "command": "npm run validate:profile-purity",
       "detects": "Content or configuration that does not belong to the Porch & Party operating profile.",
-      "profiles": ["release", "core"]
+      "profiles": [
+        "release",
+        "core"
+      ]
     },
     {
       "id": "tree-hygiene",
       "command": "npm run validate:tree-hygiene",
       "detects": "Stray, orphaned or non-canonical files in the published tree.",
-      "profiles": ["release", "core"]
+      "profiles": [
+        "release",
+        "core"
+      ]
     },
     {
       "id": "local-authority-contract",
       "command": "npm run validate:local-authority",
       "detects": "Violations of data/ops/pnp_local_authority_contract.json.",
-      "profiles": ["release"]
+      "profiles": [
+        "release"
+      ]
     },
     {
       "id": "no-internal-instruction-leak",
       "command": "npm run validate:no-instruction-leak",
       "detects": "Internal agent/prompt instructions leaking into published HTML.",
-      "profiles": ["release", "core"],
+      "profiles": [
+        "release",
+        "core"
+      ],
       "evidence": "reports/validation/internal-instruction-leak.json"
     },
     {
       "id": "no-empty-table-cells",
       "command": "npm run validate:no-empty-cells",
       "detects": "Empty table cells in published HTML.",
-      "profiles": ["release", "core"],
+      "profiles": [
+        "release",
+        "core"
+      ],
       "evidence": "reports/validation/empty-table-cells.json"
     },
     {
       "id": "content-pattern-contract",
       "command": "npm run validate:content-pattern",
       "detects": "Published pages missing the blocks an answer engine needs to quote and act on them: a direct answer, an h1 that carries the query, tables without empty cells, and one quote-request conversion path. Coverage for checklist, comparison table, concrete numbers, named sources, FAQ and JSON-LD is measured and reported.",
-      "profiles": ["release", "core"],
+      "profiles": [
+        "release",
+        "core"
+      ],
       "evidence": "reports/validation/content-pattern-contract.json"
     },
     {
       "id": "core-html-matrix",
       "command": "npm run validate:all",
       "detects": "Required files, canonicals, entity footers, legal links, internal hrefs, JSON-LD wellformedness and llms.txt extraction surfaces across every published page.",
-      "profiles": ["release", "core"],
+      "profiles": [
+        "release",
+        "core"
+      ],
       "repair_command": null,
       "no_repair_reason": "Composite page-level matrix. Its failures (missing canonical, broken href, missing footer, malformed JSON-LD) are authored defects with no single regenerator. The one derived-artifact defect it also covers - sitemap desync - is attributed precisely by the sitemap-coverage validator below, which does carry a repair."
     },
@@ -60,7 +80,10 @@
       "id": "sitemap-coverage",
       "command": "node scripts/validation/validate_sitemap_coverage.js",
       "detects": "sitemap.xml out of sync with the published HTML tree in either direction.",
-      "profiles": ["release", "core"],
+      "profiles": [
+        "release",
+        "core"
+      ],
       "repair_command": "npm run build:sitemap",
       "repair_rationale": "scripts/generators/update_sitemap.js rewrites sitemap.xml by walking the same HTML tree this validator walks. It is the regenerator of the exact artifact whose staleness is the defect."
     },
@@ -68,7 +91,9 @@
       "id": "max-fanout",
       "command": "npm run validate:max-fanout",
       "detects": "Corruption or absence of the 100k opportunity reserve: missing shards, sha256 mismatch, duplicate ids/queries, undeclared geography, wrong disposition, wrong record count.",
-      "profiles": ["release"],
+      "profiles": [
+        "release"
+      ],
       "repair_command": "npm run authority:scale:fanout",
       "repair_rationale": "build_max_fanout.mjs writes data/authority_scale/fanout_100k/ and its index.json - the exact shard corpus and manifest this validator hashes and counts. Regeneration is deterministic under AUTHORITY_RUN_DATE."
     },
@@ -76,7 +101,9 @@
       "id": "authority-scale",
       "command": "npm run validate:authority-scale",
       "detects": "Violations of the authority-scale governance contract across the admission registry, operational window, velocity governor/decision and the accepted-output freeze.",
-      "profiles": ["release"],
+      "profiles": [
+        "release"
+      ],
       "repair_command": null,
       "no_repair_reason": "Spans artifacts owned by several different actions, two of which (authority:scale:freeze, authority:publish) are governance decisions with publishing side effects rather than regenerations. Running them to clear a validation failure would be a cadence change disguised as a repair."
     },
@@ -84,7 +111,9 @@
       "id": "kpi-truth",
       "command": "npm run validate:kpi-truth",
       "detects": "KPI claims not backed by the observed surfacing ledger.",
-      "profiles": ["release"],
+      "profiles": [
+        "release"
+      ],
       "repair_command": null,
       "no_repair_reason": "The ledger is measured evidence. Nothing in the repo may generate it, and generating it would be fabrication."
     },
@@ -92,7 +121,9 @@
       "id": "citation-yield-feedback",
       "command": "npm run validate:yield",
       "detects": "Scoreboard counts that disagree with the citation-yield observation ledger, and a velocity decision that disagrees with velocity health (upshift or ceiling change while health is UNKNOWN).",
-      "profiles": ["release"],
+      "profiles": [
+        "release"
+      ],
       "repair_command": "npm run authority:yield:build",
       "repair_rationale": "build_citation_yield_feedback.mjs recomputes the scoreboard directly from the observation ledger (fixing scoreboard_truth), and evaluate_velocity.mjs recomputes the velocity decision from velocity health under its stated safety law - unknown always holds, only explicit failure downshifts (fixing upshift_on_unknown / changed_on_unknown). Both are derivations of the exact artifacts the validator compares; neither invents observations."
     },
@@ -100,7 +131,9 @@
       "id": "page-quality-contract",
       "command": "npm run validate:page-quality",
       "detects": "Published pages that do not meet the citation-yield page quality patterns.",
-      "profiles": ["release"],
+      "profiles": [
+        "release"
+      ],
       "repair_command": null,
       "no_repair_reason": "Fails on page substance. No generator in this repo rewrites page substance, and none should do so unattended."
     },
@@ -108,7 +141,9 @@
       "id": "improvement-plan",
       "command": "npm run validate:improvements",
       "detects": "data/authority_scale/page_improvement_plan.json missing, thin (<10 route plans), or carrying plans with no recommended improvements.",
-      "profiles": ["release"],
+      "profiles": [
+        "release"
+      ],
       "repair_command": "npm run authority:improvements:build",
       "repair_rationale": "build_improvement_plan.mjs writes that exact file from the candidate backlog. If the plan is genuinely thin after rebuild the validator stays red, which is the correct outcome."
     },
@@ -116,7 +151,9 @@
       "id": "territory-health",
       "command": "npm run validate:territories",
       "detects": "data/authority_scale/territory_health.json missing a required territory or reporting a thin public surface count.",
-      "profiles": ["release"],
+      "profiles": [
+        "release"
+      ],
       "repair_command": "npm run authority:territories:build",
       "repair_rationale": "build_territory_health.mjs writes that exact file by counting the live public surfaces. A territory that is genuinely thin stays red after the rebuild - the repair refreshes the measurement, it cannot fake it."
     },
@@ -124,7 +161,9 @@
       "id": "distribution-contract",
       "command": "npm run validate:distribution-contract",
       "detects": "Missing .build distribution artifacts, or an IndexNow batch that does not match sitemap.xml exactly.",
-      "profiles": ["release"],
+      "profiles": [
+        "release"
+      ],
       "repair_command": "npm run distribution:prepare",
       "repair_rationale": "build_distribution_artifacts.mjs writes .build/indexnow-batch.txt, .build/indexnow-priority.txt and .build/distribution-manifest.json, deriving the batch from sitemap.xml. batch_sitemap_mismatch is precisely the staleness this command clears."
     },
@@ -132,7 +171,9 @@
       "id": "search-intelligence-contract",
       "command": "npm run validate:search-intelligence",
       "detects": "Violations of R1-R5 of the search-intelligence truth contract, including silent green on a degraded provider and any lane write to a protected publishing path.",
-      "profiles": ["release"],
+      "profiles": [
+        "release"
+      ],
       "repair_command": null,
       "no_repair_reason": "The only writable artifact in the lane (authority_feedback_receipt.json) comes from `search:feedback --write`, which applies authority feedback derived from live provider truth. Running it unattended to clear a red validator would manufacture feedback state with no provider reachable - exactly what R4 forbids."
     },
@@ -140,9 +181,56 @@
       "id": "query-atlas",
       "command": "npm run validate:query-atlas",
       "detects": "Query evidence missing a tier or source_type, a publishable atlas entry on a non-publishable tier or with no volume, and a query_atlas.json that is absent or stale against the evidence file.",
-      "profiles": ["release", "core"],
+      "profiles": [
+        "release",
+        "core"
+      ],
       "repair_command": "npm run atlas:build",
       "repair_rationale": "build_query_atlas.mjs writes data/authority_scale/query_atlas.json from data/queries/evidence/evidence_queries.json. The validator's own failure text says 'run the atlas build first'. This is the pairing that closes the loop after queries:ingest writes new measured T1 evidence."
+    },
+    {
+      "id": "local-scope",
+      "command": "npm run validate:local-scope",
+      "detects": "A service/city/occasion row outside the Memphis-metro allowlist, or a matrix whose declared scope has drifted off \"Memphis metro only\". Also fails if the matrix carries zero rows.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "An out-of-area row is an authored decision about where the business operates. No generator can decide whether the row or the allowlist is wrong."
+    },
+    {
+      "id": "answer-coverage",
+      "command": "npm run validate:answer-coverage",
+      "detects": "An answer record with no id or no direct answer, a direct answer under 70 characters, an answer page named in the index but missing from the tree, or a missing llms-*.txt extraction surface. Also fails if the index carries zero records.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "A thin or missing direct answer is authored content. Regenerating the surfaces would hide the gap rather than close it."
+    },
+    {
+      "id": "no-orphan-scripts",
+      "command": "npm run validate:no-orphan-scripts",
+      "detects": "A tracked script under scripts/ that nothing invokes or imports. An unwired validator enforces nothing and an unwired generator aimed at a live path is a loaded gun.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "Wiring or deleting an orphan is a judgement about whether the repo still wants the rule it encodes. No generator can make that call."
+    },
+    {
+      "id": "internal-links",
+      "command": "npm run validate:internal-links",
+      "detects": "An internal href that resolves to no published file, counting clean URLs (<path>.html), directory indexes and _redirects sources as resolved.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "A broken href is either a typo or a page that was never built. Both are authored defects; a regenerator would only paper over the second."
     }
   ]
 }
