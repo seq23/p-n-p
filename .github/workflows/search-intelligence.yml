@@ -12,6 +12,12 @@ name: Search Intelligence Cycle
 # commit by default. Set commit_evidence=true to persist collected evidence to the
 # branch it ran on.
 
+# NO-DISTRIBUTION-NEEDED: this workflow commits only measurement evidence
+# (data/search_intelligence, observed_surfacing_ledger.json,
+# citation_yield_observations.json). It renders no page and mutates no publish
+# queue, so there is nothing for deploy-distribution.yml to submit. Asserted by
+# scripts/validators/validate_push_reaches_distribution.js.
+
 on:
   workflow_dispatch:
     inputs:

@@ -11,6 +11,8 @@ on:
 
 permissions:
   contents: write
+  # Required by the dispatch step below.
+  actions: write
 
 concurrency:
   group: p-n-p-self-heal
@@ -43,13 +45,27 @@ jobs:
         # bad repair cannot be pushed.
         run: npm run validate:all
       - name: Commit only validated repair output
+        id: commit
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
             echo "No safe repairs were needed."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "Self-heal: apply bounded validated repairs"
             git push origin main
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
+
+      # This repair rewrites published pages, and deploy-distribution.yml - the only
+      # workflow that submits to Search Console - runs on `push: branches: [main]`.
+      # A GITHUB_TOKEN push raises no push event, so without this the repaired pages
+      # were committed and submitted nowhere. Same defect as authority-daily.yml;
+      # scripts/validators/validate_push_reaches_distribution.js now asserts both.
+      - name: Ask Deploy Distribution to submit the repaired pages
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run deploy-distribution.yml --ref main

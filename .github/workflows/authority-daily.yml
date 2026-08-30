@@ -7,13 +7,14 @@ on:
 
 permissions:
   contents: write
+  # Needed by the final step, which dispatches Deploy Distribution. See the comment
+  # on that step: a push made with GITHUB_TOKEN never triggers another workflow, so
+  # this cycle has to ask for distribution explicitly.
+  actions: write
 
 concurrency:
   group: pnp-authority-daily
   cancel-in-progress: false
-
-env:
-  # across the portfolio at daily cadence. 3 still names the incumbents
 
 jobs:
   authority-cycle:
@@ -127,13 +128,40 @@ jobs:
           npm run cadence:accept -- --reason "Daily governed authority cycle for $(date -u +%F), run ${{ github.run_id }}. The cadence gate cleared before this step, so these pages are inside the weekly publication cap."
 
       - name: Commit governed changes if any
+        id: commit
         run: |
           git config user.name "pnp-authority-bot"
           git config user.email "actions@users.noreply.github.com"
           git add -A
           if git diff --cached --quiet; then
             echo "No governed authority changes to commit."
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
           else
             git commit -m "chore: run governed authority cycle"
             git push
+            echo "pushed=true" >> "$GITHUB_OUTPUT"
           fi
+
+      # WITHOUT THIS STEP THE PUBLISHED PAGES ARE NEVER SUBMITTED ANYWHERE.
+      #
+      # deploy-distribution.yml is the only workflow that runs distribution -
+      # distribution_scripts/deploy_distribution.sh, which is what submits to Google
+      # Search Console - and it triggers on `push: branches: [main]` and nothing else.
+      # The push above is made with the default GITHUB_TOKEN, and GitHub deliberately
+      # does NOT start workflows from pushes made with that token, precisely to stop
+      # recursive runs. So every governed cycle committed its pages and then quietly
+      # ended: the pages landed in the repo and were never submitted.
+      #
+      # A PAT would also solve it but needs an owner-held secret. Dispatching the
+      # workflow explicitly does not: a workflow_dispatch sent through the API DOES
+      # run under GITHUB_TOKEN (it is the push event specifically that is suppressed),
+      # which is the same pattern local-guides-citation-velocity uses to chain its
+      # release into validate-repo.yml. `actions: write` above is what permits it.
+      - name: Ask Deploy Distribution to submit the cycle
+        if: steps.commit.outputs.pushed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Governed cycle pushed to main. A GITHUB_TOKEN push raises no push event,"
+          echo "so dispatching Deploy Distribution explicitly."
+          gh workflow run deploy-distribution.yml --ref main
