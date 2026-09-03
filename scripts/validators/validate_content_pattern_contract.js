@@ -110,6 +110,16 @@ const FORBIDDEN = {
     why: 'statistic presented with no source on the page or beside it' },
 };
 
+// Class matching on a bare substring is how `citation-definition` came to
+// satisfy the `source_block` check. Splitting the attribute into its whitespace-
+// separated tokens and testing each one makes "has class X" mean what it says.
+function hasClassToken(html, re) {
+  for (const m of String(html).matchAll(/class="([^"]*)"/gi)) {
+    for (const token of m[1].split(/\s+/)) if (token && re.test(token)) return true;
+  }
+  return false;
+}
+
 // A breadcrumb trail is an <ol> because the steps are ordered, but it is site
 // navigation, not a protocol and not a checklist. Counting it would have moved
 // "protocol" coverage from 6.6% to 85.8% the moment breadcrumbs were added to
@@ -163,8 +173,29 @@ const CHECKS = [
     why: 'no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor' },
 
   // Named in the spec and never checked, so coverage silently omitted them.
+  // Two substring faults made this report coverage it did not have.
+  //
+  // `class="[^"]*citation` matched `class="info-panel citation-definition"`,
+  // so the three pages carrying a DEFINITION callout were counted as carrying a
+  // SOURCES block. Proof it was the definition and nothing else: the
+  // source_block and definition_callout gap lists in the evidence file were
+  // byte-identical 106-page sets, no page on disk contains `source-block`, and
+  // those three pages carry zero absolute links. Reported 2.8%, actual 0%.
+  //
+  // The second clause counted ANY absolute link - including a link to this
+  // site's own pages, the quote form and Google Fonts - as named provenance.
+  // That is the opposite of what a sources block asserts, and it is looser than
+  // the `named_sources` check twelve lines above, which already excludes all
+  // three. Both now use EXTERNAL_SOURCE, so the two source checks cannot
+  // disagree about what a source is.
+  //
+  // Class matching is whole-token, so a block has to actually be a sources
+  // block rather than merely contain those letters.
   { id: 'source_block', blocking: false,
-    test: (h) => /data-(?:bhpc-)?(?:agent-block|content-block)="source_block"|class="[^"]*(?:source-block|sources|citation)|<h[23][^>]*>\s*(?:Sources?|References?)/i.test(h) || /<a[^>]+href="https?:\/\//i.test(h),
+    test: (h) => /data-(?:bhpc-)?(?:agent-block|content-block)="source_block"/i.test(h)
+      || hasClassToken(h, /^(?:source-block|sources|citations?)$/i)
+      || /<h[23][^>]*>\s*(?:Sources?|References?)\b/i.test(h)
+      || EXTERNAL_SOURCE.test(h),
     why: 'no sources block - a claim with no visible provenance is the first thing an engine discounts' },
   { id: 'protocol', blocking: false,
     test: (h) => /data-(?:bhpc-)?(?:agent-block|content-block)="protocol"|class="[^"]*protocol|<h[23][^>]*>[^<]*(?:Protocol|Step-by-step|How to)\b/i.test(h) || /<ol[\s>]/i.test(withoutBreadcrumbs(h)),
@@ -176,6 +207,51 @@ const CHECKS = [
     test: (h) => /data-(?:bhpc-)?(?:agent-block|content-block)="prompt_template"|class="[^"]*(?:copy-paste-prompt|prompt-template)|<pre[^>]*>[\s\S]*?<code/i.test(h),
     why: 'no copy-ready prompt - the artifact this audience actually reuses' },
 ];
+
+// ------------------------------------------------- the spec must reach a PRODUCER
+//
+// The guard below this one enforces spec -> validator parity: add a block to the
+// spec without a check and it fails loudly. Nothing enforced spec -> GENERATOR
+// parity, and that asymmetry is the whole defect. `prompt_template` sat in the
+// spec with a detector, no emitter anywhere in the repo, no template partial and
+// no data field - so 0% across 109 pages was not a backlog anyone could work
+// down, it was unreachable by construction. It printed as a gap on every run for
+// weeks and reached no queue, which is "exists but nothing invokes it" wearing a
+// coverage number.
+//
+// The link is made with the block's OWN test predicate, run against generator
+// source instead of rendered HTML. If no generator contains anything its own
+// detector would recognise, no page can ever carry the block. Using the same
+// predicate for both sides is what stops the two from drifting apart again: a
+// detector that is changed without an emitter fails here.
+//
+// Validators are excluded from the producer scan on purpose. They contain every
+// marker string by necessity, and counting a detector as an emitter would make
+// this guard pass on exactly the defect it exists to catch.
+const PRODUCER_DIRS = ['templates', 'scripts'];
+const PRODUCER_EXCLUDE = /(^|\/)(validators|validation|node_modules)(\/|$)/;
+function producerSources() {
+  const out = [];
+  const walkSrc = (dir) => {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const abs = path.join(dir, entry.name);
+      const rel = path.relative(ROOT, abs);
+      if (PRODUCER_EXCLUDE.test(rel)) continue;
+      if (entry.isDirectory()) { walkSrc(abs); continue; }
+      if (!/\.(?:js|mjs|cjs)$/.test(entry.name)) continue;
+      out.push({ file: rel, src: fs.readFileSync(abs, 'utf8') });
+    }
+  };
+  for (const d of PRODUCER_DIRS) walkSrc(path.join(ROOT, d));
+  return out;
+}
+const PRODUCERS = producerSources();
+if (!PRODUCERS.length) {
+  console.error('CONTENT PATTERN CONTRACT FAILED: producer scan found zero generator sources under '
+    + `${PRODUCER_DIRS.join(', ')}. A scan that examined nothing must not report parity.`);
+  process.exit(1);
+}
 
 // The spec is the contract. If it asks for a block this validator cannot check,
 // the contract is not being enforced and reporting PASS would be false.
@@ -189,6 +265,50 @@ if (__unimplemented.length || __unenforced.length) {
   for (const id of __unenforced) console.log(`  spec forbids "${id}" but nothing detects it`);
   console.log('CONTENT PATTERN CONTRACT FAIL: spec is not fully enforced');
   process.exit(1);
+}
+
+// ---- spec -> generator parity, plus the named stops that opt a block out.
+//
+// A block is either PRODUCIBLE (some generator emits something its own detector
+// recognises) or explicitly retired with a written reason. There is no third
+// state, because the third state is what `prompt_template` was: measured
+// forever, produced never, and actionable by nobody.
+const CHECK_BY_ID = new Map(CHECKS.map((c) => [c.id, c]));
+const SPEC_BY_ID = new Map((spec.blocks || []).map((b) => [b.id, b]));
+const applies = (b) => b.applies_to_repo !== false;
+
+const producerFor = (id) => {
+  const check = CHECK_BY_ID.get(id);
+  if (!check) return null;
+  const hit = PRODUCERS.find((f) => check.test(f.src));
+  return hit ? hit.file : null;
+};
+
+const namedStops = [];
+const orphanBlocks = [];
+const staleStops = [];
+
+for (const block of spec.blocks || []) {
+  const emitter = producerFor(block.id);
+  if (!applies(block)) {
+    // A retired block must say why, in the spec, where a reviewer reads it.
+    if (!String(block.named_stop || '').trim()) {
+      staleStops.push(`spec block "${block.id}" sets applies_to_repo false with no named_stop. `
+        + 'An opt-out with no stated reason is a silenced check, not a decision.');
+      continue;
+    }
+    // And it must still be absent. The moment a page carries the block, the
+    // opt-out is a lie about this repo and has to be reinstated rather than
+    // quietly suppressing a block that now exists.
+    namedStops.push({ id: block.id, why: block.named_stop, emitter });
+    continue;
+  }
+  if (!emitter) {
+    orphanBlocks.push(`spec block "${block.id}" is required of this repo (requested ${block.requested} times) `
+      + 'but NO generator under templates/ or scripts/ emits anything its own detector recognises. '
+      + 'Its coverage can never rise above 0% by any amount of content work, so reporting it as a gap '
+      + 'sends nobody to a fix. Add an emitter, or retire it with applies_to_repo:false and a named_stop.');
+  }
 }
 
 const pages = [];
@@ -215,6 +335,40 @@ for (const rel of pages) {
     if (check.test(html)) continue;
     if (check.blocking) blockingFailures.push({ path: rel, check: check.id, why: check.why });
     else gaps[check.id].push(rel);
+  }
+}
+
+// ---- resolve the parity verdicts now that pages have actually been read.
+//
+// A retired block that has started appearing means the opt-out is stale: the
+// repo changed and the spec did not. That is a hard fail rather than a silent
+// pass, so the flag can never become a way to stop looking at something.
+for (const stop of namedStops) {
+  const present = pages.length - (gaps[stop.id] ? gaps[stop.id].length : pages.length);
+  if (present > 0) {
+    staleStops.push(`spec block "${stop.id}" is retired with applies_to_repo:false, but ${present} page(s) now carry it. `
+      + 'The opt-out is out of date. Set applies_to_repo true and delete the named_stop.');
+  }
+}
+
+// A STARVED lane: an emitter exists and is wired, and no data ever reaches it.
+// source_block is the live example - templates/page-shell.js defines and calls
+// sourceBlock(entry.sources), and zero of the 29 entries in
+// data/queries/query_universe.json carry a `sources` field, so the call site
+// runs on every page and returns an empty string every time. This is the
+// difference that decides where the work goes: an orphan block needs an
+// engineer, a starved block needs data. Reported, not blocking, because
+// supplying real named sources is editorial and a build cannot invent them -
+// but it is reported by name, with the count, so it reaches the improvement
+// plan instead of dissolving into a coverage percentage.
+const starvedBlocks = [];
+for (const block of spec.blocks || []) {
+  if (!applies(block)) continue;
+  const check = CHECK_BY_ID.get(block.id);
+  if (!check || check.blocking) continue;
+  const missing = gaps[block.id] ? gaps[block.id].length : 0;
+  if (missing === pages.length && pages.length > 0 && producerFor(block.id)) {
+    starvedBlocks.push({ id: block.id, emitter: producerFor(block.id), pages_missing: missing });
   }
 }
 
@@ -274,6 +428,17 @@ fs.writeFileSync(EVIDENCE, `${JSON.stringify({
   status: blockingFailures.length ? (ENFORCEMENT === 'block' ? 'FAIL' : 'REPORTED') : 'PASS',
   blocking_failures: blockingFailures.length,
   summary,
+  // The parity verdicts are written to evidence, not just printed, because the
+  // improvement plan reads this file. A gap that only ever existed in a CI log
+  // reached no work queue, which is how prompt_template stayed at 0% for weeks.
+  spec_producer_parity: {
+    generator_sources_scanned: PRODUCERS.length,
+    blocks_in_spec: (spec.blocks || []).length,
+    blocks_required_of_this_repo: (spec.blocks || []).filter(applies).length,
+    orphan_blocks: orphanBlocks,
+    starved_blocks: starvedBlocks,
+    named_stops: namedStops.map((n) => ({ id: n.id, why: n.why })),
+  },
   recommendation_summary_distinctness: RS_DISTINCTNESS,
   worst_gaps: Object.fromEntries(Object.entries(gaps).map(([k, v]) => [k, v.slice(0, 25)])),
   // The whole gap list, not the first 25. The 25-item slice above is what lets a
@@ -287,6 +452,11 @@ for (const s of summary) {
   const tag = s.blocking ? 'BLOCKING' : 'gap     ';
   console.log(`  ${tag} ${s.id.padEnd(22)} coverage ${String(s.coverage_pct).padStart(5)}%  missing on ${s.pages_missing}`);
 }
+for (const n of namedStops) console.log(`  NAMED STOP ${n.id}: ${n.why}`);
+for (const b of starvedBlocks) {
+  console.log(`  STARVED  ${b.id}: ${b.emitter} emits this block and is called on every page, but no record supplies the data, `
+    + `so it renders empty on all ${b.pages_missing}. This needs content, not code.`);
+}
 const d = RS_DISTINCTNESS;
 console.log(`  recommendation_summary: ${d.total_blocks} blocks, ${d.distinct_texts} distinct (ratio ${d.ratio})`);
 if (d.texts_on_more_than_one_page) {
@@ -295,6 +465,16 @@ if (d.texts_on_more_than_one_page) {
     + ' duplicate page coverage to resolve in data/queries/query_universe.json, not filler.');
   for (const w of d.worst.slice(0, 5)) console.log(`    x${w.pages} ${JSON.stringify(w.text.slice(0, 90))}`);
 }
+// An orphan block or a stale opt-out is a defect in the contract itself, not in
+// a page, so it fails regardless of enforcement mode. A contract that asks for
+// something nothing can produce is not a contract anyone can satisfy.
+if (orphanBlocks.length || staleStops.length) {
+  console.error(`\nCONTENT PATTERN CONTRACT FAILED: ${orphanBlocks.length + staleStops.length} spec/generator parity defect(s).`);
+  for (const m of orphanBlocks) console.error(`  ORPHAN     ${m}`);
+  for (const m of staleStops) console.error(`  STALE STOP ${m}`);
+  process.exit(1);
+}
+
 if (blockingFailures.length) {
   const log = ENFORCEMENT === 'block' ? console.error : console.warn;
   log(`\nCONTENT PATTERN CONTRACT: ${blockingFailures.length} blocking gap(s)`);
