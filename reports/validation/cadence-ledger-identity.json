@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-09-03T06:29:01.771Z",
+  "validator": "cadence_ledger_identity",
+  "status": "PASS",
+  "hard_failures": 0,
+  "ledger_urls": 112,
+  "sitemap_urls": 112,
+  "fixture_cases": 10,
+  "callers_checked": 2,
+  "failures": []
+}
