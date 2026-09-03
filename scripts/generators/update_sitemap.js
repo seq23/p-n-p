@@ -51,7 +51,12 @@ const ledger = ledgerLib.load();
 // the redirecting form in a sitemap points a crawler at a URL that is not the
 // one that will be indexed, for the six section indexes this site has. Only the
 // root index.html was special-cased before.
-const canonicalPath = (rel) => rel === 'index.html' ? '' : rel.replace(/(^|\/)index\.html$/, '$1');
+// ...and the same is true of the `.html` suffix itself: the origin answers
+// /pricing.html with a 308 to /pricing. Both rules now live in one place, so
+// the sitemap, the canonical tags and the guard cannot disagree about what a
+// public URL on this site looks like.
+const { sitePathForFile } = require('../lib/site_url');
+const canonicalPath = (rel) => sitePathForFile(rel).replace(/^\//, '');
 const pages = {};
 for (const rel of htmlFiles) {
   const loc = `${domain}/${canonicalPath(rel)}`;

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 const fs = require('fs');
 const path = require('path');
+const { siteUrlForFile } = require('../lib/site_url');
 
 const root = path.resolve(__dirname, '..', '..');
 let failed = false;
@@ -104,8 +105,13 @@ for (const file of htmlFiles) {
   if (!/<script type=["']application\/ld\+json["']>[\s\S]*?<\/script>/i.test(html)) fail(`${rel} missing JSON-LD`);
   if (!/hello@porchandparty901\.com/i.test(html)) fail(`${rel} missing contact email`);
   if (!/Kerseta LLC/i.test(html)) fail(`${rel} missing operating entity footer`);
-  if (!/href=["']\/privacy-policy\.html["']/i.test(html)) fail(`${rel} missing privacy link`);
-  if (!/href=["']\/terms-and-conditions\.html["']/i.test(html)) fail(`${rel} missing terms link`);
+  // These used to demand the `.html` form specifically. The origin 308s
+  // /privacy-policy.html to /privacy-policy, so the form this check required
+  // was the redirecting one - the validator was holding the defect in place.
+  // Accept either form; validate:canonical-resolves is what insists on the
+  // served one.
+  if (!/href=["']\/privacy-policy(\.html)?["']/i.test(html)) fail(`${rel} missing privacy link`);
+  if (!/href=["']\/terms-and-conditions(\.html)?["']/i.test(html)) fail(`${rel} missing terms link`);
 
   const canonical = matchAttr(html, 'link', 'rel', 'canonical', 'href');
   if (!canonical || !canonical.startsWith('https://porchandparty901.com/')) fail(`${rel} missing valid canonical`);
@@ -138,8 +144,9 @@ for (const file of htmlFiles) {
   // six pages that are in the sitemap under the URL that actually gets indexed.
   // Canonicalise the same way the generator does, rather than special-casing
   // the root index alone.
-  const canonicalRel = rel.replace(/(^|\/)index\.html$/, '$1');
-  const sitemapRel = `<loc>https://porchandparty901.com/${canonicalRel}</loc>`;
+  // ...and the `.html` suffix redirects for the same reason, so the sitemap
+  // form is derived from the shared definition rather than restated here.
+  const sitemapRel = `<loc>${siteUrlForFile(rel)}</loc>`;
   if (!noindex && sitemap && !sitemap.includes(sitemapRel)) fail(`${rel} missing from sitemap`);
   if (noindex && sitemap && sitemap.includes(sitemapRel)) fail(`${rel} is noindex but listed in sitemap`);
 

@@ -3,6 +3,14 @@ const areas = require('../data/service_areas/areas.json');
 
 const fs = require('fs');
 const path = require('path');
+// Cloudflare Pages 308s every `/x.html` on this origin to `/x`, so any URL this
+// template writes with a `.html` suffix - the canonical, og:url, the JSON-LD
+// `url`/`@id`, and every nav, footer and CTA href - names a redirect rather
+// than the page. That is what put "Canonical points to redirect: 219 URLs" on
+// the 2026-09-03 Ahrefs crawl. Rather than hand-correcting each of the ~48
+// literals below and hoping the next edit remembers, everything this module
+// returns goes out through the one shared definition of the public URL form.
+const { normalizeHtmlUrls } = require('../scripts/lib/site_url');
 
 function nav() {
   return `<header class="site-header"><div class="container header-inner"><a href="/" aria-label="Porch and Party home"><span class="brand-script">Porch &amp; Party</span></a><nav class="site-nav" aria-label="Primary navigation"><a href="/services/porch-decorating.html">Porch</a><a href="/services/celebration-setups.html">Celebrations</a><a href="/services/grazing-and-event-styling.html">Grazing &amp; Events</a><a href="/pricing.html">Pricing</a><a href="/how-it-works.html">How It Works</a><a href="/contact.html" class="btn-primary">Request a Quote</a></nav></div></header>`;
@@ -424,4 +432,8 @@ function renderPage(entry) {
 // renders the section index pages inside the same header and footer as every
 // other generated page, rather than keeping a second copy of that markup that
 // could drift.
-module.exports = { renderPage, nav, footer };
+module.exports = {
+  renderPage: (entry) => normalizeHtmlUrls(renderPage(entry)),
+  nav: () => normalizeHtmlUrls(nav()),
+  footer: () => normalizeHtmlUrls(footer()),
+};
