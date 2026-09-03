@@ -66,7 +66,10 @@ const leadLength = (html) => {
 // The one conversion destination: the quote request. /contact.html carries the
 // Google Form the business actually takes requests through, plus the direct
 // address. Service and pricing pages are hubs, not the request surface.
-const CONVERSION = /href="\/contact\.html|forms\.gle\/|mailto:hello@porchandparty901\.com/i;
+// /contact.html 308s to /contact on this origin, so matching only the `.html`
+// form meant this contract required the redirecting link. Both forms count as
+// the same one conversion destination.
+const CONVERSION = /href="\/contact(\.html)?"|forms\.gle\/|mailto:hello@porchandparty901\.com/i;
 
 // forms.gle is the conversion destination and fonts are assets - neither is a
 // cited source, so neither may satisfy the named-source check.

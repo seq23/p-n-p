@@ -1,11 +1,17 @@
 #!/usr/bin/env node
 import fs from 'node:fs';import path from 'node:path';
+import { internalHref } from '../lib/site_url.js';
 const ROOT=process.cwd(), sitemap=fs.readFileSync(path.join(ROOT,'sitemap.xml'),'utf8');
 const urls=[...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m=>m[1]).filter(Boolean);
 if(!urls.length)throw new Error('No URLs in sitemap.xml');
 const admissions=JSON.parse(fs.readFileSync(path.join(ROOT,'data/content/page_admission_registry.json'),'utf8')).admissions||[];
-const admittedUrls=admissions.filter(x=>x.status==='admitted').map(x=>`https://porchandparty901.com${x.route}.html`);
-const priority=[...new Set([...admittedUrls.slice(0,60),'https://porchandparty901.com/','https://porchandparty901.com/pricing.html','https://porchandparty901.com/contact.html'])].filter(u=>urls.includes(u));
+// The origin 308s `${route}.html` to `${route}`, so appending `.html` here
+// built a priority list of redirects - which the sitemap filter below then
+// rejected outright (`priority_contains_non_sitemap_url`). Routes in the
+// admission registry are already in served form; normalize anyway so this
+// producer cannot drift from the rest of the site.
+const admittedUrls=admissions.filter(x=>x.status==='admitted').map(x=>internalHref(`https://porchandparty901.com${x.route}`));
+const priority=[...new Set([...admittedUrls.slice(0,60),'https://porchandparty901.com/','https://porchandparty901.com/pricing','https://porchandparty901.com/contact'])].filter(u=>urls.includes(u));
 fs.mkdirSync(path.join(ROOT,'.build'),{recursive:true});
 fs.writeFileSync(path.join(ROOT,'.build/indexnow-priority.txt'),priority.join('\n')+'\n');
 fs.writeFileSync(path.join(ROOT,'.build/indexnow-batch.txt'),urls.join('\n')+'\n');

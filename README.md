@@ -23,6 +23,7 @@ them, and the generator knows nothing about either:
 |---|---|---|
 | `scripts/install_clarity.js` | `<script data-clarity-loader>` | the page records no analytics sessions, silently, forever |
 | `scripts/build_related_navigation.js` | `<section data-nav="related-pages">` | the page is orphaned; orphan count is this portfolio's strongest measured correlate with being cited |
+| `scripts/normalize_public_urls.js` | the 200-serving form of every self-referential URL | the page's canonical names a redirect, which is what tells Google to index a URL that never serves |
 
 Measured 2026-08-27: all 26 template pages differed from a fresh render, every
 one **smaller by 1,500–1,900 bytes**, and all 26 are among the 98 routes frozen
@@ -42,6 +43,24 @@ Two guards now exist:
   an active mutation scope.
 - `npm run validate:retrofit-integrity` (in `validate:pnp-phase`) hard-fails if
   any published page has lost either block by any other route.
+
+## Public URL form
+
+This origin rewrites requests before it serves them. Verified live on
+2026-09-03: `/pricing.html` 308s to `/pricing`, `/index.html` 308s to `/`, and
+`/answers` 308s to `/answers/`. So the `.html` form of any page here is a
+redirect, and only the extensionless form serves 200.
+
+`scripts/lib/site_url.js` is the single definition of that rule.
+`templates/page-shell.js` renders through it, `scripts/generators/update_sitemap.js`
+and `scripts/authority_scale/build_distribution_artifacts.mjs` build their URLs
+from it, and `scripts/normalize_public_urls.js` — the last pass in `build:all` —
+applies it to pages the other producers wrote. `npm run validate:canonical-resolves`
+asserts the result, so nothing here is trusted on faith.
+
+**Do not reintroduce a `.html` link or canonical.** Ahrefs scored this site 33
+with 331 errors on 2026-09-03, and the single largest item was 219 URLs whose
+canonical pointed at a redirect.
 
 **To change a page the generator owns:** edit its entry in
 `data/queries/query_universe.json`, render that one page, then re-run the

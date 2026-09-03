@@ -17,14 +17,14 @@
     "retrofit:answer-cards": "node scripts/retrofit_answer_cards.js",
     "retrofit:thin-pages": "node scripts/retrofit_thin_pages.js",
     "retrofit:root-pages": "node scripts/retrofit_root_pages.js",
-    "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/build_section_indexes.js && node scripts/generators/update_sitemap.js && node scripts/install_clarity.js",
+    "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/build_section_indexes.js && node scripts/generators/update_sitemap.js && node scripts/install_clarity.js && node scripts/normalize_public_urls.js",
     "publish:queue": "node scripts/generators/publish_from_queue.js",
     "validate:profile-purity": "node scripts/validation/validate_profile_purity.js",
     "validate:tree-hygiene": "node scripts/validation/validate_tree_hygiene.js",
     "validate:local-authority": "node scripts/validation/validate_local_authority_contract.js",
     "validate:all": "node scripts/validation/validate.js && npm run validate:demand-backed-pages && npm run validate:local-scope && npm run validate:answer-coverage && npm run validate:internal-links && npm run validate:no-orphan-scripts",
     "validate:llm-surfaces": "node scripts/validation/validate.js",
-    "validate:pnp-phase": "npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:no-instruction-leak && npm run validate:no-empty-cells && npm run validate:retrofit-integrity && npm run validate:content-pattern && npm run validate:all && npm run validate:atlas-units",
+    "validate:pnp-phase": "npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:no-instruction-leak && npm run validate:no-empty-cells && npm run validate:retrofit-integrity && npm run validate:canonical-resolves && npm run validate:content-pattern && npm run validate:all && npm run validate:atlas-units",
     "authority:scale:fanout": "node scripts/authority_scale/build_max_fanout.mjs && node scripts/authority_scale/build_fanout_window.mjs && node scripts/authority_scale/build_candidate_backlog.mjs",
     "authority:scale:admit": "node scripts/authority_scale/build_admission_registry.mjs",
     "authority:scale:freeze": "node scripts/authority_scale/frozen_outputs.mjs freeze",
@@ -94,6 +94,8 @@
     "pages:assemble": "node scripts/assemble_pages_output.js",
     "queries:score-discovery-gap": "node scripts/queries/score_discovery_gap.mjs",
     "oneshot:rekey-lastmod-ledger": "node scripts/rekey_lastmod_ledger.js",
-    "oneshot:repair-breadcrumb-parents": "node scripts/repair_breadcrumb_parents.js"
+    "oneshot:repair-breadcrumb-parents": "node scripts/repair_breadcrumb_parents.js",
+    "normalize:public-urls": "node scripts/normalize_public_urls.js",
+    "validate:canonical-resolves": "node scripts/validators/validate_canonical_resolves.js"
   }
 }
