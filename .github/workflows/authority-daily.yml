@@ -97,6 +97,11 @@ jobs:
         run: |
           export AUTHORITY_RUN_DATE="$(date -u +%F)"
           npm run authority:scale:fanout
+          # Measure the content-block gaps BEFORE building the plan that is supposed
+          # to carry them. The builder now hard-fails without the contract report,
+          # and running it first is what keeps the plan a cycle current instead of
+          # a cycle stale.
+          npm run validate:content-pattern
           npm run authority:improvements:build
           npm run authority:yield:build
           npm run authority:publish
