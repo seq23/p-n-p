@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "generated_for_date": "2026-09-03",
   "source": "data/authority_scale/candidate_backlog.json",
   "twin_agent_used": false,
@@ -13,6 +13,105 @@
   ],
   "truth_boundary": "This is a deterministic improvement plan, not evidence that any external engine cited or ranked a page.",
   "route_plan_count": 22,
+  "content_block_gaps": {
+    "measured_by": "reports/validation/content-pattern-contract.json",
+    "measured_at": "2026-09-03T23:16:54.285Z",
+    "pages_checked": 109,
+    "truth_boundary": "These gaps are measured against the pages present when the contract last ran. This builder runs before the publish step in the daily cycle, so a page published later in the same run is measured on the next cycle rather than this one. Over-listing is safe; a route named here is never a route that does not exist.",
+    "blocks": [
+      {
+        "id": "direct_answer",
+        "requested": 913,
+        "applies_to_repo": true,
+        "named_stop": null,
+        "coverage_pct": 100,
+        "pages_missing": 0,
+        "lane": "covered"
+      },
+      {
+        "id": "recommendation_summary",
+        "requested": 913,
+        "applies_to_repo": true,
+        "named_stop": null,
+        "coverage_pct": 97.2,
+        "pages_missing": 3,
+        "lane": "gap_needs_content"
+      },
+      {
+        "id": "checklist",
+        "requested": 429,
+        "applies_to_repo": true,
+        "named_stop": null,
+        "coverage_pct": 100,
+        "pages_missing": 0,
+        "lane": "covered"
+      },
+      {
+        "id": "source_block",
+        "requested": 384,
+        "applies_to_repo": true,
+        "named_stop": null,
+        "coverage_pct": 0,
+        "pages_missing": 109,
+        "lane": "starved_needs_data"
+      },
+      {
+        "id": "protocol",
+        "requested": 305,
+        "applies_to_repo": true,
+        "named_stop": null,
+        "coverage_pct": 2.8,
+        "pages_missing": 106,
+        "lane": "gap_needs_content"
+      },
+      {
+        "id": "cta_callout",
+        "requested": 272,
+        "applies_to_repo": true,
+        "named_stop": null,
+        "coverage_pct": 99.1,
+        "pages_missing": 1,
+        "lane": "gap_needs_content"
+      },
+      {
+        "id": "comparison_table",
+        "requested": 258,
+        "applies_to_repo": true,
+        "named_stop": null,
+        "coverage_pct": 1.8,
+        "pages_missing": 107,
+        "lane": "gap_needs_content"
+      },
+      {
+        "id": "prompt_template",
+        "requested": 255,
+        "applies_to_repo": false,
+        "named_stop": "NOT APPLICABLE TO THIS REPO. The 913 recommendations behind this spec were collected across a portfolio whose other members publish technical and advisory content, where a copy-ready prompt is the artifact a reader reuses. Porch & Party publishes event-decor and porch-styling answers for Memphis homeowners; there is no prompt for a reader to copy, and emitting one on 109 decor pages would be scaffolding of exactly the kind the template-share ceiling and the fabricated-content rules exist to prevent. Retired by flag rather than deleted: the block stays in the spec and the detector stays live, so the day this repo does publish a copyable prompt the flag below fails and the entry is reinstated. Reinstate by setting applies_to_repo true and adding an emitter to templates/page-shell.js.",
+        "coverage_pct": 0,
+        "pages_missing": 109,
+        "lane": "named_stop"
+      },
+      {
+        "id": "trust_block",
+        "requested": 215,
+        "applies_to_repo": true,
+        "named_stop": null,
+        "coverage_pct": 2.8,
+        "pages_missing": 106,
+        "lane": "gap_needs_content"
+      },
+      {
+        "id": "definition_callout",
+        "requested": 196,
+        "applies_to_repo": true,
+        "named_stop": null,
+        "coverage_pct": 2.8,
+        "pages_missing": 106,
+        "lane": "gap_needs_content"
+      }
+    ],
+    "routes_joined": 22
+  },
   "plans": [
     {
       "route": "/authority/event-decorator-memphis.html",
@@ -98,9 +197,23 @@
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits."
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 32
+      "opportunity_count": 32,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/corporate-grazing-tables-memphis.html",
@@ -186,9 +299,23 @@
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits."
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 23
+      "opportunity_count": 23,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/events/index.html",
@@ -274,9 +401,23 @@
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
-        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote."
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 19
+      "opportunity_count": 19,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/christmas-porch-decorating-memphis.html",
@@ -362,9 +503,23 @@
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work."
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 19
+      "opportunity_count": 19,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/can-i-book-decor-only-without-event-planning.html",
@@ -450,9 +605,23 @@
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits."
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 14
+      "opportunity_count": 14,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/birthday-hotel-room-setup-ideas-memphis.html",
@@ -518,9 +687,23 @@
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits."
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 9
+      "opportunity_count": 9,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/how-much-does-grazing-tables-cost.html",
@@ -586,9 +769,23 @@
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits."
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 9
+      "opportunity_count": 9,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/front-porch-styling-memphis.html",
@@ -674,9 +871,23 @@
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation."
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 20
+      "opportunity_count": 20,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/services/budget-party-decor-memphis.html",
@@ -743,9 +954,23 @@
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work."
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 9
+      "opportunity_count": 9,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/halloween-porch-decorating-memphis.html",
@@ -800,9 +1025,23 @@
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
-        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose."
+        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 7
+      "opportunity_count": 7,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/fall-porch-decorating-ideas-southern-homes.html",
@@ -882,9 +1121,23 @@
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
-        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote."
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 11
+      "opportunity_count": 11,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/services/baby-shower-decor-memphis.html",
@@ -945,9 +1198,23 @@
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
-        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote."
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 8
+      "opportunity_count": 8,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/baby-shower-decorations-memphis.html",
@@ -1007,9 +1274,23 @@
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work."
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 8
+      "opportunity_count": 8,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/what-is-included-in-party-decor-setup.html",
@@ -1062,9 +1343,23 @@
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation."
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 7
+      "opportunity_count": 7,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/services/porch-decorating.html",
@@ -1119,9 +1414,21 @@
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work."
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 7
+      "opportunity_count": 7,
+      "missing_content_blocks": [
+        "source_block",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/corporate-event-decor-memphis.html",
@@ -1169,9 +1476,23 @@
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits."
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 6
+      "opportunity_count": 6,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/hotel-room-decorations-memphis.html",
@@ -1220,9 +1541,23 @@
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation."
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 6
+      "opportunity_count": 6,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/events/bridal-shower-decorations-memphis.html",
@@ -1295,9 +1630,23 @@
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
-        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose."
+        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 10
+      "opportunity_count": 10,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/services/small-porch-decorating.html",
@@ -1346,9 +1695,23 @@
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work."
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 6
+      "opportunity_count": 6,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/services/luxury-party-decor-memphis.html",
@@ -1408,9 +1771,23 @@
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation."
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 8
+      "opportunity_count": 8,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/can-someone-decorate-hotel-room-birthday-memphis.html",
@@ -1465,9 +1842,23 @@
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
-        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose."
+        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 7
+      "opportunity_count": 7,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     },
     {
       "route": "/answers/proposal-room-setup-memphis.html",
@@ -1509,9 +1900,23 @@
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
-        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote."
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Add the source_block block: no sources block - a claim with no visible provenance is the first thing an engine discounts. The emitter for this block already exists and is called on every page; what is missing is the data, not the code.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the trust_block block: no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor.",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\".",
+        "Add the named_sources block: no named primary source (agent request #6, 288 occurrences)."
       ],
-      "opportunity_count": 5
+      "opportunity_count": 5,
+      "missing_content_blocks": [
+        "source_block",
+        "protocol",
+        "comparison_table",
+        "trust_block",
+        "definition_callout",
+        "named_sources"
+      ]
     }
   ]
 }
