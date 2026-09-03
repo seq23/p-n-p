@@ -39,7 +39,7 @@
 'use strict';
 const fs = require('fs');
 const path = require('path');
-const { sitemapUrls } = require('./cadence/sitemap_urls.js');
+const { sitemapUrls, newSinceLedger } = require('./cadence/sitemap_urls.js');
 
 const ROOT = process.cwd();
 const args = process.argv.slice(2);
@@ -112,15 +112,24 @@ const ageDays = (d) => Math.floor((today - new Date(d)) / 86400000);
 // A page that changed is not a page that was published. Counting any recent
 // lastmod as a new page made a one-off structural edit across the library look
 // like a publishing spree, which is exactly the signal this is meant to
-// distinguish. New means a URL that was not in the sitemap last time this ran.
+// distinguish. New means a page that was not in the sitemap last time this ran.
+//
+// "Page", not "URL string". Membership is tested on pageIdentity(), which routes
+// both sides through the one definition of this origin's served URL form in
+// scripts/lib/site_url.js. Comparing raw strings made a page's identity its
+// spelling: when #12 rewrote every URL from the redirecting `/x.html` form to
+// the `/x` form the origin actually serves, 105 unchanged pages read as new and
+// this gate blocked the distribution lane over a publishing spree that had not
+// happened. Re-spelling a URL is not a publication. Publishing a route that did
+// not exist before still is, and still counts against the cap below.
 const ledgerPath = path.join(ROOT, 'data/cadence/known_urls.json');
-let known = new Set();
+let knownUrls = [];
 let ledgerExists = fs.existsSync(ledgerPath);
 if (ledgerExists) {
-  try { known = new Set(JSON.parse(fs.readFileSync(ledgerPath, 'utf8')).urls || []); }
+  try { knownUrls = JSON.parse(fs.readFileSync(ledgerPath, 'utf8')).urls || []; }
   catch { ledgerExists = false; }
 }
-const newUrls = [...urls.keys()].filter((u) => !known.has(u));
+const newUrls = newSinceLedger([...urls.keys()], knownUrls);
 
 // A section index is not a publication, for the same reason the paragraph above
 // says a changed page is not a published one. The weekly cap exists because

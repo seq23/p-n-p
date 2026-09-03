@@ -86,8 +86,17 @@ if (!fs.existsSync(LEDGER)) {
     if (first.report.status !== second.report.status) {
       failures.push(`gate_not_idempotent: status changed from ${first.report.status} to ${second.report.status} across two identical runs.`);
     }
-    if (first.report.new_editorial_urls !== second.report.new_editorial_urls) {
-      failures.push(`gate_not_idempotent: new_editorial_urls changed from ${first.report.new_editorial_urls} to ${second.report.new_editorial_urls} across two identical runs.`);
+    // This compared `new_editorial_urls`, a field the gate's receipt has never
+    // carried. `undefined !== undefined` is false, so the check could not fire:
+    // it read as a count comparison and asserted nothing. The gate reports the
+    // count under `new_publications_since_last_run`, which is the number the
+    // weekly cap is actually computed from.
+    for (const field of ['new_since_last_run', 'new_publications_since_last_run']) {
+      if (!(field in first.report)) {
+        failures.push(`gate_receipt_field_missing: the cadence gate receipt has no \`${field}\`, so the idempotency check on the new-page count cannot read anything. A comparison of two absent fields always passes.`);
+      } else if (first.report[field] !== second.report[field]) {
+        failures.push(`gate_not_idempotent: ${field} changed from ${first.report[field]} to ${second.report[field]} across two identical runs.`);
+      }
     }
   } else {
     failures.push('gate_no_receipt: the cadence gate did not emit a parseable --json report, so its verdict cannot be checked.');

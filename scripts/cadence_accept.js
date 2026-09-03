@@ -48,7 +48,7 @@ if (reason.length < MIN_REASON) {
 
 // Read the gate's own receipt rather than recomputing its verdict, so what is
 // accepted is by construction what the gate blocked on.
-const { sitemapUrls, LEDGER_REL } = require('./cadence/sitemap_urls.js');
+const { sitemapUrls, newSinceLedger, LEDGER_REL } = require('./cadence/sitemap_urls.js');
 let report;
 try {
   report = JSON.parse(execFileSync('node', ['scripts/cadence_gate.js', '--json'], { cwd: ROOT, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }));
@@ -59,11 +59,14 @@ try {
 
 const urls = sitemapUrls(ROOT);
 const ledgerPath = path.join(ROOT, LEDGER_REL);
-let known = new Set();
+let knownUrls = [];
 if (fs.existsSync(ledgerPath)) {
-  try { known = new Set(JSON.parse(fs.readFileSync(ledgerPath, 'utf8')).urls || []); } catch { /* treated as empty */ }
+  try { knownUrls = JSON.parse(fs.readFileSync(ledgerPath, 'utf8')).urls || []; } catch { /* treated as empty */ }
 }
-const newUrls = [...urls.keys()].filter((u) => !known.has(u));
+// Identity, not spelling - the one shared comparison cadence_gate.js also makes.
+// If these two disagreed about what "already known" means, an acceptance would
+// record a different URL set than the one that was blocked.
+const newUrls = newSinceLedger([...urls.keys()], knownUrls);
 if (!newUrls.length) {
   console.log('Nothing to accept: no URLs are new since the ledger was last accepted.');
   process.exit(0);
