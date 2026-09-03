@@ -11,7 +11,10 @@
     { "id": "protocol",               "requested": 305, "share": 0.33, "why": "A repeatable procedure, distinct from a checklist in that it defines conditions and order." },
     { "id": "cta_callout",            "requested": 272, "share": 0.30, "why": "A conversion path. An answer-engine citation with nowhere to go earns nothing." },
     { "id": "comparison_table",       "requested": 258, "share": 0.28, "why": "Tables are extracted far more reliably than prose." },
-    { "id": "prompt_template",        "requested": 255, "share": 0.28, "why": "A copyable prompt. Specific to this portfolio's subject matter." },
+    { "id": "prompt_template",        "requested": 255, "share": 0.28, "why": "A copyable prompt. Specific to this portfolio's subject matter.",
+      "applies_to_repo": false,
+      "named_stop": "NOT APPLICABLE TO THIS REPO. The 913 recommendations behind this spec were collected across a portfolio whose other members publish technical and advisory content, where a copy-ready prompt is the artifact a reader reuses. Porch & Party publishes event-decor and porch-styling answers for Memphis homeowners; there is no prompt for a reader to copy, and emitting one on 109 decor pages would be scaffolding of exactly the kind the template-share ceiling and the fabricated-content rules exist to prevent. Retired by flag rather than deleted: the block stays in the spec and the detector stays live, so the day this repo does publish a copyable prompt the flag below fails and the entry is reinstated. Reinstate by setting applies_to_repo true and adding an emitter to templates/page-shell.js.",
+      "named_stop_recorded": "2026-09-03" },
     { "id": "trust_block",            "requested": 215, "share": 0.24, "why": "Who is speaking and on what basis. Entity clarity is a citation factor." },
     { "id": "definition_callout",     "requested": 196, "share": 0.21, "why": "A crisp definition of the primary entity, which is what an answer engine lifts when asked 'what is X'." }
   ],

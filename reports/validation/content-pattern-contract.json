@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-09-03T15:18:02.512Z",
+  "generated_at": "2026-09-03T23:16:54.285Z",
   "enforcement": "block",
   "pages_checked": 109,
   "status": "PASS",
@@ -102,8 +102,8 @@
     {
       "id": "source_block",
       "blocking": false,
-      "pages_missing": 106,
-      "coverage_pct": 2.8,
+      "pages_missing": 109,
+      "coverage_pct": 0,
       "why": "no sources block - a claim with no visible provenance is the first thing an engine discounts"
     },
     {
@@ -128,6 +128,25 @@
       "why": "no copy-ready prompt - the artifact this audience actually reuses"
     }
   ],
+  "spec_producer_parity": {
+    "generator_sources_scanned": 63,
+    "blocks_in_spec": 10,
+    "blocks_required_of_this_repo": 9,
+    "orphan_blocks": [],
+    "starved_blocks": [
+      {
+        "id": "source_block",
+        "emitter": "templates/page-shell.js",
+        "pages_missing": 109
+      }
+    ],
+    "named_stops": [
+      {
+        "id": "prompt_template",
+        "why": "NOT APPLICABLE TO THIS REPO. The 913 recommendations behind this spec were collected across a portfolio whose other members publish technical and advisory content, where a copy-ready prompt is the artifact a reader reuses. Porch & Party publishes event-decor and porch-styling answers for Memphis homeowners; there is no prompt for a reader to copy, and emitting one on 109 decor pages would be scaffolding of exactly the kind the template-share ceiling and the fabricated-content rules exist to prevent. Retired by flag rather than deleted: the block stays in the spec and the detector stays live, so the day this repo does publish a copyable prompt the flag below fails and the entry is reinstated. Reinstate by setting applies_to_repo true and adding an emitter to templates/page-shell.js."
+      }
+    ]
+  },
   "recommendation_summary_distinctness": {
     "total_blocks": 106,
     "distinct_texts": 103,
@@ -891,10 +910,13 @@
       "faq/do-party-decorators-come-to-your-house.html",
       "faq/how-far-in-advance-should-i-book-party-decor.html",
       "faq/how-long-does-it-take-to-set-up-party-decor.html",
+      "faq/how-much-does-a-balloon-garland-cost-in-memphis.html",
       "faq/how-much-does-birthday-decoration-at-home-cost.html",
       "faq/how-much-does-grazing-tables-cost.html",
       "faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
       "faq/index.html",
+      "guides/baby-shower-planning-checklist-memphis.html",
       "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
       "guides/last-minute-birthday-setup-ideas-memphis.html",
       "how-it-works.html",
