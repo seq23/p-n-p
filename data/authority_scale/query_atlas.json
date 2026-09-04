@@ -55,7 +55,7 @@
       "photo-ready-event-styling"
     ]
   },
-  "evidence_backed_count": 21,
+  "evidence_backed_count": 23,
   "rejected_policy": "A query whose disposition begins REJECTED_ in data/demand/measured_demand.json, or on its own evidence row, is excluded from this atlas entirely. It is recorded below so the exclusion is visible, and it is never publishable.",
   "rejected_count": 3,
   "rejected": [
@@ -123,7 +123,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 22,
+      "impressions_90d": 23,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -140,7 +140,57 @@
         "format": null,
         "semantic_cluster": "birthday-party-decor"
       },
-      "rank_score": 11,
+      "rank_score": 11.5,
+      "publishable": true
+    },
+    {
+      "query": "event planning for parties",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 18,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "event decorator",
+        "topic_confidence": 0.431,
+        "audience": "event hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "event-decorator"
+      },
+      "rank_score": 9,
+      "publishable": true
+    },
+    {
+      "query": "event planning for parties near me",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 18,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "event decorator",
+        "topic_confidence": 0.431,
+        "audience": "event hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "event-decorator"
+      },
+      "rank_score": 9,
       "publishable": true
     },
     {
@@ -194,56 +244,6 @@
       "publishable": true
     },
     {
-      "query": "event planning for parties",
-      "evidence_tier": "T1",
-      "source_type": "gsc_search_analytics",
-      "search_volume": null,
-      "impressions_90d": 17,
-      "demand_basis": "impressions_90d",
-      "rank_band": "own_impressions",
-      "keyword_difficulty": null,
-      "weak_incumbent_score": 0.5,
-      "intent": null,
-      "intent_method": null,
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "event decorator",
-        "topic_confidence": 0.431,
-        "audience": "event hosts",
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "event-decorator"
-      },
-      "rank_score": 8.5,
-      "publishable": true
-    },
-    {
-      "query": "event planning for parties near me",
-      "evidence_tier": "T1",
-      "source_type": "gsc_search_analytics",
-      "search_volume": null,
-      "impressions_90d": 16,
-      "demand_basis": "impressions_90d",
-      "rank_band": "own_impressions",
-      "keyword_difficulty": null,
-      "weak_incumbent_score": 0.5,
-      "intent": null,
-      "intent_method": null,
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "event decorator",
-        "topic_confidence": 0.431,
-        "audience": "event hosts",
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "event-decorator"
-      },
-      "rank_score": 8,
-      "publishable": true
-    },
-    {
       "query": "party planner near me",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
@@ -273,7 +273,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 14,
+      "impressions_90d": 15,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -290,7 +290,7 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 7,
+      "rank_score": 7.5,
       "publishable": true
     },
     {
@@ -298,7 +298,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 14,
+      "impressions_90d": 15,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -315,7 +315,7 @@
         "format": null,
         "semantic_cluster": "party-decor"
       },
-      "rank_score": 7,
+      "rank_score": 7.5,
       "publishable": true
     },
     {
@@ -448,7 +448,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 8,
+      "impressions_90d": 9,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -465,7 +465,7 @@
         "format": null,
         "semantic_cluster": "party-decor"
       },
-      "rank_score": 4,
+      "rank_score": 4.5,
       "publishable": true
     },
     {
@@ -544,6 +544,31 @@
       "publishable": true
     },
     {
+      "query": "bachelorette party",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 1,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "party decor",
+        "topic_confidence": 0.57,
+        "audience": null,
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "party-decor"
+      },
+      "rank_score": 0.5,
+      "publishable": true
+    },
+    {
       "query": "bachelorette party planner",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
@@ -564,6 +589,31 @@
         "modifier": null,
         "format": null,
         "semantic_cluster": "party-decor"
+      },
+      "rank_score": 0.5,
+      "publishable": true
+    },
+    {
+      "query": "birthday parties near me",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 1,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "birthday party decor",
+        "topic_confidence": 0.415,
+        "audience": "birthday hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "birthday-party-decor"
       },
       "rank_score": 0.5,
       "publishable": true
