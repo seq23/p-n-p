@@ -21,7 +21,9 @@
  *
  * Four blocking conditions, each with an exit code so a pipeline can act on it:
  *
- *   1. new pages in the last 7 days above the weekly cap
+ *   1. new pages above the publication allowance the weekly cap has accrued
+ *      since the ledger baseline (rate x whole weeks elapsed, bounded by the
+ *      refresh window)
  *   2. share of pages older than the refresh window above the tolerance
  *   3. URLs with no lastmod at all - a crawler gets no freshness signal
  *   4. library larger than refresh capacity can keep inside the window
@@ -124,12 +126,79 @@ const ageDays = (d) => Math.floor((today - new Date(d)) / 86400000);
 // not exist before still is, and still counts against the cap below.
 const ledgerPath = path.join(ROOT, 'data/cadence/known_urls.json');
 let knownUrls = [];
+let ledgerSince = null;
 let ledgerExists = fs.existsSync(ledgerPath);
 if (ledgerExists) {
-  try { knownUrls = JSON.parse(fs.readFileSync(ledgerPath, 'utf8')).urls || []; }
-  catch { ledgerExists = false; }
+  try {
+    const ledger = JSON.parse(fs.readFileSync(ledgerPath, 'utf8'));
+    knownUrls = ledger.urls || [];
+    ledgerSince = ledger.generated_at || null;
+  } catch { ledgerExists = false; }
 }
 const newUrls = newSinceLedger([...urls.keys()], knownUrls);
+
+// The cap is a RATE, and it has to be compared against elapsed time.
+//
+// This is the second half of the defect that reddened run 33709958800. The
+// first half - a page's identity being the spelling of its URL - is fixed in
+// scripts/cadence/sitemap_urls.js. The half that survived is here: the gate
+// enforced a rate written "per week" as a bare count, against a baseline whose
+// date it never read.
+//
+//     newPublications.length > policy.new_pages_per_week
+//
+// There is no time term in that comparison. `newPublications` accumulates from
+// the last acceptance with no window at all, while the right-hand side is one
+// week's worth, so the two sides do not share a denominator. The header comment
+// at the top of this file has always described condition 1 as "new pages in the
+// last 7 days above the weekly cap"; the code had no seven-day window in it.
+//
+// The consequence is not theoretical and is not the same bug as #12.
+// Reproduced on 2026-09-04 with the live tree: a ledger baseline eight weeks
+// old and four pages published since - four publications against a declared
+// allowance of 1/week x 8 weeks = 8, comfortably inside cadence - still printed
+//
+//     BLOCK  weekly_cap: 4 URLs are new since the last run, cap is 1 per week
+//
+// and exited 1. So `Deploy Distribution` on main goes red for publishing at
+// exactly the rate the policy permits, and the only thing that clears it is a
+// human running `cadence:accept`, which CI deliberately never runs. That is how
+// this lane keeps producing intermittent reds with nothing wrong behind them,
+// and this file's own reasoning about `library_over_ceiling` says why that
+// matters: "a gate that is permanently red teaches people to ignore it".
+//
+// The allowance therefore accrues with whole weeks elapsed since the ledger
+// baseline, and is bounded two ways:
+//
+//   - never below one week's worth, so a baseline accepted today still permits
+//     the declared rate rather than zero;
+//   - never above the refresh window's worth. Publication credit cannot be
+//     banked for longer than the window inside which a page has to be
+//     refreshed, or the cap stops protecting the refresh capacity that is its
+//     whole purpose. That bound is DERIVED from refresh_window_days by the same
+//     expression that derives the maintainable ceiling below, so no second rate
+//     literal enters this file.
+//
+// A ledger with no usable baseline date is a hard stop, for the same reason a
+// missing policy is: the failure mode of substituting one would be to grant an
+// unbounded allowance while reporting success.
+if (ledgerExists && !/^\d{4}-\d{2}-\d{2}$/.test(String(ledgerSince))) {
+  console.error(
+    `CADENCE GATE FAILED: data/cadence/known_urls.json has no usable \`generated_at\` baseline date (found ${JSON.stringify(ledgerSince)}). `
+    + 'The publication cap is a rate, so it cannot be enforced without knowing how long the baseline has stood. '
+    + 'The gate will not assume a date: guessing one recent grants no headroom, and guessing one old grants unlimited headroom while reporting success. '
+    + 'Re-record the baseline with `npm run cadence:accept -- --reason "..."`.',
+  );
+  process.exit(1);
+}
+const ledgerAgeDays = ledgerExists
+  ? Math.max(0, Math.floor((today - new Date(ledgerSince)) / 86400000))
+  : null;
+const accrualWeeksMax = Math.floor(policy.refresh_window_days / 7);
+const accrualWeeks = ledgerExists
+  ? Math.min(accrualWeeksMax, Math.max(1, Math.floor(ledgerAgeDays / 7)))
+  : null;
+const publicationAllowance = ledgerExists ? policy.new_pages_per_week * accrualWeeks : null;
 
 // A section index is not a publication, for the same reason the paragraph above
 // says a changed page is not a published one. The weekly cap exists because
@@ -188,8 +257,12 @@ const ceiling = policy.refresh_capacity_per_week * Math.floor(policy.refresh_win
 const blocking = [];
 const warnings = [];
 
-if (ledgerExists && newPublications.length > policy.new_pages_per_week) {
-  blocking.push(`weekly_cap: ${newPublications.length} URLs are new since the last run, cap is ${policy.new_pages_per_week} per week`);
+if (ledgerExists && newPublications.length > publicationAllowance) {
+  blocking.push(
+    `weekly_cap: ${newPublications.length} pages published since the baseline of ${ledgerSince} `
+    + `(${ledgerAgeDays}d = ${accrualWeeks} whole week(s) accrued, capped at the ${accrualWeeksMax}-week refresh window); `
+    + `allowance is ${publicationAllowance} at ${policy.new_pages_per_week} per week`,
+  );
 }
 if (ledgerExists && newSectionIndexes.length) {
   warnings.push(`new_section_indexes: ${newSectionIndexes.length} navigation index route(s) are new since the last run and sit outside the publication cap (${newSectionIndexes.join(', ')})`);
@@ -232,6 +305,11 @@ const report = {
   new_publications_since_last_run: ledgerExists ? newPublications.length : null,
   new_section_indexes_since_last_run: ledgerExists ? newSectionIndexes : null,
   ledger_initialised: ledgerExists,
+  ledger_baseline_date: ledgerSince,
+  ledger_age_days: ledgerAgeDays,
+  accrual_weeks: accrualWeeks,
+  accrual_weeks_max: accrualWeeksMax,
+  publication_allowance: publicationAllowance,
   maintainable_ceiling: ceiling,
   policy: { ...policy, _source: undefined },
   blocking,
