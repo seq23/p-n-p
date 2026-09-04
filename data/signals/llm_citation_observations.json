@@ -6085,19 +6085,567 @@
           "answer_mentions_brand": false
         }
       ]
+    },
+    {
+      "run_at": "2026-09-04T15:15:02.045Z",
+      "provider": "openrouter",
+      "engines": [
+        "openai/gpt-4o-mini"
+      ],
+      "mode": "grounded",
+      "queries": 25,
+      "observations": [
+        {
+          "query": "tent rental memphis",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "mahaffeytent.com",
+            "bizjournals.com",
+            "commercialappeal.com",
+            "dailymemphian.com",
+            "sunbeltrentals.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event rentals memphis",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "memphisriverparks.org",
+            "901memphiseventrentals.com",
+            "moshmemphis.com",
+            "memphiszoo.org",
+            "jccmemphis.org",
+            "mahaffeytent.com",
+            "hicksconventions.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event venue memphis",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "thekentmemphis.com",
+            "memphistn.gov",
+            "memphismagazine.com",
+            "membg.org",
+            "memphistravel.com",
+            "crosstownconcourse.com",
+            "no2vance.com",
+            "metalmuseum.org",
+            "commercialappeal.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "graduation party planning",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "graduationcapandgown.com",
+            "evite.com",
+            "peartree.com",
+            "postandcourier.com",
+            "pinotspalette.com",
+            "images.template.net",
+            "mississaugaconvention.com",
+            "graduationattire.com",
+            "adobe.com",
+            "raiseright.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "birthday party planner",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "atlantaparent.com",
+            "apps.apple.com",
+            "metrofamilymagazine.com",
+            "play.google.com",
+            "eventpage.ai",
+            "greenvelope.com",
+            "thepartyteacher.com",
+            "pressprintparty.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event planning for parties",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "eventbrite.com",
+            "studentorgs.yale.edu",
+            "scheduling.cornell.edu",
+            "tagvenue.com",
+            "evite.com",
+            "greetingsisland.com",
+            "thepartysource.com",
+            "socialtables.com",
+            "chrystinanoel.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event planning for parties near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "nearandfareventco.com",
+            "industry.828venues.com",
+            "giggster.com",
+            "party-guru.com",
+            "flexxproductions.com",
+            "eventbrite.com",
+            "limelighthawaii.com",
+            "partyslate.com",
+            "downtownspokane.org"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "party planner",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "party-planners.com",
+            "apps.apple.com",
+            "ezpzpartyplanning.com",
+            "greenvelope.com",
+            "partypromanager.com",
+            "flowermag.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "birthday party planner near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "roseahnevents.com",
+            "play.google.com",
+            "blbouncies.ourers.com",
+            "apps.apple.com",
+            "atlantaparent.com",
+            "bowlandybs.com",
+            "arenasports.net",
+            "freelistingusa.com",
+            "giggster.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "party planner near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "innovativepartyplanners.com",
+            "partydip.co",
+            "thumbtack.com",
+            "apps.apple.com",
+            "partyplanninghelper.com",
+            "bbb.org",
+            "let-the-party-begin.ueniweb.com",
+            "wacarrandson.co.uk"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event management services",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "amworldgroup.com",
+            "eventmanagementservices.co.uk",
+            "evenvalue.com",
+            "vfairs.com",
+            "outsourcedevents.com",
+            "witsexperiential.com",
+            "mlheventsolutions.com",
+            "juliacharleseventmanagement.co.uk",
+            "eventsair.com",
+            "ticketmanager.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "party planners",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "party-planners.com",
+            "apps.apple.com",
+            "partyplanners.co.in",
+            "ezpzpartyplanning.com",
+            "ladybug-mandolin-2zt7.squarespace.com",
+            "partyverse.com",
+            "realsimple.com",
+            "invyt.io"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event planning services",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "intheevent.com",
+            "wmevents.com",
+            "shineeventsbend.com",
+            "conferenceservices.cornell.edu",
+            "eventsolutions-sf.com",
+            "namic.org",
+            "rochester.edu",
+            "newevent.bg",
+            "industry.828venues.com",
+            "media.edlio.net"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "party planners near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "innovativepartyplanners.com",
+            "partydip.co",
+            "partyslate.com",
+            "bark.com",
+            "yelp.com",
+            "fash.com",
+            "thumbtack.com",
+            "dfwchild.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event management near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "events.mtap.io",
+            "choosechicago.com",
+            "novaeventmanagement.com",
+            "eventbookings.com",
+            "mymanager.com",
+            "emrgmedia.com",
+            "mapquest.com",
+            "web.meetingselect.com",
+            "eventsair.com",
+            "events.premiers.qld.gov.au"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event planning services near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "ajwevents.com",
+            "eventsolutions-sf.com",
+            "discovernewport.org",
+            "reviews.birdeye.com",
+            "iccwales.com",
+            "royalcrescent.co.uk",
+            "thisiscleveland.com",
+            "denaina.anchorageconventioncenters.com",
+            "explorehockinghills.com",
+            "visitsanantonio.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event planner near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "ajwevents.com",
+            "yournearevents.com",
+            "eventoplanner.pk",
+            "albrechtevents.com",
+            "bark.com",
+            "thebash.com",
+            "eventective.com",
+            "bbb.org"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "party planners memphis",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "memphistravel.com",
+            "partyconnection.us",
+            "mpi.org",
+            "partyplanner901.com",
+            "memphismagazine.com",
+            "planning.org",
+            "memphistn.gov",
+            "timeless-catering-and-party.ueniweb.com",
+            "bbb.org"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "bachelor party entertainment",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "f1arcade.com",
+            "taogroup.com",
+            "atomicgolf.com",
+            "timeout.com",
+            "neworleans.com",
+            "skyutecasino.com",
+            "emporiumarcadebar.com",
+            "vaildaily.com",
+            "tvguide.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "balloon artist near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "balloonimaginations.ca",
+            "bw.maptons.com",
+            "fun4alamokids.com",
+            "fun4stlkids.com",
+            "airtasker.com",
+            "fun4firstcoastkids.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "event management services near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "caphill.com",
+            "choosechicago.com",
+            "mymanager.com",
+            "pmwcom.co.uk",
+            "mapquest.com",
+            "wmevents.com",
+            "juliacharleseventmanagement.co.uk",
+            "infinityevents.great-site.net",
+            "mercurysl.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "bachelorette party",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "tv.apple.com",
+            "huffpost.com",
+            "dictionary.cambridge.org",
+            "nypost.com",
+            "today.com",
+            "dictionary.com",
+            "vice.com",
+            "parade.com",
+            "wedgewoodweddings.com",
+            "tailgatebeachclub.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "bachelorette party planner",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "scottsdalebachelorette.com",
+            "bachboss.com",
+            "phillymag.com",
+            "carteblancheparties.com",
+            "minted.com",
+            "rockymountainbride.com",
+            "today.com",
+            "marthastewart.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "birthday parties near me",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "gatesny.myrec.com",
+            "hamiltonymca.org",
+            "sofive.com",
+            "launchfamilyentertainment.com",
+            "charlottejcc.org",
+            "eventbrite.com",
+            "fun4alamokids.com",
+            "chuckecheese.com",
+            "cinergy.com",
+            "fun4orlandokids.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        },
+        {
+          "query": "princess birthday party decorations",
+          "engine": "openrouter:openai/gpt-4o-mini",
+          "mode": "grounded",
+          "observed_at": "2026-09-04T15:15:02.045Z",
+          "status": "observed",
+          "cited_domains": [
+            "merimeri.com",
+            "merimeri.co.uk",
+            "bonjourfete.com",
+            "partycity.ca",
+            "littlebigparty.co.uk",
+            "mymindseye.com",
+            "partyshop.paperlesspost.com"
+          ],
+          "cited_ours": [],
+          "self_cited": false,
+          "named_in_answer": [],
+          "answer_mentions_brand": false
+        }
+      ]
     }
   ],
   "latest_summary": {
-    "run_at": "2026-09-03T15:18:07.111Z",
+    "run_at": "2026-09-04T15:15:02.045Z",
     "provider": "openrouter",
     "engines": [
       "openai/gpt-4o-mini"
     ],
     "mode": "grounded",
     "status": "observed",
-    "queries": 24,
-    "observations": 24,
-    "answered": 24,
+    "queries": 25,
+    "observations": 25,
+    "answered": 25,
     "errored": 0,
     "self_cited": 0,
     "_mode_note": "grounded: counted when the answer was built from one of our pages",
