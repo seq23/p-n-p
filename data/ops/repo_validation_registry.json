@@ -267,6 +267,15 @@
       ],
       "purpose": "Every repo path an operator doc points at still exists. The validator shipped wired to an npm script that nothing ran, so it enforced nothing - the fourth guard found in this repo reachable only from an npm alias no lane invokes.",
       "no_repair_reason": "A stale doc reference is authored prose. Repointing it requires knowing which surface replaced the old one, which no generator can infer."
+    },
+    {
+      "id": "cadence-cap-accrual",
+      "command": "npm run validate:cadence-cap-accrual",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "The publication cap is a rate and the gate must enforce it as one. cadence_gate.js compared `newPublications.length` - which accumulates from the last acceptance with no window - against `new_pages_per_week`, one week's worth, and never read the ledger's `generated_at`. Two denominators, one comparison. Reproduced 2026-09-04: a baseline 8 weeks old with 4 pages published since, against an allowance of 1/week x 8 = 8, still printed BLOCK weekly_cap and exited 1, reddening Deploy Distribution on main for publishing at exactly the permitted rate. Runs the real gate against fixture repositories with CADENCE_TODAY pinned to 2026-09-04 under UTC, UTC+14 and UTC-11: the allowance accrues, still blocks one page past it, grants one week's worth on a same-day baseline rather than zero, cannot bank credit past the refresh window, hard-stops on a ledger with no baseline date, and still blocks the 105-page spree behind run 33709958800. Hard-fails on Rule 0 when it runs zero cases.",
+      "no_repair_reason": "A cadence breach is a publishing decision, not a defect a repair pass can undo. The pages are already written; the only honest answers are to hold them or to record a deliberate `cadence:accept` with a reason."
     }
   ]
 }
