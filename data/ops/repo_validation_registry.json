@@ -66,6 +66,14 @@
       "evidence": "reports/validation/content-pattern-contract.json"
     },
     {
+      "id": "content-pattern-reaches-plan",
+      "command": "npm run validate:content-pattern-reaches-plan",
+      "detects": "A measured content-block gap that reaches no work queue. The content-pattern contract and the page improvement plan each kept their own list of what a page needs, with no link between them, so source_block missing on 109 of 109 pages and prompt_template at 0% with no emitter in the repo were measured and printed on every run and assigned to nobody. Asserts every spec block is represented in the plan, every measured route names the blocks it is missing, a block retired with a named_stop is laned as a stop and queued against no route, and a block whose emitter no data reaches is laned as needing content rather than code. Hard-fails when it joins zero routes.",
+      "profiles": [
+        "release"
+      ]
+    },
+    {
       "id": "core-html-matrix",
       "command": "npm run validate:all",
       "detects": "Required files, canonicals, entity footers, legal links, internal hrefs, JSON-LD wellformedness and llms.txt extraction surfaces across every published page.",
