@@ -76,6 +76,11 @@ const today = process.env.CADENCE_TODAY || new Date().toISOString().slice(0, 10)
 const newPublications = report.new_publications_since_last_run;
 const newSectionIndexes = report.new_section_indexes_since_last_run || [];
 const cap = report.policy.new_pages_per_week;
+// The cap is a rate, so "over cap" is measured against the allowance the gate
+// actually blocked on - rate x whole weeks accrued since the baseline - not
+// against one week's worth. Recording the raw rate here logged every acceptance
+// made after a long baseline gap as a cap breach that never happened.
+const allowance = report.publication_allowance ?? cap;
 const entry = {
   accepted_at: today,
   reason,
@@ -84,14 +89,17 @@ const entry = {
   accepted_publications: newPublications,
   accepted_section_indexes: newSectionIndexes.length,
   weekly_cap: cap,
-  over_cap_by: Math.max(0, (newPublications || 0) - cap),
+  publication_allowance: allowance,
+  ledger_baseline_date: report.ledger_baseline_date ?? null,
+  accrual_weeks: report.accrual_weeks ?? null,
+  over_cap_by: Math.max(0, (newPublications || 0) - allowance),
   maintainable_ceiling: report.maintainable_ceiling,
   library_over_ceiling_by: Math.max(0, urls.size - report.maintainable_ceiling),
   accepted_urls: [...newUrls].sort(),
 };
 
 console.log(`Accepting ${newUrls.length} URLs into the cadence baseline (${newPublications} publications, ${newSectionIndexes.length} section indexes).`);
-console.log(`  weekly cap is ${cap}; this acceptance is ${entry.over_cap_by} publications over it.`);
+console.log(`  cap is ${cap}/week; ${entry.accrual_weeks ?? '?'} week(s) accrued since ${entry.ledger_baseline_date ?? 'an unrecorded baseline'} gives an allowance of ${allowance}; this acceptance is ${entry.over_cap_by} publications over it.`);
 if (entry.library_over_ceiling_by > 0) {
   console.log(`  library is ${entry.library_over_ceiling_by} pages above the maintainable ceiling of ${entry.maintainable_ceiling}. Accepting the count does not resolve that.`);
 }
