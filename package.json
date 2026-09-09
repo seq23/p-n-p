@@ -97,6 +97,7 @@
     "validate:retrofit-integrity": "node scripts/validators/validate_retrofit_integrity.js",
     "validate:search-intelligence": "node scripts/search_intelligence/validate_search_intelligence.mjs",
     "validate:sitemap-coverage": "node scripts/validation/validate_sitemap_coverage.js",
+    "validate:url-rule-single-source": "node scripts/validators/validate_url_rule_single_source.js",
     "validate:territories": "node scripts/authority_scale/validate_territory_health.mjs",
     "validate:tree-hygiene": "node scripts/validation/validate_tree_hygiene.js",
     "validate:workflow-lanes": "node scripts/validation/validate_workflow_lane_integrity.js",
