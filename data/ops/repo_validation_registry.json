@@ -96,6 +96,16 @@
       "repair_rationale": "scripts/generators/update_sitemap.js rewrites sitemap.xml by walking the same HTML tree this validator walks. It is the regenerator of the exact artifact whose staleness is the defect."
     },
     {
+      "id": "url-rule-single-source",
+      "command": "npm run validate:url-rule-single-source",
+      "detects": "A component that decides what a public URL looks like without asking scripts/lib/site_url.js, which is how the sitemap builder and its coverage guard came to disagree after 450e1f8 and left Bounded Self-Healing repairing an already-correct sitemap three times before giving up.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "no_repair_reason": "A second copy of the URL rule is an authored defect, not a stale artifact. Nothing can regenerate it away: the fix is to delete the copy and require the shared module, which is a code change a person or an agent makes. A repair command here would run, change nothing, and be the same non-terminating loop this validator exists to prevent."
+    },
+    {
       "id": "max-fanout",
       "command": "npm run validate:max-fanout",
       "detects": "Corruption or absence of the 100k opportunity reserve: missing shards, sha256 mismatch, duplicate ids/queries, undeclared geography, wrong disposition, wrong record count.",
