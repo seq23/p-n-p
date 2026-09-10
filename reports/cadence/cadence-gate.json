@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-09",
+  "generated_at": "2026-09-10",
   "policy_source": "data/cadence/policy.json",
   "urls": 112,
   "dated": 112,
@@ -13,10 +13,10 @@
   "new_section_indexes_since_last_run": [],
   "ledger_initialised": true,
   "ledger_baseline_date": "2026-08-27",
-  "ledger_age_days": 13,
-  "accrual_weeks": 1,
+  "ledger_age_days": 14,
+  "accrual_weeks": 2,
   "accrual_weeks_max": 13,
-  "publication_allowance": 1,
+  "publication_allowance": 2,
   "maintainable_ceiling": 104,
   "policy": {
     "refresh_window_days": 91,
