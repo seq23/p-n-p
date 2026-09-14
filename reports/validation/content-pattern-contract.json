@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-09-13T15:12:33.565Z",
+  "generated_at": "2026-09-14T15:16:04.336Z",
   "enforcement": "block",
   "pages_checked": 109,
   "status": "PASS",
