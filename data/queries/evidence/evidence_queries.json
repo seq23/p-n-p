@@ -40,12 +40,12 @@
         "cited_hosts": [
           "mahaffeytent.com",
           "bizjournals.com",
-          "dailymemphian.com",
           "commercialappeal.com",
+          "dailymemphian.com",
           "memphistravel.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -84,7 +84,7 @@
           "fox13memphis.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -109,21 +109,20 @@
       "occupancy": {
         "verdict": "CONTESTED",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.429,
+        "openness_score": 0.417,
         "platform_share": 0,
-        "institutional_share": 0.143,
-        "distinct_cited_hosts": 7,
+        "institutional_share": 0.167,
+        "distinct_cited_hosts": 6,
         "cited_hosts": [
           "downtownmemphis.com",
           "peabodymemphis.com",
-          "memphistn.gov",
           "memphistravel.com",
-          "meyersound.com",
-          "moshmemphis.com",
+          "memphistn.gov",
+          "ftw.usatoday.com",
           "shelbyfarmspark.org"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -138,32 +137,32 @@
       "gsc_average_position": 1,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
-        "verdict": "HELD",
+        "verdict": "CONTESTED",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.389,
+        "openness_score": 0.5,
         "platform_share": 0,
-        "institutional_share": 0.222,
+        "institutional_share": 0,
         "distinct_cited_hosts": 9,
         "cited_hosts": [
-          "columbiasouthern.edu",
           "forbes.com",
           "collegelifemadeeasy.com",
-          "as.vanderbilt.edu",
           "kentuckyliving.com",
           "herffjones.com",
           "graduationattire.com",
           "evite.com",
-          "cooking.nytimes.com"
+          "cooking.nytimes.com",
+          "mrsfields.com",
+          "peartree.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -178,10 +177,10 @@
       "gsc_average_position": 16.83,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -190,7 +189,7 @@
         "openness_score": 0.5,
         "platform_share": 0,
         "institutional_share": 0,
-        "distinct_cited_hosts": 9,
+        "distinct_cited_hosts": 8,
         "cited_hosts": [
           "atlantaparent.com",
           "apps.apple.com",
@@ -199,11 +198,10 @@
           "101planners.com",
           "greenvelope.com",
           "nvmoms.com",
-          "pressprintparty.com",
-          "venuenow.com"
+          "pressprintparty.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -218,33 +216,33 @@
       "gsc_average_position": 2.05,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
-        "verdict": "CONTESTED",
+        "verdict": "HELD",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.4,
+        "openness_score": 0.35,
         "platform_share": 0,
-        "institutional_share": 0.2,
+        "institutional_share": 0.3,
         "distinct_cited_hosts": 10,
         "cited_hosts": [
           "npr.org",
           "scheduling.cornell.edu",
           "dine.co.uk",
+          "pa.gov",
           "dartmouth.edu",
           "heb.com",
           "squaremeal.co.uk",
-          "tagvenue.com",
-          "flowermag.com",
           "eventacademy.com",
-          "bbcgoodfood.com"
+          "bbcgoodfood.com",
+          "weezevent.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -259,33 +257,32 @@
       "gsc_average_position": 16.26,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
         "verdict": "CONTESTED",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.55,
-        "platform_share": 0.1,
+        "openness_score": 0.556,
+        "platform_share": 0.111,
         "institutional_share": 0,
-        "distinct_cited_hosts": 10,
+        "distinct_cited_hosts": 9,
         "cited_hosts": [
           "royalcrescent.co.uk",
-          "flatstickpub.com",
-          "bouncehouserentals.net",
           "eventbrite.com",
+          "bouncehouserentals.net",
           "dreamypartiesla.com",
-          "landmarkeventco.com",
           "partyslate.com",
           "mollysmarket.ourers.com",
           "apps.apple.com",
+          "sutton.gov.uk",
           "dfwchild.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -300,10 +297,10 @@
       "gsc_average_position": 25.21,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -322,7 +319,7 @@
           "merimeri.co.uk"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -337,10 +334,10 @@
       "gsc_average_position": 23.22,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -353,16 +350,16 @@
         "cited_hosts": [
           "apps.apple.com",
           "thumbtack.com",
+          "partyplann.com",
           "atlantaparent.com",
           "partyslate.com",
           "pumpitupparty.com",
           "lakelandmom.com",
-          "planomoms.com",
           "better.org.uk",
-          "amf.com"
+          "planomoms.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -377,10 +374,10 @@
       "gsc_average_position": 22.18,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -400,7 +397,7 @@
           "partyslate.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -415,10 +412,10 @@
       "gsc_average_position": 41,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -431,8 +428,8 @@
         "cited_hosts": [
           "amworldgroup.com",
           "events.ieee.org",
-          "events.usu.edu",
           "mdmevents.org",
+          "events.usu.edu",
           "conferences.bham.ac.uk",
           "outsourcedevents.com",
           "pmwcom.co.uk",
@@ -441,7 +438,7 @@
           "ctcconferences.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -456,10 +453,10 @@
       "gsc_average_position": 39.75,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -477,11 +474,11 @@
           "oakridger.com",
           "partymaker.ancorathemes.com",
           "merimeri.co.uk",
-          "crunchbase.com",
-          "mgnevents.co.uk"
+          "mgnevents.co.uk",
+          "universalclass.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -496,33 +493,33 @@
       "gsc_average_position": 41,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
         "verdict": "HELD",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.35,
+        "openness_score": 0.3,
         "platform_share": 0,
-        "institutional_share": 0.3,
+        "institutional_share": 0.4,
         "distinct_cited_hosts": 10,
         "cited_hosts": [
           "eventservices.uccs.edu",
           "louisville.edu",
-          "theconciergeclub.com",
-          "conferenceservices.cornell.edu",
+          "pa.gov",
           "nationaleventpros.com",
           "ctcconferences.com",
-          "leighandcoevents.com",
+          "conferenceservices.cornell.edu",
           "eventsolutions-sf.com",
-          "onservices.com",
-          "namic.org"
+          "leighandcoevents.com",
+          "namic.org",
+          "landmarkeventco.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -537,29 +534,28 @@
       "gsc_average_position": 35.79,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
-        "verdict": "CONTESTED",
+        "verdict": "OPEN",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.583,
-        "platform_share": 0.167,
+        "openness_score": 0.6,
+        "platform_share": 0.2,
         "institutional_share": 0,
-        "distinct_cited_hosts": 6,
+        "distinct_cited_hosts": 5,
         "cited_hosts": [
           "partyslate.com",
           "bbb.org",
           "fash.com",
           "thumbtack.com",
-          "fun4tampakids.com",
-          "peerspace.com"
+          "fun4tampakids.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -574,10 +570,10 @@
       "gsc_average_position": 41,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -586,20 +582,19 @@
         "openness_score": 0.5,
         "platform_share": 0,
         "institutional_share": 0,
-        "distinct_cited_hosts": 9,
+        "distinct_cited_hosts": 8,
         "cited_hosts": [
-          "choosechicago.com",
-          "juliacharleseventmanagement.co.uk",
-          "events.premiers.qld.gov.au",
-          "kdmevents.co.uk",
+          "apps.apple.com",
+          "airtasker.com",
+          "mymanager.com",
           "visitkc.com",
+          "events.premiers.qld.gov.au",
+          "thecollectionevents.com",
           "business.bronxchamber.org",
-          "airfreshmarketing.com",
-          "beia.co.nz",
-          "maxwellsocial.com"
+          "kdmevents.co.uk"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -614,10 +609,10 @@
       "gsc_average_position": 41,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -626,19 +621,20 @@
         "openness_score": 0.5,
         "platform_share": 0,
         "institutional_share": 0,
-        "distinct_cited_hosts": 8,
+        "distinct_cited_hosts": 9,
         "cited_hosts": [
-          "eventsolutions-sf.com",
           "industry.828venues.com",
+          "eventsolutions-sf.com",
           "visitsanantonio.com",
-          "business.portsmouthchamber.org",
           "nationaleventpros.com",
           "partyslate.com",
+          "discovernewport.org",
+          "theconciergeclub.com",
           "denaina.anchorageconventioncenters.com",
-          "visitstaugustine.com"
+          "proglobalevents.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -653,10 +649,10 @@
       "gsc_average_position": 41,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -667,16 +663,16 @@
         "institutional_share": 0,
         "distinct_cited_hosts": 7,
         "cited_hosts": [
+          "bark.com",
           "bbb.org",
           "business.portsmouthchamber.org",
           "partyslate.com",
           "ohiobiz.com",
-          "richmond-center.com",
           "idealist.org",
           "visitstaugustine.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -691,10 +687,10 @@
       "gsc_average_position": 21,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -712,10 +708,10 @@
           "peerspace.com",
           "memphistn.gov",
           "planning.org",
-          "eventective.com"
+          "partyslate.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -730,10 +726,10 @@
       "gsc_average_position": 41,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-09-03",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -744,18 +740,18 @@
         "institutional_share": 0,
         "distinct_cited_hosts": 9,
         "cited_hosts": [
+          "airtasker.com",
           "airfreshmarketing.com",
           "choosechicago.com",
           "pmwcom.co.uk",
           "nationaleventpros.com",
           "mile0events.rsupartner.com",
           "wmevents.com",
-          "thecollectionevents.com",
           "eventsair.com",
-          "destinationtoronto.com"
+          "thecollectionevents.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -787,16 +783,16 @@
           "en.wikipedia.org",
           "globalnews.ca",
           "forbes.com",
-          "netflix.com",
           "spotlight.vegas",
+          "netflix.com",
           "emporiumarcadebar.com",
+          "boxofficemojo.com",
+          "timeout.com",
           "visitlasvegas.com",
-          "hindustantimes.com",
-          "blog.ticketmaster.com",
-          "timeout.com"
+          "hindustantimes.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -811,33 +807,33 @@
       "gsc_average_position": 29.5,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
         "verdict": "CONTESTED",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.4,
+        "openness_score": 0.5,
         "platform_share": 0,
-        "institutional_share": 0.2,
+        "institutional_share": 0,
         "distinct_cited_hosts": 10,
         "cited_hosts": [
+          "region.com.au",
+          "indianola-ia.com",
           "myeasternshoremd.com",
           "fun4firstcoastkids.com",
-          "cabq.gov",
-          "fun4alamokids.com",
-          "fun4manasotakids.com",
-          "fun4tampakids.com",
-          "fun4stlkids.com",
+          "silvagr.com",
+          "citynews.com.au",
           "fun4gatorkids.com",
-          "en.wikipedia.org",
-          "airtasker.com"
+          "fun4tampakids.com",
+          "natchezdemocrat.com",
+          "fun4manasotakids.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -852,10 +848,10 @@
       "gsc_average_position": 8,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-09-04",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -869,15 +865,15 @@
           "en.wikipedia.org",
           "vogue.com",
           "cnbc.com",
+          "bachelornation.com",
           "dictionary.cambridge.org",
+          "dictionary.com",
           "nypost.com",
           "glamour.com",
-          "chicagotribune.com",
-          "brite.co",
-          "harryanddavid.com"
+          "brite.co"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -892,10 +888,10 @@
       "gsc_average_position": 8,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -907,18 +903,18 @@
         "distinct_cited_hosts": 10,
         "cited_hosts": [
           "vogue.com",
+          "thehouseofbachelorette.com",
           "phillymag.com",
-          "insideweddings.com",
           "theeverygirl.com",
+          "insideweddings.com",
           "techcrunch.com",
+          "scottsdalebachelorette.com",
           "harryanddavid.com",
           "celebration.com",
-          "bachboss.com",
-          "businessinsider.com",
           "fearlesscaptivations.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -933,19 +929,19 @@
       "gsc_average_position": 65,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-09-04",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
         "verdict": "CONTESTED",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.5,
+        "openness_score": 0.444,
         "platform_share": 0,
-        "institutional_share": 0,
-        "distinct_cited_hosts": 8,
+        "institutional_share": 0.111,
+        "distinct_cited_hosts": 9,
         "cited_hosts": [
           "ymcasd.org",
           "boondocks.com",
@@ -953,11 +949,12 @@
           "saratoga.com",
           "wheatonparkdistrict.com",
           "ftworth.kidsoutandabout.com",
-          "houstonmom.com",
-          "barringtonparkdistrict.org"
+          "bouldercolorado.gov",
+          "orlando-parenting.com",
+          "houstonmom.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -972,10 +969,10 @@
       "gsc_average_position": 2,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-08-28",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -988,16 +985,16 @@
         "cited_hosts": [
           "kinderparties.ch",
           "merimeri.com",
-          "cardfactory.co.uk",
-          "merimeri.co.uk",
           "partyshop.paperlesspost.com",
+          "merimeri.co.uk",
+          "cardfactory.co.uk",
           "thepartydarling.com",
+          "giftlaya.com",
           "partysavesmile.co.uk",
-          "spinartnation.com",
-          "giftlaya.com"
+          "spinartnation.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-09-14T15:16:06.915Z",
+        "observed_at": "2026-09-15T15:14:49.079Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -1012,10 +1009,10 @@
       "gsc_average_position": 1,
       "target_domain": "porchandparty901.com",
       "measured_window_days": 90,
-      "measured_start": "2026-06-15",
-      "measured_end": "2026-09-13",
+      "measured_start": "2026-06-16",
+      "measured_end": "2026-09-14",
       "first_seen": "2026-09-02",
-      "last_seen": "2026-09-15",
+      "last_seen": "2026-09-16",
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
@@ -1029,9 +1026,9 @@
     }
   ],
   "last_gsc_ingest": {
-    "at": "2026-09-15T15:14:33Z",
+    "at": "2026-09-16T15:14:17Z",
     "site": "sc-domain:porchandparty901.com",
-    "window": "2026-06-15..2026-09-13",
+    "window": "2026-06-16..2026-09-14",
     "rows_returned": 22,
     "added": 0,
     "promoted_from_modelled": 0,
@@ -1040,7 +1037,7 @@
     "truth_boundary": "Impressions are this property's measured demand in Google Search Console. They are not market volume, not rank, and not evidence of citation."
   },
   "discovery_gap_pass": {
-    "at": "2026-09-15T15:14:33.703Z",
+    "at": "2026-09-16T15:14:17.673Z",
     "by": "scripts/queries/score_discovery_gap.mjs",
     "why": "The observed set is 22 queries. Every one of them carried demand and nothing else - no read on whether the answer is winnable, and none on whether the searcher is near the quote form. Both are now recorded.",
     "observed_universe_size": 26,
