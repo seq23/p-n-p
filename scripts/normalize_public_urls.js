@@ -1,7 +1,13 @@
 #!/usr/bin/env node
 /**
- * Normalize every public URL this site emits about itself to the form the
+ * Normalize every public link this site emits about itself to the form the
  * origin actually serves with a 200.
+ *
+ * Two things are normalized, both of them "the form the edge answers":
+ *   - self-referential URLs, to the extensionless 200-serving form;
+ *   - mailto: anchors, wrapped in Cloudflare's `<!--email_off-->` opt-out so
+ *     the edge stops rewriting them into `/cdn-cgi/l/email-protection`, which
+ *     answers 404. See scripts/lib/site_url.js for the measurement.
  *
  * WHY THIS IS A BUILD PASS AND NOT A ONE-OFF EDIT
  * ----------------------------------------------
@@ -65,11 +71,11 @@ for (const file of files) {
 
 if (CHECK_ONLY) {
   if (changed.length) {
-    console.error(`PUBLIC URL FORM: ${changed.length} of ${files.length} page(s) still emit a redirecting URL form:`);
+    console.error(`PUBLIC LINK FORM: ${changed.length} of ${files.length} page(s) still emit a redirecting URL form or an unprotected mailto: anchor:`);
     for (const rel of changed.slice(0, 25)) console.error(`- ${rel}`);
     process.exit(1);
   }
-  console.log(`PUBLIC URL FORM: OK (${files.length} page(s) already emit only URLs the origin serves directly)`);
+  console.log(`PUBLIC LINK FORM: OK (${files.length} page(s) already emit only links the origin serves directly)`);
 } else {
-  console.log(`PUBLIC URL FORM: normalized ${changed.length} of ${files.length} page(s) to the 200-serving URL form`);
+  console.log(`PUBLIC LINK FORM: normalized ${changed.length} of ${files.length} page(s) to the 200-serving link form`);
 }
