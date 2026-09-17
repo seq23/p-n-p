@@ -1,2 +1,10 @@
-/services  /services/porch-decorating  302
+# /quote is a short URL printed off-site; /contact is the quote page itself.
 /quote     /contact  302
+
+# /services used to redirect to /services/porch-decorating because there was no
+# services index. services/index.html has been published since 2026-08-26 and
+# is in sitemap.xml, so the rule was shadowing a real page: the origin answered
+# every internal /services link with a 302 to one service page instead of the
+# section index that lists all sixteen. Removed 2026-09-17.
+# Guarded by scripts/validation/validate_link_reachability.js, which fails on a
+# _redirects source that names a published page.
