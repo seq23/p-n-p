@@ -13,6 +13,11 @@ const allowedRootFiles = new Set([
   'AGENTS.md',
   'ARTIFACT_MANIFEST.md',
   'README.md',
+  // The portfolio-wide repo-to-domain map. The site-audit duty greps
+  // ~/GitHub/*/REPO_IDENTITY.md for a domain to decide which repository owns an
+  // Ahrefs finding; without this file at the root, porchandparty901.com matched
+  // no repository and this site was skipped on every audit run.
+  'REPO_IDENTITY.md',
   'REPO_VALIDATION_MATRIX.md',
   '_headers',
   '_redirects',
