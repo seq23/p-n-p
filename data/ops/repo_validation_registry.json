@@ -251,6 +251,16 @@
       "no_repair_reason": "A broken href is either a typo or a page that was never built. Both are authored defects; a regenerator would only paper over the second."
     },
     {
+      "id": "link-reachability",
+      "command": "npm run validate:link-reachability",
+      "detects": "An internal link with no target, a published page with zero inbound internal links (orphan), a _redirects rule that shadows a published page, or a mailto: anchor outside <!--email_off--> that Cloudflare's edge rewrites into a 404 /cdn-cgi/l/email-protection link.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": "node scripts/generators/build_section_indexes.js && node scripts/build_related_navigation.js --write && node scripts/normalize_public_urls.js"
+    },
+    {
       "id": "workflow-lane-integrity",
       "command": "npm run validate:workflow-lanes",
       "profiles": [

@@ -112,16 +112,62 @@ const LINK_ATTR = /\b(href|content)=(["'])(\/[^"']*)\2/g;
  * Additive only: it never removes markup, so it cannot strip the Clarity tag or
  * the related-pages block `validate:retrofit-integrity` protects.
  */
+// An anchor whose href is a mailto:, with its element content.
+const MAILTO_ANCHOR = /<a\b[^>]*\bhref=(["'])mailto:[^"']*\1[^>]*>[\s\S]*?<\/a>/gi;
+const EMAIL_OFF_OPEN = '<!--email_off-->';
+const EMAIL_OFF_CLOSE = '<!--/email_off-->';
+
+/**
+ * Keep the public email address a real mailto: link at the edge.
+ *
+ * THE DEFECT THIS CLOSES
+ * ----------------------
+ * Cloudflare's Email Address Obfuscation runs on this zone. Every
+ * `<a href="mailto:hello@porchandparty901.com">` served from the origin is
+ * rewritten at the edge into
+ * `<a href="/cdn-cgi/l/email-protection#<hex>"><span class="__cf_email__">[email
+ * protected]</span></a>`, and `/cdn-cgi/l/email-protection` answers 404 to
+ * anything that does not run the accompanying JavaScript.
+ *
+ * Verified live on 2026-09-17: that URL returns 404, and it is present on every
+ * page of this site because the address sits in the footer. Ahrefs reported it
+ * as "Page has links to broken page" on 112 URLs on 2026-09-10 - one broken
+ * destination, 112 source pages, which is the entire crawlable site.
+ *
+ * The obfuscation was also buying nothing. `hello@porchandparty901.com` is
+ * already served in plain text inside the LocalBusiness JSON-LD on every page,
+ * which Cloudflare does not rewrite, so a harvester reads it there regardless
+ * while the human-facing anchor is the only thing degraded - and degraded
+ * specifically for the answer engines this site is built to be cited by, which
+ * see "[email protected]" where the contact address should be.
+ *
+ * `<!--email_off-->` is Cloudflare's own documented opt-out. Wrapping the anchor
+ * leaves the mailto: intact end to end: the quote path through /contact is
+ * untouched, and the email fallback beside it starts working for crawlers again.
+ *
+ * Idempotent: an anchor already inside the wrapper is left alone.
+ */
+function protectMailtoLinks(html) {
+  return String(html).replace(MAILTO_ANCHOR, (anchor, _q, offset, whole) => {
+    const before = whole.slice(Math.max(0, offset - EMAIL_OFF_OPEN.length), offset);
+    if (before.endsWith(EMAIL_OFF_OPEN)) return anchor;
+    return `${EMAIL_OFF_OPEN}${anchor}${EMAIL_OFF_CLOSE}`;
+  });
+}
+
 function normalizeHtmlUrls(html) {
   if (DOMAIN !== 'https://porchandparty901.com') {
     throw new Error(`site_url DOMAIN changed to ${DOMAIN}; update ABSOLUTE_SELF to match.`);
   }
-  return String(html)
+  return protectMailtoLinks(String(html)
     .replace(ABSOLUTE_SELF, (url) => internalHref(url))
     .replace(LINK_ATTR, (whole, attr, quote, value) => {
       const fixed = internalHref(value);
       return fixed === value ? whole : `${attr}=${quote}${fixed}${quote}`;
-    });
+    }));
 }
 
-module.exports = { DOMAIN, sitePathForFile, siteUrlForFile, internalHref, isRedirectingForm, normalizeHtmlUrls };
+module.exports = {
+  DOMAIN, sitePathForFile, siteUrlForFile, internalHref, isRedirectingForm,
+  normalizeHtmlUrls, protectMailtoLinks, MAILTO_ANCHOR, EMAIL_OFF_OPEN, EMAIL_OFF_CLOSE
+};
