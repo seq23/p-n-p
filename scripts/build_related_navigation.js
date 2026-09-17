@@ -101,10 +101,73 @@ function linkTargets(html) {
 // --- the page set -----------------------------------------------------------
 // The sitemap is the published set. A file on disk that the sitemap does not
 // name is not a page this site claims to publish, and is left alone.
+//
+// WHY THIS RESOLVES INSTEAD OF STRIPPING A LEADING SLASH
+// -----------------------------------------------------
+// This used to read `<loc>` as a repository path: drop the domain, drop the
+// leading slash, and the remainder was expected to be `faq/foo.html`. That held
+// until #12 (2026-09-02) made the sitemap name the URL the origin actually
+// serves, which is extensionless - `https://porchandparty901.com/faq/foo`. From
+// that commit on, the only loc that still resolved to a file on disk was `/`,
+// so `published` had exactly one member, every page was filtered out, and this
+// pass wrote nothing while printing `"status": "PASS"`.
+//
+// Measured consequence: three pages published after that date - two FAQ answers
+// and guides/baby-shower-planning-checklist-memphis - never received an inbound
+// internal link from anywhere, and Ahrefs reported them as orphan pages on
+// 2026-09-10. The pass that exists to prevent exactly that had been inert for
+// eight days and reported success every time.
+//
+// A served URL is now resolved the way Cloudflare Pages resolves it: the
+// literal path, then `<path>.html`, then `<path>/index.html`. A loc that
+// resolves to no file is a hard failure, not a silent drop, because "the
+// sitemap advertises a URL this repo does not publish" is a defect in its own
+// right and is the exact shape of the bug that hid here.
 const sitemap = fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8');
-const published = new Set([...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)]
-  .map((m) => m[1].replace(DOMAIN, ''))
-  .map((p) => (p === '/' ? 'index.html' : p.replace(/^\//, ''))));
+const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1].replace(DOMAIN, ''));
+
+function relForServedPath(p) {
+  const clean = (p === '/' ? '/index' : p).replace(/\/$/, '');
+  const bare = clean.replace(/^\//, '');
+  for (const candidate of [bare, `${bare}.html`, `${bare}/index.html`]) {
+    if (candidate.endsWith('.html') && fs.existsSync(path.join(ROOT, candidate))) return candidate;
+  }
+  return null;
+}
+
+const unresolved = [];
+const published = new Set();
+for (const loc of locs) {
+  const rel = relForServedPath(loc);
+  if (rel) published.add(rel);
+  else unresolved.push(loc);
+}
+
+if (unresolved.length) {
+  console.error(JSON.stringify({
+    status: 'FAIL',
+    error: 'SITEMAP_URL_RESOLVES_TO_NO_FILE',
+    count: unresolved.length,
+    sample: unresolved.slice(0, 20)
+  }, null, 2));
+  process.exit(1);
+}
+
+// Rule 0 guard. This pass reads the whole published set to decide what relates
+// to what; a published set of one or two entries is not a small site, it is a
+// broken read, and it must not be allowed to exit 0 having written nothing.
+const MIN_PUBLISHED = 20;
+if (published.size < MIN_PUBLISHED) {
+  console.error(JSON.stringify({
+    status: 'FAIL',
+    error: 'PUBLISHED_SET_TOO_SMALL_TO_BE_REAL',
+    resolved: published.size,
+    sitemap_locs: locs.length,
+    minimum: MIN_PUBLISHED,
+    because: 'sitemap.xml parsed to fewer pages than this site has ever published. The read is broken, not the site.'
+  }, null, 2));
+  process.exit(1);
+}
 
 // The section directories plus the pages at the repository root - the home
 // page, the quote form, pricing, how-it-works and the two policy pages - which
