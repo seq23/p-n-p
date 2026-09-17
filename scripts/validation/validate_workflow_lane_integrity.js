@@ -33,11 +33,37 @@
  *    workflow_run trigger, so the link is declared in the repo rather than
  *    assumed to exist.
  *
+ * 3. A WORKFLOW FILE GITHUB CANNOT PARSE, OR A MAIN NOBODY VALIDATES.
+ *    On 2026-09-17 a human merge to main (1c9c6cb6, PR #18, 332 files) produced
+ *    zero workflow runs. The cause turned out to be GitHub never emitting the
+ *    push event (the merge is absent from the repository activity log that
+ *    lists every other merge as pr_merge), not this file - but establishing
+ *    that took a real parser and a trigger audit, because a rejected workflow
+ *    file and a filtered-out trigger produce exactly the same silence and
+ *    exactly the same absence of logs. Both are now checked here with a real
+ *    parser rather than the regex model used by the rules above. The repo
+ *    root is the Cloudflare Pages publish root and validate:tree-hygiene
+ *    forbids node_modules there, so the parser is PyYAML through python3
+ *    (the runner image ships it for the system interpreter; the lanes that
+ *    use setup-python pip-install it). No parser is a hard failure of the
+ *    scan, not a pass.
+ *
+ *    Rule 4: every file under .github/workflows parses as YAML and has `on:`
+ *            and `jobs:` mappings.
+ *    Rule 5: some workflow is reachable by a human push to main - an `on.push`
+ *            whose `branches` includes main (or is unfiltered) with no `paths`
+ *            or `paths-ignore` filter that could exclude a change - AND some
+ *            workflow runs on `pull_request` targeting main, because that is
+ *            the only trigger that validates a human change on a sha whose
+ *            event GitHub has already delivered, and AGENTS.md makes an
+ *            exact-SHA check the merge condition.
+ *
  * Hard-fails when it examines zero workflows: a scan that finds nothing because
  * it looked nowhere must not report success.
  */
 const fs = require('fs');
 const path = require('path');
+const { spawnSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '../..');
 const WF_DIR = path.join(ROOT, '.github/workflows');
@@ -275,6 +301,95 @@ for (const [file, { text, lines }] of wf) {
   }
 }
 
+// ----------------------------------------------- rules 4 and 5: real parser
+// PyYAML (YAML 1.1) reads a bare `on` key as the boolean true, which JSON
+// renders as the key "true"; a quoted "on" stays a string. Accept either.
+const onOf = (doc) => (doc && typeof doc === 'object' ? (doc.on !== undefined ? doc.on : doc.true) : undefined);
+const asList = (v) => (Array.isArray(v) ? v : v === undefined || v === null ? [] : [v]);
+const hitsMain = (branches) => !branches.length || branches.some((b) => b === 'main' || b === '**' || b === '*' || /^refs\/heads\/main$/.test(b));
+
+// Find an interpreter that has PyYAML. After actions/setup-python, `python3`
+// is the toolcache build without it, while /usr/bin/python3 still has it.
+const PY_PARSE = [
+  'import sys, json, yaml',
+  'try:',
+  '    print(json.dumps(yaml.safe_load(sys.stdin.read())))',
+  'except Exception as e:',
+  '    sys.stderr.write(" ".join(str(e).split()))',
+  '    sys.exit(1)',
+].join('\n');
+const python = ['python3', '/usr/bin/python3', 'python'].find((bin) => {
+  const r = spawnSync(bin, ['-c', 'import yaml'], { encoding: 'utf8' });
+  return r.status === 0;
+});
+if (!python) {
+  console.error('validate:workflow-lane-integrity FAILED: no python3 with PyYAML found (tried python3, /usr/bin/python3, python). The workflow files cannot be parsed, so nothing about them is proven. The scan is broken, not the repo.');
+  process.exit(1);
+}
+const parseYaml = (text) => {
+  const r = spawnSync(python, ['-c', PY_PARSE], { input: text, encoding: 'utf8' });
+  if (r.status !== 0) throw new Error((r.stderr || '').trim() || 'parse error');
+  return JSON.parse(r.stdout);
+};
+
+let parsed = 0;
+const humanPushLanes = [];
+const pullRequestLanes = [];
+for (const [file, { text }] of wf) {
+  let doc;
+  try {
+    doc = parseYaml(text);
+  } catch (e) {
+    errors.push(`${file}: does not parse as YAML (${e.message}). GitHub rejects the file and every trigger in it is dead, with no run and no log.`);
+    continue;
+  }
+  parsed += 1;
+  const on = onOf(doc);
+  if (!doc || typeof doc !== 'object' || on === undefined) {
+    errors.push(`${file}: parses, but has no \`on:\` block. A workflow with no trigger is never invoked.`);
+    continue;
+  }
+  if (!doc.jobs || typeof doc.jobs !== 'object' || !Object.keys(doc.jobs).length) {
+    errors.push(`${file}: parses, but has no jobs. GitHub accepts the file and runs nothing.`);
+    continue;
+  }
+  // `on:` may be a string, a list of event names, or a mapping.
+  const events = typeof on === 'string' ? { [on]: null } : Array.isArray(on) ? Object.fromEntries(on.map((e) => [e, null])) : on;
+  if ('push' in events) {
+    const push = events.push || {};
+    const branches = asList(push.branches);
+    const ignored = asList(push['branches-ignore']);
+    const filtered = push.paths !== undefined || push['paths-ignore'] !== undefined;
+    if (hitsMain(branches) && !ignored.includes('main')) {
+      if (filtered) {
+        errors.push(
+          `${file}: \`on.push\` reaches main but carries a paths/paths-ignore filter. A human push that touches nothing in the filter `
+          + 'produces no run and no log, which is indistinguishable from a dropped event. Validate every push to main; filter inside the job if needed.',
+        );
+      } else {
+        humanPushLanes.push(file);
+      }
+    }
+  }
+  if ('pull_request' in events) {
+    const pr = events.pull_request || {};
+    if (hitsMain(asList(pr.branches)) && !asList(pr['branches-ignore']).includes('main')) pullRequestLanes.push(file);
+  }
+}
+if (parsed && !humanPushLanes.length) {
+  errors.push(
+    'no workflow has an unfiltered `on.push` that reaches main. A human push to main would run nothing, and nothing would say so. '
+    + 'deploy-distribution.yml is expected to carry `push: branches: [main]`.',
+  );
+}
+if (parsed && !pullRequestLanes.length) {
+  errors.push(
+    'no workflow runs on `pull_request` targeting main. That is the only trigger that validates a human change before merge on a sha '
+    + 'whose event GitHub has already delivered - the push event for the merge of PR #18 was never emitted (2026-09-17), and AGENTS.md requires '
+    + 'an exact-SHA check before merge. deploy-distribution.yml is expected to carry `pull_request: branches: [main]`.',
+  );
+}
+
 if (errors.length) {
   console.error(`validate:workflow-lane-integrity FAILED: ${errors.length} lane defect(s).`);
   for (const e of errors) console.error(`  - ${e}`);
@@ -284,5 +399,6 @@ if (errors.length) {
 console.log(
   `Workflow lane integrity OK (${files.length} workflow(s) scanned; ${structuralChecked} checked for the duplicate-key and empty-mapping faults that cause a 0s startup failure; `
   + `${dryStepsChecked} dry-run step(s) shadowing a real command, all continue-on-error; `
-  + `${pushingLanes} pushing lane(s), each reachable from ${DISTRIBUTION_LANE}; ${branchOps} hardcoded-branch git operation(s))`,
+  + `${pushingLanes} pushing lane(s), each reachable from ${DISTRIBUTION_LANE}; ${branchOps} hardcoded-branch git operation(s); `
+  + `${parsed} parsed by PyYAML (${python}) with on: and jobs:; human push to main reaches ${humanPushLanes.join(', ')}; pull_request to main reaches ${pullRequestLanes.join(', ')})`,
 );

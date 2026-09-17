@@ -3,6 +3,21 @@ name: Deploy Distribution
 on:
   push:
     branches: [main]
+  # Exact-SHA validation of a human change BEFORE it reaches main. AGENTS.md
+  # makes "exact-SHA GitHub checks must pass" the merge condition, and until
+  # this trigger existed no workflow in the repo could satisfy it: PR #18 (six
+  # commits, 332 files) was merged on 2026-09-17 with the only check on its head
+  # being a Cloudflare Pages preview build.
+  #
+  # It is also the only trigger that does not depend on GitHub emitting the
+  # push event for the merge. That merge (1c9c6cb6) is absent from the
+  # repository activity log - every earlier merge is there as `pr_merge` - and
+  # nothing downstream of the ref update fired: no Actions run for any workflow,
+  # no Cloudflare Pages production build, no PushEvent. `push:` on main is
+  # necessary but was proven insufficient; the change has to be validated on a
+  # sha whose event GitHub has already delivered, which is the PR head.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
   # A push made by a workflow using the default GITHUB_TOKEN does not raise a
   # `push` event. That is a GitHub rule, not a misconfiguration, and it made the
@@ -36,6 +51,9 @@ on:
 
 permissions:
   contents: read
+  # validate:main-push-coverage lists workflow runs by head_sha to prove every
+  # human ref update on main got a run. Read-only.
+  actions: read
 
 concurrency:
   group: pnp-distribution-${{ github.ref }}
@@ -73,13 +91,18 @@ jobs:
       - name: Install optional GSC dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib
+          # pyyaml: validate:workflow-lanes parses every workflow file with a real
+          # parser through this interpreter (setup-python's build ships without it).
+          python -m pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib pyyaml
 
       # Written outside the workspace on purpose: a service-account key at the
       # repository root is one stray `git add` or one deploy-directory copy away
       # from being published, and validate:tree-hygiene correctly fails the run
       # when it appears there - which is exactly how this surfaced.
       - name: Recreate GSC service account when configured
+        # A pull_request run validates; it never distributes, so it has no reason
+        # to write a credential to disk.
+        if: github.event_name != 'pull_request'
         env:
           GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
         run: |
@@ -124,6 +147,18 @@ jobs:
           npm run validate:query-atlas
           npm run validate:release
 
+      # Silence is not green. On 2026-09-17 a human merge landed on main and no
+      # workflow ran, because GitHub never emitted the push event; nothing was
+      # red because nothing existed to be red. This step turns that into a red
+      # run: every recent human ref update on main must have a workflow run on
+      # its exact sha (or on its PR head, which the pull_request trigger above
+      # now supplies). It hard-fails when it can examine zero ref updates, and
+      # when the API cannot be reached, rather than printing OK on nothing.
+      - name: Prove every human ref update on main was validated at its exact sha
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: npm run validate:main-push-coverage
+
       - name: Cadence gate
         # Blocks publishing faster than the library can be kept inside the
         # 91-day window where pages stay citable. Warnings are reported
@@ -138,6 +173,11 @@ jobs:
           npm run cadence:gate
           npm run cadence:template-share
       - name: Run validated distribution
+        # Validation runs on every event this lane has. Distribution - IndexNow,
+        # sitemap submission, GSC URL inspection - runs only for main: a push, a
+        # dispatch, or a completed publishing cycle. A pull request is proposed
+        # content and must not be announced to any engine.
+        if: github.event_name != 'pull_request'
         env:
           GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
         run: |

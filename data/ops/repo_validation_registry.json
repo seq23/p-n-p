@@ -5,7 +5,8 @@
   "canonical_full_validation": "npm run validate:release",
   "profiles": {
     "release": "Every leaf validator reached by `npm run validate:release`, plus the query-atlas gate that guards the evidence the atlas publishes against.",
-    "core": "The page-level matrix only. Fast pass for content edits."
+    "core": "The page-level matrix only. Fast pass for content edits.",
+    "lane": "Validators that need the GitHub API and a token. Run as named steps in deploy-distribution.yml on every event it has, not from validate:release."
   },
   "repair_policy": "repair_command may only be declared when the command regenerates the exact artifact whose defect the validator detects. A repair is never declared to make an unrelated failure disappear; validators whose failures require human judgement are left with no repair and are reported by name.",
   "validators": [
@@ -266,8 +267,17 @@
       "profiles": [
         "release"
       ],
-      "purpose": "Lane wiring, not script correctness: a dry-run step that aborts the job before the real repair runs, and a workflow that pushes with GITHUB_TOKEN (which raises no push event) without being named in the distribution lane workflow_run trigger. Both were live and both left every individual script correct.",
+      "purpose": "Lane wiring, not script correctness: a dry-run step that aborts the job before the real repair runs, and a workflow that pushes with GITHUB_TOKEN (which raises no push event) without being named in the distribution lane workflow_run trigger. Both were live and both left every individual script correct. Since 2026-09-17 also: every workflow file parses under a real YAML parser with on: and jobs:, some workflow carries an unfiltered on.push reaching main, and some workflow runs on pull_request targeting main - the exact-SHA pre-merge check AGENTS.md requires, and the only trigger that does not depend on GitHub emitting the push event for a merge (it did not, for 1c9c6cb6).",
       "no_repair_reason": "A broken lane is an authored wiring defect in a workflow file. There is no generator that can re-derive the intended trigger graph, and a script that edited .github/workflows/ automatically would be repairing the thing that governs it."
+    },
+    {
+      "id": "provider-transport-resilience",
+      "command": "npm run validate:provider-transport",
+      "detects": "A googleapiclient execute() in distribution_scripts/ with no num_retries (one socket timeout fails the lane - run 35239441050), or gsc_inspect_urls.py / deploy_distribution.sh no longer mapping retry-served -> COMPLETED, persistent transport fault -> FAILED with evidence kept, 429 -> HELD_QUOTA, 401/403 -> HELD_CREDENTIAL. Proven behaviourally against a stub provider, not by reading.",
+      "profiles": [
+        "release"
+      ],
+      "no_repair_reason": "A missing retry or a wrong exit-code mapping is authored code in the provider scripts; nothing regenerates it."
     },
     {
       "id": "cadence-policy-authority",
@@ -304,6 +314,15 @@
       ],
       "purpose": "The publication cap is a rate and the gate must enforce it as one. cadence_gate.js compared `newPublications.length` - which accumulates from the last acceptance with no window - against `new_pages_per_week`, one week's worth, and never read the ledger's `generated_at`. Two denominators, one comparison. Reproduced 2026-09-04: a baseline 8 weeks old with 4 pages published since, against an allowance of 1/week x 8 = 8, still printed BLOCK weekly_cap and exited 1, reddening Deploy Distribution on main for publishing at exactly the permitted rate. Runs the real gate against fixture repositories with CADENCE_TODAY pinned to 2026-09-04 under UTC, UTC+14 and UTC-11: the allowance accrues, still blocks one page past it, grants one week's worth on a same-day baseline rather than zero, cannot bank credit past the refresh window, hard-stops on a ledger with no baseline date, and still blocks the 105-page spree behind run 33709958800. Hard-fails on Rule 0 when it runs zero cases.",
       "no_repair_reason": "A cadence breach is a publishing decision, not a defect a repair pass can undo. The pages are already written; the only honest answers are to hold them or to record a deliberate `cadence:accept` with a reason."
+    },
+    {
+      "id": "main-push-coverage",
+      "command": "npm run validate:main-push-coverage",
+      "detects": "A human landing on main (a PR merge, or the tip of a direct push) with no workflow run on its exact sha or its PR head. On 2026-09-17 GitHub never emitted the push event for the merge of PR #18 (1c9c6cb6): zero runs of any workflow, no Cloudflare Pages build, no activity-log entry, nothing red. Walks the first-parent commit graph through the API - the one record a dropped event cannot touch - and hard-fails on zero human landings or an unreachable API.",
+      "profiles": [
+        "lane"
+      ],
+      "no_repair_reason": "Needs the GitHub API and a token, so it runs as a step in deploy-distribution.yml rather than inside validate:release. An uncovered sha is covered by dispatching the lane on a branch at that sha (git push origin <sha>:refs/heads/validate/<sha> && gh workflow run \"Deploy Distribution\" --ref validate/<sha>); no generator can do that from inside a validation pass."
     }
   ]
 }
