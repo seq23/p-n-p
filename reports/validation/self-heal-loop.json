@@ -4,28 +4,14 @@
   "profile": "release",
   "max_attempts": 3,
   "dry_run": false,
-  "generated_at": "2026-09-16T16:25:30.455Z",
+  "generated_at": "2026-09-17T13:58:05.751Z",
   "status": "CLEAN",
   "safe_to_push": true,
-  "validators_run": 29,
-  "repairs_declared": 8,
+  "validators_run": 30,
+  "repairs_declared": 9,
   "attempts": [
     {
       "attempt": 1,
-      "failed": [
-        "distribution-contract"
-      ],
-      "repaired": [
-        {
-          "id": "distribution-contract",
-          "cmd": "npm run distribution:prepare",
-          "code": 0
-        }
-      ],
-      "result": "REPAIRED_RETRYING"
-    },
-    {
-      "attempt": 2,
       "failed": [],
       "repaired": [],
       "result": "CLEAN"
