@@ -5,6 +5,11 @@ from pathlib import Path
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
+# Same transport as gsc_inspect_urls.py, same class of fault: a single socket
+# timeout with zero retries failed the whole lane on 2026-09-17. Retried with
+# backoff for socket/connection/SSL errors, 429 and 5xx.
+NUM_RETRIES = 5
+
 def main():
     if len(sys.argv) < 4:
         print("Usage: gsc_submit_sitemaps.py <service-account.json> <siteUrl> <sitemapUrl1> [sitemapUrl2 ...]")
@@ -22,7 +27,7 @@ def main():
         if not sitemap_url:
             continue
         print(f"Submitting sitemap: {sitemap_url}")
-        service.sitemaps().submit(siteUrl=site_url, feedpath=sitemap_url).execute()
+        service.sitemaps().submit(siteUrl=site_url, feedpath=sitemap_url).execute(num_retries=NUM_RETRIES)
         print("OK")
 
 if __name__ == "__main__":

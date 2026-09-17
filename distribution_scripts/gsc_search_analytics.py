@@ -36,7 +36,9 @@ def query_dimension(service, site_url, start_date, end_date, dimensions, row_lim
             "rowLimit": min(row_limit, 25000),
             "startRow": start_row,
         }
-        response = service.searchanalytics().query(siteUrl=site_url, body=body).execute()
+        # Retried with backoff for socket/connection/SSL faults, 429 and 5xx: the same
+        # transport that failed the distribution lane on one read timeout on 2026-09-17.
+        response = service.searchanalytics().query(siteUrl=site_url, body=body).execute(num_retries=5)
         batch = response.get("rows", [])
         rows.extend(batch)
         if len(batch) < body["rowLimit"] or len(rows) >= row_limit:

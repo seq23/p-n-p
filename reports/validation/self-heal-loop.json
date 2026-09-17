@@ -3,11 +3,11 @@
   "repo_id": "p-n-p",
   "profile": "release",
   "max_attempts": 3,
-  "dry_run": false,
-  "generated_at": "2026-09-17T13:58:05.751Z",
+  "dry_run": true,
+  "generated_at": "2026-09-17T15:36:06.337Z",
   "status": "CLEAN",
   "safe_to_push": true,
-  "validators_run": 30,
+  "validators_run": 31,
   "repairs_declared": 9,
   "attempts": [
     {
