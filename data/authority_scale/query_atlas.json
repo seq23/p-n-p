@@ -448,7 +448,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 9,
+      "impressions_90d": 10,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -465,7 +465,7 @@
         "format": null,
         "semantic_cluster": "party-decor"
       },
-      "rank_score": 4.5,
+      "rank_score": 5,
       "publishable": true
     },
     {
