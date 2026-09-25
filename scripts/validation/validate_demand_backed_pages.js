@@ -142,7 +142,10 @@ if (exists('data/demand/measured_demand.json')) {
   }
   const backlog = demand.backlog_validated_not_yet_built || [];
   if (backlog.length) {
-    notes.push(`demand: ${backlog.length} validated queries in the backlog, not yet built (daily new-page ceiling is 3)`);
+    // Where each row stands - covered, queued, published, awaiting a draft - is
+    // validate:backlog-reaches-builder's to say; it reads the queue and fails an
+    // overdue row. This note used to be the backlog's only reader.
+    notes.push(`demand: ${backlog.length} validated queries in the backlog; see validate:backlog-reaches-builder for their build state`);
   }
 }
 

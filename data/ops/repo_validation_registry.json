@@ -323,6 +323,15 @@
         "lane"
       ],
       "no_repair_reason": "Needs the GitHub API and a token, so it runs as a step in deploy-distribution.yml rather than inside validate:release. An uncovered sha is covered by dispatching the lane on a branch at that sha (git push origin <sha>:refs/heads/validate/<sha> && gh workflow run \"Deploy Distribution\" --ref validate/<sha>); no generator can do that from inside a validation pass."
+    },
+    {
+      "id": "backlog-reaches-builder",
+      "command": "npm run validate:backlog-reaches-builder",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "The validated demand backlog in data/demand/measured_demand.json was reported and never built from: seven rows sat from 2026-08-27 while authority:publish named QUEUE_EXHAUSTED_NOTHING_REFILLS_IT daily. Hard-fails when a backlog row older than the draft deadline (7 / new_pages_per_week days, from data/cadence/policy.json) has no build attempt - no covering page, or a draft not in the publish queue; when a build link points at nothing (covering page off disk or out of the sitemap, draft missing from the query universe, a queue status that never publishes); when the backlog is empty; or when authority:backlog:promote is not run before authority:publish in both authority:cycle and authority-daily.yml.",
+      "no_repair_reason": "Resolving a row means authoring a page draft or judging that an existing page answers it. Both are content decisions no generator can make; authority:backlog:promote only queues drafts that already exist."
     }
   ]
 }

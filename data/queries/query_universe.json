@@ -1193,5 +1193,354 @@
     "localContext": "Porch & Party styles showers in homes, hotel and venue rooms, and private event spaces across Memphis, Germantown, Collierville, and Bartlett. Venue-hosted showers are the ones where the setup access window needs pinning down early, because the room is rarely available long before guests arrive.",
     "beforeBook": "Before requesting a decor quote, have the venue confirmed, the guest count settled, the palette chosen, and the setup access window known. Those four answers are what turn a quote request into an accurate quote instead of a conversation.",
     "nextStep": "Once the venue and count are settled, send the quote form the date, the venue type, the guest count, the palette, and the setup access window, and say whether you want a grazing table alongside the decor."
+  },
+  {
+    "slug": "bridal-shower-planning-checklist-memphis",
+    "folder": "guides",
+    "conversionEvents": true,
+    "eyebrow": "Bridal Shower Planning",
+    "title": "Bridal Shower Planning Checklist for Memphis Hosts | Porch & Party",
+    "h1": "Bridal shower planning checklist for Memphis hosts",
+    "description": "A bridal shower planning checklist ordered by what blocks what: the wedding date, the guest list, the venue, then decor and setup, written for Memphis-area hosts.",
+    "serviceKey": "celebration",
+    "intent": "informational",
+    "intro": "A bridal shower has one dependency a baby shower does not: it hangs off a wedding that already has a date, a guest list and a bride with opinions. Most checklists ignore that and list supplies. This one is ordered by what has to be settled before the next thing can be booked.",
+    "quickAnswer": "Plan a bridal shower in this order: agree who is hosting and the budget, fix the date against the wedding calendar, build the guest list from the wedding guest list, confirm the venue, send invitations, choose the palette, plan the food, then book decor and setup. Decor comes after the venue and the count because both decide what the styling has to fill.",
+    "forWho": "Maids of honour, bridal-party members, and family members hosting a bridal shower in the Memphis area, especially anyone hosting one for the first time.",
+    "definition": {
+      "term": "Why a bridal shower checklist starts with the wedding, not the shower",
+      "text": "A bridal shower borrows its two biggest constraints from the wedding: the date has to sit clear of the wedding itself and of other pre-wedding events, and the guest list is normally drawn from people already invited to the wedding. Settling both against the wedding plan first is what stops a shower from being rescheduled or its invitations from causing awkwardness later."
+    },
+    "includes": [
+      "A working order that puts the decisions borrowed from the wedding first",
+      "The point where venue, decor and grazing setup should be booked",
+      "What to have settled before requesting a decor quote",
+      "A day-of sequence that leaves the install enough room"
+    ],
+    "protocol": {
+      "title": "The bridal shower planning checklist, in order",
+      "steps": [
+        {
+          "step": "Agree who is hosting and what the budget is.",
+          "detail": "Showers are often co-hosted by the maid of honour, the bridal party, or family. Settle who pays for what before anything is booked, because every later step spends from that budget."
+        },
+        {
+          "step": "Fix the date against the wedding calendar.",
+          "detail": "Ask the bride which weekends are clear of the wedding, the bachelorette, and travel. Showers commonly land in the weeks before the wedding; the exact window is the bride's call, not a rule."
+        },
+        {
+          "step": "Build the guest list from the wedding guest list.",
+          "detail": "Get the list from the bride or the couple. Inviting someone to the shower who is not invited to the wedding is the etiquette problem most worth avoiding, and the list is also what decides the venue size."
+        },
+        {
+          "step": "Choose and confirm the venue.",
+          "detail": "A home, a hotel or venue room, or a private space at a restaurant. Confirm it in writing, including the time you can get in to set up, before moving on."
+        },
+        {
+          "step": "Send invitations.",
+          "detail": "Give guests several weeks of notice, and more if guests are travelling into Memphis or the date sits near a holiday weekend."
+        },
+        {
+          "step": "Choose the palette or theme with the bride.",
+          "detail": "Do it after the venue is confirmed. Many brides want the shower to echo the wedding palette without repeating it; a palette chosen against a room you have seen holds up."
+        },
+        {
+          "step": "Plan the food and drink format.",
+          "detail": "Brunch, light bites, or a grazing table. Format decides quantity, service, and how much table space the room gives up, so it comes before decor."
+        },
+        {
+          "step": "Book decor and setup.",
+          "detail": "With the venue, count and palette settled, a decor quote is fast and accurate. Porch & Party celebration setups start at $300+ and grazing table styling starts at $250+, food not included by default."
+        },
+        {
+          "step": "Plan games, gifts and the order of the afternoon.",
+          "detail": "Gift opening takes longer than hosts expect with a large guest list; decide whether it happens at the shower and build the timeline around it."
+        },
+        {
+          "step": "Confirm everything one week out.",
+          "detail": "Re-confirm the venue, the final count, the food order, and the setup access window."
+        },
+        {
+          "step": "Set the day-of timeline.",
+          "detail": "Work backwards from guest arrival: venue access, decor install, food placement, then guests. Give the install more room than you think it needs."
+        }
+      ],
+      "note": "If you have less time than this assumes, keep the order and compress the gaps. The order is what prevents rework."
+    },
+    "practical": "The two steps hosts most often get out of order are the guest list and the decor. A guest list built before the wedding list is final causes the awkward invitation problem, and decor booked before the venue is confirmed has to be redone when the room turns out to be a different size or available later than planned. Settle the wedding-borrowed decisions first and the rest of the list goes in one pass.",
+    "authority": "This page exists because bridal shower checklists are usually published as supply lists, while the decisions that cause real trouble are the ones borrowed from the wedding. The order here reflects where shower decor requests arrive in a host's planning when Porch & Party takes them.",
+    "trust": {
+      "author": "Porch &amp; Party",
+      "credential": "a Memphis-based porch decorating and celebration styling company, operated by Kerseta LLC",
+      "basis": "The sequencing reflects how Porch & Party takes shower decor requests. Prices quoted are the company’s own published starting prices, not market averages."
+    },
+    "faqQuestion": "Who usually plans and pays for a bridal shower?",
+    "faqAnswer": "It is commonly hosted by the maid of honour, the bridal party, or a family member, and the hosts usually cover it between them. The only hard rule is to agree it before booking anything, because the budget decides the venue and the scope of decor.",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN"
+    ],
+    "related": [
+      "/events/bridal-shower-decorations-memphis.html",
+      "/services/bridal-shower-decor-memphis.html",
+      "/guides/baby-shower-planning-checklist-memphis.html",
+      "/faq/how-far-in-advance-should-i-book-party-decor.html",
+      "/contact.html"
+    ],
+    "localContext": "Porch & Party styles bridal showers in homes, hotel and venue rooms, and private event spaces across Memphis, Germantown, Collierville, and Bartlett. Venue-hosted showers are the ones where the setup access window needs pinning down early.",
+    "beforeBook": "Before requesting a decor quote, have the venue confirmed, the guest count settled, the palette agreed with the bride, and the setup access window known.",
+    "nextStep": "Send the quote form the date, the venue type, the guest count, the palette, and the access window, and say whether you want a grazing table alongside the decor."
+  },
+  {
+    "slug": "grazing-table-vs-charcuterie-board",
+    "folder": "comparisons",
+    "conversionEvents": true,
+    "eyebrow": "Grazing Comparison",
+    "title": "Grazing Table vs Charcuterie Board: What Is the Difference? | Porch & Party",
+    "h1": "Grazing table vs charcuterie board: what is the difference?",
+    "description": "The difference between a grazing table and a charcuterie board, in scale, contents, setup and cost basis, and how to decide which one an event needs.",
+    "serviceKey": "grazing",
+    "intent": "commercial",
+    "intro": "The two words get used interchangeably, and they describe different things. A charcuterie board is a serving board. A grazing table is a styled spread that takes over a table, and the difference changes who builds it, how many people it serves, and what you are actually paying for.",
+    "quickAnswer": "A charcuterie board is a single board of cured meats, cheeses and accompaniments that a few people share. A grazing table is a whole table styled with food laid directly across it, built on site to feed and anchor a larger gathering. Choose a board for a small group; choose a grazing table when the food is also part of the room's decor.",
+    "forWho": "Hosts planning a shower, birthday, corporate gathering or small event in the Memphis area who are deciding between a board and a full grazing table.",
+    "definition": {
+      "term": "Grazing table, defined",
+      "text": "A grazing table is a food display that covers a table surface rather than a board, laid out and styled on site so guests serve themselves over the course of an event. Because it is built in place and sized to the table and the guest count, the setup and styling are as much a part of it as the food."
+    },
+    "includes": [
+      "A side-by-side comparison of scale, contents, setup and cost basis",
+      "A simple way to decide which one an event needs",
+      "What Porch & Party provides and what it does not include by default"
+    ],
+    "costTable": {
+      "title": "Grazing table vs charcuterie board, side by side",
+      "caption": "How the two formats differ for a hosted event.",
+      "columns": [
+        "Factor",
+        "Charcuterie board",
+        "Grazing table"
+      ],
+      "rows": [
+        [
+          "What it is",
+          "A single serving board or platter",
+          "A whole table styled with food laid across it"
+        ],
+        [
+          "Who it suits",
+          "A small group sharing one board",
+          "A larger gathering serving itself over the event"
+        ],
+        [
+          "Where it is built",
+          "Usually assembled ahead and carried in",
+          "Built and styled on site, on the table it is served from"
+        ],
+        [
+          "Role in the room",
+          "A dish on the table",
+          "A focal point that doubles as decor"
+        ],
+        [
+          "What you pay for",
+          "Mostly the food on the board",
+          "The styling and setup, plus the food"
+        ]
+      ],
+      "note": "Porch & Party grazing table styling starts at $250+. Base pricing covers styling and table presentation; food is not included by default and can be sourced for an additional fee. Porch & Party does not sell individual boards."
+    },
+    "practical": "The practical test is the guest count and the table. If a few people are sharing food at a coffee table, a board is the right tool and a grazing table is overkill. Once the food has to feed a room and hold the eye for the length of an event, a board gets picked over in the first half hour and a styled table is the better purchase.",
+    "authority": "This page exists because the two terms are used as synonyms in most search results, which leaves a host unable to tell what they are being quoted for. Porch & Party styles grazing tables, so it states plainly what that service covers and what it does not.",
+    "trust": {
+      "author": "Porch &amp; Party",
+      "credential": "a Memphis-based porch decorating and celebration styling company, operated by Kerseta LLC",
+      "basis": "Pricing on this page is Porch & Party’s own published starting price for grazing table styling, not a market average."
+    },
+    "faqQuestion": "Does a Porch & Party grazing table include the food?",
+    "faqAnswer": "Not by default. The base price covers styling and table presentation. Food can be sourced for an additional fee, so say in the quote form whether you are supplying it or want it arranged.",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN"
+    ],
+    "related": [
+      "/services/grazing-tables-memphis.html",
+      "/faq/do-grazing-tables-include-food.html",
+      "/faq/how-much-does-grazing-tables-cost.html",
+      "/services/grazing-and-event-styling.html",
+      "/contact.html"
+    ],
+    "localContext": "Porch & Party styles grazing tables for showers, birthdays, corporate gatherings and small events across Memphis, Germantown, Collierville, and Bartlett, in homes, offices and venue rooms.",
+    "beforeBook": "Before requesting a grazing quote, know the guest count, the table size or the space it will sit in, the event length, and whether you are supplying the food.",
+    "nextStep": "Use the quote form with the date, guest count, venue, table space, and whether food should be sourced."
+  },
+  {
+    "slug": "how-much-does-gender-reveal-decor-cost-in-memphis",
+    "folder": "faq",
+    "conversionEvents": true,
+    "eyebrow": "Gender Reveal Decor Cost",
+    "title": "How Much Does Gender Reveal Party Decor Cost in Memphis? | Porch & Party",
+    "h1": "How much does it cost to decorate for a gender reveal party in Memphis?",
+    "description": "What gender reveal party decor costs in Memphis when it is styled and installed, starting from the published Porch & Party price, and what moves the quote.",
+    "serviceKey": "celebration",
+    "intent": "commercial",
+    "intro": "Gender reveal decor is usually one moment built around one reveal: a backdrop, a balloon installation, and a table the photos are taken in front of. What it costs depends far more on how much of the space has to be styled than on the theme.",
+    "quickAnswer": "A styled and installed gender reveal setup from Porch & Party starts at $300, the published starting price for celebration setups. The final quote depends on how much of the space is decorated, the venue and access window, and whether a grazing table is added, which starts at $250+ for styling. Buying and assembling decor yourself costs less and takes your own time.",
+    "forWho": "Memphis-area hosts pricing decor for a gender reveal at home, in a backyard, or in a venue room.",
+    "definition": {
+      "term": "A styled gender reveal setup, defined",
+      "text": "A styled gender reveal setup is decor designed around the reveal moment and installed on site: typically a backdrop or balloon installation, a styled table, and the focal point where the reveal is photographed. It differs from buying a themed kit in that the design, assembly, installation and placement are done for you and scaled to the actual space."
+    },
+    "includes": [
+      "Colour and design direction built around the reveal moment",
+      "Backdrop, balloon or table styling installed on site",
+      "Placement planned around where the reveal will be photographed",
+      "Optional grazing table styling alongside the decor"
+    ],
+    "costTable": {
+      "title": "What decides a gender reveal decor quote",
+      "caption": "The factors that move a gender reveal setup above the celebration-setup starting price.",
+      "columns": [
+        "Factor",
+        "Effect on the quote",
+        "Why"
+      ],
+      "rows": [
+        [
+          "How much of the space is styled",
+          "Raises it",
+          "One backdrop is a small scope; a styled entry, table and backdrop together is a larger install."
+        ],
+        [
+          "Indoor or outdoor",
+          "Can raise it",
+          "Outdoor setups need securing against wind and heat, and balloons behave differently outside."
+        ],
+        [
+          "Venue and access window",
+          "Can raise it",
+          "Venue rooms with a short access window compress the install into a tighter slot."
+        ],
+        [
+          "Adding a grazing table",
+          "Raises it",
+          "Grazing table styling is quoted separately and starts at $250+; food is not included by default."
+        ],
+        [
+          "Notice given",
+          "Can raise it",
+          "Short-notice requests depend on what can be sourced and scheduled in the time available."
+        ]
+      ],
+      "note": "Celebration Setups start at $300+. Porch & Party publishes starting prices; exact quotes depend on scope, date, location and materials."
+    },
+    "practical": "The practical read: if the reveal is a small family moment and you have an afternoon free, a themed kit and some help will do it. If the reveal is being photographed or filmed for people who are not there, the backdrop is the thing everyone will see afterwards, and that is the part worth paying to have designed and installed properly.",
+    "authority": "This page exists because gender reveal cost guides mostly quote retail supply totals, which answers a different question from what a styled and installed setup costs. Porch & Party publishes its real starting price so the comparison can be made honestly.",
+    "trust": {
+      "author": "Porch &amp; Party",
+      "credential": "a Memphis-based porch decorating and celebration styling company, operated by Kerseta LLC",
+      "basis": "The prices on this page are Porch & Party’s own published starting prices for celebration setups and grazing table styling, not market averages."
+    },
+    "faqQuestion": "Can Porch & Party set up a gender reveal in a backyard?",
+    "faqAnswer": "Yes, subject to availability and the space. Outdoor setups need a plan for wind and heat, so say in the quote form that the reveal is outdoors and describe the area the decor will go in.",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN"
+    ],
+    "related": [
+      "/services/celebration-setups.html",
+      "/faq/how-much-does-a-balloon-garland-cost-in-memphis.html",
+      "/services/baby-shower-decor-memphis.html",
+      "/pricing.html",
+      "/contact.html"
+    ],
+    "localContext": "Porch & Party installs celebration decor in homes, backyards, hotel rooms and event spaces across Memphis, Germantown, Collierville, and Bartlett. Outdoor summer setups in Memphis need the most planning for heat.",
+    "beforeBook": "Before requesting a quote, know the date, whether the reveal is indoors or outdoors, the space the decor will go in, the colours, and when you can get access to set up.",
+    "nextStep": "Use the quote form with the date, location, indoor or outdoor, the colours, and a photo of the space if you have one."
+  },
+  {
+    "slug": "graduation-party-decorations-at-home-memphis",
+    "folder": "guides",
+    "conversionEvents": true,
+    "eyebrow": "Graduation Party Decor",
+    "title": "Graduation Party Decorations at Home: A Memphis Host's Guide | Porch & Party",
+    "h1": "Graduation party decorations at home: a Memphis host's guide",
+    "description": "How to decorate a graduation party at home, in the order that works: the entry, the photo spot, the display table and the food table, with what to style first.",
+    "serviceKey": "celebration",
+    "intent": "informational",
+    "intro": "A graduation party at home is decorated for guests who arrive in waves over an afternoon, walk through the front door, find the graduate, take a photo and eat. The decor that matters follows that path. Everything else is optional.",
+    "quickAnswer": "Decorate a home graduation party along the route guests take: style the front porch or entry in the school colours, build one photo backdrop, set up a display table for the graduate's photos and memorabilia, and style the food table. Put the budget into the entry and the photo spot, because those are what guests see and what the photos keep.",
+    "forWho": "Families hosting a high school or college graduation party at home or in a backyard in the Memphis area.",
+    "definition": {
+      "term": "Why home graduation decor follows the guest route",
+      "text": "Graduation parties are usually open-house in format: guests arrive and leave over several hours rather than all at once. Decor placed along the path every guest walks, from the porch to the photo spot to the food, is seen by everyone; decor spread thinly around the house is seen by few and photographed by nobody."
+    },
+    "includes": [
+      "The four places a home graduation party should be decorated, in order",
+      "Where the budget does the most work",
+      "What can be styled by Porch & Party and what hosts usually handle",
+      "What to settle before requesting a decor quote"
+    ],
+    "protocol": {
+      "title": "Decorating a graduation party at home, in order",
+      "steps": [
+        {
+          "step": "Fix the format and the guest route.",
+          "detail": "Decide whether guests will be inside, in the backyard, or both, and walk the route they will take from the street. Every decor decision below hangs off that route."
+        },
+        {
+          "step": "Style the front porch or entry.",
+          "detail": "It is the first thing every guest sees and the place people photograph arriving. School colours on the door, planters and entry are the highest-value decor at a home party. Porch & Party porch styling starts at $350+."
+        },
+        {
+          "step": "Build one photo backdrop.",
+          "detail": "One strong backdrop, such as a balloon installation or styled wall with the graduate's name and year, beats several small ones. Put it where the light is good and there is room for a group."
+        },
+        {
+          "step": "Set up the display table.",
+          "detail": "Photos, the cap and gown, awards and school memorabilia. Keep it near the photo spot so the two read as one moment."
+        },
+        {
+          "step": "Style the food table.",
+          "detail": "Open-house parties suit food guests help themselves to over hours. A styled grazing table doubles as decor; Porch & Party grazing styling starts at $250+, food not included by default."
+        },
+        {
+          "step": "Plan setup around the start time.",
+          "detail": "Book installation for the morning of or the day before, depending on whether the decor is inside or outdoors in the heat. Outdoor balloon work goes up as close to the start as possible."
+        }
+      ],
+      "note": "If the budget only stretches to one styled element, make it the entry or the photo backdrop, not the interior."
+    },
+    "practical": "The practical mistake is spreading decor evenly through the house. At an open-house party most guests see the porch, the photo spot and the food table and little else. Concentrating the decor in those three places makes a modest budget look like a full setup in every photo taken that day.",
+    "authority": "This page exists because most graduation decor guides are product lists. The decision that actually matters at a home party is where to put the decor, and that is what this guide is ordered around.",
+    "trust": {
+      "author": "Porch &amp; Party",
+      "credential": "a Memphis-based porch decorating and celebration styling company, operated by Kerseta LLC",
+      "basis": "Prices quoted are Porch & Party’s own published starting prices for porch styling, celebration setups and grazing table styling, not market averages."
+    },
+    "faqQuestion": "What does it cost to have a graduation party at home decorated?",
+    "faqAnswer": "Porch & Party celebration setups start at $300+, porch styling starts at $350+, and grazing table styling starts at $250+. Most home graduation parties combine one or two of these; the quote depends on the space, the scope and the date.",
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN"
+    ],
+    "related": [
+      "/services/celebration-setups.html",
+      "/services/porch-decorating.html",
+      "/services/grazing-tables-memphis.html",
+      "/faq/do-party-decorators-come-to-your-house.html",
+      "/contact.html"
+    ],
+    "localContext": "Porch & Party decorates homes, porches and backyards for celebrations across Memphis, Germantown, Collierville, and Bartlett. Graduation season falls in the Memphis heat, which decides when outdoor decor can be installed.",
+    "beforeBook": "Before requesting a quote, know the date and hours, whether guests will be indoors or out, the school colours, and which of the entry, photo spot and food table you want styled.",
+    "nextStep": "Use the quote form with the date, the party hours, the school colours, and which spaces you want decorated, with a photo of the porch or room if you have one."
   }
 ]

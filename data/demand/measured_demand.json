@@ -172,7 +172,11 @@
         "average cost of baby shower decorations",
         "how much should baby shower decorations cost",
         "how much are decorations for a baby shower"
-      ]
+      ],
+      "build": {
+        "covered_by": "/services/baby-shower-decor-memphis.html",
+        "why": "The baby shower decor service page states the published $300+ starting price and what moves it; a separate cost page would duplicate that intent on a second URL."
+      }
     },
     {
       "query": "grazing table cost per person",
@@ -188,7 +192,11 @@
         "how much does a grazing table cost per person",
         "average cost of grazing table",
         "how much does a grazing table for 50 people cost"
-      ]
+      ],
+      "build": {
+        "covered_by": "/answers/how-much-does-a-grazing-table-cost-in-memphis.html",
+        "why": "Answered by the grazing table cost page. Porch & Party prices grazing styling per table ($250+, food extra), not per head, so a per-person page would state a price structure the business does not use."
+      }
     },
     {
       "query": "average cost for party decorator",
@@ -204,7 +212,11 @@
         "how much do event decorators cost",
         "how much does an event decorator cost",
         "how much does event decor cost"
-      ]
+      ],
+      "build": {
+        "covered_by": "/answers/how-much-does-party-decor-cost-in-memphis.html",
+        "why": "Same intent as the existing party decor cost answer, which carries the published $300+ starting price."
+      }
     },
     {
       "query": "bridal shower planning checklist",
@@ -219,7 +231,10 @@
         "bridal shower planner checklist",
         "when to start planning bridal shower",
         "bridal shower party planning checklist"
-      ]
+      ],
+      "build": {
+        "page": "guides/bridal-shower-planning-checklist-memphis"
+      }
     },
     {
       "query": "grazing table vs charcuterie board",
@@ -233,7 +248,10 @@
         "grazing table charcuterie board",
         "difference between charcuterie and grazing board",
         "grazing vs charcuterie"
-      ]
+      ],
+      "build": {
+        "page": "comparisons/grazing-table-vs-charcuterie-board"
+      }
     },
     {
       "query": "christmas decor memphis tn",
@@ -245,7 +263,11 @@
         "christmas decor memphis tn",
         "christmas decor memphis",
         "christmas lighting memphis"
-      ]
+      ],
+      "build": {
+        "covered_by": "/seasonal/christmas-porch-decorating-memphis.html",
+        "why": "Porch & Party's Christmas service is porch and entry styling; the Memphis Christmas porch page is the intent-matched URL. Roofline lighting is not a service it sells."
+      }
     },
     {
       "query": "party decorators memphis tn",
@@ -258,7 +280,11 @@
         "party decorators memphis tn",
         "party decorations memphis",
         "party planner memphis tn"
-      ]
+      ],
+      "build": {
+        "covered_by": "/services/party-decor-memphis.html",
+        "why": "A geo-modified service query; the Memphis party decor service page is the intent-matched URL, and the authority contract prefers improving it to opening a duplicate."
+      }
     },
     {
       "query": "how much does it cost to decorate for a gender reveal party",
@@ -267,7 +293,10 @@
       "volume": null,
       "observed_at": "2026-09-25",
       "source_url": "https://www.revealtogether.com/blog/gender-reveal-party-cost-budget-guide",
-      "note": "Query coverage review 2026-09-25: real phrasing, no page on porchandparty901.com (checked against the live sitemap, 112 URLs). Both occasions fall under the existing party-decor service (birthdays, showers, home celebrations, small events)."
+      "note": "Query coverage review 2026-09-25: real phrasing, no page on porchandparty901.com (checked against the live sitemap, 112 URLs). Both occasions fall under the existing party-decor service (birthdays, showers, home celebrations, small events).",
+      "build": {
+        "page": "faq/how-much-does-gender-reveal-decor-cost-in-memphis"
+      }
     },
     {
       "query": "graduation party decorations at home",
@@ -276,9 +305,13 @@
       "volume": null,
       "observed_at": "2026-09-25",
       "source_url": "https://smartyhadaparty.com/blogs/home/graduation-party-at-home",
-      "note": "Query coverage review 2026-09-25: real phrasing, no page on porchandparty901.com (checked against the live sitemap, 112 URLs). Both occasions fall under the existing party-decor service (birthdays, showers, home celebrations, small events)."
+      "note": "Query coverage review 2026-09-25: real phrasing, no page on porchandparty901.com (checked against the live sitemap, 112 URLs). Both occasions fall under the existing party-decor service (birthdays, showers, home celebrations, small events).",
+      "build": {
+        "page": "guides/graduation-party-decorations-at-home-memphis"
+      }
     }
   ],
+  "backlog_build_policy": "Every backlog row carries a `build` link: `covered_by` names a published page that already answers it (with `why`), or `page` names a folder/slug drafted into data/queries/query_universe.json and queued in data/publish_queue/publish_queue.json. `npm run authority:backlog:promote` queues any drafted page the queue does not yet hold and names every row still waiting for a draft; `npm run authority:publish` then publishes the queue one page per week under the cadence gate. `npm run validate:backlog-reaches-builder` hard-fails when a row older than one cadence week has no build link, or when a link points at nothing.",
   "geo_expansion_finding": {
     "assessed_at": "2026-08-27",
     "method": "Google autocomplete probe, client=chrome, hl=en, gl=us",
