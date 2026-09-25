@@ -259,6 +259,24 @@
         "party decorations memphis",
         "party planner memphis tn"
       ]
+    },
+    {
+      "query": "how much does it cost to decorate for a gender reveal party",
+      "query_shape": "cost/price",
+      "source_type": "web_query_research",
+      "volume": null,
+      "observed_at": "2026-09-25",
+      "source_url": "https://www.revealtogether.com/blog/gender-reveal-party-cost-budget-guide",
+      "note": "Query coverage review 2026-09-25: real phrasing, no page on porchandparty901.com (checked against the live sitemap, 112 URLs). Both occasions fall under the existing party-decor service (birthdays, showers, home celebrations, small events)."
+    },
+    {
+      "query": "graduation party decorations at home",
+      "query_shape": "service/idea",
+      "source_type": "web_query_research",
+      "volume": null,
+      "observed_at": "2026-09-25",
+      "source_url": "https://smartyhadaparty.com/blogs/home/graduation-party-at-home",
+      "note": "Query coverage review 2026-09-25: real phrasing, no page on porchandparty901.com (checked against the live sitemap, 112 URLs). Both occasions fall under the existing party-decor service (birthdays, showers, home celebrations, small events)."
     }
   ],
   "geo_expansion_finding": {
