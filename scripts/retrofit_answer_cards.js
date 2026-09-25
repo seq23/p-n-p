@@ -232,7 +232,10 @@ for (const card of cards) {
   const image = (html.match(/<meta property="og:image" content="([^"]+)"/) || [])[1]
     || `${DOMAIN}/assets/img/celebrations/romantic-bedroom-experience.png`;
 
-  const title = `${entry.h1} | Porch & Party Answer`;
+  // Search engines cut titles past 70 characters, and Bing Site Scan flags them.
+  // The longest suffix that fits wins; the h1 alone is the floor.
+  const title = [`${entry.h1} | Porch & Party Answer`, `${entry.h1} | Porch & Party`, entry.h1]
+    .find((t) => t.length <= 70) || entry.h1;
   const description = truncate(entry.quickAnswer);
   const lead = leadAnswer(entry);
   const pairs = faqPairs(card, entry, service);

@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Every published page has a title of at least 30 characters and a meta
- * description of 110-160 characters, and no two published pages share either.
+ * Every published page has a title of 30-70 characters and a meta description
+ * of 110-160 characters, and no two published pages share either.
  *
  * WHY
  * ---
@@ -13,6 +13,8 @@
  * short, seven too long enough to be cut off in results. Nothing checked it, so
  * nothing stopped it. Bing's own thresholds flag titles of 3-19 characters and
  * descriptions of 41-98; the bounds here sit above both with room to spare.
+ * Bing Site Scan also flags "Title too long" above 70 characters, where results
+ * truncate: 18 published titles were 71-97 characters on 2026-09-25.
  *
  * SOURCES THIS GUARDS
  * -------------------
@@ -40,6 +42,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const DOMAIN = 'https://porchandparty901.com';
 const TITLE_MIN = 30;
+const TITLE_MAX = 70;
 const DESC_MIN = 110;
 const DESC_MAX = 160;
 const MIN_PUBLISHED = 20;
@@ -95,7 +98,9 @@ for (const loc of locs) {
   else {
     titles += 1;
     const title = decode(t[1]);
-    if (title.length < TITLE_MIN) fail(`${rel}: title is ${title.length} characters, minimum ${TITLE_MIN}: "${title}"`);
+    if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
+      fail(`${rel}: title is ${title.length} characters, must be ${TITLE_MIN}-${TITLE_MAX}: "${title}"`);
+    }
     if (!byTitle.has(title)) byTitle.set(title, []);
     byTitle.get(title).push(rel);
   }
@@ -118,6 +123,10 @@ for (const [desc, rels] of byDesc) if (rels.length > 1) fail(`duplicate meta des
 // The data source for generated pages, including drafts not yet published.
 const universe = require(path.join(ROOT, 'data/queries/query_universe.json'));
 for (const e of universe) {
+  const qTitle = decode(e.title || '');
+  if (qTitle.length < TITLE_MIN || qTitle.length > TITLE_MAX) {
+    fail(`data/queries/query_universe.json ${e.folder}/${e.slug}: title is ${qTitle.length} characters, must be ${TITLE_MIN}-${TITLE_MAX}`);
+  }
   const desc = decode(e.description || '');
   if (desc.length < DESC_MIN || desc.length > DESC_MAX) {
     fail(`data/queries/query_universe.json ${e.folder}/${e.slug}: description is ${desc.length} characters, must be ${DESC_MIN}-${DESC_MAX}`);
@@ -137,5 +146,5 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Meta lengths OK: ${pages} published page(s), every title >= ${TITLE_MIN} and every meta description `
-  + `${DESC_MIN}-${DESC_MAX} characters, all unique; ${universe.length} query-universe description(s) in range.`);
+console.log(`Meta lengths OK: ${pages} published page(s), every title ${TITLE_MIN}-${TITLE_MAX} and every meta description `
+  + `${DESC_MIN}-${DESC_MAX} characters, all unique; ${universe.length} query-universe title(s) and description(s) in range.`);
