@@ -8,3 +8,18 @@
 # section index that lists all sixteen. Removed 2026-09-17.
 # Guarded by scripts/validation/validate_link_reachability.js, which fails on a
 # _redirects source that names a published page.
+
+# /authority and /hubs are section directories with no index page. Nothing on
+# the site links them today, but BreadcrumbList JSON-LD named /authority/ and
+# /hubs/ as the parent of their pages until 023124f, and Bing Webmaster still
+# held both as 404 on 2026-09-25. Each goes to the live page that covers what
+# the section held, never to the home page:
+#   authority/ holds "party planner in Memphis" and "event decorator in
+#   Memphis", which the services index lists as the celebration-setup family;
+#   hubs/ holds exactly one page, the Memphis celebration setups hub.
+# Guarded by scripts/validation/validate_link_reachability.js, which fails on a
+# _redirects destination that is not a published page.
+/authority   /services/                          301
+/authority/  /services/                          301
+/hubs        /hubs/memphis-celebration-setups    301
+/hubs/       /hubs/memphis-celebration-setups    301

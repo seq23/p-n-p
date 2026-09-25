@@ -45,6 +45,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { isRedirectingForm, internalHref } = require('../lib/site_url');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const DOMAIN = 'https://porchandparty901.com';
@@ -134,6 +135,17 @@ let hrefsChecked = 0;
 let mailtoAnchors = 0;
 const unresolved = [];
 const unprotected = [];
+// (4) An internal link that the origin answers with a 3xx. Bing's crawl on
+// 2026-09-25 found 136 of them - /answers, /services, /areas, /local, /events
+// and /faq, each 308ing to its trailing-slash URL - on pages that passed every
+// check here, because a link that "has a target" was treated as a good link
+// whether the target answered 200 or 308. A link that spends a redirect costs
+// crawl budget on every page it sits on and is reported as an error, so it
+// fails here: the redirecting form (bare directory, `.html`, stray slash, as
+// decided by scripts/lib/site_url.js) and any href that names a _redirects
+// source instead of that rule's destination.
+const redirecting = [];
+let internalHrefs = 0;
 
 const ANCHOR_HREF = /href=["']([^"']+)["']/g;
 const MAILTO_ANCHOR = /<a\b[^>]*\bhref=(["'])mailto:[^"']*\1[^>]*>[\s\S]*?<\/a>/gi;
@@ -161,6 +173,12 @@ for (const [selfUrl, rel] of pages) {
     hrefsChecked += 1;
     const target = targetOf(rel, m[1]);
     if (target === null) continue;
+    internalHrefs += 1;
+    if (isRedirectingForm(m[1])) {
+      redirecting.push(`${rel} -> ${m[1]} (the origin redirects it; link ${internalHref(m[1])} instead)`);
+    } else if (redirectSources.has(target) && !pages.has(target)) {
+      redirecting.push(`${rel} -> ${m[1]} (a _redirects source; link the rule's destination instead)`);
+    }
     // A file on disk is checked before _redirects, not after. Counting a link
     // as "satisfied by a redirect rule" when the page it names actually exists
     // is how a real page stops being counted as linked: /services has both a
@@ -203,9 +221,34 @@ for (const src of redirectSources) {
   }
 }
 
+// Rule 0 for check (4): zero internal hrefs examined means the scan is broken.
+if (!internalHrefs) {
+  console.error(`LINK REACHABILITY FAILED: ${pages.size} published page(s) carried zero internal hrefs between them. `
+    + 'The redirecting-link scan examined nothing, so it proved nothing.');
+  process.exit(1);
+}
+
+// A _redirects destination must be a page this site publishes. A rule that
+// lands on a 404, or on another redirect, turns a recovered URL back into an
+// error. /authority and /hubs (Bing W404, 2026-09-25) are recovered this way.
+let redirectRules = 0;
+if (fs.existsSync(path.join(ROOT, '_redirects'))) {
+  for (const line of fs.readFileSync(path.join(ROOT, '_redirects'), 'utf8').split('\n')) {
+    const t = line.trim();
+    if (!t || t.startsWith('#')) continue;
+    const [from, to] = t.split(/\s+/);
+    redirectRules += 1;
+    if (!to) { fail(`_redirects rule for ${from} names no destination`); continue; }
+    if (isRedirectingForm(to)) fail(`_redirects: ${from} -> ${to}, a URL the origin itself redirects; name ${internalHref(to)}`);
+    const dest = targetOf('index.html', to);
+    if (dest !== null && !pages.has(dest)) fail(`_redirects: ${from} -> ${to}, which is not a page in sitemap.xml`);
+  }
+}
+
 const orphans = [...inbound].filter(([, n]) => n === 0).map(([url]) => url);
 
 for (const u of unresolved) fail(`internal link with no target: ${u}`);
+for (const u of redirecting) fail(`internal link that redirects: ${u}`);
 for (const u of unprotected) fail(`mailto: anchor outside <!--email_off-->, so Cloudflare will rewrite it into a 404 /cdn-cgi/l/email-protection link: ${u}`);
 for (const o of orphans) fail(`orphan page, published in sitemap.xml with zero inbound internal links: ${o} (${pages.get(o)})`);
 
@@ -217,4 +260,5 @@ if (failures.length) {
 }
 
 console.log(`Link reachability OK: ${pages.size} published page(s), ${hrefsChecked} href(s) checked, `
-  + `${mailtoAnchors} mailto: anchor(s) all inside <!--email_off-->, 0 internal links without a target, 0 orphan pages.`);
+  + `${mailtoAnchors} mailto: anchor(s) all inside <!--email_off-->, 0 internal links without a target, `
+  + `${internalHrefs} internal href(s) with 0 redirecting, ${redirectRules} _redirects rule(s) all landing on a published page, 0 orphan pages.`);

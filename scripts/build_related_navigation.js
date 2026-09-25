@@ -46,6 +46,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const topics = require('./lib/topics');
+const { sitePathForFile } = require('./lib/site_url');
 
 const DOMAIN = 'https://porchandparty901.com';
 const WRITE = process.argv.includes('--write');
@@ -92,12 +93,13 @@ const ANCHOR_RE = /<a\b[^>]*?\bhref="([^"]+)"/gi;
 const stripTags = (s) => s.replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
 const esc = (s) => s.replace(/&(?!#?[a-z0-9]+;)/gi, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-/** The URL Cloudflare Pages serves 200 for: no .html, no /index. */
-function servedPath(rel) {
-  let p = `/${rel}`.replace(/\.html$/, '');
-  if (p.endsWith('/index')) p = p.slice(0, -'/index'.length) || '/';
-  return p;
-}
+/**
+ * The URL Cloudflare Pages serves 200 for. A section index is served at its
+ * trailing-slash URL (`answers/index.html` -> `/answers/`); the bare `/answers`
+ * this used to emit answers 308, and it was written into the related-pages
+ * block of 48 pages. scripts/lib/site_url.js is the one definition.
+ */
+const servedPath = sitePathForFile;
 
 function h1Of(rel, html) {
   const m = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
