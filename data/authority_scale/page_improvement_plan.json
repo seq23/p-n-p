@@ -15,7 +15,7 @@
   "route_plan_count": 22,
   "content_block_gaps": {
     "measured_by": "reports/validation/content-pattern-contract.json",
-    "measured_at": "2026-09-25T22:08:24.413Z",
+    "measured_at": "2026-09-25T22:18:26.795Z",
     "pages_checked": 109,
     "truth_boundary": "These gaps are measured against the pages present when the contract last ran. This builder runs before the publish step in the daily cycle, so a page published later in the same run is measured on the next cycle rather than this one. Over-listing is safe; a route named here is never a route that does not exist.",
     "blocks": [
