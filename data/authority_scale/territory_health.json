@@ -29,7 +29,7 @@
       "status": "STRONG_BASELINE"
     },
     "party_decor": {
-      "public_surface_count": 58,
+      "public_surface_count": 59,
       "sample_routes": [
         "/authority/event-decorator-memphis.html",
         "/answers/baby-shower-decorations-memphis.html",
@@ -49,8 +49,8 @@
         "/answers/how-much-does-birthday-decoration-at-home-cost.html",
         "/answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
         "/answers/how-much-does-party-decor-cost-in-memphis.html",
-        "/answers/last-minute-birthday-setup-ideas-memphis.html",
-        "/answers/memphis-celebration-setups.html"
+        "/answers/index.html",
+        "/answers/last-minute-birthday-setup-ideas-memphis.html"
       ],
       "status": "STRONG_BASELINE"
     },

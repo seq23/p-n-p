@@ -30,7 +30,45 @@
  * copies of the same regex staying in sync.
  */
 
+const fs = require('fs');
+const path = require('path');
+
 const DOMAIN = 'https://porchandparty901.com';
+// The directory Cloudflare Pages serves. Everything here is Node built-ins, so
+// the module stays dependency-free.
+const ROOT = path.resolve(__dirname, '..', '..');
+
+const isFile = (rel) => {
+  try { return fs.statSync(path.join(ROOT, rel)).isFile(); } catch { return false; }
+};
+
+/**
+ * The slash form Cloudflare Pages answers 200 for an extensionless path.
+ *
+ * Verified live on 2026-09-25 against porchandparty901.com: `/answers`,
+ * `/services`, `/areas`, `/local`, `/events` and `/faq` each answer 308 to the
+ * trailing-slash URL, because each is served by `<dir>/index.html`. The link
+ * graph carried 136 internal links to those six bare forms, every one of them a
+ * redirect, because this module stripped `/index.html` correctly but never
+ * asked whether a bare path was a directory. The reverse holds too: `/contact/`
+ * 308s to `/contact`, because `contact.html` is a file, not a directory index.
+ *
+ * So the served form of a path depends on what is on disk, and this is where
+ * that is decided:
+ *   - `<p>.html` absent, `<p>/index.html` present -> `/p/`
+ *   - `<p>.html` present, `<p>/index.html` absent -> `/p`
+ *   - otherwise (neither, or both)                 -> unchanged
+ */
+function servedSlashForm(pathPart) {
+  if (!pathPart || pathPart === '/' || !pathPart.startsWith('/')) return pathPart;
+  const bare = pathPart.replace(/\/+$/, '').slice(1);
+  if (!bare || /\.[a-z0-9]+$/i.test(bare)) return pathPart; // an asset, not a page
+  const asFile = isFile(`${bare}.html`);
+  const asDir = isFile(`${bare}/index.html`);
+  if (asDir && !asFile) return `/${bare}/`;
+  if (asFile && !asDir) return `/${bare}`;
+  return pathPart;
+}
 
 /**
  * Map a repository-relative HTML file path to the site path that serves it 200.
@@ -81,6 +119,7 @@ function internalHref(href) {
   if (pathPart === '/index.html') pathPart = '/';
   else if (/\/index\.html$/.test(pathPart)) pathPart = pathPart.replace(/index\.html$/, '');
   else if (pathPart.endsWith('.html')) pathPart = pathPart.slice(0, -'.html'.length);
+  pathPart = servedSlashForm(pathPart);
 
   return `${prefix}${pathPart}${query}${hash}`;
 }
@@ -168,6 +207,6 @@ function normalizeHtmlUrls(html) {
 }
 
 module.exports = {
-  DOMAIN, sitePathForFile, siteUrlForFile, internalHref, isRedirectingForm,
+  DOMAIN, sitePathForFile, servedSlashForm, siteUrlForFile, internalHref, isRedirectingForm,
   normalizeHtmlUrls, protectMailtoLinks, MAILTO_ANCHOR, EMAIL_OFF_OPEN, EMAIL_OFF_CLOSE
 };
