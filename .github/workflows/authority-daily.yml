@@ -106,10 +106,17 @@ jobs:
           npm run validate:content-pattern
           npm run authority:improvements:build
           npm run authority:yield:build
+          # Feed drafted backlog rows into the publish queue, and name every row
+          # still waiting for a draft. Before this stage the backlog was reported
+          # and nothing built from it.
+          npm run authority:backlog:promote
           npm run authority:publish
           npm run build:sitemap
           npm run authority:scale:admit
           npm run authority:scale:freeze
+          # Close the exact mutation scope the publisher opened for the pages that
+          # now link to a new page; freeze above has re-accepted them.
+          npm run authority:scale:clear-scope
           npm run authority:territories:build
           npm run distribution:prepare
           npm run validate:release

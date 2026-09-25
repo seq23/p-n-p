@@ -17,6 +17,15 @@
 - Monthly audit cadence
 - No daily bulk publishing
 - The queue may have zero unpublished items when every approved query-universe item has already shipped
+- New pages publish at `new_pages_per_week` from `data/cadence/policy.json` (1 today): `npm run authority:publish` takes the tighter of the daily ceiling, that rate over the trailing seven days, and the cadence gate's own headroom
+
+## From the demand backlog to a page
+- Validated queries wait in `backlog_validated_not_yet_built` in `data/demand/measured_demand.json`
+- Each row gets a `build` link: `covered_by` (a published page that already answers it, plus `why`) or `page` (the `folder/slug` of a draft written into `data/queries/query_universe.json`)
+- Writing the draft is the approval step: it lands in the approved query universe only through a reviewed, merged PR
+- `npm run authority:backlog:promote` queues drafted rows and prints `NAMED STOP BACKLOG_AWAITING_DRAFT` for rows with no link
+- The daily cycle publishes queued drafts one per cadence week, relinks the pages whose related list names the new page under an exact mutation scope, and freezes them
+- `npm run validate:backlog-reaches-builder` fails when a row older than 7 / `new_pages_per_week` days has no build attempt
 
 ## Self-heal boundary
 - Validation may identify missing queue, manifest, sitemap, or static-file contract issues

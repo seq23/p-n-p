@@ -5,7 +5,28 @@ const { renderPage } = require('../../templates/page-shell');
 
 const root = path.resolve(__dirname, '..', '..');
 const filterFolder = process.argv[2] || 'all';
-const selected = entries.filter(entry => filterFolder === 'all' || entry.folder === filterFolder);
+
+/**
+ * A queued entry is an approved draft waiting for the cadence, not a page.
+ *
+ * Backlog rows in data/demand/measured_demand.json become pages by being drafted
+ * into the query universe and queued in data/publish_queue/publish_queue.json;
+ * `npm run authority:publish` then publishes them one at a time under the weekly
+ * cap and the cadence gate. This generator used to render every universe entry
+ * and rewrite the whole queue as `published`, so one `npm run build:all` would
+ * have published every queued draft at once, around the gate, and erased the
+ * record that they had ever been queued. It now renders only what the queue does
+ * not hold back, and it never changes a queue status it did not publish.
+ */
+const queuePath = path.join(root, 'data', 'publish_queue', 'publish_queue.json');
+const priorQueue = fs.existsSync(queuePath) ? JSON.parse(fs.readFileSync(queuePath, 'utf8')) : [];
+const priorStatus = new Map(priorQueue.map(item => [`${item.folder}/${item.slug}`, item]));
+const heldBack = (entry) => {
+  const item = priorStatus.get(`${entry.folder}/${entry.slug}`);
+  return Boolean(item && item.status !== 'published');
+};
+const publishable = entries.filter(entry => !heldBack(entry));
+const selected = publishable.filter(entry => filterFolder === 'all' || entry.folder === filterFolder);
 
 /**
  * This generator is not the last thing that writes a published page.
@@ -99,9 +120,11 @@ for (const { outPath, html, folder } of rendered) {
 // entries ever since - against 109 live URLs. Nothing read them closely enough
 // to notice, which is the only reason it went a month.
 {
-  const manifest = entries.map(entry => ({ slug: entry.slug, folder: entry.folder, path: `/${entry.folder}/${entry.slug}.html` }));
+  const manifest = publishable.map(entry => ({ slug: entry.slug, folder: entry.folder, path: `/${entry.folder}/${entry.slug}.html` }));
   const slugRegistry = entries.map(entry => `${entry.folder}/${entry.slug}`);
-  const publishQueue = entries.map(entry => ({ slug: entry.slug, folder: entry.folder, status: 'published' }));
+  const publishQueue = entries.map(entry => (heldBack(entry)
+    ? priorStatus.get(`${entry.folder}/${entry.slug}`)
+    : { ...(priorStatus.get(`${entry.folder}/${entry.slug}`) || {}), slug: entry.slug, folder: entry.folder, status: 'published' }));
   fs.writeFileSync(path.join(root, 'data', 'published_manifest', 'published_manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
   fs.writeFileSync(path.join(root, 'data', 'slug_registry', 'slug_registry.json'), JSON.stringify(slugRegistry, null, 2) + '\n');
   fs.writeFileSync(path.join(root, 'data', 'publish_queue', 'publish_queue.json'), JSON.stringify(publishQueue, null, 2) + '\n');

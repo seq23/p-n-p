@@ -39,7 +39,7 @@
  * A page may only gain links. The pass asserts that per file and aborts rather
  * than write a page that would lose a link target.
  *
- * Usage: node scripts/build_related_navigation.js [--write] [--check]
+ * Usage: node scripts/build_related_navigation.js [--write] [--check] [--only=<rel,...>] [--link-in=<rel,...> [--list-link-in]]
  */
 const fs = require('fs');
 const path = require('path');
@@ -67,7 +67,22 @@ const CHECK = process.argv.includes('--check');
  */
 const ONLY = (process.argv.find((a) => a.startsWith('--only=')) || '').slice('--only='.length)
   .split(',').map((s) => s.trim()).filter(Boolean);
-const writable = (rel) => !ONLY.length || ONLY.some((p) => rel === p || rel.startsWith(p));
+/**
+ * `--link-in=<rel>[,<rel>...]` additionally writes every page whose related list
+ * now names one of these pages, so a newly published page gains its inbound links
+ * in the same pass that gives it its outbound ones. Without it `--only` leaves a
+ * new page orphaned: its own block links out, and nothing links in, which
+ * validate:link-reachability fails. The pages it touches are exactly the ones the
+ * ranking already says belong next to the new page, so it is the scoped relink
+ * the note above describes, not a site-wide rewrite; the caller
+ * (scripts/authority_scale/publish_governed_queue.mjs) opens a mutation scope for
+ * precisely the pages this reports before writing them.
+ */
+const LINK_IN = (process.argv.find((a) => a.startsWith('--link-in=')) || '').slice('--link-in='.length)
+  .split(',').map((s) => s.trim()).filter(Boolean);
+const LIST_LINK_IN = process.argv.includes('--list-link-in');
+let linkInWriters = new Set();
+const writable = (rel) => linkInWriters.has(rel) || !ONLY.length || ONLY.some((p) => rel === p || rel.startsWith(p));
 const MAX_RELATED = 8;
 
 const MARKER = 'data-nav="related-pages"';
@@ -296,9 +311,29 @@ function block(page) {
     + `<ul>${list}</ul>${tail}</nav></div></section>`;
 }
 
+// --- inbound links for newly published pages ---------------------------------
+const linkInProblems = [];
+if (LINK_IN.length) {
+  const targets = new Set(LINK_IN);
+  for (const t of targets) if (!byRel.has(t)) linkInProblems.push(`--link-in target ${t} is not a published page in sitemap.xml`);
+  for (const page of pages) {
+    if (targets.has(page.rel)) continue;
+    if (relatedTo(page).some((o) => targets.has(o.rel))) linkInWriters.add(page.rel);
+  }
+  for (const t of targets) {
+    if (byRel.has(t) && ![...linkInWriters].some((w) => relatedTo(byRel.get(w)).some((o) => o.rel === t))) {
+      linkInProblems.push(`${t}: no published page ranks it among its related pages, so it would publish orphaned`);
+    }
+  }
+  if (LIST_LINK_IN) {
+    console.log(JSON.stringify({ link_in_targets: [...targets], link_in_writers: [...linkInWriters].sort(), problems: linkInProblems }, null, 2));
+    process.exit(linkInProblems.length ? 1 : 0);
+  }
+}
+
 // --- apply ------------------------------------------------------------------
 const changed = [];
-const problems = [];
+const problems = [...linkInProblems];
 let linksAdded = 0;
 
 const heldBack = [];
@@ -348,6 +383,7 @@ const receipt = {
   written: WRITE,
   published_pages: pages.length,
   write_scope: ONLY.length ? ONLY : 'all',
+  link_in_writers: [...linkInWriters].sort(),
   files_changed: changed.length,
   // Pages whose related list is now out of date because --only held them back.
   // Named so the number is visible rather than implied.
