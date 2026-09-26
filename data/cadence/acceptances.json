@@ -22,6 +22,24 @@
         "https://porchandparty901.com/local/",
         "https://porchandparty901.com/services/"
       ]
+    },
+    {
+      "accepted_at": "2026-09-26",
+      "reason": "Daily governed authority cycle for 2026-09-26, run 36251155716. The cadence gate cleared before this step, so these pages are inside the weekly publication cap.",
+      "urls_total_after": 113,
+      "accepted_count": 1,
+      "accepted_publications": 1,
+      "accepted_section_indexes": 0,
+      "weekly_cap": 1,
+      "publication_allowance": 4,
+      "ledger_baseline_date": "2026-08-27",
+      "accrual_weeks": 4,
+      "over_cap_by": 0,
+      "maintainable_ceiling": 104,
+      "library_over_ceiling_by": 9,
+      "accepted_urls": [
+        "https://porchandparty901.com/guides/bridal-shower-planning-checklist-memphis"
+      ]
     }
   ]
 }

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-07-24T00:00:00.000Z",
-  "count": 106,
+  "count": 107,
   "pages": [
     {
       "route": "/answers/anniversary-room-decorations-memphis",
@@ -16,27 +16,27 @@
       "route": "/answers/baby-shower-decorations-memphis",
       "rendered_file": "answers/baby-shower-decorations-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "80727b17b3e3950324363f33ff9dbe6a9b462709684f5cb1d5631a3d66b626c4",
-      "cache_file": "data/release/frozen_accepted_outputs/80727b17b3e3950324363f33ff9dbe6a9b462709684f5cb1d5631a3d66b626c4.html.gz",
-      "cache_sha256": "e1060db19d36dff7f0fcc5e7416623207d56810894f7c6f63386977142a9c96d",
+      "accepted_sha256": "5e499fccf7532eb09e757d9ba5364aa52d1ebd58daf2adcde403b5229c267c12",
+      "cache_file": "data/release/frozen_accepted_outputs/5e499fccf7532eb09e757d9ba5364aa52d1ebd58daf2adcde403b5229c267c12.html.gz",
+      "cache_sha256": "fc61cc8a7f5fa9d18aa4ad283a1d8f3f227d5db6edfbba17e8233d228d2cf1b5",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/balloon-garland-vs-full-birthday-setup",
       "rendered_file": "answers/balloon-garland-vs-full-birthday-setup.html",
       "state": "FROZEN",
-      "accepted_sha256": "8faee16d4f0cef955e0ce091aac2004c428a53204d9fdae3916fe4d05dda4236",
-      "cache_file": "data/release/frozen_accepted_outputs/8faee16d4f0cef955e0ce091aac2004c428a53204d9fdae3916fe4d05dda4236.html.gz",
-      "cache_sha256": "acc0aefd2fc7f7ecb2ba94b23241d2bbf9cf4842a7a0af75a07d9b2067fc8cfc",
+      "accepted_sha256": "525e4f05256ddb790d93845713bc1544a23ae86317f20b1acb95386ed7ae971f",
+      "cache_file": "data/release/frozen_accepted_outputs/525e4f05256ddb790d93845713bc1544a23ae86317f20b1acb95386ed7ae971f.html.gz",
+      "cache_sha256": "48c33a7707672ff1d18b49d0c8bc4c2d1ba7e74e5fec252c9db698db32b4bd7e",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/birthday-decorations-at-home-memphis",
       "rendered_file": "answers/birthday-decorations-at-home-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "2c2c0b1d6c8be6d18bcb15f4862ee9ede24e2acde23241aa4c358dbff4aae261",
-      "cache_file": "data/release/frozen_accepted_outputs/2c2c0b1d6c8be6d18bcb15f4862ee9ede24e2acde23241aa4c358dbff4aae261.html.gz",
-      "cache_sha256": "ef0e80379ccf6ff6b9b4d132b11eee4e315e51009a650772511443c1ca2daae2",
+      "accepted_sha256": "989d01eb7bf16c6271710a855cac87c9bd8ca1e172a2c0cbbb9d37cf2f26644f",
+      "cache_file": "data/release/frozen_accepted_outputs/989d01eb7bf16c6271710a855cac87c9bd8ca1e172a2c0cbbb9d37cf2f26644f.html.gz",
+      "cache_sha256": "34a7d46df8ea5f490838088bb00c7c9736b773442af0675f5a0c0d2b16ad4980",
       "accepted_at": "2026-07-24"
     },
     {
@@ -52,9 +52,9 @@
       "route": "/answers/bridal-shower-decorations-memphis",
       "rendered_file": "answers/bridal-shower-decorations-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "28eb9884595f03bba2988079ecdec66b7515ef7905e3f701def7448f39a21e11",
-      "cache_file": "data/release/frozen_accepted_outputs/28eb9884595f03bba2988079ecdec66b7515ef7905e3f701def7448f39a21e11.html.gz",
-      "cache_sha256": "f6fddb36bbec6f25fa564c7497a87242ef04e95fa106fe70fe40841f2ac27075",
+      "accepted_sha256": "11785a7877bb0aef74471d3d7726dc25bb30c0e2ee16d3fbaab7f89dfefdf0b0",
+      "cache_file": "data/release/frozen_accepted_outputs/11785a7877bb0aef74471d3d7726dc25bb30c0e2ee16d3fbaab7f89dfefdf0b0.html.gz",
+      "cache_sha256": "5f8bc57553b5799f05d7ccc30a50b015b806852b12f37b50bea9b4726e89bda5",
       "accepted_at": "2026-07-24"
     },
     {
@@ -106,9 +106,9 @@
       "route": "/answers/diy-vs-hiring-party-decorator",
       "rendered_file": "answers/diy-vs-hiring-party-decorator.html",
       "state": "FROZEN",
-      "accepted_sha256": "b3d81f2fd424e8322f29b4997d343b80ce9a24c4a1bc3d254230083700c1ff77",
-      "cache_file": "data/release/frozen_accepted_outputs/b3d81f2fd424e8322f29b4997d343b80ce9a24c4a1bc3d254230083700c1ff77.html.gz",
-      "cache_sha256": "9d066492f51c2cf04502b70e3cbd04c0305b714c9960f8ea4eefc6bd740c231e",
+      "accepted_sha256": "bbc6bab47945359cc521b35562750fa09c86f0ccce3d6e60d9bd09cc956263e8",
+      "cache_file": "data/release/frozen_accepted_outputs/bbc6bab47945359cc521b35562750fa09c86f0ccce3d6e60d9bd09cc956263e8.html.gz",
+      "cache_sha256": "e6ec95b3d037b983ff17aa1e47e97a1b69790b7b2670ca437dd4eead5ec96bf8",
       "accepted_at": "2026-07-24"
     },
     {
@@ -124,18 +124,18 @@
       "route": "/answers/do-party-decorators-come-to-your-house",
       "rendered_file": "answers/do-party-decorators-come-to-your-house.html",
       "state": "FROZEN",
-      "accepted_sha256": "f016809bc33a09aee648509312805d7610e6798b5efbb05a6a8f08b8366ce9e7",
-      "cache_file": "data/release/frozen_accepted_outputs/f016809bc33a09aee648509312805d7610e6798b5efbb05a6a8f08b8366ce9e7.html.gz",
-      "cache_sha256": "6a2a2e2509e82470b300b67afecde6902f43974b620e62edbafd41dcd20cc4ed",
+      "accepted_sha256": "6038d5af4282c30181bdec9d8cfa13f174a895108b9a21a424d12e2a36df0249",
+      "cache_file": "data/release/frozen_accepted_outputs/6038d5af4282c30181bdec9d8cfa13f174a895108b9a21a424d12e2a36df0249.html.gz",
+      "cache_sha256": "1c2e9023a8ceb2b62ea155df0bf862dd3be4e013b4227b238492be65a7c9f606",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/event-decorator-memphis",
       "rendered_file": "answers/event-decorator-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "23dcc93f833e5d812634e944b873df242494180874c4b007b467c1067f4f98cd",
-      "cache_file": "data/release/frozen_accepted_outputs/23dcc93f833e5d812634e944b873df242494180874c4b007b467c1067f4f98cd.html.gz",
-      "cache_sha256": "3588857365c686508e3b116db565d6d4fe85b101558e6b5aa3e873c0bf3d1fd0",
+      "accepted_sha256": "d35aae9a21a30956478d9e59a4d5c001062af98f47f7b8981178b90403ee0f2f",
+      "cache_file": "data/release/frozen_accepted_outputs/d35aae9a21a30956478d9e59a4d5c001062af98f47f7b8981178b90403ee0f2f.html.gz",
+      "cache_sha256": "2f629641d983614deb3e3d1a446dd330160d04753eb020cd0e9acc49b1e96496",
       "accepted_at": "2026-07-24"
     },
     {
@@ -196,18 +196,18 @@
       "route": "/answers/how-far-in-advance-should-i-book-party-decor",
       "rendered_file": "answers/how-far-in-advance-should-i-book-party-decor.html",
       "state": "FROZEN",
-      "accepted_sha256": "f50534da4edbaef10a9d5ef69a3e51a062509a60e63a6ac42899650d758b1fee",
-      "cache_file": "data/release/frozen_accepted_outputs/f50534da4edbaef10a9d5ef69a3e51a062509a60e63a6ac42899650d758b1fee.html.gz",
-      "cache_sha256": "f10ecfeda05acf3f05d74aef79ea771ffc8463fffedd8787f3770ddad50842a1",
+      "accepted_sha256": "43a36d52a742b9c5be36b5505b56e0acc4ce925c695f92ad2eb41c6f0db62a29",
+      "cache_file": "data/release/frozen_accepted_outputs/43a36d52a742b9c5be36b5505b56e0acc4ce925c695f92ad2eb41c6f0db62a29.html.gz",
+      "cache_sha256": "334542a15069f2c6646428b20e993f945098d860c2d3924ac85b3addf77f9e16",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/how-long-does-it-take-to-set-up-party-decor",
       "rendered_file": "answers/how-long-does-it-take-to-set-up-party-decor.html",
       "state": "FROZEN",
-      "accepted_sha256": "ffbb0ecdbc17fe9333000bc8210816da45d8a3c26c58ae3efc3f83a175f26499",
-      "cache_file": "data/release/frozen_accepted_outputs/ffbb0ecdbc17fe9333000bc8210816da45d8a3c26c58ae3efc3f83a175f26499.html.gz",
-      "cache_sha256": "076e7237af82c5ba599bfda6d58047b17c5de0dacb4050e77e314494e7ea811e",
+      "accepted_sha256": "dde1785807956c8455800f9568decc314c6d2d80f76639b9d697560bae04f6d0",
+      "cache_file": "data/release/frozen_accepted_outputs/dde1785807956c8455800f9568decc314c6d2d80f76639b9d697560bae04f6d0.html.gz",
+      "cache_sha256": "1f07caac5a0cf865d24628ddf8324286755e825db7b8450100f8bcc404198785",
       "accepted_at": "2026-07-24"
     },
     {
@@ -223,9 +223,9 @@
       "route": "/answers/how-much-does-birthday-decoration-at-home-cost",
       "rendered_file": "answers/how-much-does-birthday-decoration-at-home-cost.html",
       "state": "FROZEN",
-      "accepted_sha256": "cce01cbd261bda217c64517e4a39374a0ade54b236c167e0f2270ac5361db7fe",
-      "cache_file": "data/release/frozen_accepted_outputs/cce01cbd261bda217c64517e4a39374a0ade54b236c167e0f2270ac5361db7fe.html.gz",
-      "cache_sha256": "a8b31d30204b6141a813d8f8a6892ae91a76c92cb59938b50c9cf78c563bc5ea",
+      "accepted_sha256": "0d1e9f398262c095f1915f080ed8e839ae573367b7b158c4aefe16da29b723ca",
+      "cache_file": "data/release/frozen_accepted_outputs/0d1e9f398262c095f1915f080ed8e839ae573367b7b158c4aefe16da29b723ca.html.gz",
+      "cache_sha256": "2669517a3ca71b85d6d27f9600f34d39c2214a23c2fd891c3db30122bfa22d70",
       "accepted_at": "2026-07-24"
     },
     {
@@ -250,9 +250,9 @@
       "route": "/answers/how-much-does-party-decor-cost-in-memphis",
       "rendered_file": "answers/how-much-does-party-decor-cost-in-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "29d1d43b7fc74636532789523f9618831cc8f9137f381fe44548f4b92cbe6d76",
-      "cache_file": "data/release/frozen_accepted_outputs/29d1d43b7fc74636532789523f9618831cc8f9137f381fe44548f4b92cbe6d76.html.gz",
-      "cache_sha256": "7f521b80ed9569745011d77d4e82a9769d59f12f15cfb1e2a555e4627e3e2d8a",
+      "accepted_sha256": "fd63292358625e66824f7674925da442941a1847e33b021c668f6946febbe407",
+      "cache_file": "data/release/frozen_accepted_outputs/fd63292358625e66824f7674925da442941a1847e33b021c668f6946febbe407.html.gz",
+      "cache_sha256": "6603d0def4f07e39b419293666165fcbd970344c88aee625ef7827df84811da7",
       "accepted_at": "2026-07-24"
     },
     {
@@ -286,9 +286,9 @@
       "route": "/answers/last-minute-birthday-setup-ideas-memphis",
       "rendered_file": "answers/last-minute-birthday-setup-ideas-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "60f82505a1f4777bce53565b3ecc0cfe5f8adae71cf21ab6459380fbb781687f",
-      "cache_file": "data/release/frozen_accepted_outputs/60f82505a1f4777bce53565b3ecc0cfe5f8adae71cf21ab6459380fbb781687f.html.gz",
-      "cache_sha256": "37ad0c05c0a2c10f2c5277467044af5250834377a6e126a9ee5be04c69384a30",
+      "accepted_sha256": "c85ad9281cf9d2dba48f2bb105ec0cb444d09d33102b866a6bb7efdbe1efd7ce",
+      "cache_file": "data/release/frozen_accepted_outputs/c85ad9281cf9d2dba48f2bb105ec0cb444d09d33102b866a6bb7efdbe1efd7ce.html.gz",
+      "cache_sha256": "0646fdcfea2cc5ed5c066275885c8679d0b3ecff11b04bcde5ba31744f242e81",
       "accepted_at": "2026-07-24"
     },
     {
@@ -304,18 +304,18 @@
       "route": "/answers/party-decor-vs-event-planning-memphis",
       "rendered_file": "answers/party-decor-vs-event-planning-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "02ee8a9de72585718886592d859730c4e6d56d6988d50bf65d0e64df448b1b91",
-      "cache_file": "data/release/frozen_accepted_outputs/02ee8a9de72585718886592d859730c4e6d56d6988d50bf65d0e64df448b1b91.html.gz",
-      "cache_sha256": "07e1e0f93d4330ae14c3c6a69da44ddd946d7f4f1333ce8ab8fa8f68876e6a55",
+      "accepted_sha256": "9fb1f76225f36c3f1cb18e80b252404f524426cec30ca22b76100bd607e1d223",
+      "cache_file": "data/release/frozen_accepted_outputs/9fb1f76225f36c3f1cb18e80b252404f524426cec30ca22b76100bd607e1d223.html.gz",
+      "cache_sha256": "72c919b61ab9bdb9f073897e3a1a717a3fb79c3a9f2f60e4b1da80e1e101b3ee",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/party-planner-memphis",
       "rendered_file": "answers/party-planner-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "38c1f917c5f3f7855142fde0f57394066dd1f023e6246a9d5518051ee324c466",
-      "cache_file": "data/release/frozen_accepted_outputs/38c1f917c5f3f7855142fde0f57394066dd1f023e6246a9d5518051ee324c466.html.gz",
-      "cache_sha256": "cab0acf63d521bb75a4e6b50db994b0039d2c81dcbfebd35ae3096c6cedb9d1d",
+      "accepted_sha256": "1bf9a7347b509f7f96073be8e5c3bfd02a8ec2c17d0316da3f84ce5afce13023",
+      "cache_file": "data/release/frozen_accepted_outputs/1bf9a7347b509f7f96073be8e5c3bfd02a8ec2c17d0316da3f84ce5afce13023.html.gz",
+      "cache_sha256": "e5012d5e0097a81d0368a626a8aa3ba1883c51a20fa7ccb66df351aabd1e6527",
       "accepted_at": "2026-07-24"
     },
     {
@@ -349,9 +349,9 @@
       "route": "/answers/small-party-decor-ideas-memphis",
       "rendered_file": "answers/small-party-decor-ideas-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "4f023947c3956cc4f75e95cc8e211a674371dd87e3cd03eaf454a9d76b2fea5c",
-      "cache_file": "data/release/frozen_accepted_outputs/4f023947c3956cc4f75e95cc8e211a674371dd87e3cd03eaf454a9d76b2fea5c.html.gz",
-      "cache_sha256": "61fd64b4863d9624d814dceaa0c35818b832e978023cd77ef3901fe0353868f6",
+      "accepted_sha256": "23bbcf1a46625a8bfc2aec833741d351e625925904b80c7a454a403bf4589ca5",
+      "cache_file": "data/release/frozen_accepted_outputs/23bbcf1a46625a8bfc2aec833741d351e625925904b80c7a454a403bf4589ca5.html.gz",
+      "cache_sha256": "b7f930bffb3cd87e3b8d0334286d1143eaf109b4f542fb63a2c5a3c1b8f6e26d",
       "accepted_at": "2026-07-24"
     },
     {
@@ -712,6 +712,15 @@
       "accepted_sha256": "7220034fa2649e3d19e274ba03b4e0fd5c96b9d4591de7d72fb3b43843d7a462",
       "cache_file": "data/release/frozen_accepted_outputs/7220034fa2649e3d19e274ba03b4e0fd5c96b9d4591de7d72fb3b43843d7a462.html.gz",
       "cache_sha256": "7e9d8c862842bb9fee479ef7be1dd4926f3e23f6bcd015f1fdd955e5c00eee6c",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/guides/bridal-shower-planning-checklist-memphis",
+      "rendered_file": "guides/bridal-shower-planning-checklist-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "af98f398584345dd83d088f3c98fb24aa6c0b1c23e548836098cb8ca87f79370",
+      "cache_file": "data/release/frozen_accepted_outputs/af98f398584345dd83d088f3c98fb24aa6c0b1c23e548836098cb8ca87f79370.html.gz",
+      "cache_sha256": "624669ad4e6bca8646cf46984b5dd73dfe33b21ae160ecbe512d0e0a3162f7f8",
       "accepted_at": "2026-07-24"
     },
     {

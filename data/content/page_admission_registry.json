@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-07-24T00:00:00.000Z",
-  "count": 106,
+  "count": 107,
   "admissions": [
     {
       "route": "/authority/event-decorator-memphis",
@@ -37,7 +37,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "80727b17b3e3950324363f33ff9dbe6a9b462709684f5cb1d5631a3d66b626c4"
+      "content_sha256": "5e499fccf7532eb09e757d9ba5364aa52d1ebd58daf2adcde403b5229c267c12"
     },
     {
       "route": "/answers/balloon-garland-vs-full-birthday-setup",
@@ -46,7 +46,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "8faee16d4f0cef955e0ce091aac2004c428a53204d9fdae3916fe4d05dda4236"
+      "content_sha256": "525e4f05256ddb790d93845713bc1544a23ae86317f20b1acb95386ed7ae971f"
     },
     {
       "route": "/answers/birthday-decorations-at-home-memphis",
@@ -55,7 +55,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "2c2c0b1d6c8be6d18bcb15f4862ee9ede24e2acde23241aa4c358dbff4aae261"
+      "content_sha256": "989d01eb7bf16c6271710a855cac87c9bd8ca1e172a2c0cbbb9d37cf2f26644f"
     },
     {
       "route": "/answers/birthday-hotel-room-setup-ideas-memphis",
@@ -73,7 +73,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "28eb9884595f03bba2988079ecdec66b7515ef7905e3f701def7448f39a21e11"
+      "content_sha256": "11785a7877bb0aef74471d3d7726dc25bb30c0e2ee16d3fbaab7f89dfefdf0b0"
     },
     {
       "route": "/answers/can-i-book-decor-only-without-event-planning",
@@ -127,7 +127,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "b3d81f2fd424e8322f29b4997d343b80ce9a24c4a1bc3d254230083700c1ff77"
+      "content_sha256": "bbc6bab47945359cc521b35562750fa09c86f0ccce3d6e60d9bd09cc956263e8"
     },
     {
       "route": "/answers/do-grazing-tables-include-food",
@@ -145,7 +145,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "f016809bc33a09aee648509312805d7610e6798b5efbb05a6a8f08b8366ce9e7"
+      "content_sha256": "6038d5af4282c30181bdec9d8cfa13f174a895108b9a21a424d12e2a36df0249"
     },
     {
       "route": "/answers/event-decorator-memphis",
@@ -154,7 +154,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "23dcc93f833e5d812634e944b873df242494180874c4b007b467c1067f4f98cd"
+      "content_sha256": "d35aae9a21a30956478d9e59a4d5c001062af98f47f7b8981178b90403ee0f2f"
     },
     {
       "route": "/answers/fall-porch-decorating-ideas-southern-homes",
@@ -217,7 +217,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "f50534da4edbaef10a9d5ef69a3e51a062509a60e63a6ac42899650d758b1fee"
+      "content_sha256": "43a36d52a742b9c5be36b5505b56e0acc4ce925c695f92ad2eb41c6f0db62a29"
     },
     {
       "route": "/answers/how-long-does-it-take-to-set-up-party-decor",
@@ -226,7 +226,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "ffbb0ecdbc17fe9333000bc8210816da45d8a3c26c58ae3efc3f83a175f26499"
+      "content_sha256": "dde1785807956c8455800f9568decc314c6d2d80f76639b9d697560bae04f6d0"
     },
     {
       "route": "/answers/how-much-does-a-grazing-table-cost-in-memphis",
@@ -244,7 +244,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "cce01cbd261bda217c64517e4a39374a0ade54b236c167e0f2270ac5361db7fe"
+      "content_sha256": "0d1e9f398262c095f1915f080ed8e839ae573367b7b158c4aefe16da29b723ca"
     },
     {
       "route": "/answers/how-much-does-grazing-tables-cost",
@@ -271,7 +271,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "29d1d43b7fc74636532789523f9618831cc8f9137f381fe44548f4b92cbe6d76"
+      "content_sha256": "fd63292358625e66824f7674925da442941a1847e33b021c668f6946febbe407"
     },
     {
       "route": "/answers/how-much-does-porch-decorating-cost-in-memphis",
@@ -307,7 +307,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "60f82505a1f4777bce53565b3ecc0cfe5f8adae71cf21ab6459380fbb781687f"
+      "content_sha256": "c85ad9281cf9d2dba48f2bb105ec0cb444d09d33102b866a6bb7efdbe1efd7ce"
     },
     {
       "route": "/answers/memphis-celebration-setups",
@@ -325,7 +325,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "02ee8a9de72585718886592d859730c4e6d56d6988d50bf65d0e64df448b1b91"
+      "content_sha256": "9fb1f76225f36c3f1cb18e80b252404f524426cec30ca22b76100bd607e1d223"
     },
     {
       "route": "/answers/party-planner-memphis",
@@ -334,7 +334,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "38c1f917c5f3f7855142fde0f57394066dd1f023e6246a9d5518051ee324c466"
+      "content_sha256": "1bf9a7347b509f7f96073be8e5c3bfd02a8ec2c17d0316da3f84ce5afce13023"
     },
     {
       "route": "/answers/porch-decorating-under-500-memphis",
@@ -370,7 +370,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "4f023947c3956cc4f75e95cc8e211a674371dd87e3cd03eaf454a9d76b2fea5c"
+      "content_sha256": "23bbcf1a46625a8bfc2aec833741d351e625925904b80c7a454a403bf4589ca5"
     },
     {
       "route": "/answers/small-porch-styling-ideas-memphis",
@@ -713,6 +713,15 @@
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
       "content_sha256": "7220034fa2649e3d19e274ba03b4e0fd5c96b9d4591de7d72fb3b43843d7a462"
+    },
+    {
+      "route": "/guides/bridal-shower-planning-checklist-memphis",
+      "rendered_file": "guides/bridal-shower-planning-checklist-memphis.html",
+      "status": "admitted",
+      "family": "guides",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "af98f398584345dd83d088f3c98fb24aa6c0b1c23e548836098cb8ca87f79370"
     },
     {
       "route": "/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise",
