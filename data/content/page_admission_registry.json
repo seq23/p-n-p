@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-07-24T00:00:00.000Z",
-  "count": 107,
+  "count": 108,
   "admissions": [
     {
       "route": "/authority/event-decorator-memphis",
@@ -109,7 +109,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "bbc80dcad72847223e9af1c81436e23b01b1e1fe95c1bd2640399f8d5dda716f"
+      "content_sha256": "1b5ed4ffcfc71474f34316ae2cdf3e7af533222da094330eaa08fb57ad61c6a6"
     },
     {
       "route": "/answers/corporate-grazing-tables-memphis",
@@ -118,7 +118,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "56e7502471e65b9be20addc37ac3421d7fc4787bd88b7ab3710838046b2e91ca"
+      "content_sha256": "4b186ace51b99219a770c30ed545cffce674ef65f1138bfb5ef1361b85d185d1"
     },
     {
       "route": "/answers/diy-vs-hiring-party-decorator",
@@ -136,7 +136,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "285f2342ad38215e487521302ae5950ccc305aa79915dc22e0c283ed291e60be"
+      "content_sha256": "ff83cb6ffaac4daef51d5a04528c12809d9e296be846e880d5b99d8f044fa6f0"
     },
     {
       "route": "/answers/do-party-decorators-come-to-your-house",
@@ -190,7 +190,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "21210719461612f73b699d2ddda8324ba51494cd30ccfcb571cc7401280bf70d"
+      "content_sha256": "920624ad1c60e313b161bd7b67240d11d110159c6c0ac735a8738b8cf30a1303"
     },
     {
       "route": "/answers/halloween-porch-decorating-memphis",
@@ -235,7 +235,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "e50b81f9600e26c9558ad2f87cb633d5a063b9bbc1f134ed3a6a4810d1ccc055"
+      "content_sha256": "eb02ddf1b898ffe51723ed0efee775681731d35593bcdc39b4f52d0518919c9b"
     },
     {
       "route": "/answers/how-much-does-birthday-decoration-at-home-cost",
@@ -253,7 +253,7 @@
       "family": "answers",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "8ebdc7134492953cec2e3849bc55c1132c8611e3473b57df70ec3fb89eaeeb71"
+      "content_sha256": "f2f24e9be40bfb58765b663438855de0db630d96522d19794c0ddf8fe92c8913"
     },
     {
       "route": "/answers/how-much-does-hotel-room-decor-cost-in-memphis",
@@ -553,6 +553,15 @@
       "content_sha256": "1e14a47b531f93ec0d11497a9e2a381ef4980a9c819b21918746778f76c5cb28"
     },
     {
+      "route": "/comparisons/grazing-table-vs-charcuterie-board",
+      "rendered_file": "comparisons/grazing-table-vs-charcuterie-board.html",
+      "status": "admitted",
+      "family": "comparisons",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "ae34f4063b8b461555950943cd9b7e234c7fabe2dbb3a418861e850dd43a13bd"
+    },
+    {
       "route": "/corporate/corporate-event-decor-memphis",
       "rendered_file": "corporate/corporate-event-decor-memphis.html",
       "status": "admitted",
@@ -622,7 +631,7 @@
       "family": "faq",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "3412e0bb00dd01b7d58fc731226495880ac04458a0941e9dc734762a54c3a7b3"
+      "content_sha256": "8e0241946cbd7a166222157e43a0a1a392898391976cdf38cde8b4481d789cdc"
     },
     {
       "route": "/faq/do-party-decorators-come-to-your-house",
@@ -676,7 +685,7 @@
       "family": "faq",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "601a92155661aa0c1c98061c27a96e62c39f19fe34ffebbb7d369c91cf1a707f"
+      "content_sha256": "dfef6d972b7d04e49b85051fadce534ef064246a5253418406a353e464146dcb"
     },
     {
       "route": "/faq/how-much-does-hotel-room-decor-cost-in-memphis",

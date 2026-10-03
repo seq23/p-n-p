@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-07-24T00:00:00.000Z",
-  "count": 107,
+  "count": 108,
   "pages": [
     {
       "route": "/answers/anniversary-room-decorations-memphis",
@@ -88,18 +88,18 @@
       "route": "/answers/corporate-event-decor-memphis",
       "rendered_file": "answers/corporate-event-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "bbc80dcad72847223e9af1c81436e23b01b1e1fe95c1bd2640399f8d5dda716f",
-      "cache_file": "data/release/frozen_accepted_outputs/bbc80dcad72847223e9af1c81436e23b01b1e1fe95c1bd2640399f8d5dda716f.html.gz",
-      "cache_sha256": "40b1d939f1d519fb720cdd0fc82276dc28ec220848c3b71c84b006808d65f280",
+      "accepted_sha256": "1b5ed4ffcfc71474f34316ae2cdf3e7af533222da094330eaa08fb57ad61c6a6",
+      "cache_file": "data/release/frozen_accepted_outputs/1b5ed4ffcfc71474f34316ae2cdf3e7af533222da094330eaa08fb57ad61c6a6.html.gz",
+      "cache_sha256": "d2dd762819eaf9f2debf3c22857d10cef8dd5075c746778097b216d3a0ad080f",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/corporate-grazing-tables-memphis",
       "rendered_file": "answers/corporate-grazing-tables-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "56e7502471e65b9be20addc37ac3421d7fc4787bd88b7ab3710838046b2e91ca",
-      "cache_file": "data/release/frozen_accepted_outputs/56e7502471e65b9be20addc37ac3421d7fc4787bd88b7ab3710838046b2e91ca.html.gz",
-      "cache_sha256": "672ee7fdb1358dda4133b2dc5530c6602862700a701a899504aef6538904250f",
+      "accepted_sha256": "4b186ace51b99219a770c30ed545cffce674ef65f1138bfb5ef1361b85d185d1",
+      "cache_file": "data/release/frozen_accepted_outputs/4b186ace51b99219a770c30ed545cffce674ef65f1138bfb5ef1361b85d185d1.html.gz",
+      "cache_sha256": "f32a9c2dd6de8b01abf6f544e341eb62b2953341e4d5dbb106c487ca647fcef2",
       "accepted_at": "2026-07-24"
     },
     {
@@ -115,9 +115,9 @@
       "route": "/answers/do-grazing-tables-include-food",
       "rendered_file": "answers/do-grazing-tables-include-food.html",
       "state": "FROZEN",
-      "accepted_sha256": "285f2342ad38215e487521302ae5950ccc305aa79915dc22e0c283ed291e60be",
-      "cache_file": "data/release/frozen_accepted_outputs/285f2342ad38215e487521302ae5950ccc305aa79915dc22e0c283ed291e60be.html.gz",
-      "cache_sha256": "33ceb19d5f36ddb598efba8e75d0ccfbbb991e684283f8d6bc10fcef34d78927",
+      "accepted_sha256": "ff83cb6ffaac4daef51d5a04528c12809d9e296be846e880d5b99d8f044fa6f0",
+      "cache_file": "data/release/frozen_accepted_outputs/ff83cb6ffaac4daef51d5a04528c12809d9e296be846e880d5b99d8f044fa6f0.html.gz",
+      "cache_sha256": "c2d38969d6d0471762cc78df19145e890d7068c4ab3445cd3a2933e16daced1a",
       "accepted_at": "2026-07-24"
     },
     {
@@ -169,9 +169,9 @@
       "route": "/answers/grazing-tables-memphis",
       "rendered_file": "answers/grazing-tables-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "21210719461612f73b699d2ddda8324ba51494cd30ccfcb571cc7401280bf70d",
-      "cache_file": "data/release/frozen_accepted_outputs/21210719461612f73b699d2ddda8324ba51494cd30ccfcb571cc7401280bf70d.html.gz",
-      "cache_sha256": "1b96dcea6d181c8ed7d76460c80a63dcb73c43dc97f4450844a8b26245a3fcb5",
+      "accepted_sha256": "920624ad1c60e313b161bd7b67240d11d110159c6c0ac735a8738b8cf30a1303",
+      "cache_file": "data/release/frozen_accepted_outputs/920624ad1c60e313b161bd7b67240d11d110159c6c0ac735a8738b8cf30a1303.html.gz",
+      "cache_sha256": "121e27147952be9857682ec8116bcfb8f8928ae9a83eed028d9e9b527e61bfe9",
       "accepted_at": "2026-07-24"
     },
     {
@@ -214,9 +214,9 @@
       "route": "/answers/how-much-does-a-grazing-table-cost-in-memphis",
       "rendered_file": "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "e50b81f9600e26c9558ad2f87cb633d5a063b9bbc1f134ed3a6a4810d1ccc055",
-      "cache_file": "data/release/frozen_accepted_outputs/e50b81f9600e26c9558ad2f87cb633d5a063b9bbc1f134ed3a6a4810d1ccc055.html.gz",
-      "cache_sha256": "27d1c3e4f0fd9383d2d26658239eeeb141d6d47d0baa40a9d74f2210e69f5bd1",
+      "accepted_sha256": "eb02ddf1b898ffe51723ed0efee775681731d35593bcdc39b4f52d0518919c9b",
+      "cache_file": "data/release/frozen_accepted_outputs/eb02ddf1b898ffe51723ed0efee775681731d35593bcdc39b4f52d0518919c9b.html.gz",
+      "cache_sha256": "cbc1f4dc18e1ae17f1d4cd2a8c8fb6f8ae8fcb352467ebdee4817226a8e415d0",
       "accepted_at": "2026-07-24"
     },
     {
@@ -232,9 +232,9 @@
       "route": "/answers/how-much-does-grazing-tables-cost",
       "rendered_file": "answers/how-much-does-grazing-tables-cost.html",
       "state": "FROZEN",
-      "accepted_sha256": "8ebdc7134492953cec2e3849bc55c1132c8611e3473b57df70ec3fb89eaeeb71",
-      "cache_file": "data/release/frozen_accepted_outputs/8ebdc7134492953cec2e3849bc55c1132c8611e3473b57df70ec3fb89eaeeb71.html.gz",
-      "cache_sha256": "7060f914866568be42b27c703c41bcebd21b54aa72a40967bffbb7bd880765a2",
+      "accepted_sha256": "f2f24e9be40bfb58765b663438855de0db630d96522d19794c0ddf8fe92c8913",
+      "cache_file": "data/release/frozen_accepted_outputs/f2f24e9be40bfb58765b663438855de0db630d96522d19794c0ddf8fe92c8913.html.gz",
+      "cache_sha256": "5deba890469d80251c7718690302f47cad9a5f109ab6fa91a972d394dbaf8460",
       "accepted_at": "2026-07-24"
     },
     {
@@ -553,6 +553,15 @@
       "accepted_at": "2026-07-24"
     },
     {
+      "route": "/comparisons/grazing-table-vs-charcuterie-board",
+      "rendered_file": "comparisons/grazing-table-vs-charcuterie-board.html",
+      "state": "FROZEN",
+      "accepted_sha256": "ae34f4063b8b461555950943cd9b7e234c7fabe2dbb3a418861e850dd43a13bd",
+      "cache_file": "data/release/frozen_accepted_outputs/ae34f4063b8b461555950943cd9b7e234c7fabe2dbb3a418861e850dd43a13bd.html.gz",
+      "cache_sha256": "e7c7dff936439913655af095b5e425df15ae45e80f720f30ddd8050a28cb07c4",
+      "accepted_at": "2026-07-24"
+    },
+    {
       "route": "/corporate/corporate-event-decor-memphis",
       "rendered_file": "corporate/corporate-event-decor-memphis.html",
       "state": "FROZEN",
@@ -619,9 +628,9 @@
       "route": "/faq/do-grazing-tables-include-food",
       "rendered_file": "faq/do-grazing-tables-include-food.html",
       "state": "FROZEN",
-      "accepted_sha256": "3412e0bb00dd01b7d58fc731226495880ac04458a0941e9dc734762a54c3a7b3",
-      "cache_file": "data/release/frozen_accepted_outputs/3412e0bb00dd01b7d58fc731226495880ac04458a0941e9dc734762a54c3a7b3.html.gz",
-      "cache_sha256": "fd7dbba6c1a4f6e54a4b421c3997a374999367f1c4d24a2691a9ecf2fa0c3791",
+      "accepted_sha256": "8e0241946cbd7a166222157e43a0a1a392898391976cdf38cde8b4481d789cdc",
+      "cache_file": "data/release/frozen_accepted_outputs/8e0241946cbd7a166222157e43a0a1a392898391976cdf38cde8b4481d789cdc.html.gz",
+      "cache_sha256": "2dd97b2217ffa1372850c3d79f71c2ef0c993fbf66920cfc9d048005370839ce",
       "accepted_at": "2026-07-24"
     },
     {
@@ -673,9 +682,9 @@
       "route": "/faq/how-much-does-grazing-tables-cost",
       "rendered_file": "faq/how-much-does-grazing-tables-cost.html",
       "state": "FROZEN",
-      "accepted_sha256": "601a92155661aa0c1c98061c27a96e62c39f19fe34ffebbb7d369c91cf1a707f",
-      "cache_file": "data/release/frozen_accepted_outputs/601a92155661aa0c1c98061c27a96e62c39f19fe34ffebbb7d369c91cf1a707f.html.gz",
-      "cache_sha256": "a6898b8315ea8245aa0804417fb412694f6e19a8bcc0be14d5b1023a6faf03d4",
+      "accepted_sha256": "dfef6d972b7d04e49b85051fadce534ef064246a5253418406a353e464146dcb",
+      "cache_file": "data/release/frozen_accepted_outputs/dfef6d972b7d04e49b85051fadce534ef064246a5253418406a353e464146dcb.html.gz",
+      "cache_sha256": "388bacd166db4dbe9cb58ca0422bfa58b9bb7aaeaee44a0718631b36e383dbe1",
       "accepted_at": "2026-07-24"
     },
     {

@@ -81,7 +81,7 @@
       "status": "STRONG_BASELINE"
     },
     "grazing_table_styling": {
-      "public_surface_count": 23,
+      "public_surface_count": 24,
       "sample_routes": [
         "/answers/corporate-grazing-tables-memphis.html",
         "/answers/do-grazing-tables-include-food.html",
@@ -98,11 +98,11 @@
         "/areas/memphis-tn-party-decor.html",
         "/areas/olive-branch-ms-party-decor.html",
         "/areas/southaven-ms-party-decor.html",
+        "/comparisons/grazing-table-vs-charcuterie-board.html",
         "/corporate/corporate-grazing-tables-memphis.html",
         "/faq/do-grazing-tables-include-food.html",
         "/faq/how-much-does-grazing-tables-cost.html",
-        "/local/grazing-tables-memphis.html",
-        "/local/index.html"
+        "/local/grazing-tables-memphis.html"
       ],
       "status": "STRONG_BASELINE"
     }
