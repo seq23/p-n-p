@@ -55,7 +55,7 @@
       "photo-ready-event-styling"
     ]
   },
-  "evidence_backed_count": 27,
+  "evidence_backed_count": 28,
   "rejected_policy": "A query whose disposition begins REJECTED_ in data/demand/measured_demand.json, or on its own evidence row, is excluded from this atlas entirely. It is recorded below so the exclusion is visible, and it is never publishable.",
   "rejected_count": 3,
   "rejected": [
@@ -639,6 +639,31 @@
         "modifier": null,
         "format": null,
         "semantic_cluster": "party-decor"
+      },
+      "rank_score": 0.5,
+      "publishable": true
+    },
+    {
+      "query": "balloon business",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 1,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "balloon and backdrop styling",
+        "topic_confidence": 0.373,
+        "audience": null,
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "balloon-and-backdrop-styling"
       },
       "rank_score": 0.5,
       "publishable": true
