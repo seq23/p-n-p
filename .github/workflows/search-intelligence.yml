@@ -51,6 +51,7 @@ concurrency:
 
 jobs:
   search-intelligence:
+    timeout-minutes: 30  # no successful run history yet; default ceiling, revisit once it has runs
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

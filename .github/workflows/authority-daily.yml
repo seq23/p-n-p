@@ -14,6 +14,7 @@ concurrency:
 
 jobs:
   authority-cycle:
+    timeout-minutes: 11  # ~3x median 3.4m over 8 green runs; fault detector, not a budget
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
