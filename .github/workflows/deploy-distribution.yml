@@ -61,6 +61,7 @@ concurrency:
 
 jobs:
   validate-and-distribute:
+    timeout-minutes: 22  # ~3x median 7.1m over 8 green runs; fault detector, not a budget
     # Distribute on a push or a dispatch as before; on a workflow_run, only when
     # the upstream cycle actually succeeded. There is no point announcing pages
     # to IndexNow that a failed publishing run never finished writing.
