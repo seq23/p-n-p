@@ -27,10 +27,10 @@ Outcomes, one line each, never a silent zero:
 import json
 import os
 import re
-import subprocess
 import sys
-import tempfile
+import threading
 from collections import Counter
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -40,7 +40,10 @@ from collect_gsc_export import service_account_info  # noqa: E402  same credenti
 
 OUT = ROOT / "data/search_intelligence/index_coverage.json"
 SITEMAP = ROOT / "sitemap.xml"
-INSPECTOR = ROOT / "distribution_scripts/gsc_inspect_urls.py"
+# One inspect() call takes ~6 s (deploy lane, run 38108750287: 61 URLs in 6.5 min),
+# so the first serial run of 116 URLs was cancelled at 10 min. Calls run in
+# parallel, well inside the API's 600-per-minute limit.
+WORKERS = 8
 DEFAULT_PROPERTY = "sc-domain:porchandparty901.com"
 DAILY_QUOTA = 2000
 PER_RUN_CAP = 1500  # leaves 500/day for the deploy lane's priority inspections
@@ -145,19 +148,39 @@ def main():
 
     order = sorted(urls, key=lambda u: (carried.get(u, {}).get("inspected_at") or ""))
     batch = order[:PER_RUN_CAP]
-    with tempfile.TemporaryDirectory() as tmp:
-        key_path = Path(tmp) / "sa.json"
-        key_path.write_text(json.dumps(info), encoding="utf-8")
-        os.chmod(key_path, 0o600)
-        url_file = Path(tmp) / "urls.txt"
-        url_file.write_text("\n".join(batch) + "\n", encoding="utf-8")
-        results_path = Path(tmp) / "inspection-results.json"
-        run = subprocess.run([sys.executable, str(INSPECTOR), str(key_path), site, str(url_file), str(results_path)],
-                             capture_output=True, text=True)
-        results = json.loads(results_path.read_text(encoding="utf-8")) if results_path.exists() else []
-        hold_path = results_path.with_name("inspection-hold.json")
-        hold = json.loads(hold_path.read_text(encoding="utf-8")) if hold_path.exists() else None
+    # Imported only once credentials exist, so a secretless run needs no Google client.
+    sys.path.insert(0, str(ROOT / "distribution_scripts"))
+    from gsc_inspect_urls import NUM_RETRIES, classify_hold  # same retry + hold rules as the deploy lane
+    from google.oauth2 import service_account
+    from googleapiclient.discovery import build
 
+    creds = service_account.Credentials.from_service_account_info(
+        info, scopes=["https://www.googleapis.com/auth/webmasters.readonly"])
+    local = threading.local()
+    halt = threading.Event()
+    hold_box = []
+
+    def inspect(url):
+        if halt.is_set():
+            return None
+        if not hasattr(local, "svc"):  # httplib2 is not thread-safe: one client per worker
+            local.svc = build("searchconsole", "v1", credentials=creds, cache_discovery=False)
+        try:
+            body = {"inspectionUrl": url, "siteUrl": site, "languageCode": "en-US"}
+            resp = local.svc.urlInspection().index().inspect(body=body).execute(num_retries=NUM_RETRIES)
+            # The response does not echo the URL, so it is attached here.
+            return {"inspectionUrl": url, **resp}
+        except Exception as exc:  # noqa: BLE001 - every failure is recorded, none is swallowed
+            held = classify_hold(exc)
+            if held:
+                halt.set()
+                hold_box.append({"status": held[0], "detail": held[1], "first_url_refused": url})
+                return None
+            return {"inspectionUrl": url, "error": f"{type(exc).__name__}: {exc}"}
+
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        results = [r for r in pool.map(inspect, batch) if r]
+    hold = hold_box[0] if hold_box else None
     stamp = now()
     rows = dict(carried)
     errors = []
@@ -178,9 +201,9 @@ def main():
         print(stop)
         write(urls, rows, "NAMED_STOP", stop, site, inspected)
         return 0
-    if run.returncode not in (0, 1) or (inspected == 0):
-        tail = "\n".join(((run.stderr or "") + (run.stdout or "")).strip().splitlines()[-12:])
-        print(f"index-coverage: inspection failed and nothing was inspected:\n{tail}", file=sys.stderr)
+    if inspected == 0:
+        print(f"index-coverage: inspection failed and nothing was inspected; first errors: "
+              f"{[r.get('error') for r in results[:3]]}", file=sys.stderr)
         return 1
     state = "OK" if not errors else "PARTIAL"
     if errors:
