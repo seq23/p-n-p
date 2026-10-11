@@ -97,6 +97,9 @@ jobs:
           npm run search:index-coverage
           # The consolidation ledger reads impressions + coverage; no redirects.
           npm run search:consolidation
+          # sitemaps.list before/after (submit only when absent), recorded to
+          # gsc_sitemaps.json; validate:sitemap-registration checks it is present and recent.
+          npm run search:gsc-sitemaps
 
       - name: Score the ingested queries for openness and lead intent
         run: npm run queries:score-discovery-gap
@@ -115,6 +118,7 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
           git add data/queries/evidence/evidence_queries.json data/authority_scale/query_atlas.json data/search_intelligence/gsc_truth.json data/search_intelligence/target_query_set.json data/search_intelligence/consolidation_candidates.json
           if [ -f data/search_intelligence/index_coverage.json ]; then git add data/search_intelligence/index_coverage.json; fi
+          if [ -f data/search_intelligence/gsc_sitemaps.json ]; then git add data/search_intelligence/gsc_sitemaps.json; fi
           # The export exists only when Search Console answered; a NAMED STOP writes none.
           if [ -f data/search_intelligence/gsc_search_analytics_export.json ]; then git add data/search_intelligence/gsc_search_analytics_export.json; fi
           if git diff --cached --quiet; then

@@ -81,3 +81,5 @@ li { margin-bottom: 8px; }
 .breadcrumb a { color: var(--text-muted); }
 .breadcrumb [aria-current="page"] { color: var(--text-strong, inherit); }
 .breadcrumb-bar { padding: 22px 0 0; }
+
+.hero-definition { max-width: 60ch; margin: 0 auto 0.75rem; }
