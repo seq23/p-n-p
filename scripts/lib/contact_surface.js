@@ -25,6 +25,11 @@ if (!C || !C.telephone || !C.telHref || !C.smsHref || !C.googleBusinessProfileUr
   throw new Error('data/offers/services.json is missing contact.telephone/telHref/smsHref/googleBusinessProfileUrl');
 }
 
+const T = offers.businessTypes;
+const R = offers.primaryRoute;
+if (!T || !Array.isArray(T.additionalType) || !T.additionalType.length) throw new Error('data/offers/services.json is missing businessTypes.additionalType');
+if (!R || !R.href || !R.navLabel || !R.footerLabel) throw new Error('data/offers/services.json is missing primaryRoute.href/navLabel/footerLabel');
+
 const CALL_LABEL = `Call or text ${C.telephoneDisplay}`;
 const GBP_LABEL = 'Find us on Google';
 
@@ -32,8 +37,18 @@ const MARK = {
   header: 'data-contact="header-call"',
   footer: 'data-contact="footer"',
   direct: 'data-contact="direct"',
-  popular: 'data-contact="popular"'
+  popular: 'data-contact="popular"',
+  navRoute: 'data-nav-link="primary-route"',
+  footerRoute: 'data-footer-link="primary-route"'
 };
+
+/**
+ * The page Search Console shows demand for (party-planner queries, 2026-10-10),
+ * linked from the primary nav and the footer of every page. Same idempotent
+ * marker pattern as the phone link.
+ */
+const navRouteLink = () => `<a href="${R.href}" ${MARK.navRoute}>${R.navLabel}</a>`;
+const footerRouteLink = () => `<a href="${R.href}" ${MARK.footerRoute}>${R.footerLabel}</a>`;
 
 const headerCall = () =>
   `<a href="${C.telHref}" class="header-call" ${MARK.header}>${CALL_LABEL}</a>`;
@@ -49,7 +64,7 @@ const popularQuestions = () =>
 
 /** Fields every LocalBusiness node carries. */
 function businessContactFields() {
-  return { telephone: C.telephone, hasMap: C.googleBusinessProfileUrl, sameAs: [C.googleBusinessProfileUrl] };
+  return { telephone: C.telephone, hasMap: C.googleBusinessProfileUrl, sameAs: [C.googleBusinessProfileUrl], additionalType: T.additionalType.slice() };
 }
 
 function patchNode(node) {
@@ -62,6 +77,10 @@ function patchNode(node) {
     const same = [].concat(node.sameAs || []);
     if (!same.includes(C.googleBusinessProfileUrl)) same.push(C.googleBusinessProfileUrl);
     node.sameAs = same;
+    // Party planner + decorator classes; schema.org has neither type.
+    const types = [].concat(node.additionalType || []);
+    for (const t of T.additionalType) if (!types.includes(t)) types.push(t);
+    node.additionalType = types;
   }
   for (const v of Object.values(node)) patchNode(v);
 }
@@ -106,6 +125,22 @@ function applyContactSurface(html, rel) {
     if (!FOOTER_EMAIL.test(tail)) throw new Error(`${rel}: footer has no hello@ paragraph to anchor the phone`);
     out = out.slice(0, f) + tail.replace(FOOTER_EMAIL, (m) => m + footerContact());
   }
+  if (!out.includes(MARK.navRoute)) {
+    const nav = /(<nav\b[^>]*class="site-nav"[^>]*>)([\s\S]*?)(<\/nav>)/.exec(out);
+    // 404.html has no site header; every other page has exactly one site-nav.
+    if (nav) {
+      const inner = nav[2];
+      const last = inner.lastIndexOf('<a ');
+      const at = nav.index + nav[1].length + (last >= 0 ? last : inner.length);
+      out = out.slice(0, at) + navRouteLink() + out.slice(at);
+    }
+  }
+  if (!out.includes(MARK.footerRoute)) {
+    const f = out.indexOf('<footer');
+    const pricing = f >= 0 ? out.indexOf('<a href="/pricing', f) : -1;
+    if (pricing < 0) throw new Error(`${rel}: footer has no Pricing link to anchor the ${R.footerLabel} link`);
+    out = out.slice(0, pricing) + footerRouteLink() + out.slice(pricing);
+  }
   const isContact = rel === 'contact.html';
   const isHome = rel === 'index.html';
   if (isContact && !out.includes(MARK.direct)) {
@@ -113,6 +148,11 @@ function applyContactSurface(html, rel) {
     const tail = out.slice(m);
     if (m < 0 || !FOOTER_EMAIL.test(tail)) throw new Error(`${rel}: no hello@ paragraph in <main> to anchor the call/text block`);
     out = out.slice(0, m) + tail.replace(FOOTER_EMAIL, (x) => x + contactDirect());
+  }
+  if ((isContact || isHome) && out.includes(MARK.popular)) {
+    // Re-render, so a page added to data/ops/priority_pages.json reaches the
+    // block on the next pass instead of only on a page that never had one.
+    out = out.replace(/<section class="section section-soft" data-contact="popular">[\s\S]*?<\/section>/, () => popularQuestions());
   }
   if ((isContact || isHome) && !out.includes(MARK.popular)) {
     const anchor = out.indexOf('<section class="section section-soft" data-nav="related-pages">');
@@ -125,6 +165,7 @@ function applyContactSurface(html, rel) {
 
 module.exports = {
   CONTACT: C, CALL_LABEL, GBP_LABEL, MARK, PRIORITY_PAGES: priority.pages,
-  headerCall, footerContact, contactDirect, popularQuestions,
+  BUSINESS_TYPES: T.additionalType, PRIMARY_ROUTE: R,
+  headerCall, footerContact, navRouteLink, footerRouteLink, contactDirect, popularQuestions,
   businessContactFields, patchJsonLd, applyContactSurface
 };

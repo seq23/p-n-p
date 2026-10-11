@@ -11,6 +11,19 @@
     "googleBusinessProfileUrl": "https://maps.google.com/?cid=1437103205402862394",
     "googleBusinessProfileProvenance": "Google Maps feature id 0x13f19dc04f9ce33a (decimal cid 1437103205402862394), Knowledge Graph id /g/11z2n4dzgq, category Party planner. Resolved 2026-10-10: maps.google.com/?cid= 302s to google.com/maps?cid= and the place preview names Porch and Party, Party planner, /g/11z2n4dzgq."
   },
+  "businessTypes": {
+    "additionalType": [
+      "https://www.wikidata.org/wiki/Q1419997",
+      "https://www.wikidata.org/wiki/Q22811707"
+    ],
+    "provenance": "Added 2026-10-10. The Google Business Profile category is Party planner (see contact.googleBusinessProfileProvenance), and Search Console's only impressions (11 Sep-8 Oct 2026) are party-planner queries. schema.org has no party-planner or decorator type, so LocalBusiness carries Wikidata classes: Q1419997 'event producer' (person specializing in planning and execution of parties, events...; the class Wikidata resolves 'party planner' and 'event planner' to) and Q22811707 'decorator' (person who decorates for a living). Resolved via wbsearchentities on 2026-10-10."
+  },
+  "primaryRoute": {
+    "href": "/services/birthday-party-planner-memphis",
+    "navLabel": "Party Planning",
+    "footerLabel": "Birthday Party Planner",
+    "why": "The page for the party-planner queries Search Console shows impressions for. scripts/lib/contact_surface.js puts it in the primary nav and footer of every page; validate:contact-surface asserts it."
+  },
   "services": {
     "porch": {
       "name": "Seasonal Porch Decorating",

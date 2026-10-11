@@ -46,6 +46,25 @@ for (const rule of ['R1_ZERO_COST_OBSERVATION_LANE', 'R2_NO_RANK_CONFLATION', 'R
   if (!contract.hard_rules?.[rule]) errors.push(`contract_missing_hard_rule:${rule}`);
 }
 
+// ---------------------------------------------- measured-only target set
+// Since 2026-10-10 a target exists only because something measured it. Every
+// target names its source and carries a positive number; zero unmeasured.
+{
+  const set = readJson('data/search_intelligence/target_query_set.json', { targets: [] });
+  const SOURCES = new Set(['gsc_export', 'measured_demand']);
+  const list = set.targets || [];
+  if (!list.length) errors.push('targets_zero_measured_targets');
+  if (list.length !== set.target_count) errors.push(`targets_count_mismatch:${list.length}!=${set.target_count}`);
+  for (const t of list) {
+    if (!SOURCES.has(t.source)) errors.push(`targets_unknown_source:${t.target_id}:${t.source}`);
+    const v = Number(t.measurement && t.measurement.value);
+    if (!(Number.isFinite(v) && v > 0)) errors.push(`targets_unmeasured:${t.target_id}:${t.query}`);
+    const direct = t.source === 'gsc_export' ? Number(t.impressions) : Number(t.volume);
+    if (direct !== v) errors.push(`targets_number_disagrees_with_measurement:${t.target_id}`);
+    if (!t.expected_owned_route) errors.push(`targets_no_owned_route:${t.target_id}`);
+  }
+}
+
 // ------------------------------------------------- R1 zero-cost observation lane
 const observations = readJson('data/search_intelligence/live_search_observations.json', null);
 if (!observations) {

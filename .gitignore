@@ -11,3 +11,8 @@ tmp/
 # before every consumer (validate:release) in all three workflows that read
 # it, and the self-heal registry declares it as the repair command.
 .build/
+
+# collect_index_coverage.py imports collect_gsc_export.py; the daily cycle commits
+# with `git add -A`, so bytecode caches must never be picked up.
+__pycache__/
+*.pyc

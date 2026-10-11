@@ -15,8 +15,8 @@
   "route_plan_count": 22,
   "content_block_gaps": {
     "measured_by": "reports/validation/content-pattern-contract.json",
-    "measured_at": "2026-10-11T03:02:31.504Z",
-    "pages_checked": 112,
+    "measured_at": "2026-10-11T03:31:05.715Z",
+    "pages_checked": 113,
     "truth_boundary": "These gaps are measured against the pages present when the contract last ran. This builder runs before the publish step in the daily cycle, so a page published later in the same run is measured on the next cycle rather than this one. Over-listing is safe; a route named here is never a route that does not exist.",
     "blocks": [
       {
@@ -60,7 +60,7 @@
         "requested": 305,
         "applies_to_repo": true,
         "named_stop": null,
-        "coverage_pct": 3.6,
+        "coverage_pct": 4.4,
         "pages_missing": 108,
         "lane": "gap_needs_content"
       },
@@ -78,8 +78,8 @@
         "requested": 258,
         "applies_to_repo": true,
         "named_stop": null,
-        "coverage_pct": 3.6,
-        "pages_missing": 108,
+        "coverage_pct": 3.5,
+        "pages_missing": 109,
         "lane": "gap_needs_content"
       },
       {
@@ -88,7 +88,7 @@
         "applies_to_repo": false,
         "named_stop": "NOT APPLICABLE TO THIS REPO. The 913 recommendations behind this spec were collected across a portfolio whose other members publish technical and advisory content, where a copy-ready prompt is the artifact a reader reuses. Porch & Party publishes event-decor and porch-styling answers for Memphis homeowners; there is no prompt for a reader to copy, and emitting one on 109 decor pages would be scaffolding of exactly the kind the template-share ceiling and the fabricated-content rules exist to prevent. Retired by flag rather than deleted: the block stays in the spec and the detector stays live, so the day this repo does publish a copyable prompt the flag below fails and the entry is reinstated. Reinstate by setting applies_to_repo true and adding an emitter to templates/page-shell.js.",
         "coverage_pct": 0,
-        "pages_missing": 112,
+        "pages_missing": 113,
         "lane": "named_stop"
       },
       {
@@ -96,8 +96,8 @@
         "requested": 215,
         "applies_to_repo": true,
         "named_stop": null,
-        "coverage_pct": 5.4,
-        "pages_missing": 106,
+        "coverage_pct": 5.3,
+        "pages_missing": 107,
         "lane": "gap_needs_content"
       },
       {
@@ -105,8 +105,8 @@
         "requested": 196,
         "applies_to_repo": true,
         "named_stop": null,
-        "coverage_pct": 5.4,
-        "pages_missing": 106,
+        "coverage_pct": 5.3,
+        "pages_missing": 107,
         "lane": "gap_needs_content"
       }
     ],

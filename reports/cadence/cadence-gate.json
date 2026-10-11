@@ -1,15 +1,15 @@
 {
   "generated_at": "2026-10-11",
   "policy_source": "data/cadence/policy.json",
-  "urls": 115,
-  "dated": 115,
+  "urls": 116,
+  "dated": 116,
   "undated": 0,
   "stale_over_window": 0,
   "stale_pct": 0,
-  "fresh_within_30d": 115,
-  "lastmod_within_7d": 115,
-  "new_since_last_run": 0,
-  "new_publications_since_last_run": 0,
+  "fresh_within_30d": 10,
+  "lastmod_within_7d": 8,
+  "new_since_last_run": 1,
+  "new_publications_since_last_run": 1,
   "new_section_indexes_since_last_run": [],
   "ledger_initialised": true,
   "ledger_baseline_date": "2026-10-10",
@@ -25,12 +25,19 @@
     "require_lastmod": true,
     "new_pages_per_week": 1,
     "refresh_capacity_per_week": 8,
-    "_why": "13 weeks is the point where pages become markedly more likely to lose AI citations, and recency is the strongest single correlate of being cited. The ceiling is refresh capacity times that window: publish faster than the library can be maintained and the tail ages out of citability."
+    "_why": "13 weeks is the point where pages become markedly more likely to lose AI citations, and recency is the strongest single correlate of being cited. The ceiling is refresh capacity times that window: publish faster than the library can be maintained and the tail ages out of citability.",
+    "new_page_publication": {
+      "frozen": true,
+      "frozen_at": "2026-10-11",
+      "release_rule": "measured_target_only",
+      "release_rule_detail": "While frozen, scripts/authority_scale/publish_governed_queue.mjs publishes a queued page only when data/search_intelligence/target_query_set.json names that page's route as the expected_owned_route of a target carrying a measured number (Search Console impressions or a measured search volume). Today no queued page has one, so the daily cycle improves existing pages and publishes nothing new. When a measurement arrives for a queued page it publishes under the normal cadence caps with no further change here.",
+      "why": "Search Console, 11 Sep-8 Oct 2026: 0 clicks, 66 impressions, all on the homepage, for 22 queries - none of them among the 120 targets the authority cycle was writing toward, and data/demand/measured_demand.json measured 0 searches a month for those targets. Publishing more zero-demand pages adds library the 8-refreshes-a-week capacity cannot keep current (cadence gate: library_over_ceiling) while the demand Google does show goes to the homepage.",
+      "validator": "scripts/validators/validate_publication_freeze.mjs (npm run validate:publication-freeze, in validate:release)"
+    }
   },
   "blocking": [],
   "warnings": [
-    "library_over_ceiling: 115 pages against a ceiling of 104 (8 substantive refreshes per week held inside 91 days). 11 pages cannot be kept current at this capacity.",
-    "uniform_lastmod: 115 of 115 pages share a lastmod inside 7 days - that is a date bump pattern, not a refresh, and it makes the freshness signal meaningless"
+    "library_over_ceiling: 116 pages against a ceiling of 104 (8 substantive refreshes per week held inside 91 days). 12 pages cannot be kept current at this capacity."
   ],
   "status": "CLEAR"
 }

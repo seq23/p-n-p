@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "bounded_repair_preparation",
-  "generated_at": "2026-08-07T00:00:00.000Z",
+  "generated_at": "1970-01-01T00:00:00.000Z",
   "mode": "PREPARE_ONLY",
   "provider_state": "UNAVAILABLE",
   "overall_status": "UNAVAILABLE",
@@ -12,11 +12,867 @@
   "cadence_note": "This stage prepares candidates only. Publication remains governed by the existing evidence-gated daily ceiling and approval rules. The search lane is not part of authority:cycle.",
   "current_publishing_ceiling_per_day": 3,
   "current_velocity_decision": "HOLD",
-  "eligible_diagnoses": 0,
-  "candidate_count": 0,
+  "eligible_diagnoses": 22,
+  "candidate_count": 22,
   "truncated_candidates": 0,
   "truncation_note": null,
   "unavailable_note": "Provider truth was UNAVAILABLE for this run, so evidence-backed repair candidates could not be produced from live provider data. An empty candidate list here does not mean the site is healthy.",
   "bounded_repair_rule": "Emit the smallest bounded repair that the diagnosis evidence actually supports. Prefer improving one existing intent-matched route over proposing a new URL.",
-  "candidates": []
+  "candidates": [
+    {
+      "repair_candidate_id": "pnp_rc_06604ff9e92d",
+      "target_id": "pnp_sq_06604ff9e92d",
+      "query": "balloon business",
+      "target_route": "/faq/how-much-does-a-balloon-garland-cost-in-memphis",
+      "target_url": "https://porchandparty901.com/faq/how-much-does-a-balloon-garland-cost-in-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 1 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "balloon business",
+      "retest_target_id": "pnp_sq_06604ff9e92d"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_10488c0a79c5",
+      "target_id": "pnp_sq_10488c0a79c5",
+      "query": "birthday party planner near me",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 5 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "birthday party planner near me",
+      "retest_target_id": "pnp_sq_10488c0a79c5"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_1596ebef2f9f",
+      "target_id": "pnp_sq_1596ebef2f9f",
+      "query": "birthday party",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 1 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "birthday party",
+      "retest_target_id": "pnp_sq_1596ebef2f9f"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_2c273b1864f6",
+      "target_id": "pnp_sq_2c273b1864f6",
+      "query": "party planners",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 3 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "party planners",
+      "retest_target_id": "pnp_sq_2c273b1864f6"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_2fbf83107243",
+      "target_id": "pnp_sq_2fbf83107243",
+      "query": "event planning for parties",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 5 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "event planning for parties",
+      "retest_target_id": "pnp_sq_2fbf83107243"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_39b1892c84d5",
+      "target_id": "pnp_sq_39b1892c84d5",
+      "query": "party planners near me",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 6 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "party planners near me",
+      "retest_target_id": "pnp_sq_39b1892c84d5"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_4b068c2a21c7",
+      "target_id": "pnp_sq_4b068c2a21c7",
+      "query": "event management services",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 3 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "event management services",
+      "retest_target_id": "pnp_sq_4b068c2a21c7"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_5062d1006239",
+      "target_id": "pnp_sq_5062d1006239",
+      "query": "event planning services near me",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 3 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "event planning services near me",
+      "retest_target_id": "pnp_sq_5062d1006239"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_536897b30e3e",
+      "target_id": "pnp_sq_536897b30e3e",
+      "query": "bachelorette party planner",
+      "target_route": "/services/party-decor-memphis",
+      "target_url": "https://porchandparty901.com/services/party-decor-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 1 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "bachelorette party planner",
+      "retest_target_id": "pnp_sq_536897b30e3e"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_610234d10e21",
+      "target_id": "pnp_sq_610234d10e21",
+      "query": "corporate party",
+      "target_route": "/corporate/corporate-event-decor-memphis",
+      "target_url": "https://porchandparty901.com/corporate/corporate-event-decor-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 2 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "corporate party",
+      "retest_target_id": "pnp_sq_610234d10e21"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_6df17b9434e5",
+      "target_id": "pnp_sq_6df17b9434e5",
+      "query": "balloon party",
+      "target_route": "/faq/how-much-does-a-balloon-garland-cost-in-memphis",
+      "target_url": "https://porchandparty901.com/faq/how-much-does-a-balloon-garland-cost-in-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 1 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "balloon party",
+      "retest_target_id": "pnp_sq_6df17b9434e5"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_78c45308a948",
+      "target_id": "pnp_sq_78c45308a948",
+      "query": "party planners memphis",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 1 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "party planners memphis",
+      "retest_target_id": "pnp_sq_78c45308a948"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_8340e0ac4fc9",
+      "target_id": "pnp_sq_8340e0ac4fc9",
+      "query": "party planner memphis",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 1 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "party planner memphis",
+      "retest_target_id": "pnp_sq_8340e0ac4fc9"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_892ed4ee20f8",
+      "target_id": "pnp_sq_892ed4ee20f8",
+      "query": "event planning for parties near me",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 5 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "event planning for parties near me",
+      "retest_target_id": "pnp_sq_892ed4ee20f8"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_8e1909246e02",
+      "target_id": "pnp_sq_8e1909246e02",
+      "query": "bachelorette party ideas",
+      "target_route": "/services/party-decor-memphis",
+      "target_url": "https://porchandparty901.com/services/party-decor-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 1 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "bachelorette party ideas",
+      "retest_target_id": "pnp_sq_8e1909246e02"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_98532f32ea19",
+      "target_id": "pnp_sq_98532f32ea19",
+      "query": "event management services near me",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 2 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "event management services near me",
+      "retest_target_id": "pnp_sq_98532f32ea19"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_a918c1f2573c",
+      "target_id": "pnp_sq_a918c1f2573c",
+      "query": "event planning services",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 3 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "event planning services",
+      "retest_target_id": "pnp_sq_a918c1f2573c"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_a97d97ff7d71",
+      "target_id": "pnp_sq_a97d97ff7d71",
+      "query": "birthday party planner",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 7 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "birthday party planner",
+      "retest_target_id": "pnp_sq_a97d97ff7d71"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_a9b02f5fcc37",
+      "target_id": "pnp_sq_a9b02f5fcc37",
+      "query": "party planner",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 3 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "party planner",
+      "retest_target_id": "pnp_sq_a9b02f5fcc37"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_aaebb1a37961",
+      "target_id": "pnp_sq_aaebb1a37961",
+      "query": "event planner near me",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 3 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "event planner near me",
+      "retest_target_id": "pnp_sq_aaebb1a37961"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_cd5ba7741796",
+      "target_id": "pnp_sq_cd5ba7741796",
+      "query": "party planner near me",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 2 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "party planner near me",
+      "retest_target_id": "pnp_sq_cd5ba7741796"
+    },
+    {
+      "repair_candidate_id": "pnp_rc_d66f3fec6c9e",
+      "target_id": "pnp_sq_d66f3fec6c9e",
+      "query": "event management near me",
+      "target_route": "/services/birthday-party-planner-memphis",
+      "target_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "diagnosis_confidence": "PARTIAL_EVIDENCE",
+      "driving_finding": {
+        "code": "GSC_IMPRESSIONS_WITHOUT_CLICKS",
+        "basis": "google_search_console",
+        "detail": "Google reports 2 impressions and 0 clicks for this query."
+      },
+      "supporting_finding_codes": [
+        "GSC_AVERAGE_POSITION_BEYOND_FIRST_PAGE",
+        "GSC_NO_ROWS_FOR_EXPECTED_OWNED_URL"
+      ],
+      "repair_kind": "IMPROVE_EXISTING_ROUTE",
+      "bounded_change": "Rewrite the title and meta description of the existing route to match the exact query intent Google is already showing it for.",
+      "scope": "metadata_only",
+      "expected_signal": "Higher CTR on the same impressions in the next Google Search Console window.",
+      "prefers_existing_route_over_new_url": true,
+      "evidence_basis": [
+        "google_search_console"
+      ],
+      "own_site_performance_basis": "google_search_console",
+      "routes_through_existing_rules": [
+        "data/authority_scale/page_improvement_plan.json",
+        "data/authority_scale/candidate_backlog.json",
+        "npm run authority:publish"
+      ],
+      "existing_improvement_plan_route": null,
+      "existing_plan_recommendations": [],
+      "state": "PREPARED_NOT_APPLIED",
+      "publishes": false,
+      "mutates_publish_queue": false,
+      "requires_existing_approval_and_publishing_rules": true,
+      "retest_query": "event management near me",
+      "retest_target_id": "pnp_sq_d66f3fec6c9e"
+    }
+  ]
 }

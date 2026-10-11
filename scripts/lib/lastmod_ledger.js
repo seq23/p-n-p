@@ -53,11 +53,20 @@ function buildDate() {
 }
 
 /**
- * The chrome the hash ignores: <head>, <script>, <style>, <nav>, <footer>,
- * <svg>. Same list scripts/template_share.js strips before counting shingles,
- * for the same reason - none of it is what the page says.
+ * The chrome the hash ignores: <head>, <header>, <script>, <style>, <nav>,
+ * <footer>, <svg>. Same list scripts/template_share.js strips before counting
+ * shingles, for the same reason - none of it is what the page says.
+ *
+ * <header> joined the list on 2026-10-10. PR #25 put the "Call or text" link
+ * in the site header beside (not inside) the <nav>, so it counted as page text
+ * and every one of the 115 hashes changed at once: the sitemap went from 100
+ * pages dated 2026-08-26 to all 115 dated 2026-10-11, and the cadence gate
+ * reported uniform_lastmod. The site header is chrome on every page here; each
+ * page has exactly one, and it never carries the page's own content.
+ * `node scripts/rekey_lastmod_ledger.js --restore-from <rev>` re-keyed the
+ * ledger after the change without inventing a single date.
  */
-const CHROME = /<(script|style|nav|footer|head|svg)\b[\s\S]*?<\/\1>/gi;
+const CHROME = /<(script|style|nav|footer|header|head|svg)\b[\s\S]*?<\/\1>/gi;
 const TAG = /<[^>]+>/g;
 
 /**

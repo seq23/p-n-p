@@ -40,6 +40,7 @@ const requiredFiles = [
   'services/party-decor-memphis.html',
   'services/hotel-room-decor-memphis.html',
   'services/birthday-party-decor-memphis.html',
+  'services/birthday-party-planner-memphis.html',
   'services/celebration-setups-memphis.html',
   'services/grazing-tables-memphis.html',
   'services/bridal-shower-decor-memphis.html',

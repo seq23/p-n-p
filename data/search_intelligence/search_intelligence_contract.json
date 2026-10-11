@@ -119,12 +119,12 @@
   },
   "target_query_set": {
     "sources": [
-      "data/queries/query_universe.json",
-      "data/authority_scale/candidate_backlog.json",
-      "data/content/page_admission_registry.json"
+      "data/search_intelligence/gsc_search_analytics_export.json",
+      "data/demand/measured_demand.json"
     ],
-    "max_targets": 120,
-    "geography_truth_source": "data/service_areas/areas.json"
+    "max_targets": 500,
+    "measured_only": true,
+    "rebuilt_from_measured_demand_on": "2026-10-10"
   },
   "kpi_mapping": {
     "grounded_search_observation": "llm_surfacing",

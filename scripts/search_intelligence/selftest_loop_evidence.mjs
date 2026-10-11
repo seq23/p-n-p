@@ -23,6 +23,10 @@ const COPY = [
   'scripts/search_intelligence',
   'scripts/authority_scale/validate_kpi_truth.mjs',
   'data/search_intelligence/search_intelligence_contract.json',
+  // Stage 1 builds targets from measured demand only (2026-10-10), so the sandbox
+  // needs the measured inputs the real stage reads.
+  'data/search_intelligence/gsc_search_analytics_export.json',
+  'data/demand/measured_demand.json',
   'data/queries/query_universe.json',
   'data/authority_scale/candidate_backlog.json',
   'data/authority_scale/page_improvement_plan.json',
