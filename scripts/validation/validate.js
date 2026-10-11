@@ -120,7 +120,7 @@ for (const file of htmlFiles) {
 
   const hrefs = [...html.matchAll(/href=["']([^"']+)["']/g)].map(m => m[1]);
   for (const href of hrefs) {
-    if (!href || /^(https?:|mailto:|tel:|#|javascript:|\/\/)/i.test(href)) continue;
+    if (!href || /^(https?:|mailto:|tel:|sms:|#|javascript:|\/\/)/i.test(href)) continue;
     const clean = href.split('#')[0].split('?')[0];
     if (!clean) continue;
     // Three forms resolve, because three forms are served. Cloudflare Pages

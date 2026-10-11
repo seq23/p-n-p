@@ -31,10 +31,9 @@
  *     and truncated mid-word ("...increase based on");
  *   - LocalBusiness, FAQPage and BreadcrumbList JSON-LD were absent entirely.
  *
- * No NAP is emitted. data/offers/services.json carries an email and a service
- * area and no street address or telephone exists anywhere in this repo, so
- * LocalBusiness ships areaServed + email + makesOffer and omits address and
- * telephone rather than inventing them.
+ * LocalBusiness ships areaServed + email + makesOffer, plus telephone, hasMap
+ * and sameAs from scripts/lib/contact_surface.js (owner-supplied 2026-10-10).
+ * No street address exists in this repo, so none is emitted.
  *
  * Idempotent: re-running produces byte-identical output. Every substitution is
  * asserted, so a template drift fails loudly instead of silently skipping.
@@ -104,6 +103,7 @@ function localBusinessNode(image) {
     description: offers.primaryIdentity,
     areaServed: areas.areas,
     email: 'hello@porchandparty901.com',
+    ...require('./lib/contact_surface').businessContactFields(),
     brand: { '@type': 'Brand', name: offers.brandName },
     parentOrganization: { '@type': 'Organization', name: 'Kerseta LLC' },
     makesOffer: Object.values(offers.services).map((s) => ({

@@ -6,6 +6,9 @@ Static site repo for Porch & Party at porchandparty901.com.
 - Quote page: `/contact.html`
 - Form destination: https://forms.gle/vHjfKtRRAnGV3HxFA
 - Public email: hello@porchandparty901.com
+- Phone (call or text): 901-355-1518, `tel:+19013551518` / `sms:+19013551518`
+- Google Business Profile: https://maps.google.com/?cid=1437103205402862394 ("Porch and Party", Maps feature 0x13f19dc04f9ce33a)
+- These live in `data/offers/services.json` `contact`; `scripts/install_contact_surface.js` puts them on every page and every LocalBusiness node, and `npm run validate:contact-surface` asserts it. Listing copy for Thumbtack and Bark: `docs/listings/`.
 
 ## Build commands
 - `npm run build:all`

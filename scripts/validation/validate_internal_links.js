@@ -48,7 +48,7 @@ const redirects = redirectSources();
 const isFile = (p) => fs.existsSync(p) && fs.statSync(p).isFile();
 
 function resolves(from, href) {
-  if (!href || /^(https?:|mailto:|tel:|#|javascript:|\/\/)/i.test(href)) return true;
+  if (!href || /^(https?:|mailto:|tel:|sms:|#|javascript:|\/\/)/i.test(href)) return true;
   const clean = href.split('#')[0].split('?')[0];
   if (!clean) return true;
   if (redirects.has(clean)) return true;

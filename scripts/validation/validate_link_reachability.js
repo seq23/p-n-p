@@ -118,7 +118,7 @@ function targetOf(fromRel, href) {
   let h = href;
   if (h.startsWith(DOMAIN)) h = h.slice(DOMAIN.length) || '/';
   else if (/^(https?:)?\/\//i.test(h)) return null;      // another origin
-  if (/^(mailto:|tel:|javascript:|data:|#)/i.test(h)) return null;
+  if (/^(mailto:|tel:|sms:|javascript:|data:|#)/i.test(h)) return null;
   let clean = h.split('#')[0].split('?')[0];
   if (!clean) return null;
   if (!clean.startsWith('/')) {

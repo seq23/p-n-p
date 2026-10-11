@@ -2,6 +2,15 @@
   "brandName": "Porch & Party",
   "domain": "https://porchandparty901.com",
   "quoteUrl": "https://forms.gle/vHjfKtRRAnGV3HxFA",
+  "contact": {
+    "telephone": "+1-901-355-1518",
+    "telephoneDisplay": "901-355-1518",
+    "telHref": "tel:+19013551518",
+    "smsHref": "sms:+19013551518",
+    "googleBusinessProfileName": "Porch and Party",
+    "googleBusinessProfileUrl": "https://maps.google.com/?cid=1437103205402862394",
+    "googleBusinessProfileProvenance": "Google Maps feature id 0x13f19dc04f9ce33a (decimal cid 1437103205402862394), Knowledge Graph id /g/11z2n4dzgq, category Party planner. Resolved 2026-10-10: maps.google.com/?cid= 302s to google.com/maps?cid= and the place preview names Porch and Party, Party planner, /g/11z2n4dzgq."
+  },
   "services": {
     "porch": {
       "name": "Seasonal Porch Decorating",
