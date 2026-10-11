@@ -71,6 +71,7 @@ const RETROFIT_MARKERS = [
   { marker: 'data-clarity-loader', wrote: 'scripts/install_clarity.js', is: 'the Microsoft Clarity analytics tag' },
   { marker: 'data-nav="related-pages"', wrote: 'scripts/build_related_navigation.js', is: 'the related-pages internal-link block' },
   { marker: 'data-retrofit=', wrote: 'scripts/retrofit_*.js', is: 'a retrofitted content block' },
+  { marker: 'data-contact=', wrote: 'scripts/install_contact_surface.js', is: 'the phone / Google listing contact block' },
 ];
 
 const wouldLose = [];

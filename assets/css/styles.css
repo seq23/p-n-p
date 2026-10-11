@@ -38,6 +38,9 @@ li { margin-bottom: 8px; }
 .brand-script { font-size: 2.5rem; white-space: nowrap; }
 .site-nav { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
 .site-nav a { font-weight: 500; color: var(--text-main); }
+.header-call { font-weight: 600; color: var(--accent-primary); white-space: nowrap; }
+.contact-direct { margin-top: 16px; }
+[data-contact="popular"] ul { list-style: none; padding: 0; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 26px; }
 .hero-centered-cta, .centered-cta-row { justify-content: center; }
 .btn-primary, .btn-secondary { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 14px 24px; border-radius: var(--radius-sm); font-weight: 600; transition: 0.2s ease; }

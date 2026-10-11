@@ -1,4 +1,5 @@
 const offers = require('../data/offers/services.json');
+const contactSurface = require('../scripts/lib/contact_surface');
 const areas = require('../data/service_areas/areas.json');
 
 const fs = require('fs');
@@ -13,11 +14,11 @@ const path = require('path');
 const { normalizeHtmlUrls } = require('../scripts/lib/site_url');
 
 function nav() {
-  return `<header class="site-header"><div class="container header-inner"><a href="/" aria-label="Porch and Party home"><span class="brand-script">Porch &amp; Party</span></a><nav class="site-nav" aria-label="Primary navigation"><a href="/services/porch-decorating.html">Porch</a><a href="/services/celebration-setups.html">Celebrations</a><a href="/services/grazing-and-event-styling.html">Grazing &amp; Events</a><a href="/pricing.html">Pricing</a><a href="/how-it-works.html">How It Works</a><a href="/contact.html" class="btn-primary">Request a Quote</a></nav></div></header>`;
+  return `<header class="site-header"><div class="container header-inner"><a href="/" aria-label="Porch and Party home"><span class="brand-script">Porch &amp; Party</span></a><nav class="site-nav" aria-label="Primary navigation"><a href="/services/porch-decorating.html">Porch</a><a href="/services/celebration-setups.html">Celebrations</a><a href="/services/grazing-and-event-styling.html">Grazing &amp; Events</a><a href="/pricing.html">Pricing</a><a href="/how-it-works.html">How It Works</a><a href="/contact.html" class="btn-primary">Request a Quote</a></nav>${contactSurface.headerCall()}</div></header>`;
 }
 
 function footer() {
-  return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div><div class="footer-title">Porch &amp; Party</div><p class="muted">Memphis-based seasonal porch decorating, front porch styling, holiday porch decorating, and selective celebration setups.</p><p class="muted"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p></div><div><div class="footer-title">Explore</div><div class="footer-list"><a href="/services/porch-decorating.html">Seasonal Porch Decorating</a><a href="/services/celebration-setups.html">Celebration Setups</a><a href="/services/grazing-and-event-styling.html">Grazing &amp; Styled Events</a><a href="/pricing.html">Pricing</a><a href="/contact.html">Contact</a><a href="/privacy-policy.html">Privacy Policy</a><a href="/terms-and-conditions.html">Terms &amp; Conditions</a></div></div><div><div class="footer-title">Service Area</div><div class="footer-list">${areas.areas.map(a => `<span>${a.split(',')[0]}</span>`).join('')}</div></div></div><div class="legal">© 2026 Porch &amp; Party. All rights reserved.<br>Porch &amp; Party is a brand operated by Kerseta LLC.</div></div></footer>`;
+  return `<footer class="site-footer"><div class="container"><div class="footer-grid"><div><div class="footer-title">Porch &amp; Party</div><p class="muted">Memphis-based seasonal porch decorating, front porch styling, holiday porch decorating, and selective celebration setups.</p><p class="muted"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p>${contactSurface.footerContact()}</div><div><div class="footer-title">Explore</div><div class="footer-list"><a href="/services/porch-decorating.html">Seasonal Porch Decorating</a><a href="/services/celebration-setups.html">Celebration Setups</a><a href="/services/grazing-and-event-styling.html">Grazing &amp; Styled Events</a><a href="/pricing.html">Pricing</a><a href="/contact.html">Contact</a><a href="/privacy-policy.html">Privacy Policy</a><a href="/terms-and-conditions.html">Terms &amp; Conditions</a></div></div><div><div class="footer-title">Service Area</div><div class="footer-list">${areas.areas.map(a => `<span>${a.split(',')[0]}</span>`).join('')}</div></div></div><div class="legal">© 2026 Porch &amp; Party. All rights reserved.<br>Porch &amp; Party is a brand operated by Kerseta LLC.</div></div></footer>`;
 }
 
 function pickSocialImage(pathUrl, serviceKey) {
@@ -130,7 +131,7 @@ function articleJsonLd(url, headline, description, image, pathUrl) {
     author: publisher,
     publisher,
     isPartOf: { '@type': 'WebSite', name: offers.brandName, url: `${offers.domain}/` },
-    about: { '@type': 'LocalBusiness', name: offers.brandName, url: `${offers.domain}/`, areaServed: areas.areas }
+    about: { '@type': 'LocalBusiness', name: offers.brandName, url: `${offers.domain}/`, areaServed: areas.areas, ...contactSurface.businessContactFields() }
   };
 }
 
@@ -148,7 +149,7 @@ function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl, im
       '@type': 'Service',
       name: title,
       serviceType: title,
-      provider: { '@type': 'LocalBusiness', name: offers.brandName, url: offers.domain },
+      provider: { '@type': 'LocalBusiness', name: offers.brandName, url: offers.domain, ...contactSurface.businessContactFields() },
       areaServed: areas.areas,
       offers: { '@type': 'Offer', priceCurrency: 'USD', description: 'Porch & Party publishes starting prices; exact quotes depend on scope, date, location, and materials.' }
     },

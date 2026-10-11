@@ -284,12 +284,13 @@ function render(section, groups) {
   // pages and was absent from exactly these five section indexes, because every
   // other page gets it from templates/page-shell.js and an index is composed
   // here. Same brand name, domain and served area as the LocalBusiness node
-  // page-shell.js already emits, read from the same two data files: no address
-  // or telephone, because this repo records neither.
+  // page-shell.js already emits, read from the same data files, plus the
+  // telephone and Google listing from scripts/lib/contact_surface.js; no street address.
   const publisher = {
     '@context': 'https://schema.org', '@type': 'LocalBusiness',
     '@id': `${DOMAIN}/#business`, name: offers.brandName, url: `${DOMAIN}/`,
-    areaServed: areasData.areas
+    areaServed: areasData.areas,
+    ...require('../lib/contact_surface').businessContactFields()
   };
   const jsonld = [
     publisher,

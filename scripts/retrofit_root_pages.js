@@ -13,9 +13,9 @@
  *    still a page of this site, and a site-wide publisher node is the standard
  *    shape.
  *
- *    No NAP is emitted. There is no street address and no telephone number
- *    anywhere in this repository, so the node ships areaServed + email +
- *    makesOffer and omits address and telephone rather than inventing them.
+ *    The node ships areaServed + email + makesOffer, plus telephone, hasMap
+ *    and sameAs from scripts/lib/contact_surface.js (owner-supplied
+ *    2026-10-10). No street address exists in this repo, so none is emitted.
  *
  * 2. Thin content, but only where thin is actually a defect. pricing.html and
  *    how-it-works.html are answer surfaces that were missing material they
@@ -72,6 +72,7 @@ function localBusinessNode(image) {
     description: offers.primaryIdentity,
     areaServed: areas.areas,
     email: 'hello@porchandparty901.com',
+    ...require('./lib/contact_surface').businessContactFields(),
     brand: { '@type': 'Brand', name: offers.brandName },
     parentOrganization: { '@type': 'Organization', name: 'Kerseta LLC' },
     makesOffer: Object.values(offers.services).map((s) => ({

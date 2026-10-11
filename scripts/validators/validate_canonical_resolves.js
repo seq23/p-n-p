@@ -122,7 +122,7 @@ for (const abs of files) {
 
   for (const m of html.matchAll(/href=["']([^"']+)["']/g)) {
     const href = m[1];
-    if (/^(mailto:|tel:|javascript:|data:|#)/i.test(href)) continue;
+    if (/^(mailto:|tel:|sms:|javascript:|data:|#)/i.test(href)) continue;
     if (/^(https?:)?\/\//i.test(href) && !href.startsWith(DOMAIN)) continue;
     hrefs += 1;
     if (isRedirectingForm(href)) {
