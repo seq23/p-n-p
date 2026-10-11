@@ -15,7 +15,6 @@ import {
   readJson,
   writeJson,
   runStamp,
-  runDate,
   resolveProviderState,
   deriveOverallStatus,
   stableSort,
@@ -77,6 +76,23 @@ if (exportFile) {
   };
 }
 
+// Google reports pages under whichever host it indexed (www. or apex) and the
+// targets name the apex canonical, so a page is keyed by host-without-www + path.
+function normalizePageKey(value) {
+  try {
+    const u = new URL(String(value || ''));
+    const host = u.hostname.toLowerCase().replace(/^www\./, '');
+    const pathname = u.pathname.replace(/\/index\.html$/, '/').replace(/\/+$/, '') || '/';
+    return `${host}${pathname}`;
+  } catch {
+    return '';
+  }
+}
+
+function sumRows(rows, field) {
+  return (rows || []).reduce((sum, row) => sum + (Number(row[field]) || 0), 0);
+}
+
 function normalizeQueryKey(value) {
   return String(value || '')
     .toLowerCase()
@@ -102,8 +118,9 @@ if (exportFile) {
   }
   for (const row of exportFile.by_page || []) {
     const url = (row.keys || [])[0];
-    if (!url) continue;
-    byPage.set(url, {
+    const key = normalizePageKey(url);
+    if (!key) continue;
+    byPage.set(key, {
       url,
       clicks: row.clicks ?? 0,
       impressions: row.impressions ?? 0,
@@ -115,7 +132,7 @@ if (exportFile) {
 
 const perTarget = targetSet.targets.map((target) => {
   const queryRow = byQuery.get(normalizeQueryKey(target.query)) || null;
-  const pageRow = target.expected_owned_url ? byPage.get(target.expected_owned_url) || null : null;
+  const pageRow = target.expected_owned_url ? byPage.get(normalizePageKey(target.expected_owned_url)) || null : null;
   return {
     target_id: target.target_id,
     query: target.query,
@@ -134,11 +151,42 @@ const perTarget = targetSet.targets.map((target) => {
 const overall = deriveOverallStatus([providerState], { requiredProviders: ['search_console'] });
 const withRows = perTarget.filter((t) => t.truth_state === 'GSC_ROW_PRESENT');
 
+// Site totals come from the export itself, never from the target join: on
+// 2026-10-11 Google returned 22 real queries / 66 impressions while
+// total_impressions read 0, because it summed only the 120 long-tail targets
+// (none of which Google has shown yet). by_page is the complete total; by_query
+// omits anonymised queries, so its sum is reported separately.
+const siteTotals = exportFile
+  ? {
+      basis: 'by_page rows of the Search Console export (complete; by_query omits anonymised queries)',
+      clicks: sumRows(exportFile.by_page, 'clicks'),
+      impressions: sumRows(exportFile.by_page, 'impressions'),
+      pages_with_impressions: (exportFile.by_page || []).filter((r) => (r.impressions || 0) > 0).length,
+      queries_with_impressions: (exportFile.by_query || []).filter((r) => (r.impressions || 0) > 0).length,
+      query_row_impressions: sumRows(exportFile.by_query, 'impressions'),
+      query_row_clicks: sumRows(exportFile.by_query, 'clicks'),
+      top_queries: [...(exportFile.by_query || [])]
+        .sort((a, b) => (b.impressions || 0) - (a.impressions || 0) || String(a.keys?.[0]).localeCompare(String(b.keys?.[0])))
+        .slice(0, 10)
+        .map((r) => ({
+          query: (r.keys || [])[0],
+          impressions: r.impressions ?? 0,
+          clicks: r.clicks ?? 0,
+          gsc_average_position: r.position ?? null
+        }))
+    }
+  : null;
+
+// A run stamp is the env-pinned run date; without one, the export's own
+// collected_at (deterministic for a given input). Never the 1970 epoch for real data.
+const EPOCH = '1970-01-01T00:00:00.000Z';
+const stamp = runStamp() !== EPOCH ? runStamp() : exportFile?.collected_at ? new Date(exportFile.collected_at).toISOString() : EPOCH;
+
 const out = {
   schema_version: '1.0',
   contract: contract.contract,
   stage: 'provider_truth',
-  generated_at: runStamp(),
+  generated_at: stamp,
   own_site_google_performance_authority: contract.own_site_google_performance_authority,
   provider_state: providerState.state,
   provider_states: [providerState],
@@ -149,11 +197,14 @@ const out = {
   export_window: exportFile ? { start_date: exportFile.start_date, end_date: exportFile.end_date } : null,
   export_collected_at: exportFile ? exportFile.collected_at : null,
   export_counts: exportFile ? exportFile.counts || {} : null,
-  requested_for_date: runDate(),
+  requested_for_date: stamp.slice(0, 10),
   target_count: perTarget.length,
   targets_with_gsc_rows: withRows.length,
-  total_impressions: withRows.reduce((sum, t) => sum + (t.query_metrics?.impressions || 0), 0),
-  total_clicks: withRows.reduce((sum, t) => sum + (t.query_metrics?.clicks || 0), 0),
+  total_impressions: siteTotals ? siteTotals.impressions : 0,
+  total_clicks: siteTotals ? siteTotals.clicks : 0,
+  site_totals: siteTotals,
+  target_impressions: withRows.reduce((sum, t) => sum + (t.query_metrics?.impressions || t.page_metrics?.impressions || 0), 0),
+  target_clicks: withRows.reduce((sum, t) => sum + (t.query_metrics?.clicks || t.page_metrics?.clicks || 0), 0),
   unavailable_note: exportFile
     ? null
     : `Google Search Console truth is ${providerState.state}. Reason: ${providerState.reason}. Collect real rows with: python3 ${gscCfg.collector} <service-account.json> "$GSC_SITE_URL" <startDate> <endDate> ${exportPath}`,

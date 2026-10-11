@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "provider_truth",
-  "generated_at": "1970-01-01T00:00:00.000Z",
+  "generated_at": "2026-10-11T02:40:15.118Z",
   "own_site_google_performance_authority": "google_search_console",
   "provider_state": "OK",
   "provider_states": [
@@ -28,11 +28,84 @@
     "by_page": 1,
     "by_query_page": 22
   },
-  "requested_for_date": "1970-01-01",
+  "requested_for_date": "2026-10-11",
   "target_count": 120,
   "targets_with_gsc_rows": 0,
-  "total_impressions": 0,
+  "total_impressions": 66,
   "total_clicks": 0,
+  "site_totals": {
+    "basis": "by_page rows of the Search Console export (complete; by_query omits anonymised queries)",
+    "clicks": 0,
+    "impressions": 66,
+    "pages_with_impressions": 1,
+    "queries_with_impressions": 22,
+    "query_row_impressions": 61,
+    "query_row_clicks": 0,
+    "top_queries": [
+      {
+        "query": "birthday party planner",
+        "impressions": 7,
+        "clicks": 0,
+        "gsc_average_position": 22.428571428571427
+      },
+      {
+        "query": "party planners near me",
+        "impressions": 6,
+        "clicks": 0,
+        "gsc_average_position": 34.333333333333336
+      },
+      {
+        "query": "birthday party planner near me",
+        "impressions": 5,
+        "clicks": 0,
+        "gsc_average_position": 25
+      },
+      {
+        "query": "event planning for parties",
+        "impressions": 5,
+        "clicks": 0,
+        "gsc_average_position": 1
+      },
+      {
+        "query": "event planning for parties near me",
+        "impressions": 5,
+        "clicks": 0,
+        "gsc_average_position": 7
+      },
+      {
+        "query": "event management services",
+        "impressions": 3,
+        "clicks": 0,
+        "gsc_average_position": 41
+      },
+      {
+        "query": "event planner near me",
+        "impressions": 3,
+        "clicks": 0,
+        "gsc_average_position": 41
+      },
+      {
+        "query": "event planning services",
+        "impressions": 3,
+        "clicks": 0,
+        "gsc_average_position": 41
+      },
+      {
+        "query": "event planning services near me",
+        "impressions": 3,
+        "clicks": 0,
+        "gsc_average_position": 41
+      },
+      {
+        "query": "party planner",
+        "impressions": 3,
+        "clicks": 0,
+        "gsc_average_position": 21
+      }
+    ]
+  },
+  "target_impressions": 0,
+  "target_clicks": 0,
   "unavailable_note": null,
   "truth_boundary": "Google Search Console is the only authority for own-site Google impressions, clicks, CTR, average position, and indexation in this repo.",
   "per_target": [

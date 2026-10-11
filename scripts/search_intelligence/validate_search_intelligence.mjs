@@ -134,6 +134,22 @@ if (!gscTruth) {
   if (gscTruth.own_site_google_performance_authority !== 'google_search_console') {
     errors.push('r3_truth_artifact_authority_mismatch');
   }
+  // 2026-10-11: an OK truth read 0 impressions and a 1970 stamp over an export
+  // holding 66 real impressions. An OK truth must carry a real stamp and the
+  // export's own totals.
+  if (gscTruth.provider_state === 'OK') {
+    if (!gscTruth.generated_at || gscTruth.generated_at.startsWith('1970-')) {
+      errors.push('r3_truth_ok_with_epoch_timestamp');
+    }
+    const gscExport = readJson(gscTruth.export_path || 'data/search_intelligence/gsc_search_analytics_export.json', null);
+    if (gscExport) {
+      const exportImpressions = (gscExport.by_page || []).reduce((s, r) => s + (Number(r.impressions) || 0), 0);
+      const exportClicks = (gscExport.by_page || []).reduce((s, r) => s + (Number(r.clicks) || 0), 0);
+      if (gscTruth.total_impressions !== exportImpressions || gscTruth.total_clicks !== exportClicks) {
+        errors.push(`r3_truth_totals_disagree_with_export:${gscTruth.total_impressions}/${gscTruth.total_clicks}!=${exportImpressions}/${exportClicks}`);
+      }
+    }
+  }
   for (const t of gscTruth.per_target || []) {
     const hasMetrics = Boolean(t.query_metrics || t.page_metrics);
     if (hasMetrics && t.own_site_performance_basis !== 'google_search_console') {

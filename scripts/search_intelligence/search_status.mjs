@@ -55,7 +55,7 @@ lines.push(
   `  3. Competitor comparison   : ${competitors ? `${competitors.overall_status} — ${competitors.competitor_count} domains across ${competitors.observed_query_count} observed queries` : 'NOT RUN'}`
 );
 lines.push(
-  `  4. Provider truth (GSC)    : ${truth ? `${truth.overall_status} — ${truth.targets_with_gsc_rows} of ${truth.target_count} targets have real GSC rows` : 'NOT RUN'}`
+  `  4. Provider truth (GSC)    : ${truth ? `${truth.overall_status} — ${truth.targets_with_gsc_rows} of ${truth.target_count} targets have real GSC rows; site ${truth.total_impressions ?? 0} impressions / ${truth.total_clicks ?? 0} clicks over ${truth.site_totals?.pages_with_impressions ?? 0} page(s)` : 'NOT RUN'}`
 );
 lines.push(
   `  5. Diagnosis               : ${diagnosis ? `${diagnosis.overall_status} — ${diagnosis.evidence_backed_count} evidence-backed, ${diagnosis.partial_evidence_count} partial, ${diagnosis.insufficient_evidence_count} insufficient` : 'NOT RUN'}`

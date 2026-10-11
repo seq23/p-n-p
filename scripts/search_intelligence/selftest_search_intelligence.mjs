@@ -145,7 +145,14 @@ const CASES = [
     name: 'R4_degraded_without_unavailable_note',
     expect: 'r4_degraded_artifact_missing_unavailable_note',
     mutate: (dir) =>
+      // Force the degraded shape first: since the daily cycle began collecting a
+      // real export (2026-10-11) the live truth is OK, and nulling the note on an
+      // OK artifact is legal, so the case no longer exercised the rule at all.
       patch(dir, 'data/search_intelligence/gsc_truth.json', (d) => {
+        d.provider_state = 'DEGRADED';
+        d.provider_states = (d.provider_states || [{ provider: 'search_console' }]).map((p) => ({ ...p, state: 'DEGRADED' }));
+        d.overall_status = 'DEGRADED';
+        d.status_is_healthy = false;
         d.unavailable_note = null;
       })
   },
