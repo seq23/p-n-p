@@ -46,7 +46,7 @@ on:
   # are built from.
   workflow_run:
     workflows:
-      ["Daily Authority Cycle", "Bounded Self-Healing", "Search Intelligence Cycle"]
+      ["Daily Authority Cycle", "Bounded Self-Healing", "Search Intelligence Cycle", "Paid Citation Probe"]
     types: [completed]
 
 permissions:

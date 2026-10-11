@@ -91,7 +91,7 @@ if (!anyProviderTruth) {
   lines.push(`    python3 ${contract.providers.search_console.collector} <service-account.json> "$GSC_SITE_URL" <start> <end> ${contract.providers.search_console.export_path}`);
   lines.push('    then: npm run search:truth');
   lines.push('  Grounded search observation (free-allowance governed):');
-  lines.push(`    export ${contract.providers.grounded_search.credential_env}=...  &&  npm run search:observe`);
+  lines.push(`    export ${contract.providers.grounded_search.credential_env}=...  &&  CONFIRM_PAID=true npm run search:observe   # paid lane, off by owner policy 2026-10-11`);
   lines.push('  Or dispatch .github/workflows/search-intelligence.yml, which already has the GSC secrets.');
   lines.push('');
 }
