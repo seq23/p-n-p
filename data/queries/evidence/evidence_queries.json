@@ -45,7 +45,7 @@
           "bizjournals.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -84,7 +84,7 @@
           "memphisparks.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -109,22 +109,20 @@
       "occupancy": {
         "verdict": "HELD",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.375,
+        "openness_score": 0.333,
         "platform_share": 0,
-        "institutional_share": 0.25,
-        "distinct_cited_hosts": 8,
+        "institutional_share": 0.333,
+        "distinct_cited_hosts": 6,
         "cited_hosts": [
           "cityofmemphismi.gov",
           "downtownmemphis.com",
-          "peabodymemphis.com",
           "memphistn.gov",
           "thekentmemphis.com",
-          "minglewoodhallmemphis.com",
-          "venues.ticketsmemphis.org",
-          "thememphian.com"
+          "zipdatamaps.com",
+          "eventective.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -146,25 +144,24 @@
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
-        "verdict": "HELD",
+        "verdict": "CONTESTED",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.389,
+        "openness_score": 0.438,
         "platform_share": 0,
-        "institutional_share": 0.222,
-        "distinct_cited_hosts": 9,
+        "institutional_share": 0.125,
+        "distinct_cited_hosts": 8,
         "cited_hosts": [
-          "cmns.umd.edu",
           "fastweb.com",
           "canterbury.ac.nz",
           "evite.com",
+          "smu.ca",
           "miamioh.edu",
           "hgtv.com",
-          "partyideas.punchbowl.com",
-          "chefscater.com",
-          "jotform.com"
+          "jotform.com",
+          "upistudy.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -200,12 +197,12 @@
           "planningbirthday.com",
           "andrewrobyevents.com",
           "partygeniusai.com",
-          "metrofamilymagazine.com",
           "planneapp.com",
-          "pbs.org"
+          "metrofamilymagazine.com",
+          "play.google.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -235,17 +232,17 @@
         "distinct_cited_hosts": 9,
         "cited_hosts": [
           "npr.org",
-          "eventbrite.com",
           "scheduling.cornell.edu",
           "wsj.com",
           "dine.co.uk",
           "hac.org.uk",
           "thekentmemphis.com",
-          "meghanwarrenevents.com",
-          "partyhouses.co.uk"
+          "eventbrite.com",
+          "partyhouses.co.uk",
+          "meghanwarrenevents.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -284,7 +281,7 @@
           "powerhousestudios.tv"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -317,13 +314,13 @@
           "enzoeventplanner.com",
           "perfectpartyplanner.com",
           "thumbtack.com",
-          "partypoppinsny.com",
           "partyoneventstx.com",
+          "partypoppinsny.com",
           "yelp.com",
           "atlantaparent.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -355,16 +352,16 @@
           "partyperfect.com",
           "partyplann.com",
           "partyplan.com",
-          "perfectpartyplanner.com",
           "plantheparty.co.uk",
+          "perfectpartyplanner.com",
           "mrspartyplanner.events",
           "primapartychatt.com",
-          "party-planners.com",
           "apps.apple.com",
+          "party-planners.com",
           "partypioneer.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -393,16 +390,16 @@
         "institutional_share": 0,
         "distinct_cited_hosts": 7,
         "cited_hosts": [
-          "premierpartyplanners.com",
           "partyslate.com",
-          "partypoppinsny.com",
+          "premierpartyplanners.com",
           "myperfectparty.com.au",
           "bark.com",
+          "partypoppinsny.com",
           "yelp.com",
           "fash.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -426,23 +423,23 @@
       "occupancy": {
         "verdict": "CONTESTED",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.5,
+        "openness_score": 0.444,
         "platform_share": 0,
-        "institutional_share": 0,
+        "institutional_share": 0.111,
         "distinct_cited_hosts": 9,
         "cited_hosts": [
+          "partyperfect.com",
           "party-planners.com",
           "partyplann.com",
           "profpartyplanners.com",
+          "bls.gov",
           "propartyplanners.com",
-          "plantheparty.co.uk",
           "mrspartyplanner.events",
-          "partyplannersqa.com",
-          "partyperfect.com",
-          "primapartychatt.com"
+          "plantheparty.co.uk",
+          "partyplannersqa.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -472,18 +469,18 @@
         "distinct_cited_hosts": 10,
         "cited_hosts": [
           "pem.co.nz",
-          "dcmeventmanagement.com",
           "emceventsgroup.com",
+          "dcmeventmanagement.com",
           "eventmanagementservices.co.uk",
           "fcmtravel.com",
           "amworldgroup.com",
           "goldenstateevents.com",
           "events.ieee.org",
-          "essentialeventmanagement.com",
-          "cmsevents.com.au"
+          "cmsevents.com.au",
+          "youreventsolutions.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -505,24 +502,25 @@
       "lead_intent_tier": "T1_LOCAL_READY",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
-        "verdict": "CONTESTED",
+        "verdict": "OPEN",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.563,
-        "platform_share": 0.125,
+        "openness_score": 0.611,
+        "platform_share": 0.222,
         "institutional_share": 0,
-        "distinct_cited_hosts": 8,
+        "distinct_cited_hosts": 9,
         "cited_hosts": [
-          "fash.com",
           "perfectpartyplanner.com",
+          "fash.com",
           "myperfectparty.com.au",
           "yelp.com",
           "bark.com",
           "klikparty.com",
           "bbb.org",
-          "premierpartyplanners.com"
+          "thumbtack.com",
+          "planitparties.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -557,13 +555,13 @@
           "goldenstateevents.com",
           "evendaevents.com",
           "intheevent.com",
-          "eventplannersplus.com",
           "twelve24events.com",
-          "keyevents.com",
-          "theeventllcga.com"
+          "eventplannersplus.com",
+          "mandyseventplanning.com",
+          "keyevents.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -587,23 +585,24 @@
       "occupancy": {
         "verdict": "CONTESTED",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.556,
-        "platform_share": 0.111,
+        "openness_score": 0.55,
+        "platform_share": 0.1,
         "institutional_share": 0,
-        "distinct_cited_hosts": 9,
+        "distinct_cited_hosts": 10,
         "cited_hosts": [
           "weplanit.com",
           "ny.apexauthorities.com",
-          "simplyeventsinc.com",
           "yelp.com",
+          "simplyeventsinc.com",
           "visitsanantonio.com",
           "eventsolutions.com",
+          "albrechtevents.com",
+          "sc.officereadypros.com",
           "hirerush.com",
-          "ca.civicrouteco.com",
-          "albrechtevents.com"
+          "ca.civicrouteco.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -634,17 +633,17 @@
         "cited_hosts": [
           "luma.com",
           "event-activity-client.vercel.app",
-          "ralphroodevents.com",
           "eventalways.com",
-          "allevents.expert",
+          "ralphroodevents.com",
           "eleven11eventstudio.com",
+          "allevents.expert",
           "gaslampevent.com",
           "hirerush.com",
           "bgcevents.co.uk",
-          "bbandc.com"
+          "albrechtevents.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -677,11 +676,11 @@
           "sbeventsplanning.com",
           "event-blvd.com",
           "bbb.org",
-          "thedceventplanner.com",
-          "amandapriceevents.com"
+          "amandapriceevents.com",
+          "thedceventplanner.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -703,10 +702,10 @@
       "lead_intent_tier": "T4_INFORMATIONAL",
       "lead_intent_method": "regex_classifier_on_query_string, scripts/queries/score_discovery_gap.mjs",
       "occupancy": {
-        "verdict": "CONTESTED",
+        "verdict": "OPEN",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.556,
-        "platform_share": 0.111,
+        "openness_score": 0.611,
+        "platform_share": 0.222,
         "institutional_share": 0,
         "distinct_cited_hosts": 9,
         "cited_hosts": [
@@ -717,11 +716,11 @@
           "southerneventplanners.com",
           "s3.amazonaws.com",
           "weddingwire.com",
-          "infinityeventsmemphis.com",
-          "kgeventsmemphis.com"
+          "partyslate.com",
+          "yelp.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -762,7 +761,7 @@
           "bbandc.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -792,17 +791,17 @@
         "distinct_cited_hosts": 9,
         "cited_hosts": [
           "johngiovannelli.com",
-          "nytimes.com",
           "cigientertainment.com",
+          "nytimes.com",
           "en.wikipedia.org",
           "people.com",
           "seenthemagazine.com",
           "globalnews.ca",
           "spotlight.vegas",
-          "skyutecasino.com"
+          "wildthingzeast.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -829,19 +828,20 @@
         "openness_score": 0.5,
         "platform_share": 0,
         "institutional_share": 0,
-        "distinct_cited_hosts": 8,
+        "distinct_cited_hosts": 9,
         "cited_hosts": [
+          "scottsdalebachelorette.com",
           "azbacheloretteparty.com",
-          "thehouseofbachelorette.com",
           "bach-me.com",
+          "thehouseofbachelorette.com",
           "phillymag.com",
           "latimes.com",
           "bachplace.com",
           "bonitabachelorettes.webflow.io",
-          "insideweddings.com"
+          "wedsly.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -865,24 +865,24 @@
       "occupancy": {
         "verdict": "CONTESTED",
         "reason": "GROUNDED_CITATION_OBSERVATION",
-        "openness_score": 0.4,
+        "openness_score": 0.45,
         "platform_share": 0,
-        "institutional_share": 0.2,
+        "institutional_share": 0.1,
         "distinct_cited_hosts": 10,
         "cited_hosts": [
-          "amazingarthur.com",
-          "zoomalata.com",
-          "citynews.com.au",
           "gsbooru.org",
-          "pinkballoon.com",
-          "italianacademy.columbia.edu",
-          "nga.gov",
-          "maxon.net",
-          "krqe.com",
-          "jeremysballoons.com"
+          "getyourguide.com",
+          "amazingarthur.com",
+          "kelliraye.getarchive.net",
+          "jeremysballoons.com",
+          "denverballoonartist.com",
+          "jonahstwisters.com",
+          "cabq.gov",
+          "myeasternshoremd.com",
+          "community.houstonpress.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -913,17 +913,17 @@
         "cited_hosts": [
           "london.ac.uk",
           "corporateparty.ie",
-          "mainevent.com",
           "ca-corporate.parte.info",
+          "mainevent.com",
           "us-corporate.parte.info",
           "ebombo.com",
           "wepleia.com",
           "amf.com",
-          "simasgovlaw.com",
-          "andresbanquet.com"
+          "andresbanquet.com",
+          "simasgovlaw.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -952,19 +952,19 @@
         "institutional_share": 0.1,
         "distinct_cited_hosts": 10,
         "cited_hosts": [
+          "abcnews.com",
           "en.wikipedia.org",
           "vogue.com",
-          "azbacheloretteparty.com",
-          "cnbc.com",
           "foxbusiness.com",
+          "cnbc.com",
           "bachbride.com",
-          "thehouseofbachelorette.com",
           "dictionary.cambridge.org",
+          "thehouseofbachelorette.com",
           "thatbacheloretteshow.com",
           "brides.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -998,13 +998,13 @@
           "brit.co",
           "ideas.hallmark.com",
           "knoxnews.com",
-          "thepioneerwoman.com",
           "theknot.com",
+          "elitedaily.com",
           "en.wikipedia.org",
-          "elitedaily.com"
+          "yahoo.com"
         ],
         "cited_ours": [],
-        "observed_at": "2026-10-10T15:14:43.163Z",
+        "observed_at": "2026-10-11T02:40:32.288Z",
         "engine": "openrouter:openai/gpt-4o-mini"
       }
     },
@@ -1192,18 +1192,18 @@
     }
   ],
   "last_gsc_ingest": {
-    "at": "2026-10-11T02:40:14Z",
+    "at": "2026-10-11T03:02:20Z",
     "site": "sc-domain:porchandparty901.com",
     "window": "2026-07-11..2026-10-09",
     "rows_returned": 27,
-    "added": 1,
+    "added": 0,
     "promoted_from_modelled": 0,
-    "updated": 26,
+    "updated": 27,
     "total_queries": 32,
     "truth_boundary": "Impressions are this property's measured demand in Google Search Console. They are not market volume, not rank, and not evidence of citation."
   },
   "discovery_gap_pass": {
-    "at": "2026-10-11T02:40:15.465Z",
+    "at": "2026-10-11T03:02:23.038Z",
     "by": "scripts/queries/score_discovery_gap.mjs",
     "why": "The observed set is 22 queries. Every one of them carried demand and nothing else - no read on whether the answer is winnable, and none on whether the searcher is near the quote form. Both are now recorded.",
     "observed_universe_size": 32,
