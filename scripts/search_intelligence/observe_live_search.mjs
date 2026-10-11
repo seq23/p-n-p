@@ -25,6 +25,10 @@ import {
   PROVIDER_UNAVAILABLE
 } from './lib/si_core.mjs';
 import { openRouterWebSearch, OPENROUTER_DEFAULT_MAX_RESULTS } from '../lib/openrouter_web_search.mjs';
+import { refuseUnlessPaidConfirmed } from '../llm/free_router.mjs';
+
+// Paid lane, off by owner policy (11 Oct 2026). Dispatch-only behind confirm_paid.
+refuseUnlessPaidConfirmed('grounded search observation (scripts/search_intelligence/observe_live_search.mjs)');
 
 const contract = loadContract();
 const providerCfg = contract.providers.grounded_search;

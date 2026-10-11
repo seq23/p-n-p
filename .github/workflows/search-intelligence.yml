@@ -29,6 +29,10 @@ on:
         description: "Run the grounded search observation lane (requires the OPENROUTER_API_KEY secret)"
         type: boolean
         default: false
+      confirm_paid:
+        description: "Paid lane, off by owner policy (11 Oct 2026). The grounded observation bills per web result; it runs only when this is true."
+        type: boolean
+        default: false
       grounded_call_budget:
         description: "Number of queries to observe. OpenRouter's web plugin bills per result, so this is the spend dial: 0 makes no calls and the lane reports NOT_RUN_NO_CALL_BUDGET."
         required: false
@@ -107,9 +111,14 @@ jobs:
       # That plugin bills per result, so spend is explicit: the lane makes no calls
       # at all unless a budget is authorised here, and it reports
       # NOT_RUN_NO_CALL_BUDGET rather than a green zero when it is not.
+      - name: Refuse the paid grounded observation (named stop)
+        if: ${{ inputs.run_grounded_observation && !inputs.confirm_paid }}
+        run: echo "NAMED STOP PAID_LANE_REFUSED - grounded search observation is disabled by owner policy (11 Oct 2026). Re-dispatch with confirm_paid=true to run it once."
+
       - name: Run grounded search observation
-        if: ${{ inputs.run_grounded_observation }}
+        if: ${{ inputs.run_grounded_observation && inputs.confirm_paid }}
         env:
+          CONFIRM_PAID: ${{ inputs.confirm_paid }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           SEARCH_INTELLIGENCE_ALLOW_PAID_SPEND: "true"
           SEARCH_INTELLIGENCE_DAILY_CALL_BUDGET: ${{ inputs.grounded_call_budget }}

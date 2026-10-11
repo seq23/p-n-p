@@ -10,6 +10,7 @@ This is the required structural/repository release gate. It does not claim live 
 
 | Validator / Test | Command | Severity | What It Proves |
 |---|---|---:|---|
+| Zero paid LLM (owner policy 2026-10-11) | `npm run validate:zero-paid-llm` | HARD FAIL | config/llm_routing.json lists only $0 models with a snapshot date and max_cost_usd 0; no model/provider call outside scripts/llm/free_router.mjs or a declared paid lane; no scheduled workflow reaches a paid lane; paid lanes are dispatch-only behind confirm_paid and refuse without it; router never falls back to paid and fails on a reported cost |
 | Static/public site integrity | `npm run validate:pnp-phase` | HARD FAIL | Required files, metadata, internal links, sitemap coverage, legal identity, queue/manifest integrity, and validator purity remain intact |
 | 100K fanout integrity | `npm run validate:max-fanout` | HARD FAIL | Exactly 100K unique planning queries, valid compressed shards, declared service-area geography only, and no page-quota conflation |
 | Authority lifecycle | `npm run validate:authority-scale` | HARD FAIL | Operational window/backlog exist, Twin is disabled, admitted/frozen counts align, no unauthorized frozen drift, and starting velocity law is intact |

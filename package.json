@@ -106,7 +106,7 @@
     "validate:pnp-phase": "npm run validate:contact-surface && npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:no-instruction-leak && npm run validate:no-empty-cells && npm run validate:retrofit-integrity && npm run validate:canonical-resolves && npm run validate:content-pattern && npm run validate:all && npm run validate:atlas-units",
     "validate:profile-purity": "node scripts/validation/validate_profile_purity.js",
     "validate:query-atlas": "node scripts/atlas/validate_query_atlas.mjs",
-    "validate:release": "npm run validate:pnp-phase && npm run validate:max-fanout && npm run validate:authority-scale && npm run validate:kpi-truth && npm run validate:yield && npm run validate:page-quality && npm run validate:improvements && npm run validate:territories && npm run validate:distribution-contract && npm run validate:search-intelligence && npm run validate:workflow-lanes && npm run validate:provider-transport && npm run validate:cadence-policy && npm run validate:cadence-ledger-identity && npm run validate:evidence-openness && npm run validate:operator-doc-currency && npm run validate:content-pattern-reaches-plan && npm run validate:backlog-reaches-builder && npm run validate:sitemap-lastmod && npm run validate:publication-freeze && npm run validate:index-coverage && npm run validate:site-icons && npm run validate:homepage-definition && npm run validate:engine-key-file && npm run validate:sitemap-registration",
+    "validate:release": "npm run validate:zero-paid-llm && npm run validate:pnp-phase && npm run validate:max-fanout && npm run validate:authority-scale && npm run validate:kpi-truth && npm run validate:yield && npm run validate:page-quality && npm run validate:improvements && npm run validate:territories && npm run validate:distribution-contract && npm run validate:search-intelligence && npm run validate:workflow-lanes && npm run validate:provider-transport && npm run validate:cadence-policy && npm run validate:cadence-ledger-identity && npm run validate:evidence-openness && npm run validate:operator-doc-currency && npm run validate:content-pattern-reaches-plan && npm run validate:backlog-reaches-builder && npm run validate:sitemap-lastmod && npm run validate:publication-freeze && npm run validate:index-coverage && npm run validate:site-icons && npm run validate:homepage-definition && npm run validate:engine-key-file && npm run validate:sitemap-registration",
     "validate:retrofit-integrity": "node scripts/validators/validate_retrofit_integrity.js",
     "validate:index-coverage": "node scripts/validators/validate_index_coverage.mjs",
     "validate:site-icons": "node scripts/validators/validate_site_icons.mjs",
@@ -122,6 +122,8 @@
     "validate:tree-hygiene": "node scripts/validation/validate_tree_hygiene.js",
     "validate:workflow-lanes": "node scripts/validation/validate_workflow_lane_integrity.js",
     "validate:yield": "node scripts/authority_scale/validate_citation_yield_feedback.mjs",
-    "search:selftest:gsc-truth": "node scripts/search_intelligence/selftest_gsc_truth.mjs"
+    "search:selftest:gsc-truth": "node scripts/search_intelligence/selftest_gsc_truth.mjs",
+    "llm:check": "node scripts/llm/free_router.mjs --check --ping",
+    "validate:zero-paid-llm": "node scripts/llm/validate_zero_paid_llm.mjs"
   }
 }

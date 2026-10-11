@@ -37,6 +37,10 @@ import {
   OPENROUTER_DEFAULT_MODEL,
   OPENROUTER_DEFAULT_MAX_RESULTS,
 } from './lib/openrouter_web_search.mjs';
+import { refuseUnlessPaidConfirmed } from './llm/free_router.mjs';
+
+// Paid lane, off by owner policy (11 Oct 2026). Dispatch-only behind confirm_paid.
+refuseUnlessPaidConfirmed('citation probe (scripts/llm_citation_probe.mjs)');
 
 const ROOT = process.cwd();
 const argv = process.argv.slice(2);
