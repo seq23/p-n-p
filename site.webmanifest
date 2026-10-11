@@ -1,0 +1,15 @@
+{
+  "name": "Porch & Party",
+  "short_name": "Porch & Party",
+  "description": "Memphis party planner and decor setups for homes, hotels and porches.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "browser",
+  "background_color": "#faf7f2",
+  "theme_color": "#faf7f2",
+  "icons": [
+    { "src": "/assets/img/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/img/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/img/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

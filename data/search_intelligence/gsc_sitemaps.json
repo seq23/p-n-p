@@ -1,0 +1,52 @@
+{
+  "schema_version": "1.0",
+  "collected_at": "2026-10-11T13:02:42.492551+00:00",
+  "site": "sc-domain:porchandparty901.com",
+  "sitemap_url": "https://porchandparty901.com/sitemap.xml",
+  "state": "REGISTERED",
+  "submitted_this_run": false,
+  "listed_before": true,
+  "listed_after": true,
+  "list_before": {
+    "sitemap": [
+      {
+        "path": "https://porchandparty901.com/sitemap.xml",
+        "lastSubmitted": "2026-10-11T04:05:49.882Z",
+        "isPending": true,
+        "isSitemapsIndex": false,
+        "type": "sitemap",
+        "lastDownloaded": "2026-10-09T15:47:43.208Z",
+        "warnings": "0",
+        "errors": "0",
+        "contents": [
+          {
+            "type": "web",
+            "submitted": "114",
+            "indexed": "0"
+          }
+        ]
+      }
+    ]
+  },
+  "list_after": {
+    "sitemap": [
+      {
+        "path": "https://porchandparty901.com/sitemap.xml",
+        "lastSubmitted": "2026-10-11T04:05:49.882Z",
+        "isPending": true,
+        "isSitemapsIndex": false,
+        "type": "sitemap",
+        "lastDownloaded": "2026-10-09T15:47:43.208Z",
+        "warnings": "0",
+        "errors": "0",
+        "contents": [
+          {
+            "type": "web",
+            "submitted": "114",
+            "indexed": "0"
+          }
+        ]
+      }
+    ]
+  }
+}

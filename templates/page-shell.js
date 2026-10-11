@@ -1,5 +1,6 @@
 const offers = require('../data/offers/services.json');
 const contactSurface = require('../scripts/lib/contact_surface');
+const siteIcons = require('../scripts/lib/site_icons');
 const areas = require('../data/service_areas/areas.json');
 
 const fs = require('fs');
@@ -347,6 +348,7 @@ function renderPage(entry) {
   <meta name="twitter:description" content="${entry.description}" />
   <meta name="twitter:image" content="${socialImage.url}" />
   <meta name="theme-color" content="#faf7f2" />
+  ${siteIcons.HEAD_ICON_LINKS}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">

@@ -3,7 +3,7 @@
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
   "gsc_window": "2026-09-11..2026-10-08",
-  "coverage_collected_at": "2026-10-11T04:02:56.487715+00:00",
+  "coverage_collected_at": "2026-10-11T13:02:42.257361+00:00",
   "url_count": 116,
   "roles": {
     "candidate": 87,
@@ -990,7 +990,7 @@
       "role": "root",
       "impressions_28d": 66,
       "clicks_28d": 0,
-      "word_count": 1221,
+      "word_count": 1278,
       "coverage_state": "Submitted and indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
