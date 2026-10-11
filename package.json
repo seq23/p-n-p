@@ -104,12 +104,13 @@
     "validate:query-atlas": "node scripts/atlas/validate_query_atlas.mjs",
     "validate:release": "npm run validate:pnp-phase && npm run validate:max-fanout && npm run validate:authority-scale && npm run validate:kpi-truth && npm run validate:yield && npm run validate:page-quality && npm run validate:improvements && npm run validate:territories && npm run validate:distribution-contract && npm run validate:search-intelligence && npm run validate:workflow-lanes && npm run validate:provider-transport && npm run validate:cadence-policy && npm run validate:cadence-ledger-identity && npm run validate:evidence-openness && npm run validate:operator-doc-currency && npm run validate:content-pattern-reaches-plan && npm run validate:backlog-reaches-builder",
     "validate:retrofit-integrity": "node scripts/validators/validate_retrofit_integrity.js",
-    "validate:search-intelligence": "node scripts/search_intelligence/validate_search_intelligence.mjs",
+    "validate:search-intelligence": "node scripts/search_intelligence/validate_search_intelligence.mjs && node scripts/search_intelligence/selftest_gsc_truth.mjs && npm run search:proof",
     "validate:sitemap-coverage": "node scripts/validation/validate_sitemap_coverage.js",
     "validate:url-rule-single-source": "node scripts/validators/validate_url_rule_single_source.js",
     "validate:territories": "node scripts/authority_scale/validate_territory_health.mjs",
     "validate:tree-hygiene": "node scripts/validation/validate_tree_hygiene.js",
     "validate:workflow-lanes": "node scripts/validation/validate_workflow_lane_integrity.js",
-    "validate:yield": "node scripts/authority_scale/validate_citation_yield_feedback.mjs"
+    "validate:yield": "node scripts/authority_scale/validate_citation_yield_feedback.mjs",
+    "search:selftest:gsc-truth": "node scripts/search_intelligence/selftest_gsc_truth.mjs"
   }
 }
