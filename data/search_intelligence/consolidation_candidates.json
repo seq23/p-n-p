@@ -3,7 +3,7 @@
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
   "gsc_window": "2026-09-11..2026-10-08",
-  "coverage_collected_at": "2026-10-11T03:29:05.286122+00:00",
+  "coverage_collected_at": "2026-10-11T04:02:56.487715+00:00",
   "url_count": 116,
   "roles": {
     "candidate": 87,
@@ -34,7 +34,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 478,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -45,7 +45,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 481,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/baby-shower-decor-memphis",
       "fold_rule": "/baby-shower|gender-reveal/"
     },
@@ -56,7 +56,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 480,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -67,7 +67,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 470,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -78,7 +78,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 380,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -89,7 +89,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 478,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/bridal-shower-decor-memphis",
       "fold_rule": "/bridal|bachelorette/"
     },
@@ -100,7 +100,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 367,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
       "fold_rule": "/planner|planning|event-management/"
     },
@@ -111,7 +111,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 353,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -122,7 +122,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 463,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/christmas-porch-decorating",
       "fold_rule": "/christmas|holiday/"
     },
@@ -133,7 +133,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 488,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -144,7 +144,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 468,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -155,7 +155,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 479,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/budget-party-decor-memphis",
       "fold_rule": "/budget|under-|cheap|diy/"
     },
@@ -166,7 +166,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 445,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -177,7 +177,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 471,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -188,7 +188,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 491,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -199,7 +199,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 349,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/fall-porch-decorating",
       "fold_rule": "/fall|halloween|autumn|thanksgiving|pumpkin/"
     },
@@ -210,7 +210,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 362,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -221,7 +221,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 397,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/bridal-shower-decor-memphis",
       "fold_rule": "/bridal|bachelorette/"
     },
@@ -232,7 +232,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 497,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -243,7 +243,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 453,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/fall-porch-decorating",
       "fold_rule": "/fall|halloween|autumn|thanksgiving|pumpkin/"
     },
@@ -254,7 +254,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 455,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -265,7 +265,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 474,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -276,7 +276,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 480,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -287,7 +287,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 348,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -298,7 +298,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 495,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -309,7 +309,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 472,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -320,7 +320,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 473,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -331,7 +331,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 351,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -342,7 +342,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 352,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -353,7 +353,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 507,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -364,7 +364,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 1467,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -375,7 +375,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 507,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -386,7 +386,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 477,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -397,7 +397,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 370,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
       "fold_rule": "/planner|planning|event-management/"
     },
@@ -408,7 +408,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 502,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
       "fold_rule": "/planner|planning|event-management/"
     },
@@ -419,7 +419,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 363,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -430,7 +430,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 474,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -441,7 +441,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 478,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -452,7 +452,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 383,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -463,7 +463,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 360,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/small-porch-decorating",
       "fold_rule": "/small-porch|apartment|townhome/"
     },
@@ -474,7 +474,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 370,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -485,7 +485,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 345,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -496,7 +496,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 396,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -507,7 +507,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 348,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -518,7 +518,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 396,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -529,7 +529,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 348,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -540,7 +540,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 396,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -551,7 +551,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 410,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -562,7 +562,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 344,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -573,7 +573,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 396,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -584,7 +584,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 779,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -595,7 +595,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 349,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -606,7 +606,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 396,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -617,7 +617,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 359,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -628,7 +628,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 404,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -639,7 +639,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 348,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -650,7 +650,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 341,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -661,7 +661,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 510,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -672,7 +672,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 500,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
       "fold_rule": "/planner|planning|event-management/"
     },
@@ -683,7 +683,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 447,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -694,7 +694,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 465,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/budget-party-decor-memphis",
       "fold_rule": "/budget|under-|cheap|diy/"
     },
@@ -705,7 +705,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 845,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -716,7 +716,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 298,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -727,7 +727,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 431,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -738,7 +738,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 416,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -749,7 +749,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 416,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -760,7 +760,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 428,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/baby-shower-decor-memphis",
       "fold_rule": "/baby-shower|gender-reveal/"
     },
@@ -771,7 +771,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 415,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/bridal-shower-decor-memphis",
       "fold_rule": "/bridal|bachelorette/"
     },
@@ -782,7 +782,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 358,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -793,7 +793,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 405,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -804,7 +804,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 403,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -815,7 +815,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 426,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -826,7 +826,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 441,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -837,7 +837,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 415,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -848,7 +848,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 972,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -859,7 +859,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 443,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -870,7 +870,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 842,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/baby-shower-decor-memphis",
       "fold_rule": "/baby-shower|gender-reveal/"
     },
@@ -881,7 +881,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 433,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -892,7 +892,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 461,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -903,7 +903,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 971,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/christmas-porch-decorating",
       "fold_rule": "/christmas|holiday/"
     },
@@ -914,7 +914,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 679,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -925,7 +925,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 1205,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
       "fold_rule": "/planner|planning|event-management/"
     },
@@ -936,7 +936,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 1149,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
       "fold_rule": "/planner|planning|event-management/"
     },
@@ -947,7 +947,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 474,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -958,7 +958,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 460,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -969,7 +969,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 485,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -980,7 +980,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 421,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -991,7 +991,7 @@
       "impressions_28d": 66,
       "clicks_28d": 0,
       "word_count": 1221,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Submitted and indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1002,7 +1002,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 448,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -1013,7 +1013,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 445,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
       "fold_rule": "/grazing|charcuterie|corporate/"
     },
@@ -1024,7 +1024,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 447,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -1035,7 +1035,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 346,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1046,7 +1046,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 432,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -1057,7 +1057,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 399,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1068,7 +1068,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 125,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1079,7 +1079,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 404,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/christmas-porch-decorating",
       "fold_rule": "/christmas|holiday/"
     },
@@ -1090,7 +1090,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 395,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/fall-porch-decorating",
       "fold_rule": "/fall|halloween|autumn|thanksgiving|pumpkin/"
     },
@@ -1101,7 +1101,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 416,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1112,7 +1112,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 448,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1123,7 +1123,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 1388,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1134,7 +1134,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 426,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1145,7 +1145,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 443,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1156,7 +1156,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 436,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1167,7 +1167,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 422,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1178,7 +1178,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 307,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1189,7 +1189,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 313,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1200,7 +1200,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 313,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1211,7 +1211,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 366,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1222,7 +1222,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 449,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1233,7 +1233,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 451,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1244,7 +1244,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 1014,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1255,7 +1255,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 436,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1266,7 +1266,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 341,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1277,7 +1277,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 446,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1288,7 +1288,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 314,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1299,7 +1299,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 138,
-      "coverage_state": "NOT_INSPECTED",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     }
