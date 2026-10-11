@@ -19,7 +19,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { CONTACT: C, MARK, PRIORITY_PAGES } = require('../lib/contact_surface');
+const { CONTACT: C, MARK, PRIORITY_PAGES, BUSINESS_TYPES, PRIMARY_ROUTE } = require('../lib/contact_surface');
 const { publishedPages } = require('../install_contact_surface');
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -49,6 +49,7 @@ function walk(node, rel) {
     if (node.telephone !== C.telephone) fail(`${rel}: LocalBusiness telephone is ${JSON.stringify(node.telephone)}`);
     if (node.hasMap !== C.googleBusinessProfileUrl) fail(`${rel}: LocalBusiness hasMap is ${JSON.stringify(node.hasMap)}`);
     if (![].concat(node.sameAs || []).includes(C.googleBusinessProfileUrl)) fail(`${rel}: LocalBusiness sameAs lacks the Google listing`);
+    for (const t of BUSINESS_TYPES) if (![].concat(node.additionalType || []).includes(t)) fail(`${rel}: LocalBusiness additionalType lacks ${t}`);
   }
   Object.values(node).forEach((v) => walk(v, rel));
 }
@@ -59,6 +60,10 @@ for (const rel of pages) {
   if (html.indexOf('<footer') < 0 || !footer.includes(MARK.footer) || !footer.includes(TEL) || !footer.includes(GBP)) fail(`${rel}: footer lacks the tel: link or the Google listing link`);
   const header = (html.match(/<header[\s\S]*?<\/header>/) || [''])[0];
   if (header && !(header.includes(MARK.header) && header.includes(TEL))) fail(`${rel}: header lacks the call/text link`);
+  const routeHref = `href="${PRIMARY_ROUTE.href}"`;
+  const siteNav = (html.match(/<nav\b[^>]*class="site-nav"[^>]*>[\s\S]*?<\/nav>/) || [''])[0];
+  if (header && !(siteNav.includes(MARK.navRoute) && siteNav.includes(routeHref))) fail(`${rel}: primary nav lacks the ${PRIMARY_ROUTE.navLabel} link`);
+  if (!(footer.includes(MARK.footerRoute) && footer.includes(routeHref))) fail(`${rel}: footer lacks the ${PRIMARY_ROUTE.footerLabel} link`);
   for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
     try { walk(JSON.parse(m[1]), rel); } catch (e) { fail(`${rel}: unparseable JSON-LD (${e.message})`); }
   }
@@ -78,10 +83,11 @@ for (const p of PRIORITY_PAGES) {
   else if (!html.includes(TEL)) fail(`priority page ${p.href} lacks the tel: link`);
 }
 
+if (!read(`${PRIMARY_ROUTE.href.replace(/^\//, '')}.html`)) fail(`primary route ${PRIMARY_ROUTE.href} has no published file`);
 if (errors.length) {
   console.error(`contact-surface: FAIL (${errors.length})`);
   errors.slice(0, 25).forEach((e) => console.error(`  - ${e}`));
   console.error('  repair: npm run contact:install');
   process.exit(1);
 }
-console.log(`contact-surface: OK - ${pages.length} pages carry tel: + Google listing; ${lbNodes} LocalBusiness nodes carry telephone/hasMap/sameAs; ${PRIORITY_PAGES.length} priority pages linked from home and contact`);
+console.log(`contact-surface: OK - ${pages.length} pages carry tel: + Google listing + the ${PRIMARY_ROUTE.href} nav/footer link; ${lbNodes} LocalBusiness nodes carry telephone/hasMap/sameAs/additionalType; ${PRIORITY_PAGES.length} priority pages linked from home and contact`);

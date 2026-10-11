@@ -14,7 +14,9 @@ concurrency:
 
 jobs:
   authority-cycle:
-    timeout-minutes: 11  # ~3x median 3.4m over 8 green runs; fault detector, not a budget
+    # ~3x median 3.4m over 8 green runs, plus ~2-3 min for URL Inspection of every
+    # sitemap URL (added 2026-10-10, ~1 s per call). Fault detector, not a budget.
+    timeout-minutes: 16
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -78,7 +80,23 @@ jobs:
           GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
         run: |
           npm run search:gsc:collect
+          # Targets are rebuilt from the measured export (2026-10-10), so the truth
+          # stage reads targets measured in this same run.
+          npm run search:targets
           npm run search:truth
+
+      # Index coverage for every sitemap URL (URL Inspection API, under the
+      # 2,000/day property quota). A missing secret or a 403 is a NAMED STOP line
+      # with the owner step and exit 0, never a red cycle; the file still counts
+      # every URL, as NOT_INSPECTED where the API could not be reached.
+      - name: Measure index coverage
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+          GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+        run: |
+          npm run search:index-coverage
+          # The consolidation ledger reads impressions + coverage; no redirects.
+          npm run search:consolidation
 
       - name: Score the ingested queries for openness and lead intent
         run: npm run queries:score-discovery-gap
@@ -95,7 +113,8 @@ jobs:
         run: |
           git config user.name "pnp-authority-bot"
           git config user.email "actions@users.noreply.github.com"
-          git add data/queries/evidence/evidence_queries.json data/authority_scale/query_atlas.json data/search_intelligence/gsc_truth.json
+          git add data/queries/evidence/evidence_queries.json data/authority_scale/query_atlas.json data/search_intelligence/gsc_truth.json data/search_intelligence/target_query_set.json data/search_intelligence/consolidation_candidates.json
+          if [ -f data/search_intelligence/index_coverage.json ]; then git add data/search_intelligence/index_coverage.json; fi
           # The export exists only when Search Console answered; a NAMED STOP writes none.
           if [ -f data/search_intelligence/gsc_search_analytics_export.json ]; then git add data/search_intelligence/gsc_search_analytics_export.json; fi
           if git diff --cached --quiet; then
