@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-10-11T02:40:27.144Z",
+  "generated_at": "2026-10-11T03:02:34.530Z",
   "enforcement": "block",
   "pages_checked": 112,
   "status": "PASS",
@@ -129,7 +129,7 @@
     }
   ],
   "spec_producer_parity": {
-    "generator_sources_scanned": 68,
+    "generator_sources_scanned": 69,
     "blocks_in_spec": 10,
     "blocks_required_of_this_repo": 9,
     "orphan_blocks": [],
