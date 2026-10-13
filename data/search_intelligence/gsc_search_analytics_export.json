@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-09-12",
-  "end_date": "2026-10-09",
-  "collected_at": "2026-10-12T15:17:55.927720+00:00",
+  "start_date": "2026-09-13",
+  "end_date": "2026-10-10",
+  "collected_at": "2026-10-13T15:16:39.205901+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -214,6 +214,15 @@
     }
   ],
   "by_page": [
+    {
+      "keys": [
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 14
+    },
     {
       "keys": [
         "https://www.porchandparty901.com/"
@@ -448,7 +457,7 @@
   ],
   "counts": {
     "by_query": 22,
-    "by_page": 1,
+    "by_page": 2,
     "by_query_page": 22
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
