@@ -1,0 +1,20 @@
+# Cloudflare Pages config for porchandparty901.com (Pages project "p-n-p", Git-connected).
+# The static site is assembled into .pages-output by scripts/assemble_pages_output.js;
+# functions/ serves the invoicing console at /admin and /api/admin/* (docs/admin-console.md).
+# Secrets are set on the project, never here: PNP_ADMIN_PASSWORD, PNP_ADMIN_SESSION_KEY,
+# GOOGLE_SA_JSON. Declaring this file makes it the source of truth for bindings and vars.
+name = "p-n-p"
+pages_build_output_dir = ".pages-output"
+compatibility_date = "2026-03-22"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "pnp-admin"
+database_id = "a78e157d-177d-44a0-9418-dcfa6e735bd0"
+migrations_dir = "migrations"
+
+# Pages cannot hold a send_email binding, so mail goes through the private
+# pnp-mailer Worker (workers/pnp-mailer), which holds it. No public route.
+[[services]]
+binding = "MAILER"
+service = "pnp-mailer"

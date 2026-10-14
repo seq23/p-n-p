@@ -16,3 +16,7 @@ tmp/
 # with `git add -A`, so bytecode caches must never be picked up.
 __pycache__/
 *.pyc
+
+# wrangler pages dev / local D1 state for the /admin console (npm run admin:dev).
+.wrangler/
+.dev.vars

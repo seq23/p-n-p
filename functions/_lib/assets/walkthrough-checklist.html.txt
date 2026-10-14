@@ -1,0 +1,271 @@
+<title>Porch & Party Walk-Through Checklist</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Great+Vibes&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: four letter-size print pages in the site's own palette. Page 1 every job, page 2 party decor, page 3 porch decor, page 4 rentals plus the quote and close for every job. Lined note blocks everywhere. Single light theme by choice: it is a print form. */
+:root{--bg:#faf7f2;--card:#fffdf9;--ink:#3b302a;--muted:#7a6a5f;--accent:#c46e4e;--rose:#c98f8a;--line:rgba(59,48,42,.18);--rule:rgba(59,48,42,.22);
+--script:"Great Vibes",cursive;--serif:"Cormorant Garamond",Georgia,serif;--sans:"Inter",system-ui,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:12.5px;line-height:1.45;padding-block:24px;padding-inline:16px}
+.page{max-width:8.5in;min-height:10.6in;margin:0 auto 20px;background:var(--card);border:1px solid var(--line);padding:26px 34px;display:flex;flex-direction:column}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid var(--rose);padding-bottom:8px;margin-bottom:12px;flex-wrap:wrap}
+.brand{font-family:var(--script);font-size:34px;color:var(--rose);line-height:1}
+.title{font-family:var(--serif);font-size:20px;font-weight:600;margin:0}
+.sub{color:var(--muted);font-size:11px;text-align:right}
+.pageno{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+h2{font-family:var(--serif);font-size:17px;font-weight:600;margin:12px 0 6px;color:var(--accent);break-after:avoid}
+h2 small{font-family:var(--sans);font-size:10.5px;color:var(--muted);font-weight:500;letter-spacing:.04em;text-transform:uppercase;margin-left:8px}
+.grid{display:grid;gap:8px 18px;grid-template-columns:1fr 1fr}
+.grid.three{grid-template-columns:1fr 1fr 1fr}
+.f{display:flex;flex-direction:column;gap:2px;min-width:0}
+.f label{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.f .w{border-bottom:1px solid var(--rule);height:20px}
+.f .w.tall{height:44px}
+ul.ck{list-style:none;margin:0;padding:0;columns:2;column-gap:22px}
+ul.ck.one{columns:1}
+ul.ck li{break-inside:avoid;display:flex;gap:8px;align-items:flex-start;padding:3px 0}
+ul.ck li::before{content:"";flex:none;width:12px;height:12px;border:1.5px solid var(--ink);border-radius:3px;margin-top:2px}
+.note{background:var(--bg);border-left:3px solid var(--accent);padding:6px 10px;font-size:11.5px;margin:6px 0}
+.lines{flex:1;min-height:120px;margin-top:4px;background:repeating-linear-gradient(to bottom,transparent 0,transparent 23px,var(--rule) 23px,var(--rule) 24px);border-bottom:0}
+.lines.fixed{flex:none}
+.lines.h3{min-height:72px}.lines.h6{min-height:144px}.lines.h9{min-height:216px}.lines.h12{min-height:288px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:5px 6px;border-bottom:1px solid var(--line)}
+th{font-size:10.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+td.blank{min-width:70px}
+.foot{margin-top:auto;padding-top:8px;border-top:1px solid var(--line);color:var(--muted);font-size:10.5px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.skip{font-size:11px;color:var(--muted);font-style:italic;margin:0 0 6px}
+@media print{body{background:#fff;padding:0;font-size:11.5px;line-height:1.35}.page{border:0;padding:0;max-width:none;min-height:0;margin:0;break-after:page;height:9.85in;overflow:hidden}.page:last-child{break-after:auto}.lines{min-height:48px}.lines.h3{min-height:48px}h2{margin:8px 0 4px;font-size:15.5px}.f .w{height:17px}.f .w.tall{height:36px}ul.ck li{padding:2px 0}th,td{padding:3px 6px}.brand{font-size:28px}header{margin-bottom:8px}@page{size:letter;margin:.5in}}
+@media (max-width:560px){.grid,.grid.three{grid-template-columns:1fr}ul.ck{columns:1}}
+</style>
+
+<!-- PAGE 1: every job -->
+<section class="page">
+  <header>
+    <div><div class="brand">Porch &amp; Party</div><p class="title">Walk-Through &amp; Quote Checklist</p></div>
+    <div class="sub"><div class="pageno">Page 1 of 4 · Every job</div>Memphis · hello@porchandparty901.com</div>
+  </header>
+
+  <h2>Before you leave</h2>
+  <ul class="ck">
+    <li>Request form read, ID matched to name and date of birth</li>
+    <li>Social link opened, looks like a real person</li>
+    <li>Address confirmed by text; parking and gate code asked</li>
+    <li>Phone charged, this packet, pen, tape measure</li>
+    <li>Price floor decided before you arrive (page 4)</li>
+    <li>Someone knows where you are and when you'll be done</li>
+  </ul>
+
+  <h2>Customer</h2>
+  <div class="grid three">
+    <div class="f"><label>Name</label><div class="w"></div></div>
+    <div class="f"><label>Phone</label><div class="w"></div></div>
+    <div class="f"><label>Email</label><div class="w"></div></div>
+    <div class="f"><label>Event address</label><div class="w"></div></div>
+    <div class="f"><label>Event date</label><div class="w"></div></div>
+    <div class="f"><label>Start time / guests arrive</label><div class="w"></div></div>
+    <div class="f"><label>Occasion</label><div class="w"></div></div>
+    <div class="f"><label>Guest of honor (name, age)</label><div class="w"></div></div>
+    <div class="f"><label>Surprise? Who can't know</label><div class="w"></div></div>
+    <div class="f"><label>Guests (about)</label><div class="w"></div></div>
+    <div class="f"><label>How they found us</label><div class="w"></div></div>
+    <div class="f"><label>Best way to reach them on the day</label><div class="w"></div></div>
+  </div>
+
+  <h2>What this job is <small>tick all that apply, fill the matching page</small></h2>
+  <ul class="ck three" style="columns:3">
+    <li>Party / event decor → page 2</li>
+    <li>Porch decor → page 3</li>
+    <li>Game rentals → page 4</li>
+  </ul>
+
+  <h2>The look</h2>
+  <div class="grid">
+    <div class="f"><label>Colors (exact shades, show samples on phone)</label><div class="w"></div></div>
+    <div class="f"><label>Theme / vibe in their words</label><div class="w"></div></div>
+    <div class="f"><label>Must-haves</label><div class="w tall"></div></div>
+    <div class="f"><label>Absolutely not (colors, items, allergies, pets)</label><div class="w tall"></div></div>
+    <div class="f"><label>Inspiration photos? (ask them to text 2–3)</label><div class="w"></div></div>
+    <div class="f"><label>Things they own that we should use</label><div class="w"></div></div>
+  </div>
+
+  <h2>Notes <small>first impressions, what they said twice, what they care about most</small></h2>
+  <div class="lines"></div>
+
+  <div class="foot"><span>ID and social are checked for safety only and deleted after the event.</span><span>Porch &amp; Party · Memphis</span></div>
+</section>
+
+<!-- PAGE 2: party / event decor -->
+<section class="page">
+  <header>
+    <div><div class="brand">Porch &amp; Party</div><p class="title">Party &amp; Event Decor</p></div>
+    <div class="sub"><div class="pageno">Page 2 of 4 · Party decor only</div>Leave blank if this job has no party decor</div>
+  </header>
+
+  <h2>The room or venue</h2>
+  <ul class="ck">
+    <li>Walk every area they want decorated, in order</li>
+    <li>Measure the main wall / backdrop spot (W × H)</li>
+    <li>Measure the table(s) for grazing or dessert</li>
+    <li>Photos: wide shot, each wall, ceiling, floor, entry</li>
+    <li>Ceiling height; what can be hung and from what</li>
+    <li>Walls: tape ok? hooks? nothing?</li>
+    <li>Power outlets near the setup (lights, music)</li>
+    <li>Furniture to move, and who moves it</li>
+    <li>Lighting at party time (daylight, lamps, dim?)</li>
+    <li>Pets, kids, smokers, candles allowed?</li>
+    <li>Hotel: room number, check-in time, front desk aware?</li>
+    <li>Venue: load-in rules, elevator, setup window limits</li>
+  </ul>
+  <div class="grid three">
+    <div class="f"><label>Main wall / backdrop W × H</label><div class="w"></div></div>
+    <div class="f"><label>Table sizes</label><div class="w"></div></div>
+    <div class="f"><label>Ceiling height</label><div class="w"></div></div>
+    <div class="f"><label>Where we park / carry in</label><div class="w"></div></div>
+    <div class="f"><label>Who lets us in</label><div class="w"></div></div>
+    <div class="f"><label>Setup window (arrive / done by)</label><div class="w"></div></div>
+  </div>
+
+  <h2>Pieces they want <small>circle, then price on page 4</small></h2>
+  <ul class="ck">
+    <li>Balloon garland / arch</li>
+    <li>Backdrop + sign / name</li>
+    <li>Table styling, runner, centerpieces</li>
+    <li>Grazing table styling (food sourced separately)</li>
+    <li>Dessert or cake table</li>
+    <li>Bed / hotel-room romantic setup</li>
+    <li>Florals (fresh or silk)</li>
+    <li>Lighting, candles (LED), string lights</li>
+    <li>Entry or door moment for arrivals</li>
+    <li>Favors, place cards, menu cards</li>
+    <li>Kids' corner / activity table</li>
+    <li>Takedown afterwards (starts at $75) — date / time:</li>
+  </ul>
+
+  <h2>Notes &amp; sketch <small>layout, where each piece goes, sizes, anything promised</small></h2>
+  <div class="lines"></div>
+  <div class="foot"><span>Party decor from $300. Takedown starts at $75, quoted with the setup.</span><span>Page 2 of 4</span></div>
+</section>
+
+<!-- PAGE 3: porch decor -->
+<section class="page">
+  <header>
+    <div><div class="brand">Porch &amp; Party</div><p class="title">Porch Decor</p></div>
+    <div class="sub"><div class="pageno">Page 3 of 4 · Porch decor only</div>Leave blank if this job has no porch work</div>
+  </header>
+
+  <h2>The porch</h2>
+  <ul class="ck">
+    <li>Photos: from the street, from the sidewalk, head-on, each side, the door</li>
+    <li>Measure porch W × D, door W × H, step count and width</li>
+    <li>Railing: style, height, can we tie / clip to it?</li>
+    <li>Columns or posts to wrap (how many, circumference)</li>
+    <li>Outdoor outlet? Distance from the door</li>
+    <li>Door color and hardware (wreath hook ok? magnets?)</li>
+    <li>Sun and wind: which way does the porch face?</li>
+    <li>Sprinklers, drainage, where water pools</li>
+    <li>HOA or landlord rules on decor, lights, signage</li>
+    <li>Pets or packages that could knock things over</li>
+    <li>Neighbors' line; nothing past the property edge</li>
+    <li>Keep walkway and door fully clear</li>
+  </ul>
+  <div class="grid three">
+    <div class="f"><label>Porch W × D</label><div class="w"></div></div>
+    <div class="f"><label>Door W × H</label><div class="w"></div></div>
+    <div class="f"><label>Steps (count × width)</label><div class="w"></div></div>
+    <div class="f"><label>Columns (count, size)</label><div class="w"></div></div>
+    <div class="f"><label>Railing length</label><div class="w"></div></div>
+    <div class="f"><label>Outlet (yes / no, where)</label><div class="w"></div></div>
+  </div>
+
+  <h2>Season &amp; pieces <small>circle, then price on page 4</small></h2>
+  <ul class="ck">
+    <li>Fall (pumpkins, mums, hay, lanterns)</li>
+    <li>Halloween (spooky or cute?)</li>
+    <li>Christmas / holiday (garland, wreath, lights, bows)</li>
+    <li>Celebration porch (birthday, welcome home, baby)</li>
+    <li>Wreath and door styling only</li>
+    <li>Lights: warm white / color, timer wanted?</li>
+    <li>Planters and florals (real or faux)</li>
+    <li>Signage, letters, a welcome sign</li>
+    <li>Install date / time window</li>
+    <li>Refresh visit mid-season?</li>
+    <li>Takedown (starts at $75) — date:</li>
+    <li>Keep or return items after the season?</li>
+  </ul>
+
+  <h2>Notes &amp; sketch <small>where each piece goes, what they said no to, promises made</small></h2>
+  <div class="lines"></div>
+  <div class="foot"><span>Seasonal porch decor from $350. Takedown starts at $75, quoted with the setup.</span><span>Page 3 of 4</span></div>
+</section>
+
+<!-- PAGE 4: rentals + quote & close -->
+<section class="page">
+  <header>
+    <div><div class="brand">Porch &amp; Party</div><p class="title">Game Rentals · Quote &amp; Close</p></div>
+    <div class="sub"><div class="pageno">Page 4 of 4 · Rentals if any, quote &amp; close for every job</div>Delivery only: Memphis, Olive Branch, Southaven</div>
+  </header>
+
+  <h2>Game rentals <small>leave blank if none</small></h2>
+  <ul class="ck" style="columns:3">
+    <li>Giant Connect Four</li>
+    <li>Cornhole (2 sets)</li>
+    <li>Giant Tumble Tower</li>
+    <li>Giant Yard Pong</li>
+    <li>Ladder Toss</li>
+    <li>Giant Checkers</li>
+    <li>Giant Color Stack (2 sets)</li>
+    <li>Giant Uno</li>
+    <li>Grab the Mic</li>
+  </ul>
+  <div class="grid three">
+    <div class="f"><label>Day ($40 each) or weekend ($60 each)</label><div class="w"></div></div>
+    <div class="f"><label>Delivery date / time (by noon)</label><div class="w"></div></div>
+    <div class="f"><label>Pickup next day: morning / afternoon / evening</label><div class="w"></div></div>
+    <div class="f"><label>Indoor / outdoor; flat, dry spot?</label><div class="w"></div></div>
+    <div class="f"><label>Delivery city (Memphis / Olive Branch / Southaven)</label><div class="w"></div></div>
+    <div class="f"><label>Who receives the games (18+)</label><div class="w"></div></div>
+  </div>
+  <ul class="ck">
+    <li>Explained: no water, paint or glitter on the games; wiped between rentals</li>
+    <li>Explained: $50 damage deposit, refunded at pickup; $5 per missing piece</li>
+    <li>Explained: delivery $30 flat, free on orders of $150 or more</li>
+    <li>Explained: rain or storms reschedule free within 30 days</li>
+  </ul>
+
+  <h2>Quote worksheet <small>every job</small></h2>
+  <table>
+    <tr><th>Line</th><th>Notes</th><th style="text-align:right">Amount</th></tr>
+    <tr><td>Setup (party from $300 · porch from $350)</td><td class="blank"></td><td class="num blank"></td></tr>
+    <tr><td>Add-on</td><td class="blank"></td><td class="num blank"></td></tr>
+    <tr><td>Add-on</td><td class="blank"></td><td class="num blank"></td></tr>
+    <tr><td>Takedown (starts at $75)</td><td class="blank"></td><td class="num blank"></td></tr>
+    <tr><td>Games (×$40 day / ×$60 weekend; Pick 3 $110, Pick 5 $175, all 9 $275)</td><td class="blank"></td><td class="num blank"></td></tr>
+    <tr><td>Delivery ($30, free over $150)</td><td class="blank"></td><td class="num blank"></td></tr>
+    <tr><td><strong>Total</strong></td><td></td><td class="num blank"></td></tr>
+    <tr><td><strong>Deposit to hold the date (50%)</strong></td><td></td><td class="num blank"></td></tr>
+  </table>
+  <div class="grid three" style="margin-top:8px">
+    <div class="f"><label>Their budget (from the form)</label><div class="w"></div></div>
+    <div class="f"><label>My opening price</label><div class="w"></div></div>
+    <div class="f"><label>My floor (never below)</label><div class="w"></div></div>
+  </div>
+  <div class="note">If they push on price, take something out instead of lowering the number: fewer add-ons, a smaller area, they supply the balloons. Say the floor once, kindly, and stop talking.</div>
+
+  <h2>Close <small>every job</small></h2>
+  <ul class="ck">
+    <li>Agreed price written down and read back to them</li>
+    <li>Deposit: 50% by Zelle or Cash App, invoice sent today</li>
+    <li>Date is held only when the deposit lands</li>
+    <li>Cancellation: full refund up to 48 hours before</li>
+    <li>Weather: free reschedule within 30 days</li>
+    <li>Photos OK for our page? (note the answer)</li>
+  </ul>
+  <div class="grid">
+    <div class="f"><label>Agreed price / deposit / due date</label><div class="w"></div></div>
+    <div class="f"><label>Follow-ups I owe them (what, by when)</label><div class="w tall"></div></div>
+  </div>
+  <h2>Notes</h2>
+  <div class="lines h3 fixed"></div>
+  <div class="foot"><span>Keep this packet with the booking.</span><span>Page 4 of 4</span></div>
+</section>
