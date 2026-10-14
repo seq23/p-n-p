@@ -41,15 +41,10 @@ const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 const weekend = (n) => Math.round(n * data.weekendMultiplier * 100) / 100;
 const useLabel = (u) => (u === 'outdoor' ? 'Outdoor only' : 'Indoor or outdoor');
 
-// The two shared shell blocks, with Rentals added next to Pricing. Asserted
-// rather than assumed: if the shell markup moves, this refuses to render a
-// page whose nav silently lacks the link.
-function withRentalsLink(html, before, link) {
-  if (!html.includes(before)) throw new Error(`shell markup changed: cannot find ${before}`);
-  return html.replace(before, `${link}${before}`);
-}
-const header = withRentalsLink(nav(), '<a href="/pricing">Pricing</a>', '<a href="/rentals/" aria-current="page">Rentals</a>');
-const foot = withRentalsLink(footer(), '<a href="/pricing">Pricing</a>', '<a href="/rentals/">Party Game Rentals</a>');
+// The shared shell blocks. Rentals is in the canonical nav and footer
+// (scripts/lib/site_chrome.js), so the page needs no local additions.
+const header = nav('/rentals/');
+const foot = footer();
 
 const FAQ = [
   ['Where do you deliver party game rentals?',
@@ -155,6 +150,7 @@ function render() {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/styles.css" />
+  <link rel="stylesheet" href="/assets/css/site-nav.css" data-site-chrome="css" />
   ${jsonLd()}
 </head>
 <body>

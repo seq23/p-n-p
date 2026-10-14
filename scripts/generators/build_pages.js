@@ -72,6 +72,7 @@ const RETROFIT_MARKERS = [
   { marker: 'data-nav="related-pages"', wrote: 'scripts/build_related_navigation.js', is: 'the related-pages internal-link block' },
   { marker: 'data-retrofit=', wrote: 'scripts/retrofit_*.js', is: 'a retrofitted content block' },
   { marker: 'data-contact=', wrote: 'scripts/install_contact_surface.js', is: 'the phone / Google listing contact block' },
+  { marker: 'data-site-chrome=', wrote: 'scripts/install_site_chrome.js', is: 'the canonical site header / nav stylesheet' },
 ];
 
 const wouldLose = [];

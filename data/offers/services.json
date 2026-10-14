@@ -20,9 +20,8 @@
   },
   "primaryRoute": {
     "href": "/services/birthday-party-planner-memphis",
-    "navLabel": "Party Planning",
     "footerLabel": "Birthday Party Planner",
-    "why": "The page for the party-planner queries Search Console shows impressions for. scripts/lib/contact_surface.js puts it in the primary nav and footer of every page; validate:contact-surface asserts it."
+    "why": "The page for the party-planner queries Search Console shows impressions for. scripts/lib/contact_surface.js puts it in the footer of every page (owner ruling 2026-10-13: not in the header nav); validate:contact-surface asserts both."
   },
   "services": {
     "porch": {

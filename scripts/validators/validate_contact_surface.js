@@ -6,6 +6,8 @@
  *
  *   - every page: footer carries the tel: link and the Google Business Profile
  *     link; every page with a site header carries the header call link;
+ *   - every page: the footer links the primary route; the header never does
+ *     (owner ruling 2026-10-13);
  *   - every LocalBusiness JSON-LD node, nested ones included: telephone,
  *     hasMap = the GBP link, sameAs containing the GBP link;
  *   - contact.html: tel:, sms: and the GBP link in the page body;
@@ -61,8 +63,11 @@ for (const rel of pages) {
   const header = (html.match(/<header[\s\S]*?<\/header>/) || [''])[0];
   if (header && !(header.includes(MARK.header) && header.includes(TEL))) fail(`${rel}: header lacks the call/text link`);
   const routeHref = `href="${PRIMARY_ROUTE.href}"`;
-  const siteNav = (html.match(/<nav\b[^>]*class="site-nav"[^>]*>[\s\S]*?<\/nav>/) || [''])[0];
-  if (header && !(siteNav.includes(MARK.navRoute) && siteNav.includes(routeHref))) fail(`${rel}: primary nav lacks the ${PRIMARY_ROUTE.navLabel} link`);
+  const siteNav = (html.match(/<nav\b[^>]*class="site-nav[^"]*"[^>]*>[\s\S]*?<\/nav>/) || [''])[0];
+  // Owner ruling 2026-10-13: the planner page is a footer link, never a header
+  // nav item; the whole header (desktop row and mobile panel) must not carry it.
+  if (header && (header.includes(routeHref) || header.includes('data-nav-link="primary-route"'))) fail(`${rel}: header still links ${PRIMARY_ROUTE.href} (Party Planning was removed from the nav 2026-10-13)`);
+  if (header && !siteNav) fail(`${rel}: header has no primary site-nav`);
   if (!(footer.includes(MARK.footerRoute) && footer.includes(routeHref))) fail(`${rel}: footer lacks the ${PRIMARY_ROUTE.footerLabel} link`);
   for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
     try { walk(JSON.parse(m[1]), rel); } catch (e) { fail(`${rel}: unparseable JSON-LD (${e.message})`); }
@@ -90,4 +95,4 @@ if (errors.length) {
   console.error('  repair: npm run contact:install');
   process.exit(1);
 }
-console.log(`contact-surface: OK - ${pages.length} pages carry tel: + Google listing + the ${PRIMARY_ROUTE.href} nav/footer link; ${lbNodes} LocalBusiness nodes carry telephone/hasMap/sameAs/additionalType; ${PRIORITY_PAGES.length} priority pages linked from home and contact`);
+console.log(`contact-surface: OK - ${pages.length} pages carry tel: + Google listing + the ${PRIMARY_ROUTE.href} footer link (absent from every header); ${lbNodes} LocalBusiness nodes carry telephone/hasMap/sameAs/additionalType; ${PRIORITY_PAGES.length} priority pages linked from home and contact`);
