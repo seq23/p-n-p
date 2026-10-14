@@ -47,6 +47,19 @@ Two guards now exist:
 - `npm run validate:retrofit-integrity` (in `validate:pnp-phase`) hard-fails if
   any published page has lost either block by any other route.
 
+## Site navigation (header + footer Rentals link)
+
+One definition: `scripts/lib/site_chrome.js` (owner ruling 2026-10-13: Porch ·
+Celebrations · Grazing & Events · Rentals · Pricing · How It Works, then Request a
+Quote and Call or text; no Party Planning in the header). Styles:
+`assets/css/site-nav.css`. `templates/page-shell.js` renders it natively;
+`npm run chrome:install` (in `build:all`) puts it on every published page,
+frozen ones included: it proves each frozen change is chrome-only, thaws exactly
+those routes, refreezes, and restores the mutation scope. `npm run
+validate:site-chrome` (in `validate:pnp-phase`) fails when any page's header
+differs. To change the nav: edit `site_chrome.js` and the `RULED` list in the
+validator, then run `npm run chrome:install`.
+
 ## Public URL form
 
 This origin rewrites requests before it serves them. Verified live on

@@ -41,6 +41,10 @@ const siteName = (index.match(/<title>([^<]*)<\/title>/i) || [, 'This site'])[1]
 // Reuse the site's own footer so the 404 carries the same legal/nav links every
 // other page does, rather than becoming a dead end.
 const footer = (index.match(/<footer[\s\S]*?<\/footer>/i) || [''])[0];
+// And the same header, so the nav is identical on every page (owner ruling
+// 2026-10-13); the homepage marks no nav item current, but strip it anyway.
+const header = (index.match(/<header\b[^>]*class="site-header[\s\S]*?<\/header>/i) || [''])[0]
+  .replace(/ aria-current="page"/g, '');
 // Derive the origin from the homepage's canonical so the 404 can self-canonicalize
 // without this script knowing any repo's domain.
 // Attribute order varies across these repos, so match either arrangement.
@@ -71,6 +75,7 @@ ${styles}
   </style>
 </head>
 <body>
+${header}
   <main class="nf-wrap">
     <p class="nf-code">Error 404</p>
     <h1>We couldn&rsquo;t find that page</h1>

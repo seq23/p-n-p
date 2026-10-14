@@ -1,0 +1,121 @@
+/* Site header + mobile menu (owner ruling 2026-10-13).
+   Markup: scripts/lib/site_chrome.js. Every page links this file after its own
+   styles, so these rules win over older inline header styles on root pages.
+   Tokens come from assets/css/styles.css; the fallbacks keep pages that carry
+   their own inline :root (privacy, terms) identical. */
+.pnp-header {
+  --pnp-h: 64px;
+  position: sticky; top: 0; z-index: 50;
+  background: var(--bg-main, #faf7f2);
+  border-bottom: 1px solid var(--border-soft, rgba(59, 48, 42, 0.10));
+  backdrop-filter: none; -webkit-backdrop-filter: none; /* a filter would trap the fixed menu panel */
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+.pnp-header-inner {
+  box-sizing: border-box; display: flex; align-items: center; gap: 8px;
+  width: 100%; max-width: 1320px; height: var(--pnp-h); margin: 0 auto; padding: 0 16px;
+}
+.pnp-header a { text-decoration: none; }
+.pnp-header .pnp-logo { display: inline-flex; align-items: center; flex: none; margin-right: auto; border-radius: 6px; }
+.pnp-header .brand-script { font-family: "Great Vibes", cursive; font-weight: 400; line-height: 1; white-space: nowrap; color: var(--accent-secondary, #c98f8a); font-size: 2rem; }
+.pnp-header :focus-visible { outline: 2px solid var(--accent-primary, #c46e4e); outline-offset: 3px; border-radius: 4px; }
+.pnp-ico { flex: none; }
+
+/* ---------- desktop row (>= 1024px) ---------- */
+.pnp-header .pnp-nav { display: none; }
+.pnp-header .pnp-actions { display: none; }
+@media (min-width: 1024px) {
+  .pnp-header { --pnp-h: 76px; }
+  .pnp-header-inner { gap: 20px; padding: 0 24px; }
+  .pnp-header .brand-script { font-size: 2.15rem; }
+  .pnp-header .pnp-nav { display: flex; align-items: center; flex-wrap: nowrap; gap: clamp(14px, 1.5vw, 26px); margin: 0 auto; }
+  .pnp-header .pnp-nav a {
+    position: relative; display: inline-flex; align-items: center; height: 40px; white-space: nowrap;
+    font-size: 15px; font-weight: 500; letter-spacing: 0.01em; line-height: 1;
+    color: var(--text-muted, #7a6a5f); transition: color 0.15s ease;
+  }
+  .pnp-header .pnp-nav a::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: 4px; height: 2px; border-radius: 2px;
+    background: var(--accent-primary, #c46e4e); transform: scaleX(0); transform-origin: left; transition: transform 0.18s ease;
+  }
+  .pnp-header .pnp-nav a:hover { color: var(--text-main, #3b302a); }
+  .pnp-header .pnp-nav a:hover::after { transform: scaleX(0.5); opacity: 0.45; }
+  .pnp-header .pnp-nav a[aria-current="page"] { color: var(--accent-primary-hover, #aa5c40); }
+  .pnp-header .pnp-nav a[aria-current="page"]::after { transform: scaleX(1); opacity: 1; }
+  .pnp-header .pnp-actions { display: flex; align-items: center; flex: none; gap: 18px; }
+  .pnp-header .pnp-quote {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 42px; padding: 0 18px;
+    border-radius: var(--radius-sm, 6px); background: var(--accent-primary, #c46e4e); color: #fff;
+    font-size: 15px; font-weight: 600; letter-spacing: 0.01em; white-space: nowrap; transition: background 0.15s ease;
+  }
+  .pnp-header .pnp-quote:hover, .pnp-header .pnp-quote[aria-current="page"] { background: var(--accent-primary-hover, #aa5c40); }
+  .pnp-header .pnp-call {
+    display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;
+    font-size: 15px; font-weight: 600; letter-spacing: 0.01em; color: var(--accent-primary-hover, #aa5c40);
+  }
+  .pnp-header .pnp-call:hover { color: var(--text-main, #3b302a); }
+  .pnp-header .pnp-icon-call, .pnp-header .pnp-toggle, .pnp-header .pnp-panel, .pnp-header .pnp-backdrop { display: none !important; }
+}
+/* 1024-1279: the "Call or text" lead goes visually hidden (still read out),
+   so the full row fits on one line without dropping an item. */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .pnp-header-inner { gap: 12px; padding: 0 16px; }
+  .pnp-header .brand-script { font-size: 1.75rem; }
+  .pnp-header .pnp-nav { gap: 13px; }
+  .pnp-header .pnp-actions { gap: 12px; }
+  .pnp-header .pnp-quote { padding: 0 13px; }
+  .pnp-header .pnp-call-lead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+
+/* ---------- mobile (< 1024px) ---------- */
+.pnp-header .pnp-icon-call, .pnp-header .pnp-toggle {
+  display: inline-flex; align-items: center; justify-content: center; flex: none;
+  width: 44px; height: 44px; border-radius: 999px; border: 0; padding: 0; margin: 0;
+  background: transparent; color: var(--text-main, #3b302a); cursor: pointer; font: inherit;
+}
+.pnp-header .pnp-icon-call { color: var(--accent-primary-hover, #aa5c40); }
+.pnp-header .pnp-icon-call:hover, .pnp-header .pnp-toggle:hover { background: var(--bg-soft, #f4ece3); }
+.pnp-header button.pnp-toggle[hidden] { display: none; }
+.pnp-burger { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+.pnp-burger-close { display: none; }
+.pnp-header.is-open .pnp-burger-open { display: none; }
+.pnp-header.is-open .pnp-burger-close { display: inline; }
+
+.pnp-panel {
+  display: none; box-sizing: border-box;
+  position: fixed; left: 0; right: 0; top: var(--pnp-h); z-index: 52;
+  max-height: calc(100vh - var(--pnp-h)); max-height: calc(100dvh - var(--pnp-h)); overflow-y: auto; overscroll-behavior: contain;
+  padding: 8px 20px 28px; background: var(--bg-main, #faf7f2);
+  border-bottom: 1px solid var(--border-soft, rgba(59, 48, 42, 0.10));
+  box-shadow: 0 18px 30px rgba(59, 48, 42, 0.10);
+}
+.pnp-header:not(.pnp-js) .pnp-panel:target, .pnp-header.is-open .pnp-panel { display: block; }
+.pnp-backdrop { display: none; position: fixed; left: 0; right: 0; bottom: 0; top: var(--pnp-h); z-index: 51; background: rgba(59, 48, 42, 0.32); }
+.pnp-header.is-open .pnp-backdrop { display: block; }
+html.pnp-lock, html.pnp-lock body { overflow: hidden; }
+
+.pnp-panel-nav { display: flex; flex-direction: column; margin: 0 0 20px; }
+.pnp-panel-nav a {
+  display: block; padding: 12px 0; border-bottom: 1px solid var(--border-soft, rgba(59, 48, 42, 0.10));
+  font-family: "Cormorant Garamond", Georgia, serif; font-size: 28px; font-weight: 500; line-height: 1.2;
+  color: var(--text-main, #3b302a);
+}
+.pnp-panel-nav a:hover { color: var(--accent-primary-hover, #aa5c40); }
+.pnp-panel-nav a[aria-current="page"] { color: var(--accent-primary-hover, #aa5c40); }
+.pnp-panel-nav a[aria-current="page"]::before { content: ""; display: inline-block; width: 18px; height: 2px; margin: 0 10px 0 0; vertical-align: middle; background: var(--accent-primary, #c46e4e); }
+.pnp-header .pnp-panel-quote {
+  display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; box-sizing: border-box;
+  border-radius: var(--radius-sm, 6px); background: var(--accent-primary, #c46e4e); color: #fff;
+  font-family: "Inter", system-ui, sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0.01em;
+}
+.pnp-header .pnp-panel-quote:hover { background: var(--accent-primary-hover, #aa5c40); }
+.pnp-panel-call {
+  display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 16px; min-height: 44px;
+  font-size: 16px; font-weight: 600; color: var(--accent-primary-hover, #aa5c40);
+}
+.pnp-panel-close { display: block; margin-top: 8px; text-align: center; font-size: 14px; color: var(--text-muted, #7a6a5f); }
+.pnp-js .pnp-panel-close { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pnp-header *, .pnp-header *::after { transition: none !important; }
+}

@@ -28,7 +28,7 @@ if (!C || !C.telephone || !C.telHref || !C.smsHref || !C.googleBusinessProfileUr
 const T = offers.businessTypes;
 const R = offers.primaryRoute;
 if (!T || !Array.isArray(T.additionalType) || !T.additionalType.length) throw new Error('data/offers/services.json is missing businessTypes.additionalType');
-if (!R || !R.href || !R.navLabel || !R.footerLabel) throw new Error('data/offers/services.json is missing primaryRoute.href/navLabel/footerLabel');
+if (!R || !R.href || !R.footerLabel) throw new Error('data/offers/services.json is missing primaryRoute.href/footerLabel');
 
 const CALL_LABEL = `Call or text ${C.telephoneDisplay}`;
 const GBP_LABEL = 'Find us on Google';
@@ -38,16 +38,15 @@ const MARK = {
   footer: 'data-contact="footer"',
   direct: 'data-contact="direct"',
   popular: 'data-contact="popular"',
-  navRoute: 'data-nav-link="primary-route"',
   footerRoute: 'data-footer-link="primary-route"'
 };
 
 /**
  * The page Search Console shows demand for (party-planner queries, 2026-10-10),
- * linked from the primary nav and the footer of every page. Same idempotent
- * marker pattern as the phone link.
+ * linked from the footer of every page. Owner ruling 2026-10-13 took it out of
+ * the header nav (scripts/lib/site_chrome.js owns the header); the footer link
+ * and its links from the services index and hubs stay.
  */
-const navRouteLink = () => `<a href="${R.href}" ${MARK.navRoute}>${R.navLabel}</a>`;
 const footerRouteLink = () => `<a href="${R.href}" ${MARK.footerRoute}>${R.footerLabel}</a>`;
 
 const headerCall = () =>
@@ -125,16 +124,6 @@ function applyContactSurface(html, rel) {
     if (!FOOTER_EMAIL.test(tail)) throw new Error(`${rel}: footer has no hello@ paragraph to anchor the phone`);
     out = out.slice(0, f) + tail.replace(FOOTER_EMAIL, (m) => m + footerContact());
   }
-  if (!out.includes(MARK.navRoute)) {
-    const nav = /(<nav\b[^>]*class="site-nav"[^>]*>)([\s\S]*?)(<\/nav>)/.exec(out);
-    // 404.html has no site header; every other page has exactly one site-nav.
-    if (nav) {
-      const inner = nav[2];
-      const last = inner.lastIndexOf('<a ');
-      const at = nav.index + nav[1].length + (last >= 0 ? last : inner.length);
-      out = out.slice(0, at) + navRouteLink() + out.slice(at);
-    }
-  }
   if (!out.includes(MARK.footerRoute)) {
     const f = out.indexOf('<footer');
     const pricing = f >= 0 ? out.indexOf('<a href="/pricing', f) : -1;
@@ -166,6 +155,6 @@ function applyContactSurface(html, rel) {
 module.exports = {
   CONTACT: C, CALL_LABEL, GBP_LABEL, MARK, PRIORITY_PAGES: priority.pages,
   BUSINESS_TYPES: T.additionalType, PRIMARY_ROUTE: R,
-  headerCall, footerContact, navRouteLink, footerRouteLink, contactDirect, popularQuestions,
+  headerCall, footerContact, footerRouteLink, contactDirect, popularQuestions,
   businessContactFields, patchJsonLd, applyContactSurface
 };
