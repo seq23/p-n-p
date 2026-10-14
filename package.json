@@ -106,7 +106,7 @@
     "validate:pnp-phase": "npm run validate:contact-surface && npm run validate:site-chrome && npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:no-instruction-leak && npm run validate:no-empty-cells && npm run validate:retrofit-integrity && npm run validate:canonical-resolves && npm run validate:content-pattern && npm run validate:all && npm run validate:atlas-units",
     "validate:profile-purity": "node scripts/validation/validate_profile_purity.js",
     "validate:query-atlas": "node scripts/atlas/validate_query_atlas.mjs",
-    "validate:release": "npm run validate:zero-paid-llm && npm run validate:pnp-phase && npm run validate:max-fanout && npm run validate:authority-scale && npm run validate:kpi-truth && npm run validate:yield && npm run validate:page-quality && npm run validate:improvements && npm run validate:territories && npm run validate:distribution-contract && npm run validate:search-intelligence && npm run validate:workflow-lanes && npm run validate:provider-transport && npm run validate:cadence-policy && npm run validate:cadence-ledger-identity && npm run validate:evidence-openness && npm run validate:operator-doc-currency && npm run validate:content-pattern-reaches-plan && npm run validate:backlog-reaches-builder && npm run validate:sitemap-lastmod && npm run validate:publication-freeze && npm run validate:index-coverage && npm run validate:site-icons && npm run validate:homepage-definition && npm run validate:rentals && npm run validate:engine-key-file && npm run validate:sitemap-registration",
+    "validate:release": "npm run validate:zero-paid-llm && npm run validate:admin && npm run validate:pnp-phase && npm run validate:max-fanout && npm run validate:authority-scale && npm run validate:kpi-truth && npm run validate:yield && npm run validate:page-quality && npm run validate:improvements && npm run validate:territories && npm run validate:distribution-contract && npm run validate:search-intelligence && npm run validate:workflow-lanes && npm run validate:provider-transport && npm run validate:cadence-policy && npm run validate:cadence-ledger-identity && npm run validate:evidence-openness && npm run validate:operator-doc-currency && npm run validate:content-pattern-reaches-plan && npm run validate:backlog-reaches-builder && npm run validate:sitemap-lastmod && npm run validate:publication-freeze && npm run validate:index-coverage && npm run validate:site-icons && npm run validate:homepage-definition && npm run validate:rentals && npm run validate:engine-key-file && npm run validate:sitemap-registration",
     "validate:retrofit-integrity": "node scripts/validators/validate_retrofit_integrity.js",
     "validate:index-coverage": "node scripts/validators/validate_index_coverage.mjs",
     "validate:site-icons": "node scripts/validators/validate_site_icons.mjs",
@@ -127,6 +127,13 @@
     "validate:zero-paid-llm": "node scripts/llm/validate_zero_paid_llm.mjs",
     "build:rentals": "node scripts/generators/build_rentals_page.js",
     "validate:rentals": "node scripts/validators/validate_rentals_page.js",
+    "validate:admin": "npm run validate:admin-noindex && npm run validate:admin-prices && npm run validate:admin-checklist",
+    "validate:admin-noindex": "node scripts/validators/validate_admin_noindex.mjs",
+    "validate:admin-prices": "node scripts/validators/validate_admin_prices.mjs",
+    "validate:admin-checklist": "node scripts/validators/validate_admin_checklist.mjs",
+    "admin:migrate": "npx wrangler d1 migrations apply pnp-admin --remote",
+    "admin:dev": "node scripts/assemble_pages_output.js && npx wrangler d1 migrations apply pnp-admin --local && npx wrangler pages dev --binding PNP_ADMIN_PASSWORD=local-test-pass PNP_ADMIN_SESSION_KEY=local-dev-session-key PNP_SHEET_FIXTURE=1",
+    "mailer:deploy": "cd workers/pnp-mailer && npx wrangler@4.151.0 deploy",
     "chrome:install": "node scripts/install_site_chrome.js",
     "validate:site-chrome": "node scripts/validators/validate_site_chrome.js"
   }

@@ -27,6 +27,10 @@ const EXCLUDE = new Set([
   'content-recipes', '.wrangler', '.astro', 'coverage',
   'package.json', 'package-lock.json', 'AGENTS.md', 'README.md',
   'ARTIFACT_MANIFEST.md', 'REPO_VALIDATION_MATRIX.md',
+  // The /admin console's server code and config (docs/admin-console.md). Pages
+  // reads functions/ and wrangler.toml from the repo root at build time; a copy
+  // in the output would publish their source as static files.
+  'functions', 'migrations', 'workers', 'wrangler.toml',
 ]);
 const EXCLUDE_EXT = new Set(['.md']);
 

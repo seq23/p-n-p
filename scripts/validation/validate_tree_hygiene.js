@@ -38,7 +38,10 @@ const allowedRootFiles = new Set([
   'privacy-policy.html',
   'robots.txt',
   'sitemap.xml',
-  'terms-and-conditions.html'
+  'terms-and-conditions.html',
+  // Cloudflare Pages config for the /admin invoicing console: declares the
+  // pnp-admin D1 binding and the pnp-mailer service binding (docs/admin-console.md).
+  'wrangler.toml'
 ]);
 
 const allowedRootDirs = new Set([
@@ -71,6 +74,15 @@ const allowedRootDirs = new Set([
   'seasonal',
   'services',
     'templates',
+    // Pages Functions for the /admin invoicing console (docs/admin-console.md);
+    // excluded from .pages-output by scripts/assemble_pages_output.js.
+    'functions',
+    // D1 schema for the console (pnp-admin), applied by `npm run admin:migrate`.
+    'migrations',
+    // The private pnp-mailer Worker that holds the send_email binding Pages cannot.
+    'workers',
+    // Gitignored local state of `wrangler pages dev` / local D1 (npm run admin:dev).
+    '.wrangler',
     // Holds the content-pattern contract derived from the agent recommendation
     // corpus. Read by the generators, so it belongs in the tree.
     '.clarity'
