@@ -10,9 +10,9 @@ const SANS = "Inter, 'Helvetica Neue', Arial, sans-serif";
 
 export function paymentStatus(settings) {
   const missing = [];
-  if (!settings.zelle) missing.push('Zelle handle');
-  if (!settings.cashapp) missing.push('Cash App cashtag');
-  if (!settings.qr_png) missing.push('QR code image');
+  if (!settings.zelle) missing.push('Zelle');
+  if (!settings.cashapp) missing.push('Cash App name');
+  if (!settings.qr_png) missing.push('QR code');
   return { complete: missing.length === 0, missing };
 }
 

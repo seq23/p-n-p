@@ -57,6 +57,7 @@ export function saidYes(answer) {
 }
 
 // Lines for a new invoice, prefilled from one form request. Every line stays editable.
+// A $0 line is "price needed" unless its note is 'free' (the free-delivery line).
 export function prefillLines(request, table) {
   const lines = [];
   const games = matchGames(request.gamesAnswer, table);
@@ -79,7 +80,7 @@ export function prefillLines(request, table) {
       }
       gamesCents = plan.totalCents;
     } else {
-      lines.push({ description: 'Game rental (1 day)', qty: 1, unit_cents: table.dayCents, note: 'Check which games they asked for', refundable: 0 });
+      lines.push({ description: 'Game rental (1 day)', qty: 1, unit_cents: table.dayCents, note: '', refundable: 0 });
       gamesCents = table.dayCents;
     }
     if (gamesCents >= table.freeDeliveryFromCents) {
@@ -91,7 +92,7 @@ export function prefillLines(request, table) {
   }
   if (request.wantsDecor) {
     const what = request.eventType ? `Decor: ${request.eventType}` : 'Decor setup';
-    lines.push({ description: what, qty: 1, unit_cents: 0, note: 'Set the decor price', refundable: 0 });
+    lines.push({ description: what, qty: 1, unit_cents: 0, note: '', refundable: 0 }); // $0 = price needed; the send screen asks for it
     if (saidYes(request.takedownAnswer)) {
       lines.push({ description: 'Takedown', qty: 1, unit_cents: table.takedownCents, note: '', refundable: 0 });
     }

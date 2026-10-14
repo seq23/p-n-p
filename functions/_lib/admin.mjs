@@ -2,7 +2,7 @@
 // functions/admin/_middleware.js (see guard.mjs).
 import {
   SHEET_URL, FROM_EMAIL, esc, redirect, htmlResponse, getSettings, putSetting, toCents, invoiceTotal,
-  halfDeposit, todayISO, fromB64urlText, bytesToB64, b64ToBytes,
+  halfDeposit, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice,
 } from './util.mjs';
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
 import { loadRequests, driveFileId, idFolderId } from './sheet.mjs';
@@ -127,7 +127,7 @@ async function dashboard(env, url) {
   const checklists = {};
   const saved = await env.DB.prepare('SELECT request_key, data FROM request_checklist').all();
   for (const row of saved.results || []) { try { checklists[row.request_key] = checklistState(JSON.parse(row.data)); } catch { /* unreadable row: no badge */ } }
-  return htmlResponse(V.dashboardPage({ requests, statuses, checklists, folderUrl: await folderUrl(env, settings, requests), sheetError, flash: url.searchParams.get('m') || '' }));
+  return htmlResponse(V.dashboardPage({ requests, statuses, checklists, folderUrl: await folderUrl(env, settings, requests), sheetError, flash: url.searchParams.get('m') || '', missingPayment: paymentStatus(settings).missing }));
 }
 
 async function newInvoice(env, url) {
@@ -135,11 +135,12 @@ async function newInvoice(env, url) {
   let request = null; const warnings = [];
   if (key) {
     try { request = (await loadRequests(env)).find((r) => r.key === key) || null; } catch (e) { warnings.push(e.message); }
-    if (!request) warnings.push('That request was not found in the sheet; starting a blank invoice.');
+    if (!request) warnings.push('That request could not be found, so this invoice starts empty.');
   }
   let lines = request ? prefillLines(request, PRICE_TABLE) : [{ description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 }];
   let depositCents = null; let dueDate = todayISO(7);
   const fromChecklist = key ? invoiceFromChecklist(CHECKLIST_SOURCE, await savedChecklist(env, key)) : null;
+  if (request && request.gamesAnswer && lines.some((l) => l.description === 'Game rental (1 day)')) warnings.push(`We could not match the games they picked ("${request.gamesAnswer}"). Check the first line under Change the invoice.`);
   if (fromChecklist) {
     if (fromChecklist.lines.length) {
       const damage = lines.find((l) => l.refundable);
@@ -147,15 +148,16 @@ async function newInvoice(env, url) {
     }
     if (fromChecklist.depositCents) depositCents = fromChecklist.depositCents;
     if (fromChecklist.dueDate) dueDate = fromChecklist.dueDate;
-    warnings.push('Prefilled from the walk-through checklist (quote worksheet and agreed price). Check every line.');
+    warnings.push('Filled in from your checklist (quote and agreed price). Check the lines before sending.');
     const total = invoiceTotal(lines.filter((l) => !l.refundable));
-    if (fromChecklist.agreedPriceCents && fromChecklist.agreedPriceCents !== total) warnings.push(`The agreed price on the checklist is $${(fromChecklist.agreedPriceCents / 100).toFixed(2)}; these lines (before the refundable deposit) add up to $${(total / 100).toFixed(2)}.`);
+    if (fromChecklist.agreedPriceCents && fromChecklist.agreedPriceCents !== total) warnings.push(`Your checklist says the agreed price is $${(fromChecklist.agreedPriceCents / 100).toFixed(2)}, but these lines add up to $${(total / 100).toFixed(2)} (not counting the deposit they get back).`);
   }
   const invoice = {
     customer_name: request ? request.name : '', customer_email: request ? request.email : '', customer_phone: request ? request.phone : '',
     issue_date: todayISO(), due_date: dueDate, deposit_due_cents: depositCents !== null ? depositCents : halfDeposit(invoiceTotal(lines)), notes: '', deposit_touched: depositCents !== null,
   };
-  return htmlResponse(V.invoiceEditorPage({ invoice, lines, request, action: '/admin/invoices', title: 'New invoice', warnings }));
+  const pay = paymentStatus(await getSettings(env.DB));
+  return htmlResponse(V.invoiceEditorPage({ invoice, lines, request, action: '/admin/invoices', title: request ? `Invoice for ${V.firstName(request.name)}` : 'New invoice', warnings, pay, mode: 'new' }));
 }
 
 async function createInvoice(env, request) {
@@ -180,7 +182,8 @@ async function createInvoice(env, request) {
     const existing = await env.DB.prepare('SELECT status FROM request_status WHERE request_key = ?1').bind(key).first();
     await setRequestStatus(env.DB, key, existing ? existing.status : 'new', id);
   }
-  return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(`Saved ${number} as a draft.`)}`);
+  if (form.get('go') === 'send') return afterSend(id, await deliver(env, id, false));
+  return redirect(`/admin/invoices/${id}?m=${encodeURIComponent('Saved. Not sent yet.')}`);
 }
 
 async function updateInvoice(env, request, id) {
@@ -189,6 +192,7 @@ async function updateInvoice(env, request, id) {
   await env.DB.prepare(`UPDATE invoices SET customer_name=?1, customer_email=?2, customer_phone=?3, issue_date=?4, due_date=?5, deposit_due_cents=?6, notes=?7, updated_at=datetime('now') WHERE id=?8`)
     .bind(invoice.customer_name, invoice.customer_email, invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, id).run();
   await saveLines(env.DB, id, lines);
+  if (form.get('go') === 'send') return afterSend(id, await deliver(env, id, false));
   return redirect(`/admin/invoices/${id}?m=Saved.`);
 }
 
@@ -202,15 +206,16 @@ async function emailParts(env, invoice, lines, settings, forPreview) {
   return { ...rendered, attachments };
 }
 
-async function sendInvoice(env, request, id) {
-  const form = await request.formData();
-  const test = form.get('test') === '1';
+async function deliver(env, id, test) {
   const loaded = await loadInvoice(env.DB, id);
-  if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
+  if (!loaded) return { ok: false, error: 'That invoice was not found.' };
   const { invoice, lines } = loaded;
-  if (invoice.status === 'void') return redirect(`/admin/invoices/${id}?e=${encodeURIComponent('This invoice is void.')}`);
-  if (!test && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(invoice.customer_email)) return redirect(`/admin/invoices/${id}?e=${encodeURIComponent('The customer email looks wrong. Edit the invoice first.')}`);
-  if (!env.MAILER) return redirect(`/admin/invoices/${id}?e=${encodeURIComponent('Email is not connected on this deployment (no MAILER binding).')}`);
+  if (invoice.status === 'void') return { ok: false, error: 'This invoice is cancelled. Bring it back under More before sending.' };
+  if (!test && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(invoice.customer_email)) return { ok: false, error: "The customer's email address is missing or has a typo. Fix it under More, Change the invoice, then tap Send again." };
+  if (!lines.length) return { ok: false, error: 'This invoice has no lines yet. Add what they are paying for under More, Change the invoice.' };
+  const unpriced = lines.filter(needsPrice);
+  if (!test && unpriced.length) return { ok: false, error: `Not sent yet: ${unpriced.map((l) => l.description).join(', ')} has no price. Tap More, Change the invoice, type the price, then send.` };
+  if (!env.MAILER) return { ok: false, error: 'Email is not connected on this copy of the site, so nothing was sent.' };
   const settings = await getSettings(env.DB);
   const parts = await emailParts(env, invoice, lines, settings, false);
   const payload = {
@@ -220,15 +225,27 @@ async function sendInvoice(env, request, id) {
     subject: test ? `TEST ${parts.subject}` : parts.subject,
     html: parts.html, text: parts.text, attachments: parts.attachments,
   };
-  const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   let out = {};
-  try { out = await res.json(); } catch { out = { ok: false, error: `mailer answered ${res.status}` }; }
-  if (!res.ok || !out.ok) return redirect(`/admin/invoices/${id}?e=${encodeURIComponent(`The email did not send: ${out.error || res.status}`)}`);
-  if (test) return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(`Test sent to ${FROM_EMAIL}.`)}`);
+  try {
+    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    try { out = await res.json(); } catch { out = { ok: false, error: `mailer answered ${res.status}` }; }
+    if (!res.ok) out.ok = false;
+  } catch (e) { out = { ok: false, error: String(e && e.message ? e.message : e) }; }
+  if (!out.ok) return { ok: false, error: `The email did not go out. Nothing was changed; please try again in a minute. (${out.error || 'no answer'})` };
+  if (test) return { ok: true, message: `Test copy sent ✓ to ${FROM_EMAIL}` };
   const status = invoice.status === 'draft' ? 'sent' : invoice.status;
   await env.DB.prepare("UPDATE invoices SET status=?1, sent_at=datetime('now'), updated_at=datetime('now') WHERE id=?2").bind(status, id).run();
   if (invoice.request_key && invoice.status === 'draft') await setRequestStatus(env.DB, invoice.request_key, 'invoiced', id);
-  return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(`Sent to ${invoice.customer_email} (copy to ${FROM_EMAIL}).`)}`);
+  return { ok: true, message: `Sent ✓ to ${invoice.customer_email}` };
+}
+
+function afterSend(id, result) {
+  return redirect(`/admin/invoices/${id}?${result.ok ? 'm' : 'e'}=${encodeURIComponent(result.ok ? result.message : result.error)}`);
+}
+
+async function sendInvoice(env, request, id) {
+  const form = await request.formData();
+  return afterSend(id, await deliver(env, id, form.get('test') === '1'));
 }
 
 async function changeStatus(env, request, id) {
@@ -249,7 +266,7 @@ async function changeStatus(env, request, id) {
       await setRequestStatus(env.DB, invoice.request_key, REQUEST_STATUS[next], id);
     }
   }
-  const label = { deposit_paid: 'Marked deposit paid.', paid: 'Marked paid.', done: 'Marked done.', void: 'Voided.', draft: 'Restored as a draft.' }[next];
+  const label = { deposit_paid: 'Deposit received ✓', paid: 'Paid in full ✓', done: 'Marked done ✓', void: 'Invoice cancelled.', draft: 'Invoice brought back. It is not sent yet.' }[next];
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(label)}`);
 }
 
@@ -263,15 +280,15 @@ async function saveSettings(env, request) {
   }
   const file = form.get('qr');
   if (file && typeof file === 'object' && file.size > 0) {
-    if (file.size > QR_MAX_BYTES) return redirect(`/admin/settings?e=${encodeURIComponent('That image is over 1 MB. Use a smaller one.')}`);
+    if (file.size > QR_MAX_BYTES) return redirect(`/admin/settings?e=${encodeURIComponent('That picture is too big (over 1 MB). Take a screenshot of the QR code and upload the screenshot instead.')}`);
     const bytes = new Uint8Array(await file.arrayBuffer());
     const isPng = bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4e && bytes[3] === 0x47;
     const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8;
-    if (!isPng && !isJpeg) return redirect(`/admin/settings?e=${encodeURIComponent('The QR code must be a PNG or JPEG image.')}`);
+    if (!isPng && !isJpeg) return redirect(`/admin/settings?e=${encodeURIComponent('That file is not a picture we can use. Upload a PNG or JPG photo or screenshot of the QR code.')}`);
     await putSetting(env.DB, 'qr_png', bytesToB64(bytes));
     await putSetting(env.DB, 'qr_type', isPng ? 'image/png' : 'image/jpeg');
   }
-  return redirect('/admin/settings?m=Saved.');
+  return redirect('/admin/settings?m=Saved ✓');
 }
 
 async function changePassword(env, request) {
@@ -314,7 +331,7 @@ export async function handleAdmin(context) {
     const key = decodeKey(form.get('r'));
     const status = String(form.get('status') || '');
     if (key && ['new', 'invoiced', 'deposit_paid', 'paid', 'done'].includes(status)) await setRequestStatus(env.DB, key, status, null);
-    return redirect('/admin/?m=Status updated.');
+    return redirect('/admin/?m=Status saved ✓');
   }
   if (segs[0] === 'invoices') {
     if (segs.length === 1 && method === 'GET') {
@@ -336,8 +353,9 @@ export async function handleAdmin(context) {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
         const touched = loaded.invoice.deposit_due_cents !== halfDeposit(invoiceTotal(loaded.lines));
+        const pay = paymentStatus(await getSettings(env.DB));
         return htmlResponse(V.invoiceEditorPage({ invoice: { ...loaded.invoice, deposit_touched: touched }, lines: loaded.lines, request: null,
-          action: `/admin/invoices/${id}`, title: `Edit ${loaded.invoice.number}` }));
+          action: `/admin/invoices/${id}`, title: `Change invoice for ${V.firstName(loaded.invoice.customer_name)}`, pay, mode: 'edit' }));
       }
       if (segs.length === 2 && method === 'POST') return updateInvoice(env, request, id);
       if (segs[2] === 'send' && method === 'POST') return sendInvoice(env, request, id);
@@ -350,6 +368,7 @@ export async function handleAdmin(context) {
       }
     }
   }
+  if (segs[0] === 'help' && method === 'GET') return htmlResponse(V.helpPage());
   if (segs[0] === 'checklist' && method === 'GET') {
     if (segs.length === 1) return checklistPrint(env, url);
     if (segs[1] === 'online') return checklistOnline(env, url);
