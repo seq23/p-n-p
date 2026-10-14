@@ -123,7 +123,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 30,
+      "impressions_90d": 29,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -140,7 +140,7 @@
         "format": null,
         "semantic_cluster": "birthday-party-decor"
       },
-      "rank_score": 15,
+      "rank_score": 14.5,
       "publishable": true
     },
     {
@@ -173,7 +173,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 21,
+      "impressions_90d": 20,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -190,7 +190,7 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 10.5,
+      "rank_score": 10,
       "publishable": true
     },
     {
@@ -198,7 +198,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 20,
+      "impressions_90d": 19,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -215,36 +215,11 @@
         "format": null,
         "semantic_cluster": "birthday-party-decor"
       },
-      "rank_score": 10,
+      "rank_score": 9.5,
       "publishable": true
     },
     {
       "query": "party planner",
-      "evidence_tier": "T1",
-      "source_type": "gsc_search_analytics",
-      "search_volume": null,
-      "impressions_90d": 20,
-      "demand_basis": "impressions_90d",
-      "rank_band": "own_impressions",
-      "keyword_difficulty": null,
-      "weak_incumbent_score": 0.5,
-      "intent": null,
-      "intent_method": null,
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "party decor",
-        "topic_confidence": 0.57,
-        "audience": null,
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "party-decor"
-      },
-      "rank_score": 10,
-      "publishable": true
-    },
-    {
-      "query": "party planners near me",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
@@ -269,7 +244,7 @@
       "publishable": true
     },
     {
-      "query": "party planners",
+      "query": "party planners near me",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
@@ -298,7 +273,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 17,
+      "impressions_90d": 16,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -315,32 +290,7 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 8.5,
-      "publishable": true
-    },
-    {
-      "query": "party planner near me",
-      "evidence_tier": "T1",
-      "source_type": "gsc_search_analytics",
-      "search_volume": null,
-      "impressions_90d": 17,
-      "demand_basis": "impressions_90d",
-      "rank_band": "own_impressions",
-      "keyword_difficulty": null,
-      "weak_incumbent_score": 0.5,
-      "intent": null,
-      "intent_method": null,
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "party decor",
-        "topic_confidence": 0.57,
-        "audience": null,
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "party-decor"
-      },
-      "rank_score": 8.5,
+      "rank_score": 8,
       "publishable": true
     },
     {
@@ -369,11 +319,61 @@
       "publishable": true
     },
     {
-      "query": "event planning services near me",
+      "query": "party planner near me",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 13,
+      "impressions_90d": 16,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "party decor",
+        "topic_confidence": 0.57,
+        "audience": null,
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "party-decor"
+      },
+      "rank_score": 8,
+      "publishable": true
+    },
+    {
+      "query": "party planners",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 16,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "party decor",
+        "topic_confidence": 0.57,
+        "audience": null,
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "party-decor"
+      },
+      "rank_score": 8,
+      "publishable": true
+    },
+    {
+      "query": "event management near me",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 12,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -390,11 +390,11 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 6.5,
+      "rank_score": 6,
       "publishable": true
     },
     {
-      "query": "event management near me",
+      "query": "event planning services near me",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
@@ -448,7 +448,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 10,
+      "impressions_90d": 9,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -465,7 +465,7 @@
         "format": null,
         "semantic_cluster": "party-decor"
       },
-      "rank_score": 5,
+      "rank_score": 4.5,
       "publishable": true
     },
     {

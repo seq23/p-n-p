@@ -2,12 +2,12 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-09-13..2026-10-10",
-  "coverage_collected_at": "2026-10-13T15:18:16.293421+00:00",
-  "url_count": 116,
+  "gsc_window": "2026-09-14..2026-10-11",
+  "coverage_collected_at": "2026-10-14T15:17:59.163551+00:00",
+  "url_count": 117,
   "roles": {
     "candidate": 87,
-    "section_index": 6,
+    "section_index": 7,
     "root": 6,
     "hub": 17
   },
@@ -990,7 +990,7 @@
       "role": "root",
       "impressions_28d": 66,
       "clicks_28d": 0,
-      "word_count": 1278,
+      "word_count": 1330,
       "coverage_state": "Submitted and indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1069,6 +1069,17 @@
       "clicks_28d": 0,
       "word_count": 125,
       "coverage_state": "Crawled - currently not indexed",
+      "fold_into_if_crawled_not_indexed": null,
+      "fold_rule": null
+    },
+    {
+      "url": "https://porchandparty901.com/rentals/",
+      "file": "rentals/index.html",
+      "role": "section_index",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 1359,
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1243,7 +1254,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1014,
+      "word_count": 1121,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
