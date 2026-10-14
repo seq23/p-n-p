@@ -14,6 +14,11 @@
  *    the llms files and every Marketplace listing quote it, carry no retired
  *    zone or game, and the Facebook copy is email only (no phone).
  *
+ * 4. Renter safety (owner-approved 2026-10-14): the booking section and the
+ *    llms rentals sections carry the photo-ID / social-link line and the
+ *    three-minute, Google-sign-in form note from services.json renterSafety;
+ *    the takedown add-on never appears here (rental pickup is included).
+ *
  * Read-only. Rule 0: zero games or zero listings is a failure, not a pass.
  */
 const fs = require('fs');
@@ -93,14 +98,23 @@ if (onDisk) {
   if (RETIRED.test(onDisk.replace(/<script[\s\S]*?<\/script>/g, ''))) errors.push('rentals/index.html still quotes the retired delivery zones or 1.5x weekend rate');
   if (!onDisk.includes('901-355-1518')) errors.push('rentals/index.html lost the site phone 901-355-1518');
 }
+const SAFE = require(path.join(ROOT, 'data/offers/services.json')).renterSafety || {};
+const SAFE_TEXT = `${SAFE.line} ${SAFE.rentalFormNote}`;
+if (!/government photo ID/.test(SAFE.line || '') || !/three minutes/.test(SAFE.rentalFormNote || '') || !/Google sign-in/.test(SAFE.rentalFormNote || '')) errors.push('services.json renterSafety is not the owner-approved ID / three-minute Google sign-in copy');
+if (onDisk) {
+  const booking = (onDisk.split('id="how-booking-works"')[1] || '').split('</section>')[0];
+  if (!booking.includes(SAFE_TEXT)) errors.push('rentals/index.html How Booking Works lacks the renter-safety line and form note');
+  if (/takedown/i.test(onDisk)) errors.push('rentals/index.html mentions takedown; rental pickup is included, the add-on is porch and event decor only');
+}
 for (const f of ['llms.txt', 'llms-full.txt', 'llms-services.txt']) {
   const t = fs.readFileSync(path.join(ROOT, f), 'utf8');
   const sec = (t.split('## Party game rentals')[1] || '').split(/\n## /)[0];
   if (!sec) { errors.push(`${f} has no Party game rentals section`); continue; }
+  if (!sec.includes(SAFE_TEXT)) errors.push(`${f} rentals section lacks the renter-safety line and form note`);
   if (RETIRED.test(sec)) errors.push(`${f} rentals section still quotes the retired zones or 1.5x weekend rate`);
   for (const g of data.games) if (!sec.toLowerCase().includes(g.name.replace(/ Set$/, '').toLowerCase())) errors.push(`${f} rentals section does not name ${g.name}`);
   for (const n of [`${money(V2.day)} per game per day`, `${money(V2.weekend)} per game for a weekend`, ...Object.values(V2.bundles).map(money), `${money(V2.deliveryFee)} flat`, `${money(V2.damageDeposit)} damage deposit`])
     if (!sec.includes(n)) errors.push(`${f} rentals section does not quote ${n}`);
 }
 if (errors.length) { for (const e of errors) console.error(`rentals: ${e}`); process.exit(1); }
-console.log(`rentals: OK - page matches a fresh render; v2 prices pinned; ${data.games.length} Marketplace listings, the Facebook Page copy and 3 llms files match games.json; Facebook copy email only`);
+console.log(`rentals: OK - page matches a fresh render; v2 prices pinned; ${data.games.length} Marketplace listings, the Facebook Page copy and 3 llms files match games.json; renter-safety line on the page and in the llms files; Facebook copy email only`);

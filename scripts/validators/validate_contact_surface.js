@@ -15,6 +15,13 @@
  *     and each of those pages exists and carries the tel: link;
  *   - the data itself: the GBP link is the decimal cid of the listing's Maps
  *     feature id, and tel:/sms: carry the same digits as the telephone.
+ *   - contact.html: the renter-safety line (owner-approved 2026-10-14, text in
+ *     services.json renterSafety) sits right after the quote-form note;
+ *   - the takedown add-on (owner-approved 2026-10-14, $75, services.json
+ *     addOns.takedown): every page and llms file that quotes porch or event
+ *     decor takedown quotes the priced line, the FAQ data carries it, no page
+ *     keeps the unpriced "available for an additional fee" wording, and the
+ *     rentals page never offers it (rental pickup is included).
  *
  * Hard-fails on zero pages or zero LocalBusiness nodes, so it cannot pass by
  * having checked nothing. Repair: npm run contact:install.
@@ -88,6 +95,48 @@ for (const p of PRIORITY_PAGES) {
   else if (!html.includes(TEL)) fail(`priority page ${p.href} lacks the tel: link`);
 }
 
+// Renter-safety line on contact.html, next to the quote form.
+const offers = require(path.join(ROOT, 'data/offers/services.json'));
+const SAFE = (offers.renterSafety || {}).line || '';
+if (!/government photo ID/.test(SAFE) || !/social media link/.test(SAFE)) fail('services.json renterSafety.line does not ask for a government photo ID and a social media link');
+{
+  const c = read('contact.html') || '';
+  const at = c.indexOf(`<p class="muted" ${MARK.safety}>${SAFE}</p>`);
+  const form = c.indexOf(`href="${offers.quoteUrl}"`);
+  if (at < 0) fail('contact.html lacks the renter-safety line from services.json renterSafety');
+  else if (form < 0 || at < form || at - form > 600) fail('contact.html renter-safety line is not next to the quote form link');
+}
+
+// Takedown add-on: one price, one line, everywhere it is quoted.
+const TD = (offers.addOns || {}).takedown || {};
+const TD_PRICE = 75; // owner-approved 2026-10-14 (corrected from $95 the same day); change with services.json, never alone
+if (TD.fromPrice !== TD_PRICE || TD.line !== `Takedown starts at $${TD_PRICE}, quoted with your setup.`) fail(`services.json addOns.takedown is not the owner-approved $${TD_PRICE} line`);
+if (JSON.stringify(TD.appliesTo) !== JSON.stringify(['porch', 'celebration'])) fail('services.json addOns.takedown.appliesTo is not porch + celebration (rentals include pickup)');
+if (offers.services.porch.notes[0] !== TD.line) fail('services.json porch notes[0] is not the takedown line');
+const faqTd = require(path.join(ROOT, 'data/faqs/faqs.json')).find((q) => /take-?down/i.test(q.question));
+if (!faqTd || !faqTd.answer.includes(TD.line)) fail('data/faqs/faqs.json takedown answer does not quote the takedown line');
+const TD_PAGES = ['pricing.html', 'how-it-works.html', 'contact.html', 'index.html', 'terms-and-conditions.html', 'services/index.html',
+  'services/porch-decorating.html', 'services/christmas-porch-decorating.html', 'services/fall-porch-decorating.html',
+  'services/small-porch-decorating.html', 'services/front-door-styling.html',
+  'llms.txt', 'llms-full.txt', 'llms-services.txt', 'llms-answers.txt'];
+const TD_QUOTE = new RegExp(`(Takedown starts at|takedown, from|takedown for seasonal porch installs and event decor starts at) \\$${TD_PRICE}\\b`);
+for (const rel of TD_PAGES) {
+  const t = read(rel);
+  if (!t) { fail(`${rel} is missing`); continue; }
+  if (!TD_QUOTE.test(t)) fail(`${rel} does not quote takedown from $${TD_PRICE}`);
+}
+for (const rel of ['pricing.html', 'how-it-works.html']) if (!(read(rel) || '').includes(TD.line)) fail(`${rel} lacks the exact takedown line`);
+const UNPRICED = /take-?down (service )?(is )?available for an additional fee|take-?down when quoted separately|take-?down for seasonal porch installs is available/i;
+let tdScanned = 0;
+for (const rel of [...pages, 'llms.txt', 'llms-full.txt', 'llms-services.txt', 'llms-answers.txt']) {
+  const t = read(rel);
+  if (!t) continue;
+  tdScanned += 1;
+  if (UNPRICED.test(t)) fail(`${rel} still quotes takedown without the $${TD_PRICE} price`);
+}
+if (!tdScanned) fail('takedown scan read 0 files');
+if (/takedown starts/i.test(read('rentals/index.html') || '')) fail('rentals/index.html offers the takedown add-on; rental pickup is included');
+
 if (!read(`${PRIMARY_ROUTE.href.replace(/^\//, '')}.html`)) fail(`primary route ${PRIMARY_ROUTE.href} has no published file`);
 if (errors.length) {
   console.error(`contact-surface: FAIL (${errors.length})`);
@@ -95,4 +144,4 @@ if (errors.length) {
   console.error('  repair: npm run contact:install');
   process.exit(1);
 }
-console.log(`contact-surface: OK - ${pages.length} pages carry tel: + Google listing + the ${PRIMARY_ROUTE.href} footer link (absent from every header); ${lbNodes} LocalBusiness nodes carry telephone/hasMap/sameAs/additionalType; ${PRIORITY_PAGES.length} priority pages linked from home and contact`);
+console.log(`contact-surface: OK - ${pages.length} pages carry tel: + Google listing + the ${PRIMARY_ROUTE.href} footer link (absent from every header); ${lbNodes} LocalBusiness nodes carry telephone/hasMap/sameAs/additionalType; ${PRIORITY_PAGES.length} priority pages linked from home and contact; renter-safety line on contact; takedown $${TD_PRICE} quoted on ${TD_PAGES.length} surfaces, unpriced wording absent from ${tdScanned} files`);
