@@ -3,7 +3,7 @@
 /**
  * Renders /rentals/ (rentals/index.html), the party game rentals page.
  *
- * Every rate, bundle, zone and image on the page comes from
+ * Every rate, bundle, delivery fee and image on the page comes from
  * data/rentals/games.json, so the page, its Product/Offer JSON-LD and the
  * Facebook Marketplace copy in docs/listings/ cannot quote two different
  * prices. Header and footer come from templates/page-shell.js like every
@@ -32,14 +32,15 @@ const C = offers.contact;
 const FORM_URL = 'https://forms.gle/vHjfKtRRAnGV3HxFA';
 const MAILTO = 'mailto:hello@porchandparty901.com?subject=Party%20game%20rental%20inquiry';
 const TITLE = 'Party Game Rentals in Memphis | Porch and Party';
-const DESCRIPTION = 'Giant yard game rentals for birthdays and backyard parties in Memphis, Olive Branch and Southaven, from $25 a day, delivered and set up.';
+const DESCRIPTION = 'Giant yard game rentals for birthdays and backyard parties in Memphis, Olive Branch and Southaven, $40 a game per day, delivered and set up.';
 const H1 = 'Giant yard game rentals for Memphis parties, delivered and set up';
 const AREAS = ['Memphis, TN', 'Olive Branch, MS', 'Southaven, MS'];
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
-const weekend = (n) => Math.round(n * data.weekendMultiplier * 100) / 100;
-const useLabel = (u) => (u === 'outdoor' ? 'Outdoor only' : 'Indoor or outdoor');
+const RATE = data.rates;
+const DEL = data.delivery;
+const useLabel = (u) => (u === 'outdoor' ? 'Outdoor only' : u === 'indoor' ? 'Indoor tabletop' : 'Indoor or outdoor');
 
 // The shared shell blocks. Rentals is in the canonical nav and footer
 // (scripts/lib/site_chrome.js), so the page needs no local additions.
@@ -48,32 +49,37 @@ const foot = footer();
 
 const FAQ = [
   ['Where do you deliver party game rentals?',
-    `We deliver in Memphis, Olive Branch and Southaven only. Zone 1 is Memphis city limits (ZIP codes 38103 to 38141) for a $25 delivery fee, free on orders of $150 or more. Zone 2 is Olive Branch and Southaven, MS for $40. Rentals are delivery only; there is no customer pickup.`],
+    `We deliver in Memphis, Olive Branch and Southaven only. Delivery and setup is a flat ${money(DEL.fee)} anywhere in those three cities, and free on orders of ${money(DEL.freeOver)} or more. Rentals are delivery only; there is no customer pickup.`],
+  ['How much do the games cost?',
+    `Every game is ${money(RATE.day)} a day or ${money(RATE.weekend)} for a weekend (Friday delivery, Monday pickup). Bundles: ${data.bundles.map((b) => `${b.name} ${money(b.dayPrice)}`).join(', ')}. There is no minimum order.`],
   ['What happens if it rains?',
-    'If rain or a storm is forecast for your date, we reschedule the rental free within 30 days. Every game except Giant Yard Pong also works indoors, so many hosts simply move the games inside.'],
+    'If rain or a storm is forecast for your date, we reschedule the rental free within 30 days. Every game except Giant Yard Pong also works indoors, so many hosts simply move the games inside, and Grab the Mic is a tabletop game made for an indoor party.'],
   ['Can we use the games indoors?',
     'Yes. Every game works indoors except Giant Yard Pong, which is outdoor only. Indoors you need flat floor space; the Giant Connect Four stands 4 ft tall and the Giant Tumble Tower stacks to about 5 ft.'],
   ['How far ahead should I book?',
     'Two to three weeks ahead is safest for Saturdays and holiday weekends, because each game is limited to one or two units. Weekday and short-notice requests are fine to send; we confirm what is open for your date.'],
   ['How much is the deposit?',
-    '50% holds your date and the balance is due at delivery. Cancel 48 hours or more before delivery for a full refund.'],
+    `50% holds your date and the balance is due at delivery, along with a ${money(data.damageDeposit)} damage deposit that we refund at pickup. Cancel 48 hours or more before delivery for a full refund.`],
   ['How long does setup take?',
     'We deliver by noon and set the games up on flat ground where you want them, usually in about 15 to 30 minutes depending on how many games you booked. We pick everything up the next day, or on Monday for a weekend rental.'],
   ['Are the games safe for kids, and who can rent?',
-    'The renter must be 18 or older and an adult should supervise play. Giant Color Stack is made for ages 6 and up, and every other game suits older kids, teens and adults. Games are wiped down between rentals.']
+    'The renter must be 18 or older and an adult should supervise play. Giant Color Stack is made for ages 6 and up, Giant Uno for 7 and up and Grab the Mic for 8 and up; every other game suits older kids, teens and adults. Games are wiped down between rentals.']
 ];
 
 const STEPS = [
-  ['Send an inquiry', 'Tell us your date, ZIP code and the games or bundle you want, through the quote form, email or a call or text.'],
-  ['We confirm date and games', 'We confirm what is open, the delivery zone fee and the total. 50% holds the date.'],
+  ['Send an inquiry', 'Tell us your date, your city and the games or bundle you want, through the quote form, email or a call or text.'],
+  ['We confirm date and games', `We confirm what is open and the total, including the ${money(DEL.fee)} delivery fee unless your order is ${money(DEL.freeOver)} or more. 50% holds the date.`],
   ['We deliver and set up', 'Delivered by noon and set up on flat ground, indoors or out. The balance is due at delivery.'],
   ['We pick up', 'We collect the games the next day, or Monday for a weekend rental, and check every piece.']
 ];
 
 const TERMS = [
   '<strong>Rental period:</strong> 24 hours. Delivered by noon, picked up the next day.',
-  '<strong>Weekend rental:</strong> Friday delivery, Monday pickup, at 1.5 times the day rate.',
+  `<strong>Price:</strong> ${money(RATE.day)} per game per day; no minimum order.`,
+  `<strong>Weekend rental:</strong> Friday delivery, Monday pickup, ${money(RATE.weekend)} per game.`,
   '<strong>Deposit:</strong> 50% holds the date; the balance is due at delivery.',
+  `<strong>Damage deposit:</strong> ${money(data.damageDeposit)}, refunded at pickup.`,
+  `<strong>Delivery and setup:</strong> ${money(DEL.fee)} flat anywhere in Memphis, Olive Branch or Southaven; free on orders of ${money(DEL.freeOver)} or more.`,
   '<strong>Cancellation:</strong> full refund if you cancel 48 hours or more before delivery.',
   '<strong>Weather:</strong> rain or storms reschedule free within 30 days.',
   '<strong>Pieces:</strong> games are checked at pickup. A missing bag, block, ring or ball is $5 each; a broken board or frame is charged at replacement cost.',
@@ -84,13 +90,14 @@ const TERMS = [
 function gameCard(g) {
   const avail = g.availableNow ? 'Available now' : 'Coming this month';
   const qty = g.quantity > 1 ? ` ${g.quantity} available.` : '';
-  return `<article class="card" id="${g.slug}"><div class="card-media"><img src="/assets/rentals/${g.slug}.webp" alt="${esc(g.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(g.name)}</h3><p>${esc(g.blurb)}</p><ul><li><strong>Size:</strong> ${esc(g.size)}</li><li><strong>Use:</strong> ${useLabel(g.use)}</li><li><strong>Day rate:</strong> ${money(g.dayRate)} &middot; weekend ${money(weekend(g.dayRate))}</li></ul><p class="muted">${avail}.${qty}</p></div></article>`;
+  return `<article class="card" id="${g.slug}"><div class="card-media"><img src="/assets/rentals/${g.slug}.webp" alt="${esc(g.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(g.name)}</h3><p>${esc(g.blurb)}</p><ul><li><strong>Size:</strong> ${esc(g.size)}</li><li><strong>Use:</strong> ${useLabel(g.use)}</li><li><strong>Price:</strong> ${money(RATE.day)} a day &middot; ${money(RATE.weekend)} a weekend</li></ul><p class="muted">${avail}.${qty}</p></div></article>`;
 }
 
 function bundleCard(b) {
-  const wk = b.weekendPrice || weekend(b.dayPrice);
   const what = b.games === data.games.length ? `All ${b.games} games` : `Any ${b.games} games`;
-  return `<div class="pricing-card"><h3>${b.name}</h3><span class="price">${money(b.dayPrice)}</span><p>${what} for one day, set up by us.</p><p class="muted">Weekend (Friday to Monday): ${money(wk)}.</p></div>`;
+  const save = b.games * RATE.day - b.dayPrice;
+  const free = b.dayPrice >= DEL.freeOver ? ' Delivery is free.' : '';
+  return `<div class="pricing-card"><h3>${b.name}</h3><span class="price">${money(b.dayPrice)}</span><p>${what} for one day, set up by us.</p><p class="muted">Saves ${money(save)} on the ${money(RATE.day)} day rate.${free}</p></div>`;
 }
 
 function jsonLd() {
@@ -107,9 +114,9 @@ function jsonLd() {
       itemListElement: data.games.map((g, i) => ({ '@type': 'ListItem', position: i + 1,
         item: { '@type': 'Product', name: `${g.name} rental`, description: `${g.blurb} Size: ${g.size}. ${useLabel(g.use)}.`,
           image: `${DOMAIN}/assets/rentals/${g.slug}.webp`, url: `${URL}#${g.slug}`, brand: { '@type': 'Brand', name: offers.brandName },
-          offers: { '@type': 'Offer', price: g.dayRate, priceCurrency: 'USD', url: `${URL}#${g.slug}`,
+          offers: { '@type': 'Offer', price: RATE.day, priceCurrency: 'USD', url: `${URL}#${g.slug}`,
             availability: g.availableNow ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder',
-            priceSpecification: { '@type': 'UnitPriceSpecification', price: g.dayRate, priceCurrency: 'USD', unitCode: 'DAY', referenceQuantity: { '@type': 'QuantitativeValue', value: 1, unitCode: 'DAY' } },
+            priceSpecification: { '@type': 'UnitPriceSpecification', price: RATE.day, priceCurrency: 'USD', unitCode: 'DAY', referenceQuantity: { '@type': 'QuantitativeValue', value: 1, unitCode: 'DAY' } },
             seller: { '@type': 'LocalBusiness', name: offers.brandName, url: `${DOMAIN}/`, ...contactSurface.businessContactFields() }, areaServed: AREAS } } })) },
     { '@context': 'https://schema.org', '@type': 'FAQPage',
       mainEntity: FAQ.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) },
@@ -121,7 +128,6 @@ function jsonLd() {
 }
 
 function render() {
-  const z1 = data.zones[0]; const z2 = data.zones[1];
   const featured = data.games.map(gameCard).join('');
   return `<!doctype html>
 <html lang="en">
@@ -161,7 +167,7 @@ function render() {
         <div class="page-intro">
           <span class="eyebrow">Party Game Rentals in Memphis</span>
           <h1>${H1}</h1>
-          <p id="what-are-porch-and-party-rentals">Porch &amp; Party rents giant yard games for backyard parties, birthdays, family reunions, church and school events in Memphis, Olive Branch and Southaven. We deliver by noon, set the games up indoors or outdoors, and pick them up the next day. Games start at $25 a day, or pick 3 for $99.</p>
+          <p id="what-are-porch-and-party-rentals">Porch &amp; Party rents giant yard games for backyard parties, birthdays, family reunions, church and school events in Memphis, Olive Branch and Southaven. We deliver by noon, set the games up indoors or outdoors, and pick them up the next day. Every game is ${money(RATE.day)} a day, or pick 3 for ${money(data.bundles[0].dayPrice)}, with no minimum order.</p>
           <div class="btn-row hero-centered-cta"><a href="/contact" class="btn-primary" data-quote-cta="rentals-top">Check My Date</a><a href="#games" class="btn-secondary">See the Games</a></div>
           <p class="muted" style="margin-top: 14px;"><a href="${C.telHref}">Call or text ${C.telephoneDisplay}</a></p>
         </div>
@@ -171,7 +177,7 @@ function render() {
 
     <section class="section section-soft" id="games">
       <div class="container">
-        <div class="answer-block"><span class="eyebrow">The Games</span><h2>${data.games.length} giant games for rent, priced per day</h2><p>Every rental is delivered and set up by us. The weekend rate (Friday delivery, Monday pickup) is 1.5 times the day rate.</p></div>
+        <div class="answer-block"><span class="eyebrow">The Games</span><h2>${data.games.length} party games for rent, ${money(RATE.day)} each per day</h2><p>Every rental is delivered and set up by us. A weekend (Friday delivery, Monday pickup) is ${money(RATE.weekend)} a game.</p></div>
         <div class="cards-grid">${featured}</div>
       </div>
     </section>
@@ -180,16 +186,16 @@ function render() {
       <div class="container">
         <div class="answer-block"><span class="eyebrow">Bundles</span><h2>Bundle the games and save</h2><p>Mix any games you like. The whole yard is every game on this page.</p></div>
         <div class="pricing-grid">${data.bundles.map(bundleCard).join('')}</div>
-        <p class="pricing-note muted">Delivery, setup and next-day pickup come with every rental. The delivery fee depends on your zone, below.</p>
+        <p class="pricing-note muted">Delivery, setup and next-day pickup come with every rental. Delivery is ${money(DEL.fee)} flat, free on orders of ${money(DEL.freeOver)} or more.</p>
       </div>
     </section>
 
     <section class="section section-soft" id="delivery">
       <div class="container">
-        <div class="answer-block"><span class="eyebrow">Delivery Area</span><h2>We deliver in Memphis, Olive Branch and Southaven only.</h2><p>Rentals are delivery only: there is no customer pickup, and we do not deliver outside these two zones.</p></div>
+        <div class="answer-block"><span class="eyebrow">Delivery Area</span><h2>We deliver in Memphis, Olive Branch and Southaven only.</h2><p>Rentals are delivery only: there is no customer pickup, and we do not deliver outside these three cities.</p></div>
         <div class="pricing-grid">
-          <div class="pricing-card"><h3>${z1.name}: Memphis</h3><span class="price">${money(z1.fee)}</span><p>${esc(z1.area)}.</p><p class="muted">Free delivery on orders of ${money(z1.freeOver)} or more.</p></div>
-          <div class="pricing-card"><h3>${z2.name}: Olive Branch &amp; Southaven</h3><span class="price">${money(z2.fee)}</span><p>${esc(z2.area)}.</p><p class="muted">Delivered by noon, picked up the next day.</p></div>
+          <div class="pricing-card"><h3>Delivery and setup</h3><span class="price">${money(DEL.fee)}</span><p>One flat fee anywhere in ${DEL.areas.slice(0, -1).join(', ')} or ${DEL.areas[DEL.areas.length - 1]}.</p><p class="muted">Delivered by noon, picked up the next day.</p></div>
+          <div class="pricing-card"><h3>Free delivery</h3><span class="price">${money(DEL.freeOver)}+</span><p>Orders of ${money(DEL.freeOver)} or more deliver free, including the ${data.bundles.filter((b) => b.dayPrice >= DEL.freeOver).map((b) => b.name).join(' and ')} bundles.</p><p class="muted">A ${money(data.damageDeposit)} damage deposit is refunded at pickup.</p></div>
         </div>
       </div>
     </section>
@@ -219,7 +225,7 @@ function render() {
       <div class="container">
         <span class="eyebrow">Book Party Games</span>
         <h2>Check your date for party game rentals</h2>
-        <p>Use the Porch &amp; Party quote form and choose "Party game rentals": share your date, ZIP code and the games or bundle you want. We confirm availability, your delivery zone and the total.</p>
+        <p>Use the Porch &amp; Party quote form and choose "Party game rentals": share your date, your city and the games or bundle you want. We confirm availability and the total.</p>
         <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary" rel="noopener" target="_blank" data-quote-cta="rentals-form">Start Your Rental Request</a><a href="${MAILTO}" class="btn-secondary">Email Us</a></div>
         <p class="muted" style="margin-top: 14px;"><a href="${C.telHref}">Call ${C.telephoneDisplay}</a> or <a href="${C.smsHref}">text ${C.telephoneDisplay}</a> &middot; <a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p>
       </div>
