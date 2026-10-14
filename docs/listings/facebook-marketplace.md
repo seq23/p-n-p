@@ -23,7 +23,10 @@ $45 a day (24 hours), or $67.50 for a weekend (Friday delivery, Monday pickup). 
 
 Delivery only, delivered by noon and picked up the next day. We deliver in Memphis, Olive Branch and Southaven only: Memphis city limits (ZIP 38103–38141) $25, free on orders of $150 or more; Olive Branch and Southaven, MS $40. 50% holds your date, balance at delivery. Full refund if you cancel 48 hours out; rain or storms reschedule free within 30 days. Renter must be 18+.
 
-See every game: https://porchandparty901.com/rentals/
+Porch & Party, Memphis
+Website: https://porchandparty901.com/rentals/
+Email: hello@porchandparty901.com
+Facebook Page: https://www.facebook.com/porchandparty901
 Call or text 901-355-1518 to book.
 
 ## Cornhole Set
@@ -41,7 +44,10 @@ $40 a day (24 hours), or $60 for a weekend (Friday delivery, Monday pickup). Bun
 
 Delivery only, delivered by noon and picked up the next day. We deliver in Memphis, Olive Branch and Southaven only: Memphis city limits (ZIP 38103–38141) $25, free on orders of $150 or more; Olive Branch and Southaven, MS $40. 50% holds your date, balance at delivery. Full refund if you cancel 48 hours out; rain or storms reschedule free within 30 days. Renter must be 18+.
 
-See every game: https://porchandparty901.com/rentals/
+Porch & Party, Memphis
+Website: https://porchandparty901.com/rentals/
+Email: hello@porchandparty901.com
+Facebook Page: https://www.facebook.com/porchandparty901
 Call or text 901-355-1518 to book.
 
 ## Giant Tumble Tower
@@ -59,7 +65,10 @@ $40 a day (24 hours), or $60 for a weekend (Friday delivery, Monday pickup). Bun
 
 Delivery only, delivered by noon and picked up the next day. We deliver in Memphis, Olive Branch and Southaven only: Memphis city limits (ZIP 38103–38141) $25, free on orders of $150 or more; Olive Branch and Southaven, MS $40. 50% holds your date, balance at delivery. Full refund if you cancel 48 hours out; rain or storms reschedule free within 30 days. Renter must be 18+.
 
-See every game: https://porchandparty901.com/rentals/
+Porch & Party, Memphis
+Website: https://porchandparty901.com/rentals/
+Email: hello@porchandparty901.com
+Facebook Page: https://www.facebook.com/porchandparty901
 Call or text 901-355-1518 to book.
 
 ## Giant Yard Pong
@@ -77,7 +86,10 @@ $35 a day (24 hours), or $52.50 for a weekend (Friday delivery, Monday pickup). 
 
 Delivery only, delivered by noon and picked up the next day. We deliver in Memphis, Olive Branch and Southaven only: Memphis city limits (ZIP 38103–38141) $25, free on orders of $150 or more; Olive Branch and Southaven, MS $40. 50% holds your date, balance at delivery. Full refund if you cancel 48 hours out; rain or storms reschedule free within 30 days. Renter must be 18+.
 
-See every game: https://porchandparty901.com/rentals/
+Porch & Party, Memphis
+Website: https://porchandparty901.com/rentals/
+Email: hello@porchandparty901.com
+Facebook Page: https://www.facebook.com/porchandparty901
 Call or text 901-355-1518 to book.
 
 ## Ladder Toss
@@ -95,7 +107,10 @@ $30 a day (24 hours), or $45 for a weekend (Friday delivery, Monday pickup). Bun
 
 Delivery only, delivered by noon and picked up the next day. We deliver in Memphis, Olive Branch and Southaven only: Memphis city limits (ZIP 38103–38141) $25, free on orders of $150 or more; Olive Branch and Southaven, MS $40. 50% holds your date, balance at delivery. Full refund if you cancel 48 hours out; rain or storms reschedule free within 30 days. Renter must be 18+.
 
-See every game: https://porchandparty901.com/rentals/
+Porch & Party, Memphis
+Website: https://porchandparty901.com/rentals/
+Email: hello@porchandparty901.com
+Facebook Page: https://www.facebook.com/porchandparty901
 Call or text 901-355-1518 to book.
 
 ## Giant Dice (Yardzee)
@@ -113,7 +128,10 @@ $25 a day (24 hours), or $37.50 for a weekend (Friday delivery, Monday pickup). 
 
 Delivery only, delivered by noon and picked up the next day. We deliver in Memphis, Olive Branch and Southaven only: Memphis city limits (ZIP 38103–38141) $25, free on orders of $150 or more; Olive Branch and Southaven, MS $40. 50% holds your date, balance at delivery. Full refund if you cancel 48 hours out; rain or storms reschedule free within 30 days. Renter must be 18+.
 
-See every game: https://porchandparty901.com/rentals/
+Porch & Party, Memphis
+Website: https://porchandparty901.com/rentals/
+Email: hello@porchandparty901.com
+Facebook Page: https://www.facebook.com/porchandparty901
 Call or text 901-355-1518 to book.
 
 ## Giant Checkers
@@ -131,7 +149,10 @@ $25 a day (24 hours), or $37.50 for a weekend (Friday delivery, Monday pickup). 
 
 Delivery only, delivered by noon and picked up the next day. We deliver in Memphis, Olive Branch and Southaven only: Memphis city limits (ZIP 38103–38141) $25, free on orders of $150 or more; Olive Branch and Southaven, MS $40. 50% holds your date, balance at delivery. Full refund if you cancel 48 hours out; rain or storms reschedule free within 30 days. Renter must be 18+.
 
-See every game: https://porchandparty901.com/rentals/
+Porch & Party, Memphis
+Website: https://porchandparty901.com/rentals/
+Email: hello@porchandparty901.com
+Facebook Page: https://www.facebook.com/porchandparty901
 Call or text 901-355-1518 to book.
 
 ## Giant Tic-Tac-Toe
@@ -149,7 +170,10 @@ $25 a day (24 hours), or $37.50 for a weekend (Friday delivery, Monday pickup). 
 
 Delivery only, delivered by noon and picked up the next day. We deliver in Memphis, Olive Branch and Southaven only: Memphis city limits (ZIP 38103–38141) $25, free on orders of $150 or more; Olive Branch and Southaven, MS $40. 50% holds your date, balance at delivery. Full refund if you cancel 48 hours out; rain or storms reschedule free within 30 days. Renter must be 18+.
 
-See every game: https://porchandparty901.com/rentals/
+Porch & Party, Memphis
+Website: https://porchandparty901.com/rentals/
+Email: hello@porchandparty901.com
+Facebook Page: https://www.facebook.com/porchandparty901
 Call or text 901-355-1518 to book.
 
 ## Giant Color Stack
@@ -167,5 +191,8 @@ $25 a day (24 hours), or $37.50 for a weekend (Friday delivery, Monday pickup). 
 
 Delivery only, delivered by noon and picked up the next day. We deliver in Memphis, Olive Branch and Southaven only: Memphis city limits (ZIP 38103–38141) $25, free on orders of $150 or more; Olive Branch and Southaven, MS $40. 50% holds your date, balance at delivery. Full refund if you cancel 48 hours out; rain or storms reschedule free within 30 days. Renter must be 18+.
 
-See every game: https://porchandparty901.com/rentals/
+Porch & Party, Memphis
+Website: https://porchandparty901.com/rentals/
+Email: hello@porchandparty901.com
+Facebook Page: https://www.facebook.com/porchandparty901
 Call or text 901-355-1518 to book.
