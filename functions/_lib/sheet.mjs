@@ -126,12 +126,13 @@ export function driveFileId(url) {
   return m ? (m[1] || m[2]) : null;
 }
 
+// Google Forms writes the sheet's local wall-clock time ("10/14/2026 9:15:02"); keep it as
+// written (stored as if UTC) so the page shows the same time the sheet does, on any server.
 function parseTimestamp(ts) {
-  const t = Date.parse(ts);
-  if (!Number.isNaN(t)) return t;
   const m = String(ts || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?/);
   if (m) return Date.UTC(+m[3], +m[1] - 1, +m[2], +m[4], +m[5], +(m[6] || 0));
-  return 0;
+  const t = Date.parse(ts);
+  return Number.isNaN(t) ? 0 : t;
 }
 
 export function rowsToRequests(values) {

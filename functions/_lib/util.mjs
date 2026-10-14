@@ -116,5 +116,11 @@ export async function putSetting(db, key, value) {
 
 export const STATUS_LABELS = {
   new: 'New', invoiced: 'Invoiced', deposit_paid: 'Deposit paid', paid: 'Paid', done: 'Done',
-  draft: 'Draft', sent: 'Invoiced', void: 'Void',
+  draft: 'Not sent yet', sent: 'Invoiced', void: 'Cancelled',
 };
+
+// A $0 line the customer would see as "Free" when nobody meant it: the decor line before
+// Valerie sets its price. Only the free-delivery line is marked 'free' on purpose.
+export function needsPrice(line) {
+  return lineTotal(line) === 0 && line.note !== 'free';
+}
