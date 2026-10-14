@@ -101,6 +101,14 @@ function groupServices(pages) {
     };
   });
   if (bySlug.size) throw new Error(`services pages not assigned to an offer family: ${[...bySlug.keys()].join(', ')}`);
+  // Party game rentals (owner-approved 2026-10-13) are a service line whose
+  // page lives at /rentals/ rather than under services/, so it is read by path
+  // here. Missing file is a hard error, never a silently shorter index.
+  groups.push({
+    heading: 'Party Game Rentals - from $25 a day',
+    blurb: 'Giant yard games delivered and set up in Memphis, Olive Branch and Southaven, indoors or outdoors, with next-day pickup.',
+    pages: [readPage('rentals/index.html')]
+  });
   return groups;
 }
 
@@ -142,7 +150,7 @@ const SECTIONS = [
     h1: 'Porch &amp; Party services in the Memphis metro area',
     title: 'Porch &amp; Party Services in Memphis | Porch, Party &amp; Grazing',
     description: 'Every Porch & Party service in one place: porch decorating from $350+, celebration setups from $300+, and grazing-table styling from $250+ in Memphis.',
-    lead: `Porch &amp; Party publishes three service families: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, and ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}. Every page below sits inside one of those three, so start with the family that matches the setup you need and open the page that names it.`,
+    lead: `Porch &amp; Party publishes three service families: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, and ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}. Every styling page below sits inside one of those three, so start with the family that matches the setup you need and open the page that names it. Party game rentals, from $25 a day, are listed last.`,
     summary: 'Pick the service family first - porch, celebration, or grazing - then open the page for the specific setup. Starting prices are published on each page and the exact quote depends on scope, date, location, and materials.',
     group: groupServices,
     faq: [

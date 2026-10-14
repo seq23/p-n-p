@@ -2,9 +2,9 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-10-13T15:18:26.432Z",
+  "generated_at": "2026-10-14T00:13:10.177Z",
   "enforcement": "block",
-  "pages_checked": 113,
+  "pages_checked": 114,
   "status": "PASS",
   "blocking_failures": 0,
   "summary": [
@@ -46,7 +46,7 @@
     {
       "id": "comparison_table",
       "blocking": false,
-      "pages_missing": 109,
+      "pages_missing": 110,
       "coverage_pct": 3.5,
       "why": "no comparison or cost table (agent request #2, 529 occurrences)"
     },
@@ -81,21 +81,21 @@
     {
       "id": "recommendation_summary",
       "blocking": false,
-      "pages_missing": 3,
-      "coverage_pct": 97.3,
+      "pages_missing": 4,
+      "coverage_pct": 96.5,
       "why": "no recommendation summary - asked for on 913 of 913 agent recommendations, the single most requested block"
     },
     {
       "id": "definition_callout",
       "blocking": false,
-      "pages_missing": 107,
+      "pages_missing": 108,
       "coverage_pct": 5.3,
       "why": "no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\""
     },
     {
       "id": "trust_block",
       "blocking": false,
-      "pages_missing": 107,
+      "pages_missing": 108,
       "coverage_pct": 5.3,
       "why": "no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor"
     },
@@ -109,7 +109,7 @@
     {
       "id": "protocol",
       "blocking": false,
-      "pages_missing": 108,
+      "pages_missing": 109,
       "coverage_pct": 4.4,
       "why": "no ordered protocol - ordered steps are what gets lifted for \"how do I\""
     },
@@ -123,13 +123,13 @@
     {
       "id": "prompt_template",
       "blocking": false,
-      "pages_missing": 113,
+      "pages_missing": 114,
       "coverage_pct": 0,
       "why": "no copy-ready prompt - the artifact this audience actually reuses"
     }
   ],
   "spec_producer_parity": {
-    "generator_sources_scanned": 74,
+    "generator_sources_scanned": 75,
     "blocks_in_spec": 10,
     "blocks_required_of_this_repo": 9,
     "orphan_blocks": [],
@@ -214,7 +214,8 @@
     "recommendation_summary": [
       "how-it-works.html",
       "index.html",
-      "pricing.html"
+      "pricing.html",
+      "rentals/index.html"
     ],
     "definition_callout": [
       "answers/anniversary-room-decorations-memphis.html",
@@ -425,6 +426,7 @@
       "local/index.html",
       "local/romantic-room-decorations-memphis.html",
       "pricing.html",
+      "rentals/index.html",
       "seasonal/christmas-porch-decorating-memphis.html",
       "seasonal/halloween-porch-decorating-memphis.html",
       "services/baby-shower-decor-memphis.html",
@@ -453,7 +455,8 @@
     "recommendation_summary": [
       "how-it-works.html",
       "index.html",
-      "pricing.html"
+      "pricing.html",
+      "rentals/index.html"
     ],
     "definition_callout": [
       "answers/anniversary-room-decorations-memphis.html",
@@ -543,6 +546,7 @@
       "local/index.html",
       "local/romantic-room-decorations-memphis.html",
       "pricing.html",
+      "rentals/index.html",
       "seasonal/christmas-porch-decorating-memphis.html",
       "seasonal/halloween-porch-decorating-memphis.html",
       "services/baby-shower-decor-memphis.html",
@@ -652,6 +656,7 @@
       "local/index.html",
       "local/romantic-room-decorations-memphis.html",
       "pricing.html",
+      "rentals/index.html",
       "seasonal/christmas-porch-decorating-memphis.html",
       "seasonal/halloween-porch-decorating-memphis.html",
       "services/baby-shower-decor-memphis.html",
@@ -766,6 +771,7 @@
       "local/index.html",
       "local/romantic-room-decorations-memphis.html",
       "pricing.html",
+      "rentals/index.html",
       "seasonal/christmas-porch-decorating-memphis.html",
       "seasonal/halloween-porch-decorating-memphis.html",
       "services/baby-shower-decor-memphis.html",
@@ -881,6 +887,7 @@
       "local/index.html",
       "local/romantic-room-decorations-memphis.html",
       "pricing.html",
+      "rentals/index.html",
       "seasonal/christmas-porch-decorating-memphis.html",
       "seasonal/halloween-porch-decorating-memphis.html",
       "services/baby-shower-decor-memphis.html",

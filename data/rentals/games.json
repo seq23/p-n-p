@@ -1,0 +1,43 @@
+{
+  "_why": "Single source for the party game rentals line (owner-approved 2026-10-13). scripts/generators/build_rentals_page.js renders /rentals/ from this file; docs/listings/facebook-marketplace.md quotes the same rates. Images under assets/rentals/ are AI placeholders (Workers AI flux-1-schnell, free allowance) until real photos replace them.",
+  "weekendMultiplier": 1.5,
+  "games": [
+    { "slug": "giant-connect-four", "name": "Giant Connect Four", "size": "4 ft tall", "use": "both", "dayRate": 45, "quantity": 1, "availableNow": true,
+      "blurb": "Four-in-a-row at yard scale. Big enough for kids and adults to play standing up.",
+      "alt": "Black father and daughter dropping red and yellow discs into a four-foot giant connect four game at a Memphis backyard party" },
+    { "slug": "cornhole", "name": "Cornhole Set", "size": "Regulation, 2 boards + 8 bags", "use": "both", "dayRate": 40, "quantity": 2, "availableNow": true,
+      "blurb": "Two regulation boards and eight bags. Two sets available for a tournament.",
+      "alt": "Black woman tossing a bean bag at a wooden cornhole board on a green lawn at a backyard party" },
+    { "slug": "giant-tumble-tower", "name": "Giant Tumble Tower", "size": "54 blocks, stacks to 5 ft", "use": "both", "dayRate": 40, "quantity": 1, "availableNow": false,
+      "blurb": "The giant block-stacking game. 54 wooden blocks that stack to about five feet before it falls.",
+      "alt": "Two Black teenagers pulling a block from a giant wooden tumble tower on a backyard lawn" },
+    { "slug": "giant-yard-pong", "name": "Giant Yard Pong", "size": "12 buckets", "use": "outdoor", "dayRate": 35, "quantity": 1, "availableNow": false,
+      "blurb": "Twelve buckets and balls for a lawn-sized pong game.",
+      "alt": "Black adult friends tossing a ball toward white buckets set up for giant yard pong on a lawn" },
+    { "slug": "ladder-toss", "name": "Ladder Toss", "size": "2 ladders + 6 bolas", "use": "both", "dayRate": 30, "quantity": 1, "availableNow": false,
+      "blurb": "Two ladders and six bolas. Easy to learn, good for every age at the party.",
+      "alt": "Black grandfather tossing a bola at a ladder toss frame while his grandchildren cheer on a backyard lawn" },
+    { "slug": "giant-dice", "name": "Giant Dice (Yardzee)", "size": "Oversized dice set", "use": "both", "dayRate": 25, "quantity": 1, "availableNow": false,
+      "blurb": "Oversized dice for Yardzee or any dice game. Score cards are easy to print at home.",
+      "alt": "Black children rolling oversized dice on a green lawn at a backyard party" },
+    { "slug": "giant-checkers", "name": "Giant Checkers", "size": "4 x 4 ft mat", "use": "both", "dayRate": 25, "quantity": 1, "availableNow": false,
+      "blurb": "A four-by-four-foot mat with oversized pieces. Works on a lawn, a porch or indoors.",
+      "alt": "Black mother and son playing giant checkers with oversized red and black pieces on a front porch" },
+    { "slug": "giant-tic-tac-toe", "name": "Giant Tic-Tac-Toe", "size": "3 ft frame", "use": "both", "dayRate": 25, "quantity": 1, "availableNow": false,
+      "blurb": "A three-foot wooden frame with big X and O pieces. The easiest game for the youngest guests.",
+      "alt": "Black girl placing an X piece in a three-foot wooden tic-tac-toe frame on a lawn while her friend waits her turn" },
+    { "slug": "giant-color-stack", "name": "Giant Color Stack", "size": "2 ft color-sorting stacking puzzle, ages 6+", "use": "both", "dayRate": 25, "quantity": 2, "availableNow": true,
+      "blurb": "A two-foot color-sorting stacking puzzle for ages 6 and up. Two available.",
+      "alt": "Young Black children sorting colorful rings onto a giant color stack puzzle on a green lawn" }
+  ],
+  "bundles": [
+    { "name": "Pick 3", "games": 3, "dayPrice": 99 },
+    { "name": "Pick 5", "games": 5, "dayPrice": 149 },
+    { "name": "Whole Yard", "games": 9, "dayPrice": 225, "weekendPrice": 335 }
+  ],
+  "zones": [
+    { "name": "Zone 1", "area": "Memphis city limits (ZIP codes 38103 to 38141)", "fee": 25, "freeOver": 150 },
+    { "name": "Zone 2", "area": "Olive Branch, MS and Southaven, MS", "fee": 40 }
+  ],
+  "hero": { "file": "/assets/rentals/hero.webp", "alt": "Black family and hosts playing giant connect four, cornhole and a giant tumble tower on a green lawn at a Memphis backyard party with balloons" }
+}

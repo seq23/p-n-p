@@ -439,4 +439,7 @@ module.exports = {
   renderPage: (entry) => normalizeHtmlUrls(renderPage(entry)),
   nav: () => normalizeHtmlUrls(nav()),
   footer: () => normalizeHtmlUrls(footer()),
+  // Exported for scripts/generators/build_rentals_page.js so its data-quote-cta
+  // hooks report through the same Clarity event as every opted-in page.
+  quoteEventScript,
 };
