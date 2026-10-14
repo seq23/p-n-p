@@ -38,7 +38,8 @@ const MARK = {
   footer: 'data-contact="footer"',
   direct: 'data-contact="direct"',
   popular: 'data-contact="popular"',
-  footerRoute: 'data-footer-link="primary-route"'
+  footerRoute: 'data-footer-link="primary-route"',
+  safety: 'data-contact="renter-safety"'
 };
 
 /**
@@ -57,6 +58,12 @@ const footerContact = () =>
 
 const contactDirect = () =>
   `<div class="contact-direct" ${MARK.direct}><p><strong>Prefer to talk it through?</strong> <a href="${C.telHref}">Call ${C.telephoneDisplay}</a> or <a href="${C.smsHref}">text ${C.telephoneDisplay}</a>.</p><p><a href="${C.googleBusinessProfileUrl}" rel="noopener" target="_blank">${GBP_LABEL}</a>: see Porch and Party on Google Maps.</p></div>`;
+
+// Owner-approved 2026-10-14: the renter-safety line sits next to the quote
+// form link on contact.html. Text lives in data/offers/services.json renterSafety.
+const SAFETY = offers.renterSafety;
+const renterSafety = () => `<p class="muted" ${MARK.safety}>${SAFETY.line}</p>`;
+const SAFETY_BLOCK = /<p class="muted" data-contact="renter-safety">[\s\S]*?<\/p>/;
 
 const popularQuestions = () =>
   `<section class="section section-soft" ${MARK.popular}><div class="container"><div class="answer-block"><span class="eyebrow">Popular questions</span><h2>What Memphis hosts ask most</h2></div><ul class="footer-list">${priority.pages.map((p) => `<li><a href="${p.href}">${p.label}</a></li>`).join('')}</ul><p class="muted"><a href="${C.telHref}">${CALL_LABEL}</a> for a quick answer on your date.</p></div></section>`;
@@ -138,6 +145,13 @@ function applyContactSurface(html, rel) {
     if (m < 0 || !FOOTER_EMAIL.test(tail)) throw new Error(`${rel}: no hello@ paragraph in <main> to anchor the call/text block`);
     out = out.slice(0, m) + tail.replace(FOOTER_EMAIL, (x) => x + contactDirect());
   }
+  if (isContact && out.includes(MARK.safety)) out = out.replace(SAFETY_BLOCK, () => renterSafety());
+  if (isContact && !out.includes(MARK.safety)) {
+    const form = out.indexOf(`href="${offers.quoteUrl}"`);
+    const end = form < 0 ? -1 : out.indexOf('</p>', out.indexOf('</div>', form));
+    if (end < 0) throw new Error(`${rel}: no quote-form link and note to anchor the renter-safety line`);
+    out = out.slice(0, end + 4) + renterSafety() + out.slice(end + 4);
+  }
   if ((isContact || isHome) && out.includes(MARK.popular)) {
     // Re-render, so a page added to data/ops/priority_pages.json reaches the
     // block on the next pass instead of only on a page that never had one.
@@ -155,6 +169,6 @@ function applyContactSurface(html, rel) {
 module.exports = {
   CONTACT: C, CALL_LABEL, GBP_LABEL, MARK, PRIORITY_PAGES: priority.pages,
   BUSINESS_TYPES: T.additionalType, PRIMARY_ROUTE: R,
-  headerCall, footerContact, footerRouteLink, contactDirect, popularQuestions,
+  headerCall, footerContact, footerRouteLink, contactDirect, popularQuestions, renterSafety, SAFETY,
   businessContactFields, patchJsonLd, applyContactSurface
 };

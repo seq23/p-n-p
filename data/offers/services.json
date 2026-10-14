@@ -2,6 +2,11 @@
   "brandName": "Porch & Party",
   "domain": "https://porchandparty901.com",
   "quoteUrl": "https://forms.gle/vHjfKtRRAnGV3HxFA",
+  "renterSafety": {
+    "line": "We ask every renter for a government photo ID and a social media link. It keeps our games and your party safe.",
+    "rentalFormNote": "The request form takes about three minutes and needs a Google sign-in for the ID upload.",
+    "provenance": "Owner-approved 2026-10-14. contact.html carries the line through scripts/lib/contact_surface.js; rentals/index.html through scripts/generators/build_rentals_page.js."
+  },
   "contact": {
     "telephone": "+1-901-355-1518",
     "telephoneDisplay": "901-355-1518",
@@ -35,7 +40,7 @@
         "On-site porch styling and installation for Memphis-area homes"
       ],
       "notes": [
-        "Optional take-down is available for an additional fee.",
+        "Takedown starts at $75, quoted with your setup.",
         "Final pricing depends on scale, material choice, and setup complexity."
       ]
     },
@@ -68,6 +73,19 @@
         "Base pricing covers styling only.",
         "Food is not included by default and can be sourced for an additional fee."
       ]
+    }
+  },
+  "addOns": {
+    "takedown": {
+      "name": "Takedown",
+      "fromPrice": 75,
+      "line": "Takedown starts at $75, quoted with your setup.",
+      "appliesTo": [
+        "porch",
+        "celebration"
+      ],
+      "notFor": "Party game rentals: rental pickup is included.",
+      "provenance": "Owner-approved 2026-10-14 ($75, corrected from $95 the same day). Takedown is quoted with the porch or event-decor setup; scripts/validators/validate_contact_surface.js pins this line on every page that quotes it."
     }
   },
   "primaryIdentity": "Porch & Party is a Memphis-based porch decorating and celebration styling company offering seasonal front porch decorating, hotel-room decor, party decor, and grazing table setups in the Memphis metro area."

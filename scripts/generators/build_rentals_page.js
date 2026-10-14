@@ -204,6 +204,7 @@ function render() {
       <div class="container">
         <div class="answer-block"><span class="eyebrow">How Booking Works</span><h2>Four steps from inquiry to pickup</h2></div>
         <div class="steps">${STEPS.map(([h, p], i) => `<div class="step"><div class="step-number">${i + 1}</div><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>
+        <p class="muted" style="text-align: center; margin-top: 16px;" data-rentals="renter-safety">${offers.renterSafety.line} ${offers.renterSafety.rentalFormNote}</p>
         <div class="btn-row centered-cta-row"><a href="/contact" class="btn-primary" data-quote-cta="rentals-steps">Request Game Rentals</a></div>
       </div>
     </section>
