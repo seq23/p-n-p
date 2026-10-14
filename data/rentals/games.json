@@ -1,43 +1,131 @@
 {
-  "_why": "Single source for the party game rentals line (owner-approved 2026-10-13). scripts/generators/build_rentals_page.js renders /rentals/ from this file; docs/listings/facebook-marketplace.md quotes the same rates. Images under assets/rentals/ are AI placeholders (Workers AI flux-1-schnell, free allowance) until real photos replace them.",
-  "weekendMultiplier": 1.5,
+  "_why": "Single source for the party game rentals line (owner-approved 2026-10-13; pricing v2 and the Giant Uno / Grab the Mic swap owner-approved 2026-10-14). scripts/generators/build_rentals_page.js renders /rentals/ from this file; docs/listings/facebook-marketplace.md and facebook-page.md quote the same rates and scripts/validators/validate_rentals_page.js holds them to it. Images under assets/rentals/ are AI placeholders (Workers AI flux-1-schnell, free allowance) until real photos replace them.",
+  "rates": {
+    "day": 40,
+    "weekend": 60,
+    "_note": "Flat per game: $40 for a 24-hour day, $60 for a weekend (Friday delivery, Monday pickup)."
+  },
   "games": [
-    { "slug": "giant-connect-four", "name": "Giant Connect Four", "size": "4 ft tall", "use": "both", "dayRate": 45, "quantity": 1, "availableNow": true,
+    {
+      "slug": "giant-connect-four",
+      "name": "Giant Connect Four",
+      "size": "4 ft tall",
+      "use": "both",
+      "quantity": 1,
+      "availableNow": true,
       "blurb": "Four-in-a-row at yard scale. Big enough for kids and adults to play standing up.",
-      "alt": "Black father and daughter dropping red and yellow discs into a four-foot giant connect four game at a Memphis backyard party" },
-    { "slug": "cornhole", "name": "Cornhole Set", "size": "Regulation, 2 boards + 8 bags", "use": "both", "dayRate": 40, "quantity": 2, "availableNow": true,
+      "alt": "Black father and daughter dropping red and yellow discs into a four-foot giant connect four game at a Memphis backyard party"
+    },
+    {
+      "slug": "cornhole",
+      "name": "Cornhole Set",
+      "size": "Regulation, 2 boards + 8 bags",
+      "use": "both",
+      "quantity": 2,
+      "availableNow": true,
       "blurb": "Two regulation boards and eight bags. Two sets available for a tournament.",
-      "alt": "Black woman tossing a bean bag at a wooden cornhole board on a green lawn at a backyard party" },
-    { "slug": "giant-tumble-tower", "name": "Giant Tumble Tower", "size": "54 blocks, stacks to 5 ft", "use": "both", "dayRate": 40, "quantity": 1, "availableNow": false,
+      "alt": "Black woman tossing a bean bag at a wooden cornhole board on a green lawn at a backyard party"
+    },
+    {
+      "slug": "giant-tumble-tower",
+      "name": "Giant Tumble Tower",
+      "size": "54 blocks, stacks to 5 ft",
+      "use": "both",
+      "quantity": 1,
+      "availableNow": false,
       "blurb": "The giant block-stacking game. 54 wooden blocks that stack to about five feet before it falls.",
-      "alt": "Two Black boys sliding a block from a giant wooden tumble tower on a backyard lawn at a party" },
-    { "slug": "giant-yard-pong", "name": "Giant Yard Pong", "size": "12 buckets", "use": "outdoor", "dayRate": 35, "quantity": 1, "availableNow": false,
+      "alt": "Two Black boys sliding a block from a giant wooden tumble tower on a backyard lawn at a party"
+    },
+    {
+      "slug": "giant-yard-pong",
+      "name": "Giant Yard Pong",
+      "size": "12 buckets",
+      "use": "outdoor",
+      "quantity": 1,
+      "availableNow": false,
       "blurb": "Twelve buckets and balls for a lawn-sized pong game.",
-      "alt": "Black adult friends tossing a ball toward white buckets set up for giant yard pong on a lawn" },
-    { "slug": "ladder-toss", "name": "Ladder Toss", "size": "2 ladders + 6 bolas", "use": "both", "dayRate": 30, "quantity": 1, "availableNow": false,
+      "alt": "Black adult friends tossing a ball toward white buckets set up for giant yard pong on a lawn"
+    },
+    {
+      "slug": "ladder-toss",
+      "name": "Ladder Toss",
+      "size": "2 ladders + 6 bolas",
+      "use": "both",
+      "quantity": 1,
+      "availableNow": false,
       "blurb": "Two ladders and six bolas. Easy to learn, good for every age at the party.",
-      "alt": "Black grandfather tossing a bola at a ladder toss frame while his grandchildren cheer on a backyard lawn" },
-    { "slug": "giant-dice", "name": "Giant Dice (Yardzee)", "size": "Oversized dice set", "use": "both", "dayRate": 25, "quantity": 1, "availableNow": false,
-      "blurb": "Oversized dice for Yardzee or any dice game. Score cards are easy to print at home.",
-      "alt": "Black children rolling oversized dice on a green lawn at a backyard party" },
-    { "slug": "giant-checkers", "name": "Giant Checkers", "size": "4 x 4 ft mat", "use": "both", "dayRate": 25, "quantity": 1, "availableNow": false,
+      "alt": "Black grandfather tossing a bola at a ladder toss frame while his grandchildren cheer on a backyard lawn"
+    },
+    {
+      "slug": "giant-uno",
+      "name": "Giant Uno",
+      "size": "Oversized Uno cards, ages 7+",
+      "use": "both",
+      "quantity": 1,
+      "availableNow": false,
+      "blurb": "Oversized Uno cards, same rules as the original. Play on a table or spread out on the lawn.",
+      "alt": "Black family and friends on a picnic blanket on a backyard lawn holding up oversized red, yellow, green and blue cards for a giant Uno game"
+    },
+    {
+      "slug": "giant-checkers",
+      "name": "Giant Checkers",
+      "size": "4 x 4 ft mat",
+      "use": "both",
+      "quantity": 1,
+      "availableNow": false,
       "blurb": "A four-by-four-foot mat with oversized pieces. Works on a lawn, a porch or indoors.",
-      "alt": "Black mother and her young son kneeling on a giant checkers mat on a backyard lawn, moving oversized black checker pieces" },
-    { "slug": "giant-tic-tac-toe", "name": "Giant Tic-Tac-Toe", "size": "3 ft frame", "use": "both", "dayRate": 25, "quantity": 1, "availableNow": false,
-      "blurb": "A three-foot wooden frame with big X and O pieces. The easiest game for the youngest guests.",
-      "alt": "Black girl placing an X piece in a three-foot wooden tic-tac-toe frame on a lawn while her friend waits her turn" },
-    { "slug": "giant-color-stack", "name": "Giant Color Stack", "size": "2 ft color-sorting stacking puzzle, ages 6+", "use": "both", "dayRate": 25, "quantity": 2, "availableNow": true,
-      "blurb": "A two-foot color-sorting stacking puzzle for ages 6 and up. Two available.",
-      "alt": "Young Black children sorting colorful rings onto a giant color stack puzzle on a green lawn" }
+      "alt": "Black mother and her young son kneeling on a giant checkers mat on a backyard lawn, moving oversized black checker pieces"
+    },
+    {
+      "slug": "grab-the-mic",
+      "name": "Grab the Mic",
+      "size": "Tabletop, 2 to 10 players, ages 8+",
+      "use": "indoor",
+      "quantity": 1,
+      "availableNow": false,
+      "blurb": "The Lucky Egg tabletop singing party game. Flip a word card, and the first player to grab the foam mic and sing a lyric with that word scores. Our rain-plan game.",
+      "alt": "Black friends laughing around a party table while a woman holds a microphone mid-song, a stack of word cards on the table"
+    },
+    {
+      "slug": "giant-color-stack",
+      "name": "Giant Color Stack",
+      "size": "2 ft tall, 5 poles and rings in 4 colors, ages 6+",
+      "use": "both",
+      "quantity": 2,
+      "availableNow": true,
+      "blurb": "A two-foot color-sorting stacking puzzle: slide the sky blue, lime green, yellow and pink rings onto five poles until every pole is one color. Two sets for head-to-head races.",
+      "alt": "Black mother and young children sliding sky blue, lime green, yellow and pink rings onto the light-blue poles of two giant color stack sets side by side on a backyard party table"
+    }
   ],
   "bundles": [
-    { "name": "Pick 3", "games": 3, "dayPrice": 99 },
-    { "name": "Pick 5", "games": 5, "dayPrice": 149 },
-    { "name": "Whole Yard", "games": 9, "dayPrice": 225, "weekendPrice": 335 }
+    {
+      "name": "Pick 3",
+      "games": 3,
+      "dayPrice": 110
+    },
+    {
+      "name": "Pick 5",
+      "games": 5,
+      "dayPrice": 175
+    },
+    {
+      "name": "Whole Yard",
+      "games": 9,
+      "dayPrice": 275
+    }
   ],
-  "zones": [
-    { "name": "Zone 1", "area": "Memphis city limits (ZIP codes 38103 to 38141)", "fee": 25, "freeOver": 150 },
-    { "name": "Zone 2", "area": "Olive Branch, MS and Southaven, MS", "fee": 40 }
-  ],
-  "hero": { "file": "/assets/rentals/hero.webp", "alt": "Black family reunion in a Memphis backyard with a giant connect four, a cornhole board and a giant tumble tower set up on the lawn, balloons and a party table behind" }
+  "delivery": {
+    "fee": 30,
+    "freeOver": 150,
+    "areas": [
+      "Memphis",
+      "Olive Branch",
+      "Southaven"
+    ]
+  },
+  "damageDeposit": 50,
+  "hero": {
+    "file": "/assets/rentals/hero.webp",
+    "alt": "Black family reunion in a Memphis backyard with a giant connect four, a cornhole board and a giant tumble tower set up on the lawn, balloons and a party table behind"
+  }
 }
