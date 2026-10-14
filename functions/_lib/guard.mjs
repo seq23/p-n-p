@@ -23,8 +23,23 @@ export async function guard(context) {
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
   if (method !== 'GET' && method !== 'HEAD') {
+    // Same-site check. The site answers on both porchandparty901.com and
+    // www.porchandparty901.com, and some phone browsers send "Origin: null"
+    // on a plain form post, so compare hosts without the www. prefix and let
+    // the browser's own Sec-Fetch-Site verdict settle the rest. The session
+    // cookie is SameSite=Lax, which already blocks cross-site posts.
     const origin = request.headers.get('Origin');
-    if (origin && origin !== url.origin) return harden(new Response('cross-site request refused', { status: 403 }));
+    const fetchSite = (request.headers.get('Sec-Fetch-Site') || '').toLowerCase();
+    const bare = (h) => String(h || '').toLowerCase().replace(/^www\./, '');
+    let sameSite = true;
+    if (origin && origin !== 'null') {
+      let originHost = '';
+      try { originHost = new URL(origin).host; } catch { originHost = ''; }
+      sameSite = bare(originHost) === bare(url.host);
+    } else if (fetchSite && fetchSite !== 'same-origin' && fetchSite !== 'same-site' && fetchSite !== 'none') {
+      sameSite = false;
+    }
+    if (!sameSite) return harden(new Response('cross-site request refused', { status: 403 }));
   }
   const open = PUBLIC.some((rule) => rule(method, url.pathname));
   if (!open && !(await isAuthed(request, env))) {
