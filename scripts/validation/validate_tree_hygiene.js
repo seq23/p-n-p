@@ -65,6 +65,7 @@ const allowedRootDirs = new Set([
   'guides',
   'hubs',
   'local',
+  'rentals',
   'reports',
   'scripts',
   'seasonal',

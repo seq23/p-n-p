@@ -952,9 +952,9 @@
       "route": "/services/index",
       "rendered_file": "services/index.html",
       "state": "FROZEN",
-      "accepted_sha256": "aac011e06a216a85bb7d7395f9ae8503ebb3f138a0ce43b8bafad4b070fb944c",
-      "cache_file": "data/release/frozen_accepted_outputs/aac011e06a216a85bb7d7395f9ae8503ebb3f138a0ce43b8bafad4b070fb944c.html.gz",
-      "cache_sha256": "eae5f9bfdb6ce87035ff574806c6358ba159a88d9c486fb31d021c5a59549d88",
+      "accepted_sha256": "03018c156440509e896cb98a987f2b89a67fa1451892db0a0b781488f247a806",
+      "cache_file": "data/release/frozen_accepted_outputs/03018c156440509e896cb98a987f2b89a67fa1451892db0a0b781488f247a806.html.gz",
+      "cache_sha256": "d57c3e34aa3aac7b4ef749d0109d8b8d5844330d82895cbad5d9edfa58e364dc",
       "accepted_at": "2026-07-24"
     },
     {

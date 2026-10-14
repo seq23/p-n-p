@@ -18,7 +18,7 @@ const fs = require('fs');
 const path = require('path');
 
 const SECTION_DIRS = ['authority', 'answers', 'areas', 'comparisons', 'corporate',
-  'events', 'faq', 'guides', 'hubs', 'local', 'seasonal', 'services'];
+  'events', 'faq', 'guides', 'hubs', 'local', 'rentals', 'seasonal', 'services'];
 
 const TERRITORIES = {
   seasonal_porch_decorating: {
