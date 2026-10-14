@@ -11,8 +11,9 @@
  * come from data/offers/services.json through scripts/lib/contact_surface.js.
  *
  * Deterministic: no dates, no randomness, so a re-render of unchanged data is
- * byte-identical and the sitemap lastmod ledger does not advance. `--check`
- * exits 1 if the file on disk differs from a fresh render.
+ * byte-identical and the sitemap lastmod ledger does not advance.
+ * scripts/validators/validate_rentals_page.js asserts the file on disk equals
+ * a fresh render.
  */
 const fs = require('fs');
 const path = require('path');
@@ -235,40 +236,31 @@ function render() {
 `;
 }
 
-// The retrofit passes that run after every producer (README, "Read this
-// before running build:all") are applied here too, so a fresh render is
-// already in their output form and the passes are a no-op on it. Clarity's
-// loader is owned by scripts/install_clarity.js, which exports nothing, so the
-// block it wrote is carried over from disk rather than dropped: losing it is
-// the silent analytics blackout the README describes.
-const CLARITY = /<script data-clarity-loader>[\s\S]*?<\/script>/;
-const before = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;
-let html = contactSurface.applyContactSurface(normalizeHtmlUrls(render()), 'rentals/index.html');
-if (typeof html !== 'string') html = html.html;
-const loader = before && before.match(CLARITY);
-if (loader) html = html.replace('</head>', `${loader[0]}\n</head>`);
-// Same for the related-pages block scripts/build_related_navigation.js owns.
-const RELATED = /<section[^>]+data-nav="related-pages"[\s\S]*?<\/section>/i;
-const related = before && before.match(RELATED);
-if (related) html = html.replace('</main>', () => `${related[0]}</main>`);
-if (process.argv.includes('--check')) {
-  const errors = [];
-  if (before !== html) errors.push('rentals/index.html differs from a fresh render: run npm run build:rentals');
-  // The Marketplace copy is pasted by hand into Facebook, so a rate change in
-  // games.json that skips it would put two prices for one game in public.
-  const listing = fs.readFileSync(path.join(ROOT, 'docs/listings/facebook-marketplace.md'), 'utf8');
-  const blocks = listing.split(/^## /m).slice(1);
-  if (blocks.length !== data.games.length) errors.push(`facebook-marketplace.md has ${blocks.length} listings, games.json has ${data.games.length}`);
-  for (const g of data.games) {
-    const b = blocks.find((x) => x.startsWith(`${g.name}\n`));
-    if (!b) { errors.push(`facebook-marketplace.md has no listing for ${g.name}`); continue; }
-    if (!b.includes(`**Price:** $${g.dayRate} (per day)`)) errors.push(`${g.name}: Marketplace price is not the $${g.dayRate} day rate`);
-    if (!b.includes(`**Title:** ${g.name} rental – Memphis`)) errors.push(`${g.name}: Marketplace title is not "${g.name} rental – Memphis"`);
-    if (g.availableNow !== b.includes('AVAILABLE NOW')) errors.push(`${g.name}: Marketplace availability disagrees with games.json`);
-  }
-  if (errors.length) { for (const e of errors) console.error(`rentals: ${e}`); process.exit(1); }
-  console.log(`rentals page: up to date; ${data.games.length} Marketplace listings match games.json`);
-} else {
+function finalHtml(before) {
+  // The retrofit passes that run after every producer (README, "Read this
+  // before running build:all") are applied here too, so a fresh render is
+  // already in their output form and the passes are a no-op on it. Clarity's
+  // loader is owned by scripts/install_clarity.js, which exports nothing, so the
+  // block it wrote is carried over from disk rather than dropped: losing it is
+  // the silent analytics blackout the README describes.
+  const CLARITY = /<script data-clarity-loader>[\s\S]*?<\/script>/;
+  let html = contactSurface.applyContactSurface(normalizeHtmlUrls(render()), 'rentals/index.html');
+  if (typeof html !== 'string') html = html.html;
+  const loader = before && before.match(CLARITY);
+  if (loader) html = html.replace('</head>', `${loader[0]}\n</head>`);
+  // Same for the related-pages block scripts/build_related_navigation.js owns.
+  const RELATED = /<section[^>]+data-nav="related-pages"[\s\S]*?<\/section>/i;
+  const related = before && before.match(RELATED);
+  if (related) html = html.replace('</main>', () => `${related[0]}</main>`);
+  return html;
+}
+
+module.exports = { finalHtml, data, OUT };
+
+if (require.main === module) {
+  const before = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;
+  const html = finalHtml(before);
+
   fs.mkdirSync(path.dirname(OUT), { recursive: true });
   if (before !== html) fs.writeFileSync(OUT, html);
   console.log(`rentals page: ${before === html ? 'unchanged' : 'written'} (${data.games.length} games)`);
