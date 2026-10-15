@@ -42,8 +42,8 @@
  *    file and a filtered-out trigger produce exactly the same silence and
  *    exactly the same absence of logs. Both are now checked here with a real
  *    parser rather than the regex model used by the rules above. The repo
- *    root is the Cloudflare Pages publish root and validate:tree-hygiene
- *    forbids node_modules there, so the parser is PyYAML through python3
+ *    publish root is .pages-output (assembled without node_modules) and
+ *    the YAML parser must not depend on an npm install, so it is PyYAML through python3
  *    (the runner image ships it for the system interpreter; the lanes that
  *    use setup-python pip-install it). No parser is a hard failure of the
  *    scan, not a pass.

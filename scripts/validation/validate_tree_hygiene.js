@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 const fs = require('fs');
+const { execFileSync } = require('child_process');
 const path = require('path');
 
 const root = path.resolve(__dirname, '..', '..');
@@ -83,13 +84,18 @@ const allowedRootDirs = new Set([
     'workers',
     // Gitignored local state of `wrangler pages dev` / local D1 (npm run admin:dev).
     '.wrangler',
+    // Dependency install for functions/ (pdf-lib); guarded below: never tracked, never published.
+    'node_modules',
     // Holds the content-pattern contract derived from the agent recommendation
     // corpus. Read by the generators, so it belongs in the tree.
     '.clarity'
 ]);
 
+// node_modules is NOT in this set: npm ci creates it in CI and the Cloudflare Pages build
+// creates it to bundle functions/ dependencies (pdf-lib). The harms it used to stand for are
+// pinned directly below: it must never be tracked in git, never be copied into the publish
+// root (.pages-output, see scripts/assemble_pages_output.js), and must stay gitignored.
 const forbiddenNames = new Set([
-  'node_modules',
   '.validation-runtime',
   '.validation-cache',
   '.cache',
@@ -98,6 +104,16 @@ const forbiddenNames = new Set([
 ]);
 
 const errors = [];
+
+{
+  const tracked = execFileSync('git', ['ls-files', '--', 'node_modules'], { cwd: root, encoding: 'utf8' }).trim();
+  if (tracked) errors.push(`node_modules is tracked in git (${tracked.split('\n').length} files); it must stay out of the repository`);
+  const ignore = fs.existsSync(path.join(root, '.gitignore')) ? fs.readFileSync(path.join(root, '.gitignore'), 'utf8') : '';
+  if (!/^node_modules\/?$/m.test(ignore)) errors.push('.gitignore does not ignore node_modules');
+  const assemble = fs.readFileSync(path.join(root, 'scripts/assemble_pages_output.js'), 'utf8');
+  if (!/'node_modules'/.test(assemble)) errors.push('scripts/assemble_pages_output.js no longer excludes node_modules from the publish root');
+  if (fs.existsSync(path.join(root, '.pages-output', 'node_modules'))) errors.push('node_modules was copied into the publish root .pages-output');
+}
 
 for (const item of fs.readdirSync(root, { withFileTypes: true })) {
   if (item.name === '.git') continue;
