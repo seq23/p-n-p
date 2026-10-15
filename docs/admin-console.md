@@ -18,6 +18,9 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   `PNP-YYYY-NNNN`; pay plan (`pay_plan`: half / full / custom, migration 0003) decides what is asked for now;
   half is the default, full asks for the whole total by the due date, custom is a typed deposit.
   "See it before sending" saves the draft and shows the email inline on the invoice page.
+  `GET /admin/invoices/:id/invoice.pdf` renders the same invoice as a PDF (functions/_lib/pdf.mjs,
+  pdf-lib) for customers reached by text; "Text the invoice (PDF)" shares it from the phone and
+  the `texted` status action marks it sent without an email.
 - **Send**: HTML email from hello@porchandparty901.com with a copy (Bcc) to hello@; payment block
   from Settings (Zelle, Cash App, QR as an inline CID image, which Gmail renders; Gmail strips
   data: URIs). A test send goes to hello@ only with a `TEST` subject and changes nothing.
