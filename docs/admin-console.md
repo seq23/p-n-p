@@ -15,7 +15,9 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
 - **Invoices**: prefilled from the request with live prices from `data/rentals/games.json` and
   `data/offers/services.json` (bundles priced at the cheapest Pick 3 / Pick 5 / Whole Yard mix,
   delivery free from the threshold, refundable damage deposit, takedown add-on). Numbers are
-  `PNP-YYYY-NNNN`; deposit defaults to 50 %.
+  `PNP-YYYY-NNNN`; pay plan (`pay_plan`: half / full / custom, migration 0003) decides what is asked for now;
+  half is the default, full asks for the whole total by the due date, custom is a typed deposit.
+  "See it before sending" saves the draft and shows the email inline on the invoice page.
 - **Send**: HTML email from hello@porchandparty901.com with a copy (Bcc) to hello@; payment block
   from Settings (Zelle, Cash App, QR as an inline CID image, which Gmail renders; Gmail strips
   data: URIs). A test send goes to hello@ only with a `TEST` subject and changes nothing.

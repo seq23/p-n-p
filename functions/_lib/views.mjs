@@ -1,7 +1,7 @@
 // Server-rendered pages for the /admin console. Built for one non-technical person on a phone:
 // plain words, one obvious button per step, big tap targets (48 px+), 16 px+ type, no hover-only
 // controls, no framework, no analytics. Secondary things fold under "More".
-import { esc, money, lineTotal, invoiceTotal, prettyDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice } from './util.mjs';
+import { esc, money, lineTotal, invoiceTotal, prettyDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
 
 const CSS = `
 :root{--cream:#faf7f2;--ink:#3b302a;--accent:#b85f40;--line:#e3d8cb;--muted:#5f5148;--card:#fff;--ok:#3f6b3a;--warn:#8a5212}
@@ -44,6 +44,12 @@ textarea{min-height:90px}
 .notice a{font-weight:600}
 .sumlines{width:100%;border-collapse:collapse}.sumlines td{padding:10px 0;border-bottom:1px solid var(--line);vertical-align:top}
 .sumlines .amt{text-align:right;white-space:nowrap;padding-left:12px}
+.calc{margin-top:10px;border-top:2px solid var(--ink);padding-top:8px}.calc .spread{padding:4px 0}.calc .now{color:var(--accent);font-size:1.15rem}
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}@media(max-width:520px){.plans{grid-template-columns:1fr}}
+.plan{display:flex;gap:8px;align-items:flex-start;border:1.5px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;background:#fff;margin:0}
+.plan input{margin-top:5px;width:auto}.plan strong{display:block}.plan small{color:var(--muted);line-height:1.3;display:block}
+.plan:has(input:checked){border-color:var(--accent);background:#fbf0ea}
+.emailframe{width:100%;border:0;display:block;min-height:720px;background:#faf7f2}
 .bigtotal{font-family:"Cormorant Garamond",Georgia,serif;font-size:1.7rem;font-weight:600}
 .line{border:1px solid var(--line);border-radius:12px;padding:12px;margin:0 0 10px;background:var(--cream)}
 .line .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.line .grid .full{grid-column:1/-1}
@@ -217,19 +223,25 @@ function lineEditor(line) {
 const EDITOR_JS = `
 (function(){
   var form=document.getElementById('inv');if(!form)return;
-  var list=form.querySelector('[data-lines]'),tpl=document.getElementById('line-tpl'),dep=form.querySelector('[name=deposit]'),touched=form.querySelector('[name=deposit_touched]');
-  var depTouched=touched&&touched.value==='1';
+  var list=form.querySelector('[data-lines]'),tpl=document.getElementById('line-tpl'),dep=form.querySelector('[name=deposit]');
+  function plan(){var r=form.querySelector('[name=pay_plan]:checked');return r?r.value:'half';}
+  function txt(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
+  function show(id,on){var el=document.getElementById(id);if(el)el.hidden=!on;}
   function fmt(c){return '$'+(c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
   function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
   function recalc(){var t=0,rows='',missing=[];list.querySelectorAll('[data-line]').forEach(function(el){var d=el.querySelector('[name=line_desc]').value.trim();if(!d)return;var q=parseFloat(el.querySelector('[data-qty]').value)||0,p=Math.round((parseFloat(el.querySelector('[data-price]').value)||0)*100),lt=Math.round(q*p),r=el.querySelector('[name=line_refundable]').value==='1',free=el.querySelector('[name=line_note]').value==='free';t+=lt;if(lt===0&&!free)missing.push(d);
       rows+='<tr><td>'+esc(d)+(q!==1?' &times; '+q:'')+(r?'<div class="muted">Given back after the event</div>':'')+'</td><td class="amt">'+(lt===0?(free?'Free':'<strong style="color:#8f3427">Price needed</strong>'):fmt(lt))+'</td></tr>';});
     var pn=document.getElementById('price-needed');if(pn){pn.hidden=!missing.length;pn.querySelector('span').textContent=missing.join(', ');}
-    if(dep&&!depTouched){dep.value=(Math.round(t/2)/100).toFixed(2);}
-    var dc=Math.round((parseFloat(dep&&dep.value)||0)*100);
-    document.getElementById('sum-lines').innerHTML=rows||'<tr><td class="muted">No lines yet. Tap Change the invoice.</td><td></td></tr>';
-    document.getElementById('sum-total').textContent=fmt(t);document.getElementById('sum-deposit').textContent=fmt(dc);
-    var due=form.querySelector('[name=due_date]').value;document.getElementById('sum-due').textContent=due?new Date(due+'T12:00:00Z').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'}):'';}
-  form.addEventListener('input',function(e){if(e.target===dep){depTouched=true;touched.value='1';}recalc();});
+    var p=plan();show('custom-wrap',p==='custom');
+    var dc=p==='full'?t:(p==='custom'?Math.min(t,Math.round((parseFloat(dep&&dep.value)||0)*100)):Math.round(t/2));
+    if(p!=='custom'&&dep)dep.value=(dc/100).toFixed(2);
+    document.getElementById('sum-lines').innerHTML=rows||'<tr><td class="muted">Nothing in the total yet. Tap Change what goes into the total.</td><td></td></tr>';
+    txt('sum-total',fmt(t));txt('sum-deposit',fmt(dc));txt('sum-rest',fmt(t-dc));
+    show('sum-now-row',p!=='full');show('sum-rest-row',p!=='full');
+    txt('sum-now-label',p==='half'?'Deposit asked for now (half)':'Deposit asked for now');
+    txt('sum-due-label',p==='full'?'Full amount due by':'Rest due by');
+    var due=form.querySelector('[name=due_date]').value;txt('sum-due',due?new Date(due+'T12:00:00Z').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'}):'');}
+  form.addEventListener('input',recalc);
   form.addEventListener('change',recalc);
   form.addEventListener('click',function(e){if(e.target.matches('[data-remove]')){e.target.closest('[data-line]').remove();recalc();}});
   document.getElementById('add-line').addEventListener('click',function(){list.insertAdjacentHTML('beforeend',tpl.innerHTML);recalc();});
@@ -252,31 +264,43 @@ function paymentWarning(pay) {
 export function invoiceEditorPage({ invoice, lines, request, action, title, warnings = [], pay, mode = 'new' }) {
   const blank = { description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 };
   const who = firstName(invoice.customer_name);
-  const sendLabel = mode === 'new' ? `Send invoice to ${who}` : `Save and send to ${who}`;
+  const sendLabel = mode === 'new' ? `Send to ${who}` : `Save and send to ${who}`;
   return layout(title, `<h1>${esc(title)}</h1>
   ${pay ? paymentWarning(pay) : ''}
   ${warnings.map((w) => `<div class="notice warn">${esc(w)}</div>`).join('')}
-  <div class="notice err" id="price-needed"${lines.some((l) => l.description && needsPrice(l)) ? '' : ' hidden'}><strong>Add a price first:</strong> <span>${esc(lines.filter((l) => l.description && needsPrice(l)).map((l) => l.description).join(', '))}</span>. Tap <strong>Change the invoice</strong>, type the price, then send.</div>
+  <div class="notice err" id="price-needed"${lines.some((l) => l.description && needsPrice(l)) ? '' : ' hidden'}><strong>Add a price first:</strong> <span>${esc(lines.filter((l) => l.description && needsPrice(l)).map((l) => l.description).join(', '))}</span>. Tap <strong>Change what goes into the total</strong>, type the price, then send.</div>
   <form id="inv" method="post" action="${esc(action)}">
     ${request ? `<input type="hidden" name="r" value="${esc(b64urlText(request.key))}">` : ''}
     <div class="card">
       <div class="muted">For</div>
       <div style="font-size:1.2rem;font-weight:600">${esc(invoice.customer_name || 'No name yet')}</div>
-      <div class="muted" style="word-break:break-all">${esc(invoice.customer_email || 'No email yet: add one under Change the invoice')}</div>
-      <table class="sumlines" style="margin-top:12px"><tbody id="sum-lines"></tbody></table>
-      <div class="spread" style="margin-top:10px"><span>Total</span><span class="bigtotal" id="sum-total">${money(invoiceTotal(lines))}</span></div>
-      <div class="spread"><span>Deposit to pay now</span><strong id="sum-deposit">${money(invoice.deposit_due_cents)}</strong></div>
-      <div class="spread"><span>Rest due by</span><strong id="sum-due">${esc(prettyDate(invoice.due_date))}</strong></div>
+      <div class="muted" style="word-break:break-all">${esc(invoice.customer_email || 'No email yet: add one under Change what goes into the total')}</div>
+      <div class="muted" style="margin-top:14px">What goes into the total</div>
+      <table class="sumlines"><tbody id="sum-lines"></tbody></table>
+      <div class="calc">
+        <div class="spread"><span>Total</span><span class="bigtotal" id="sum-total">${money(invoiceTotal(lines))}</span></div>
+        <div class="spread" id="sum-now-row"><span id="sum-now-label">Deposit asked for now</span><strong class="now" id="sum-deposit">${money(invoice.deposit_due_cents)}</strong></div>
+        <div class="spread" id="sum-rest-row"><span>Rest after the deposit</span><strong id="sum-rest">${money(invoiceTotal(lines) - invoice.deposit_due_cents)}</strong></div>
+        <div class="spread"><span id="sum-due-label">Rest due by</span><strong id="sum-due">${esc(prettyDate(invoice.due_date))}</strong></div>
+      </div>
     </div>
-    <details class="more card" style="padding-top:0"${lines.some((l) => l.description && needsPrice(l)) ? ' open' : ''}><summary>Change the invoice</summary>
+    <div class="card">
+      <div class="muted">How they pay</div>
+      <div class="plans">
+        ${[['half', 'Half now', 'A deposit of half holds the date. The rest is due by the due date.'], ['full', 'Full amount', 'No deposit. The whole total is due by the due date.'], ['custom', 'Other deposit', 'You type the deposit. The rest is due by the due date.']]
+          .map(([v, big, small]) => `<label class="plan"><input type="radio" name="pay_plan" value="${v}"${(invoice.pay_plan || 'half') === v ? ' checked' : ''}><span><strong>${big}</strong><small>${small}</small></span></label>`).join('')}
+      </div>
+      <div id="custom-wrap"${(invoice.pay_plan || 'half') === 'custom' ? '' : ' hidden'}>
+        <label for="dep">Deposit to ask for now ($)</label>
+        <input id="dep" name="deposit" type="number" step="0.01" inputmode="decimal" value="${esc((invoice.deposit_due_cents / 100).toFixed(2))}">
+      </div>
+      <label for="dd">Due date</label><input id="dd" name="due_date" type="date" value="${esc(invoice.due_date)}">
+      <input type="hidden" name="issue_date" value="${esc(invoice.issue_date)}">
+    </div>
+    <details class="more card" style="padding-top:0"${lines.some((l) => l.description && needsPrice(l)) ? ' open' : ''}><summary>Change what goes into the total</summary>
       <label for="cn">Customer name</label><input id="cn" name="customer_name" value="${esc(invoice.customer_name)}">
       <label for="ce">Customer email</label><input id="ce" name="customer_email" type="email" value="${esc(invoice.customer_email)}">
       <label for="cp">Customer phone</label><input id="cp" name="customer_phone" type="tel" value="${esc(invoice.customer_phone)}">
-      <label for="dd">Rest due by</label><input id="dd" name="due_date" type="date" value="${esc(invoice.due_date)}">
-      <input type="hidden" name="issue_date" value="${esc(invoice.issue_date)}">
-      <label for="dep">Deposit to pay now ($), half the total unless you change it</label>
-      <input id="dep" name="deposit" type="number" step="0.01" inputmode="decimal" value="${esc((invoice.deposit_due_cents / 100).toFixed(2))}">
-      <input type="hidden" name="deposit_touched" value="${invoice.deposit_touched ? '1' : '0'}">
       <h3 style="margin-top:18px">Lines</h3>
       <div data-lines>${lines.map(lineEditor).join('')}</div>
       <template id="line-tpl">${lineEditor(blank)}</template>
@@ -284,13 +308,16 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
       <label for="nt">Message to the customer (optional)</label><textarea id="nt" name="notes">${esc(invoice.notes)}</textarea>
       <div style="margin-top:12px"><button class="btn ghost" type="submit" name="go" value="save">Save without sending</button></div>
     </details>
-    <button class="btn primary" type="submit" name="go" value="send">${esc(sendLabel)}</button>
+    <button class="btn primary" type="submit" name="go" value="preview">See it before sending</button>
+    <button class="btn ghost" type="submit" name="go" value="send" style="margin-top:10px">${esc(sendLabel)} now</button>
   </form>
   <script>${EDITOR_JS}</script>`);
 }
 
-export function invoiceViewPage({ invoice, lines, pay, flash, error }) {
+export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml = '' }) {
   const total = invoiceTotal(lines);
+  const plan = payPlanOf(invoice, total);
+  const now = plan === 'full' ? total : invoice.deposit_due_cents;
   const id = invoice.id;
   const who = firstName(invoice.customer_name);
   const act = (action, label, cls = 'ghost') => `<form method="post" action="/admin/invoices/${id}/status"><input type="hidden" name="action" value="${action}"><button class="btn ${cls}" type="submit">${label}</button></form>`;
@@ -299,7 +326,10 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error }) {
   let main = '';
   if (voided) main = `<div class="actions">${act('unvoid', 'Bring this invoice back')}</div>`;
   else if (invoice.status === 'draft') main = `<div class="actions">${sendForm(`Send invoice to ${esc(who)}`, 'primary')}</div>`;
+  else if (plan === 'full') main = `<div class="actions">${act('paid', 'Paid in full', invoice.status === 'sent' ? '' : 'ghost')}${sendForm('Resend', 'ghost')}</div>`;
   else main = `<div class="actions three">${act('deposit_paid', 'Deposit received', invoice.status === 'sent' ? '' : 'ghost')}${act('paid', 'Paid in full', invoice.status === 'deposit_paid' ? '' : 'ghost')}${sendForm('Resend', 'ghost')}</div>`;
+  const preview = emailHtml && !voided ? `<div class="card" style="padding:0;overflow:hidden"><div class="muted" style="padding:10px 14px;border-bottom:1px solid var(--line)">The email the customer gets</div>
+    <iframe class="emailframe" title="Invoice email" srcdoc="${esc(emailHtml)}" onload="try{this.style.height=(this.contentDocument.documentElement.scrollHeight+24)+'px'}catch(e){}"></iframe></div>` : '';
   return layout(invoice.customer_name || invoice.number, `<div class="spread"><h1 style="margin:0">${esc(invoice.customer_name || 'Invoice')}</h1>${chip(invoice.status)}</div>
   <p class="muted" style="margin-top:4px">Invoice ${esc(invoice.number)}${invoice.sent_at ? ` · last sent ${esc(prettyDate(invoice.sent_at.slice(0, 10)))}` : ' · not sent yet'}</p>
   ${flash ? `<div class="notice ok" style="font-size:1.1rem"><strong>${esc(flash)}</strong></div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
@@ -307,11 +337,17 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error }) {
   <div class="card"><table class="sumlines">
     ${lines.map((l) => `<tr><td>${esc(l.description)}${Number(l.qty) !== 1 ? ` × ${esc(l.qty)}` : ''}${l.refundable ? '<div class="muted">Given back after the event</div>' : ''}</td><td class="amt">${needsPrice(l) ? '<strong style="color:#8f3427">Price needed</strong>' : (lineTotal(l) === 0 ? 'Free' : money(lineTotal(l)))}</td></tr>`).join('')}
   </table>
-    <div class="spread" style="margin-top:10px"><span>Total</span><span class="bigtotal">${money(total)}</span></div>
-    <div class="spread"><span>Deposit to pay now</span><strong>${money(invoice.deposit_due_cents)}</strong></div>
-    <div class="spread"><span>Rest due by</span><strong>${esc(prettyDate(invoice.due_date))}</strong></div>
+    <div class="calc">
+      <div class="spread"><span>Total</span><span class="bigtotal">${money(total)}</span></div>
+      ${plan === 'full' ? `<div class="spread"><span>Full amount due by</span><strong>${esc(prettyDate(invoice.due_date))}</strong></div>`
+    : `<div class="spread"><span>Deposit asked for now${plan === 'half' ? ' (half)' : ''}</span><strong class="now">${money(now)}</strong></div>
+      <div class="spread"><span>Rest after the deposit</span><strong>${money(total - now)}</strong></div>
+      <div class="spread"><span>Rest due by</span><strong>${esc(prettyDate(invoice.due_date))}</strong></div>`}
+    </div>
   </div>
+  ${invoice.status === 'draft' ? preview : ''}
   ${main}
+  ${invoice.status !== 'draft' ? preview : ''}
   <details class="more"><summary>More</summary>
     <div class="actions">
       ${voided ? '' : `<a class="btn ghost" href="/admin/invoices/${id}/edit">Change the invoice</a>`}
@@ -330,13 +366,14 @@ export function helpPage() {
   <div class="card"><ol class="steps">
     <li><strong>A request comes in.</strong> It shows up under Requests within a minute, newest at the top, marked <span class="chip new">New</span>.</li>
     <li><strong>Visit or call, and fill the checklist.</strong> Tap ${pic('Open checklist', 'ghost')} It saves by itself as you type. Or tap ${pic('Print checklist', 'ghost')} for the paper version.</li>
-    <li><strong>Send the invoice.</strong> Tap ${pic('Create invoice')} Prices are already filled in. Check the total, then tap ${pic('Send invoice to Jane', 'primary')} The customer gets the email with how to pay.</li>
+    <li><strong>Send the invoice.</strong> Tap ${pic('Create invoice')} Prices are already filled in. Check what goes into the total, pick <strong>Half now</strong>, <strong>Full amount</strong> or <strong>Other deposit</strong>, set the due date, then tap ${pic('See it before sending', 'primary')} The email shows on screen. When it looks right, tap ${pic('Send invoice to Jane', 'primary')}</li>
     <li><strong>When money arrives, tap one button.</strong> ${pic('Deposit received', 'ghost')} ${pic('Paid in full', 'ghost')} If they lost the email, tap ${pic('Resend', 'ghost')}</li>
   </ol></div>
   <div class="card"><h2>Good to know</h2>
     <p>Add your Zelle, Cash App and QR code once in Settings. They go on every invoice.</p><a class="btn ghost" href="/admin/settings">Open Settings</a>
     <p>Anything less common (change prices, cancel an invoice, see the email) is under <strong>More</strong>.</p>
-    <p>A line that says <strong style="color:#8f3427">Price needed</strong> (usually decor) needs its price typed in under <strong>Change the invoice</strong> before it can be sent.</p>
+    <p>A line that says <strong style="color:#8f3427">Price needed</strong> (usually decor) needs its price typed in under <strong>Change what goes into the total</strong> before it can be sent.</p>
+    <p>With a deposit, the email asks for the deposit right away and shows the rest (total minus deposit) and its due date. With Full amount, it asks for the whole total by the due date.</p>
     <p style="margin-bottom:0">Every invoice is also copied to hello@porchandparty901.com.</p></div>`);
 }
 

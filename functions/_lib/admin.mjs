@@ -2,7 +2,7 @@
 // functions/admin/_middleware.js (see guard.mjs).
 import {
   SHEET_URL, FROM_EMAIL, esc, redirect, htmlResponse, getSettings, putSetting, toCents, invoiceTotal,
-  halfDeposit, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice,
+  halfDeposit, PAY_PLANS, payPlanOf, amountDueNow, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice,
 } from './util.mjs';
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
 import { loadRequests, driveFileId, idFolderId } from './sheet.mjs';
@@ -48,7 +48,7 @@ function parseInvoiceForm(form) {
     lines.push({ description, qty: Number.isFinite(q) ? q : 1, unit_cents: toCents(price[i]), note: String(note[i] || '').trim(), refundable: ref[i] === '1' ? 1 : 0 });
   });
   const total = invoiceTotal(lines);
-  const touched = form.get('deposit_touched') === '1';
+  const plan = PAY_PLANS.includes(form.get('pay_plan')) ? form.get('pay_plan') : 'half';
   return {
     invoice: {
       customer_name: String(form.get('customer_name') || '').trim(),
@@ -56,7 +56,8 @@ function parseInvoiceForm(form) {
       customer_phone: String(form.get('customer_phone') || '').trim(),
       issue_date: String(form.get('issue_date') || todayISO()),
       due_date: String(form.get('due_date') || todayISO(7)),
-      deposit_due_cents: touched ? toCents(form.get('deposit')) : halfDeposit(total),
+      pay_plan: plan,
+      deposit_due_cents: amountDueNow(plan, total, toCents(form.get('deposit'))),
       notes: String(form.get('notes') || '').trim(),
     },
     lines,
@@ -140,7 +141,7 @@ async function newInvoice(env, url) {
   let lines = request ? prefillLines(request, PRICE_TABLE) : [{ description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 }];
   let depositCents = null; let dueDate = todayISO(7);
   const fromChecklist = key ? invoiceFromChecklist(CHECKLIST_SOURCE, await savedChecklist(env, key)) : null;
-  if (request && request.gamesAnswer && lines.some((l) => l.description === 'Game rental (1 day)')) warnings.push(`We could not match the games they picked ("${request.gamesAnswer}"). Check the first line under Change the invoice.`);
+  if (request && request.gamesAnswer && lines.some((l) => l.description === 'Game rental (1 day)')) warnings.push(`We could not match the games they picked ("${request.gamesAnswer}"). Check the first line under Change what goes into the total.`);
   if (fromChecklist) {
     if (fromChecklist.lines.length) {
       const damage = lines.find((l) => l.refundable);
@@ -154,7 +155,8 @@ async function newInvoice(env, url) {
   }
   const invoice = {
     customer_name: request ? request.name : '', customer_email: request ? request.email : '', customer_phone: request ? request.phone : '',
-    issue_date: todayISO(), due_date: dueDate, deposit_due_cents: depositCents !== null ? depositCents : halfDeposit(invoiceTotal(lines)), notes: '', deposit_touched: depositCents !== null,
+    issue_date: todayISO(), due_date: dueDate, pay_plan: depositCents !== null ? 'custom' : 'half', notes: '',
+    deposit_due_cents: amountDueNow(depositCents !== null ? 'custom' : 'half', invoiceTotal(lines), depositCents || 0),
   };
   const pay = paymentStatus(await getSettings(env.DB));
   return htmlResponse(V.invoiceEditorPage({ invoice, lines, request, action: '/admin/invoices', title: request ? `Invoice for ${V.firstName(request.name)}` : 'New invoice', warnings, pay, mode: 'new' }));
@@ -168,9 +170,9 @@ async function createInvoice(env, request) {
   let id = null;
   for (let attempt = 0; attempt < 3 && id === null; attempt += 1) {
     try {
-      const row = await env.DB.prepare(`INSERT INTO invoices (number, request_key, customer_name, customer_email, customer_phone, issue_date, due_date, deposit_due_cents, notes, status)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'draft') RETURNING id`).bind(number, key, invoice.customer_name, invoice.customer_email,
-        invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes).first();
+      const row = await env.DB.prepare(`INSERT INTO invoices (number, request_key, customer_name, customer_email, customer_phone, issue_date, due_date, deposit_due_cents, notes, status, pay_plan)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'draft', ?10) RETURNING id`).bind(number, key, invoice.customer_name, invoice.customer_email,
+        invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, invoice.pay_plan).first();
       id = row.id;
     } catch (e) {
       if (!/UNIQUE/i.test(String(e))) throw e;
@@ -183,17 +185,22 @@ async function createInvoice(env, request) {
     await setRequestStatus(env.DB, key, existing ? existing.status : 'new', id);
   }
   if (form.get('go') === 'send') return afterSend(id, await deliver(env, id, false));
-  return redirect(`/admin/invoices/${id}?m=${encodeURIComponent('Saved. Not sent yet.')}`);
+  return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(afterSaveMessage(form.get('go')))}`);
+}
+
+// 'preview' = she tapped "See it before sending": the invoice page shows the email itself.
+function afterSaveMessage(go) {
+  return go === 'preview' ? 'Saved, not sent. Below is the email the customer gets. Tap Send when it looks right.' : 'Saved. Not sent yet.';
 }
 
 async function updateInvoice(env, request, id) {
   const form = await request.formData();
   const { invoice, lines } = parseInvoiceForm(form);
-  await env.DB.prepare(`UPDATE invoices SET customer_name=?1, customer_email=?2, customer_phone=?3, issue_date=?4, due_date=?5, deposit_due_cents=?6, notes=?7, updated_at=datetime('now') WHERE id=?8`)
-    .bind(invoice.customer_name, invoice.customer_email, invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, id).run();
+  await env.DB.prepare(`UPDATE invoices SET customer_name=?1, customer_email=?2, customer_phone=?3, issue_date=?4, due_date=?5, deposit_due_cents=?6, notes=?7, pay_plan=?9, updated_at=datetime('now') WHERE id=?8`)
+    .bind(invoice.customer_name, invoice.customer_email, invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, id, invoice.pay_plan).run();
   await saveLines(env.DB, id, lines);
   if (form.get('go') === 'send') return afterSend(id, await deliver(env, id, false));
-  return redirect(`/admin/invoices/${id}?m=Saved.`);
+  return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(afterSaveMessage(form.get('go')))}`);
 }
 
 async function emailParts(env, invoice, lines, settings, forPreview) {
@@ -211,10 +218,10 @@ async function deliver(env, id, test) {
   if (!loaded) return { ok: false, error: 'That invoice was not found.' };
   const { invoice, lines } = loaded;
   if (invoice.status === 'void') return { ok: false, error: 'This invoice is cancelled. Bring it back under More before sending.' };
-  if (!test && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(invoice.customer_email)) return { ok: false, error: "The customer's email address is missing or has a typo. Fix it under More, Change the invoice, then tap Send again." };
-  if (!lines.length) return { ok: false, error: 'This invoice has no lines yet. Add what they are paying for under More, Change the invoice.' };
+  if (!test && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(invoice.customer_email)) return { ok: false, error: "The customer's email address is missing or has a typo. Fix it under Change the invoice, Change what goes into the total, then tap Send again." };
+  if (!lines.length) return { ok: false, error: 'This invoice has no lines yet. Add what they are paying for under Change the invoice, Change what goes into the total.' };
   const unpriced = lines.filter(needsPrice);
-  if (!test && unpriced.length) return { ok: false, error: `Not sent yet: ${unpriced.map((l) => l.description).join(', ')} has no price. Tap More, Change the invoice, type the price, then send.` };
+  if (!test && unpriced.length) return { ok: false, error: `Not sent yet: ${unpriced.map((l) => l.description).join(', ')} has no price. Tap Change the invoice, then Change what goes into the total, type the price, then send.` };
   if (!env.MAILER) return { ok: false, error: 'Email is not connected on this copy of the site, so nothing was sent.' };
   const settings = await getSettings(env.DB);
   const parts = await emailParts(env, invoice, lines, settings, false);
@@ -347,14 +354,14 @@ export async function handleAdmin(context) {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
         const settings = await getSettings(env.DB);
-        return htmlResponse(V.invoiceViewPage({ ...loaded, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+        const emailHtml = (await emailParts(env, loaded.invoice, loaded.lines, settings, true)).html;
+        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
       }
       if (segs[2] === 'edit' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
-        const touched = loaded.invoice.deposit_due_cents !== halfDeposit(invoiceTotal(loaded.lines));
         const pay = paymentStatus(await getSettings(env.DB));
-        return htmlResponse(V.invoiceEditorPage({ invoice: { ...loaded.invoice, deposit_touched: touched }, lines: loaded.lines, request: null,
+        return htmlResponse(V.invoiceEditorPage({ invoice: { ...loaded.invoice, pay_plan: payPlanOf(loaded.invoice, invoiceTotal(loaded.lines)) }, lines: loaded.lines, request: null,
           action: `/admin/invoices/${id}`, title: `Change invoice for ${V.firstName(loaded.invoice.customer_name)}`, pay, mode: 'edit' }));
       }
       if (segs.length === 2 && method === 'POST') return updateInvoice(env, request, id);

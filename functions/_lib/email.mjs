@@ -2,7 +2,7 @@
 // (cream #faf7f2, ink #3b302a, accent #c46e4e; Cormorant Garamond / Inter with
 // safe fallbacks) plus a plain-text twin. The QR code rides as an inline CID
 // attachment: Gmail strips data: URIs from <img>, CID images render.
-import { esc, money, lineTotal, invoiceTotal, prettyDate, FROM_EMAIL } from './util.mjs';
+import { esc, money, lineTotal, invoiceTotal, prettyDate, payPlanOf, FROM_EMAIL } from './util.mjs';
 
 const C = { cream: '#faf7f2', ink: '#3b302a', accent: '#c46e4e', line: '#e8dfd4', muted: '#7a6b60' };
 const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
@@ -24,6 +24,12 @@ function cashtag(value) {
 export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc }) {
   const total = invoiceTotal(lines);
   const refundable = lines.filter((l) => l.refundable).reduce((s, l) => s + lineTotal(l), 0);
+  const plan = payPlanOf(invoice, total);
+  const now = plan === 'full' ? total : invoice.deposit_due_cents;
+  const rest = total - now;
+  const payBox = plan === 'full'
+    ? { big: `Amount due: ${money(total)}`, small: `Please pay by ${prettyDate(invoice.due_date)}.` }
+    : { big: `Deposit due now: ${money(now)}`, small: `This holds your date. The rest, ${money(rest)}, is due by ${prettyDate(invoice.due_date)}.` };
   const pay = paymentStatus(settings);
   const business = settings.business_name || 'Porch & Party';
   const footerLine = settings.business_address || 'Memphis, Tennessee';
@@ -74,8 +80,8 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc })
   <tr><td style="padding:8px 24px;">
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.cream};border-radius:10px;">
       <tr><td style="padding:16px;font-family:${SANS};font-size:15px;color:${C.ink};">
-        <div style="font-family:${SERIF};font-size:20px;font-weight:600;margin-bottom:4px;">Deposit due now: ${money(invoice.deposit_due_cents)}</div>
-        <div style="color:${C.muted};font-size:14px;">Balance of ${money(total - invoice.deposit_due_cents)} due by ${esc(prettyDate(invoice.due_date))}.</div>
+        <div style="font-family:${SERIF};font-size:20px;font-weight:600;margin-bottom:4px;">${esc(payBox.big)}</div>
+        <div style="color:${C.muted};font-size:14px;">${esc(payBox.small)}</div>
       </td></tr>
     </table>
   </td></tr>
@@ -98,8 +104,8 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc })
     ...lines.map((l) => `${l.description}${Number(l.qty) !== 1 ? ` x ${l.qty}` : ''}${l.refundable ? ' (refundable)' : ''}: ${lineTotal(l) === 0 ? 'Free' : money(lineTotal(l))}`),
     '',
     `Total: ${money(total)}`,
-    `Deposit due now: ${money(invoice.deposit_due_cents)}`,
-    `Balance due by ${prettyDate(invoice.due_date)}: ${money(total - invoice.deposit_due_cents)}`,
+    payBox.big,
+    payBox.small,
     '',
     'How to pay:',
     ...(settings.zelle ? [`Zelle: ${settings.zelle}`] : []),
