@@ -37,6 +37,23 @@ export function halfDeposit(totalCents) {
   return Math.round(totalCents / 2);
 }
 
+// How the customer pays. 'half': a deposit of half the total now, the rest by the due
+// date. 'full': the whole total by the due date. 'custom': a typed deposit now.
+export const PAY_PLANS = ['half', 'full', 'custom'];
+
+export function payPlanOf(invoice, totalCents) {
+  if (PAY_PLANS.includes(invoice.pay_plan)) return invoice.pay_plan;
+  if (totalCents > 0 && invoice.deposit_due_cents >= totalCents) return 'full';
+  return invoice.deposit_due_cents === halfDeposit(totalCents) ? 'half' : 'custom';
+}
+
+// What is asked for right now under a plan; the rest is total minus this.
+export function amountDueNow(plan, totalCents, customCents = 0) {
+  if (plan === 'full') return totalCents;
+  if (plan === 'custom') return Math.max(0, Math.min(totalCents, Math.round(customCents) || 0));
+  return halfDeposit(totalCents);
+}
+
 export function b64url(bytes) {
   const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
   let s = '';
