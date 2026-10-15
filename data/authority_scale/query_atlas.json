@@ -148,7 +148,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 22,
+      "impressions_90d": 23,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -165,7 +165,7 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 11,
+      "rank_score": 11.5,
       "publishable": true
     },
     {
@@ -173,7 +173,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 20,
+      "impressions_90d": 21,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -190,7 +190,7 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 10,
+      "rank_score": 10.5,
       "publishable": true
     },
     {

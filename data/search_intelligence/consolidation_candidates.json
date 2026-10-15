@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-09-14..2026-10-11",
-  "coverage_collected_at": "2026-10-14T15:17:59.163551+00:00",
+  "gsc_window": "2026-09-15..2026-10-12",
+  "coverage_collected_at": "2026-10-15T15:17:08.655822+00:00",
   "url_count": 117,
   "roles": {
     "candidate": 87,
@@ -177,7 +177,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 471,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -573,7 +573,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 396,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
     },
@@ -715,7 +715,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 298,
+      "word_count": 346,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -968,7 +968,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 485,
+      "word_count": 518,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -988,9 +988,9 @@
       "url": "https://porchandparty901.com/",
       "file": "index.html",
       "role": "root",
-      "impressions_28d": 66,
+      "impressions_28d": 52,
       "clicks_28d": 0,
-      "word_count": 1330,
+      "word_count": 1331,
       "coverage_state": "Submitted and indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1056,7 +1056,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 399,
+      "word_count": 428,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1078,7 +1078,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1359,
+      "word_count": 1397,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1188,7 +1188,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 307,
+      "word_count": 318,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1199,7 +1199,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 313,
+      "word_count": 324,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1210,7 +1210,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 313,
+      "word_count": 324,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1233,7 +1233,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 449,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -1287,7 +1287,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 446,
+      "word_count": 445,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1298,7 +1298,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 314,
+      "word_count": 325,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1309,7 +1309,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 138,
+      "word_count": 153,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
