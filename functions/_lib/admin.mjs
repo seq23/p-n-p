@@ -7,6 +7,7 @@ import {
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
 import { loadRequests, driveFileId, idFolderId } from './sheet.mjs';
 import { PRICE_TABLE, CONTACT } from './prices.mjs';
+import { renderInvoicePdf, textMessage } from './pdf.mjs';
 import { prefillLines } from './pricing.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
@@ -218,7 +219,7 @@ async function deliver(env, id, test) {
   if (!loaded) return { ok: false, error: 'That invoice was not found.' };
   const { invoice, lines } = loaded;
   if (invoice.status === 'void') return { ok: false, error: 'This invoice is cancelled. Bring it back under More before sending.' };
-  if (!test && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(invoice.customer_email)) return { ok: false, error: "The customer's email address is missing or has a typo. Fix it under Change the invoice, Change what goes into the total, then tap Send again." };
+  if (!test && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(invoice.customer_email)) return { ok: false, error: 'No working email on this invoice. Tap Text the invoice (PDF) instead, or add the email under Change the invoice.' };
   if (!lines.length) return { ok: false, error: 'This invoice has no lines yet. Add what they are paying for under Change the invoice, Change what goes into the total.' };
   const unpriced = lines.filter(needsPrice);
   if (!test && unpriced.length) return { ok: false, error: `Not sent yet: ${unpriced.map((l) => l.description).join(', ')} has no price. Tap Change the invoice, then Change what goes into the total, type the price, then send.` };
@@ -261,9 +262,10 @@ async function changeStatus(env, request, id) {
   const loaded = await loadInvoice(env.DB, id);
   if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
   const { invoice } = loaded;
-  const next = { deposit_paid: 'deposit_paid', paid: 'paid', done: 'done', void: 'void', unvoid: 'draft' }[action];
+  const next = { texted: 'sent', deposit_paid: 'deposit_paid', paid: 'paid', done: 'done', void: 'void', unvoid: 'draft' }[action];
   if (!next) return redirect(`/admin/invoices/${id}`);
-  await env.DB.prepare("UPDATE invoices SET status=?1, updated_at=datetime('now') WHERE id=?2").bind(next, id).run();
+  if (action === 'texted') await env.DB.prepare("UPDATE invoices SET status='sent', sent_at=datetime('now'), updated_at=datetime('now') WHERE id=?1").bind(id).run();
+  else await env.DB.prepare("UPDATE invoices SET status=?1, updated_at=datetime('now') WHERE id=?2").bind(next, id).run();
   if (invoice.request_key) {
     if (next === 'void') {
       await env.DB.prepare("UPDATE request_status SET status='new', invoice_id=NULL, updated_at=datetime('now') WHERE request_key=?1 AND invoice_id=?2").bind(invoice.request_key, id).run();
@@ -273,7 +275,7 @@ async function changeStatus(env, request, id) {
       await setRequestStatus(env.DB, invoice.request_key, REQUEST_STATUS[next], id);
     }
   }
-  const label = { deposit_paid: 'Deposit received ✓', paid: 'Paid in full ✓', done: 'Marked done ✓', void: 'Invoice cancelled.', draft: 'Invoice brought back. It is not sent yet.' }[next];
+  const label = { sent: 'Marked as sent by text ✓', deposit_paid: 'Deposit received ✓', paid: 'Paid in full ✓', done: 'Marked done ✓', void: 'Invoice cancelled.', draft: 'Invoice brought back. It is not sent yet.' }[next];
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(label)}`);
 }
 
@@ -355,7 +357,8 @@ export async function handleAdmin(context) {
         if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
         const settings = await getSettings(env.DB);
         const emailHtml = (await emailParts(env, loaded.invoice, loaded.lines, settings, true)).html;
-        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+        const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings });
+        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
       }
       if (segs[2] === 'edit' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
@@ -367,6 +370,13 @@ export async function handleAdmin(context) {
       if (segs.length === 2 && method === 'POST') return updateInvoice(env, request, id);
       if (segs[2] === 'send' && method === 'POST') return sendInvoice(env, request, id);
       if (segs[2] === 'status' && method === 'POST') return changeStatus(env, request, id);
+      if (segs[2] === 'invoice.pdf' && method === 'GET') {
+        const loaded = await loadInvoice(env.DB, id);
+        if (!loaded) return htmlResponse('Not found', 404);
+        const bytes = await renderInvoicePdf({ invoice: loaded.invoice, lines: loaded.lines, settings: await getSettings(env.DB), contact: CONTACT });
+        const filename = `Porch-and-Party-Invoice-${loaded.invoice.number}.pdf`;
+        return new Response(bytes, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `${url.searchParams.get('dl') === '1' ? 'attachment' : 'inline'}; filename="${filename}"`, 'Cache-Control': 'no-store' } });
+      }
       if (segs[2] === 'preview' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse('Not found', 404);

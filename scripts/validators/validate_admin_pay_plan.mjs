@@ -15,6 +15,10 @@ const mod = (p) => import(pathToFileURL(path.join(ROOT, p)).href);
 const util = await mod('functions/_lib/util.mjs');
 const views = await mod('functions/_lib/views.mjs');
 const email = await mod('functions/_lib/email.mjs');
+const pdf = await mod('functions/_lib/pdf.mjs');
+const { PDFDocument } = await import('pdf-lib');
+// 1x1 PNG so the QR embed path runs.
+const QR = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 const errors = [];
 const must = (cond, msg) => { if (!cond) errors.push(msg); };
 
@@ -34,7 +38,7 @@ must(util.payPlanOf({ deposit_due_cents: 8500 }, total) === 'half', 'an old half
 must(util.payPlanOf({ deposit_due_cents: 3000 }, total) === 'custom', 'an old custom row is not read as custom');
 must(util.payPlanOf({ pay_plan: 'full', deposit_due_cents: 0 }, total) === 'full', 'a stored pay_plan is ignored');
 
-const settings = { zelle: 'hello@porchandparty901.com', cashapp: '$porchandparty', business_name: 'Porch & Party', business_address: '' };
+const settings = { zelle: 'hello@porchandparty901.com', cashapp: '$porchandparty', business_name: 'Porch & Party', business_address: '', qr_png: QR, qr_type: 'image/png' };
 const plans = { half: 8500, full: 17000, custom: 3000 };
 let rendered = 0;
 for (const [plan, now] of Object.entries(plans)) {
@@ -62,6 +66,17 @@ for (const [plan, now] of Object.entries(plans)) {
   must(editor.includes(`value="${plan}" checked`), `${plan}: editor does not preselect the stored plan`);
   must(editor.includes('name="due_date"') && editor.includes('value="preview"') && editor.includes('See it before sending'), `${plan}: editor lacks due date or the preview button`);
   for (const v of ['half', 'full', 'custom']) must(editor.includes(`name="pay_plan" value="${v}"`), `${plan}: editor lacks the ${v} choice`);
+
+  // The PDF for customers reached by text, and the buttons that share it.
+  const bytes = await pdf.renderInvoicePdf({ invoice, lines, settings, contact: { telephoneDisplay: '901-355-1518' } });
+  must(bytes.length > 1500 && String.fromCharCode(...bytes.slice(0, 5)) === '%PDF-', `${plan}: invoice.pdf is not a PDF`);
+  const loadedPdf = await PDFDocument.load(bytes);
+  must(loadedPdf.getPageCount() === 1 && loadedPdf.getTitle() === 'Invoice PNP-2026-0007 from Porch & Party', `${plan}: PDF is not one titled page`);
+  const sms = pdf.textMessage({ invoice, lines, settings });
+  must(sms.includes('PNP-2026-0007') && sms.includes('$170.00') && (plan === 'full' ? sms.includes('pay by October 22, 2026') : sms.includes(`Deposit of ${util.money(now)} due now`)), `${plan}: text message lacks the number, total or what is due now`);
+  must(page.includes('Text the invoice (PDF)') && page.includes('/invoice.pdf') && page.includes('data-copy="sms"'), `${plan}: invoice page lacks the text/PDF buttons or the copyable message`);
+  const noEmail = views.invoiceViewPage({ invoice: { ...invoice, status: 'draft', customer_email: '' }, lines, pay: { complete: true, missing: [] }, flash: '', error: '', emailHtml: mail.html, smsText: sms });
+  must(noEmail.includes('btn primary" data-share-pdf') && noEmail.includes('value="texted"') && !noEmail.includes('Send invoice to'), `${plan}: a draft with no email should lead with Text the invoice (PDF) and Mark as sent by text`);
 }
 must(rendered === 3, 'fewer than three plans rendered');
 
@@ -69,6 +84,7 @@ const migration = path.join(ROOT, 'migrations/0003_pay_plan.sql');
 must(fs.existsSync(migration) && /ADD COLUMN pay_plan/.test(fs.readFileSync(migration, 'utf8')), 'migration 0003 does not add pay_plan');
 const admin = fs.readFileSync(path.join(ROOT, 'functions/_lib/admin.mjs'), 'utf8');
 must(/INSERT INTO invoices \([^)]*pay_plan/.test(admin) && /pay_plan=\?\d/.test(admin), 'admin.mjs does not store pay_plan on create and update');
+must(/segs\[2\] === 'invoice\.pdf'/.test(admin) && /texted: 'sent'/.test(admin), 'admin.mjs does not serve invoice.pdf or accept the texted status');
 
 if (errors.length) { console.error(`validate_admin_pay_plan: FAIL\n - ${errors.join('\n - ')}`); process.exit(1); }
-console.log(`validate_admin_pay_plan: OK (${rendered} plans rendered, email + editor + invoice page checked)`);
+console.log(`validate_admin_pay_plan: OK (${rendered} plans rendered: email, editor, invoice page, PDF and text message checked)`);

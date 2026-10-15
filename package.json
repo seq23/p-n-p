@@ -137,5 +137,8 @@
     "mailer:deploy": "cd workers/pnp-mailer && npx wrangler@4.151.0 deploy",
     "chrome:install": "node scripts/install_site_chrome.js",
     "validate:site-chrome": "node scripts/validators/validate_site_chrome.js"
+  },
+  "dependencies": {
+    "pdf-lib": "^1.17.1"
   }
 }

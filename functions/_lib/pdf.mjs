@@ -1,0 +1,160 @@
+// The invoice as a one-page PDF (US Letter) for customers reached by text rather than
+// email. Same facts as the email (functions/_lib/email.mjs): lines, total, what is asked
+// for now under the pay plan, how to pay with the QR code, the note, the footer.
+// pdf-lib is pure JavaScript and runs in Pages Functions; standard fonts only, so text
+// is reduced to WinAnsi before drawing.
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { money, lineTotal, invoiceTotal, prettyDate, payPlanOf, needsPrice, FROM_EMAIL } from './util.mjs';
+
+const INK = rgb(0.23, 0.19, 0.16);
+const ACCENT = rgb(0.72, 0.37, 0.25);
+const MUTED = rgb(0.37, 0.32, 0.28);
+const LINE = rgb(0.89, 0.85, 0.80);
+const CREAM = rgb(0.98, 0.97, 0.95);
+const PAGE = { w: 612, h: 792, margin: 48 };
+
+const SWAP = { '’': "'", '‘': "'", '“': '"', '”': '"', '–': '-', '—': '-', '…': '...', ' ': ' ', '✕': 'x', '×': 'x' };
+export function winAnsi(text) {
+  return String(text == null ? '' : text).replace(/[^\x20-\x7e\xa1-\xff]/g, (c) => SWAP[c] || '');
+}
+
+function cashtag(value) {
+  const v = String(value || '').trim();
+  return v ? (v.startsWith('$') ? v : `$${v}`) : '';
+}
+
+export function payLines({ invoice, lines }) {
+  const total = invoiceTotal(lines);
+  const plan = payPlanOf(invoice, total);
+  const now = plan === 'full' ? total : invoice.deposit_due_cents;
+  if (plan === 'full') return { total, plan, now, big: `Amount due: ${money(total)}`, small: `Please pay by ${prettyDate(invoice.due_date)}.` };
+  return { total, plan, now, big: `Deposit due now: ${money(now)}`, small: `This holds your date. The rest, ${money(total - now)}, is due by ${prettyDate(invoice.due_date)}.` };
+}
+
+// The short message that goes with the PDF in a text.
+export function textMessage({ invoice, lines, settings }) {
+  const business = settings.business_name || 'Porch & Party';
+  const p = payLines({ invoice, lines });
+  const first = (invoice.customer_name || '').split(' ')[0] || 'there';
+  const how = [settings.zelle ? `Zelle ${settings.zelle}` : '', cashtag(settings.cashapp) ? `Cash App ${cashtag(settings.cashapp)}` : ''].filter(Boolean).join(' or ');
+  return [`Hi ${first}, here is your ${business} invoice ${invoice.number} (PDF attached). Total ${money(p.total)}.`,
+    p.plan === 'full' ? `Please pay by ${prettyDate(invoice.due_date)}.` : `Deposit of ${money(p.now)} due now holds your date; the rest, ${money(p.total - p.now)}, is due by ${prettyDate(invoice.due_date)}.`,
+    how ? `Pay by ${how}, with ${invoice.number} in the note.` : '', 'Thank you!'].filter(Boolean).join(' ');
+}
+
+export async function renderInvoicePdf({ invoice, lines, settings, contact }) {
+  const business = settings.business_name || 'Porch & Party';
+  const footerLine = settings.business_address || 'Memphis, Tennessee';
+  const phone = contact && contact.telephoneDisplay ? contact.telephoneDisplay : '';
+  const tag = cashtag(settings.cashapp);
+  const pay = payLines({ invoice, lines });
+  const refundable = lines.filter((l) => l.refundable).reduce((s, l) => s + lineTotal(l), 0);
+
+  const doc = await PDFDocument.create();
+  doc.setTitle(`Invoice ${invoice.number} from ${business}`);
+  doc.setAuthor(business);
+  const sans = await doc.embedFont(StandardFonts.Helvetica);
+  const sansBold = await doc.embedFont(StandardFonts.HelveticaBold);
+  const serifBold = await doc.embedFont(StandardFonts.TimesRomanBold);
+  let page = doc.addPage([PAGE.w, PAGE.h]);
+  let y = PAGE.h - PAGE.margin;
+  const left = PAGE.margin; const right = PAGE.w - PAGE.margin; const width = right - left;
+
+  const text = (s, x, yy, { font = sans, size = 11, color = INK, align = 'left' } = {}) => {
+    const t = winAnsi(s); const w = font.widthOfTextAtSize(t, size);
+    page.drawText(t, { x: align === 'right' ? x - w : x, y: yy, size, font, color });
+    return w;
+  };
+  const wrap = (s, font, size, maxWidth) => {
+    const out = []; let line = '';
+    for (const word of winAnsi(s).split(/\s+/).filter(Boolean)) {
+      const probe = line ? `${line} ${word}` : word;
+      if (font.widthOfTextAtSize(probe, size) <= maxWidth || !line) line = probe; else { out.push(line); line = word; }
+    }
+    if (line) out.push(line);
+    return out;
+  };
+  const ensure = (h) => { if (y - h < PAGE.margin + 40) { page = doc.addPage([PAGE.w, PAGE.h]); y = PAGE.h - PAGE.margin; } };
+  const rule = (yy, color = LINE) => page.drawLine({ start: { x: left, y: yy }, end: { x: right, y: yy }, thickness: 0.8, color });
+
+  // Header
+  text(business, left, y - 22, { font: serifBold, size: 26 });
+  text(`INVOICE ${invoice.number}`.toUpperCase(), left, y - 40, { font: sansBold, size: 9.5, color: ACCENT });
+  text(`Issued ${prettyDate(invoice.issue_date)}`, right, y - 16, { size: 10, color: MUTED, align: 'right' });
+  text(`Due ${prettyDate(invoice.due_date)}`, right, y - 30, { size: 10, color: MUTED, align: 'right' });
+  y -= 62; rule(y); y -= 18;
+
+  // Bill to
+  text('Bill to', left, y, { font: sansBold, size: 9, color: MUTED });
+  y -= 15; text(invoice.customer_name || 'Customer', left, y, { font: sansBold, size: 12 });
+  for (const v of [invoice.customer_email, invoice.customer_phone].filter(Boolean)) { y -= 14; text(v, left, y, { size: 10, color: MUTED }); }
+  y -= 24;
+
+  // Lines
+  text('Description', left, y, { font: sansBold, size: 9, color: MUTED });
+  text('Amount', right, y, { font: sansBold, size: 9, color: MUTED, align: 'right' });
+  y -= 8; rule(y); y -= 16;
+  for (const l of lines) {
+    const label = `${l.description}${Number(l.qty) !== 1 ? ` x ${l.qty}` : ''}`;
+    const rows = wrap(label, sans, 11, width - 110);
+    ensure(rows.length * 14 + (l.refundable ? 14 : 0) + 10);
+    rows.forEach((r, i) => text(r, left, y - i * 14, { size: 11 }));
+    const amt = needsPrice(l) ? 'Price needed' : (lineTotal(l) === 0 ? 'Free' : money(lineTotal(l)));
+    text(amt, right, y, { size: 11, align: 'right', font: needsPrice(l) ? sansBold : sans, color: needsPrice(l) ? ACCENT : INK });
+    y -= rows.length * 14;
+    if (l.refundable) { text('Given back after the event', left, y, { size: 9, color: MUTED }); y -= 14; }
+    y -= 4; rule(y); y -= 16;
+  }
+  ensure(60);
+  text('Total', left, y, { font: serifBold, size: 18 });
+  text(money(pay.total), right, y, { font: serifBold, size: 18, align: 'right' });
+  y -= 16;
+  if (refundable) { text(`Includes ${money(refundable)} refundable deposit.`, left, y, { size: 9.5, color: MUTED }); y -= 14; }
+  y -= 10;
+
+  // Pay box
+  const boxH = 58; ensure(boxH + 10);
+  page.drawRectangle({ x: left, y: y - boxH, width, height: boxH, color: CREAM, borderColor: LINE, borderWidth: 0.8 });
+  text(pay.big, left + 14, y - 24, { font: serifBold, size: 16 });
+  text(pay.small, left + 14, y - 44, { size: 10.5, color: MUTED });
+  y -= boxH + 22;
+
+  // How to pay (with the QR on the right)
+  let qr = null;
+  if (settings.qr_png) {
+    try {
+      const bytes = Uint8Array.from(atob(settings.qr_png), (c) => c.charCodeAt(0));
+      qr = settings.qr_type === 'image/jpeg' ? await doc.embedJpg(bytes) : await doc.embedPng(bytes);
+    } catch (e) { qr = null; }
+  }
+  const qrSize = qr ? 120 : 0;
+  const textWidth = width - (qr ? qrSize + 20 : 0);
+  ensure(Math.max(qrSize, 90) + 20);
+  const sectionTop = y;
+  text('How to pay', left, y, { font: serifBold, size: 16 }); y -= 20;
+  const items = [settings.zelle ? `Zelle: ${settings.zelle}` : '', tag ? `Cash App: ${tag}` : ''].filter(Boolean);
+  if (!items.length) items.push('Payment details coming. We will follow up with how to pay.');
+  for (const it of items) { text(it, left, y, { size: 11.5 }); y -= 16; }
+  for (const r of wrap(`Please put ${invoice.number} in the payment note.`, sans, 9.5, textWidth)) { text(r, left, y, { size: 9.5, color: MUTED }); y -= 13; }
+  if (qr) {
+    page.drawImage(qr, { x: right - qrSize, y: sectionTop - qrSize + 6, width: qrSize, height: qrSize });
+    y = Math.min(y, sectionTop - qrSize);
+  }
+  y -= 14;
+
+  if (invoice.notes) {
+    rule(y); y -= 16;
+    for (const para of String(invoice.notes).split(/\n+/)) {
+      for (const r of wrap(para, sans, 10.5, width)) { ensure(16); text(r, left, y, { size: 10.5 }); y -= 14; }
+      y -= 4;
+    }
+  }
+
+  // Footer on the last page
+  const fy = PAGE.margin;
+  rule(fy + 26);
+  text(`${business}  |  ${footerLine}`, left, fy + 12, { size: 8.5, color: MUTED });
+  text(`Questions? Write ${FROM_EMAIL}${phone ? ` or call or text ${phone}` : ''}.`, left, fy, { size: 8.5, color: MUTED });
+
+  return doc.save();
+}

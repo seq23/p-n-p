@@ -253,6 +253,23 @@ const EDITOR_JS = `
   recalc();
 })();`;
 
+// "Text the invoice (PDF)": on a phone this opens the share sheet with the PDF and the
+// message (Messages, WhatsApp, Mail...). Where sharing files is not possible it downloads.
+const SHARE_JS = `
+(function(){
+  document.addEventListener('click',async function(e){
+    var b=e.target.closest('[data-share-pdf]');
+    if(b){e.preventDefault();var url=b.getAttribute('data-share-pdf'),name=b.getAttribute('data-name'),text=b.getAttribute('data-text'),was=b.textContent;b.disabled=true;b.textContent='Getting the PDF...';
+      try{var r=await fetch(url,{credentials:'same-origin'});if(!r.ok)throw new Error('pdf');var f=new File([await r.blob()],name,{type:'application/pdf'});
+        if(navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:name,text:text});}
+        else{var a=document.createElement('a');a.href=URL.createObjectURL(f);a.download=name;document.body.appendChild(a);a.click();a.remove();}
+      }catch(err){if(!(err&&err.name==='AbortError'))location.href=url+'?dl=1';}
+      b.disabled=false;b.textContent=was;return;}
+    var c=e.target.closest('[data-copy]');
+    if(c){var t=document.getElementById(c.getAttribute('data-copy'));try{await navigator.clipboard.writeText(t.value);c.textContent='Copied';setTimeout(function(){c.textContent='Copy the message';},1500);}catch(err){t.select();}}
+  });
+})();`;
+
 function paymentWarning(pay) {
   if (pay.complete) return '';
   return `<div class="notice warn"><strong>Payment details are missing.</strong> Add your ${esc(pay.missing.join(', ').replace(/, ([^,]*)$/, ' and $1'))} in Settings before sending, so the customer knows how to pay. If you send now, the email says "Payment details coming".
@@ -274,7 +291,7 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
     <div class="card">
       <div class="muted">For</div>
       <div style="font-size:1.2rem;font-weight:600">${esc(invoice.customer_name || 'No name yet')}</div>
-      <div class="muted" style="word-break:break-all">${esc(invoice.customer_email || 'No email yet: add one under Change what goes into the total')}</div>
+      <div class="muted" style="word-break:break-all">${esc(invoice.customer_email || 'No email: text them the PDF after saving')}</div>
       <div class="muted" style="margin-top:14px">What goes into the total</div>
       <table class="sumlines"><tbody id="sum-lines"></tbody></table>
       <div class="calc">
@@ -299,7 +316,7 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
     </div>
     <details class="more card" style="padding-top:0"${lines.some((l) => l.description && needsPrice(l)) ? ' open' : ''}><summary>Change what goes into the total</summary>
       <label for="cn">Customer name</label><input id="cn" name="customer_name" value="${esc(invoice.customer_name)}">
-      <label for="ce">Customer email</label><input id="ce" name="customer_email" type="email" value="${esc(invoice.customer_email)}">
+      <label for="ce">Customer email (leave blank if you only text them)</label><input id="ce" name="customer_email" type="email" value="${esc(invoice.customer_email)}">
       <label for="cp">Customer phone</label><input id="cp" name="customer_phone" type="tel" value="${esc(invoice.customer_phone)}">
       <h3 style="margin-top:18px">Lines</h3>
       <div data-lines>${lines.map(lineEditor).join('')}</div>
@@ -314,7 +331,7 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
   <script>${EDITOR_JS}</script>`);
 }
 
-export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml = '' }) {
+export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml = '', smsText = '' }) {
   const total = invoiceTotal(lines);
   const plan = payPlanOf(invoice, total);
   const now = plan === 'full' ? total : invoice.deposit_due_cents;
@@ -323,9 +340,14 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
   const act = (action, label, cls = 'ghost') => `<form method="post" action="/admin/invoices/${id}/status"><input type="hidden" name="action" value="${action}"><button class="btn ${cls}" type="submit">${label}</button></form>`;
   const sendForm = (label, cls, test = false) => `<form method="post" action="/admin/invoices/${id}/send">${test ? '<input type="hidden" name="test" value="1">' : ''}<button class="btn ${cls}" type="submit">${label}</button></form>`;
   const voided = invoice.status === 'void';
+  const hasEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(invoice.customer_email || '');
+  const pdfUrl = `/admin/invoices/${id}/invoice.pdf`;
+  const pdfName = `Porch-and-Party-Invoice-${invoice.number}.pdf`;
+  const textBtn = (cls) => `<button type="button" class="btn ${cls}" data-share-pdf="${pdfUrl}" data-name="${esc(pdfName)}" data-text="${esc(smsText)}">Text the invoice (PDF)</button>`;
   let main = '';
   if (voided) main = `<div class="actions">${act('unvoid', 'Bring this invoice back')}</div>`;
-  else if (invoice.status === 'draft') main = `<div class="actions">${sendForm(`Send invoice to ${esc(who)}`, 'primary')}</div>`;
+  else if (invoice.status === 'draft' && !hasEmail) main = `<p class="muted" style="margin:0 0 8px">No email on this invoice, so send the PDF by text. Then tap Mark as sent.</p><div class="actions">${textBtn('primary')}${act('texted', 'Mark as sent by text')}</div>`;
+  else if (invoice.status === 'draft') main = `<div class="actions">${sendForm(`Send invoice to ${esc(who)}`, 'primary')}${textBtn('ghost')}${act('texted', 'Mark as sent by text')}</div>`;
   else if (plan === 'full') main = `<div class="actions">${act('paid', 'Paid in full', invoice.status === 'sent' ? '' : 'ghost')}${sendForm('Resend', 'ghost')}</div>`;
   else main = `<div class="actions three">${act('deposit_paid', 'Deposit received', invoice.status === 'sent' ? '' : 'ghost')}${act('paid', 'Paid in full', invoice.status === 'deposit_paid' ? '' : 'ghost')}${sendForm('Resend', 'ghost')}</div>`;
   const preview = emailHtml && !voided ? `<div class="card" style="padding:0;overflow:hidden"><div class="muted" style="padding:10px 14px;border-bottom:1px solid var(--line)">The email the customer gets</div>
@@ -347,17 +369,23 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
   </div>
   ${invoice.status === 'draft' ? preview : ''}
   ${main}
+  ${voided || invoice.status === 'draft' ? '' : `<div class="actions" style="margin-top:8px">${textBtn('ghost')}</div>`}
   ${invoice.status !== 'draft' ? preview : ''}
   <details class="more"><summary>More</summary>
     <div class="actions">
       ${voided ? '' : `<a class="btn ghost" href="/admin/invoices/${id}/edit">Change the invoice</a>`}
       <a class="btn ghost" href="/admin/invoices/${id}/preview" target="_blank" rel="noopener">See the email</a>
+      <a class="btn ghost" href="${pdfUrl}?dl=1" download="${esc(pdfName)}">Download the PDF</a>
+      <a class="btn ghost" href="${pdfUrl}" target="_blank" rel="noopener">Open the PDF</a>
       ${voided ? '' : sendForm('Send a test copy to hello@porchandparty901.com', 'ghost', true)}
       ${voided || invoice.status === 'done' ? '' : act('done', 'Job finished (mark done)')}
       ${voided ? '' : act('void', 'Cancel this invoice (void)', 'danger')}
     </div>
-    <p class="muted">Email: ${esc(invoice.customer_email)}</p>
-  </details>`);
+    <p class="muted">Email: ${esc(invoice.customer_email || 'none')}${invoice.customer_phone ? ` · Phone: ${esc(invoice.customer_phone)}` : ''}</p>
+    <label for="sms">Text message to send with the PDF</label><textarea id="sms" readonly rows="4">${esc(smsText)}</textarea>
+    <button type="button" class="btn ghost" data-copy="sms">Copy the message</button>
+  </details>
+  <script>${SHARE_JS}</script>`);
 }
 
 export function helpPage() {
@@ -373,6 +401,7 @@ export function helpPage() {
     <p>Add your Zelle, Cash App and QR code once in Settings. They go on every invoice.</p><a class="btn ghost" href="/admin/settings">Open Settings</a>
     <p>Anything less common (change prices, cancel an invoice, see the email) is under <strong>More</strong>.</p>
     <p>A line that says <strong style="color:#8f3427">Price needed</strong> (usually decor) needs its price typed in under <strong>Change what goes into the total</strong> before it can be sent.</p>
+    <p><strong>No email?</strong> Leave the email blank, save the invoice, then tap <strong>Text the invoice (PDF)</strong>. On your phone that opens Messages with the PDF and a short message attached. Tap <strong>Mark as sent by text</strong> so the dashboard knows.</p>
     <p>With a deposit, the email asks for the deposit right away and shows the rest (total minus deposit) and its due date. With Full amount, it asks for the whole total by the due date.</p>
     <p style="margin-bottom:0">Every invoice is also copied to hello@porchandparty901.com.</p></div>`);
 }
