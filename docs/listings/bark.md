@@ -35,7 +35,7 @@ Do not add Catering: grazing-table pricing covers styling, not food, and a cater
 4. `assets/img/porch/arlington-front-porch-styling-pumpkins.jpg`
 5. `assets/img/party/memphis-party-decor-hotel-room-birthday-setup.jpg`
 6. `assets/img/party/east-memphis-hotel-room-celebration-decor.jpg`
-7. `assets/img/celebrations/romantic-bedroom-experience.png`
+7. `assets/img/celebrations/romantic-bedroom-experience.jpg`
 8. `assets/img/party/germantown-party-decor-bridal-shower-setup.jpg`
 9. `assets/img/party/bartlett-birthday-party-decor-setup.jpg`
 10. `assets/img/grazing/grazing-table-corporate.jpg`

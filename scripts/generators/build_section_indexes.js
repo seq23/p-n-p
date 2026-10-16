@@ -260,7 +260,7 @@ const SOCIAL = {
     'Memphis fall front porch decorating with pumpkins and layered seasonal styling'],
   areas: ['/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg',
     'Collierville Christmas porch decorating with wreaths, garland, and front door holiday styling'],
-  faq: ['/assets/img/celebrations/romantic-bedroom-experience.png',
+  faq: ['/assets/img/celebrations/romantic-bedroom-experience.jpg',
     'Celebration setup in a hotel room with balloons and candles'],
   local: ['/assets/img/party/memphis-party-decor-hotel-room-birthday-setup.jpg',
     'Memphis hotel room birthday party decor setup'],

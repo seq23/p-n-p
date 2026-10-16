@@ -230,7 +230,7 @@ for (const card of cards) {
   let html = fs.readFileSync(abs, 'utf8');
   const url = `${DOMAIN}/answers/${card.id}.html`;
   const image = (html.match(/<meta property="og:image" content="([^"]+)"/) || [])[1]
-    || `${DOMAIN}/assets/img/celebrations/romantic-bedroom-experience.png`;
+    || `${DOMAIN}/assets/img/celebrations/romantic-bedroom-experience.jpg`;
 
   // Search engines cut titles past 70 characters, and Bing Site Scan flags them.
   // The longest suffix that fits wins; the h1 alone is the floor.

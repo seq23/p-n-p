@@ -40,7 +40,7 @@ function pickSocialImage(pathUrl, serviceKey) {
     };
   }
   return {
-    url: `${offers.domain}/assets/img/celebrations/romantic-bedroom-experience.png`,
+    url: `${offers.domain}/assets/img/celebrations/romantic-bedroom-experience.jpg`,
     alt: 'Celebration setup in a hotel room with balloons and candles'
   };
 }
