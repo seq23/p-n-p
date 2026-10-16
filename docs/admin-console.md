@@ -5,7 +5,7 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
 ## What it does
 - **Requests**: read live from the request form's Google Sheet (`Form Responses 1`), newest first,
   as the `gsc-bot@gsc-automation-493801` service account (Sheets API, JWT signed in the Worker,
-  cached 60 s). Each card shows contact, DOB, social links, the ID file, the rentals/decor answers and
+  cached 60 s). Each card shows contact, DOB, the ID file, the rentals/decor answers and
   a status chip (New / Invoiced / Deposit paid / Paid / Done, table `request_status`).
 - **Walk-through checklist**: `/admin/checklist` prints the four-page checklist (blank, or
   `?r=` pre-filled from a request). `/admin/checklist/online?r=` is the same checklist as a form,

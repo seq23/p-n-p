@@ -49,7 +49,7 @@ td.blank{min-width:70px}
   <h2>Before you leave</h2>
   <ul class="ck">
     <li>Request form read, ID matched to name and date of birth</li>
-    <li>Social link opened, looks like a real person</li>
+    <li>Social link (if given) opened, looks like a real person</li>
     <li>Address confirmed by text; parking and gate code asked</li>
     <li>Phone charged, this packet, pen, tape measure</li>
     <li>Price floor decided before you arrive (page 4)</li>
@@ -92,7 +92,7 @@ td.blank{min-width:70px}
   <h2>Notes <small>first impressions, what they said twice, what they care about most</small></h2>
   <div class="lines"></div>
 
-  <div class="foot"><span>ID and social are checked for safety only and deleted after the event.</span><span>Porch &amp; Party · Memphis</span></div>
+  <div class="foot"><span>ID and social (if given) are checked for safety only and deleted after the event.</span><span>Porch &amp; Party · Memphis</span></div>
 </section>
 
 <!-- PAGE 2: party / event decor -->

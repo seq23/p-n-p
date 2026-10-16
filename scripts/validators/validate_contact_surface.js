@@ -23,6 +23,11 @@
  *     keeps the unpriced "available for an additional fee" wording, and the
  *     rentals page never offers it (rentals have no takedown; the renter returns them).
  *
+ *   - owner ruling 2026-10-15: every page's header Request a Quote links
+ *     services.json quoteUrl (target="_blank" rel="noopener"), never /contact;
+ *     no quote CTA on any page links /contact (it is linked only as "Contact");
+ *     contact.html keeps its own form button.
+ *
  * Hard-fails on zero pages or zero LocalBusiness nodes, so it cannot pass by
  * having checked nothing. Repair: npm run contact:install.
  */
@@ -30,6 +35,7 @@ const fs = require('fs');
 const path = require('path');
 const { CONTACT: C, MARK, PRIORITY_PAGES, BUSINESS_TYPES, PRIMARY_ROUTE } = require('../lib/contact_surface');
 const { publishedPages } = require('../install_contact_surface');
+const QUOTE_URL = require('../../data/offers/services.json').quoteUrl;
 
 const ROOT = path.resolve(__dirname, '../..');
 const FEATURE_ID = '0x13f19dc04f9ce33a';
@@ -76,6 +82,14 @@ for (const rel of pages) {
   if (header && (header.includes(routeHref) || header.includes('data-nav-link="primary-route"'))) fail(`${rel}: header still links ${PRIMARY_ROUTE.href} (Party Planning was removed from the nav 2026-10-13)`);
   if (header && !siteNav) fail(`${rel}: header has no primary site-nav`);
   if (!(footer.includes(MARK.footerRoute) && footer.includes(routeHref))) fail(`${rel}: footer lacks the ${PRIMARY_ROUTE.footerLabel} link`);
+  // Quote CTAs open the form directly (owner ruling 2026-10-15).
+  if (header) {
+    const q = [...header.matchAll(/<a\b([^>]*)>Request a Quote<\/a>/g)].map((m) => m[1]);
+    if (q.length !== 2 || !q.every((a) => a.includes(`href="${QUOTE_URL}"`) && a.includes('target="_blank"') && a.includes('rel="noopener"'))) fail(`${rel}: header Request a Quote (desktop + mobile, ${q.length} found) does not open ${QUOTE_URL} in a new tab`);
+  }
+  for (const m of html.matchAll(/<a\b[^>]*href="\/contact(?:\.html)?"[^>]*>([\s\S]*?)<\/a>/g)) {
+    if (m[1].replace(/<[^>]+>/g, '').trim() !== 'Contact') fail(`${rel}: quote CTA "${m[1].replace(/<[^>]+>/g, '').trim()}" links /contact instead of ${QUOTE_URL}`);
+  }
   for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
     try { walk(JSON.parse(m[1]), rel); } catch (e) { fail(`${rel}: unparseable JSON-LD (${e.message})`); }
   }
@@ -98,11 +112,20 @@ for (const p of PRIORITY_PAGES) {
 // Renter-safety line on contact.html, next to the quote form.
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const SAFE = (offers.renterSafety || {}).line || '';
-if (!/government photo ID/.test(SAFE) || !/social media link/.test(SAFE)) fail('services.json renterSafety.line does not ask for a government photo ID and a social media link');
+// Owner ruling 2026-10-15: the photo ID stays required; the social media link is
+// optional and described only on the form itself - the site never mentions it.
+const SAFE_LEAD = 'We ask every renter for a government photo ID.';
+if (!SAFE.startsWith(SAFE_LEAD) || /social/i.test(SAFE)) fail(`services.json renterSafety.line does not start "${SAFE_LEAD}"`);
+for (const rel of ['contact.html', 'rentals/index.html', 'llms.txt', 'llms-services.txt', 'llms-full.txt']) {
+  const t = read(rel);
+  if (!t.includes(SAFE_LEAD)) fail(`${rel} lacks the renter-safety line "${SAFE_LEAD}"`);
+  if (/social media/i.test(t)) fail(`${rel} mentions a social media link (owner ruling 2026-10-15: only the form itself asks for it)`);
+}
 {
   const c = read('contact.html') || '';
   const at = c.indexOf(`<p class="muted" ${MARK.safety}>${SAFE}</p>`);
-  const form = c.indexOf(`href="${offers.quoteUrl}"`);
+  // The page body's form button: the header Request a Quote also links the form.
+  const form = c.indexOf('<main') < 0 ? -1 : c.indexOf(`href="${QUOTE_URL}"`, c.indexOf('<main'));
   if (at < 0) fail('contact.html lacks the renter-safety line from services.json renterSafety');
   else if (form < 0 || at < form || at - form > 600) fail('contact.html renter-safety line is not next to the quote form link');
 }

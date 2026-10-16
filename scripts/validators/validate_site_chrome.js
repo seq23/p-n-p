@@ -10,7 +10,12 @@
  *   - independently of that module, the desktop nav and the mobile panel each
  *     list exactly the ruled items in the ruled order (spelled out below, so
  *     editing the module cannot quietly change the nav), followed by the
- *     Request a Quote button (/contact) and the Call or text tel: link;
+ *     Request a Quote button and the Call or text tel: link;
+ *   - owner ruling 2026-10-15: the header Request a Quote (desktop row AND
+ *     mobile panel) opens the quote form (services.json quoteUrl) with
+ *     target="_blank" rel="noopener"; on every page no quote CTA links
+ *     /contact - the only link to /contact anywhere is one labelled "Contact" -
+ *     and every link to the form opens in a new tab with rel="noopener";
  *   - no header links the party-planner page ("Party Planning" was removed);
  *   - the hamburger is a <button> with aria-expanded + aria-controls="site-menu",
  *     the panel #site-menu exists, and the no-JS :target fallback link exists;
@@ -18,8 +23,9 @@
  *   - every footer Explore list carries exactly one Rentals link (/rentals/).
  *
  * Self-test first: a page with Rentals dropped from the nav, a page with Party
- * Planning added back, and a page without the footer Rentals link must each
- * FAIL, so the check cannot pass vacuously. Hard-fails on zero pages.
+ * Planning added back, a page without the footer Rentals link, a header quote
+ * button back on /contact, an in-body quote CTA on /contact and a form link
+ * without a new tab must each FAIL, so the check cannot pass vacuously. Hard-fails on zero pages.
  * Repair: npm run chrome:install.
  */
 const fs = require('fs');
@@ -39,6 +45,10 @@ const RULED = [
   ['/how-it-works', 'How It Works']
 ];
 const TEL = 'tel:+19013551518';
+// Written out on purpose (not read from services.json or the chrome module).
+const FORM = 'https://forms.gle/vHjfKtRRAnGV3HxFA';
+const CONTACT_RE = /^\/contact(?:\.html)?\/?(?:[?#].*)?$/;
+const newTab = (attrs) => / target="_blank"/.test(` ${attrs}`) && /\brel="[^"]*\bnoopener\b[^"]*"/.test(attrs);
 const PLANNER = '/services/birthday-party-planner-memphis';
 
 const text = (s) => s.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
@@ -69,17 +79,23 @@ function checkPage(html, rel) {
   }
   const actions = (h.match(/<div class="pnp-actions">([\s\S]*?)<\/div>/) || [])[1] || '';
   const act = links(actions);
-  if (!(act.length === 2 && act[0].href === '/contact' && act[0].label === 'Request a Quote' && act[1].href === TEL && act[1].label === 'Call or text 901-355-1518')) errs.push(`${rel}: header actions are not [Request a Quote (/contact), Call or text 901-355-1518 (tel:)]`);
+  if (!(act.length === 2 && act[0].href === FORM && newTab(act[0].attrs) && act[0].label === 'Request a Quote' && act[1].href === TEL && act[1].label === 'Call or text 901-355-1518')) errs.push(`${rel}: header actions are not [Request a Quote (${FORM}, target=_blank rel=noopener), Call or text 901-355-1518 (tel:)]`);
   const panel = (h.match(/<div class="pnp-panel" id="site-menu">([\s\S]*?)<\/div>/) || [])[1];
   if (!panel) errs.push(`${rel}: no mobile panel #site-menu`);
   else {
     const after = links(panel.replace(/<nav[\s\S]*?<\/nav>/, ''));
-    if (!after.some((l) => l.href === '/contact' && l.label === 'Request a Quote')) errs.push(`${rel}: mobile panel lacks Request a Quote`);
+    if (!after.some((l) => l.href === FORM && newTab(l.attrs) && l.label === 'Request a Quote')) errs.push(`${rel}: mobile panel lacks Request a Quote opening ${FORM} in a new tab`);
     if (!after.some((l) => l.href === TEL && l.label === 'Call or text 901-355-1518')) errs.push(`${rel}: mobile panel lacks the phone line`);
   }
   if (!/<button type="button" class="pnp-toggle" aria-expanded="false" aria-controls="site-menu"/.test(h)) errs.push(`${rel}: hamburger <button> lacks aria-expanded/aria-controls`);
   if (!/<a href="#site-menu" class="pnp-toggle"/.test(h)) errs.push(`${rel}: no no-JS :target fallback for the menu`);
   if (/Party Planning/.test(h) || h.includes(`href="${PLANNER}"`)) errs.push(`${rel}: header still carries Party Planning`);
+  // Every link on the page, not only the header: /contact is linked only as
+  // "Contact"; any other label there is a quote CTA that must open the form.
+  for (const l of links(html)) {
+    if (CONTACT_RE.test(l.href || '') && l.label !== 'Contact') errs.push(`${rel}: "${l.label}" links ${l.href} - quote CTAs open ${FORM} directly (owner ruling 2026-10-15)`);
+    if (l.href === FORM && !newTab(l.attrs)) errs.push(`${rel}: "${l.label}" links the quote form without target="_blank" rel="noopener"`);
+  }
   const head = html.slice(0, html.indexOf('</head>'));
   if (!head.includes(`href="${chrome.CSS_HREF}"`)) errs.push(`${rel}: <head> does not link ${chrome.CSS_HREF}`);
   if (!/fonts\.googleapis\.com\/css2\?family=Cormorant/.test(head)) errs.push(`${rel}: <head> does not load the site fonts (Inter, Cormorant Garamond, Great Vibes)`);
@@ -98,7 +114,10 @@ const sample = fs.readFileSync(path.join(ROOT, 'pricing.html'), 'utf8');
 const broken = {
   'nav without Rentals': sample.replace(/(<nav class="site-nav[^>]*>[\s\S]*?)<a href="\/rentals\/">Rentals<\/a>/, '$1'),
   'Party Planning back in the nav': sample.replace(/(<nav class="site-nav[^>]*>)/, `$1<a href="${PLANNER}">Party Planning</a>`),
-  'footer without Rentals': sample.replace(chrome.RENTALS_FOOTER, '')
+  'footer without Rentals': sample.replace(chrome.RENTALS_FOOTER, ''),
+  'header quote back on /contact': sample.replace(`<a href="${FORM}" class="btn-primary pnp-quote" target="_blank" rel="noopener">`, '<a href="/contact" class="btn-primary pnp-quote">'),
+  'an in-body quote CTA on /contact': sample.replace('</main>', '<a href="/contact.html" class="btn-primary">Request a Quote</a></main>'),
+  'a form link without a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary">Check My Date</a></main>`)
 };
 for (const [what, html] of Object.entries(broken)) {
   if (html === sample) errors.push(`self-test: could not build the "${what}" fixture (pricing.html shape changed)`);
@@ -117,4 +136,4 @@ if (errors.length) {
   console.error('  repair: npm run chrome:install');
   process.exit(1);
 }
-console.log(`site-chrome: OK - ${pages.length} pages carry the identical header (${RULED.map((r) => r[1]).join(' · ')} + Request a Quote + Call or text), the mobile menu, ${chrome.CSS_HREF}, and the footer Rentals link; self-test rejected 3 broken fixtures`);
+console.log(`site-chrome: OK - ${pages.length} pages carry the identical header (${RULED.map((r) => r[1]).join(' · ')} + Request a Quote -> ${FORM} + Call or text), the mobile menu, ${chrome.CSS_HREF}, and the footer Rentals link; no quote CTA links /contact, every form link opens in a new tab; self-test rejected ${Object.keys(broken).length} broken fixtures`);

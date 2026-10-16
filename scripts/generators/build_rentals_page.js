@@ -202,7 +202,7 @@ function render() {
           <span class="eyebrow">Party Game Rentals in Memphis</span>
           <h1>${H1}</h1>
           <p id="what-are-porch-and-party-rentals">Porch &amp; Party rents giant yard games, an inflatable movie screen and a card table for backyard parties, birthdays, family reunions, church and school events in Memphis, Olive Branch and Southaven. You pick up and return at ${esc(PICK.place)}, a safe exchange zone. Every game is ${money(RATE.day)} a day, or pick 3 for ${money(BUNDLES[0].dayPrice)}, with no minimum order.</p>
-          <div class="btn-row hero-centered-cta"><a href="/contact" class="btn-primary" data-quote-cta="rentals-top">Check My Date</a><a href="#games" class="btn-secondary">See the Rentals</a></div>
+          <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary" rel="noopener" target="_blank" data-quote-cta="rentals-top">Check My Date</a><a href="#games" class="btn-secondary">See the Rentals</a></div>
           <p class="muted" style="margin-top: 14px;"><a href="${C.telHref}">Call or text ${C.telephoneDisplay}</a></p>
         </div>
         <div class="card-media" style="margin-top: 28px; border-radius: 22px; overflow: hidden;"><img src="${data.hero.file}" alt="${esc(data.hero.alt)}" width="1600" height="900" fetchpriority="high" decoding="async" style="width: 100%; height: auto; display: block;"/></div>
@@ -236,7 +236,7 @@ function render() {
         <div class="answer-block"><span class="eyebrow">How Booking Works</span><h2>Four steps from request to return</h2></div>
         <div class="steps">${STEPS.map(([h, p], i) => `<div class="step"><div class="step-number">${i + 1}</div><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>
         <p class="muted" style="text-align: center; margin-top: 16px;" data-rentals="renter-safety">${offers.renterSafety.line} ${offers.renterSafety.rentalFormNote}</p>
-        <div class="btn-row centered-cta-row"><a href="/contact" class="btn-primary" data-quote-cta="rentals-steps">Request Game Rentals</a></div>
+        <div class="btn-row centered-cta-row"><a href="${FORM_URL}" class="btn-primary" rel="noopener" target="_blank" data-quote-cta="rentals-steps">Request Game Rentals</a></div>
       </div>
     </section>
 
