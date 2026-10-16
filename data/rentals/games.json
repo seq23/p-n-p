@@ -142,7 +142,9 @@
       "games": 3,
       "items": [],
       "dayPrice": 110,
-      "includes": "Any 3 games"
+      "includes": "Any 3 games",
+      "image": "/assets/rentals/bundles/bundle-pick-3.jpg",
+      "alt": "Giant connect four, giant color stack and a cornhole board set up on a backyard lawn"
     },
     {
       "slug": "pick-5",
@@ -151,7 +153,9 @@
       "games": 5,
       "items": [],
       "dayPrice": 175,
-      "includes": "Any 5 games"
+      "includes": "Any 5 games",
+      "image": "/assets/rentals/bundles/bundle-pick-5.jpg",
+      "alt": "Giant connect four, giant color stack, cornhole, a giant checkers mat and giant Uno cards on a backyard lawn"
     },
     {
       "slug": "whole-yard",
@@ -160,7 +164,9 @@
       "games": 6,
       "items": [],
       "dayPrice": 195,
-      "includes": "All 6 games"
+      "includes": "All 6 games",
+      "image": "/assets/rentals/bundles/bundle-whole-yard.jpg",
+      "alt": "All six party games on a backyard lawn: giant connect four, giant color stack, cornhole, giant checkers, giant Uno and Grab the Mic"
     },
     {
       "slug": "movie-night",
@@ -171,7 +177,9 @@
         "inflatable-movie-screen"
       ],
       "dayPrice": 110,
-      "includes": "The inflatable movie screen + any 2 games"
+      "includes": "The inflatable movie screen + any 2 games",
+      "image": "/assets/rentals/bundles/bundle-movie-night.jpg",
+      "alt": "Black inflatable movie screen under string lights at dusk with a cornhole board and giant connect four on the lawn"
     },
     {
       "slug": "game-night",
@@ -182,7 +190,9 @@
         "card-table"
       ],
       "dayPrice": 85,
-      "includes": "The card table + any 2 games"
+      "includes": "The card table + any 2 games",
+      "image": "/assets/rentals/bundles/bundle-game-night.jpg",
+      "alt": "Folding card table with a green felt top on a sunny lawn, with giant Uno cards and Grab the Mic beside it"
     },
     {
       "slug": "whole-party",
@@ -195,7 +205,9 @@
       ],
       "dayPrice": 235,
       "weekendPrice": 350,
-      "includes": "All 6 games, the movie screen and the card table"
+      "includes": "All 6 games, the movie screen and the card table",
+      "image": "/assets/rentals/bundles/bundle-whole-party.jpg",
+      "alt": "Every rental on one lawn: inflatable movie screen, card table, giant connect four, giant color stack, cornhole, giant checkers, giant Uno and Grab the Mic"
     }
   ],
   "pickup": {

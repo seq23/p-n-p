@@ -5,7 +5,7 @@
 - **Category (every listing):** Party Supplies
 - **Condition:** Used – Like New
 - **Location:** Memphis, TN 38115 (pickup and return at Mt. Moriah Station; no street address of ours is published)
-- **Photos:** the listed `assets/rentals/<file>.webp`, then `assets/rentals/hero.webp`. These are AI-generated placeholders; replace them with real photos as soon as they exist.
+- **Photos:** the listed file (an item photo under `assets/rentals/`, or a bundle collage under `assets/rentals/bundles/`), then `assets/rentals/hero.webp`. The movie screen, card table and bundle collages are the current product shots; the game photos are AI-generated placeholders until real photos replace them.
 - **Contact:** email only. No phone number goes in any Facebook copy (owner ruling, 14 Oct 2026); the website keeps the phone.
 
 ## Giant Connect Four
@@ -205,7 +205,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Title:** Pick 3 Yard Games Bundle, $110/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $110 (per day)  
-**Photo:** `assets/rentals/hero.webp`
+**Photo:** `assets/rentals/bundles/bundle-pick-3.jpg`
 
 **Description:**
 
@@ -229,7 +229,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Title:** Pick 5 Yard Games Bundle, $175/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $175 (per day)  
-**Photo:** `assets/rentals/hero.webp`
+**Photo:** `assets/rentals/bundles/bundle-pick-5.jpg`
 
 **Description:**
 
@@ -253,7 +253,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Title:** Whole Yard Bundle, all 6 games, $195/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $195 (per day)  
-**Photo:** `assets/rentals/hero.webp`
+**Photo:** `assets/rentals/bundles/bundle-whole-yard.jpg`
 
 **Description:**
 
@@ -277,7 +277,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Title:** Movie Night Bundle, screen + 2 games, $110/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $110 (per day)  
-**Photo:** `assets/rentals/inflatable-movie-screen.webp`
+**Photo:** `assets/rentals/bundles/bundle-movie-night.jpg`
 
 **Description:**
 
@@ -301,7 +301,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Title:** Game Night Bundle, card table + 2 games, $85/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $85 (per day)  
-**Photo:** `assets/rentals/card-table.webp`
+**Photo:** `assets/rentals/bundles/bundle-game-night.jpg`
 
 **Description:**
 
@@ -325,7 +325,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Title:** The Whole Party Bundle, all 8 items, $235/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $235 (per day)  
-**Photo:** `assets/rentals/hero.webp`
+**Photo:** `assets/rentals/bundles/bundle-whole-party.jpg`
 
 **Description:**
 

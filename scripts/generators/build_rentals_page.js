@@ -128,7 +128,8 @@ function bundleCard(b) {
   const price = wk ? `${money(b.dayPrice)} a day` : money(b.dayPrice);
   const weekend = wk ? `<p><strong>${money(b.weekendPrice)} for a weekend.</strong></p>` : '';
   const save = `Saves ${money(day.save)} on day prices (${money(day.list)} separately).${wk ? ` A weekend saves ${money(wk.save)} (${money(wk.list)} separately).` : ''}`;
-  return `<div class="pricing-card" id="bundle-${b.slug}"><h3>${esc(b.name)}</h3><span class="price">${price}</span><p>${esc(b.includes)}${wk ? '' : ', for one day'}.</p>${weekend}<p class="muted">${save}</p></div>`;
+  const img = `<div class="card-media" style="margin: -26px -26px 16px;"><img src="${b.image}" alt="${esc(b.alt)}" width="1200" height="1200" loading="lazy" decoding="async" style="aspect-ratio: 1 / 1;"/></div>`;
+  return `<div class="pricing-card" id="bundle-${b.slug}">${img}<h3>${esc(b.name)}</h3><span class="price">${price}</span><p>${esc(b.includes)}${wk ? '' : ', for one day'}.</p>${weekend}<p class="muted">${save}</p></div>`;
 }
 
 function jsonLd() {

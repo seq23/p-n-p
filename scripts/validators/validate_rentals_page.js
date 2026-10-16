@@ -81,9 +81,20 @@ const imgDir = path.join(ROOT, 'assets/rentals');
 const slugs = new Set([...data.games, ...(data.extras || [])].map((g) => g.slug));
 for (const i of ITEMS) if (!fs.existsSync(path.join(imgDir, `${i.slug}.webp`))) errors.push(`assets/rentals/${i.slug}.webp is missing`);
 for (const f of fs.readdirSync(imgDir)) {
+  if (f === 'bundles' && fs.statSync(path.join(imgDir, f)).isDirectory()) continue;
   const slug = f.replace(/(-alt)?\.webp$/, '');
   if (slug !== 'hero' && !slugs.has(slug)) errors.push(`assets/rentals/${f} belongs to no item in games.json`);
 }
+// Bundle collages: each bundle names its image in games.json; every file under
+// assets/rentals/bundles/ is some bundle's image.
+const bundleImages = new Set(BUNDLES.map((b) => String(b.image || '').replace(/^\//, '')));
+for (const b of BUNDLES) {
+  if (b.image !== `/assets/rentals/bundles/bundle-${b.slug}.jpg`) errors.push(`games.json bundle ${b.name} image is not /assets/rentals/bundles/bundle-${b.slug}.jpg`);
+  else if (!fs.existsSync(path.join(ROOT, b.image))) errors.push(`${b.image} is missing`);
+  if (!b.alt) errors.push(`games.json bundle ${b.name} has no alt text`);
+}
+const bundleDir = path.join(imgDir, 'bundles');
+for (const f of fs.existsSync(bundleDir) ? fs.readdirSync(bundleDir) : []) if (!bundleImages.has(`assets/rentals/bundles/${f}`)) errors.push(`assets/rentals/bundles/${f} belongs to no bundle in games.json`);
 
 // ---- Prices: every $ amount is a games.json price ----------------------------
 const PRICES = new Set([R.day, R.weekend, data.damageDeposit, 5,
@@ -116,7 +127,8 @@ if (onDisk) {
   const cards = bundleSec.match(/class="pricing-card"/g) || [];
   if (cards.length !== 6) errors.push(`rentals/index.html #bundles shows ${cards.length} bundle cards, v3 is 6`);
   for (const b of BUNDLES) {
-    const card = (bundleSec.split(`id="bundle-${b.slug}"`)[1] || '').split('</div>')[0];
+    const card = (bundleSec.split(`id="bundle-${b.slug}"`)[1] || '').split('id="bundle-')[0];
+    if (!card.includes(`<img src="${b.image}"`)) errors.push(`rentals/index.html bundle ${b.name} card lacks its collage ${b.image}`);
     if (!card.includes(money(b.dayPrice)) || !card.includes(`Saves ${money(bundleValue(b, 'day').save)}`)) errors.push(`rentals/index.html bundle ${b.name} card lacks its price or saving`);
     if (b.weekendPrice && !card.includes(`${money(b.weekendPrice)} for a weekend`)) errors.push(`rentals/index.html bundle ${b.name} card lacks its weekend price`);
   }
@@ -156,7 +168,7 @@ const checkListing = (b, where, title, price, photo) => {
   if (!b) { errors.push(`facebook-marketplace.md has no listing for ${where}`); return; }
   if (!b.includes(`**Price:** ${money(price)} (per day)`)) errors.push(`${where}: Marketplace price is not the ${money(price)} day price`);
   if (!new RegExp(`\\*\\*Title:\\*\\* ${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^\\n]*, \\$${price}/day, Memphis pickup`).test(b)) errors.push(`${where}: Marketplace title is not "${title}…, ${money(price)}/day, Memphis pickup"`);
-  if (!b.includes(`assets/rentals/${photo}.webp`)) errors.push(`${where}: Marketplace photo is not assets/rentals/${photo}.webp`);
+  if (photo && !b.includes(`assets/rentals/${photo}.webp`)) errors.push(`${where}: Marketplace photo is not assets/rentals/${photo}.webp`);
   for (const r of RULES) if (!b.includes(r)) errors.push(`${where}: Marketplace listing lacks "${r}"`);
   if (!b.trimEnd().endsWith(CONTACT.trimEnd())) errors.push(`${where}: Marketplace listing does not end with the email-only contact block`);
 };
@@ -167,8 +179,9 @@ for (const i of ITEMS) {
 }
 for (const bd of BUNDLES) {
   const b = blocks.find((x) => x.startsWith(`${bd.name} bundle\n`));
-  checkListing(b, `${bd.name} bundle`, bd.name, bd.dayPrice, b ? ((b.match(/assets\/rentals\/([a-z0-9-]+)\.webp/) || [])[1] || '?') : '?');
+  checkListing(b, `${bd.name} bundle`, bd.name, bd.dayPrice, null);
   if (!b) continue;
+  if (!b.includes(`**Photo:** \`${bd.image.replace(/^\//, '')}\``)) errors.push(`${bd.name} bundle: Marketplace photo is not its collage ${bd.image}`);
   if (!b.toLowerCase().includes(bd.includes.toLowerCase())) errors.push(`${bd.name} bundle: Marketplace listing lacks what it includes ("${bd.includes}")`);
   if (!b.includes(`You save ${money(bundleValue(bd, 'day').save)} on day prices`)) errors.push(`${bd.name} bundle: Marketplace listing lacks its ${money(bundleValue(bd, 'day').save)} saving`);
   if (bd.weekendPrice && !b.includes(`${money(bd.weekendPrice)} for a weekend`)) errors.push(`${bd.name} bundle: Marketplace listing lacks its weekend price`);
