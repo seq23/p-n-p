@@ -12,22 +12,22 @@ Porch and Party
 (If a name reads slightly differently in Facebook's category search, pick the closest match it suggests.)
 
 ## About (short bio, 255 characters max)
-Memphis party planning, decor setups and party game rentals. Giant Connect Four, cornhole, Giant Uno and more, $40 a game per day, delivered and set up in Memphis, Olive Branch and Southaven. hello@porchandparty901.com
+Memphis party planning, decor and party rentals: giant yard games $40 a day, a movie screen and a card table. Pick up and return at Mt. Moriah Station. hello@porchandparty901.com
 
 ## About (long description)
-Porch and Party is a Memphis party planning and decor company, and now a party game rental service. We plan and install parties for kids and adults, hotel-room surprises, baby and bridal showers, grazing tables and seasonal porch decorating across the Memphis metro.
+Porch and Party is a Memphis party planning and decor company, and now a party rental service. We plan and install parties for kids and adults, hotel-room surprises, baby and bridal showers, grazing tables and seasonal porch decorating across the Memphis metro.
 
-Our party game rentals bring giant yard games to backyard parties, birthdays, family reunions, church and school events, indoors or outdoors: Giant Connect Four, cornhole, Giant Tumble Tower, Giant Yard Pong, Ladder Toss, Giant Uno, Giant Checkers, Grab the Mic and Giant Color Stack. Every game is $40 a day or $60 for a weekend, with no minimum order. Bundles: Pick 3 for $110, Pick 5 for $175, or the Whole Yard (all 9 games) for $275.
+Our party rentals bring giant yard games, an inflatable movie screen and a card table to backyard parties, birthdays, family reunions, church and school events: Giant Connect Four, cornhole, Giant Checkers, Giant Color Stack, Giant Uno, Grab the Mic, the Inflatable Movie Screen and the Card Table with Cup Holders. Every game is $40 a day or $60 for a weekend, with no minimum order; the movie screen is $50 a day ($75 a weekend) and the card table $15 a day ($25 a weekend). Bundles: Pick 3 for $110, Pick 5 for $175, the Whole Yard (all 6 games) for $195, Movie Night (screen + 2 games) for $110, Game Night (card table + 2 games) for $85, or The Whole Party (all 8 items) for $235 a day or $350 a weekend.
 
-We deliver by noon, set everything up and pick it up the next day. We deliver in Memphis, Olive Branch and Southaven only: delivery and setup is $30 flat, free on orders of $150 or more. 50% holds your date, a $50 damage deposit is refunded at pickup, and rain or storms reschedule free within 30 days.
+You pick up and return at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, a safe exchange zone. A $50 damage deposit + 50% holds your date by Zelle or Cash App; the rest is paid at pickup by Zelle or Cash App, and the deposit is refunded at return. Bring a photo ID that matches the invoice name. Rain or storms reschedule free within 30 days.
 
-See every game and book at https://porchandparty901.com/rentals/ or email hello@porchandparty901.com.
+See every rental and book at https://porchandparty901.com/rentals/ or email hello@porchandparty901.com.
 
 ## Contact details
 - Website: https://porchandparty901.com/rentals/
 - Phone: leave blank (email only on Facebook, owner ruling 14 Oct 2026)
 - Email: hello@porchandparty901.com
-- Address: leave blank and choose "We serve customers at their location" (delivery only; no address is published anywhere)
+- Address: leave blank and choose "We serve customers at their location" (rentals are picked up at Mt. Moriah Station; no address of ours is published)
 
 ## Service area
 Memphis, TN; Olive Branch, MS; Southaven, MS.
@@ -38,23 +38,23 @@ Memphis, TN; Olive Branch, MS; Southaven, MS.
 ## Photos (from `assets/rentals/`)
 - Cover photo: `assets/rentals/hero.webp`
 - Profile photo: the Porch & Party logo, or a clear photo of the owner
-- Photo album "Party Game Rentals": the nine `assets/rentals/<game>.webp` images
+- Photo album "Party Rentals": the eight `assets/rentals/<item>.webp` images of the items on the rentals page
 
-These images are AI-generated placeholders; swap in real photos of the games as soon as they exist.
+These images are AI-generated placeholders; swap in real photos as soon as they exist.
 
 ## Launch posts
 
 ### Post 1 — announcement
-New at Porch and Party: party game rentals! Giant Connect Four, cornhole, Giant Color Stack, Giant Uno and more, delivered and set up at your party. Every game is $40 a day, or pick any 3 for $110, no minimum order. We deliver in Memphis, Olive Branch and Southaven.
+New at Porch and Party: party rentals! Giant Connect Four, cornhole, Giant Color Stack, Giant Uno and more at $40 a day, or pick any 3 for $110, no minimum order. Pick up and return at Mt. Moriah Station in Memphis, a safe exchange zone.
 Book your date: https://porchandparty901.com/rentals/ or email hello@porchandparty901.com.
 (Photo: `assets/rentals/hero.webp`)
 
-### Post 2 — available now
-Available now for your next party: Giant Connect Four, two cornhole sets and two Giant Color Stack sets for ages 6+, each $40 a day. Backyard, church hall or school gym: every one works indoors or out. We drop off by noon, set up, and pick up the next day.
-See them all: https://porchandparty901.com/rentals/ · hello@porchandparty901.com
-(Photos: `giant-connect-four.webp`, `cornhole.webp`, `giant-color-stack.webp`)
+### Post 2 — Movie night in your backyard
+Movie night in your backyard: our inflatable movie screen comes with its blower, stakes and an extension cord. Bring your own projector and speaker and a plug within 50 ft, and it fits in your trunk. The screen is $50 a day, or get Movie Night (the screen + any 2 games) for $110. Pick up and return at Mt. Moriah Station; a $50 damage deposit + 50% holds your date.
+Reserve your night: https://porchandparty901.com/rentals/ · hello@porchandparty901.com
+(Photo: `assets/rentals/inflatable-movie-screen.webp`)
 
-### Post 3 — the Whole Yard
-Planning a family reunion or a church picnic? Rent the Whole Yard: all 9 games for $275 a day, and delivery is free on every order of $150 or more in Memphis, Olive Branch and Southaven. 50% holds the date and rain reschedules free.
+### Post 3 — The Whole Party
+Planning a family reunion or a church picnic? Rent The Whole Party: all 6 games, the movie screen and the card table for $235 a day or $350 for a weekend (pick up Friday, return Monday). 50% holds the date and rain reschedules free.
 Reserve your date: https://porchandparty901.com/rentals/ · hello@porchandparty901.com
-(Photo: `assets/rentals/hero.webp` or a carousel of all nine)
+(Photo: `assets/rentals/hero.webp` or a carousel of all eight)

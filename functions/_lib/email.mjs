@@ -21,7 +21,8 @@ function cashtag(value) {
   return t ? `$${t}` : '';
 }
 
-export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc }) {
+// pickup: the rentals pickup line (pricing.mjs pickupNote), '' on a decor-only invoice.
+export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, pickup = '' }) {
   const total = invoiceTotal(lines);
   const refundable = lines.filter((l) => l.refundable).reduce((s, l) => s + lineTotal(l), 0);
   const plan = payPlanOf(invoice, total);
@@ -82,6 +83,7 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc })
       <tr><td style="padding:16px;font-family:${SANS};font-size:15px;color:${C.ink};">
         <div style="font-family:${SERIF};font-size:20px;font-weight:600;margin-bottom:4px;">${esc(payBox.big)}</div>
         <div style="color:${C.muted};font-size:14px;">${esc(payBox.small)}</div>
+        ${pickup ? `<div style="color:${C.ink};font-size:14px;margin-top:8px;" data-pickup-line>${esc(pickup)}</div>` : ''}
       </td></tr>
     </table>
   </td></tr>
@@ -106,6 +108,7 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc })
     `Total: ${money(total)}`,
     payBox.big,
     payBox.small,
+    ...(pickup ? [pickup] : []),
     '',
     'How to pay:',
     ...(settings.zelle ? [`Zelle: ${settings.zelle}`] : []),

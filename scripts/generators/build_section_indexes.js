@@ -107,7 +107,7 @@ function groupServices(pages) {
   // here. Missing file is a hard error, never a silently shorter index.
   groups.push({
     heading: `Party Game Rentals - $${rentalRates.day} a game per day`,
-    blurb: 'Giant yard games delivered and set up in Memphis, Olive Branch and Southaven, indoors or outdoors, with next-day pickup.',
+    blurb: 'Giant yard games, an inflatable movie screen and a card table for Memphis parties, picked up and returned at Mt. Moriah Station.',
     pages: [readPage('rentals/index.html')]
   });
   return groups;

@@ -125,7 +125,7 @@ export function wantSummary(r) {
   const parts = [];
   if (r.gamesAnswer) {
     const how = /weekend/i.test(r.durationAnswer) ? 'for the weekend' : (r.durationAnswer ? 'for one day' : '');
-    const when = answerOf(r, /delivery date/i);
+    const when = answerOf(r, /pickup date|delivery date/i);
     parts.push(`Games: ${r.gamesAnswer}${how ? ` ${how}` : ''}${when ? `, ${when}` : ''}`);
   } else if (r.wantsRentals) parts.push('Game rentals');
   if (r.wantsDecor) {
@@ -331,7 +331,7 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
   <script>${EDITOR_JS}</script>`);
 }
 
-export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml = '', smsText = '' }) {
+export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml = '', smsText = '', pickup = '' }) {
   const total = invoiceTotal(lines);
   const plan = payPlanOf(invoice, total);
   const now = plan === 'full' ? total : invoice.deposit_due_cents;
@@ -365,6 +365,7 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
     : `<div class="spread"><span>Deposit asked for now${plan === 'half' ? ' (half)' : ''}</span><strong class="now">${money(now)}</strong></div>
       <div class="spread"><span>Rest after the deposit</span><strong>${money(total - now)}</strong></div>
       <div class="spread"><span>Rest due by</span><strong>${esc(prettyDate(invoice.due_date))}</strong></div>`}
+      ${pickup ? `<p class="muted" style="margin:8px 0 0" data-pickup-line>${esc(pickup)}</p>` : ''}
     </div>
   </div>
   ${invoice.status === 'draft' ? preview : ''}

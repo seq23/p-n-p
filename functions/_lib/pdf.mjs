@@ -23,31 +23,32 @@ function cashtag(value) {
   return v ? (v.startsWith('$') ? v : `$${v}`) : '';
 }
 
-export function payLines({ invoice, lines }) {
+// pickup: the rentals pickup line (pricing.mjs pickupNote), '' on a decor-only invoice.
+export function payLines({ invoice, lines, pickup = '' }) {
   const total = invoiceTotal(lines);
   const plan = payPlanOf(invoice, total);
   const now = plan === 'full' ? total : invoice.deposit_due_cents;
-  if (plan === 'full') return { total, plan, now, big: `Amount due: ${money(total)}`, small: `Please pay by ${prettyDate(invoice.due_date)}.` };
-  return { total, plan, now, big: `Deposit due now: ${money(now)}`, small: `This holds your date. The rest, ${money(total - now)}, is due by ${prettyDate(invoice.due_date)}.` };
+  if (plan === 'full') return { total, plan, now, pickup, big: `Amount due: ${money(total)}`, small: `Please pay by ${prettyDate(invoice.due_date)}.` };
+  return { total, plan, now, pickup, big: `Deposit due now: ${money(now)}`, small: `This holds your date. The rest, ${money(total - now)}, is due by ${prettyDate(invoice.due_date)}.` };
 }
 
 // The short message that goes with the PDF in a text.
-export function textMessage({ invoice, lines, settings }) {
+export function textMessage({ invoice, lines, settings, pickup = '' }) {
   const business = settings.business_name || 'Porch & Party';
-  const p = payLines({ invoice, lines });
+  const p = payLines({ invoice, lines, pickup });
   const first = (invoice.customer_name || '').split(' ')[0] || 'there';
   const how = [settings.zelle ? `Zelle ${settings.zelle}` : '', cashtag(settings.cashapp) ? `Cash App ${cashtag(settings.cashapp)}` : ''].filter(Boolean).join(' or ');
   return [`Hi ${first}, here is your ${business} invoice ${invoice.number} (PDF attached). Total ${money(p.total)}.`,
     p.plan === 'full' ? `Please pay by ${prettyDate(invoice.due_date)}.` : `Deposit of ${money(p.now)} due now holds your date; the rest, ${money(p.total - p.now)}, is due by ${prettyDate(invoice.due_date)}.`,
-    how ? `Pay by ${how}, with ${invoice.number} in the note.` : '', 'Thank you!'].filter(Boolean).join(' ');
+    how ? `Pay by ${how}, with ${invoice.number} in the note.` : '', p.pickup, 'Thank you!'].filter(Boolean).join(' ');
 }
 
-export async function renderInvoicePdf({ invoice, lines, settings, contact }) {
+export async function renderInvoicePdf({ invoice, lines, settings, contact, pickup = '' }) {
   const business = settings.business_name || 'Porch & Party';
   const footerLine = settings.business_address || 'Memphis, Tennessee';
   const phone = contact && contact.telephoneDisplay ? contact.telephoneDisplay : '';
   const tag = cashtag(settings.cashapp);
-  const pay = payLines({ invoice, lines });
+  const pay = payLines({ invoice, lines, pickup });
   const refundable = lines.filter((l) => l.refundable).reduce((s, l) => s + lineTotal(l), 0);
 
   const doc = await PDFDocument.create();
@@ -113,10 +114,12 @@ export async function renderInvoicePdf({ invoice, lines, settings, contact }) {
   y -= 10;
 
   // Pay box
-  const boxH = 58; ensure(boxH + 10);
+  const pickupRows = pay.pickup ? wrap(pay.pickup, sans, 10.5, width - 28) : [];
+  const boxH = 58 + pickupRows.length * 14; ensure(boxH + 10);
   page.drawRectangle({ x: left, y: y - boxH, width, height: boxH, color: CREAM, borderColor: LINE, borderWidth: 0.8 });
   text(pay.big, left + 14, y - 24, { font: serifBold, size: 16 });
   text(pay.small, left + 14, y - 44, { size: 10.5, color: MUTED });
+  pickupRows.forEach((r, i) => text(r, left + 14, y - 58 - i * 14, { size: 10.5 }));
   y -= boxH + 22;
 
   // How to pay (with the QR on the right)

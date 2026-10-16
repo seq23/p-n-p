@@ -203,34 +203,37 @@ td.blank{min-width:70px}
 <section class="page">
   <header>
     <div><div class="brand">Porch &amp; Party</div><p class="title">Game Rentals · Quote &amp; Close</p></div>
-    <div class="sub"><div class="pageno">Page 4 of 4 · Rentals if any, quote &amp; close for every job</div>Delivery only: Memphis, Olive Branch, Southaven</div>
+    <div class="sub"><div class="pageno">Page 4 of 4 · Rentals if any, quote &amp; close for every job</div>No delivery: pickup and return at Mt. Moriah Station</div>
   </header>
 
-  <h2>Game rentals <small>leave blank if none</small></h2>
-  <ul class="ck" style="columns:3">
+  <h2>Game rentals <small>blank if none · Pick 3 $110 · Pick 5 $175 · Whole Yard $195 · Movie Night $110 · Game Night $85 · Whole Party $235 / $350 weekend</small></h2>
+  <ul class="ck" style="columns:4">
     <li>Giant Connect Four</li>
     <li>Cornhole (2 sets)</li>
-    <li>Giant Tumble Tower</li>
-    <li>Giant Yard Pong</li>
-    <li>Ladder Toss</li>
     <li>Giant Checkers</li>
     <li>Giant Color Stack (2 sets)</li>
     <li>Giant Uno</li>
     <li>Grab the Mic</li>
+    <li>Inflatable movie screen</li>
+    <li>Card table with cup holders</li>
   </ul>
   <div class="grid three">
     <div class="f"><label>Day ($40 each) or weekend ($60 each)</label><div class="w"></div></div>
-    <div class="f"><label>Delivery date / time (by noon)</label><div class="w"></div></div>
-    <div class="f"><label>Pickup next day: morning / afternoon / evening</label><div class="w"></div></div>
-    <div class="f"><label>Indoor / outdoor; flat, dry spot?</label><div class="w"></div></div>
-    <div class="f"><label>Delivery city (Memphis / Olive Branch / Southaven)</label><div class="w"></div></div>
-    <div class="f"><label>Who receives the games (18+)</label><div class="w"></div></div>
+    <div class="f"><label>Pickup date / time (set by text or call)</label><div class="w"></div></div>
+    <div class="f"><label>Return date / time</label><div class="w"></div></div>
   </div>
   <ul class="ck">
-    <li>Explained: no water, paint or glitter on the games; wiped between rentals</li>
-    <li>Explained: $50 damage deposit, refunded at pickup; $5 per missing piece</li>
-    <li>Explained: delivery $30 flat, free on orders of $150 or more</li>
-    <li>Explained: rain or storms reschedule free within 30 days</li>
+    <li>Explained: no delivery; pickup and return at Mt. Moriah Station, 2602 Mt. Moriah Rd</li>
+    <li>Explained: $50 damage deposit + 50% holds the date; the rest at pickup by Zelle or Cash App, never cash</li>
+    <li>Explained: no water, paint or glitter; $5 a missing piece; rain reschedules free (30 days)</li>
+  </ul>
+  <h2>Meet-up <small>at pickup and at return</small></h2>
+  <ul class="ck" style="columns:2">
+    <li>Payment confirmed before leaving</li>
+    <li>Photo ID matches the invoice name</li>
+    <li>Photo of the loaded car taken</li>
+    <li>Return check: every piece counted</li>
+    <li>Damage deposit refunded the same day</li>
   </ul>
 
   <h2>Quote worksheet <small>every job</small></h2>
@@ -240,8 +243,7 @@ td.blank{min-width:70px}
     <tr><td>Add-on</td><td class="blank"></td><td class="num blank"></td></tr>
     <tr><td>Add-on</td><td class="blank"></td><td class="num blank"></td></tr>
     <tr><td>Takedown (starts at $75)</td><td class="blank"></td><td class="num blank"></td></tr>
-    <tr><td>Games (×$40 day / ×$60 weekend; Pick 3 $110, Pick 5 $175, all 9 $275)</td><td class="blank"></td><td class="num blank"></td></tr>
-    <tr><td>Delivery ($30, free over $150)</td><td class="blank"></td><td class="num blank"></td></tr>
+    <tr><td>Rentals (×$40 day / ×$60 weekend; screen $50 / $75; card table $15 / $25)</td><td class="blank"></td><td class="num blank"></td></tr>
     <tr><td><strong>Total</strong></td><td></td><td class="num blank"></td></tr>
     <tr><td><strong>Deposit to hold the date (50%)</strong></td><td></td><td class="num blank"></td></tr>
   </table>

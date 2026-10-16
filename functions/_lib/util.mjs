@@ -137,7 +137,7 @@ export const STATUS_LABELS = {
 };
 
 // A $0 line the customer would see as "Free" when nobody meant it: the decor line before
-// Valerie sets its price. Only the free-delivery line is marked 'free' on purpose.
+// Valerie sets its price. A line Valerie marks with the note 'free' is free on purpose.
 export function needsPrice(line) {
   return lineTotal(line) === 0 && line.note !== 'free';
 }

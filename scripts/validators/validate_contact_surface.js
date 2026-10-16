@@ -21,7 +21,7 @@
  *     addOns.takedown): every page and llms file that quotes porch or event
  *     decor takedown quotes the priced line, the FAQ data carries it, no page
  *     keeps the unpriced "available for an additional fee" wording, and the
- *     rentals page never offers it (rental pickup is included).
+ *     rentals page never offers it (rentals have no takedown; the renter returns them).
  *
  * Hard-fails on zero pages or zero LocalBusiness nodes, so it cannot pass by
  * having checked nothing. Repair: npm run contact:install.
@@ -111,7 +111,7 @@ if (!/government photo ID/.test(SAFE) || !/social media link/.test(SAFE)) fail('
 const TD = (offers.addOns || {}).takedown || {};
 const TD_PRICE = 75; // owner-approved 2026-10-14 (corrected from $95 the same day); change with services.json, never alone
 if (TD.fromPrice !== TD_PRICE || TD.line !== `Takedown starts at $${TD_PRICE}, quoted with your setup.`) fail(`services.json addOns.takedown is not the owner-approved $${TD_PRICE} line`);
-if (JSON.stringify(TD.appliesTo) !== JSON.stringify(['porch', 'celebration'])) fail('services.json addOns.takedown.appliesTo is not porch + celebration (rentals include pickup)');
+if (JSON.stringify(TD.appliesTo) !== JSON.stringify(['porch', 'celebration'])) fail('services.json addOns.takedown.appliesTo is not porch + celebration (rentals have no takedown)');
 if (offers.services.porch.notes[0] !== TD.line) fail('services.json porch notes[0] is not the takedown line');
 const faqTd = require(path.join(ROOT, 'data/faqs/faqs.json')).find((q) => /take-?down/i.test(q.question));
 if (!faqTd || !faqTd.answer.includes(TD.line)) fail('data/faqs/faqs.json takedown answer does not quote the takedown line');
@@ -135,7 +135,7 @@ for (const rel of [...pages, 'llms.txt', 'llms-full.txt', 'llms-services.txt', '
   if (UNPRICED.test(t)) fail(`${rel} still quotes takedown without the $${TD_PRICE} price`);
 }
 if (!tdScanned) fail('takedown scan read 0 files');
-if (/takedown starts/i.test(read('rentals/index.html') || '')) fail('rentals/index.html offers the takedown add-on; rental pickup is included');
+if (/takedown starts/i.test(read('rentals/index.html') || '')) fail('rentals/index.html offers the takedown add-on; rentals have no takedown, the renter returns them');
 
 if (!read(`${PRIMARY_ROUTE.href.replace(/^\//, '')}.html`)) fail(`primary route ${PRIMARY_ROUTE.href} has no published file`);
 if (errors.length) {
