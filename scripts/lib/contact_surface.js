@@ -147,7 +147,8 @@ function applyContactSurface(html, rel) {
   }
   if (isContact && out.includes(MARK.safety)) out = out.replace(SAFETY_BLOCK, () => renterSafety());
   if (isContact && !out.includes(MARK.safety)) {
-    const form = out.indexOf(`href="${offers.quoteUrl}"`);
+    // The page body's form button, not the header's Request a Quote (which also opens the form).
+    const form = out.indexOf(`href="${offers.quoteUrl}"`, Math.max(0, out.indexOf('<main')));
     const end = form < 0 ? -1 : out.indexOf('</p>', out.indexOf('</div>', form));
     if (end < 0) throw new Error(`${rel}: no quote-form link and note to anchor the renter-safety line`);
     out = out.slice(0, end + 4) + renterSafety() + out.slice(end + 4);

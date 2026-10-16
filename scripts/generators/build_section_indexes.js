@@ -38,6 +38,9 @@ const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
 const rentalRates = require(path.join(ROOT, 'data/rentals/games.json')).rates;
 const { nav, footer } = require(path.join(ROOT, 'templates/page-shell.js'));
+// Owner ruling 2026-10-15: every quote CTA opens the quote form directly, in a new tab.
+const { QUOTE } = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
+const QUOTE_LINK = `href="${QUOTE.href}" ${QUOTE.attrs}`;
 
 const DOMAIN = offers.domain;
 const CHECK = process.argv.includes('--check');
@@ -381,7 +384,7 @@ function render(section, groups) {
           <span class="eyebrow">${section.eyebrow}</span>
           <h1>${section.h1}</h1>
           <p>${section.lead}</p>
-          <div class="btn-row hero-centered-cta"><a href="/contact.html" class="btn-primary">Request a Quote</a><a href="/pricing.html" class="btn-secondary">See Pricing</a></div>
+          <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary" ${QUOTE.attrs}>Request a Quote</a><a href="/pricing.html" class="btn-secondary">See Pricing</a></div>
         </div>
         <div class="info-panel recommendation-summary" data-content-block="recommendation_summary" id="recommendation-summary">
           <h2>What this page recommends</h2>
@@ -389,7 +392,7 @@ function render(section, groups) {
           <ul class="recommendation-summary__points">
             <li><strong>Pages in this section:</strong> ${listItems.length}</li>
             <li><strong>Service area:</strong> ${CITY_LIST} and the greater Memphis metro area.</li>
-            <li><strong>Next step:</strong> <a href="/contact.html">Request a Quote</a></li>
+            <li><strong>Next step:</strong> <a ${QUOTE_LINK}>Request a Quote</a></li>
           </ul>
         </div>
       </div>
@@ -405,7 +408,7 @@ ${faqHtml}
     <section class="section section-soft">
       <div class="container">
         <div class="info-panel"><h2>Related pages</h2><ul>${section.related
-          .map((r) => `<li><a href="${r}">${esc(RELATED_LABELS[r] || r)}</a></li>`).join('')}</ul></div>
+          .map((r) => `<li><a ${r === '/contact.html' ? QUOTE_LINK : `href="${r}"`}>${esc(RELATED_LABELS[r] || r)}</a></li>`).join('')}</ul></div>
       </div>
     </section>
 
@@ -414,7 +417,7 @@ ${faqHtml}
         <span class="eyebrow">Request a Quote</span>
         <h2>Ready to plan your setup?</h2>
         <p>Share the occasion, city, date, location type, budget range, and any inspiration notes so Porch &amp; Party can confirm fit and quote direction.</p>
-        <div class="btn-row hero-centered-cta"><a href="/contact.html" class="btn-primary">Start Your Request</a></div>
+        <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary" ${QUOTE.attrs}>Start Your Request</a></div>
         <p class="muted" style="margin-top: 14px;"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p>
       </div>
     </section>

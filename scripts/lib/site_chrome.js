@@ -4,8 +4,16 @@
  * footer Rentals link and the nav stylesheet link, for every published page.
  *
  * Owner ruling 2026-10-13: the nav is Porch · Celebrations · Grazing & Events ·
- * Rentals · Pricing · How It Works, then "Request a Quote" (/contact) and
+ * Rentals · Pricing · How It Works, then "Request a Quote" and
  * "Call or text 901-355-1518", identical on EVERY page, frozen ones included.
+ *
+ * Owner ruling 2026-10-15: every quote call-to-action opens the quote form
+ * (services.json quoteUrl, a Google Form) directly, in a new tab - the header
+ * button and every in-body "Request a Quote" / "Start Your Request" / "Check
+ * My Date" link. /contact stays (email, phone, the form button) and is linked
+ * only as "Contact". retargetQuoteCtas() moves any quote CTA still pointing at
+ * /contact onto the form; it runs inside applySiteChrome(), so it reaches the
+ * frozen pages the same chrome-only way the header does.
  * "Party Planning" is not in the header; the planner page keeps its footer link
  * (scripts/lib/contact_surface.js) and its links from the services index/hubs.
  *
@@ -37,7 +45,13 @@ const NAV_ITEMS = Object.freeze([
   { href: '/pricing', label: 'Pricing' },
   { href: '/how-it-works', label: 'How It Works' }
 ]);
-const QUOTE = Object.freeze({ href: '/contact', label: 'Request a Quote' });
+const QUOTE = Object.freeze({ href: offers.quoteUrl, label: 'Request a Quote', attrs: 'target="_blank" rel="noopener"' });
+const CONTACT_HREF_RE = /^\/contact(?:\.html)?\/?(?:[?#].*)?$/;
+// A link whose words ask for a quote, a request or a date check is a quote CTA.
+const QUOTE_CTA_LABEL_RE = /\b(?:quote|request|check my date|book)\b/i;
+const ANCHOR_RE = /<a\b([^>]*)>([\s\S]*?)<\/a>/g;
+const anchorText = (s) => s.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+const hrefOf = (attrs) => (attrs.match(/\bhref="([^"]*)"/) || [])[1];
 const CALL_LABEL = `Call or text ${C.telephoneDisplay}`;
 
 const MARK = Object.freeze({
@@ -78,7 +92,7 @@ const cur = (href, currentPath) => (isCurrent(href, currentPath) ? ' aria-curren
 
 function header(currentPath) {
   const items = NAV_ITEMS.map((i) => `<a href="${i.href}"${cur(i.href, currentPath)}>${i.label}</a>`).join('');
-  const quote = (cls) => `<a href="${QUOTE.href}" class="${cls}"${cur(QUOTE.href, currentPath)}>${QUOTE.label}</a>`;
+  const quote = (cls) => `<a href="${QUOTE.href}" class="${cls}" ${QUOTE.attrs}>${QUOTE.label}</a>`;
   return `<header class="site-header pnp-header" ${MARK.header}><div class="pnp-header-inner">`
     + `<a class="pnp-logo" href="/" aria-label="Porch and Party home"><span class="brand-script">Porch &amp; Party</span></a>`
     + `<nav class="site-nav pnp-nav" aria-label="Primary navigation">${items}</nav>`
@@ -111,12 +125,32 @@ const HEADER_RE = /<header\b[^>]*class="site-header[^"]*"[^>]*>[\s\S]*?<\/header
 const EXPLORE_RE = /(<div class="footer-title">Explore<\/div>\s*<div class="footer-list">)([\s\S]*?)(<\/div>)/;
 const RENTALS_ANY_RE = /<a\b[^>]*href="\/rentals\/?"[^>]*>[^<]*<\/a>/g;
 
+/** True when an anchor (its attribute string and inner HTML) is a quote call-to-action. */
+function isQuoteCta(attrs, inner) {
+  const href = hrefOf(attrs);
+  if (href !== QUOTE.href && !CONTACT_HREF_RE.test(href || '')) return false;
+  return QUOTE_CTA_LABEL_RE.test(anchorText(inner));
+}
+
+/**
+ * Points every quote CTA that still links /contact at the quote form, in a new
+ * tab. Keeps every other attribute (class, data-quote-cta) where it was; any
+ * old target/rel is replaced. Idempotent.
+ */
+function retargetQuoteCtas(html) {
+  return html.replace(ANCHOR_RE, (whole, attrs, inner) => {
+    if (!CONTACT_HREF_RE.test(hrefOf(attrs) || '') || !isQuoteCta(attrs, inner)) return whole;
+    const rest = attrs.replace(/\s+(?:target|rel)="[^"]*"/g, '').replace(/\bhref="[^"]*"/, `href="${QUOTE.href}"`);
+    return `<a${rest} ${QUOTE.attrs}>${inner}</a>`;
+  });
+}
+
 /**
  * Applies the canonical chrome to one page. Idempotent; throws when a page has
  * no place for a block, so a new page shape fails loudly.
  */
 function applySiteChrome(html, rel) {
-  let out = html;
+  let out = retargetQuoteCtas(html);
   const want = header(sitePathOf(rel));
   if (HEADER_RE.test(out)) out = out.replace(HEADER_RE, () => want);
   else {
@@ -148,10 +182,13 @@ function withoutChrome(html) {
   return html
     .replace(HEADER_RE, '')
     .replace(/<link\b[^>]*data-site-chrome="(?:css|fonts)"[^>]*>/g, '')
-    .replace(RENTALS_ANY_RE, '');
+    .replace(RENTALS_ANY_RE, '')
+    .replace(ANCHOR_RE, (whole, attrs, inner) => (isQuoteCta(attrs, inner)
+      ? `<a${attrs.replace(/\s+(?:href|target|rel)="[^"]*"/g, '')} data-quote-target>${inner}</a>` : whole));
 }
 
 module.exports = {
   NAV_ITEMS, QUOTE, CALL_LABEL, MARK, CSS_HREF, RENTALS_FOOTER, HEADER_RE, EXPLORE_RE,
-  header, cssLink, fontsLink, sitePathOf, isCurrent, applySiteChrome, withoutChrome
+  header, cssLink, fontsLink, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
+  isQuoteCta, retargetQuoteCtas
 };
