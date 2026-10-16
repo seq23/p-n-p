@@ -93,6 +93,32 @@ if (credentials.length) {
   process.exit(1);
 }
 
+// No shipped image may exceed 500 KB. Ahrefs Site Audit (14 Oct 2026) flagged
+// two 5 MB celebration PNGs as "Image too large"; they were re-encoded as JPEG
+// at 1600px. Fail the build rather than publish a multi-megabyte image again.
+const IMAGE_EXT = /\.(png|jpe?g|webp|avif|gif|svg|ico|bmp|tiff?)$/i;
+const IMAGE_MAX_BYTES = 500 * 1024;
+const heavy = [];
+let imagesChecked = 0;
+(function scanImages(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) { scanImages(full); continue; }
+    if (!IMAGE_EXT.test(entry.name)) continue;
+    imagesChecked += 1;
+    const size = fs.statSync(full).size;
+    if (size > IMAGE_MAX_BYTES) heavy.push(`${path.relative(dist, full)} (${size} bytes)`);
+  }
+})(dist);
+if (imagesChecked === 0) {
+  console.error('assemble: no images found in dist; the image size check reached nothing');
+  process.exit(1);
+}
+if (heavy.length) {
+  console.error(`assemble: ${heavy.length} image(s) over ${IMAGE_MAX_BYTES} bytes; compress at source:\n  ` + heavy.join('\n  '));
+  process.exit(1);
+}
+
 const leaked = ['README.md', 'package.json', 'AGENTS.md', 'package-lock.json']
   .filter((f) => fs.existsSync(path.join(dist, f)));
 if (leaked.length) {
