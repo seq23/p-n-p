@@ -3,9 +3,9 @@
   "domain": "https://porchandparty901.com",
   "quoteUrl": "https://forms.gle/vHjfKtRRAnGV3HxFA",
   "renterSafety": {
-    "line": "We ask every renter for a government photo ID, and strongly encourage a social media link. It keeps our games and your party safe.",
+    "line": "We ask every renter for a government photo ID. It keeps our games and your party safe.",
     "rentalFormNote": "The request form takes about three minutes and needs a Google sign-in for the ID upload.",
-    "provenance": "Owner-approved 2026-10-14; owner ruling 2026-10-15: the photo ID stays required, the social media link is no longer required, only strongly encouraged. contact.html carries the line through scripts/lib/contact_surface.js; rentals/index.html through scripts/generators/build_rentals_page.js."
+    "provenance": "Owner-approved 2026-10-14; owner ruling 2026-10-15: the photo ID stays required; the social media link is optional and is described only on the form itself, never on the site or in docs. contact.html carries the line through scripts/lib/contact_surface.js; rentals/index.html through scripts/generators/build_rentals_page.js."
   },
   "contact": {
     "telephone": "+1-901-355-1518",

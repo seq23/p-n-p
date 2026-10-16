@@ -112,13 +112,14 @@ for (const p of PRIORITY_PAGES) {
 // Renter-safety line on contact.html, next to the quote form.
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const SAFE = (offers.renterSafety || {}).line || '';
-// Owner ruling 2026-10-15: the photo ID stays required; the social media link is strongly encouraged, not required.
-const SAFE_LEAD = 'We ask every renter for a government photo ID, and strongly encourage a social media link.';
-if (!SAFE.startsWith(SAFE_LEAD)) fail(`services.json renterSafety.line does not start "${SAFE_LEAD}"`);
+// Owner ruling 2026-10-15: the photo ID stays required; the social media link is
+// optional and described only on the form itself - the site never mentions it.
+const SAFE_LEAD = 'We ask every renter for a government photo ID.';
+if (!SAFE.startsWith(SAFE_LEAD) || /social/i.test(SAFE)) fail(`services.json renterSafety.line does not start "${SAFE_LEAD}"`);
 for (const rel of ['contact.html', 'rentals/index.html', 'llms.txt', 'llms-services.txt', 'llms-full.txt']) {
   const t = read(rel);
   if (!t.includes(SAFE_LEAD)) fail(`${rel} lacks the renter-safety line "${SAFE_LEAD}"`);
-  if (/photo ID (?:and|,) (?:a )?social media link(?! is strongly)|social media link and a photo ID/i.test(t)) fail(`${rel} still requires a social media link (strongly encouraged since 2026-10-15)`);
+  if (/social media/i.test(t)) fail(`${rel} mentions a social media link (owner ruling 2026-10-15: only the form itself asks for it)`);
 }
 {
   const c = read('contact.html') || '';
