@@ -13,8 +13,12 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   the phone shrinks them to 1600 px). Its quote worksheet and "Agreed price / deposit / due date"
   pre-fill the invoice. Source wording: `functions/_lib/assets/walkthrough-checklist.html.txt`.
 - **Invoices**: prefilled from the request with live prices from `data/rentals/games.json` and
-  `data/offers/services.json` (bundles priced at the cheapest Pick 3 / Pick 5 / Whole Yard mix,
-  delivery free from the threshold, refundable damage deposit, takedown add-on). Numbers are
+  `data/offers/services.json` (items and bundles priced at the cheapest mix of the six bundles,
+  The Whole Party at its weekend price on a weekend, refundable damage deposit, takedown add-on;
+  never a delivery line: rentals v3 has no delivery). A rental invoice (any line from the rentals
+  price table, `isRentalInvoice` in `functions/_lib/pricing.mjs`) adds "Pay the rest at pickup.
+  Text or call 901-355-1518 to set your pickup time at Mt. Moriah Station." to the email, PDF,
+  text message and invoice page. Numbers are
   `PNP-YYYY-NNNN`; pay plan (`pay_plan`: half / full / custom, migration 0003) decides what is asked for now;
   half is the default, full asks for the whole total by the due date, custom is a typed deposit.
   "See it before sending" saves the draft and shows the email inline on the invoice page.
@@ -24,6 +28,34 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
 - **Send**: HTML email from hello@porchandparty901.com with a copy (Bcc) to hello@; payment block
   from Settings (Zelle, Cash App, QR as an inline CID image, which Gmail renders; Gmail strips
   data: URIs). A test send goes to hello@ only with a `TEST` subject and changes nothing.
+
+## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
+The Google Form is rebuilt by hand; the admin prefill maps these exact strings
+(`formChoice` in `data/rentals/games.json`). `npm run validate:admin-prices` reads this list and
+fails if a string is missing from the data, maps to the wrong price, or names a hidden item.
+
+"Which games?" (checkboxes):
+- `Giant Connect Four`
+- `Cornhole set`
+- `Giant Checkers`
+- `Giant Color Stack`
+- `Giant Uno`
+- `Grab the Mic`
+- `Inflatable movie screen`
+- `Card table with cup holders`
+- `Pick 3 bundle ($110)`
+- `Pick 5 bundle ($175)`
+- `Whole Yard, all 6 games ($195)`
+- `Movie Night, screen + 2 games ($110)`
+- `Game Night, card table + 2 games ($85)`
+- `The Whole Party, all 8 items ($235 day / $350 weekend)`
+
+"How long?" (multiple choice):
+- `One day (24 hours)`
+- `Weekend (Friday pickup, Monday return)`
+
+"Pickup date" replaces "Delivery date". The delivery address, city and pickup-time questions are
+gone: pickup and return are at Mt. Moriah Station, time set by text or call after payment.
 
 ## Where things live
 | Piece | Place |

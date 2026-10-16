@@ -84,7 +84,7 @@
         "porch",
         "celebration"
       ],
-      "notFor": "Party game rentals: rental pickup is included.",
+      "notFor": "Party game rentals: no takedown; the renter returns them at Mt. Moriah Station (rentals v3, 2026-10-15).",
       "provenance": "Owner-approved 2026-10-14 ($75, corrected from $95 the same day). Takedown is quoted with the porch or event-decor setup; scripts/validators/validate_contact_surface.js pins this line on every page that quotes it."
     }
   },

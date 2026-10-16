@@ -80,6 +80,29 @@ for (const [plan, now] of Object.entries(plans)) {
 }
 must(rendered === 3, 'fewer than three plans rendered');
 
+// Rentals v3 (2026-10-15): a rental invoice says where and how the rest is paid, in every
+// surface the customer sees; a decor-only invoice does not. admin.mjs passes the line from
+// pricing.mjs pickupNote() to all four.
+const PICKUP = 'Pay the rest at pickup. Text or call 901-355-1518 to set your pickup time at Mt. Moriah Station.';
+{
+  const invoice = { id: 8, number: 'PNP-2026-0008', customer_name: 'Jane Doe', customer_email: 'jane@example.com', customer_phone: '',
+    issue_date: '2026-10-15', due_date: '2026-10-22', deposit_due_cents: 8500, pay_plan: 'half', notes: '', status: 'sent' };
+  for (const [kind, pickup] of [['rental', PICKUP], ['decor', '']]) {
+    const mail = email.renderInvoiceEmail({ invoice, lines, settings, contact: { phone: '' }, qrSrc: null, pickup });
+    const sms = pdf.textMessage({ invoice, lines, settings, pickup });
+    const page = views.invoiceViewPage({ invoice, lines, pay: { complete: true, missing: [] }, flash: '', error: '', emailHtml: mail.html, smsText: sms, pickup });
+    const pay = pdf.payLines({ invoice, lines, pickup });
+    const has = { 'email html': mail.html.includes(PICKUP), 'email text': mail.text.includes(PICKUP), 'text message': sms.includes(PICKUP),
+      'invoice page': page.includes(PICKUP.replace(/\./g, '.')), 'PDF pay box': pay.pickup === PICKUP };
+    for (const [where, yes] of Object.entries(has)) must(yes === (kind === 'rental'), `${kind} invoice: ${where} ${yes ? 'carries' : 'lacks'} the pickup line`);
+    must(mail.text.includes('The rest, $85.00, is due by October 22, 2026'), `${kind} invoice: "rest due by" wording changed`);
+  }
+  must(/pickupRows/.test(fs.readFileSync(path.join(ROOT, 'functions/_lib/pdf.mjs'), 'utf8')), 'pdf.mjs no longer draws the pickup line in the pay box');
+  const adminSrc = fs.readFileSync(path.join(ROOT, 'functions/_lib/admin.mjs'), 'utf8');
+  must((adminSrc.match(/pickupNote\(/g) || []).length >= 3 && /pickup: pickupNote\(lines, PRICE_TABLE\)/.test(adminSrc) && /textMessage\(\{[^}]*pickup \}\)/.test(adminSrc) && /invoiceViewPage\(\{[^}]*pickup,/.test(adminSrc),
+    'admin.mjs does not pass the pickup line to the email, PDF, text message and invoice page');
+}
+
 const migration = path.join(ROOT, 'migrations/0003_pay_plan.sql');
 must(fs.existsSync(migration) && /ADD COLUMN pay_plan/.test(fs.readFileSync(migration, 'utf8')), 'migration 0003 does not add pay_plan');
 const admin = fs.readFileSync(path.join(ROOT, 'functions/_lib/admin.mjs'), 'utf8');

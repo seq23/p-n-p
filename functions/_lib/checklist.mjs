@@ -138,12 +138,13 @@ export function prefillFromRequest(source, request) {
   const values = {};
   const byLabel = (page, re) => fields.find((f) => f.page === page && re.test(f.label));
   const set = (page, re, v) => { const f = byLabel(page, re); if (f && v) values[f.id] = v; };
+  // Rentals v3: no delivery address on the form any more (older responses may still carry one).
   const address = [answer(request, /delivery address|^address/i), answer(request, /^city/i)].filter(Boolean).join(', ') || answer(request, /^location/i);
   set(1, /^name$/i, request.name);
   set(1, /^phone$/i, request.phone);
   set(1, /^email$/i, request.email);
   set(1, /^event address$/i, address);
-  set(1, /^event date$/i, answer(request, /event date/i) || answer(request, /delivery date/i));
+  set(1, /^event date$/i, answer(request, /event date/i) || answer(request, /pickup date|delivery date/i));
   set(1, /^occasion$/i, answer(request, /occasion/i) || request.eventType);
   set(1, /^guests/i, answer(request, /guest/i));
   set(1, /how they found us/i, request.heard);

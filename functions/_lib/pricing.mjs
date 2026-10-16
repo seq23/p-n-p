@@ -3,49 +3,57 @@
 // data/offers/services.json (functions/_lib/prices.mjs). validate:admin-prices
 // runs this module against the data files AND against a perturbed copy, so a
 // price typed into this file instead of read from the table fails the build.
+//
+// Rentals v3 (owner-approved 2026-10-15): no delivery line, ever. Pickup and
+// return at Mt. Moriah Station; items with availableNow:false are not in the
+// table, so the prefill cannot price a hidden item.
 
 export function buildPriceTable(games, services) {
   const takedown = services && services.addOns && services.addOns.takedown;
+  const cents = (d) => Math.round(d * 100);
+  const items = [
+    ...(games.games || []).filter((g) => g.availableNow).map((g) => ({
+      slug: g.slug, name: g.name, choice: g.formChoice, kind: 'game', dayCents: cents(games.rates.day), weekendCents: cents(games.rates.weekend),
+    })),
+    ...(games.extras || []).filter((x) => x.availableNow).map((x) => ({
+      slug: x.slug, name: x.name, choice: x.formChoice, kind: 'extra', dayCents: cents(x.dayPrice), weekendCents: cents(x.weekendPrice),
+    })),
+  ];
+  const pickup = games.pickup || {};
   return {
-    dayCents: Math.round(games.rates.day * 100),
-    weekendCents: Math.round(games.rates.weekend * 100),
-    bundles: (games.bundles || []).map((b) => ({ name: b.name, games: b.games, dayCents: Math.round(b.dayPrice * 100) })),
-    deliveryCents: Math.round(games.delivery.fee * 100),
-    freeDeliveryFromCents: Math.round(games.delivery.freeOver * 100),
-    damageDepositCents: Math.round(games.damageDeposit * 100),
-    takedownCents: Math.round(takedown.fromPrice * 100),
-    gameNames: (games.games || []).map((g) => g.name),
+    dayCents: cents(games.rates.day),
+    weekendCents: cents(games.rates.weekend),
+    items,
+    bundles: (games.bundles || []).map((b) => ({
+      slug: b.slug, name: b.name, choice: b.formChoice, games: b.games, items: b.items || [],
+      dayCents: cents(b.dayPrice), weekendCents: b.weekendPrice == null ? null : cents(b.weekendPrice),
+    })),
+    damageDepositCents: cents(games.damageDeposit),
+    takedownCents: cents(takedown.fromPrice),
+    pickupLine: `Pay the rest at pickup. Text or call ${pickup.phone} to set your pickup time at ${String(pickup.place || '').split(',')[0]}.`,
+    gameNames: items.filter((i) => i.kind === 'game').map((i) => i.name),
   };
 }
 
-function dollars(cents) {
-  return `$${(cents / 100).toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
-}
+const norm = (s) => String(s || '').toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/\bsets?\b/g, ' ').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 
-// Cheapest way to price n one-day games with singles and bundles. Bundles are
-// "pick N", so any N of the chosen games fill one.
-export function cheapestDayPlan(n, table) {
-  const cost = [0]; const choice = [null];
-  for (let k = 1; k <= n; k += 1) {
-    cost[k] = cost[k - 1] + table.dayCents; choice[k] = null;
-    for (const b of table.bundles) {
-      if (b.games <= k && cost[k - b.games] + b.dayCents < cost[k]) { cost[k] = cost[k - b.games] + b.dayCents; choice[k] = b; }
-    }
+// What the "Which games?" answer asked for: bundle choices first (their strings
+// carry commas, so the answer is never split on commas), then single items by
+// their form choice or their name.
+export function matchAnswer(answer, table) {
+  let text = String(answer || '').toLowerCase();
+  const bundles = [];
+  for (const b of table.bundles) {
+    const c = String(b.choice || '').toLowerCase();
+    if (c && text.includes(c)) { bundles.push(b); text = text.split(c).join(' | '); }
   }
-  const bundles = []; let k = n; let singles = 0;
-  while (k > 0) {
-    const b = choice[k];
-    if (b) { bundles.push(b); k -= b.games; } else { singles += 1; k -= 1; }
-  }
-  return { bundles, singles, totalCents: cost[n] };
+  const hay = ` ${norm(text)} `;
+  const items = table.items.filter((i) => [i.choice, i.name].some((n) => n && hay.includes(` ${norm(n)} `)));
+  return { items, bundles };
 }
 
 export function matchGames(answer, table) {
-  const text = String(answer || '').toLowerCase();
-  if (!text) return [];
-  const norm = (s) => s.toLowerCase().replace(/\bset\b/g, '').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
-  const hay = ` ${norm(text)} `;
-  return table.gameNames.filter((name) => hay.includes(` ${norm(name)} `));
+  return matchAnswer(answer, table).items.map((i) => i.name);
 }
 
 export function isWeekend(answer) {
@@ -56,39 +64,87 @@ export function saidYes(answer) {
   return /^\s*(yes|y|yeah|yep|please|sure)\b/i.test(String(answer || ''));
 }
 
+// Cheapest way to price `games` games plus the extras in `extras` (slugs) with
+// singles and bundles. A bundle with no price for the mode (weekend) is skipped.
+export function cheapestPlan(games, extras, table, weekend) {
+  const extraItems = table.items.filter((i) => i.kind === 'extra');
+  const bit = (slug) => 1 << extraItems.findIndex((x) => x.slug === slug);
+  const price = (o) => (weekend ? o.weekendCents : o.dayCents);
+  const gamePrice = weekend ? table.weekendCents : table.dayCents;
+  const usable = table.bundles.filter((b) => price(b) != null && b.items.every((s) => extraItems.some((x) => x.slug === s)))
+    .map((b) => ({ b, mask: b.items.reduce((m, s) => m | bit(s), 0) }));
+  const memo = new Map();
+  function best(g, mask) {
+    if (!g && !mask) return { cents: 0, picks: [] };
+    const key = `${g}|${mask}`;
+    if (memo.has(key)) return memo.get(key);
+    let out = null;
+    const tryPick = (cost, rest, pick) => { if (!rest) return; const c = cost + rest.cents; if (!out || c < out.cents) out = { cents: c, picks: [pick, ...rest.picks] }; };
+    if (g > 0) tryPick(gamePrice, best(g - 1, mask), { game: true });
+    extraItems.forEach((x, i) => { if (mask & (1 << i)) tryPick(price(x), best(g, mask & ~(1 << i)), { extra: x }); });
+    for (const u of usable) if (u.b.games <= g && (mask & u.mask) === u.mask) tryPick(price(u.b), best(g - u.b.games, mask & ~u.mask), { bundle: u.b });
+    memo.set(key, out);
+    return out;
+  }
+  const mask = extras.reduce((m, s) => m | bit(s), 0);
+  return best(games, mask);
+}
+
+// Kept for callers that only price games: cheapest one-day plan for n games.
+export function cheapestDayPlan(n, table) {
+  const plan = cheapestPlan(n, [], table, false);
+  return { bundles: plan.picks.filter((p) => p.bundle).map((p) => p.bundle), singles: plan.picks.filter((p) => p.game).length, totalCents: plan.cents };
+}
+
+function gameList(named, slots, table) {
+  // Named games fill the slots first; a slot nobody named is "of your choice",
+  // except when the slots are every game (Whole Yard, The Whole Party).
+  const out = named.slice(0, slots);
+  if (slots >= table.gameNames.length) for (const n of table.gameNames) if (out.length < slots && !out.includes(n)) out.push(n);
+  return out;
+}
+
 // Lines for a new invoice, prefilled from one form request. Every line stays editable.
-// A $0 line is "price needed" unless its note is 'free' (the free-delivery line).
+// A $0 line is "price needed" (the decor line before Valerie prices it).
 export function prefillLines(request, table) {
   const lines = [];
-  const games = matchGames(request.gamesAnswer, table);
-  if (request.wantsRentals || games.length) {
-    let gamesCents = 0;
-    if (games.length && isWeekend(request.durationAnswer)) {
-      for (const name of games) {
-        lines.push({ description: `${name} (weekend)`, qty: 1, unit_cents: table.weekendCents, note: '', refundable: 0 });
-        gamesCents += table.weekendCents;
-      }
-    } else if (games.length) {
-      const plan = cheapestDayPlan(games.length, table);
-      let i = 0;
-      for (const b of plan.bundles) {
-        const picked = games.slice(i, i + b.games); i += b.games;
-        lines.push({ description: `${b.name} bundle, 1 day: ${picked.join(', ')}`, qty: 1, unit_cents: b.dayCents, note: '', refundable: 0 });
-      }
-      for (const name of games.slice(i)) {
-        lines.push({ description: `${name} (1 day)`, qty: 1, unit_cents: table.dayCents, note: '', refundable: 0 });
-      }
-      gamesCents = plan.totalCents;
+  const { items, bundles: picked } = matchAnswer(request.gamesAnswer, table);
+  if (request.wantsRentals || items.length || picked.length) {
+    const weekend = isWeekend(request.durationAnswer);
+    const span = weekend ? 'weekend' : '1 day';
+    let named = items.filter((i) => i.kind === 'game').map((i) => i.name);
+    const extras = new Set(items.filter((i) => i.kind === 'extra').map((i) => i.slug));
+    // A ticked bundle asks for its slots: its extras, and enough games to fill it.
+    let wanted = 0;
+    for (const b of picked) { b.items.forEach((s) => extras.add(s)); wanted += b.games; }
+    const slots = Math.max(named.length, Math.min(wanted, table.gameNames.length));
+    if (slots > named.length) named = gameList(named, slots, table);
+    const open = Math.max(0, slots - named.length);
+    if (!named.length && !open && !extras.size) {
+      lines.push({ description: `Game rental (${span})`, qty: 1, unit_cents: weekend ? table.weekendCents : table.dayCents, note: '', refundable: 0 });
     } else {
-      lines.push({ description: 'Game rental (1 day)', qty: 1, unit_cents: table.dayCents, note: '', refundable: 0 });
-      gamesCents = table.dayCents;
+      const plan = cheapestPlan(named.length + open, [...extras], table, weekend);
+      const queue = [...named, ...Array(open).fill(null)];
+      const take = (n) => {
+        const got = queue.splice(0, n);
+        const real = got.filter(Boolean); const choice = got.length - real.length;
+        return [...real, ...(choice ? [`${choice} ${choice === 1 ? 'game' : 'games'} of your choice`] : [])];
+      };
+      const byName = (slug) => table.items.find((i) => i.slug === slug).name;
+      for (const p of plan.picks.filter((x) => x.bundle)) {
+        const b = p.bundle;
+        const what = [...b.items.map(byName), ...take(b.games)];
+        lines.push({ description: `${b.name} bundle, ${span}: ${what.join(', ')}`, qty: 1, unit_cents: weekend ? b.weekendCents : b.dayCents, note: '', refundable: 0 });
+      }
+      for (const p of plan.picks.filter((x) => x.game)) {
+        const [name] = take(1);
+        lines.push({ description: `${/of your choice/.test(name) ? 'Game of your choice' : name} (${span})`, qty: 1, unit_cents: weekend ? table.weekendCents : table.dayCents, note: '', refundable: 0 });
+      }
+      for (const p of plan.picks.filter((x) => x.extra)) {
+        lines.push({ description: `${p.extra.name} (${span})`, qty: 1, unit_cents: weekend ? p.extra.weekendCents : p.extra.dayCents, note: '', refundable: 0 });
+      }
     }
-    if (gamesCents >= table.freeDeliveryFromCents) {
-      lines.push({ description: `Delivery and pickup (free on orders of ${dollars(table.freeDeliveryFromCents)}+)`, qty: 1, unit_cents: 0, note: 'free', refundable: 0 });
-    } else {
-      lines.push({ description: 'Delivery and pickup', qty: 1, unit_cents: table.deliveryCents, note: '', refundable: 0 });
-    }
-    lines.push({ description: 'Damage deposit (refundable)', qty: 1, unit_cents: table.damageDepositCents, note: 'Refunded after pickup if everything comes back undamaged', refundable: 1 });
+    lines.push({ description: 'Damage deposit (refundable)', qty: 1, unit_cents: table.damageDepositCents, note: 'Refunded at return if everything comes back undamaged', refundable: 1 });
   }
   if (request.wantsDecor) {
     const what = request.eventType ? `Decor: ${request.eventType}` : 'Decor setup';
@@ -98,4 +154,18 @@ export function prefillLines(request, table) {
     }
   }
   return lines;
+}
+
+// A rental invoice is one with any line from the rentals price table: an item,
+// a bundle, the "Game rental" fallback or the rentals damage deposit. Derived
+// from the saved lines, so an invoice edited later is judged as it stands.
+export function isRentalInvoice(lines, table) {
+  const starts = [...table.items.map((i) => i.name), ...table.bundles.map((b) => `${b.name} bundle`), 'Game rental', 'Game of your choice', 'Damage deposit']
+    .map((s) => s.toLowerCase());
+  return (lines || []).some((l) => starts.some((s) => String(l.description || '').toLowerCase().startsWith(s)));
+}
+
+// The line rental invoices carry under the pay box (email, PDF, text, invoice page).
+export function pickupNote(lines, table) {
+  return isRentalInvoice(lines, table) ? table.pickupLine : '';
 }

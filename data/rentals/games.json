@@ -1,9 +1,9 @@
 {
-  "_why": "Single source for the party game rentals line (owner-approved 2026-10-13; pricing v2 and the Giant Uno / Grab the Mic swap owner-approved 2026-10-14). scripts/generators/build_rentals_page.js renders /rentals/ from this file; docs/listings/facebook-marketplace.md and facebook-page.md quote the same rates and scripts/validators/validate_rentals_page.js holds them to it. Images under assets/rentals/ are AI placeholders (Workers AI flux-1-schnell, free allowance) until real photos replace them.",
+  "_why": "Single source for the party game rentals line (owner-approved 2026-10-13; pricing v2 2026-10-14; rentals v3 2026-10-15: no delivery, pickup and return at Mt. Moriah Station, six bundles, two extras). scripts/generators/build_rentals_page.js renders /rentals/ from this file; functions/_lib/pricing.mjs prices invoices from it; docs/listings/facebook-marketplace.md and facebook-page.md quote the same rates and scripts/validators/validate_rentals_page.js + validate_admin_prices.mjs hold them to it. Items with availableNow:false are hidden everywhere (page, schema, invoice prefill, form contract, listings) but keep their data for later. formChoice is the exact Google Form checkbox string the admin prefill maps (docs/admin-console.md). Images under assets/rentals/ are AI placeholders (Workers AI flux-1-schnell, free allowance) until real photos replace them.",
   "rates": {
     "day": 40,
     "weekend": 60,
-    "_note": "Flat per game: $40 for a 24-hour day, $60 for a weekend (Friday delivery, Monday pickup)."
+    "_note": "Flat per game: $40 for a day (return within 24 hours), $60 for a weekend (pick up Friday, return Monday)."
   },
   "games": [
     {
@@ -14,7 +14,8 @@
       "quantity": 1,
       "availableNow": true,
       "blurb": "Four-in-a-row at yard scale. Big enough for kids and adults to play standing up.",
-      "alt": "Black father and daughter dropping red and yellow discs into a four-foot giant connect four game at a Memphis backyard party"
+      "alt": "Black father and daughter dropping red and yellow discs into a four-foot giant connect four game at a Memphis backyard party",
+      "formChoice": "Giant Connect Four"
     },
     {
       "slug": "cornhole",
@@ -24,7 +25,8 @@
       "quantity": 2,
       "availableNow": true,
       "blurb": "Two regulation boards and eight bags. Two sets available for a tournament.",
-      "alt": "Black woman tossing a bean bag at a wooden cornhole board on a green lawn at a backyard party"
+      "alt": "Black woman tossing a bean bag at a wooden cornhole board on a green lawn at a backyard party",
+      "formChoice": "Cornhole set"
     },
     {
       "slug": "giant-tumble-tower",
@@ -34,7 +36,8 @@
       "quantity": 1,
       "availableNow": false,
       "blurb": "The giant block-stacking game. 54 wooden blocks that stack to about five feet before it falls.",
-      "alt": "Two Black boys sliding a block from a giant wooden tumble tower on a backyard lawn at a party"
+      "alt": "Two Black boys sliding a block from a giant wooden tumble tower on a backyard lawn at a party",
+      "_why": "Hidden from rentals v3 (owner, 2026-10-15): not offered right now. Data kept so it can come back by flipping availableNow."
     },
     {
       "slug": "giant-yard-pong",
@@ -44,7 +47,8 @@
       "quantity": 1,
       "availableNow": false,
       "blurb": "Twelve buckets and balls for a lawn-sized pong game.",
-      "alt": "Black adult friends tossing a ball toward white buckets set up for giant yard pong on a lawn"
+      "alt": "Black adult friends tossing a ball toward white buckets set up for giant yard pong on a lawn",
+      "_why": "Hidden from rentals v3 (owner, 2026-10-15): not offered right now. Data kept so it can come back by flipping availableNow."
     },
     {
       "slug": "ladder-toss",
@@ -54,7 +58,8 @@
       "quantity": 1,
       "availableNow": false,
       "blurb": "Two ladders and six bolas. Easy to learn, good for every age at the party.",
-      "alt": "Black grandfather tossing a bola at a ladder toss frame while his grandchildren cheer on a backyard lawn"
+      "alt": "Black grandfather tossing a bola at a ladder toss frame while his grandchildren cheer on a backyard lawn",
+      "_why": "Hidden from rentals v3 (owner, 2026-10-15): not offered right now. Data kept so it can come back by flipping availableNow."
     },
     {
       "slug": "giant-uno",
@@ -62,9 +67,10 @@
       "size": "Oversized Uno cards, ages 7+",
       "use": "both",
       "quantity": 1,
-      "availableNow": false,
+      "availableNow": true,
       "blurb": "Oversized Uno cards, same rules as the original. Play on a table or spread out on the lawn.",
-      "alt": "Black family and friends on a picnic blanket on a backyard lawn holding up oversized red, yellow, green and blue cards for a giant Uno game"
+      "alt": "Black family and friends on a picnic blanket on a backyard lawn holding up oversized red, yellow, green and blue cards for a giant Uno game",
+      "formChoice": "Giant Uno"
     },
     {
       "slug": "giant-checkers",
@@ -72,9 +78,10 @@
       "size": "4 x 4 ft mat",
       "use": "both",
       "quantity": 1,
-      "availableNow": false,
+      "availableNow": true,
       "blurb": "A four-by-four-foot mat with oversized pieces. Works on a lawn, a porch or indoors.",
-      "alt": "Black mother and her young son kneeling on a giant checkers mat on a backyard lawn, moving oversized black checker pieces"
+      "alt": "Black mother and her young son kneeling on a giant checkers mat on a backyard lawn, moving oversized black checker pieces",
+      "formChoice": "Giant Checkers"
     },
     {
       "slug": "grab-the-mic",
@@ -82,9 +89,10 @@
       "size": "Tabletop, 2 to 10 players, ages 8+",
       "use": "indoor",
       "quantity": 1,
-      "availableNow": false,
+      "availableNow": true,
       "blurb": "The Lucky Egg tabletop singing party game. Flip a word card, and the first player to grab the foam mic and sing a lyric with that word scores. Our rain-plan game.",
-      "alt": "Black friends laughing around a party table while a woman holds a microphone mid-song, a stack of word cards on the table"
+      "alt": "Black friends laughing around a party table while a woman holds a microphone mid-song, a stack of word cards on the table",
+      "formChoice": "Grab the Mic"
     },
     {
       "slug": "giant-color-stack",
@@ -94,29 +102,119 @@
       "quantity": 2,
       "availableNow": true,
       "blurb": "A two-foot color-sorting stacking puzzle: slide the sky blue, lime green, yellow and pink rings onto five poles until every pole is one color. Two sets for head-to-head races.",
-      "alt": "Black mother and young children sliding sky blue, lime green, yellow and pink rings onto the light-blue poles of two giant color stack sets side by side on a backyard party table"
+      "alt": "Black mother and young children sliding sky blue, lime green, yellow and pink rings onto the light-blue poles of two giant color stack sets side by side on a backyard party table",
+      "formChoice": "Giant Color Stack"
+    }
+  ],
+  "extras": [
+    {
+      "slug": "inflatable-movie-screen",
+      "name": "Inflatable Movie Screen",
+      "formChoice": "Inflatable movie screen",
+      "dayPrice": 50,
+      "weekendPrice": 75,
+      "size": "Outdoor screen with blower, stakes and extension cord",
+      "use": "outdoor",
+      "quantity": 1,
+      "availableNow": true,
+      "blurb": "An inflatable outdoor movie screen with its blower, stakes and an extension cord. Bring your own projector and speaker; it needs a plug within 50 ft.",
+      "alt": "Black inflatable outdoor movie screen standing on a backyard lawn at dusk under string lights, lawn chairs set out in front"
+    },
+    {
+      "slug": "card-table",
+      "name": "Card Table with Cup Holders",
+      "formChoice": "Card table with cup holders",
+      "dayPrice": 15,
+      "weekendPrice": 25,
+      "size": "Folding card table, seats 4",
+      "use": "both",
+      "quantity": 1,
+      "availableNow": true,
+      "blurb": "A folding card table with a green felt top, four cup holders and chip trays. No chairs.",
+      "alt": "White folding card table with a green felt top and four cup holders set up on a patio"
     }
   ],
   "bundles": [
     {
+      "slug": "pick-3",
       "name": "Pick 3",
+      "formChoice": "Pick 3 bundle ($110)",
       "games": 3,
-      "dayPrice": 110
+      "items": [],
+      "dayPrice": 110,
+      "includes": "Any 3 games",
+      "image": "/assets/rentals/bundles/bundle-pick-3.jpg",
+      "alt": "Giant connect four, giant color stack and a cornhole board set up on a backyard lawn"
     },
     {
+      "slug": "pick-5",
       "name": "Pick 5",
+      "formChoice": "Pick 5 bundle ($175)",
       "games": 5,
-      "dayPrice": 175
+      "items": [],
+      "dayPrice": 175,
+      "includes": "Any 5 games",
+      "image": "/assets/rentals/bundles/bundle-pick-5.jpg",
+      "alt": "Giant connect four, giant color stack, cornhole, a giant checkers mat and giant Uno cards on a backyard lawn"
     },
     {
+      "slug": "whole-yard",
       "name": "Whole Yard",
-      "games": 9,
-      "dayPrice": 275
+      "formChoice": "Whole Yard, all 6 games ($195)",
+      "games": 6,
+      "items": [],
+      "dayPrice": 195,
+      "includes": "All 6 games",
+      "image": "/assets/rentals/bundles/bundle-whole-yard.jpg",
+      "alt": "All six party games on a backyard lawn: giant connect four, giant color stack, cornhole, giant checkers, giant Uno and Grab the Mic"
+    },
+    {
+      "slug": "movie-night",
+      "name": "Movie Night",
+      "formChoice": "Movie Night, screen + 2 games ($110)",
+      "games": 2,
+      "items": [
+        "inflatable-movie-screen"
+      ],
+      "dayPrice": 110,
+      "includes": "The inflatable movie screen + any 2 games",
+      "image": "/assets/rentals/bundles/bundle-movie-night.jpg",
+      "alt": "Black inflatable movie screen under string lights at dusk with a cornhole board and giant connect four on the lawn"
+    },
+    {
+      "slug": "game-night",
+      "name": "Game Night",
+      "formChoice": "Game Night, card table + 2 games ($85)",
+      "games": 2,
+      "items": [
+        "card-table"
+      ],
+      "dayPrice": 85,
+      "includes": "The card table + any 2 games",
+      "image": "/assets/rentals/bundles/bundle-game-night.jpg",
+      "alt": "Folding card table with a green felt top on a sunny lawn, with giant Uno cards and Grab the Mic beside it"
+    },
+    {
+      "slug": "whole-party",
+      "name": "The Whole Party",
+      "formChoice": "The Whole Party, all 8 items ($235 day / $350 weekend)",
+      "games": 6,
+      "items": [
+        "inflatable-movie-screen",
+        "card-table"
+      ],
+      "dayPrice": 235,
+      "weekendPrice": 350,
+      "includes": "All 6 games, the movie screen and the card table",
+      "image": "/assets/rentals/bundles/bundle-whole-party.jpg",
+      "alt": "Every rental on one lawn: inflatable movie screen, card table, giant connect four, giant color stack, cornhole, giant checkers, giant Uno and Grab the Mic"
     }
   ],
-  "delivery": {
-    "fee": 30,
-    "freeOver": 150,
+  "pickup": {
+    "_why": "Rentals v3 (owner, 2026-10-15): no delivery. Pickup and return at a police safe exchange zone, time set by text or call after payment.",
+    "place": "Mt. Moriah Station, Memphis Police Department",
+    "address": "2602 Mt. Moriah Rd, Memphis, TN 38115",
+    "phone": "901-355-1518",
     "areas": [
       "Memphis",
       "Olive Branch",
@@ -124,8 +222,9 @@
     ]
   },
   "damageDeposit": 50,
+  "holdPercent": 50,
   "hero": {
     "file": "/assets/rentals/hero.webp",
-    "alt": "Black family reunion in a Memphis backyard with a giant connect four, a cornhole board and a giant tumble tower set up on the lawn, balloons and a party table behind"
+    "alt": "Black family reunion in a Memphis backyard with a giant connect four, a cornhole board and other giant yard games set up on the lawn, balloons and a party table behind"
   }
 }

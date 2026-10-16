@@ -8,7 +8,7 @@ import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLi
 import { loadRequests, driveFileId, idFolderId } from './sheet.mjs';
 import { PRICE_TABLE, CONTACT } from './prices.mjs';
 import { renderInvoicePdf, textMessage } from './pdf.mjs';
-import { prefillLines } from './pricing.mjs';
+import { prefillLines, pickupNote } from './pricing.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
 import { CHECKLIST_SOURCE } from './checklist-source.mjs';
@@ -142,7 +142,8 @@ async function newInvoice(env, url) {
   let lines = request ? prefillLines(request, PRICE_TABLE) : [{ description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 }];
   let depositCents = null; let dueDate = todayISO(7);
   const fromChecklist = key ? invoiceFromChecklist(CHECKLIST_SOURCE, await savedChecklist(env, key)) : null;
-  if (request && request.gamesAnswer && lines.some((l) => l.description === 'Game rental (1 day)')) warnings.push(`We could not match the games they picked ("${request.gamesAnswer}"). Check the first line under Change what goes into the total.`);
+  if (request && request.gamesAnswer && lines.some((l) => /^Game rental \(/.test(l.description))) warnings.push(`We could not match the games they picked ("${request.gamesAnswer}"). Check the first line under Change what goes into the total.`);
+  if (request && lines.some((l) => /of your choice/i.test(l.description))) warnings.push('They picked a bundle without naming every game. Ask which games, then change the line under Change what goes into the total.');
   if (fromChecklist) {
     if (fromChecklist.lines.length) {
       const damage = lines.find((l) => l.refundable);
@@ -206,7 +207,7 @@ async function updateInvoice(env, request, id) {
 
 async function emailParts(env, invoice, lines, settings, forPreview) {
   const qrSrc = settings.qr_png ? (forPreview ? '/api/admin/qr.png' : 'cid:pnp-payment-qr') : null;
-  const rendered = renderInvoiceEmail({ invoice, lines, settings, contact: CONTACT, qrSrc });
+  const rendered = renderInvoiceEmail({ invoice, lines, settings, contact: CONTACT, qrSrc, pickup: pickupNote(lines, PRICE_TABLE) });
   const attachments = settings.qr_png && !forPreview ? [{
     contentBase64: settings.qr_png, filename: settings.qr_type === 'image/jpeg' ? 'payment-qr.jpg' : 'payment-qr.png',
     type: settings.qr_type || 'image/png', disposition: 'inline', contentId: 'pnp-payment-qr',
@@ -357,8 +358,9 @@ export async function handleAdmin(context) {
         if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
         const settings = await getSettings(env.DB);
         const emailHtml = (await emailParts(env, loaded.invoice, loaded.lines, settings, true)).html;
-        const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings });
-        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+        const pickup = pickupNote(loaded.lines, PRICE_TABLE);
+        const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings, pickup });
+        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pickup, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
       }
       if (segs[2] === 'edit' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
@@ -373,7 +375,7 @@ export async function handleAdmin(context) {
       if (segs[2] === 'invoice.pdf' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse('Not found', 404);
-        const bytes = await renderInvoicePdf({ invoice: loaded.invoice, lines: loaded.lines, settings: await getSettings(env.DB), contact: CONTACT });
+        const bytes = await renderInvoicePdf({ invoice: loaded.invoice, lines: loaded.lines, settings: await getSettings(env.DB), contact: CONTACT, pickup: pickupNote(loaded.lines, PRICE_TABLE) });
         const filename = `Porch-and-Party-Invoice-${loaded.invoice.number}.pdf`;
         return new Response(bytes, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `${url.searchParams.get('dl') === '1' ? 'attachment' : 'inline'}; filename="${filename}"`, 'Cache-Control': 'no-store' } });
       }
