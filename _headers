@@ -22,10 +22,11 @@
 /package-lock.json
   X-Robots-Tag: noindex, nofollow
 
-# Stylesheets and scripts are referenced without a version query, so a
-# 4-hour browser cache (the Pages default) leaves returning visitors on the
-# old CSS after every layout change: /faq/ rendered unstyled for them on
-# 17 Oct 2026. The edge still caches; browsers revalidate on each load.
+# Asks browsers to revalidate CSS and JS. On its own this does NOT reach
+# visitors: the porchandparty901.com zone's Browser Cache TTL rewrites it to
+# max-age=14400 (p-n-p.pages.dev serves it unchanged). The working fix is the
+# ?v=<content hash> that scripts/assemble_pages_output.js stamps on every
+# stylesheet and script URL in the published HTML.
 /assets/css/*
   Cache-Control: public, max-age=0, must-revalidate
 /assets/js/*
