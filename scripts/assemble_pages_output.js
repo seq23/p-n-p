@@ -119,6 +119,60 @@ if (heavy.length) {
   process.exit(1);
 }
 
+// Stylesheets and scripts are served with a version query: /assets/css/x.css?v=<hash>.
+// The porchandparty901.com zone's Browser Cache TTL (4 hours) rewrites the
+// Cache-Control that Pages sends for cacheable assets (pages.dev serves
+// max-age=0; the custom domain serves max-age=14400), so a _headers rule cannot
+// stop returning visitors keeping old CSS: /faq/ rendered unstyled for them on
+// 17 Oct 2026. A content hash in the URL changes the moment the file changes,
+// whatever any cache layer does. Source HTML keeps plain URLs; only the
+// published copy is stamped, so no generator has to know about it.
+const crypto = require('crypto');
+const ASSET_DIRS = ['assets/css', 'assets/js'];
+const assetVersion = new Map();
+for (const rel of ASSET_DIRS) {
+  const dir = path.join(dist, rel);
+  if (!fs.existsSync(dir)) continue;
+  for (const name of fs.readdirSync(dir)) {
+    if (!/\.(css|js)$/.test(name)) continue;
+    const hash = crypto.createHash('sha256').update(fs.readFileSync(path.join(dir, name))).digest('hex').slice(0, 10);
+    assetVersion.set(`/${rel}/${name}`, hash);
+  }
+}
+if (assetVersion.size === 0) {
+  console.error('assemble: no stylesheets found under assets/css; the asset versioning step reached nothing');
+  process.exit(1);
+}
+const ASSET_REF = /(\b(?:href|src)=["'])(\/assets\/(?:css|js)\/[^"'?#]+)(?:\?[^"'#]*)?(["'#])/g;
+let stampedFiles = 0;
+let stampedRefs = 0;
+const unversioned = [];
+(function stamp(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) { stamp(full); continue; }
+    if (!entry.name.endsWith('.html')) continue;
+    const html = fs.readFileSync(full, 'utf8');
+    let changed = 0;
+    const out = html.replace(ASSET_REF, (m, pre, url, post) => {
+      const v = assetVersion.get(url);
+      if (!v) { unversioned.push(`${path.relative(dist, full)} -> ${url}`); return m; }
+      changed += 1;
+      return `${pre}${url}?v=${v}${post}`;
+    });
+    if (changed) { fs.writeFileSync(full, out); stampedFiles += 1; stampedRefs += changed; }
+  }
+})(dist);
+if (unversioned.length) {
+  console.error(`assemble: ${unversioned.length} asset reference(s) point at files that do not exist:\n  ` + unversioned.slice(0, 10).join('\n  '));
+  process.exit(1);
+}
+const homepage = fs.readFileSync(path.join(dist, 'index.html'), 'utf8');
+if (stampedRefs === 0 || !/\/assets\/css\/styles\.css\?v=[0-9a-f]{10}/.test(homepage)) {
+  console.error('assemble: the homepage stylesheet is not versioned; returning visitors would keep stale CSS');
+  process.exit(1);
+}
+
 const leaked = ['README.md', 'package.json', 'AGENTS.md', 'package-lock.json']
   .filter((f) => fs.existsSync(path.join(dist, f)));
 if (leaked.length) {
@@ -126,4 +180,4 @@ if (leaked.length) {
   process.exit(1);
 }
 
-console.log(`assemble: ${copied} files into .pages-output/ (sitemap URLs verified)`);
+console.log(`assemble: ${copied} files into .pages-output/ (sitemap URLs verified; ${stampedRefs} asset URLs versioned in ${stampedFiles} pages)`);
