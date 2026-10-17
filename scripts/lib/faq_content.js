@@ -34,6 +34,7 @@ const [board, small, full, extra] = grazingTiers;
 const SECTIONS = [
   {
     id: 'booking', title: 'Booking & payment', eyebrow: 'Every service',
+    lead: 'How to book, what holds your date, and how you pay.',
     intro: 'How a booking works, what holds your date, and how you pay. These apply to porches, party and room decor, grazing tables and rentals.',
     qa: [
       ['How do I book?',
@@ -56,6 +57,7 @@ const SECTIONS = [
   },
   {
     id: 'porch', title: 'Porch decor', eyebrow: S.porch.name,
+    lead: `Seasonal front-porch styling from ${S.porch.price}.`,
     intro: `Seasonal front-porch styling from ${S.porch.price}. Pick the picture that looks most like your porch for a starting price, then send a photo with your request for the exact quote.`,
     picker: 'porch',
     qa: [
@@ -77,6 +79,7 @@ const SECTIONS = [
   },
   {
     id: 'party', title: 'Party & room decor', eyebrow: S.celebration.name,
+    lead: `Birthdays, proposals, showers and hotel-room surprises from ${S.celebration.price}.`,
     intro: `Birthdays, anniversaries, proposals, showers and hotel-room surprises from ${S.celebration.price}, at your home, a hotel or a venue.`,
     qa: [
       ['What do you set up?',
@@ -97,6 +100,7 @@ const SECTIONS = [
   },
   {
     id: 'grazing', title: 'Grazing tables', eyebrow: S.grazing.name,
+    lead: `Styled grazing spreads from ${S.grazing.price} for the styling.`,
     intro: `Styled spreads of cheeses, charcuterie, fruit, breads, dips and sweets, from ${S.grazing.price} for the styling. Use the estimator for the size you need.`,
     estimator: 'grazing',
     qa: [
@@ -120,6 +124,7 @@ const SECTIONS = [
   },
   {
     id: 'rentals', title: 'Party game rentals', eyebrow: 'Rentals',
+    lead: `Giant yard games and a movie screen, ${money(games.rates.day)} a game a day.`,
     intro: `Giant yard games, an inflatable movie screen and a card table, ${money(games.rates.day)} a game a day, picked up and returned at ${PICK.place}. The same answers are on the rentals page.`,
     qa: [
       ...RENTALS_FAQ,
