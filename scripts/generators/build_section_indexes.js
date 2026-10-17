@@ -189,9 +189,11 @@ const SECTIONS = [
     eyebrow: 'Common Questions',
     crumb: 'FAQ',
     h1: 'Porch &amp; Party frequently asked questions',
+    heroH1: 'Frequently asked questions',
     title: 'Porch &amp; Party FAQ | Pricing, Setup Time &amp; Booking Questions',
     description: 'Questions asked most before booking Porch & Party: what setups cost, how long they take, how far ahead to book, and what grazing-table pricing covers.',
     lead: 'Every question we get, in one place, sectioned by service: booking and payment, porch decor, party and room decor, grazing tables and party game rentals. The grazing estimator and the porch-size pictures give you a starting price before you ask.',
+    heroNote: 'Use the estimator below for a starting price before you ask.',
     summary: 'Jump to your service below. Setup and styling prices are firm starting points from our price list; food for grazing tables is always a separate rough estimate until the menu is confirmed.',
     group: (pages) => [{ heading: 'Longer answers', blurb: 'Each of these is a full page with the pricing detail behind one question.', pages }],
     groups: faqContent.SECTIONS,
@@ -275,10 +277,10 @@ const money = faqContent.money;
 function porchPickerHtml() {
   const tiers = faqContent.porchTiers;
   return `
-        <div class="porch-tiers" data-estimator="porch">${tiers.map((t) => `
-          <article class="card porch-tier"><img src="${t.image}" alt="${esc(t.name)}: ${esc(t.describe)}" loading="lazy" width="1200" height="900" /><div class="card-body"><h3>${esc(t.name)}</h3><p>${esc(t.describe)}</p><p class="price">From ${money(t.from)}</p><p class="muted">Looks like yours? <a ${QUOTE_LINK}>Request a quote</a> and attach a photo of your porch.</p></div></article>`).join('')}
+        <div class="faq-tool" id="porch-picker"><div class="porch-tiers" data-estimator="porch">${tiers.map((t) => `
+          <article class="card porch-tier"><img src="${t.image}" alt="${esc(t.name)}: ${esc(t.describe)}" loading="lazy" width="1200" height="900" /><div class="card-body"><h3>${esc(t.name)}</h3><p>${esc(t.describe)}</p><p class="price">From ${money(t.from)}</p><p class="muted">Looks like yours? Attach a photo of your porch to your quote request.</p></div></article>`).join('')}
         </div>
-        <p class="muted estimator-note" style="text-align:center;margin-top:14px;">${esc(offers.services.porch.notes[1])} ${esc(offers.addOns.takedown.line)}</p>`;
+        <p class="muted estimator-note" style="text-align:center;margin-top:14px;">${esc(offers.services.porch.notes[1])} ${esc(offers.addOns.takedown.line)}</p></div>`;
 }
 
 function grazingEstimatorHtml() {
@@ -286,7 +288,7 @@ function grazingEstimatorHtml() {
   const food = faqContent.food;
   const cfg = JSON.stringify({ tiers, food: { low: food.low, high: food.high } });
   return `
-        <div class="info-panel estimator" data-estimator="grazing" data-config='${cfg.replace(/'/g, '&#39;')}'>
+        <div class="info-panel estimator" id="grazing-estimator" data-estimator="grazing" data-config='${cfg.replace(/'/g, '&#39;')}'>
           <h3>How big a grazing table do I need?</h3>
           <form class="estimator-form" onsubmit="return false">
             <label>Guests <input type="number" name="guests" min="1" max="500" value="30" inputmode="numeric"></label>
@@ -307,15 +309,34 @@ function run(){var g=Math.max(1,parseInt(f.guests.value,10)||1);var r=pick(g,f.s
 f.addEventListener('input',run);f.addEventListener('change',run);run();})();</script>`;
 }
 
+// Owner-approved navigation (2026-10-17): a map of the page under the hero, a
+// sticky jump nav, native <details> accordions (first open per section), the
+// calculator first in its section, one quote button and a back/next row per section.
+function faqMapHtml(groups) {
+  const card = (href, title, lead, meta, go, tool) => `<a class="faq-map__card${tool ? ' faq-map__card--tool' : ''}" href="${href}">`
+    + `<span class="faq-map__title">${esc(title)}</span><span class="faq-map__lead">${esc(lead)}</span>`
+    + `<span class="faq-map__meta">${meta}</span><span class="faq-map__go">${go} &rarr;</span></a>`;
+  return `
+        <nav class="faq-map" aria-label="What is on this page">${groups.map((g) => card(`#${g.id}`, g.title, g.lead, `${g.qa.length} questions`, 'See answers', false)).join('')}${card('#porch-picker', 'Price my porch', 'Pick the porch picture that looks like yours for a starting price.', 'Porch picker', 'Open the picker', true)}${card('#grazing-estimator', 'Estimate my grazing table', 'Enter your guest count for a table size and a starting price.', 'Grazing estimator', 'Open the estimator', true)}</nav>`;
+}
+
+const FAQ_NAV_SCRIPT = `<script>(function(){var nav=document.querySelector('.faq-jump');if(!nav||!('IntersectionObserver' in window))return;var links={};Array.prototype.forEach.call(nav.querySelectorAll('a[href^="#"]'),function(a){links[a.getAttribute('href').slice(1)]=a;});var set=function(id){Object.keys(links).forEach(function(k){var a=links[k];if(k===id){a.classList.add('is-active');a.setAttribute('aria-current','true');if(nav.scrollWidth>nav.clientWidth)nav.scrollLeft=Math.max(0,a.offsetLeft-nav.firstElementChild.offsetWidth-24);}else{a.classList.remove('is-active');a.removeAttribute('aria-current');}});};var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)set(e.target.id);});},{rootMargin:'-170px 0px -55% 0px'});Object.keys(links).forEach(function(id){var el=document.getElementById(id);if(el)io.observe(el);});})();</script>`;
+
 function groupedFaqHtml(groups) {
-  const jump = `<nav class="faq-jump" aria-label="FAQ sections">${groups.map((g) => `<a href="#${g.id}">${esc(g.title)}</a>`).join('')}</nav>`;
-  const sections = groups.map((g) => `
+  const jump = `<nav class="faq-jump" aria-label="FAQ sections"><span class="faq-jump__label">Jump to:</span>${groups.map((g) => `<a href="#${g.id}">${esc(g.title)}</a>`).join('')}</nav>`;
+  const sections = groups.map((g, i) => {
+    const next = groups[i + 1];
+    const tool = g.picker === 'porch' ? porchPickerHtml() : g.estimator === 'grazing' ? grazingEstimatorHtml() : '';
+    return `
         <section class="faq-section" id="${g.id}">
-          <div class="answer-block"><span class="eyebrow">${esc(g.eyebrow)}</span><h2>${esc(g.title)}</h2><p>${esc(g.intro)}</p></div>${g.picker === 'porch' ? porchPickerHtml() : ''}${g.estimator === 'grazing' ? grazingEstimatorHtml() : ''}
-          <div class="faq-list">${g.qa.map(([q, a]) => `<article class="faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></article>`).join('')}</div>
+          <div class="answer-block"><span class="eyebrow">${esc(g.eyebrow)}</span><h2>${esc(g.title)}</h2><p>${esc(g.intro)}</p></div>${tool}
+          <div class="faq-list">${g.qa.map(([q, a], j) => `<details class="faq-item"${j === 0 ? ' open' : ''}><summary><h3>${esc(q)}</h3></summary><p>${esc(a)}</p></details>`).join('')}</div>
           <p class="faq-cta"><a ${QUOTE_LINK} class="btn-primary">Request a Quote</a></p>
-        </section>`).join('');
-  return `${jump}${sections}`;
+          <p class="faq-next"><a href="#top">&uarr; Back to top</a>${next ? `<a href="#${next.id}">Next: ${esc(next.title)} &rarr;</a>` : ''}</p>
+        </section>`;
+  }).join('');
+  return `${jump}${sections}
+        ${FAQ_NAV_SCRIPT}`;
 }
 
 function breadcrumbHtml(crumb) {
@@ -423,9 +444,16 @@ function render(section, groups) {
   ${nav()}
   <main>
     ${breadcrumbHtml(section.crumb)}
-    <section class="section">
+    <section class="section${section.groups ? ' faq-hero' : ''}">
       <div class="container">
-        <div class="page-intro">
+${section.groups ? `        <div class="page-intro" id="top">
+          <span class="eyebrow">${section.eyebrow}</span>
+          <h1>${section.heroH1}</h1>
+          <p>${section.lead}</p>
+          <p class="faq-hero-note">${esc(section.heroNote)}</p>
+          <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary" ${QUOTE.attrs}>Request a Quote</a></div>
+        </div>${faqMapHtml(section.groups)}
+` : `        <div class="page-intro">
           <span class="eyebrow">${section.eyebrow}</span>
           <h1>${section.h1}</h1>
           <p>${section.lead}</p>
@@ -440,18 +468,19 @@ function render(section, groups) {
             <li><strong>Next step:</strong> <a ${QUOTE_LINK}>Request a Quote</a></li>
           </ul>
         </div>
-      </div>
+`}      </div>
     </section>
 
-    <section class="section section-soft">
+    <section class="section section-soft${section.groups ? ' faq-body' : ''}">
       <div class="container">
 ${section.groups ? faqHtml : cards}
       </div>
     </section>
 
-${section.groups ? `    <section class="section">
+${section.groups ? `    <section class="section faq-longer-section">
       <div class="container">
-${cards}
+${groups.map((g) => `<div class="answer-block"><h2>${esc(g.heading)}</h2>${g.blurb ? `<p>${esc(g.blurb)}</p>` : ''}</div>`
+  + `<ul class="faq-longer">${g.pages.map((p) => `<li><a href="${p.url}">${esc(p.h1)}</a></li>`).join('')}</ul>`).join('\n')}
       </div>
     </section>
 ` : faqHtml}
@@ -461,7 +490,7 @@ ${cards}
           .map((r) => `<li><a ${r === '/contact.html' ? QUOTE_LINK : `href="${r}"`}>${esc(RELATED_LABELS[r] || r)}</a></li>`).join('')}</ul></div>
       </div>
     </section>
-
+${section.groups ? '' : `
     <section class="section cta-band">
       <div class="container">
         <span class="eyebrow">Request a Quote</span>
@@ -470,7 +499,7 @@ ${cards}
         <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary" ${QUOTE.attrs}>Start Your Request</a></div>
         <p class="muted" style="margin-top: 14px;"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p>
       </div>
-    </section>
+    </section>`}
   </main>
   ${footer()}
 </body>
