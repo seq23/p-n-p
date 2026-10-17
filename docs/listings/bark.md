@@ -21,7 +21,7 @@ Location to enter in Bark: Memphis, TN, with a 25-mile radius (covers all eight 
 - Phone: 901-355-1518 (call or text)
 - Email: hello@porchandparty901.com
 - Website: https://porchandparty901.com
-- Google Business Profile: https://maps.google.com/?cid=1437103205402862394
+- Google Business Profile: https://www.google.com/maps?cid=1437103205402862394
 
 ## Services to select on Bark
 Primary: **Event Decorator**. (If a name below reads slightly differently on the platform, pick the closest match its category search suggests.)

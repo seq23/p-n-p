@@ -43,7 +43,7 @@ const errors = [];
 const fail = (m) => errors.push(m);
 
 const digits = (s) => String(s).replace(/\D/g, '');
-const expectedGbp = `https://maps.google.com/?cid=${BigInt(FEATURE_ID).toString()}`;
+const expectedGbp = `https://www.google.com/maps?cid=${BigInt(FEATURE_ID).toString()}`;
 if (C.googleBusinessProfileUrl !== expectedGbp) fail(`services.json contact.googleBusinessProfileUrl is ${C.googleBusinessProfileUrl}, expected ${expectedGbp} (cid of Maps feature ${FEATURE_ID})`);
 if (digits(C.telephone) !== '19013551518') fail(`services.json contact.telephone ${C.telephone} is not +1-901-355-1518`);
 for (const k of ['telHref', 'smsHref']) if (digits(C[k]) !== digits(C.telephone)) fail(`services.json contact.${k} ${C[k]} does not match telephone ${C.telephone}`);
