@@ -175,7 +175,9 @@ function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl, im
   }
   const article = articleJsonLd(url, title, description, image, pathUrl);
   if (article) blocks.push(article);
-  return blocks.map(obj => `<script type="application/ld+json">${JSON.stringify(obj)}</script>`).join('\n');
+  // One business entity per page: the first business node becomes the full
+  // #business node, every other one an @id reference (scripts/lib/contact_surface.js).
+  return contactSurface.patchJsonLd(blocks.map(obj => `<script type="application/ld+json">${JSON.stringify(obj)}</script>`).join('\n'));
 }
 
 const labels = {

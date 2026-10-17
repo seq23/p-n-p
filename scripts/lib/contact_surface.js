@@ -32,6 +32,8 @@ if (!R || !R.href || !R.footerLabel) throw new Error('data/offers/services.json 
 
 const CALL_LABEL = `Call or text ${C.telephoneDisplay}`;
 const GBP_LABEL = 'Find us on Google';
+const MAPS_LABEL = 'Find us on Google Maps';
+const FB_LABEL = 'Porch & Party on Facebook';
 
 const MARK = {
   header: 'data-contact="header-call"',
@@ -54,7 +56,7 @@ const headerCall = () =>
   `<a href="${C.telHref}" class="header-call" ${MARK.header}>${CALL_LABEL}</a>`;
 
 const footerContact = () =>
-  `<p class="muted" ${MARK.footer}><a href="${C.telHref}">${CALL_LABEL}</a><br><a href="${C.googleBusinessProfileUrl}" rel="noopener" target="_blank">${GBP_LABEL}</a></p>`;
+  `<p class="muted" ${MARK.footer}><a href="${C.telHref}">${CALL_LABEL}</a><br><a href="${C.googleBusinessProfileUrl}" rel="noopener" target="_blank">${MAPS_LABEL}</a><br><a href="${C.facebookPageUrl}" rel="noopener" target="_blank">${FB_LABEL.replace('&', '&amp;')}</a></p>`;
 
 const contactDirect = () =>
   `<div class="contact-direct" ${MARK.direct}><p><strong>Prefer to talk it through?</strong> <a href="${C.telHref}">Call ${C.telephoneDisplay}</a> or <a href="${C.smsHref}">text ${C.telephoneDisplay}</a>.</p><p><a href="${C.googleBusinessProfileUrl}" rel="noopener" target="_blank">${GBP_LABEL}</a>: see Porch and Party on Google Maps.</p></div>`;
@@ -68,36 +70,111 @@ const SAFETY_BLOCK = /<p class="muted" data-contact="renter-safety">[\s\S]*?<\/p
 const popularQuestions = () =>
   `<section class="section section-soft" ${MARK.popular}><div class="container"><div class="answer-block"><span class="eyebrow">Popular questions</span><h2>What Memphis hosts ask most</h2></div><ul class="footer-list">${priority.pages.map((p) => `<li><a href="${p.href}">${p.label}</a></li>`).join('')}</ul><p class="muted"><a href="${C.telHref}">${CALL_LABEL}</a> for a quick answer on your date.</p></div></section>`;
 
-/** Fields every LocalBusiness node carries. */
+/**
+ * One business entity (owner-approved 2026-10-16): the site, the Google
+ * Business Profile and the Facebook Page are the same business. Every page
+ * carries exactly ONE full business node with the stable @id
+ * https://porchandparty901.com/#business, whose sameAs names the Facebook Page
+ * and the Maps cid; every other node that would describe the business
+ * (a nested Service.provider, Article.about/publisher/author, Offer.seller)
+ * is reduced to {"@id": ...}. Values come from data/offers/services.json
+ * contact.entity. Guarded by scripts/validators/validate_business_entity.js.
+ */
+const ENTITY = C.entity;
+if (!ENTITY || !ENTITY.id || !Array.isArray(ENTITY.type) || !ENTITY.type.includes('LocalBusiness') || !C.facebookPageUrl) {
+  throw new Error('data/offers/services.json is missing contact.entity (id, type incl. LocalBusiness) or contact.facebookPageUrl');
+}
+const BUSINESS_ID = ENTITY.id;
+const SAME_AS = [C.facebookPageUrl, C.googleBusinessProfileUrl];
+const AREAS = require(path.join(__dirname, '../../data/service_areas/areas.json')).areas;
+
+const businessRef = () => ({ '@id': BUSINESS_ID });
+
+/** Fields every business node carries (spread into generator output; the page pass then dedupes). */
 function businessContactFields() {
-  return { telephone: C.telephone, hasMap: C.googleBusinessProfileUrl, sameAs: [C.googleBusinessProfileUrl], additionalType: T.additionalType.slice() };
+  return { '@id': BUSINESS_ID, telephone: C.telephone, email: 'hello@porchandparty901.com', hasMap: C.googleBusinessProfileUrl, sameAs: SAME_AS.slice(), additionalType: T.additionalType.slice() };
 }
 
-function patchNode(node) {
-  if (Array.isArray(node)) { node.forEach(patchNode); return; }
-  if (!node || typeof node !== 'object') return;
-  const types = [].concat(node['@type'] || []);
-  if (types.includes('LocalBusiness')) {
-    node.telephone = C.telephone;
-    node.hasMap = C.googleBusinessProfileUrl;
-    const same = [].concat(node.sameAs || []);
-    if (!same.includes(C.googleBusinessProfileUrl)) same.push(C.googleBusinessProfileUrl);
-    node.sameAs = same;
-    // Party planner + decorator classes; schema.org has neither type.
-    const types = [].concat(node.additionalType || []);
-    for (const t of T.additionalType) if (!types.includes(t)) types.push(t);
-    node.additionalType = types;
+const typesOf = (n) => [].concat((n && n['@type']) || []);
+function isBusinessNode(n) {
+  if (!n || typeof n !== 'object' || Array.isArray(n)) return false;
+  const t = typesOf(n);
+  if (t.includes('LocalBusiness')) return true;
+  if (t.includes('Organization') && n.name === offers.brandName) return true;
+  return n['@id'] === BUSINESS_ID && Object.keys(n).length > 1;
+}
+
+const union = (a, b) => {
+  const out = [];
+  const seen = new Set();
+  for (const v of [].concat(a || [], b || [])) { const k = JSON.stringify(v); if (!seen.has(k)) { seen.add(k); out.push(v); } }
+  return out;
+};
+
+/** The one full business node, keeping any page-specific extras (description, makesOffer...). */
+function canonicalBusiness(existing = {}) {
+  const { '@context': ctx, '@type': _t, '@id': _i, name: _n, url: _u, ...rest } = existing;
+  const node = {
+    ...(ctx ? { '@context': ctx } : {}),
+    '@type': ENTITY.type.slice(),
+    '@id': BUSINESS_ID,
+    name: offers.brandName,
+    url: `${offers.domain}/`,
+    ...rest,
+    telephone: C.telephone,
+    email: 'hello@porchandparty901.com',
+    logo: ENTITY.logo,
+    image: existing.image || ENTITY.image,
+    priceRange: ENTITY.priceRange,
+    areaServed: union(existing.areaServed, AREAS),
+    hasMap: C.googleBusinessProfileUrl,
+    sameAs: union(SAME_AS, existing.sameAs),
+    additionalType: union(existing.additionalType, T.additionalType)
+  };
+  return node;
+}
+
+function unifyNodes(roots) {
+  let placed = false;
+  const visit = (node) => {
+    if (Array.isArray(node)) return node.map(visit);
+    if (!node || typeof node !== 'object') return node;
+    if (isBusinessNode(node)) {
+      if (placed) return businessRef();
+      placed = true;
+      const full = canonicalBusiness(node);
+      for (const k of Object.keys(full)) if (!['@context', '@type', '@id'].includes(k)) full[k] = visit(full[k]);
+      return full;
+    }
+    const out = {};
+    for (const [k, v] of Object.entries(node)) out[k] = visit(v);
+    return out;
+  };
+  // A top-level business node is the preferred home for the full node.
+  const top = roots.findIndex((r) => isBusinessNode(r));
+  const order = top >= 0 ? [top, ...roots.keys()].filter((v, i, a) => a.indexOf(v) === i) : [...roots.keys()];
+  const result = new Array(roots.length);
+  for (const i of order) result[i] = visit(roots[i]);
+  if (placed) {
+    for (const r of result) {
+      if (r && !Array.isArray(r) && ['WebSite', 'WebPage', 'CollectionPage'].some((t) => typesOf(r).includes(t)) && !r.publisher) r.publisher = businessRef();
+    }
   }
-  for (const v of Object.values(node)) patchNode(v);
+  return result;
 }
 
 const JSONLD = /(<script type="application\/ld\+json">)([\s\S]*?)(<\/script>)/g;
 
+/** Page-level pass: exactly one full business node, everything else references it. Idempotent. */
 function patchJsonLd(html) {
+  const blocks = [...html.matchAll(JSONLD)];
+  if (!blocks.length) return html;
+  const parsed = blocks.map((m) => JSON.parse(m[2]));
+  if (!JSON.stringify(parsed).match(/LocalBusiness|#business"|"Organization"/)) return html;
+  const unified = unifyNodes(parsed);
+  let i = 0;
   return html.replace(JSONLD, (whole, open, body, close) => {
-    if (!body.includes('LocalBusiness')) return whole;
-    const data = JSON.parse(body);
-    patchNode(data);
+    const data = unified[i++];
     const lead = body.match(/^\s*/)[0];
     const trail = body.match(/\s*$/)[0];
     const pretty = /^\{\s*\n(\s+)"/.exec(body.trim());
@@ -124,6 +201,8 @@ function applyContactSurface(html, rel) {
     out = out.slice(0, at) + headerCall() + out.slice(at);
     }
   }
+  // Re-render an existing footer contact line so a change here reaches every page.
+  out = out.replace(/<p class="muted" data-contact="footer">[\s\S]*?<\/p>/, () => footerContact());
   if (!out.includes(MARK.footer)) {
     const f = out.indexOf('<footer');
     if (f < 0) throw new Error(`${rel}: no <footer>`);
@@ -171,5 +250,6 @@ module.exports = {
   CONTACT: C, CALL_LABEL, GBP_LABEL, MARK, PRIORITY_PAGES: priority.pages,
   BUSINESS_TYPES: T.additionalType, PRIMARY_ROUTE: R,
   headerCall, footerContact, footerRouteLink, contactDirect, popularQuestions, renterSafety, SAFETY,
-  businessContactFields, patchJsonLd, applyContactSurface
+  businessContactFields, businessRef, canonicalBusiness, isBusinessNode, BUSINESS_ID, SAME_AS, MAPS_LABEL, FB_LABEL,
+  patchJsonLd, applyContactSurface
 };

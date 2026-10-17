@@ -298,12 +298,7 @@ function render(section, groups) {
   // here. Same brand name, domain and served area as the LocalBusiness node
   // page-shell.js already emits, read from the same data files, plus the
   // telephone and Google listing from scripts/lib/contact_surface.js; no street address.
-  const publisher = {
-    '@context': 'https://schema.org', '@type': 'LocalBusiness',
-    '@id': `${DOMAIN}/#business`, name: offers.brandName, url: `${DOMAIN}/`,
-    areaServed: areasData.areas,
-    ...require('../lib/contact_surface').businessContactFields()
-  };
+  const publisher = require('../lib/contact_surface').canonicalBusiness({ '@context': 'https://schema.org', areaServed: areasData.areas });
   const jsonld = [
     publisher,
     { '@context': 'https://schema.org', '@type': 'CollectionPage', name: plainH1, description: section.description, url, publisher: { '@id': `${DOMAIN}/#business` } },
