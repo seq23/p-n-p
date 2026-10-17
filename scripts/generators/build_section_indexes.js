@@ -36,6 +36,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
+const faqContent = require(path.join(ROOT, 'scripts/lib/faq_content.js'));
 const rentalRates = require(path.join(ROOT, 'data/rentals/games.json')).rates;
 const { nav, footer } = require(path.join(ROOT, 'templates/page-shell.js'));
 // Owner ruling 2026-10-15: every quote CTA opens the quote form directly, in a new tab.
@@ -163,7 +164,7 @@ const SECTIONS = [
       ['Do the starting prices include take-down or food?',
         `No. ${offers.services.porch.notes[0]} ${offers.services.grazing.notes[0]} ${offers.services.grazing.notes[1]}`]
     ],
-    related: ['/areas/index.html', '/local/index.html', '/events/index.html', '/pricing.html']
+    related: ['/faq/index.html', '/areas/index.html', '/local/index.html', '/events/index.html', '/pricing.html']
   },
   {
     dir: 'areas',
@@ -190,15 +191,11 @@ const SECTIONS = [
     h1: 'Porch &amp; Party frequently asked questions',
     title: 'Porch &amp; Party FAQ | Pricing, Setup Time &amp; Booking Questions',
     description: 'Questions asked most before booking Porch & Party: what setups cost, how long they take, how far ahead to book, and what grazing-table pricing covers.',
-    lead: 'These are the questions asked most often before a Porch &amp; Party booking: what a setup costs, how long the install takes, how far in advance to book, and what the starting price does and does not cover. Each answer below is a full page with the pricing detail behind it.',
-    summary: 'Read the cost and timing answers before requesting a quote - they cover the four things that move a Porch & Party price most: setup size, location, materials, and timing.',
-    group: (pages) => [{ heading: 'Questions asked before booking', blurb: '', pages }],
-    faq: [
-      ['Where do Porch &amp; Party prices start?',
-        `${offers.services.porch.name} starts at ${offers.services.porch.price}, ${offers.services.celebration.name} at ${offers.services.celebration.price}, and ${offers.services.grazing.name} at ${offers.services.grazing.price}. The exact quote depends on scope, date, location, and materials.`],
-      ['How do I get an exact quote?',
-        'Send the date, city, occasion, location type, and budget range through the quote form. Porch & Party responds with scope, pricing direction, and availability; availability is not guaranteed until your request is confirmed.']
-    ],
+    lead: 'Every question we get, in one place, sectioned by service: booking and payment, porch decor, party and room decor, grazing tables and party game rentals. The grazing estimator and the porch-size pictures give you a starting price before you ask.',
+    summary: 'Jump to your service below. Setup and styling prices are firm starting points from our price list; food for grazing tables is always a separate rough estimate until the menu is confirmed.',
+    group: (pages) => [{ heading: 'Longer answers', blurb: 'Each of these is a full page with the pricing detail behind one question.', pages }],
+    groups: faqContent.SECTIONS,
+    faq: faqContent.flat(),
     related: ['/answers/index.html', '/pricing.html', '/services/index.html', '/how-it-works.html']
   },
   {
@@ -270,6 +267,57 @@ const SOCIAL = {
 
 const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj)}</script>`;
 
+// --- the consolidated FAQ (owner ruling 2026-10-17) -------------------------
+// Sections by service with anchors and jump links; the grazing estimator and the
+// porch-size picker read their numbers from the same data the answers quote.
+const money = faqContent.money;
+
+function porchPickerHtml() {
+  const tiers = faqContent.porchTiers;
+  return `
+        <div class="porch-tiers" data-estimator="porch">${tiers.map((t) => `
+          <article class="card porch-tier"><img src="${t.image}" alt="${esc(t.name)}: ${esc(t.describe)}" loading="lazy" width="1200" height="900" /><div class="card-body"><h3>${esc(t.name)}</h3><p>${esc(t.describe)}</p><p class="price">From ${money(t.from)}</p><p class="muted">Looks like yours? <a ${QUOTE_LINK}>Request a quote</a> and attach a photo of your porch.</p></div></article>`).join('')}
+        </div>
+        <p class="muted estimator-note" style="text-align:center;margin-top:14px;">${esc(offers.services.porch.notes[1])} ${esc(offers.addOns.takedown.line)}</p>`;
+}
+
+function grazingEstimatorHtml() {
+  const tiers = faqContent.grazingTiers;
+  const food = faqContent.food;
+  const cfg = JSON.stringify({ tiers, food: { low: food.low, high: food.high } });
+  return `
+        <div class="info-panel estimator" data-estimator="grazing" data-config='${cfg.replace(/'/g, '&#39;')}'>
+          <h3>How big a grazing table do I need?</h3>
+          <form class="estimator-form" onsubmit="return false">
+            <label>Guests <input type="number" name="guests" min="1" max="500" value="30" inputmode="numeric"></label>
+            <label>Serving as <select name="style"><option value="snack">A snack with drinks</option><option value="meal">The meal</option></select></label>
+            <label>Food <select name="food"><option value="us">Sourced by Porch &amp; Party</option><option value="you">Supplied by you</option></select></label>
+          </form>
+          <div class="estimator-result" aria-live="polite">
+            <div><strong data-out="size"></strong></div>
+            <div>Setup and styling: <strong data-out="styling"></strong></div>
+            <div>Food: <strong data-out="food"></strong></div>
+            <p class="muted estimator-note">${esc(food.line)}</p>
+          </div>
+          <noscript><p class="muted">${tiers.map((t) => `${esc(t.name)}: ${t.feedsSnack[0]} to ${t.feedsSnack[1]} as a snack, ${t.feedsMeal[0]} to ${t.feedsMeal[1]} as the meal, styling from ${money(t.from)}.`).join(' ')}</p></noscript>
+        </div>
+        <script>(function(){var el=document.querySelector('[data-estimator="grazing"]');if(!el)return;var cfg=JSON.parse(el.getAttribute('data-config'));var f=el.querySelector('form');var out=function(k){return el.querySelector('[data-out="'+k+'"]')};var money=function(n){return '$'+Math.round(n).toLocaleString('en-US')};
+function pick(guests,style){var key=style==='meal'?'feedsMeal':'feedsSnack';var main=cfg.tiers.slice(0,3);var extra=cfg.tiers[3];for(var i=0;i<main.length;i++){if(guests<=main[i][key][1])return {tier:main[i],extras:0};}var full=main[2];var more=Math.max(0,Math.ceil((guests-full[key][1])/extra[key][1]));return {tier:full,extras:more};}
+function run(){var g=Math.max(1,parseInt(f.guests.value,10)||1);var r=pick(g,f.style.value);var name=r.tier.name+(r.extras?' + '+r.extras+' additional table'+(r.extras>1?'s':''):'');out('size').textContent=name+' for '+g+' guests';out('styling').textContent='from '+money(r.tier.from+r.extras*cfg.tiers[3].from);out('food').textContent=f.food.value==='you'?'$0, you supply the food':'rough estimate '+money(g*cfg.food.low)+' to '+money(g*cfg.food.high)+' ('+money(cfg.food.low)+' to '+money(cfg.food.high)+' a head)';}
+f.addEventListener('input',run);f.addEventListener('change',run);run();})();</script>`;
+}
+
+function groupedFaqHtml(groups) {
+  const jump = `<nav class="faq-jump" aria-label="FAQ sections">${groups.map((g) => `<a href="#${g.id}">${esc(g.title)}</a>`).join('')}</nav>`;
+  const sections = groups.map((g) => `
+        <section class="faq-section" id="${g.id}">
+          <div class="answer-block"><span class="eyebrow">${esc(g.eyebrow)}</span><h2>${esc(g.title)}</h2><p>${esc(g.intro)}</p></div>${g.picker === 'porch' ? porchPickerHtml() : ''}${g.estimator === 'grazing' ? grazingEstimatorHtml() : ''}
+          <div class="faq-list">${g.qa.map(([q, a]) => `<article class="faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></article>`).join('')}</div>
+          <p class="faq-cta"><a ${QUOTE_LINK} class="btn-primary">Request a Quote</a></p>
+        </section>`).join('');
+  return `${jump}${sections}`;
+}
+
 function breadcrumbHtml(crumb) {
   return `<div class="breadcrumb-bar"><div class="container">`
     + `<nav class="breadcrumb" aria-label="Breadcrumb"><ol><li><a href="/">Home</a></li>`
@@ -328,7 +376,9 @@ function render(section, groups) {
   }
   const jsonldHtml = jsonld.map(ld).join('\n  ');
 
-  const faqHtml = section.faq && section.faq.length
+  const faqHtml = section.groups
+    ? groupedFaqHtml(section.groups)
+    : section.faq && section.faq.length
     ? `
     <section class="section">
       <div class="container">
@@ -395,11 +445,16 @@ function render(section, groups) {
 
     <section class="section section-soft">
       <div class="container">
-${cards}
+${section.groups ? faqHtml : cards}
       </div>
     </section>
 
-${faqHtml}
+${section.groups ? `    <section class="section">
+      <div class="container">
+${cards}
+      </div>
+    </section>
+` : faqHtml}
     <section class="section section-soft">
       <div class="container">
         <div class="info-panel"><h2>Related pages</h2><ul>${section.related

@@ -221,6 +221,7 @@ function render() {
         <div class="answer-block"><span class="eyebrow">Bundles</span><h2>${BUNDLES.length} bundles that save on day prices</h2><p>Mix any games you like. ${esc(BUNDLES[BUNDLES.length - 1].name)} is every item on this page, and the only bundle with a weekend price.</p></div>
         <div class="pricing-grid">${BUNDLES.map(bundleCard).join('')}</div>
         <p class="pricing-note muted">Every rental adds a ${money(data.damageDeposit)} damage deposit, refunded at return.</p>
+        <div class="btn-row centered-cta-row"><a href="${FORM_URL}" class="btn-primary" rel="noopener" target="_blank" data-quote-cta="rentals-bundles">Check My Date</a></div>
       </div>
     </section>
 
@@ -248,7 +249,7 @@ function render() {
 
     <section class="section" id="faq">
       <div class="container">
-        <div class="answer-block"><span class="eyebrow">FAQ</span><h2>Party game rental questions</h2></div>
+        <div class="answer-block"><span class="eyebrow">FAQ</span><h2>Party game rental questions</h2><p>Every question for every service, with the grazing and porch estimators, is on the <a href="/faq/#rentals">FAQ page</a>.</p></div>
         <div class="faq-list">${FAQ.map(([q, a]) => `<div class="faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></div>`).join('')}</div>
       </div>
     </section>
@@ -289,7 +290,7 @@ function finalHtml(before) {
   return html;
 }
 
-module.exports = { finalHtml, data, OUT, ITEMS, GAMES, EXTRAS, BUNDLES, bundleValue };
+module.exports = { finalHtml, data, OUT, ITEMS, GAMES, EXTRAS, BUNDLES, bundleValue, FAQ };
 
 if (require.main === module) {
   const before = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;

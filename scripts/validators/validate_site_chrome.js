@@ -42,7 +42,8 @@ const RULED = [
   ['/services/grazing-and-event-styling', 'Grazing & Events'],
   ['/rentals/', 'Rentals'],
   ['/pricing', 'Pricing'],
-  ['/how-it-works', 'How It Works']
+  ['/how-it-works', 'How It Works'],
+  ['/faq/', 'FAQ']
 ];
 const TEL = 'tel:+19013551518';
 // Written out on purpose (not read from services.json or the chrome module).
@@ -104,6 +105,8 @@ function checkPage(html, rel) {
   else {
     const r = links(ex[2]).filter((l) => l.href === '/rentals/');
     if (r.length !== 1 || !r[0].attrs.includes(chrome.MARK.footerRentals)) errs.push(`${rel}: footer Explore list has ${r.length} canonical Rentals link(s), want 1`);
+    const fq = links(ex[2]).filter((l) => /^\/faq\/?(?:index\.html)?$/.test(l.href || ''));
+    if (fq.length !== 1 || !fq[0].attrs.includes(chrome.MARK.footerFaq) || fq[0].label !== 'FAQ') errs.push(`${rel}: footer Explore list has ${fq.length} FAQ link(s), want exactly one labelled FAQ (owner ruling 2026-10-17)`);
   }
   return errs;
 }
@@ -115,6 +118,8 @@ const broken = {
   'nav without Rentals': sample.replace(/(<nav class="site-nav[^>]*>[\s\S]*?)<a href="\/rentals\/">Rentals<\/a>/, '$1'),
   'Party Planning back in the nav': sample.replace(/(<nav class="site-nav[^>]*>)/, `$1<a href="${PLANNER}">Party Planning</a>`),
   'footer without Rentals': sample.replace(chrome.RENTALS_FOOTER, ''),
+  'footer without FAQ': sample.replace(chrome.FAQ_FOOTER, ''),
+  'nav without FAQ': sample.replace(/(<nav class="site-nav[^>]*>[\s\S]*?)<a href="\/faq\/">FAQ<\/a>/, '$1'),
   'header quote back on /contact': sample.replace(`<a href="${FORM}" class="btn-primary pnp-quote" target="_blank" rel="noopener">`, '<a href="/contact" class="btn-primary pnp-quote">'),
   'an in-body quote CTA on /contact': sample.replace('</main>', '<a href="/contact.html" class="btn-primary">Request a Quote</a></main>'),
   'a form link without a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary">Check My Date</a></main>`)
