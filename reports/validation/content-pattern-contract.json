@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-10-17T00:26:19.256Z",
+  "generated_at": "2026-10-17T15:14:17.012Z",
   "enforcement": "block",
   "pages_checked": 114,
   "status": "PASS",
@@ -81,8 +81,8 @@
     {
       "id": "recommendation_summary",
       "blocking": false,
-      "pages_missing": 4,
-      "coverage_pct": 96.5,
+      "pages_missing": 5,
+      "coverage_pct": 95.6,
       "why": "no recommendation summary - asked for on 913 of 913 agent recommendations, the single most requested block"
     },
     {
@@ -129,7 +129,7 @@
     }
   ],
   "spec_producer_parity": {
-    "generator_sources_scanned": 78,
+    "generator_sources_scanned": 79,
     "blocks_in_spec": 10,
     "blocks_required_of_this_repo": 9,
     "orphan_blocks": [],
@@ -142,9 +142,9 @@
     ]
   },
   "recommendation_summary_distinctness": {
-    "total_blocks": 110,
-    "distinct_texts": 107,
-    "ratio": 0.9727,
+    "total_blocks": 109,
+    "distinct_texts": 106,
+    "ratio": 0.9725,
     "texts_on_more_than_one_page": 3,
     "pages_carrying_a_repeated_text": 6,
     "worst": [
@@ -212,6 +212,7 @@
     "faq": [],
     "structured_data": [],
     "recommendation_summary": [
+      "faq/index.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
@@ -453,6 +454,7 @@
     "faq": [],
     "structured_data": [],
     "recommendation_summary": [
+      "faq/index.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
