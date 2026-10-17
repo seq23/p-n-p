@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-09-16..2026-10-13",
-  "coverage_collected_at": "2026-10-16T15:15:22.585167+00:00",
+  "gsc_window": "2026-09-17..2026-10-14",
+  "coverage_collected_at": "2026-10-17T15:14:02.248897+00:00",
   "url_count": 117,
   "roles": {
     "candidate": 87,
@@ -913,7 +913,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 679,
+      "word_count": 2134,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -990,7 +990,7 @@
       "role": "root",
       "impressions_28d": 52,
       "clicks_28d": 0,
-      "word_count": 1327,
+      "word_count": 1345,
       "coverage_state": "Submitted and indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1078,7 +1078,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1688,
+      "word_count": 1708,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1254,7 +1254,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1132,
+      "word_count": 1138,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
