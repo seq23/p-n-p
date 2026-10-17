@@ -4,7 +4,7 @@
  * footer Rentals link and the nav stylesheet link, for every published page.
  *
  * Owner ruling 2026-10-13: the nav is Porch · Celebrations · Grazing & Events ·
- * Rentals · Pricing · How It Works, then "Request a Quote" and
+ * Rentals · Pricing · How It Works · FAQ (FAQ added by owner ruling 2026-10-17), then "Request a Quote" and
  * "Call or text 901-355-1518", identical on EVERY page, frozen ones included.
  *
  * Owner ruling 2026-10-15: every quote call-to-action opens the quote form
@@ -43,7 +43,8 @@ const NAV_ITEMS = Object.freeze([
   { href: '/services/grazing-and-event-styling', label: 'Grazing &amp; Events' },
   { href: '/rentals/', label: 'Rentals' },
   { href: '/pricing', label: 'Pricing' },
-  { href: '/how-it-works', label: 'How It Works' }
+  { href: '/how-it-works', label: 'How It Works' },
+  { href: '/faq/', label: 'FAQ' }
 ]);
 const QUOTE = Object.freeze({ href: offers.quoteUrl, label: 'Request a Quote', attrs: 'target="_blank" rel="noopener"' });
 const CONTACT_HREF_RE = /^\/contact(?:\.html)?\/?(?:[?#].*)?$/;
@@ -58,12 +59,15 @@ const MARK = Object.freeze({
   header: 'data-site-chrome="header"',
   css: 'data-site-chrome="css"',
   fonts: 'data-site-chrome="fonts"',
-  footerRentals: 'data-footer-link="rentals"'
+  footerRentals: 'data-footer-link="rentals"',
+  footerFaq: 'data-footer-link="faq"'
 });
 
 const CSS_HREF = '/assets/css/site-nav.css';
 const FONTS_HREF = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap';
 const RENTALS_FOOTER = `<a href="/rentals/" ${MARK.footerRentals}>Party Game Rentals</a>`;
+// Owner ruling 2026-10-17: the consolidated FAQ page is in the header and the footer of every page.
+const FAQ_FOOTER = `<a href="/faq/" ${MARK.footerFaq}>FAQ</a>`;
 
 const PHONE_SVG = '<svg class="pnp-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>';
 const BURGER_SVG = '<svg class="pnp-burger" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path class="pnp-burger-open" d="M4 7h16M4 12h16M4 17h16"/><path class="pnp-burger-close" d="M6 6l12 12M18 6L6 18"/></svg>';
@@ -124,6 +128,7 @@ function sitePathOf(rel) {
 const HEADER_RE = /<header\b[^>]*class="site-header[^"]*"[^>]*>[\s\S]*?<\/header>/;
 const EXPLORE_RE = /(<div class="footer-title">Explore<\/div>\s*<div class="footer-list">)([\s\S]*?)(<\/div>)/;
 const RENTALS_ANY_RE = /<a\b[^>]*href="\/rentals\/?"[^>]*>[^<]*<\/a>/g;
+const FAQ_ANY_RE = /<a\b[^>]*href="\/faq\/?(?:index\.html)?"[^>]*>[^<]*<\/a>/g;
 
 /** True when an anchor (its attribute string and inner HTML) is a quote call-to-action. */
 function isQuoteCta(attrs, inner) {
@@ -174,6 +179,16 @@ function applySiteChrome(html, rel) {
     next = next.slice(0, anchor.index) + RENTALS_FOOTER + next.slice(anchor.index);
     out = out.slice(0, ex.index) + ex[1] + next + ex[3] + out.slice(ex.index + ex[0].length);
   }
+  const ex2 = EXPLORE_RE.exec(out);
+  const list2 = ex2[2];
+  if (!list2.includes(FAQ_FOOTER) || (list2.match(FAQ_ANY_RE) || []).length !== 1) {
+    let next = list2.replace(FAQ_ANY_RE, '');
+    const pricing = /<a\b[^>]*href="\/pricing"[^>]*>[^<]*<\/a>/.exec(next);
+    if (!pricing) throw new Error(`${rel}: footer Explore list has no Pricing link to anchor FAQ`);
+    const at = pricing.index + pricing[0].length;
+    next = next.slice(0, at) + FAQ_FOOTER + next.slice(at);
+    out = out.slice(0, ex2.index) + ex2[1] + next + ex2[3] + out.slice(ex2.index + ex2[0].length);
+  }
   return out;
 }
 
@@ -183,12 +198,13 @@ function withoutChrome(html) {
     .replace(HEADER_RE, '')
     .replace(/<link\b[^>]*data-site-chrome="(?:css|fonts)"[^>]*>/g, '')
     .replace(RENTALS_ANY_RE, '')
+    .replace(FAQ_ANY_RE, '')
     .replace(ANCHOR_RE, (whole, attrs, inner) => (isQuoteCta(attrs, inner)
       ? `<a${attrs.replace(/\s+(?:href|target|rel)="[^"]*"/g, '')} data-quote-target>${inner}</a>` : whole));
 }
 
 module.exports = {
-  NAV_ITEMS, QUOTE, CALL_LABEL, MARK, CSS_HREF, RENTALS_FOOTER, HEADER_RE, EXPLORE_RE,
+  NAV_ITEMS, QUOTE, CALL_LABEL, MARK, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, HEADER_RE, EXPLORE_RE,
   header, cssLink, fontsLink, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
   isQuoteCta, retargetQuoteCtas
 };

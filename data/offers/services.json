@@ -54,7 +54,31 @@
       "notes": [
         "Takedown starts at $75, quoted with your setup.",
         "Final pricing depends on scale, material choice, and setup complexity."
-      ]
+      ],
+      "tiers": [
+        {
+          "slug": "stoop",
+          "name": "Small stoop",
+          "describe": "One door, a step or two, little or no railing.",
+          "from": 350,
+          "image": "/assets/img/porch/bartlett-small-front-porch-styling-under-500.jpg"
+        },
+        {
+          "slug": "standard",
+          "name": "Standard porch",
+          "describe": "One door, 8 to 15 ft wide, columns or railings.",
+          "from": 600,
+          "image": "/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg"
+        },
+        {
+          "slug": "large",
+          "name": "Large or wraparound porch",
+          "describe": "Wider than 15 ft, two entries, or a wraparound.",
+          "from": 800,
+          "image": "/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg"
+        }
+      ],
+      "tiersProvenance": "Owner-approved 2026-10-17: from $350 small stoop, from $600 standard porch, from $800 large or wraparound. Shown as three pictures on /faq/ (people do not know their porch dimensions); the exact quote follows a porch photo on the form."
     },
     "celebration": {
       "name": "Celebration Setups",
@@ -84,7 +108,67 @@
       "notes": [
         "Base pricing covers styling only.",
         "Food is not included by default and can be sourced for an additional fee."
-      ]
+      ],
+      "tiers": [
+        {
+          "slug": "board",
+          "name": "Board",
+          "feedsSnack": [
+            10,
+            15
+          ],
+          "feedsMeal": [
+            6,
+            8
+          ],
+          "from": 250
+        },
+        {
+          "slug": "small-table",
+          "name": "Small table (4 to 6 ft)",
+          "feedsSnack": [
+            20,
+            30
+          ],
+          "feedsMeal": [
+            12,
+            15
+          ],
+          "from": 400
+        },
+        {
+          "slug": "full-table",
+          "name": "Full table (8 ft and up)",
+          "feedsSnack": [
+            40,
+            60
+          ],
+          "feedsMeal": [
+            25,
+            30
+          ],
+          "from": 650
+        },
+        {
+          "slug": "extra-table",
+          "name": "Each additional table",
+          "feedsSnack": [
+            40,
+            40
+          ],
+          "feedsMeal": [
+            25,
+            25
+          ],
+          "from": 500
+        }
+      ],
+      "foodPerHead": {
+        "low": 12,
+        "high": 18,
+        "line": "Food is always a rough estimate, from everyday selections at the low end to premium selections (imported cheeses, cured meats, specialty fruit) at the high end, and is quoted exactly once your menu and headcount are confirmed. Setup and styling is priced separately and never added into the food estimate."
+      },
+      "tiersProvenance": "Owner-approved 2026-10-17: board $250 (the homepage's published start), small table $400, full table $650, each additional table $500, as styling prices; food shown as a separate rough per-head range by quality."
     }
   },
   "addOns": {
@@ -100,5 +184,25 @@
       "provenance": "Owner-approved 2026-10-14 ($75, corrected from $95 the same day). Takedown is quoted with the porch or event-decor setup; scripts/validators/validate_contact_surface.js pins this line on every page that quotes it."
     }
   },
-  "primaryIdentity": "Porch & Party is a Memphis-based porch decorating and celebration styling company offering seasonal front porch decorating, hotel-room decor, party decor, and grazing table setups in the Memphis metro area."
+  "primaryIdentity": "Porch & Party is a Memphis-based porch decorating and celebration styling company offering seasonal front porch decorating, hotel-room decor, party decor, and grazing table setups in the Memphis metro area.",
+  "travel": {
+    "includedAreasFrom": "data/service_areas/areas.json",
+    "extendedFee": 75,
+    "line": "Memphis, Germantown, Collierville, Bartlett, Lakeland, Arlington, Southaven and Olive Branch are included. Anywhere further is a flat $75 travel fee, shown on your quote up front.",
+    "appliesTo": [
+      "porch",
+      "celebration",
+      "grazing"
+    ],
+    "provenance": "Owner-approved 2026-10-17: the eight cities on data/service_areas/areas.json carry no travel fee; beyond them a flat $75, said on the quote. Rentals are pickup only, so travel never applies to them."
+  },
+  "payment": {
+    "methods": "Zelle or Cash App",
+    "cashAccepted": false,
+    "decorHold": "50% of the quote",
+    "decorBalanceDue": "by the time we arrive to set up",
+    "cancelFreeHours": 48,
+    "weatherRescheduleDays": 30,
+    "provenance": "Owner-approved 2026-10-17: decor, porch and grazing dates are held by 50% of the quote, the rest is due by the time of arrival to set up; rentals are in data/rentals/games.json (deposit + holdPercent, rest at pickup)."
+  }
 }

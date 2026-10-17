@@ -84,3 +84,22 @@ li { margin-bottom: 8px; }
 .new-badge__chip { display: inline-block; padding: 4px 12px; border-radius: 999px; background: var(--accent-primary); color: #fff; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.08em; }
 .new-badge a { font-weight: 600; }
 @media (max-width: 600px) { .new-badge { border-radius: 22px; padding: 12px 16px; } }
+
+/* FAQ page (owner ruling 2026-10-17): one consolidated page, sectioned by service, with estimators. */
+.faq-jump { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 0 auto 8px; }
+.faq-jump a { display: inline-flex; align-items: center; min-height: 40px; padding: 0 16px; border: 1px solid var(--border-soft); border-radius: 999px; background: rgba(255,255,255,0.72); text-decoration: none; }
+.faq-section { scroll-margin-top: 90px; }
+.faq-section .faq-list { margin-top: 8px; }
+.faq-section .faq-cta { text-align: center; margin-top: 22px; }
+.estimator { max-width: 860px; margin: 28px auto 0; }
+.estimator-form { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); align-items: end; }
+.estimator-form label { display: grid; gap: 6px; font-size: 0.95rem; }
+.estimator-form input, .estimator-form select { min-height: 44px; padding: 8px 12px; border: 1px solid var(--border-soft); border-radius: 10px; background: #fff; font: inherit; }
+.estimator-result { margin-top: 18px; display: grid; gap: 8px; }
+.estimator-result strong { font-size: 1.15rem; }
+.estimator-note { font-size: 0.92rem; }
+.porch-tiers { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); max-width: 980px; margin: 24px auto 0; }
+.porch-tier { overflow: hidden; }
+.porch-tier img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; display: block; }
+.porch-tier .card-body { padding: 18px 20px; }
+.porch-tier .price { font-weight: 600; }
