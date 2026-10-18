@@ -44,9 +44,15 @@ for(const item of queue){if(item.status!=='queued')continue;const key=`${item.fo
 // then re-accepts and authority:scale:clear-scope closes, both later in the cycle.
 if(published){const run=(args)=>execFileSync('node',args,{cwd:ROOT,stdio:'inherit'});const rels=publishedRoutes.map(r=>`${r.slice(1)}.html`);run(['scripts/generators/update_sitemap.js']);
   const linkIn=JSON.parse(execFileSync('node',['scripts/build_related_navigation.js',`--link-in=${rels.join(',')}`,'--list-link-in'],{cwd:ROOT,encoding:'utf8'}));
-  const scopeRoutes=[...publishedRoutes,...linkIn.link_in_writers.map(r=>`/${r.replace(/\.html$/,'')}`)];
+  // A porch price article (data/offers/porch_packages.json `articles`) also gets the full
+  // package grid + Offer schema, and every porch page, the other published articles and
+  // the FAQ porch section link to it the same day (scripts/install_porch_packages.js).
+  // Those pages are written under the same exact mutation scope.
+  const porchPk=JSON.parse(fs.readFileSync(path.join(ROOT,'data/offers/porch_packages.json'),'utf8'));const porchArticles=(porchPk.articles||[]).map(a=>a.path);const porchPublished=rels.some(r=>porchArticles.includes(r));
+  const porchWriters=porchPublished?[...porchPk.pages,...porchArticles.filter(p=>fs.existsSync(path.join(ROOT,p))),'faq/index.html'].map(r=>`/${r.replace(/\.html$/,'')}`):[];
+  const scopeRoutes=[...new Set([...publishedRoutes,...linkIn.link_in_writers.map(r=>`/${r.replace(/\.html$/,'')}`),...porchWriters])];
   run(['scripts/authority_scale/frozen_outputs.mjs','prepare-scope',...scopeRoutes]);
-  run(['scripts/build_related_navigation.js','--write',`--only=${rels.join(',')}`,`--link-in=${rels.join(',')}`]);run(['scripts/install_clarity.js']);run(['scripts/normalize_public_urls.js']);}
+  run(['scripts/build_related_navigation.js','--write',`--only=${rels.join(',')}`,`--link-in=${rels.join(',')}`]);if(porchPublished)run(['scripts/install_porch_packages.js']);run(['scripts/install_clarity.js']);run(['scripts/normalize_public_urls.js']);}
 if(published){ledger.days=ledger.days||{};ledger.days[day]={new_pages:used+published,ceiling,routes:[...(ledger.days[day]?.routes||[]),...publishedRoutes],publication_frozen:frozen,updated_at:new Date().toISOString()};fs.writeFileSync(queuePath,JSON.stringify(queue,null,2)+'\n');fs.writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(slugPath,JSON.stringify(slugs.sort(),null,2)+'\n');fs.writeFileSync(ledgerPath,JSON.stringify(ledger,null,2)+'\n');}
 // Rule 0: no stage may exit 0 having done nothing. Publishing zero pages is often
 // legitimate here, but "success" with no explanation is how a create stage reports

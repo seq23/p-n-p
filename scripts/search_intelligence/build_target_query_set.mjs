@@ -90,7 +90,10 @@ for (const r of [...(demand.records || []), ...(demand.backlog_validated_not_yet
     continue;
   }
   const covered = r.covered_by || (r.build && r.build.covered_by);
-  const route = covered ? String(covered).replace(/\.html$/, '') : routeFor(norm(r.query));
+  // A backlog row drafted into a page (build.page = "folder/slug") is owned by that page,
+  // so the publication freeze (measured_target_only) can release it under the cadence cap.
+  const drafted = r.build && r.build.page ? `/${String(r.build.page).replace(/^\/|\.html$/g, '')}` : null;
+  const route = covered ? String(covered).replace(/\.html$/, '') : drafted || routeFor(norm(r.query));
   add({
     query: r.query,
     source: 'measured_demand',

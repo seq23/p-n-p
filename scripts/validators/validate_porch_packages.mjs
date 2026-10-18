@@ -227,6 +227,72 @@ const pub = published();
 if (pub.length < 100) fail(`Rule 0: only ${pub.length} published files scanned for retired wording`);
 for (const abs of pub) { const h = fs.readFileSync(abs, 'utf8'); for (const re of RETIRED) if (re.test(h)) fail(`${path.relative(ROOT, abs)}: still says "${h.match(re)[0]}" (retired porch tiers)`); }
 
+// ---- 7. porch price articles (owner-approved 18 Oct 2026) ---------------------------
+// Each article in porch_packages.json `articles` is either published (grid + schema + the
+// article links current) or queued for the cadence gate with a measured target naming its
+// route. A queued draft types no price: rendered from a perturbed copy of the data it shows
+// only the perturbed prices, with the comparison table, several FAQ questions in the
+// FAQPage node, speakable, the bundle line and a /request?service=porch link.
+// templates/page-shell.js requires JSON, which the admin harness's module loader (above)
+// rewrites, so the page renders in a clean child process: the same renderPage the
+// publisher calls.
+const { execFileSync } = await import('node:child_process');
+const RENDER_JS = `const fs=require('fs');const {renderPage}=require(process.argv[1]);const jobs=JSON.parse(fs.readFileSync(0,'utf8'));process.stdout.write(JSON.stringify(jobs.map(([e,d])=>renderPage(e,d?{porchPackages:d}:{}))));`;
+const renderPage = (entry, opts = {}) => JSON.parse(execFileSync(process.execPath, ['-e', RENDER_JS, path.join(ROOT, 'templates/page-shell.js')], { input: JSON.stringify([[entry, opts.porchPackages || null]]), encoding: 'utf8', maxBuffer: 1 << 26 }))[0];
+const { applyFaqLinks, publishedArticles } = require(path.join(ROOT, 'scripts/install_porch_packages.js'));
+const universe = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/queries/query_universe.json'), 'utf8'));
+const queue = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/publish_queue/publish_queue.json'), 'utf8'));
+const targetSet = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/search_intelligence/target_query_set.json'), 'utf8'));
+const measuredRoutes = new Set((targetSet.targets || []).filter((t) => t.measurement && Number(t.measurement.value) > 0).map((t) => t.expected_owned_route));
+let pubArticles = [];
+try { pubArticles = publishedArticles(pk); } catch (err) { fail(err.message); }
+/** True when a rendered porch article is missing something it must carry. */
+function checkArticle(html, data, label) {
+  const before = errors.length;
+  const t = text(html);
+  if (/\{\{/.test(html)) fail(`${label}: an unfilled {{token}} is on the page`);
+  for (const s of data.seasons) for (const k of data.tierOrder) if (!t.includes(money(s.tiers[k].from))) fail(`${label}: ${s.name} ${data.tiers[k].name} price ${money(s.tiers[k].from)} is not on the page`);
+  // $350 is also the overall porch floor in services.json, which every porch page prints ("starts at $350+").
+  const floor = String(services.services.porch.price).replace(/\+$/, '');
+  if (data !== pk) for (const m of origOnly) if (m !== floor && new RegExp(`\\${m.replace(',', ',')}(?![\\d,])`).test(t)) fail(`${label}: shows ${m}, a price typed in the draft rather than read from the data`);
+  if (!/<caption>[^<]*porch packages/i.test(html) || !html.includes('<th scope="col">Package</th>')) fail(`${label}: no package comparison table`);
+  const faq = [...html.matchAll(/<script type="application\/ld\+json">(\{"@context":"https:\/\/schema.org","@type":"FAQPage"[\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]))[0];
+  if (!faq || faq.mainEntity.length < 4) fail(`${label}: FAQPage schema has fewer than 4 questions`);
+  if (!/"speakable":\{"@type":"SpeakableSpecification","cssSelector":\[/.test(html)) fail(`${label}: no speakable`);
+  if (!html.includes('href="/request?service=porch')) fail(`${label}: no /request?service=porch link`);
+  if (!t.includes(data.bundle.line)) fail(`${label}: lacks the bundle line`);
+  for (const re of RETIRED) if (re.test(html)) fail(`${label}: says "${html.match(re)[0]}" (retired porch tiers)`);
+  return errors.length > before;
+}
+const drafts = universe.filter((e) => e.porchPackages);
+let articlesChecked = 0;
+for (const a of pk.articles || []) {
+  const abs = path.join(ROOT, a.path);
+  const route = `/${a.path.replace(/\.html$/, '')}`;
+  if (fs.existsSync(abs)) {
+    const html = fs.readFileSync(abs, 'utf8');
+    if (applyPorchPackages(html, a.path, pk, services.domain, pubArticles) !== html) fail(`${a.path}: the porch grid, schema or article links are stale (run node scripts/install_porch_packages.js)`);
+    articlesChecked += 1;
+    continue;
+  }
+  const entry = drafts.find((e) => `${e.folder}/${e.slug}.html` === a.path);
+  if (!entry) { fail(`${a.path}: not published and no porchPackages draft in data/queries/query_universe.json`); continue; }
+  const q = queue.find((x) => `${x.folder}/${x.slug}.html` === a.path);
+  if (!q || q.status !== 'queued') fail(`${a.path}: not published and not queued in data/publish_queue/publish_queue.json`);
+  if (!measuredRoutes.has(route)) fail(`${a.path}: no measured target in data/search_intelligence/target_query_set.json names ${route}, so the publication freeze would hold it forever`);
+  checkArticle(applyPorchPackages(renderPage(entry), a.path, pk, services.domain, pubArticles), pk, a.path);
+  checkArticle(renderPage(entry, { porchPackages: pk2 }), pk2, `${a.path} (perturbed data)`);
+  articlesChecked += 1;
+}
+for (const e of drafts) if (!(pk.articles || []).some((a) => a.path === `${e.folder}/${e.slug}.html`)) fail(`${e.folder}/${e.slug}: a porchPackages draft missing from porch_packages.json articles`);
+if (articlesChecked < 4) fail(`Rule 0: only ${articlesChecked} porch price articles checked`);
+for (const rel of pk.pages) {
+  const abs = path.join(ROOT, rel);
+  if (fs.existsSync(abs) && !fs.readFileSync(abs, 'utf8').includes(PP.articleLinksHtml(pk, pubArticles, rel))) fail(`${rel}: the porch price article links are missing or stale`);
+}
+if (applyFaqLinks(faqHtml, pk, pubArticles) !== faqHtml) fail('faq/index.html: the porch section does not link the published porch price articles');
+if (pubArticles.length && !faqHtml.includes(`href="/${pubArticles[0].replace(/\.html$/, '')}"`)) fail('faq/index.html: the porch section links no porch price article');
+
 // ---- self-test ---------------------------------------------------------------------
 const probe = (label, broken) => { const before = errors.length; const caught = broken(); errors.length = before; if (!caught) errors.push(`self-test: ${label} passed when it should fail`); };
 probe('a form with a tier price', () => checkForm(formHtml.replace('Not sure yet, help me decide', `Not sure yet, help me decide (${money(PP.priceOf(pk, 'fall', 'classic'))})`), 'probe'));
@@ -234,6 +300,13 @@ probe('a form without the bundle box', () => checkForm(formHtml.replace(/<input 
 probe('a form with reworded answers', () => checkForm(formHtml.replace('A full porch (our Classic package)', 'A full porch (Classic)'), 'probe'));
 probe('a calculator with a typed price', () => { const real = PP.calculatorHtml; const fake = (d) => real(d).replace(money(d.seasons[0].tiers.classic.from), '$550'); const before = errors.length; const out = fake(pk2); for (const m of origOnly) if (out.includes(m)) errors.push('x'); return errors.length > before; });
 probe('a page without the grid', () => { const h = fs.readFileSync(path.join(ROOT, pk.pages[0]), 'utf8').replace(/<!--porch-packages-->[\s\S]*?<!--\/porch-packages-->/, ''); return !h.includes(PP.pageBlockHtml(pk)); });
+{
+  const d = drafts[0];
+  const typed = JSON.parse(JSON.stringify(d).replace('{{from:fall.classic}}', money(PP.priceOf(pk, 'fall', 'classic'))));
+  probe('an article draft with a typed price', () => checkArticle(renderPage(typed, { porchPackages: pk2 }), pk2, 'probe'));
+  probe('an article with no FAQ list', () => checkArticle(renderPage({ ...d, faqs: [] }), pk, 'probe'));
+  probe('an article with no speakable', () => checkArticle(renderPage({ ...d, speakable: [] }), pk, 'probe'));
+}
 
 if (errors.length) { console.error(`VALIDATION FAIL: porch packages\n - ${[...new Set(errors)].join('\n - ')}`); process.exit(1); }
-console.log(`validate_porch_packages: OK - ${offers.length} priced offers from data/offers/porch_packages.json; ${Object.keys(surfaces(pk)).length} surfaces follow a perturbed copy; ${scanned} source files free of typed tier prices; /request shows only the from/range lines with the owner's five answers; ${pagesChecked} pages + /faq/ carry the grid and Offer schema; admin grid = public grid; bundle on grid, calculator, form, card and invoice; card, invoice, preselect and /admin/packages proven end to end; ${pub.length} published files free of the retired tiers`);
+console.log(`validate_porch_packages: OK - ${offers.length} priced offers from data/offers/porch_packages.json; ${Object.keys(surfaces(pk)).length} surfaces follow a perturbed copy; ${scanned} source files free of typed tier prices; /request shows only the from/range lines with the owner's five answers; ${pagesChecked} pages + /faq/ carry the grid and Offer schema; admin grid = public grid; bundle on grid, calculator, form, card and invoice; card, invoice, preselect and /admin/packages proven end to end; ${articlesChecked} porch price articles (${pubArticles.length} published and linked from every porch page and /faq/, the rest queued with a measured target, drafts free of typed prices); ${pub.length} published files free of the retired tiers`);

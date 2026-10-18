@@ -309,6 +309,34 @@
       "build": {
         "page": "guides/graduation-party-decorations-at-home-memphis"
       }
+    },
+    {
+      "query": "porch decorating service",
+      "query_normalized": "porch decorating service",
+      "query_shape": "service/price",
+      "source_type": "dataforseo_search_volume",
+      "evidence_tier": "T2-measured-volume",
+      "volume": 90,
+      "volume_metric": "US monthly search volume",
+      "observed_at": "2026-10-18",
+      "measured_by": "DataForSEO, US, measured 18 Oct 2026 (owner-approved JOB D brief, ~/porch-and-party/admin-next-jobs-brief.md)",
+      "build": {
+        "page": "guides/porch-decorating-packages-memphis"
+      }
+    },
+    {
+      "query": "holiday porch decorating service",
+      "query_normalized": "holiday porch decorating service",
+      "query_shape": "service/price",
+      "source_type": "dataforseo_search_volume",
+      "evidence_tier": "T2-measured-volume",
+      "volume": 20,
+      "volume_metric": "US monthly search volume",
+      "observed_at": "2026-10-18",
+      "measured_by": "DataForSEO, US, measured 18 Oct 2026 (owner-approved JOB D brief, ~/porch-and-party/admin-next-jobs-brief.md)",
+      "build": {
+        "page": "guides/holiday-porch-decorating-service-memphis"
+      }
     }
   ],
   "backlog_build_policy": "Every backlog row carries a `build` link: `covered_by` names a published page that already answers it (with `why`), or `page` names a folder/slug drafted into data/queries/query_universe.json and queued in data/publish_queue/publish_queue.json. `npm run authority:backlog:promote` queues any drafted page the queue does not yet hold and names every row still waiting for a draft; `npm run authority:publish` then publishes the queue one page per week under the cadence gate. `npm run validate:backlog-reaches-builder` hard-fails when a row older than one cadence week has no build link, or when a link points at nothing.",
