@@ -48,6 +48,8 @@ export function fromRow(row) {
     agreedName: row.agreed_name || '', referredBy: row.referred_by || '', referralCode: row.referral_code || '', robotCheck: row.robot_check || '',
     idObject: row.id_object || '', idDeletedAt: row.id_deleted_at || '', isTest: Boolean(row.is_test), submittedAt: row.submitted_at,
     takedownPlan: row.takedown_plan || '',
+    confirmEmailedAt: row.confirm_emailed_at || '', confirmedTextedAt: row.confirmed_texted_at || '', thankyouEmailedAt: row.thankyou_emailed_at || '',
+    thankyouTextedAt: row.thankyou_texted_at || '', thankyouSkip: Boolean(row.thankyou_skip), holdTextedAt: row.hold_texted_at || '',
   };
   if (row.source === 'google_form') {
     const raw = parse(row.raw_row, null);

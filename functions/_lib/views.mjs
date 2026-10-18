@@ -225,7 +225,7 @@ function confirmStep({ key, yesKey, label, question, action, hidden, danger = fa
       <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('pay.no')}>No, go back</button></div></div></details>${hint(key)}</div>`;
 }
 const LABEL = { 'dep.refundYes': 'Yes, record the refund', 'dep.keepYes': 'Yes, keep it for damage', 'exp.deleteYes': 'Yes, delete the expense', 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
-  'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'set.newTokenYes': 'Yes, make a new link', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
+  'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'hold.releaseYes': 'Yes, release the games', 'hold.depositYes': 'Yes, mark deposit received', 'set.newTokenYes': 'Yes, make a new link', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
 
 const hiddenInputs = (obj) => Object.entries(obj).map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(v)}">`).join('');
 
@@ -367,7 +367,7 @@ function requestPayment(r, st, inv) {
 }
 
 // schedule: { [request_key]: { date, id } } earliest booking per request.
-export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '' }) {
+export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '' }) {
   const top = `<div class="big-buttons">
     ${act(`<a class="btn ghost" href="${esc(SHEET_URL)}" target="_blank" rel="noopener noreferrer"${tip('req.sheet')}>Open responses sheet</a>`, 'req.sheet')}
     ${act(`<a class="btn ghost" href="${esc(folderUrl)}" target="_blank" rel="noopener noreferrer"${tip('req.idFolder')}>Open ID folder</a>`, 'req.idFolder')}
@@ -414,6 +414,7 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
       ${want.map((w) => `<div class="want">${esc(w)}</div>`).join('')}
       ${cl && cl !== 'none' ? `<div class="muted" style="margin-top:4px">Checklist ${cl === 'done' ? 'done ✓' : 'started'}</div>` : ''}
       ${progress}
+      ${cardExtras[r.key] || ''}
       ${returned && ret.damaged ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : ''}
       ${finishedPrompt}
       <div class="actions">${next}</div>
@@ -435,7 +436,7 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
     </article>`;
   }).join('');
   return layout('Requests', `${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}${setupBanner(missingPayment)}
-    <h1>Requests</h1>${week}${extraTop}${top}${err}${idsBox}
+    <h1>Requests</h1>${holdsBox}${week}${extraTop}${top}${err}${idsBox}
     ${requests.length ? cards : (sheetError ? '' : '<div class="card"><p style="margin:0">No requests waiting. New ones from the website form show up here within a minute. Finished ones are under Put away.</p></div>')}
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
@@ -724,6 +725,15 @@ export function settingsPage({ settings, flash, error, hasQr, categories = [], p
     <p>Your Bookings, Monthly totals and Expenses tabs in the request sheet update by themselves.${settings.sheet_synced_at ? ` Last updated ${esc(prettyDate(settings.sheet_synced_at.slice(0, 10)))}.` : ''}${pendingSync ? ' <strong>An update is waiting and will be tried again.</strong>' : ''}</p>
     <form method="post" action="/admin/settings/sheet-sync">${act(`<button class="btn ghost" type="submit"${tip('set.sheetSync')}>Update the Google Sheet now</button>`, 'set.sheetSync')}</form>
   </section>
+  <form class="card" method="post" action="/admin/settings/holds" data-hold-settings><h2>Game rental holds</h2>
+    <p class="muted">A rental booked on the website holds its games while the customer pays the deposit.</p>
+    <label for="hh">How long a hold lasts (hours)</label><input id="hh" name="hold_hours" type="number" min="1" max="336" inputmode="numeric" value="${esc(settings.hold_hours || '24')}">
+    <label class="row" style="color:var(--ink);gap:10px;min-height:48px"><input type="checkbox" name="hold_auto_expire" value="1"${settings.hold_auto_expire === '0' ? '' : ' checked'} style="width:24px;min-height:24px"> Expire unpaid holds automatically (off: every new hold is held by hand until you release it)</label>
+    <label class="row" style="color:var(--ink);gap:10px;min-height:48px"><input type="checkbox" name="hold_reminder" value="1"${settings.hold_reminder === '0' ? '' : ' checked'} style="width:24px;min-height:24px"> Email the customer a reminder before the hold ends</label>
+    <label for="hrh">Send that reminder this many hours before the end</label><input id="hrh" name="hold_reminder_hours" type="number" min="1" max="48" inputmode="numeric" value="${esc(settings.hold_reminder_hours || '4')}">
+    <label for="hsh">Show "Holds ending soon" for holds ending within (hours)</label><input id="hsh" name="hold_soon_hours" type="number" min="1" max="72" inputmode="numeric" value="${esc(settings.hold_soon_hours || '12')}">
+    <div style="margin-top:12px">${act(`<button class="btn primary" type="submit"${tip('set.holds')}>Save hold settings</button>`, 'set.holds')}</div>
+  </form>
   <form class="card" method="post" action="/admin/settings/categories"><h2>Expense categories</h2>
     <label for="cats">One per line</label><textarea id="cats" name="categories" rows="8">${esc(categories.join('\n'))}</textarea>
     <div style="margin-top:12px">${act(`<button class="btn ghost" type="submit"${tip('set.categories')}>Save categories</button>`, 'set.categories')}</div>

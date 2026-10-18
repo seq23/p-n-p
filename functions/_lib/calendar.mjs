@@ -571,16 +571,17 @@ const usd = (c) => `$${(Math.round(c) / 100).toFixed(2).replace(/\.00$/, '')}`;
 
 // Short plain text of one day for an SMS to herself. Cut on a whole line, politely, with a
 // link to the full list when it would run long.
-export function daySheetText(date, rows, { max = 480, host = 'porchandparty901.com', dayLabel = date } = {}) {
-  const head = `${dayLabel} day list (${rows.length} ${rows.length === 1 ? 'booking' : 'bookings'}):`;
-  const lines = rows.map((r) => {
+export function daySheetText(date, rows, { max = 480, host = 'porchandparty901.com', dayLabel = date, holds = [] } = {}) {
+  const head = `${dayLabel} day list (${rows.length} ${rows.length === 1 ? 'booking' : 'bookings'}${holds.length ? `, ${holds.length} ${holds.length === 1 ? 'hold' : 'holds'} ending` : ''}):`;
+  const holdLines = holds.map((h) => `Hold ends ${h.timeLabel} - ${h.name || 'No name'}${h.items ? ` (${h.items})` : ''}: deposit not in yet${h.phone ? `, ${h.phone}` : ''}`);
+  const lines = [...holdLines, ...rows.map((r) => {
     const bits = [`${r.timeLabel ? `${r.timeLabel} ` : ''}${KIND_LABELS[r.kind] || 'Booking'} - ${r.customer_name || 'No name'}`];
     if (r.phone) bits.push(r.phone);
     if (r.items) bits.push(r.items);
     if (r.owed > 0) bits.push(`collect ${usd(r.owed)}`);
     if (r.note) bits.push(`note: ${firstLine(r.note, 40)}`);
     return bits.join(', ');
-  });
+  })];
   const tail = `Full list: ${host}/admin/day/${date}`;
   let out = head;
   for (let i = 0; i < lines.length; i += 1) {

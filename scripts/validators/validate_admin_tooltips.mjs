@@ -47,6 +47,21 @@ const up1 = await s.upload(PNG, 'image/jpeg');
 const up2 = await s.upload(PNG, 'image/jpeg');
 await s.post(`/admin/money/expenses/${up2.json.id}`, { vendor: 'Party City', date: '2026-10-12', total: '42.17', tax: '3.17', category: 'Supplies & decor', payment_method: 'card', note: '' });
 
+// Site-form rentals: one held (ending soon), one held by hand; a site porch job done with
+// the thank-you turned off; the deposit-received screen.
+const F = await mod('functions/_lib/request-form.mjs');
+const dplus = (n) => { const d = new Date(`${F.chicagoToday()}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const heldReq = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', pickup_date: dplus(12), name: 'Hana Held', phone: '901-555-0177', email: 'hana@example.com' });
+await s.db.prepare("UPDATE holds SET until = datetime('now', '+2 hours') WHERE request_key = ?1").bind(heldReq.row.request_key).run();
+await s.db.prepare("INSERT INTO settings (key, value) VALUES ('hold_auto_expire', '0')").run();
+const handReq = await s.siteRequest({ service: 'rentals', games: ['giant-checkers'], duration: 'day', pickup_date: dplus(13), name: 'Hal Hand', phone: '901-555-0178', email: 'hal@example.com' });
+await s.db.prepare("DELETE FROM settings WHERE key = 'hold_auto_expire'").run();
+const tyReq = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', event_date: dplus(3), location: 'Germantown', name: 'Tia Thanks', phone: '901-555-0179', email: 'tia@example.com' });
+await s.post('/admin/requests/jobdone', { r: s.rk(tyReq.row.request_key) });
+await s.post('/admin/requests/thankyou-skip', { r: s.rk(tyReq.row.request_key), skip: '1' });
+const tyReq2 = await s.siteRequest({ service: 'party', party_event: 'Birthday', party_where: 'Home', event_date: dplus(4), location: 'Bartlett', name: 'Tom Thanks', phone: '901-555-0180', email: 'tom@example.com' });
+await s.post('/admin/requests/jobdone', { r: s.rk(tyReq2.row.request_key) });
+if (!(heldReq.status === 303 && handReq.status === 303 && tyReq.status === 303 && tyReq2.status === 303)) errors.push('the site-form scenario requests did not go through');
 const screens = [
   ['/admin', { auth: false, home: true }],
   ['/admin/', { home: true }],
@@ -60,6 +75,7 @@ const screens = [
   ['/admin/invoices'], ['/admin/invoices/new'], [`/admin/invoices/new?r=${s.rk(reqA.key)}`],
   [`/admin/invoices/${invA.id}`], [`/admin/invoices/${invB.id}`], [`/admin/invoices/${draftWithEmail.id}`], [`/admin/invoices/${v.id}`], [`/admin/invoices/${paidInv.id}`], [`/admin/invoices/${invA.id}/edit`],
   ['/admin/settings'], ['/admin/help', { help: true }],
+  [`/admin/confirmed?r=${s.rk(heldReq.row.request_key)}&m=Deposit%20received&back=/admin/`],
   [`/admin/checklist/online?r=${s.rk(reqA.key)}`], ['/admin/checklist', { print: true }], [`/admin/checklist?r=${s.rk(reqA.key)}`, { print: true }],
   ['/admin/search'], ['/admin/search?q=renter'], ['/admin/search?q=zzzz'],
   ['/admin/nothing-here'],

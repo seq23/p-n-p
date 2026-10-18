@@ -1,9 +1,16 @@
 // pnp-mailer: sends one email through Cloudflare Email Service on behalf of the
 // p-n-p Pages Functions (service binding MAILER). Reachable only through that binding.
-// Its daily cron sends the day-before booking reminders (functions/_lib/reminders.mjs) from
-// the pnp-admin D1 database: crons at 15:00 and 16:00 UTC, and only the run that lands on
-// 10 AM in Memphis does the work (15:00 UTC in daylight time, 16:00 UTC in standard time).
+// Its cron runs every hour (UTC, on the hour):
+//   every hour   expire unpaid rental holds whose end time has passed, and email each
+//                customer whose hold ends within the Settings reminder window (once per
+//                end time) - functions/_lib/holds.mjs + customer-messages.mjs;
+//   10 AM Memphis (15:00 UTC in daylight time, 16:00 UTC in standard time: only the run whose
+//                Memphis hour is 10 does it) - the day-before booking reminders
+//                (reminders.mjs), the thank-you emails for jobs marked done before today
+//                (customer-messages.mjs sendThankYous) and the daily Google Sheet resync.
 import { sendEmailReminders, chicagoHour } from '../../../functions/_lib/reminders.mjs';
+import { expireHolds } from '../../../functions/_lib/holds.mjs';
+import { sendThankYous, sendHoldReminders } from '../../../functions/_lib/customer-messages.mjs';
 
 const FROM = { email: 'hello@porchandparty901.com', name: 'Porch & Party' };
 
@@ -19,10 +26,15 @@ async function sendOne(env, msg) {
   return true;
 }
 
+// The site's messages go out through this Worker's own /send (same code path as the site).
+const mailEnv = (env) => ({ ...env, MAILER: { fetch: (url, init) => worker.fetch(new Request(url, init), env) } });
+
 export async function runReminders(env, now = new Date()) {
-  if (chicagoHour(now) !== 10) return { skipped: `not 10 AM in Memphis (hour ${chicagoHour(now)})` };
+  const hourly = { expiredHolds: await expireHolds(env.DB, now.getTime()), holdReminders: await sendHoldReminders(mailEnv(env), now.getTime()) };
+  if (chicagoHour(now) !== 10) return { ...hourly, daily: `not 10 AM in Memphis (hour ${chicagoHour(now)})` };
   const reminders = await sendEmailReminders(env.DB, (m) => sendOne(env, m), now, FROM.email);
-  return { reminders, sheet: await askForSheetResync(env) };
+  const thankYous = await sendThankYous(mailEnv(env), now);
+  return { ...hourly, reminders, thankYous, sheet: await askForSheetResync(env) };
 }
 
 // Daily full Google Sheet resync: the site holds the Google key, so the cron just asks it,
@@ -36,7 +48,7 @@ async function askForSheetResync(env, site = 'https://porchandparty901.com') {
   } catch (e) { return { error: String(e && e.message ? e.message : e) }; }
 }
 
-export default {
+const worker = {
   async scheduled(event, env, ctx) {
     ctx.waitUntil(runReminders(env, new Date(event.scheduledTime)).then((r) => console.log(`reminders: ${JSON.stringify(r)}`)));
   },
@@ -72,3 +84,5 @@ export default {
     }
   },
 };
+
+export default worker;

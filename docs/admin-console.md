@@ -93,9 +93,10 @@ the top of every screen, and a printable guide at `/admin/help`.
   `sms:<digits>?&body=…` link (marks itself sent), "Mark reminded", or "Email reminder" when
   there is no phone. Wording per kind lives only in `functions/_lib/reminders.mjs` and is
   transactional, as the terms' Text messages clause allows. The private Worker `pnp-mailer`
-  emails the same reminder at 10 AM Memphis to customers with an email (crons `0 15 * * *` and
-  `0 16 * * *` UTC; only the run that is 10 AM in America/Chicago works, so daylight saving needs
-  no change), Bcc hello@, claiming `email_reminded_at` before sending so it never double-sends;
+  emails the same reminder at 10 AM Memphis to customers with an email (cron `0 * * * *` UTC,
+  hourly; the daily work runs only in the run that is 10 AM in America/Chicago, which is 15:00 UTC
+  in daylight time and 16:00 UTC in standard time, so daylight saving needs no change; every hour
+  it also expires unpaid rental holds and sends the hold reminders), Bcc hello@, claiming `email_reminded_at` before sending so it never double-sends;
   void and put-away requests are skipped. Deploy it with `npm run mailer:deploy` (it now holds
   the `pnp-admin` D1 binding).
 - **Google Calendar**: `/api/calendar/<64-hex token>.ics` (token in settings `calendar_token`,
@@ -182,7 +183,24 @@ another tab/retry queue, the cron hook).
   goes from hello@ (`functions/_lib/messages.mjs`, the one templates map and `sendMessage` seam).
 - **Referrals**: each request gets a random 8-letter code; `/r/<code>` sets a cookie the form reads
   and the card says "Referred by <name>". No reward, no discount, no review ask.
-- **Guard**: `npm run validate:request-form` (in `validate:admin`).
+- **Holds (Valerie's controls)**: on a held rental card, in "Holds ending soon" (top of Requests and
+  Calendar & Bookings, threshold in Settings, tab badge "N holds ending soon") and in the
+  Calendar's Held view: Give them more time (+24 h, +48 h, a picked Memphis day and time), Keep
+  holding — I'll handle it (no end time), Release now, Mark deposit received, Call, Text a
+  reminder / Email them. Settings: hold length, automatic expiry switch, reminder on/off and
+  hours before the end. Every change is logged on the request. Holds ending a day are on its Day
+  sheet and in "Text it to me".
+- **Messages**: one templates map (`functions/_lib/messages.mjs`) and one seam, `sendMessage(channel,
+  template, ctx)`: texts are free sms: links from Valerie's phone (no paid SMS provider), every text
+  button has an "Email them" twin that sends at once from hello@. Confirmation: emailed by itself
+  once when a deposit is marked received, then the "Text them it's confirmed" screen. Thank-you:
+  emailed by itself the morning after Job done / Returned (10 AM Memphis cron), once; never for
+  void, no email, or "Don't send a thank-you"; undoing Job done first cancels it; the rental
+  deposit line only after a clean return. It carries the referral block (four services, Text /
+  Email a friend, Share on Facebook, the customer's /r/<code>). No review ask, no discount.
+- **Mailer cron** (`workers/pnp-mailer`, `npm run mailer:deploy`): hourly `0 * * * *` UTC: hold
+  expiry and hold reminders; at 10 AM Memphis: day-before reminders, thank-yous, sheet resync.
+- **Guard**: `npm run validate:request-form` and `npm run validate:request-messages` (in `validate:admin`).
 
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 The Google Form is rebuilt by hand; the admin prefill maps these exact strings
