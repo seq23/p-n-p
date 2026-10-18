@@ -18,7 +18,8 @@
  *     data-config, and the food line says it is a separate rough estimate;
  *   - the travel answer names every city in areas.json and the $75 fee;
  *   - rentals/index.html links /faq/#rentals above its questions and has
- *     two Check My Date buttons (hero + under the bundles);
+ *     the hero and under-the-bundles buttons read "Book your games" and open
+ *     the booking form's rentals path (owner, 2026-10-18; were "Check My Date");
  *   - the homepage links /faq/ from its FAQ block.
  * Navigation pass (owner-approved 2026-10-17):
  *   - no "What this page recommends" block; the hero (#top) has ONE button,
@@ -45,7 +46,7 @@ const games = require(path.join(ROOT, 'data/rentals/games.json'));
 const areas = require(path.join(ROOT, 'data/service_areas/areas.json'));
 const { FAQ: RENTALS_FAQ } = require(path.join(ROOT, 'scripts/generators/build_rentals_page.js'));
 
-const FORM = 'https://forms.gle/vHjfKtRRAnGV3HxFA';
+const FORM = '/request';
 const SECTIONS = ['booking', 'porch', 'party', 'grazing', 'rentals'];
 const errors = [];
 const fail = (m) => errors.push(m);
@@ -136,7 +137,7 @@ function checkFaqPage(html) {
   const sections = [...html.matchAll(/<section class="faq-section" id="([a-z]+)">([\s\S]*?)<\/section>/g)];
   if (sections.length !== SECTIONS.length) fail(`faq/index.html: ${sections.length} faq sections, want ${SECTIONS.length}`);
   for (const [, id, body] of sections) {
-    if (!new RegExp(`<a href="${FORM.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}" target="_blank" rel="noopener" class="btn-primary">Request a Quote</a>`).test(body)) fail(`faq/index.html: section #${id} has no Request a Quote button opening the form in a new tab`);
+    if (!body.includes(`<a href="${FORM}" class="btn-primary">Request a Quote</a>`)) fail(`faq/index.html: section #${id} has no Request a Quote button opening the request form`);
     if ((body.match(/<details class="faq-item"/g) || []).length < 5) fail(`faq/index.html: section #${id} has fewer than 5 questions`);
   }
   const ld = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
@@ -182,9 +183,10 @@ function checkFaqPage(html) {
 function checkOtherPages() {
   const r = read('rentals/index.html');
   if (!/<a href="\/faq\/#rentals">FAQ page<\/a>/.test(r)) fail('rentals/index.html: no link to /faq/#rentals above its questions');
-  const cmd = (r.match(/>Check My Date<\/a>/g) || []).length;
-  if (cmd !== 2) fail(`rentals/index.html has ${cmd} Check My Date button(s), want 2 (hero + under the bundles)`);
-  if (!/data-quote-cta="rentals-bundles"/.test(r)) fail('rentals/index.html: the Check My Date under the bundles is missing');
+  for (const where of ['rentals-top', 'rentals-bundles']) {
+    if (!r.includes(`<a href="/request?service=rentals" class="btn-primary" data-quote-cta="${where}">Book your games</a>`)) fail(`rentals/index.html: the ${where === 'rentals-top' ? 'hero' : 'under-the-bundles'} button is not "Book your games" opening /request?service=rentals`);
+  }
+  if (/Check My Date/.test(r)) fail('rentals/index.html still says "Check My Date"');
   const home = read('index.html');
   if (!/<a href="\/faq\/">FAQ page<\/a>/.test(home)) fail('index.html: FAQ block does not link the FAQ page');
 }
@@ -208,7 +210,7 @@ probe('jump nav without its label', html.replace('<span class="faq-jump__label">
 probe('a question as an <article>', html.replace(/<details class="faq-item"><summary><h3>([\s\S]*?)<\/h3><\/summary>(<p>[\s\S]*?<\/p>)<\/details>/, '<article class="faq-item"><h3>$1</h3>$2</article>'));
 probe('two open questions in a section', html.replace(/(<section class="faq-section" id="party">[\s\S]*?<details class="faq-item" open>[\s\S]*?)<details class="faq-item">/, '$1<details class="faq-item" open>'));
 probe('porch picker after the questions', html.replace(sectionOf('porch'), sectionOf('porch').replace('<div class="faq-tool" id="porch-picker">', '<div class="faq-tool" id="porch-picker-moved">').replace('<p class="faq-cta">', '<div class="faq-tool" id="porch-picker"></div><p class="faq-cta">')));
-probe('an extra quote link in main', html.replace('<p class="faq-hero-note">', `<p><a href="${FORM}" target="_blank" rel="noopener">Request a quote</a></p><p class="faq-hero-note">`));
+probe('an extra quote link in main', html.replace('<p class="faq-hero-note">', `<p><a href="${FORM}">Request a quote</a></p><p class="faq-hero-note">`));
 probe('a section without Back to top', html.replace(/<p class="faq-next"><a href="#top">[^<]*<\/a>/, '<p class="faq-next">'));
 probe('a section without its Next link', html.replace(/<a href="#party">Next: [^<]+<\/a>/, ''));
 probe('FAQPage with a question the page does not render', html.replace(/<details class="faq-item"><summary>[\s\S]*?<\/details>/, ''));

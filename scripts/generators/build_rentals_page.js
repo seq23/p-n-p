@@ -30,7 +30,8 @@ const OUT = path.join(ROOT, 'rentals', 'index.html');
 const DOMAIN = offers.domain;
 const URL = `${DOMAIN}/rentals/`;
 const C = offers.contact;
-const FORM_URL = 'https://forms.gle/vHjfKtRRAnGV3HxFA';
+// The site's request form, opened on its rentals path (a booking, not a quote).
+const FORM_URL = '/request?service=rentals';
 const MAILTO = 'mailto:hello@porchandparty901.com?subject=Party%20game%20rental%20inquiry';
 const TITLE = 'Party Game Rentals in Memphis | Porch and Party';
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
@@ -97,8 +98,8 @@ const FAQ = [
 ];
 
 const STEPS = [
-  ['Send a request', 'Tell us your date and the games or bundle you want on the quote form, with your photo ID.'],
-  ['Hold your date', `We confirm what is open and send the invoice. ${money(data.damageDeposit)} damage deposit + ${data.holdPercent}% by Zelle or Cash App holds the date.`],
+  ['Book your games', 'Pick your games and pickup date on our booking form: it shows what is free and your exact total. Add your photo ID.'],
+  ['Hold your date', `Your games are held for 24 hours. ${money(data.damageDeposit)} damage deposit + ${data.holdPercent}% by Zelle or Cash App from your invoice confirms them.`],
   ['Pick up', `Text or call ${PICK.phone} to set a time, then meet us at ${PLACE}. We check your ID and you pay the rest on the spot.`],
   ['Return', 'Bring everything back within 24 hours, or Monday for a weekend. We check every piece and refund the deposit.']
 ];
@@ -119,7 +120,7 @@ const TERMS = [
 
 function itemCard(i) {
   const qty = i.quantity > 1 ? ` ${i.quantity} available.` : '';
-  return `<article class="card" id="${i.slug}"><div class="card-media"><img src="/assets/rentals/${i.slug}.webp" alt="${esc(i.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(i.name)}</h3><p>${esc(i.blurb)}</p><ul><li><strong>Size:</strong> ${esc(i.size)}</li><li><strong>Use:</strong> ${useLabel(i.use)}</li><li><strong>Price:</strong> ${money(i.dayPrice)} a day &middot; ${money(i.weekendPrice)} a weekend</li></ul><p class="muted">Available now.${qty}</p><p><a href="${FORM_URL}" rel="noopener" target="_blank" data-quote-cta="rentals-item-${i.slug}">Request the ${esc(i.name)}</a></p></div></article>`;
+  return `<article class="card" id="${i.slug}"><div class="card-media"><img src="/assets/rentals/${i.slug}.webp" alt="${esc(i.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(i.name)}</h3><p>${esc(i.blurb)}</p><ul><li><strong>Size:</strong> ${esc(i.size)}</li><li><strong>Use:</strong> ${useLabel(i.use)}</li><li><strong>Price:</strong> ${money(i.dayPrice)} a day &middot; ${money(i.weekendPrice)} a weekend</li></ul><p class="muted">Available now.${qty}</p><p><a href="${FORM_URL}" data-quote-cta="rentals-item-${i.slug}">Book the ${esc(i.name)}</a></p></div></article>`;
 }
 
 function bundleCard(b) {
@@ -202,7 +203,7 @@ function render() {
           <span class="eyebrow">Party Game Rentals in Memphis</span>
           <h1>${H1}</h1>
           <p id="what-are-porch-and-party-rentals">Porch &amp; Party rents giant yard games, an inflatable movie screen and a card table for backyard parties, birthdays, family reunions, church and school events in Memphis, Olive Branch and Southaven. You pick up and return at ${esc(PICK.place)}, a safe exchange zone. Every game is ${money(RATE.day)} a day, or pick 3 for ${money(BUNDLES[0].dayPrice)}, with no minimum order.</p>
-          <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary" rel="noopener" target="_blank" data-quote-cta="rentals-top">Check My Date</a><a href="#games" class="btn-secondary">See the Rentals</a></div>
+          <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary" data-quote-cta="rentals-top">Book your games</a><a href="#games" class="btn-secondary">See the Rentals</a></div>
           <p class="muted" style="margin-top: 14px;"><a href="${C.telHref}">Call or text ${C.telephoneDisplay}</a></p>
         </div>
         <div class="card-media" style="margin-top: 28px; border-radius: 22px; overflow: hidden;"><img src="${data.hero.file}" alt="${esc(data.hero.alt)}" width="1600" height="900" fetchpriority="high" decoding="async" style="width: 100%; height: auto; display: block;"/></div>
@@ -211,7 +212,7 @@ function render() {
 
     <section class="section section-soft" id="games">
       <div class="container">
-        <div class="answer-block"><span class="eyebrow">The Rentals</span><h2>${ITEMS.length} party rentals: ${GAMES.length} games at ${money(RATE.day)} a day, plus a movie screen and a card table</h2><p>A weekend (pick up Friday, return Monday) is ${money(RATE.weekend)} a game. Tap any item to request it on the quote form.</p></div>
+        <div class="answer-block"><span class="eyebrow">The Rentals</span><h2>${ITEMS.length} party rentals: ${GAMES.length} games at ${money(RATE.day)} a day, plus a movie screen and a card table</h2><p>A weekend (pick up Friday, return Monday) is ${money(RATE.weekend)} a game. Tap any item to book it.</p></div>
         <div class="cards-grid">${ITEMS.map(itemCard).join('')}</div>
       </div>
     </section>
@@ -221,7 +222,7 @@ function render() {
         <div class="answer-block"><span class="eyebrow">Bundles</span><h2>${BUNDLES.length} bundles that save on day prices</h2><p>Mix any games you like. ${esc(BUNDLES[BUNDLES.length - 1].name)} is every item on this page, and the only bundle with a weekend price.</p></div>
         <div class="pricing-grid">${BUNDLES.map(bundleCard).join('')}</div>
         <p class="pricing-note muted">Every rental adds a ${money(data.damageDeposit)} damage deposit, refunded at return.</p>
-        <div class="btn-row centered-cta-row"><a href="${FORM_URL}" class="btn-primary" rel="noopener" target="_blank" data-quote-cta="rentals-bundles">Check My Date</a></div>
+        <div class="btn-row centered-cta-row"><a href="${FORM_URL}" class="btn-primary" data-quote-cta="rentals-bundles">Book your games</a></div>
       </div>
     </section>
 
@@ -237,7 +238,7 @@ function render() {
         <div class="answer-block"><span class="eyebrow">How Booking Works</span><h2>Four steps from request to return</h2></div>
         <div class="steps">${STEPS.map(([h, p], i) => `<div class="step"><div class="step-number">${i + 1}</div><h3>${h}</h3><p>${p}</p></div>`).join('')}</div>
         <p class="muted" style="text-align: center; margin-top: 16px;" data-rentals="renter-safety">${offers.renterSafety.line} ${offers.renterSafety.rentalFormNote}</p>
-        <div class="btn-row centered-cta-row"><a href="${FORM_URL}" class="btn-primary" rel="noopener" target="_blank" data-quote-cta="rentals-steps">Request Game Rentals</a></div>
+        <div class="btn-row centered-cta-row"><a href="${FORM_URL}" class="btn-primary" data-quote-cta="rentals-steps">Book your games</a></div>
       </div>
     </section>
 
@@ -257,9 +258,9 @@ function render() {
     <section class="section cta-band">
       <div class="container">
         <span class="eyebrow">Book Party Games</span>
-        <h2>Check your date for party game rentals</h2>
-        <p>Use the Porch &amp; Party quote form and choose "Party game rentals": share your pickup date and the games or bundle you want. We confirm availability and send the invoice.</p>
-        <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary" rel="noopener" target="_blank" data-quote-cta="rentals-form">Start Your Rental Request</a><a href="${MAILTO}" class="btn-secondary">Email Us</a></div>
+        <h2>Book party game rentals</h2>
+        <p>Pick your games and pickup date on the Porch &amp; Party booking form: it greys out what is already booked and shows your exact total. Your games are held for 24 hours while you pay the deposit.</p>
+        <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary" data-quote-cta="rentals-form">Book your games</a><a href="${MAILTO}" class="btn-secondary">Email Us</a></div>
         <p class="muted" style="margin-top: 14px;"><a href="${C.telHref}">Call ${C.telephoneDisplay}</a> or <a href="${C.smsHref}">text ${C.telephoneDisplay}</a> &middot; <a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p>
       </div>
     </section>

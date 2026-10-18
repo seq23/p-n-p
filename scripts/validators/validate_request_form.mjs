@@ -63,8 +63,17 @@ must(blank.includes('enctype="multipart/form-data"') && blank.includes('action="
 const page = fs.readFileSync(path.join(ROOT, 'request.html'), 'utf8');
 const rules = fs.readFileSync(path.join(ROOT, 'rules.html'), 'utf8');
 must(page.includes('<!--request-form-->') && page.includes('<!--/request-form-->') && /<meta name="robots" content="index,follow/.test(page) && page.includes('<link rel="canonical" href="https://porchandparty901.com/request"'), 'request.html is not an indexable page with the form block');
-const mainOf = (h) => h.slice(h.indexOf('<main'), h.indexOf('</main>'));
-must(!/forms\.gle/.test(mainOf(page)) && !/forms\.gle/.test(mainOf(rules)), 'request.html or rules.html links the old Google Form in its body');
+must(!/forms\.gle/.test(page) && !/forms\.gle/.test(rules), 'request.html or rules.html links the old Google Form');
+// No published page links the retired Google Form any more (the link swap, 18 Oct 2026).
+{
+  const walk = (d, acc = []) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { if (['node_modules', '.git', '.pages-output', 'reports', 'data', 'scripts', 'functions', 'docs', 'templates', 'workers', '.wrangler'].includes(e.name) || e.name.startsWith('.')) continue; const a = path.join(d, e.name); if (e.isDirectory()) walk(a, acc); else if (/\.(html|txt|xml|webmanifest)$/.test(e.name)) acc.push(a); } return acc; };
+  const files = walk(ROOT);
+  const left = files.filter((f) => /forms\.gle|docs\.google\.com\/forms/.test(fs.readFileSync(f, 'utf8')));
+  must(files.length > 100 && !left.length, `published files still link the Google Form: ${left.slice(0, 5).map((f) => path.relative(ROOT, f)).join(', ')}`);
+  const rentalsPage = fs.readFileSync(path.join(ROOT, 'rentals/index.html'), 'utf8');
+  must((rentalsPage.match(/href="\/request\?service=rentals"[^>]*>Book your games<\/a>/g) || []).length >= 4, 'the rentals page buttons do not read "Book your games" and open the rentals path');
+  must(/<a href="\/rules">Rules &amp; Responsibilities<\/a>/.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')), 'the footer legal links lack Rules & Responsibilities');
+}
 for (const id of ['everyone', 'rentals', 'porch', 'party', 'grazing', 'photo-id']) must(rules.includes(`<h2 id="${id}">`), `rules.html lacks the ${id} section`);
 must(rules.includes(`data-rules-version="${F.RULES_VERSION}"`) && rules.includes(`Version ${F.RULES_VERSION}`), 'rules.html does not show its version');
 must(!/\$\d+(?!\d)/.test(rules.replace(/\$5 each|\$50|\$75|\$40|\$60/g, '')), 'rules.html quotes a fee the Terms do not state');
