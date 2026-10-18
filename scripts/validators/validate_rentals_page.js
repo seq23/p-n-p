@@ -22,6 +22,9 @@
  * 6. Renter safety (2026-10-14): the booking section and the llms rentals
  *    sections carry the photo-ID line and the form note; no takedown here.
  *
+ * 7. Request page (2026-10-18): every live Marketplace description's line 2 and
+ *    the Page bio and action button point at porchandparty901.com/request.
+ *
  * Read-only. Rule 0: zero items, zero bundles or zero listings is a failure.
  */
 const fs = require('fs');
@@ -163,7 +166,19 @@ if (PHONE.test(listing)) errors.push('facebook-marketplace.md carries a phone nu
 if (RETIRED.test(listing)) errors.push('facebook-marketplace.md still quotes retired zones, the 1.5x weekend rate or free delivery');
 if (DELIVERY.test(listing)) errors.push('facebook-marketplace.md mentions delivery; rentals v3 is pickup and return only');
 hiddenIn(listing, 'facebook-marketplace.md');
-pricesOnlyFromData(listing, 'facebook-marketplace.md');
+pricesOnlyFromData(blocks.join('## '), 'facebook-marketplace.md');
+// ---- Request-page lines (owner-approved wording, 2026-10-18) -------------------
+// Line 2 of every live Marketplace description points at the site request page;
+// listings are edited in place, never deleted and re-added.
+const RENTAL_L1 = 'RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.';
+const RENTAL_L2 = "Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.";
+const DECOR_L2 = 'Request your date at porchandparty901.com/request. We reply with a quote.';
+const decorBlocks = (listing.split(/^## /m)[0].split(/^### Decor: /m)).slice(1);
+if (decorBlocks.length !== 2) errors.push(`facebook-marketplace.md has ${decorBlocks.length} decor service listings, Marketplace has 2 (porch decor, room decor)`);
+for (const d of decorBlocks) {
+  const desc = (d.split('**Description:**\n\n')[1] || '').split('\n');
+  if (!/^DECOR SERVICE, not an item for sale: /.test(desc[0] || '') || desc[1] !== DECOR_L2) errors.push(`decor listing "${d.split('\n')[0]}": description does not open with the DECOR SERVICE line then "${DECOR_L2}"`);
+}
 const checkListing = (b, where, title, price, photo) => {
   if (!b) { errors.push(`facebook-marketplace.md has no listing for ${where}`); return; }
   if (!b.includes(`**Price:** ${money(price)} (per day)`)) errors.push(`${where}: Marketplace price is not the ${money(price)} day price`);
@@ -179,8 +194,9 @@ for (const i of ITEMS) {
 }
 for (const bd of BUNDLES) {
   const b = blocks.find((x) => x.startsWith(`${bd.name} bundle\n`));
-  checkListing(b, `${bd.name} bundle`, bd.name, bd.dayPrice, null);
+  checkListing(b, `${bd.name} bundle`, `RENTAL ONLY: ${bd.name}`, bd.dayPrice, null);
   if (!b) continue;
+  if (!b.includes(`**Description:**\n\n${RENTAL_L1}\n${RENTAL_L2}\n`)) errors.push(`${bd.name} bundle: Marketplace description does not open with the RENTAL ONLY line then "${RENTAL_L2}"`);
   if (!b.includes(`**Photo:** \`${bd.image.replace(/^\//, '')}\``)) errors.push(`${bd.name} bundle: Marketplace photo is not its collage ${bd.image}`);
   if (!b.toLowerCase().includes(bd.includes.toLowerCase())) errors.push(`${bd.name} bundle: Marketplace listing lacks what it includes ("${bd.includes}")`);
   if (!b.includes(`You save ${money(bundleValue(bd, 'day').save)} on day prices`)) errors.push(`${bd.name} bundle: Marketplace listing lacks its ${money(bundleValue(bd, 'day').save)} saving`);
@@ -197,6 +213,9 @@ pricesOnlyFromData(page.split('## About (long description)')[1] || '', 'facebook
 const bio = (page.match(/## About \(short bio[^\n]*\n([^\n]+)/) || [])[1] || '';
 if (!bio.includes('hello@porchandparty901.com')) errors.push('facebook-page.md short bio does not carry the email');
 if (!bio.includes('Mt. Moriah Station')) errors.push('facebook-page.md short bio does not say where pickup is');
+if (!bio.endsWith('Reserve online: porchandparty901.com/request')) errors.push('facebook-page.md short bio does not end with "Reserve online: porchandparty901.com/request"');
+const actionBtn = (page.split('## Action button')[1] || '').split('\n## ')[0];
+if (!actionBtn.includes('**Learn more**') || !actionBtn.includes('https://porchandparty901.com/request')) errors.push('facebook-page.md action button is not "Learn more" linked to https://porchandparty901.com/request');
 if (bio.length > 255) errors.push(`facebook-page.md short bio is ${bio.length} characters, Facebook allows 255`);
 if (!/### Post \d+ — Movie night in your backyard/.test(page)) errors.push('facebook-page.md lacks the "Movie night in your backyard" post');
 for (const i of ITEMS) if (!page.toLowerCase().includes(i.name.replace(/ Set$/, '').toLowerCase())) errors.push(`facebook-page.md does not name ${i.name}`);
