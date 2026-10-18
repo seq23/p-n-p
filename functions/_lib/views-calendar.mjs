@@ -21,8 +21,9 @@ function tel(phone) {
 }
 
 // ctx: { bal, notes, ret, today }
-export function statusBits(b, { bal, notes = [], ret, today }) {
+export function statusBits(b, { bal, notes = [], ret, today, hold = null }) {
   const bits = [];
+  if (hold && hold.state === 'held' && RENTAL.has(b.kind)) bits.push(`<span class="money owe" data-held-booking>Held — waiting for deposit${hold.until ? '' : ' (held by hand)'}</span>`);
   if (bal && !bal.void) {
     bits.push(bal.owed > 0 ? `<span class="money owe" data-owed>${esc(balanceWords(bal))}</span>` : `<span class="money ok" data-paid>${esc(balanceWords(bal))}</span>`);
     if (b.kind === 'rental_pickup' && bal.owed > 0) bits.push(`<span class="money owe" data-collect>Collect ${esc(money(bal.owed))} at pickup</span>`);
@@ -71,6 +72,7 @@ export function remindersBox(rows, tomorrowLabel) {
       <div class="actions">
         ${sms ? act(`<a class="btn${done ? ' ghost' : ''}" href="${esc(sms)}" data-remind-tap="/admin/calendar/bookings/${b.id}/reminded"${tip('rem.text')}>Text reminder</a>`, 'rem.text') : '<p style="margin:0"><strong>No phone on file.</strong></p>'}
         ${!sms && mail ? act(`<a class="btn ghost" href="${mail}"${tip('rem.email')}>Email reminder</a>`, 'rem.email') : ''}
+        ${sms && mail && !b.email_reminded_at ? `<form method="post" action="/admin/calendar/bookings/${b.id}/email-reminder">${act(`<button class="btn ghost" type="submit"${tip('rem.emailNow')}>Email them</button>`, 'rem.emailNow')}</form>` : ''}
         ${done ? '' : `<form method="post" action="/admin/calendar/bookings/${b.id}/reminded">${act(`<button class="btn ghost" type="submit"${tip('rem.mark')}>Mark reminded</button>`, 'rem.mark')}</form>`}
       </div></div>`;
   }).join('');
@@ -123,7 +125,7 @@ export function searchBox(q = '') {
       fetch('/admin/search?partial=1&q='+encodeURIComponent(q),{credentials:'same-origin'}).then(function(r){return r.text();}).then(function(h){if(i.value.trim()===q)out.innerHTML=h;});},300);});})();</script>`;
 }
 
-export function calendarPage({ month, today, bookings, all = bookings, ctx, windows, table, warnings, unscheduled, reminders, tomorrowLabel, overdue, flash = '', error = '' }) {
+export function calendarPage({ month, today, bookings, all = bookings, ctx, windows, table, warnings, unscheduled, reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
   const [y, m] = month.split('-').map(Number);
   const first = `${month}-01`;
   const startPad = new Date(`${first}T12:00:00Z`).getUTCDay();
@@ -162,6 +164,7 @@ export function calendarPage({ month, today, bookings, all = bookings, ctx, wind
     ${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
     <h1>Calendar</h1>
     ${searchBox()}
+    ${holdsBox}
     ${overdueBox(overdue)}
     ${remindersBox(reminders, tomorrowLabel)}
     ${warn}
@@ -169,10 +172,12 @@ export function calendarPage({ month, today, bookings, all = bookings, ctx, wind
       ${act(`<a class="btn" href="/admin/calendar/new"${tip('cal.add')}>Add a booking</a>`, 'cal.add')}
       ${act(`<a class="btn ghost" href="/admin/calendar/link"${tip('cal.link')}>Link my Google Calendar</a>`, 'cal.link')}
     </div>
-    <div class="actions" style="grid-template-columns:1fr 1fr" role="group" aria-label="How to show bookings">
+    <div class="actions" style="grid-template-columns:1fr 1fr 1fr" role="group" aria-label="How to show bookings">
       <button type="button" class="btn" data-view="month" aria-pressed="true"${tip('cal.viewMonth')}>Month</button>
       <button type="button" class="btn ghost" data-view="list" aria-pressed="false"${tip('cal.viewList')}>List</button>
+      <button type="button" class="btn ghost" data-view="held" aria-pressed="false"${tip('cal.viewHeld')}>Held</button>
     </div>
+    <div data-pane="held" hidden>${heldPane}</div>
     <div class="legend" data-service-key>${serviceKey()}</div>
     <div data-pane="list" hidden>${listView(all, today, ctx)}</div>
     <div data-pane="month">
@@ -197,7 +202,7 @@ const VIEW_JS = `
     document.querySelectorAll('[data-view]').forEach(function(b){var on=b.getAttribute('data-view')===v;b.setAttribute('aria-pressed',on?'true':'false');b.classList.toggle('ghost',!on);});
     try{localStorage.setItem(KEY,v);}catch(e){}}
   document.querySelectorAll('[data-view]').forEach(function(b){b.addEventListener('click',function(){show(b.getAttribute('data-view'));});});
-  var saved=null;try{saved=localStorage.getItem(KEY);}catch(e){}if(saved==='list'||saved==='month')show(saved);
+  var saved=null;try{saved=localStorage.getItem(KEY);}catch(e){}if(saved==='list'||saved==='month'||saved==='held')show(saved);
   var past=document.querySelector('[data-show-past]');if(past)past.addEventListener('click',function(){var box=document.getElementById('past-list');box.hidden=!box.hidden;past.setAttribute('aria-pressed',box.hidden?'false':'true');past.textContent=box.hidden?'Show past bookings':'Hide past bookings';});
 })();`;
 
@@ -238,7 +243,7 @@ function noteWhen(utc) {
   return `${date.replace(/^(\w+), (\w+) (\d+)$/, '$1 $3 $2')}, ${time}`;
 }
 
-export function dayPage({ date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '' }) {
+export function dayPage({ date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [] }) {
   const u = usageOn(windows, date, today, table);
   let owedTotal = 0; let depositTotal = 0;
   const rows = bookings.map((b) => {
@@ -253,6 +258,7 @@ export function dayPage({ date, today, bookings, ctx, windows, table, sheetText,
     <div class="strip" data-strip>${table.items.map((it) => { const v = u.byItem[it.name]; const n = v.who.length; return `<div class="it ${n > v.stock ? 'over' : (n ? 'out' : '')}"><strong>${esc(it.name)}</strong><br>${n ? `Out (${n} of ${v.stock})` : 'In'}${n ? `<div class="muted">${esc(v.who.map((w) => `${w.name}, back ${shortDate(w.end)}`).join('; '))}</div>` : ''}</div>`; }).join('')}</div>
     ${u.out.some((w) => w.unnamed) ? `<p class="muted">${esc(u.out.filter((w) => w.unnamed).map((w) => `${w.name}: ${w.unnamed} game${w.unnamed === 1 ? '' : 's'} not picked yet`).join('; '))}</p>` : ''}
     ${u.out.length ? `<div data-out-list>${u.out.flatMap((w) => w.names.map((n) => `<div>${esc(n)} — ${esc(w.name)}, back ${esc(shortDate(w.end))}</div>`)).join('')}</div>` : ''}</section>`;
+  const holdsToday = holds.length ? `<section class="card" data-day-holds><h2>Holds ending this day</h2>${holds.map((h) => `<div><strong>${esc(h.timeLabel)}: ${esc(h.name || 'No name')}</strong> · ${esc(h.items || '')} · deposit not in yet</div>`).join('')}</section>` : '';
   const loading = rows.filter((r) => r.b.kind === 'rental_pickup');
   const load = loading.length ? `<section class="card" data-load><h2>Load these items</h2>${loading.map((r) => {
     const w = windows.find((x) => x.key === (r.b.request_key || `m:${String(r.b.customer_name).toLowerCase()}|${String(r.b.items).toLowerCase()}`));
@@ -297,7 +303,7 @@ export function dayPage({ date, today, bookings, ctx, windows, table, sheetText,
     ${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
     <h1>${esc(prettyDate(date))}</h1>
     ${tools}
-    ${sheet}${load}${strip}
+    ${holdsToday}${sheet}${load}${strip}
     <div class="dayonly">${entries}
     ${act(`<a class="btn" href="/admin/calendar/new?date=${esc(date)}"${tip('cal.add')}>Add a booking on this day</a>`, 'cal.add')}</div>`, { screen: 'day', back: { href: `/admin/calendar?month=${date.slice(0, 7)}`, label: 'Back to the calendar' } });
 }
@@ -421,6 +427,7 @@ export function searchResults({ q, groups, capped }) {
     <h3>${esc(g.name || 'No name')}</h3>
     <div class="row">${tel(g.phone) ? `<a class="btn inline" href="${tel(g.phone)}"${tip('day.call')}>Call ${esc(g.phone)}</a>` : ''}${g.email ? `<span class="muted">${esc(g.email)}</span>` : ''}</div>
     <p data-customer-total><strong>${g.items.filter((i) => i.type === 'booking').length} ${g.items.filter((i) => i.type === 'booking').length === 1 ? 'booking' : 'bookings'} · ${esc(money(g.paid))} paid${g.owed ? ` · ${esc(money(g.owed))} still owed` : ''}</strong></p>
+    ${g.sent ? `<p data-sent-you>Sent you ${g.sent} ${g.sent === 1 ? 'customer' : 'customers'}</p>` : ''}
     ${g.items.map((i) => `<div class="booking">
       <strong>${esc(i.date ? shortDate(i.date) : 'No date')}</strong> ${i.type === 'booking' ? kindTag(i.kind) : '<span class="k other">Request (not on the calendar)</span>'}
       ${i.archived ? ' <span class="chip done">Put away</span>' : ''}${i.void ? ' <span class="chip void">Void</span>' : ''}

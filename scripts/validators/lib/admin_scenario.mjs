@@ -43,5 +43,19 @@ export async function session({ db = makeDb() } = {}) {
   }
   const one = async (sql, ...args) => db.prepare(sql).bind(...args).first();
   const all = async (sql, ...args) => (await db.prepare(sql).bind(...args).all()).results;
-  return { env, db, A, get, post, upload, routed, requests, rk, invoiceFor, one, all, PRICE_TABLE, util, cookie };
+  // A request sent through the real public form handler (porchandparty901.com/request).
+  const RS = await mod('functions/_lib/request-submit.mjs');
+  let ipN = 0;
+  async function siteRequest(fields, { file = new Uint8Array([0xff, 0xd8, 0xff, 0xda, 0, 2, 0xff, 0xd9]), cookie: c = '' } = {}) {
+    const fd = new FormData();
+    const all = { ts: await RS.signTs(env, Date.now() - 10000), website: '', agree: 'yes', dob: '1990-02-03', ...fields };
+    for (const [k, v] of Object.entries(all)) (Array.isArray(v) ? v : [v]).forEach((x) => { if (x !== undefined && x !== null) fd.append(k, x); });
+    if (file) fd.append('id_photo', new File([file], 'id.jpg', { type: 'image/jpeg' }));
+    ipN += 1;
+    const request = new Request('https://porchandparty901.com/request', { method: 'POST', body: fd, headers: { 'CF-Connecting-IP': `192.0.2.${ipN}`, ...(c ? { Cookie: c } : {}) } });
+    const res = await RS.handleRequestPage({ request, env, params: {} });
+    const row = fields.email ? await db.prepare('SELECT * FROM requests WHERE email = ?1').bind(fields.email).first() : null;
+    return { status: res.status, location: res.headers.get('Location') || '', row, text: res.status === 303 ? '' : await res.text() };
+  }
+  return { env, db, A, get, post, upload, routed, requests, rk, invoiceFor, one, all, PRICE_TABLE, util, cookie, siteRequest, RS };
 }

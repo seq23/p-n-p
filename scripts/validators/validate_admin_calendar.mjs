@@ -386,9 +386,10 @@ let invA;
   await s.db.prepare("UPDATE request_status SET archived_at = NULL, status = 'void' WHERE request_key = 'zz'").run();
   must((await R.tomorrowsBookings(s.db)).length === before - 1, 'a void request still gets a reminder');
   const mailer = fs.readFileSync(path.join(ROOT, 'workers/pnp-mailer/wrangler.toml'), 'utf8');
-  must(/crons = \["0 15 \* \* \*", "0 16 \* \* \*"\]/.test(mailer) && /binding = "DB"/.test(mailer), 'pnp-mailer lacks its reminder crons or its D1 binding');
+  // Hourly on the hour: covers 15:00 UTC (10 AM CDT) and 16:00 UTC (10 AM CST); the handler gates the daily work.
+  must(/crons = \["0 \* \* \* \*"\]/.test(mailer) && /binding = "DB"/.test(mailer), 'pnp-mailer lacks its hourly cron or its D1 binding');
   const worker = fs.readFileSync(path.join(ROOT, 'workers/pnp-mailer/src/index.js'), 'utf8');
-  must(/async scheduled\(/.test(worker) && /chicagoHour\(now\) !== 10/.test(worker), 'pnp-mailer has no scheduled handler gated on 10 AM Memphis');
+  must(/async scheduled\(/.test(worker) && /chicagoHour\(now\) !== 10/.test(worker) && /expireHolds\(/.test(worker) && /sendThankYous\(/.test(worker), 'pnp-mailer has no scheduled handler gated on 10 AM Memphis, or it does not expire holds / send thank-yous');
 }
 
 // Find a customer.

@@ -10,6 +10,8 @@ import { balances, balanceWords, depositWords } from './ledger.mjs';
 import { tomorrowsBookings, tomorrowChicago, chicagoDate } from './reminders.mjs';
 import * as V from './views.mjs';
 import * as VC from './views-calendar.mjs';
+import * as VM2 from './views-messages.mjs';
+import { expireHolds, endingSoon, holdSettings, currentHolds } from './holds.mjs';
 
 const decodeKey = (v) => { try { return fromB64urlText(v); } catch { return ''; } };
 const wantsJson = (request) => request.headers.get('X-Pnp-Fetch') === '1';
@@ -28,8 +30,9 @@ async function requestsSafe(env, opts) {
 
 // Everything a booking row needs to describe itself: balance, notes, check-in.
 export async function contextFor(db, bookings) {
-  const [bals, returns, notes] = await Promise.all([balances(db), C.loadReturns(db), C.notesByBooking(db, bookings)]);
-  const ctx = (b) => ({ bal: b.invoice_id ? bals[b.invoice_id] : null, notes: notes[b.id] || [], ret: returns[C.returnKeyOf(b)], today: chicagoDate() });
+  const [bals, returns, notes, holdRows] = await Promise.all([balances(db), C.loadReturns(db), C.notesByBooking(db, bookings), db.prepare("SELECT * FROM holds WHERE state = 'held'").all().then((r) => r.results || []).catch(() => [])]);
+  const holds = Object.fromEntries(holdRows.map((h) => [h.request_key, h]));
+  const ctx = (b) => ({ bal: b.invoice_id ? bals[b.invoice_id] : null, notes: notes[b.id] || [], ret: returns[C.returnKeyOf(b)], today: chicagoDate(), hold: b.request_key ? holds[b.request_key] || null : null });
   return { ctx, bals, returns, notes };
 }
 
@@ -74,6 +77,7 @@ export async function archivePage(env, url) {
 // ---- Calendar --------------------------------------------------------------------------
 
 export async function calendarPage(env, url) {
+  await expireHolds(env.DB);
   const today = chicagoDate();
   const month = /^\d{4}-\d{2}$/.test(url.searchParams.get('month') || '') ? url.searchParams.get('month') : today.slice(0, 7);
   const all = await C.listBookings(env.DB);
@@ -86,7 +90,12 @@ export async function calendarPage(env, url) {
   const from = C.addDays(`${month}-01`, -7); const to = C.addDays(`${month}-01`, 45);
   const visible = all.filter((b) => (b.date >= from && b.date <= to) || (b.date >= today && b.date <= C.addDays(today, 14)));
   const { reminders, tomorrowLabel, overdue } = await remindersAndOverdue(env.DB);
+  const { holdsWithButtons } = await import('./admin.mjs');
+  const settings = await getSettings(env.DB);
+  const holds = await holdsWithButtons(env, '/admin/calendar');
+  const soon = endingSoon(holds, Date.now(), settings);
   return htmlResponse(VC.calendarPage({
+    holdsBox: VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours, back: '/admin/calendar' }), heldPane: VM2.heldPane(holds),
     month, today, bookings: visible, all, ctx, windows, table: PRICE_TABLE, warnings: C.overlapWarnings(windows, PRICE_TABLE, { today }),
     unscheduled, reminders, tomorrowLabel, overdue, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '',
   }));
@@ -101,16 +110,18 @@ export async function daySheetData(env, date) {
     const c = ctx(b);
     return { ...b, timeLabel: b.time ? C.prettyTime(b.time) : '', owed: c.bal && !c.bal.void ? c.bal.owed : 0, note: c.notes[0] ? c.notes[0].body : '' };
   });
-  return { all, ctx, windows, bookings, rows };
+  const holds = (await currentHolds(env.DB)).filter((h) => !h.by_hand && h.until && C.chicagoDayOf(h.until) === date)
+    .map((h) => ({ ...h, timeLabel: new Date(h.untilMs).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) }));
+  return { all, ctx, windows, bookings, rows, holds };
 }
 
 export async function dayPage(env, url, date) {
   if (date === 'today') return redirect(`/admin/day/${chicagoDate()}`);
   if (!C.isISODate(date)) return redirect('/admin/calendar');
   const settings = await getSettings(env.DB);
-  const { ctx, windows, bookings, rows } = await daySheetData(env, date);
-  const sheetText = C.daySheetText(date, rows, { host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date) });
-  return htmlResponse(VC.dayPage({ date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  const { ctx, windows, bookings, rows, holds } = await daySheetData(env, date);
+  const sheetText = C.daySheetText(date, rows, { host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date), holds });
+  return htmlResponse(VC.dayPage({ holds, date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
 }
 
 // "Email it to me": the full day list to the Settings address, through the mailer.
@@ -118,10 +129,10 @@ export async function emailDay(env, url, date) {
   if (!C.isISODate(date)) return redirect('/admin/calendar');
   const settings = await getSettings(env.DB);
   const to = settings.day_list_email || FROM_EMAIL;
-  const { rows } = await daySheetData(env, date);
-  const text = C.daySheetText(date, rows, { max: 100000, host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date) });
+  const { rows, holds } = await daySheetData(env, date);
+  const text = C.daySheetText(date, rows, { max: 100000, host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date), holds });
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const html = `<div style="font:16px/1.5 Arial,sans-serif;color:#3b302a"><h2>Day list for ${esc(shortDate(date))}</h2>${rows.map((r) => `<p><strong>${esc(r.timeLabel || 'Any time')} · ${esc(C.KIND_LABELS[r.kind])} · ${esc(r.customer_name || 'No name')}</strong><br>${esc([r.phone, r.items, r.place].filter(Boolean).join(' · '))}${r.owed ? `<br>Still owed: $${(r.owed / 100).toFixed(2)}` : ''}${r.note ? `<br>Note: ${esc(r.note)}` : ''}</p>`).join('') || '<p>Nothing booked.</p>'}</div>`;
+  const html = `<div style="font:16px/1.5 Arial,sans-serif;color:#3b302a"><h2>Day list for ${esc(shortDate(date))}</h2>${holds.map((h) => `<p><strong>Hold ends ${esc(h.timeLabel)} · ${esc(h.name || 'No name')}</strong><br>${esc(h.items || '')} · deposit not in yet</p>`).join('')}${rows.map((r) => `<p><strong>${esc(r.timeLabel || 'Any time')} · ${esc(C.KIND_LABELS[r.kind])} · ${esc(r.customer_name || 'No name')}</strong><br>${esc([r.phone, r.items, r.place].filter(Boolean).join(' · '))}${r.owed ? `<br>Still owed: $${(r.owed / 100).toFixed(2)}` : ''}${r.note ? `<br>Note: ${esc(r.note)}` : ''}</p>`).join('') || '<p>Nothing booked.</p>'}</div>`;
   if (!env.MAILER) return redirect(`/admin/day/${date}?e=${encodeURIComponent('Email is not connected on this copy of the site, so nothing was sent.')}`);
   let ok = false; let err = '';
   try {
@@ -372,6 +383,13 @@ export async function searchData(env, q) {
     const st = statuses[r.key];
     const g = group(r.name, r.phone, r.email);
     g.items.push({ type: 'request', date: '', items: V.wantSummary(r).join(' · '), href: st && st.archived_at ? '/admin/archive' : '/admin/', archived: Boolean(st && st.archived_at), void: Boolean(st && st.status === 'void'), balance: '', returnWords: '', note: '' });
+  }
+  // "Sent you N customers": requests that came in on this customer's referral link.
+  for (const r of requests) {
+    if (!r.referralCode) continue;
+    const n = requests.filter((x) => x.referredBy === r.referralCode).length;
+    const g = n ? groups.get(keyOf(r.name, r.phone)) : null;
+    if (g) g.sent = (g.sent || 0) + n;
   }
   return { groups: [...groups.values()], capped };
 }

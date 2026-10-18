@@ -2,13 +2,18 @@
 // functions/admin/_middleware.js (see guard.mjs).
 import {
   SHEET_URL, FROM_EMAIL, esc, redirect, htmlResponse, getSettings, putSetting, toCents, invoiceTotal,
-  halfDeposit, PAY_PLANS, payPlanOf, amountDueNow, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice,
+  halfDeposit, PAY_PLANS, payPlanOf, amountDueNow, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice, b64urlText,
 } from './util.mjs';
+import { tip } from './helptext.mjs';
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
 import { driveFileId, idFolderId } from './sheet.mjs';
 import { loadRequests, weekCounts, monthCount, idOnFile, logEvent } from './requests.mjs';
 import { chicagoDate } from './reminders.mjs';
-import { expireHolds } from './holds.mjs';
+import { expireHolds, confirmHold, extendHold, keepHolding, releaseHold, currentHolds, endingSoon, holdSettings, getHold, fromSql } from './holds.mjs';
+import { messageCtx, autoConfirm, smsFor } from './customer-messages.mjs';
+import { sendMessage } from './messages.mjs';
+import * as VM2 from './views-messages.mjs';
+import { hasEmail } from './reminders.mjs';
 import { PRICE_TABLE, CONTACT } from './prices.mjs';
 import { renderInvoicePdf, textMessage } from './pdf.mjs';
 import { prefillLines, pickupNote, isRentalInvoice } from './pricing.mjs';
@@ -149,6 +154,57 @@ export function readyToDeleteId(r, st, inv, ret) {
   return r.wantsRentals ? Boolean(ret && ret.returned_at) : true;
 }
 
+// "2026-10-26T15:00" typed on her phone = Memphis wall clock -> UTC ms.
+export function chicagoLocalToMs(local) {
+  const m = String(local || '').match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/);
+  if (!m) return NaN;
+  const guess = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5]);
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(guess)).map((x) => [x.type, x.value]));
+  const wall = Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute);
+  return guess - (wall - guess);
+}
+
+// The holds list with what each row's buttons need (sms text, email twin, deposit target).
+export async function holdsWithButtons(env, back = '/admin/') {
+  const holds = await currentHolds(env.DB);
+  for (const h of holds) {
+    const ctx = await messageCtx(env.DB, h.request_key);
+    h.sms = ctx ? smsFor('holdEnding', ctx) : null;
+    h.canEmail = Boolean(ctx && hasEmail(ctx.email));
+    h.depositTarget = h.invoice_id ? { action: `/admin/invoices/${h.invoice_id}/status`, fields: { action: 'deposit_paid', back } } : { action: '/admin/requests/status', fields: { r: b64urlText(h.request_key), status: 'deposit_paid' } };
+  }
+  return holds;
+}
+
+// Per-card extras: the hold controls on a held rental, "Hold expired", and the thank-you box.
+async function cardExtras(env, requests, statuses, holds) {
+  const out = {};
+  const byKey = Object.fromEntries(holds.map((h) => [h.request_key, h]));
+  for (const r of requests) {
+    const rk = b64urlText(r.key);
+    const st = statuses[r.key] || {};
+    const bits = [];
+    const h = byKey[r.key];
+    if (h) bits.push(`<style>${VM2.HOLD_CSS}</style>${VM2.holdControls(h, { rk, sms: h.sms, canEmail: h.canEmail, depositTarget: h.depositTarget })}`);
+    else {
+      const old = r.source === 'site' && r.wantsRentals ? await getHold(env.DB, r.key) : null;
+      if (old && old.state === 'expired') bits.push('<div class="notice warn" data-hold-expired><strong>Hold expired.</strong> No deposit came in by the end time, so the games were freed. Use Give them more time on a new request, or book it by hand.</div>');
+    }
+    if (st.job_done_at && st.status !== 'void' && r.source) {
+      const ctx = await messageCtx(env.DB, r.key);
+      bits.push(VM2.thankYouBox(r, { rk, sms: ctx ? smsFor('thankyou', ctx) : null, canEmail: Boolean(ctx && hasEmail(ctx.email)) }));
+    }
+    if (st.status === 'deposit_paid' || st.status === 'paid' || st.status === 'scheduled') {
+      const ctx = await messageCtx(env.DB, r.key);
+      if (ctx && (r.confirmEmailedAt || r.confirmedTextedAt)) bits.push(`<p class="money ok" data-confirm-sent>${r.confirmedTextedAt ? 'Confirmation sent ✓' : 'Confirmation email sent ✓'}</p>`);
+      if (ctx) bits.push(`<details class="disclose" data-confirm-resend><summary${tip('conf.text')}>Text them it's confirmed</summary>${VM2.twinButtons({ sms: smsFor('confirmation', ctx), rk, template: 'confirmation', textKey: 'conf.text', emailKey: 'conf.email', textLabel: "Text them it's confirmed", canEmail: hasEmail(ctx.email) })}</details>`);
+      if (ctx && ctx.service === 'rentals') bits.push(VM2.twinButtons({ sms: smsFor('pickupTime', ctx), rk, template: 'pickupTime', textKey: 'msg.pickupText', emailKey: 'msg.pickupEmail', textLabel: 'Text about pickup time', canEmail: hasEmail(ctx.email) }));
+    }
+    if (bits.length) out[r.key] = bits.join('');
+  }
+  return out;
+}
+
 async function dashboard(env, url) {
   await expireHolds(env.DB);
   const settings = await getSettings(env.DB);
@@ -171,8 +227,12 @@ async function dashboard(env, url) {
   for (const r of requests) if (r.referralCode) referrers[r.referralCode] = r.name;
   const idsReady = requests.filter((r) => idOnFile(r) && readyToDeleteId(r, statuses[r.key], statuses[r.key] && statuses[r.key].invoice_id ? invoices[statuses[r.key].invoice_id] : null, returns[r.key]));
   const week = weekCounts(requests, chicagoDate());
+  const holds = await holdsWithButtons(env);
+  const extras = await cardExtras(env, open, statuses, holds);
+  const soon = endingSoon(holds, Date.now(), settings);
   return htmlResponse(V.dashboardPage({ requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
-    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady),
+    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady), cardExtras: extras,
+    holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length ? VM2.TAP_JS : ''}`,
     flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
     extraTop: `${VC.overdueBox(overdue)}${VC.remindersBox(reminders, tomorrowLabel)}` }));
 }
@@ -358,6 +418,10 @@ async function changeStatus(env, request, id) {
     if (action === 'done') await env.DB.prepare("UPDATE request_status SET job_done_at = COALESCE(job_done_at, datetime('now')) WHERE request_key = ?1").bind(invoice.request_key).run();
   }
   if (action === 'texted') await syncInvoiceBookings(env, id);
+  if ((action === 'deposit_paid' || (action === 'paid' && !['deposit_paid', 'paid', 'done'].includes(invoice.status))) && invoice.request_key) {
+    const flash = action === 'deposit_paid' ? `Deposit received ✓${recorded ? ` ($${(recorded / 100).toFixed(2)} recorded)` : ''}` : `Paid in full ✓${recorded ? ` ($${(recorded / 100).toFixed(2)} recorded)` : ''}`;
+    return afterDeposit(env, invoice.request_key, flash, back || `/admin/invoices/${id}`);
+  }
   const money = (c) => `$${(c / 100).toFixed(2)}`;
   const label = {
     texted: 'Marked as sent by text ✓', deposit_paid: `Deposit received ✓${recorded ? ` (${money(recorded)} recorded)` : ''}`, paid: `Paid in full ✓${recorded ? ` (${money(recorded)} recorded)` : ''}`,
@@ -427,6 +491,88 @@ async function deleteId(env, request) {
   return redirect(`/admin/?m=${encodeURIComponent(msg)}`);
 }
 
+const BACK_OK = (v) => (/^\/admin\/[A-Za-z0-9/_?=&.%-]*$/.test(String(v || '')) && !String(v).includes('//') ? String(v) : '/admin/');
+async function holdAction(env, request, what) {
+  const form = await request.formData();
+  const key = decodeKey(form.get('r'));
+  const back = BACK_OK(form.get('back'));
+  const go = (k, m) => redirect(`${back}${back.includes('?') ? '&' : '?'}${k}=${encodeURIComponent(m)}`);
+  if (!key) return go('e', 'Which request?');
+  if (what === 'extend') {
+    const until = form.get('until') ? chicagoLocalToMs(String(form.get('until'))) : 0;
+    const r = await extendHold(env.DB, key, until ? { until: new Date(until).toISOString() } : { hours: Number(form.get('hours')) || 24 });
+    if (!r.ok) return go('e', r.error);
+    if (r.ok) {
+      // A hold that had expired comes back: put its games on the calendar again.
+      const req = await findRequest(env, key);
+      const bk = await env.DB.prepare("SELECT COUNT(*) AS n FROM bookings WHERE request_key = ?1 AND kind IN ('rental_pickup','rental_return')").bind(key).first();
+      if (req && (!bk || !bk.n)) {
+        const pickup = (req.rentals.find((x) => /pickup date/i.test(x.label)) || {}).value;
+        const ret = (req.rentals.find((x) => /return date/i.test(x.label)) || {}).value;
+        const items = C.itemsText(C.expandItems(req.gamesAnswer, PRICE_TABLE)) || req.gamesAnswer;
+        const st = await env.DB.prepare('SELECT invoice_id FROM request_status WHERE request_key = ?1').bind(key).first();
+        const base = { request_key: key, invoice_id: st ? st.invoice_id : null, time: null, customer_name: req.name, phone: req.phone, email: req.email, place: PRICE_TABLE.pickupPlace, items };
+        if (pickup && ret) await C.upsertBookings(env.DB, [{ ...base, kind: 'rental_pickup', date: pickup }, { ...base, kind: 'rental_return', date: ret }]);
+      }
+    }
+    return go('m', `Hold extended ✓ ${VM2.endsWords(fromSql(r.until)).text}`);
+  }
+  if (what === 'keep') return go('m', (await keepHolding(env.DB, key)) ? 'Held by hand ✓ It stays held until you release it.' : 'That hold is not active any more.');
+  return go('m', (await releaseHold(env.DB, key)) ? 'Games released ✓ They are free for others.' : 'That hold is not active any more.');
+}
+
+const MSG_TEMPLATES = { confirmation: 'confirm_emailed_at', thankyou: 'thankyou_emailed_at', holdEnding: null, pickupTime: null };
+const TAP_COLUMNS = { confirmation: 'confirmed_texted_at', thankyou: 'thankyou_texted_at', holdEnding: 'hold_texted_at' };
+async function emailMessage(env, request) {
+  const form = await request.formData();
+  const key = decodeKey(form.get('r'));
+  const template = String(form.get('template') || '');
+  if (!key || !(template in MSG_TEMPLATES)) return redirect(`/admin/?e=${encodeURIComponent('That message could not be found.')}`);
+  const ctx = await messageCtx(env.DB, key);
+  if (!ctx) return redirect(`/admin/?e=${encodeURIComponent('That request was not found.')}`);
+  const col = MSG_TEMPLATES[template];
+  if (col && ctx.row[col]) return redirect(`/admin/?m=${encodeURIComponent('That email was already sent ✓')}`);
+  const out = await sendMessage(env, 'email', template, ctx);
+  if (!out.ok) return redirect(`/admin/?e=${encodeURIComponent(`The email did not go out. (${out.error})`)}`);
+  if (col) await env.DB.prepare(`UPDATE requests SET ${col} = datetime('now') WHERE request_key = ?1`).bind(key).run();
+  await logEvent(env.DB, key, `Emailed: ${template}`, 'Valerie');
+  return redirect(`/admin/?m=${encodeURIComponent('Sent ✓')}`);
+}
+
+async function tappedMessage(env, request) {
+  const form = await request.formData();
+  const key = decodeKey(form.get('r'));
+  const col = TAP_COLUMNS[String(form.get('template') || '')];
+  if (key && col) await env.DB.prepare(`UPDATE requests SET ${col} = COALESCE(${col}, datetime('now')) WHERE request_key = ?1`).bind(key).run();
+  return Response.json({ ok: true });
+}
+
+async function confirmedScreen(env, url) {
+  const key = decodeKey(url.searchParams.get('r') || '');
+  const ctx = key ? await messageCtx(env.DB, key) : null;
+  const back = BACK_OK(url.searchParams.get('back'));
+  if (!ctx) return redirect(back);
+  return htmlResponse(VM2.confirmedPage({ rk: b64urlText(key), name: ctx.name, sms: smsFor('confirmation', ctx), emailed: Boolean(ctx.row.confirm_emailed_at), texted: Boolean(ctx.row.confirmed_texted_at), canEmail: hasEmail(ctx.email), flash: url.searchParams.get('m') || '', back }));
+}
+
+// After a deposit is marked received on a request: confirm its hold, email the confirmation
+// once, then the success screen with "Text them it's confirmed".
+async function afterDeposit(env, key, flash, back) {
+  await confirmHold(env.DB, key);
+  if (env.DB) await autoConfirm(env, key).catch(() => null);
+  return redirect(`/admin/confirmed?r=${b64urlText(key)}&m=${encodeURIComponent(flash)}&back=${encodeURIComponent(back || '/admin/')}`);
+}
+
+async function emailReminder(env, id) {
+  const R = await import('./reminders.mjs');
+  const b = await env.DB.prepare(`SELECT b.*, COALESCE(NULLIF(b.email, ''), i.customer_email, '') AS reminder_email FROM bookings b LEFT JOIN invoices i ON i.id = b.invoice_id WHERE b.id = ?1`).bind(id).first();
+  if (!b || !hasEmail(b.reminder_email)) return redirect(`/admin/calendar?e=${encodeURIComponent('No email on file for that booking.')}`);
+  const out = await sendMessage(env, 'email', 'reminder', { name: b.customer_name, reminderText: R.reminderText(b).replace(/Reply here/, 'Reply to this email'), dayShort: b.date }, { to: b.reminder_email });
+  if (!out.ok) return redirect(`/admin/calendar?e=${encodeURIComponent(`The email did not go out. (${out.error})`)}`);
+  await env.DB.prepare("UPDATE bookings SET email_reminded_at = datetime('now') WHERE id = ?1").bind(id).run();
+  return redirect(`/admin/calendar?m=${encodeURIComponent('Reminder emailed ✓')}`);
+}
+
 export async function login(env, request) {
   if (!loginConfigured(env)) return htmlResponse(V.loginPage({ disabled: true }), 503);
   const ip = clientIp(request);
@@ -442,12 +588,23 @@ export async function login(env, request) {
 // shortly" while one is waiting. Neither ever blocks or breaks the page.
 const NO_SYNC = /^\/admin\/(login|logout|settings\/password|settings\/sheet-sync)$/;
 export async function handleAdmin(context) {
-  const res = await routeAdmin(context);
+  let res = await routeAdmin(context);
   const { request, env } = context;
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
   const later = (p) => { if (typeof context.waitUntil === 'function') context.waitUntil(p.catch(() => {})); };
   if (method === 'POST' && res.status < 400 && !NO_SYNC.test(url.pathname.replace(/\/+$/, ''))) later(AM.syncSafely(env));
+  if (method === 'GET' && res.status === 200 && /text\/html/.test(res.headers.get('Content-Type') || '') && env.DB && await isAuthed(request, env)) {
+    // The tab badge: "2 holds ending soon" on Requests and Calendar & Bookings.
+    let soon = 0;
+    try { soon = endingSoon(await currentHolds(env.DB), Date.now(), await getSettings(env.DB)).length; } catch { soon = 0; }
+    if (soon) {
+      const badge = `<span class="navbadge" data-holds-badge> ${soon} ${soon === 1 ? 'hold' : 'holds'} ending soon</span>`;
+      const html = (await res.text()).replace(/(<a href="\/admin\/"[^>]*>Requests)(<\/a>)/, `$1${badge}$2`).replace(/(<a href="\/admin\/calendar"[^>]*>Calendar &amp; Bookings)(<\/a>)/, `$1${badge}$2`)
+        .replace('</style>', '.navbadge{background:#fff3dc;color:#7a4a0c;border:1px solid #ebcf96;border-radius:999px;padding:0 6px;font-size:.8rem;font-weight:700;margin-left:4px}</style>');
+      res = new Response(html, { status: res.status, headers: res.headers });
+    }
+  }
   if (method === 'GET' && res.status === 200 && /text\/html/.test(res.headers.get('Content-Type') || '') && env.DB) {
     const pending = await AM.pendingSync(env.DB);
     if (pending) {
@@ -483,6 +640,7 @@ async function routeAdmin(context) {
     if (isVoid && want !== 'unvoid') return redirect(`/admin/?e=${encodeURIComponent('This request is void, so it cannot be marked paid. Tap Bring back (undo Void) first.')}`);
     const status = { deposit_paid: 'deposit_paid', paid: 'paid', unpaid: 'new', void: 'void', unvoid: 'new' }[want];
     if (key && status) await setRequestStatus(env.DB, key, status, null);
+    if (key && (status === 'deposit_paid' || (status === 'paid' && !(current && ['deposit_paid', 'paid'].includes(current.status))))) return afterDeposit(env, key, status === 'paid' ? 'Paid in full ✓' : 'Deposit received ✓', '/admin/');
     return redirect(`/admin/?m=${encodeURIComponent(status === 'void' ? 'Request is void.' : 'Saved ✓')}`);
   }
   if (segs[0] === 'requests' && segs[1] === 'jobdone' && method === 'POST') {
@@ -497,6 +655,16 @@ async function routeAdmin(context) {
           status = 'job_done', job_done_at = COALESCE(request_status.job_done_at, datetime('now')), updated_at = datetime('now')`).bind(key).run();
     }
     return redirect(`/admin/?m=${encodeURIComponent(undo ? 'Job done undone.' : 'Job done ✓')}`);
+  }
+  if (segs[0] === 'holds' && method === 'POST' && ['extend', 'keep', 'release'].includes(segs[1])) return holdAction(env, request, segs[1]);
+  if (segs[0] === 'msg' && segs[1] === 'email' && method === 'POST') return emailMessage(env, request);
+  if (segs[0] === 'msg' && segs[1] === 'tapped' && method === 'POST') return tappedMessage(env, request);
+  if (segs[0] === 'confirmed' && method === 'GET') return confirmedScreen(env, url);
+  if (segs[0] === 'requests' && segs[1] === 'thankyou-skip' && method === 'POST') {
+    const form = await request.formData();
+    const key = decodeKey(form.get('r'));
+    if (key) await env.DB.prepare('UPDATE requests SET thankyou_skip = ?2 WHERE request_key = ?1').bind(key, form.get('skip') === '1' ? 1 : 0).run();
+    return redirect(`/admin/?m=${encodeURIComponent(form.get('skip') === '1' ? 'No thank-you email will be sent for this request.' : 'The thank-you email will go out tomorrow morning.')}`);
   }
   if (segs[0] === 'requests' && segs[1] === 'id' && segs.length === 2 && method === 'GET') return idPhoto(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
@@ -549,6 +717,7 @@ async function routeAdmin(context) {
         if (segs[3] === 'move' && method === 'GET') return AC.movePage(env, bid);
         if (segs[3] === 'move' && method === 'POST') return AC.moveRoute(env, request, bid);
         if (segs[3] === 'reminded' && method === 'POST') return AC.remindedRoute(env, request, bid);
+        if (segs[3] === 'email-reminder' && method === 'POST') return emailReminder(env, bid);
         if (segs[3] === 'notes' && method === 'POST') return AC.addNoteRoute(env, request, bid);
       }
     }
@@ -615,6 +784,16 @@ async function routeAdmin(context) {
     if (segs[1] === 'calendar-token' && method === 'POST') return AC.regenerateToken(env);
     if (segs[1] === 'sheet-sync' && method === 'POST') return AM.syncNowRoute(env, url);
     if (segs[1] === 'categories' && method === 'POST') return AM.saveCategories(env, request);
+    if (segs[1] === 'holds' && method === 'POST') {
+      const form = await request.formData();
+      const n = (k, d, lo, hi) => { const v = Number(form.get(k)); return String(Number.isFinite(v) && v >= lo && v <= hi ? Math.round(v) : d); };
+      await putSetting(env.DB, 'hold_hours', n('hold_hours', 24, 1, 336));
+      await putSetting(env.DB, 'hold_reminder_hours', n('hold_reminder_hours', 4, 1, 48));
+      await putSetting(env.DB, 'hold_soon_hours', n('hold_soon_hours', 12, 1, 72));
+      await putSetting(env.DB, 'hold_reminder', form.get('hold_reminder') === '1' ? '1' : '0');
+      await putSetting(env.DB, 'hold_auto_expire', form.get('hold_auto_expire') === '1' ? '1' : '0');
+      return redirect('/admin/settings?m=Hold settings saved ✓');
+    }
   }
   return htmlResponse(V.layout('Not found', '<p>Nothing here.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
 }

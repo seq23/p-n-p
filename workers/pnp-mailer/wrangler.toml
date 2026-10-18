@@ -12,10 +12,11 @@ preview_urls = false
 name = "EMAIL"
 allowed_sender_addresses = ["hello@porchandparty901.com"]
 
-# Day-before reminders (functions/_lib/reminders.mjs): 10 AM America/Chicago all year. Two UTC
-# crons because of daylight saving; the handler runs only the one that is 10 AM in Memphis.
+# Every hour on the hour (UTC): rental hold expiry and hold reminders. The daily work (day-before
+# reminders, thank-you emails, sheet resync) runs only in the run that is 10 AM America/Chicago:
+# 15:00 UTC in daylight time (CDT, UTC-5), 16:00 UTC in standard time (CST, UTC-6).
 [triggers]
-crons = ["0 15 * * *", "0 16 * * *"]
+crons = ["0 * * * *"]
 
 # The admin console's database: reminders read tomorrow's bookings and record email_reminded_at.
 [[d1_databases]]
