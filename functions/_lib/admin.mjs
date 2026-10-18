@@ -25,7 +25,8 @@ import * as VC from './views-calendar.mjs';
 import * as C from './calendar.mjs';
 import * as AC from './admin-calendar.mjs';
 import * as AM from './admin-money.mjs';
-import { balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld } from './ledger.mjs';
+import { balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines } from './ledger.mjs';
+import * as AE from './admin-edit.mjs';
 import { categoriesFrom } from './expenses.mjs';
 import { CHECKLIST_SOURCE } from './checklist-source.mjs';
 import { renderPrintPage, prefillFromRequest, renderOnlineSections, checklistState, invoiceFromChecklist, fieldIndex } from './checklist.mjs';
@@ -68,15 +69,7 @@ async function loadInvoice(db, id) {
 }
 
 function parseInvoiceForm(form) {
-  const desc = form.getAll('line_desc'); const qty = form.getAll('line_qty');
-  const price = form.getAll('line_price'); const note = form.getAll('line_note'); const ref = form.getAll('line_refundable');
-  const lines = [];
-  desc.forEach((d, i) => {
-    const description = String(d || '').trim();
-    if (!description) return;
-    const q = Number(qty[i]);
-    lines.push({ description, qty: Number.isFinite(q) ? q : 1, unit_cents: toCents(price[i]), note: String(note[i] || '').trim(), refundable: ref[i] === '1' ? 1 : 0 });
-  });
+  const lines = linesFromForm(form);
   const total = invoiceTotal(lines);
   const plan = PAY_PLANS.includes(form.get('pay_plan')) ? form.get('pay_plan') : 'half';
   return {
@@ -92,13 +85,6 @@ function parseInvoiceForm(form) {
     },
     lines,
   };
-}
-
-async function saveLines(db, invoiceId, lines) {
-  const stmts = [db.prepare('DELETE FROM invoice_lines WHERE invoice_id = ?1').bind(invoiceId)];
-  lines.forEach((l, i) => stmts.push(db.prepare('INSERT INTO invoice_lines (invoice_id, position, description, qty, unit_cents, note, refundable) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)')
-    .bind(invoiceId, i, l.description, l.qty, l.unit_cents, l.note, l.refundable)));
-  await db.batch(stmts);
 }
 
 async function setRequestStatus(db, key, status, invoiceId) {
@@ -704,6 +690,11 @@ async function routeAdmin(context) {
       await logEvent(env.DB, key, plan === 'not_sure' ? `Takedown: not decided yet${note ? ` (${note})` : ''}` : (plan ? `Takedown: the customer will handle it${note ? ` (${note})` : ''}` : 'Takedown question asked again'), 'admin');
     }
     return redirect(`/admin/?m=${encodeURIComponent(plan === 'not_sure' ? 'Saved: takedown not decided yet.' : (plan ? 'Saved: the customer will handle the takedown.' : 'Saved ✓'))}`);
+  }
+  // "Change anything on this request" (owner, 18 Oct 2026): one page, one Save per section, at any stage.
+  if (segs[0] === 'requests' && segs[1] === 'edit') {
+    if (segs.length === 2 && method === 'GET') return AE.editPage(env, url);
+    if (segs.length === 3 && method === 'POST') return AE.editRoute(env, request, segs[2]);
   }
   if (segs[0] === 'requests' && segs[1] === 'id' && segs.length === 2 && method === 'GET') return idPhoto(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
