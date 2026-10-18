@@ -4,6 +4,8 @@ const path = require('path');
 const { siteUrlForFile } = require('../lib/site_url');
 const brand = require('../lib/brand');
 const chrome = require('../lib/site_chrome');
+const contact = require('../lib/contact_surface');
+const FB_LINK_RE = new RegExp('<a\\b([^>]*href="' + contact.CONTACT.facebookPageUrl.replace(/[.?/]/g, '\\$&') + '"[^>]*)>([\\s\\S]*?)<\\/a>', 'g');
 
 const root = path.resolve(__dirname, '..', '..');
 let failed = false;
@@ -118,6 +120,17 @@ for (const file of htmlFiles) {
   if (!html.includes(chrome.footerAbout())) fail(`${rel} footer lacks the service sentence and city line: ${brand.SERVICE_SENTENCE}`);
   if (!html.includes(chrome.legal())) fail(`${rel} footer lacks the copyright and legal links row`);
   for (const l of chrome.LEGAL_LINKS) if (!html.includes(`<a href="${l.href}">${l.label}</a>`)) fail(`${rel} footer lacks the ${l.label} link`);
+  // Facebook icon link (owner-approved 2026-10-18, scripts/lib/contact_surface.js):
+  // the footer links the Page with an inline SVG "f" logo, never a text link.
+  const fbFooter = html.includes('<footer') ? html.slice(html.indexOf('<footer')) : '';
+  const fbLinks = [...fbFooter.matchAll(FB_LINK_RE)];
+  if (fbLinks.length !== 1) fail(`${rel} footer has ${fbLinks.length} links to ${contact.CONTACT.facebookPageUrl}, expected exactly 1 icon link`);
+  for (const [, attrs, inner] of fbLinks) {
+    for (const need of [`aria-label="${contact.FB_LABEL_HTML}"`, 'rel="noopener"', 'target="_blank"']) if (!attrs.includes(need)) fail(`${rel} footer Facebook link lacks ${need}`);
+    if (!/^<svg\b[^>]*aria-hidden="true"[^>]*focusable="false"[^>]*>[\s\S]*?<\/svg>/.test(inner)) fail(`${rel} footer Facebook link does not open with an inline <svg aria-hidden="true" focusable="false">`);
+    if (!inner.includes(`<span class="pnp-sr">${contact.FB_LABEL_HTML}</span>`)) fail(`${rel} footer Facebook link lacks the visually hidden label`);
+  }
+  if (rel === 'contact.html' && !html.includes(contact.facebookFollowLink())) fail(`${rel} direct-contact block lacks the "${contact.FB_FOLLOW_LABEL}" icon link`);
   const visible = html.replace(/<script\b[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, ' ');
   const legalPage = rel === 'terms-and-conditions.html' || rel === 'privacy-policy.html';
   if (legalPage && !visible.includes('Kerseta LLC ("Porch &amp; Party", "we", "us")')) fail(`${rel} does not open by naming Kerseta LLC ("Porch & Party", "we", "us")`);

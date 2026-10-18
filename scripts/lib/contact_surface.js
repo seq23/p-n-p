@@ -55,11 +55,29 @@ const footerRouteLink = () => `<a href="${R.href}" ${MARK.footerRoute}>${R.foote
 const headerCall = () =>
   `<a href="${C.telHref}" class="header-call" ${MARK.header}>${CALL_LABEL}</a>`;
 
+/**
+ * Facebook icon link (owner-approved 2026-10-18): the footer carries the
+ * standard Facebook "f" logo as an inline SVG (no external request, no icon
+ * font) instead of a text link, with an aria-label and a visually hidden
+ * label for screen readers. contact.html also carries it with visible text in
+ * its direct-contact block. Styles: assets/css/site-nav.css (.pnp-fb), the one
+ * stylesheet every page loads. Guarded by scripts/validation/validate.js.
+ */
+const FB_LABEL_HTML = FB_LABEL.replace('&', '&amp;');
+const FB_FOLLOW_LABEL = 'Follow us on Facebook';
+const FB_ICON = '<svg class="pnp-fb-ico" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg>';
+const facebookIconLink = () =>
+  `<a href="${C.facebookPageUrl}" class="pnp-fb" aria-label="${FB_LABEL_HTML}" rel="noopener" target="_blank">${FB_ICON}<span class="pnp-sr">${FB_LABEL_HTML}</span></a>`;
+// Visible text is the accessible name here (no aria-label, so the spoken name
+// matches what a voice-control user sees: WCAG 2.5.3 label in name).
+const facebookFollowLink = () =>
+  `<p class="pnp-fb-follow"><a href="${C.facebookPageUrl}" class="pnp-fb pnp-fb-text" rel="noopener" target="_blank">${FB_ICON}<span>${FB_FOLLOW_LABEL}</span></a></p>`;
+
 const footerContact = () =>
-  `<p class="muted" ${MARK.footer}><a href="${C.telHref}">${CALL_LABEL}</a><br><a href="${C.googleBusinessProfileUrl}" rel="noopener" target="_blank">${MAPS_LABEL}</a><br><a href="${C.facebookPageUrl}" rel="noopener" target="_blank">${FB_LABEL.replace('&', '&amp;')}</a></p>`;
+  `<p class="muted" ${MARK.footer}><a href="${C.telHref}">${CALL_LABEL}</a><br><a href="${C.googleBusinessProfileUrl}" rel="noopener" target="_blank">${MAPS_LABEL}</a><br>${facebookIconLink()}</p>`;
 
 const contactDirect = () =>
-  `<div class="contact-direct" ${MARK.direct}><p><strong>Prefer to talk it through?</strong> <a href="${C.telHref}">Call ${C.telephoneDisplay}</a> or <a href="${C.smsHref}">text ${C.telephoneDisplay}</a>.</p><p><a href="${C.googleBusinessProfileUrl}" rel="noopener" target="_blank">${GBP_LABEL}</a>: see Porch and Party on Google Maps.</p></div>`;
+  `<div class="contact-direct" ${MARK.direct}><p><strong>Prefer to talk it through?</strong> <a href="${C.telHref}">Call ${C.telephoneDisplay}</a> or <a href="${C.smsHref}">text ${C.telephoneDisplay}</a>.</p><p><a href="${C.googleBusinessProfileUrl}" rel="noopener" target="_blank">${GBP_LABEL}</a>: see Porch and Party on Google Maps.</p>${facebookFollowLink()}</div>`;
 
 // Owner-approved 2026-10-14: the renter-safety line sits next to the quote
 // form link on contact.html. Text lives in data/offers/services.json renterSafety.
@@ -218,6 +236,8 @@ function applyContactSurface(html, rel) {
   }
   const isContact = rel === 'contact.html';
   const isHome = rel === 'index.html';
+  // Re-render an existing direct-contact block so a change here reaches contact.html.
+  if (isContact && out.includes(MARK.direct)) out = out.replace(/<div class="contact-direct" data-contact="direct">[\s\S]*?<\/div>/, () => contactDirect());
   if (isContact && !out.includes(MARK.direct)) {
     const m = out.indexOf('<main');
     const tail = out.slice(m);
@@ -250,6 +270,6 @@ module.exports = {
   CONTACT: C, CALL_LABEL, GBP_LABEL, MARK, PRIORITY_PAGES: priority.pages,
   BUSINESS_TYPES: T.additionalType, PRIMARY_ROUTE: R,
   headerCall, footerContact, footerRouteLink, contactDirect, popularQuestions, renterSafety, SAFETY,
-  businessContactFields, businessRef, canonicalBusiness, isBusinessNode, BUSINESS_ID, SAME_AS, MAPS_LABEL, FB_LABEL,
+  businessContactFields, businessRef, canonicalBusiness, isBusinessNode, BUSINESS_ID, SAME_AS, MAPS_LABEL, FB_LABEL, FB_LABEL_HTML, FB_FOLLOW_LABEL, FB_ICON, facebookIconLink, facebookFollowLink,
   patchJsonLd, applyContactSurface
 };
