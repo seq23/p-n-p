@@ -58,27 +58,23 @@ export const SCHEDULE_FIRST = {
   grazing: ['card.schedSetup', 'grazing_setup'],
   rentals: ['card.schedPickup', 'rental_pickup'],
 };
-// The optional second booking (never required): porch/party takedown, grazing pickup.
-export const SCHEDULE_SECOND = {
-  porch: ['card.schedTakedown', 'porch_takedown'],
-  party: ['card.schedTakedown', 'party_takedown'],
-  grazing: ['card.schedGrazingPickup', 'grazing_pickup'],
-};
+// The optional second booking (never required): porch/party takedown, grazing pickup. It is
+// booked on the card's inline row (views.mjs takedownRow), never through a button to another page.
+export const SCHEDULE_SECOND = { porch: 'porch_takedown', party: 'party_takedown', grazing: 'grazing_pickup' };
 
 // Buttons that belong to one service only. A key here never shows on a card without it.
 export const SERVICE_ONLY = {
   'card.checklist': ['porch', 'party', 'grazing'],
   'card.printChecklist': ['porch', 'party', 'grazing'],
   'card.schedInstall': ['porch'],
-  'card.schedTakedown': ['porch', 'party'],
   'card.schedSetup': ['party', 'grazing'],
-  'card.schedGrazingPickup': ['grazing'],
   'card.schedPickup': ['rentals'],
   'ret.mark': ['rentals'],
   'ret.see': ['rentals'],
   'msg.pickupText': ['rentals'],
   'card.jobDone': ['porch', 'party', 'grazing'],
   'td.markDone': ['porch', 'party'],
+  'td.save': ['porch', 'party', 'grazing'],
   'card.undoJobDone': ['porch', 'party', 'grazing'],
 };
 
@@ -86,7 +82,7 @@ export const SERVICE_ONLY = {
 // wait under "Show details", most relevant first (the order below).
 export const MAX_SECONDARY = 3;
 const SECONDARY_ORDER = ['card.openInvoice', 'card.createInvoice', 'card.schedInstall', 'card.schedSetup', 'card.schedPickup', 'ret.mark', 'card.seeCal',
-  'card.schedTakedown', 'card.schedGrazingPickup', 'ret.see', 'card.checklist', 'card.undoJobDone', 'card.printChecklist'];
+  'ret.see', 'card.checklist', 'card.undoJobDone', 'card.printChecklist'];
 const rank = (k) => { const i = SECONDARY_ORDER.indexOf(k.split('|')[0]); return i < 0 ? SECONDARY_ORDER.length : i; };
 
 // The rules table. facts: { services, stage, inv, plan, sched, kinds (booked kinds),
@@ -103,8 +99,8 @@ const rank = (k) => { const i = SECONDARY_ORDER.indexOf(k.split('|')[0]); return
 // Exactly ONE big button whenever there is a step to take; never more than one.
 //
 // Takedown (owner, 18 Oct 2026): after Job done on a porch/party the customer asked to take down,
-// the primary is "Schedule takedown" (not booked yet) or "Mark takedown done" (booked, on/after
-// its day); before its day nothing big (the "Next:" line waits for it). takedown = takedownState().
+// the inline takedown row carries the next step: its Save (not booked yet, primary '') or its
+// one-tap "Mark takedown done" (booked, any day: primary 'td.markDone'). takedown = takedownState().
 export function cardButtons({ services, stage, inv = null, plan = 'half', sched = false, kinds = [], returned = false, jobDoneAt = false, takedownPlan = '',
   eventReached = true, pickupReached = true, pickupTimeSet = false, canText = true, takedown = null, paidFull = false }) {
   const has = (k) => services.includes(k);
@@ -127,10 +123,12 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
     else if (backLeft && !pickupTimeSet && canText) primary = 'msg.pickupText';
     else if (!jobLeft && !backLeft) primary = 'pay.paid';
   } else if (stage === 'job_done') {
+    // The takedown lives in the inline row on the card (views.mjs takedownRow): not booked yet,
+    // its Save is the next step (no primary here, so never two big buttons); booked, its
+    // one-tap "Mark takedown done" IS the primary, on any day (owner, 18 Oct 2026).
     const td = takedown && takedown.pending ? takedown : null;
-    if (td && (td.status === 'to_schedule' || td.status === 'not_sure')) primary = `card.schedTakedown|${td.kind}`;
-    else if (td && td.status === 'due') primary = 'td.markDone';
-    else if (td && td.status === 'booked') primary = paidFull ? '' : 'pay.paid';
+    if (td && (td.status === 'to_schedule' || td.status === 'not_sure')) primary = '';
+    else if (td && (td.status === 'due' || td.status === 'booked')) primary = 'td.markDone';
     else primary = 'pay.paid';
   }
   const sec = [];
@@ -138,16 +136,9 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
   if (!inv && primary !== 'card.createInvoice') sec.push('card.createInvoice');
   for (const s of firstSched) if (s !== primary) sec.push(s);
   if (sched) sec.push('card.seeCal');
-  // The second booking: once the first one is on the calendar, and not booked yet. A porch or
-  // party takedown shows as a button only when the plan is "scheduled" (the form said yes);
-  // undecided, the takedown box on the card asks (takedownChoice); "customer will handle it"
-  // shows nothing (no booking, no nagging). The grazing pickup is always just optional.
-  for (const k of decorish) {
-    const second = SCHEDULE_SECOND[k];
-    if (!second || !kinds.includes(SCHEDULE_FIRST[k][1]) || kinds.includes(second[1])) continue;
-    if (k !== 'grazing' && takedownPlan !== 'scheduled') continue;
-    if (!sec.includes(`${second[0]}|${second[1]}`)) sec.push(`${second[0]}|${second[1]}`);
-  }
+  // The second booking (porch/party takedown, grazing pickup) is never a button that opens
+  // another page any more: the inline row on the card books it in place (owner, 18 Oct 2026).
+  void takedownPlan;
   if (has('rentals') && returned) sec.push('ret.see');
   if (has('rentals') && !returned && sched && pickupReached && primary !== 'ret.mark') sec.push('ret.mark');
   if (decorish.length && jobDoneAt && !returned) sec.push('card.undoJobDone');
@@ -178,8 +169,9 @@ export function cardDates({ r, services, bookings = [], today }) {
 }
 
 // The quiet "Next:" line on a card with nothing big to tap yet (waiting for the day).
+// It shows IN the primary slot (one place for "what next"), never as a second line.
 export function cardWaiting({ services, stage, primary, returned = false, jobDoneAt = false, dates, takedown = null }) {
-  if (!primary && stage === 'job_done' && takedown && takedown.status === 'booked') return { key: 'td.markDone', date: takedown.date, words: 'Mark takedown done, from the takedown day' };
+  void takedown;
   if (primary || !['deposit_paid', 'scheduled'].includes(stage)) return null;
   if (services.some((k) => k !== 'rentals') && !jobDoneAt && !dates.eventReached) return { key: 'card.jobDone', date: dates.eventDate, words: 'Mark job done, on the event day' };
   if (services.includes('rentals') && !returned && !dates.pickupReached) return { key: 'ret.mark', date: dates.pickupDate, words: 'Mark returned, from pickup day' };
@@ -209,14 +201,15 @@ export function cardPayment({ inv = null, status = 'new', plan = 'half', primary
   return { state, button, undo: state === 'deposit' || state === 'paid' };
 }
 
-// The takedown box: which porch/party takedown still needs a decision on this card.
-// Returns '' (nothing to show), 'ask' (no plan yet), 'not_sure', or 'customer_handles'.
-export function takedownChoice({ services, kinds = [], takedownPlan = '', stage }) {
+// The inline takedown / pickup row (views.mjs takedownRow): which line a card shows. Porch and
+// party & decor: the takedown; grazing: its optional pickup; rentals never. Never on a Void,
+// Finished or Put away card.
+export function inlineRowKind({ services, stage }) {
   if (['void', 'finished', 'archived'].includes(stage)) return '';
-  const k = services.find((x) => (x === 'porch' || x === 'party') && kinds.includes(SCHEDULE_FIRST[x][1]) && !kinds.includes(SCHEDULE_SECOND[x][1]));
-  if (!k) return '';
-  if (takedownPlan === 'scheduled') return '';
-  return takedownPlan === 'not_sure' || takedownPlan === 'customer_handles' ? takedownPlan : 'ask';
+  if (services.includes('porch')) return 'porch_takedown';
+  if (services.includes('party')) return 'party_takedown';
+  if (services.includes('grazing')) return 'grazing_pickup';
+  return '';
 }
 export const TAKEDOWN_PLANS = ['scheduled', 'not_sure', 'customer_handles'];
 

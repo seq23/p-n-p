@@ -14,7 +14,7 @@ import { chicagoDate, chicagoHour } from './reminders.mjs';
 import { balances } from './ledger.mjs';
 import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
 import { getSettings, money, esc, FROM_EMAIL } from './util.mjs';
-import { PRICE_TABLE } from './prices.mjs';
+import { TRACK_TABLE as PRICE_TABLE } from './prices.mjs';
 
 const SITE = 'https://porchandparty901.com';
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

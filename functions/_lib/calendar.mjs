@@ -157,9 +157,15 @@ export async function saveRequestBooking(db, key, b) {
       place = excluded.place, items = excluded.items, name_norm = excluded.name_norm, phone_digits = excluded.phone_digits,
       edited_by_hand = 1, updated_at = datetime('now') RETURNING id`)
     .bind(key, b.kind, b.date, b.time, b.customer_name, b.phone, b.email || '', b.place, b.items, normName(b.customer_name), digitsOf(b.phone)).first();
-  await markScheduled(db, key);
+  // Only a FIRST booking (install, setup, rental pickup, or one typed in as Other) marks the
+  // request Scheduled. A takedown or a grazing pickup booked after Job done never moves it back.
+  if (!SECOND_KINDS.has(b.kind)) await markScheduled(db, key);
   return row.id;
 }
+
+// The optional second bookings (porch/party takedown, grazing pickup) and a rental's return:
+// booking one of them never changes the request's status.
+export const SECOND_KINDS = new Set(['porch_takedown', 'party_takedown', 'grazing_pickup', 'rental_return']);
 
 // A booking typed in by hand (no request).
 export async function createBooking(db, b) {
@@ -243,11 +249,15 @@ export function digitsOf(s) {
   return String(s || '').replace(/\D/g, '');
 }
 
-// The request's status becomes 'scheduled'; the one it had is kept in prev_status.
+// The request's status becomes 'scheduled'; the one it had is kept in prev_status. A request
+// already past Scheduled (Job done, Paid, Done) or Void never moves back (live bug, 18 Oct 2026:
+// booking a takedown after Job done showed the job as Scheduled again).
+export const PAST_SCHEDULED = ['job_done', 'paid', 'done', 'void'];
 export async function markScheduled(db, key) {
   await db.prepare(`INSERT INTO request_status (request_key, status, prev_status, updated_at) VALUES (?1, 'scheduled', 'new', datetime('now'))
     ON CONFLICT(request_key) DO UPDATE SET prev_status = CASE WHEN request_status.status = 'scheduled' THEN request_status.prev_status ELSE request_status.status END,
-      status = 'scheduled', updated_at = datetime('now')`).bind(key).run();
+      status = 'scheduled', updated_at = datetime('now')
+    WHERE request_status.status NOT IN (${PAST_SCHEDULED.map((x) => `'${x}'`).join(', ')})`).bind(key).run();
 }
 
 // After a booking is deleted: if the request has none left and is still 'scheduled', it goes
@@ -296,6 +306,11 @@ export function bookingFromRequest(request, table) {
 }
 
 // Requests still waiting for a day: not put away, not void, not scheduled, no booking yet.
+// bookedKeys = request keys with a FIRST booking (firstBookedKeys): a takedown booked straight
+// from the form's date does not take a request off this list.
+export function firstBookedKeys(bookings) {
+  return new Set((bookings || []).filter((b) => b.request_key && !SECOND_KINDS.has(b.kind)).map((b) => b.request_key));
+}
 export function unscheduledRequests(requests, statuses, bookedKeys) {
   return requests.filter((r) => {
     const st = statuses[r.key];

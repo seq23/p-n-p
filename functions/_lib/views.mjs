@@ -5,10 +5,10 @@
 // screen opens with a numbered 1-2-3 and (except Requests itself) a Back link.
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
-import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, cardWaiting, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, takedownChoice } from './cards.mjs';
+import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, cardWaiting, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, inlineRowKind } from './cards.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
-import { takedownState, takedownStepWords } from './takedown.mjs';
+import { takedownState, takedownStepWords, inlineDefaultDate } from './takedown.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
 
 const CSS = `
@@ -374,6 +374,9 @@ function cardPaymentBox(r, st, inv, primary, ctx) {
     deposit: inv ? `Deposit in · still owes ${money(owed)}` : 'Deposit in.',
     paid: 'Paid in full ✓',
   }[p.state] || '';
+  // Paid in full: no box at all (owner, 18 Oct 2026: the progress line already says it; the undo
+  // is the small link on the progress line and on the Edit page).
+  if (p.state === 'paid') return '';
   if (p.state === 'none' || p.state === 'draft') return `<p class="payline muted" data-payment data-pay-state="${p.state}" data-pay-words>${esc(words)}</p>`;
   const out = [];
   if (p.button) out.push(cardButton(p.button, ctx, false, { helper: false }));
@@ -403,9 +406,8 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .facts{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin:6px 0 2px;font-size:1.05rem}
 .facts .call{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;background:var(--ok);color:#fff;font-weight:700;text-decoration:none}
 .progress.mini{gap:4px;margin:8px 0}.progress.mini li{padding:1px 8px;font-size:.82rem}
-.secrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.secrow>*{min-width:0}
-.secrow .btn{min-height:48px;font-size:.98rem;padding:8px 10px}
-@media(min-width:700px){.secrow{grid-template-columns:repeat(3,1fr)}}
+.secrow{display:flex;flex-wrap:wrap;gap:6px 8px;margin-top:10px}.secrow>*{min-width:0;margin:0}
+.secrow .act{margin:0}.secrow .btn{width:auto;min-height:44px;font-size:.95rem;padding:6px 14px;border-width:1px;border-radius:999px}
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
 .filters a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--ink);font-weight:600;text-decoration:none}
 .filters a[aria-current=true]{background:var(--ink);border-color:var(--ink);color:#fff}
@@ -426,6 +428,25 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .msgpair{display:inline-flex;flex-wrap:wrap;align-items:center;gap:0 6px}.msgpair form{display:inline;margin:0}
 .msglink{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline}
 .nextline{margin:12px 2px 0;font-size:1rem}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.tdrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;margin:12px 0 4px;padding:10px 12px;border:2px solid var(--line);border-radius:12px;background:#fff}
+.tdrow.amber{border-color:#ebcf96;background:#fffaf0}.tdrow.okrow{border-color:#b2d3ab;background:#f3faf1}
+.tdrow .tdl{font-weight:700;font-size:1.1rem}
+.tdrow input[type=date],.tdrow input[type=time]{width:auto;min-height:48px;font-size:1.05rem;margin:0}
+.tdrow .btn{width:auto;min-height:48px;padding:8px 18px}
+.tdrow .hint{flex-basis:100%;margin:0}
+.tdrow .tdsaved{flex-basis:100%;font-weight:700;color:#2f5a2b}
+.tdrow details{display:inline}.tdrow details[open]{flex-basis:100%}.tdrow summary{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:600;text-decoration:underline;cursor:pointer;list-style:none}
+.tdrow .tdmore{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px}
+.tdrow form{margin:0;display:inline-flex;flex-wrap:wrap;align-items:center;gap:8px}
+.tdchoices{display:inline-flex;flex-wrap:wrap;align-items:center;gap:0 8px}
+.tdpill{display:inline-block;padding:2px 10px;border-radius:999px;background:#fff3dc;color:#7a4a0c;font-weight:700;font-size:.9rem}
+.nextslot{display:flex;align-items:center;min-height:52px;padding:8px 16px;border:2px dashed var(--line);border-radius:12px;color:var(--muted);font-weight:600;margin:12px 0 0}
+.tyline{margin:10px 2px 0;font-size:.92rem;color:var(--muted);line-height:2.6}
+.tyline>span[aria-hidden]{margin:0 6px}
+.tyline form,.tyline .msgpair,.tyline .msgpair form{display:inline;margin:0}.tyline .msgpair .muted{margin:0 6px}
+.tyline .linkbtn,.tyline .msglink{display:inline;font-size:.92rem;min-height:0;padding:6px 0}
+.paidundo{display:inline-block;margin-left:4px;font-size:.85rem}.paidundo .linkbtn{font-size:.85rem;min-height:32px}
 .tdsub{font-weight:600;color:#92400e}.tdsub.done{color:inherit;font-weight:400}.tdbox{margin:10px 0}.tdbox .secrow{margin-top:8px}.linkbtn{background:none;border:0;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}
 `;
 
@@ -445,7 +466,7 @@ const CARD_LABEL = {
   'card.createInvoice': 'Create invoice', 'card.openInvoice': 'Open invoice', 'card.seeCal': 'See it on the calendar',
   'card.checklist': 'Walk-through checklist', 'card.printChecklist': 'Print checklist', 'ret.mark': 'Mark returned', 'ret.see': 'See the check-in',
   'card.schedInstall': 'Schedule install', 'card.schedSetup': 'Schedule setup', 'card.schedPickup': 'Schedule pickup + return',
-  'card.schedTakedown': 'Schedule takedown', 'card.schedGrazingPickup': 'Schedule pickup (optional)', 'td.markDone': 'Mark takedown done',
+  'td.markDone': 'Mark takedown done',
 };
 
 // One button from the rules table. ctx: { rk, inv, st, sched, payTarget, who, plan }.
@@ -463,8 +484,8 @@ function cardButton(keyKind, ctx, primary, { helper = true } = {}) {
     case 'card.printChecklist': return a(`/admin/checklist?r=${rk}`, CARD_LABEL[key], ' target="_blank" rel="noopener"');
     case 'ret.mark': case 'ret.see': return a(`/admin/returns?k=${rk}`, CARD_LABEL[key]);
     case 'msg.pickupText': { const m = ctx.msgs && ctx.msgs.pickup; return m && m.sms ? a(m.sms.href, 'Text about pickup time', ` data-msg-tap="pickupTime" data-rk="${esc(rk)}"`) : ''; }
-    case 'card.schedInstall': case 'card.schedSetup': case 'card.schedPickup': case 'card.schedTakedown': case 'card.schedGrazingPickup':
-      return a(`/admin/calendar/new?r=${rk}&kind=${kind}${key === 'card.schedTakedown' && ctx.td && ctx.td.date && !ctx.td.booking ? `&date=${ctx.td.date}` : ''}`, CARD_LABEL[key]);
+    case 'card.schedInstall': case 'card.schedSetup': case 'card.schedPickup':
+      return a(`/admin/calendar/new?r=${rk}&kind=${kind}`, CARD_LABEL[key]);
     case 'td.markDone': return ctx.td && ctx.td.booking ? `<form method="post" action="/admin/calendar/bookings/${ctx.td.booking.id}/takedown-done">${wrap(`<button class="${cls}" type="submit"${tip(key)}>Mark takedown done</button>`)}</form>` : '';
     case 'card.jobDone':
       // Takedown not decided yet: ask once, at the moment of Job done; never blocks it.
@@ -486,29 +507,45 @@ function cardButton(keyKind, ctx, primary, { helper = true } = {}) {
   }
 }
 
-// The takedown box (porch/party, once the install/setup is booked): the second step is never
-// required. "Schedule it" · "Not sure yet" (amber, listed in Still to decide on the calendar) ·
-// "Customer will handle it" (no booking, no nagging), each with a note.
-function takedownBox(td, r, rk, services) {
-  const k = services.includes('porch') ? 'porch' : 'party';
-  const sched = `<a class="btn ghost" href="/admin/calendar/new?r=${rk}&kind=${k}_takedown"${tip('td.schedule')}>Schedule it</a>`;
-  const choose = (plans) => `<form method="post" action="/admin/requests/takedown" class="tdform">${hiddenInputs({ r: rk })}
-      <label for="tdn-${esc(rk)}">Note (optional)</label><input id="tdn-${esc(rk)}" name="note" value="${esc(r.takedownNote || '')}" placeholder="e.g. they will tell us after the party">
-      <div class="secrow"><div class="act">${sched}</div>${plans.map(([v, key, label]) => `<div class="act"><button class="btn ghost" type="submit" name="plan" value="${v}"${tip(key)}>${label}</button></div>`).join('')}</div></form>`;
-  if (td === 'customer_handles') return `<div class="tdbox muted" data-takedown="customer_handles">Takedown: the customer will handle it${r.takedownNote ? ` (${esc(r.takedownNote)})` : ''}.
-    <form method="post" action="/admin/requests/takedown" style="display:inline">${hiddenInputs({ r: rk, plan: '' })}<button class="linkbtn" type="submit"${tip('td.change')}>Change</button></form></div>`;
-  if (td === 'not_sure') return `<div class="notice warn tdbox" data-takedown="not_sure"><strong>Takedown: not decided yet.</strong>${r.takedownNote ? ` ${esc(r.takedownNote)}` : ''}
-    ${choose([['customer_handles', 'td.customer', 'Customer will handle it']])}</div>`;
-  return `<div class="tdbox card" style="background:var(--cream)" data-takedown="ask"><strong>Takedown afterwards?</strong> <span class="muted">Never required.</span>
-    ${choose([['not_sure', 'td.notSure', 'Not sure yet'], ['customer_handles', 'td.customer', 'Customer will handle it']])}</div>`;
+// The inline takedown row (owner, 18 Oct 2026: "too many steps"). ONE line on every porch and
+// party & decor card: "Takedown:" + date box (the booked day, else the form's / owner's date,
+// else the day after the install / setup) + optional time + Save · Not sure yet · Customer will
+// handle it. Save books it right here (POST /admin/requests/takedown-inline) and comes back to
+// this card. Booked: "Booked for Tue 20 Oct" + one-tap Mark takedown done (any day) + Change /
+// Remove. Grazing gets the same line for its optional pickup (Save / Change / Remove only).
+// Rentals never have it (cards.mjs inlineRowKind).
+function takedownRow({ kind, tdS, r, rk, bookings, eventDate, primaryDone, saved, savedWords }) {
+  const grazing = kind === 'grazing_pickup';
+  const label = grazing ? 'Pickup (optional):' : 'Takedown:';
+  const booking = (bookings || []).find((b) => b.kind === kind) || null;
+  const dateIn = (id, value) => `<label class="sr" for="${id}">${grazing ? 'Pickup day' : 'Takedown day'}</label><input type="date" id="${id}" name="date" value="${esc(value)}" required${tip('td.date')}>`;
+  const timeIn = (id, value) => `<label class="sr" for="${id}">Time (optional)</label><input type="time" id="${id}" name="time" value="${esc(value || '')}"${tip('td.time')}>`;
+  const ok = saved ? `<p class="tdsaved" data-takedown-saved role="status">${esc(savedWords || '')}</p>` : '';
+  const id = `td-${esc(rk)}`;
+  const hid = hiddenInputs({ r: rk, kind });
+  if (!grazing && tdS.status === 'done') {
+    return `<div class="tdrow okrow" data-takedown-row="done"><span class="tdl">${label}</span> <strong>Done ✓</strong>${booking ? ` <span class="muted">(${esc(shortDate(booking.date))})</span>
+      <form method="post" action="/admin/calendar/bookings/${booking.id}/takedown-done">${hiddenInputs({ undo: '1' })}<button class="linkbtn" type="submit"${tip('td.undoDone')}>Undo</button></form>` : ''}${ok}</div>`;
+  }
+  if (!grazing && tdS.status === 'customer_handles') {
+    return `<div class="tdrow" data-takedown-row="customer_handles"><span class="tdl">${label}</span> <span>The customer will handle it${r.takedownNote ? ` (${esc(r.takedownNote)})` : ''}.</span>
+      <form method="post" action="/admin/requests/takedown">${hiddenInputs({ r: rk, plan: '' })}<button class="linkbtn" type="submit"${tip('td.change')}>Change</button></form>${ok}</div>`;
+  }
+  if (booking) {
+    const when = `Booked for ${shortDate(booking.date)}${booking.time ? `, ${prettyTimeOf(booking.time)}` : ''}`;
+    const done = grazing ? '' : `<form method="post" action="/admin/calendar/bookings/${booking.id}/takedown-done"><button class="btn ${primaryDone ? 'primary' : 'ghost'}" type="submit" data-takedown-done-tap${tip('td.markDone')}>Mark takedown done</button></form>${primaryDone ? hint('td.markDone') : ''}`;
+    return `<div class="tdrow okrow" data-takedown-row="booked"><span class="tdl">${label}</span> <strong data-takedown-booked="${esc(booking.date)}">${esc(when)}</strong> ${done}
+      <details><summary${tip('td.changeDate')}>Change</summary><form method="post" action="/admin/requests/takedown-inline" class="tdmore">${hid}${dateIn(`${id}-c`, booking.date)}${timeIn(`${id}-ct`, booking.time)}<button class="btn ghost" type="submit" name="go" value="save"${tip('td.save')}>Save</button></form></details>
+      <form method="post" action="/admin/requests/takedown-inline">${hid}<button class="linkbtn" type="submit" name="go" value="remove"${tip('td.remove')}>Remove</button></form>${ok}</div>`;
+  }
+  const value = inlineDefaultDate({ kind, bookings, takedownDate: r.takedownDate, eventDate });
+  const notSure = !grazing && tdS.status === 'not_sure';
+  const choices = grazing ? '' : `<span class="tdchoices"><button class="linkbtn" type="submit" formaction="/admin/requests/takedown" name="plan" value="not_sure"${tip('td.notSure')}>Not sure yet</button><span class="muted">·</span><button class="linkbtn" type="submit" formaction="/admin/requests/takedown" name="plan" value="customer_handles"${tip('td.customer')}>Customer will handle it</button></span>`;
+  const asked = !grazing && tdS.status === 'to_schedule';
+  return `<div class="tdrow${notSure || asked ? ' amber' : ''}" data-takedown-row="${notSure ? 'not_sure' : 'open'}"><form method="post" action="/admin/requests/takedown-inline">${hid}<span class="tdl">${label}</span>${notSure ? ` <span class="tdpill">Not decided yet</span>${r.takedownNote ? ` <em data-takedown-note>${esc(r.takedownNote)}</em>` : ''}` : ''}${asked ? ' <span class="tdpill">Asked for, not booked yet</span>' : ''}
+    ${dateIn(id, value)}${timeIn(`${id}-t`, '')}<button class="btn ${primaryDone ? 'primary' : 'ghost'}" type="submit" name="go" value="save"${tip('td.save')}>Save</button>${choices}</form>${primaryDone ? hint('td.save') : ''}${ok}</div>`;
 }
-
-// Asked for, not booked yet: the amber prompt (owner, 18 Oct 2026). The date is the form's or
-// the owner's and only PREFILLS the booking screen; nothing is booked until she confirms it.
-function takedownRequested(td, rk) {
-  const words = td.date ? `Takedown requested for ${shortDate(td.date)} — tap to schedule` : 'Takedown requested — tap to schedule';
-  return `<div class="notice warn tdbox" data-takedown="requested"><a href="/admin/calendar/new?r=${rk}&amp;kind=${td.kind}${td.date ? `&amp;date=${td.date}` : ''}"${tip('td.requested')}><strong>${esc(words)}</strong></a></div>`;
-}
+const prettyTimeOf = (hhmm) => { const m = String(hhmm || '').match(/^(\d{2}):(\d{2})$/); if (!m) return ''; const h = Number(m[1]); return `${((h + 11) % 12) + 1}:${m[2]} ${h < 12 ? 'AM' : 'PM'}`; };
 
 function payTargetFor(r, inv) {
   return inv ? { action: `/admin/invoices/${inv.id}/status`, field: 'action', extra: { back: '/admin/' } } : { action: '/admin/requests/status', field: 'status', extra: { r: b64urlText(r.key) } };
@@ -549,7 +586,7 @@ const chicagoToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America
 // One request card. o: everything dashboardPage knows about this request.
 export function requestCard(r, o) {
   const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace,
-    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false } = o;
+    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '' } = o;
   const rk = b64urlText(r.key);
   const services = servicesOf(r);
   const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
@@ -564,18 +601,25 @@ export function requestCard(r, o) {
     takedown: tdS, paidFull: pr.steps.some((x) => x.key === 'paid' && x.done) || pr.paidEarly });
   const waiting = cardWaiting({ services, stage, primary: rules.primary, returned, jobDoneAt: Boolean(st.job_done_at), dates, takedown: tdS });
   const quietStage = ['void', 'finished', 'archived'].includes(stage);
-  const td = tdS.status === 'to_schedule' && !quietStage ? 'requested' : takedownChoice({ services, kinds, takedownPlan: r.takedownPlan, stage });
-  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: td === 'not_sure', msgs, td: tdS };
+  const rowKind = inlineRowKind({ services, stage });
+  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: tdS.status === 'not_sure', msgs, td: tdS };
+  // The takedown row's own button is the one big button when it is the next step.
+  const rowPrimary = stage === 'job_done' && (rules.primary === 'td.markDone' || (!rules.primary && ['to_schedule', 'not_sure'].includes(tdS.status)));
+  const row = rowKind ? takedownRow({ kind: rowKind, tdS, r, rk, bookings, eventDate: dates.eventDate, primaryDone: rowPrimary, saved: Boolean(tdSaved), savedWords: tdSaved }) : '';
   const first = serviceBadge(services[0]);
   const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
+  // No status pills beside the name (owner, 18 Oct 2026: "Paid in full" / "Scheduled for Sat 17
+  // Oct" repeated the progress line). Only what the progress line cannot say: Void (no progress
+  // line), Finished, and Returned — check damage.
   const chips = [
-    pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : (pr.current === 'scheduled' && sched && !pr.finished ? '' : `<span class="chip ${pr.current === 'paid' ? 'paid' : (pr.damaged && pr.current === 'job_done' ? 'deposit_paid' : 'step')}" data-step="${pr.current}">${esc(pr.finished ? 'Finished: job done and paid' : pr.label)}</span>`),
-    pr.paidEarly ? '<span class="chip paid" data-paid-early>Paid in full ✓</span>' : '',
-    sched && !pr.void ? `<span class="chip sched" data-scheduled>Scheduled for ${esc(shortDate(sched.date))}</span>` : '',
-    returned ? (ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : `<span class="chip paid" data-returned>Returned ${esc(shortDate(String(ret.returned_at).slice(0, 10)))}</span>`) : '',
-    notPaidYet(inv) ? `<span class="chip deposit_paid" data-owes>Owes ${esc(money(inv.balance.owed))}</span>` : '',
+    pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : '',
+    pr.finished && !pr.void ? '<span class="chip paid" data-step="paid">Finished: job done and paid</span>' : '',
+    returned && ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : '',
   ].join('');
-  const progress = pr.void || archived ? '' : `<ol class="progress mini" data-progress aria-label="Step ${pr.steps.findIndex((x) => x.key === pr.current) + 1} of 6">${pr.steps.map((x) => `<li class="${x.done ? 'done' : ''}${x.key === pr.current ? ' now' : ''}"><span class="pn">${x.done ? '✓' : x.n}</span> ${esc(x.label)}${x.key === 'job_done' && tdS.status !== 'none' ? `<span class="tdsub${tdS.pending ? '' : ' done'}" data-takedown-step="${esc(tdS.status)}"> · ${esc(takedownStepWords(tdS, shortDate))}</span>` : ''}</li>`).join('')}</ol>`;
+  const paidStep = pr.steps.find((x) => x.key === 'paid');
+  const paidNow = (paidStep && paidStep.done) || pr.paidEarly;
+  const unpaidLink = paidNow && !archived && !pr.void ? `<span class="paidundo" data-paid-undo>${confirmStep({ key: 'pay.unpaid', yesKey: 'pay.unpaidYes', label: 'undo paid', question: `Mark ${ctx.who} as not paid? Only do this to fix a mistake.`, action: ctx.payTarget.action, hidden: hiddenInputs({ ...ctx.payTarget.extra, [ctx.payTarget.field]: 'unpaid' }), link: true, helper: false })}</span>` : '';
+  const progress = pr.void || archived ? '' : `<ol class="progress mini" data-progress aria-label="Step ${pr.steps.findIndex((x) => x.key === pr.current) + 1} of 6">${pr.steps.map((x) => `<li class="${x.done || (x.key === 'paid' && pr.paidEarly) ? 'done' : ''}${x.key === pr.current ? ' now' : ''}"><span class="pn">${x.done || (x.key === 'paid' && pr.paidEarly) ? '✓' : x.n}</span> ${esc(x.label)}${x.key === 'scheduled' && sched && !pr.void ? ` <span data-scheduled>${esc(shortDate(sched.date))}</span>` : ''}${x.key === 'job_done' && tdS.status !== 'none' ? `<span class="tdsub${tdS.pending ? '' : ' done'}" data-takedown-step="${esc(tdS.status)}"> · ${esc(takedownStepWords(tdS, shortDate))}</span>` : ''}</li>`).join('')}</ol>${unpaidLink}`;
   const g = services.includes('grazing') ? grazingFacts(r, foodPerHead) : null;
   const gLine = g && (g.guests || g.estimate) ? `<div class="want" data-grazing-facts>${esc([g.guests ? `Guests: ${g.guests}` : '', g.estimate].filter(Boolean).join(' · '))}</div>` : '';
   const quiet = ['void', 'finished', 'archived'].includes(stage);
@@ -590,12 +634,13 @@ export function requestCard(r, o) {
       ${progress}
       ${quiet ? '' : extras}
       ${damage}${finishedNote}
-      ${td === 'requested' ? takedownRequested(tdS, rk) : (td ? takedownBox(td, r, rk, services) : '')}
-      ${rules.primary ? `<div class="actions" data-primary>${cardButton(rules.primary, ctx, true)}</div>` : ''}
-      ${waiting ? `<p class="nextline muted" data-next-wait="${esc(waiting.key)}"${tip(waiting.key)}>Next: ${esc(waiting.words)}${waiting.date ? ` (${esc(shortDate(waiting.date))})` : ''}.</p>` : ''}
+      ${row}
+      ${rules.primary && rules.primary !== 'td.markDone' ? `<div class="actions" data-primary>${cardButton(rules.primary, ctx, true)}</div>` : ''}
+      ${waiting ? `<p class="nextslot" data-primary-wait data-next-wait="${esc(waiting.key)}"${tip(waiting.key)}>Next: ${esc(waiting.words)}${waiting.date ? ` (${esc(shortDate(waiting.date))})` : ''}</p>` : ''}
       ${rules.secondary.length ? `<div class="secrow" data-secondary>${rules.secondary.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
       ${messagesLine(msgs, { rk, services, primary: rules.primary, returned, quiet })}
       ${payment}
+      ${quiet ? '' : bottom}
       <details class="disclose" data-details><summary${tip('card.details')}>Show details</summary>
         <div class="muted" style="margin-top:4px">${esc(friendlyWhen(r))}${archived && st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</div>
         ${cl && cl !== 'none' ? `<div class="muted" style="margin-top:4px">Checklist ${cl === 'done' ? 'done ✓' : 'started'}</div>` : ''}
@@ -626,7 +671,7 @@ export function requestsPanel(folderUrl) {
 
 // schedule: { [request_key]: { date } } earliest booking per request; kinds: { [request_key]: [kind] }.
 export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '',
-  cardMsgs = {}, bookings = {}, takedownInvoices = new Set(), today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station' }) {
+  cardMsgs = {}, cardBottom = {}, tdSaved = null, bookings = {}, takedownInvoices = new Set(), today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station' }) {
   const err = sheetError ? `<div class="notice err"><strong>The requests could not be loaded right now.</strong> ${/not shared/i.test(sheetError)
     ? `The responses sheet needs to be shared with the site. In Google Sheets tap Share and add <code>${esc(SA_EMAIL)}</code> as a Viewer.`
     : 'Please try again in a minute.'}<div class="muted" style="margin-top:6px;font-size:.95rem">Details: ${esc(sheetError)}</div></div>` : '';
@@ -634,7 +679,7 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
   const one = (r, isArchived) => {
     const st = statuses[r.key] || { status: 'new' };
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
-    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)) }) };
+    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '' }) };
   };
   const shown = requests.map((r) => one(r, false)).filter((x) => matchesFilter(f, x));
   const putRows = archived.map((r) => one(r, true)).filter((x) => matchesFilter(f, x));
@@ -872,7 +917,12 @@ export function helpPage() {
   return layout('How to use this', `<h1>How to use this</h1>
   <p class="noprint">${act(`<button type="button" class="btn ghost inline" onclick="window.print()"${tip('help.print')}>Print this page</button>`, 'help.print')}</p>
   ${tab('Requests', 'requests', '<p>Each request has a <strong>Payment</strong> box. Money buttons always ask "Are you sure?" first. When a job is over, tap <strong>Done — put away</strong>.</p>')}
-  ${tab('Calendar', 'calendar', '<p>Bookings from invoices appear by themselves. A booking you make or change by hand keeps your date, even if the invoice is sent again.</p>')}
+  ${tab('Calendar', 'calendar', '<p>Bookings from invoices appear by themselves. A booking you make or change by hand keeps your date, even if the invoice is sent again.</p><p data-help-chips><strong>Filled = booked · Outlined = asked for, not booked yet.</strong> An outlined chip says <strong>Requested</strong> with the first name; tap it to open the request card. A held rental is filled and says <strong>Held</strong>.</p>')}
+  <section class="card" data-help-takedown><h2>The takedown, on the card</h2><ol class="steps">
+    <li>Every porch and party card has one line: <strong>Takedown:</strong> with a day, a time (optional) and <strong>Save</strong>. The day starts on the one the customer asked for.</li>
+    <li>Tap <strong>Save</strong>: it is on the calendar. The card says <strong>Takedown on the calendar for Tue 20 Oct ✓</strong>. Or tap <strong>Not sure yet</strong> or <strong>Customer will handle it</strong>.</li>
+    <li>When it is done, tap <strong>Mark takedown done</strong> on that line, any day. <strong>Change</strong> moves it, <strong>Remove</strong> takes it off.</li>
+  </ol><p>A takedown date on the form is booked by itself. A grazing table has the same line for its optional pickup.</p></section>
   ${tab('Money', 'money', '<p>Tap any total to see the payments or jobs behind it. Damage deposits are never counted as income. Your Bookings tab in the request sheet updates by itself.</p>')}
   ${tab('Put away', 'archive')}
   ${tab('Invoice', 'invoice')}

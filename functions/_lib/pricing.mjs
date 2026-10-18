@@ -43,6 +43,15 @@ export function buildPriceTable(games, services, porchPackages = null) {
   };
 }
 
+// The calendar's item list (Calendar & Bookings, games out, availability, the booking form):
+// every priced item plus games.json "adminItems" ({ slug, name, quantity, admin_only: true }),
+// which no public generator reads. Same object otherwise, so prices never come from here.
+export function buildTrackTable(table, games) {
+  const extra = (games.adminItems || []).filter((x) => x.admin_only && x.availableNow !== false)
+    .map((x) => ({ slug: x.slug, name: x.name, choice: x.name, kind: 'admin', quantity: x.quantity || 1, dayCents: 0, weekendCents: 0, adminOnly: true }));
+  return { ...table, items: [...table.items, ...extra.filter((x) => !table.items.some((i) => i.slug === x.slug))] };
+}
+
 const norm = (s) => String(s || '').toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/\bsets?\b/g, ' ').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 
 // What the "Which games?" answer asked for: bundle choices first (their strings

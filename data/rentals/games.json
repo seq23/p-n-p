@@ -226,5 +226,15 @@
   "hero": {
     "file": "/assets/rentals/hero.webp",
     "alt": "Black family reunion in a Memphis backyard with a giant connect four, a cornhole board and other giant yard games set up on the lawn, balloons and a party table behind"
-  }
+  },
+  "adminItems": [
+    {
+      "slug": "projector",
+      "name": "Projector",
+      "quantity": 1,
+      "admin_only": true,
+      "availableNow": true,
+      "_why": "Owner 18 Oct 2026: tracked so it shows In/Out on the Day sheet, counts toward availability and cannot be double-booked. Admin only: never priced, never on /rentals/, the /request form, the schema or any listing (public generators read games and extras only; validate:admin-takedown-inline proves it)."
+    }
+  ]
 }

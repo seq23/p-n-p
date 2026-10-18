@@ -65,7 +65,7 @@ check(realGamesAnswer('a giant trampoline', PRICE_TABLE) === '', 'an answer nami
   check(!/>\s*\d?\s*Returned/.test(card.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').replace(/^/, '>')) && !/data-step="job_done"[^>]*>Returned/.test(card), 'decor card progress says Returned');
   check(/Job done/.test(card), 'decor card progress lacks "Job done"');
   check(/Mark job done/.test(card), 'decor card primary button is not Mark job done');
-  check(/Scheduled for Sat 17 Oct/.test(card), 'decor card lacks the dated Scheduled chip');
+  check(/Scheduled <span data-scheduled>Sat 17 Oct<\/span>/.test(card) && !/chip sched/.test(card), 'decor card progress line lacks the dated Scheduled step (or the duplicate pill is back)');
   check(!/data-step="scheduled"/.test(card), 'decor card shows a bare "Scheduled" chip beside the dated one');
   check(!/<dd>\s*n\/a\s*<\/dd>|<dd>\s*N\/A\s*<\/dd>/i.test(card), 'an n/a answer line is shown on the card');
 }

@@ -5,7 +5,10 @@
 import { redirect, htmlResponse, getSettings, putSetting, fromB64urlText, b64urlText, shortDate, todayISO, FROM_EMAIL } from './util.mjs';
 import { loadRequests, logEvent } from './requests.mjs';
 import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
-import { PRICE_TABLE } from './prices.mjs';
+import { TRACK_TABLE as PRICE_TABLE } from './prices.mjs';
+import { autoBookTakedown, inlineKindFor } from './takedown.mjs';
+import { servicesOf } from './cards.mjs';
+import { requestedChips, gamesAskedOn } from './requested.mjs';
 import * as C from './calendar.mjs';
 import { notPaidYet } from './notpaid.mjs';
 import { balances, balanceWords, depositWords } from './ledger.mjs';
@@ -79,7 +82,7 @@ export async function calendarPage(env, url) {
   const windows = C.rentalWindows(all, returns, PRICE_TABLE);
   const statuses = await statusMap(env.DB);
   const { requests } = await requestsSafe(env);
-  const booked = new Set(all.map((b) => b.request_key).filter(Boolean));
+  const booked = C.firstBookedKeys(all);
   const unscheduled = C.unscheduledRequests(requests, statuses, booked).map((r) => ({ ...r, summary: V.wantSummary(r).join(' · ') }));
   const from = C.addDays(`${month}-01`, -7); const to = C.addDays(`${month}-01`, 45);
   const visible = all.filter((b) => (b.date >= from && b.date <= to) || (b.date >= today && b.date <= C.addDays(today, 14)));
@@ -94,7 +97,9 @@ export async function calendarPage(env, url) {
   // "Takedowns to schedule": the customer asked for a takedown that is not booked yet; the day
   // they named prefills the booking screen, nothing is booked until she saves it.
   const toSchedule = takedownsToSchedule(requests, statuses, await loadTakedownFacts(env.DB), today).map((t) => ({ ...t, rk: b64urlText(t.key) }));
-  return htmlResponse(VC.calendarPage({ stillToDecide, toSchedule,
+  // Asked for, not booked yet: outlined "Requested" chips (requested.mjs), never bookings.
+  const requested = requestedChips(requests, statuses, all, PRICE_TABLE).map((c) => ({ ...c, rk: b64urlText(c.key) }));
+  return htmlResponse(VC.calendarPage({ stillToDecide, toSchedule, requested,
     holdsBox: VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours, back: '/admin/calendar' }), heldPane: VM2.heldPane(holds),
     month, today, bookings: visible, all, ctx, windows, table: PRICE_TABLE, warnings: C.overlapWarnings(windows, PRICE_TABLE, { today }),
     unscheduled, reminders, tomorrowLabel, overdue, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '',
@@ -124,9 +129,13 @@ export async function dayPage(env, url, date) {
   // A customer with a balance is booked today: say how much is not paid yet in all.
   const { requests } = await requestsSafe(env);
   const np = await notPaidYet(env.DB, requests, chicagoDate());
-  const tdToday = takedownsToSchedule(requests, await statusMap(env.DB), await loadTakedownFacts(env.DB), chicagoDate()).filter((t) => t.date === date).map((t) => ({ ...t, rk: b64urlText(t.key) }));
+  const statuses = await statusMap(env.DB);
+  const tdToday = takedownsToSchedule(requests, statuses, await loadTakedownFacts(env.DB), chicagoDate()).filter((t) => t.date === date).map((t) => ({ ...t, rk: b64urlText(t.key) }));
+  const reqChips = requestedChips(requests, statuses, await C.listBookings(env.DB), PRICE_TABLE).map((c) => ({ ...c, rk: b64urlText(c.key) }));
+  const requested = reqChips.filter((c) => c.date === date);
+  const gamesAsked = gamesAskedOn(reqChips, date);
   const owingToday = np.owed.filter((r) => bookings.some((b) => (b.request_key && b.request_key === r.requestKey) || (b.invoice_id && b.invoice_id === r.id)));
-  return htmlResponse(VC.dayPage({ tdToday, notPaid: owingToday.length ? { today: owingToday.length, count: np.count, total: np.total } : null, holds, date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  return htmlResponse(VC.dayPage({ tdToday, requested, gamesAsked, notPaid: owingToday.length ? { today: owingToday.length, count: np.count, total: np.total } : null, holds, date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
 }
 
 // "Email it to me": the full day list to the Settings address, through the mailer.
@@ -224,6 +233,13 @@ export async function createBookingRoute(env, request) {
   }
   if (b.note) await C.addNote(env.DB, { id, request_key: key || null }, b.note);
   if (key && /_takedown$/.test(b.kind)) await env.DB.prepare("UPDATE requests SET takedown_plan = 'scheduled' WHERE request_key = ?1").bind(key).run();
+  // The install / setup is on the calendar: the takedown date the form gave is booked too, if
+  // it was not already (never over a takedown she booked or changed).
+  if (key && /^(porch_install|party_setup)$/.test(b.kind)) {
+    const { requests } = await requestsSafe(env);
+    const req = requests.find((r) => r.key === key);
+    if (req) await autoBookTakedown(env.DB, req);
+  }
   return redirect(`/admin/day/${b.date}?m=${encodeURIComponent(key ? 'Saved ✓ The request is marked Scheduled.' : 'Saved ✓')}`);
 }
 
@@ -276,8 +292,10 @@ export async function remindedRoute(env, request, id) {
   return redirect(/\/admin\/calendar/.test(ref) ? '/admin/calendar?m=Reminder marked ✓' : '/admin/?m=Reminder marked ✓');
 }
 
-// "Mark takedown done" / "Undo takedown done" on a porch/party takedown booking. Time-aware: only
-// on/after the takedown day. With Job done and Paid in full, the request is then Finished.
+// "Mark takedown done" / "Undo takedown done" on a porch/party takedown booking: ONE tap, any
+// day (owner, 18 Oct 2026: "I don't see where I would mark the takedown as done with one click";
+// it used to be refused before the takedown day). With Job done and Paid in full, the request is
+// then Finished. Back to the card it came from (#c-<rk>) or the Day sheet.
 export async function takedownDoneRoute(env, request, id) {
   const form = await request.formData();
   const undo = form.get('undo') === '1';
@@ -285,14 +303,57 @@ export async function takedownDoneRoute(env, request, id) {
   const back = (m, e = false) => {
     const ref = request.headers.get('Referer') || '';
     const to = /\/admin\/day\//.test(ref) && b ? `/admin/day/${b.date}` : '/admin/';
-    return redirect(`${to}?${e ? 'e' : 'm'}=${encodeURIComponent(m)}`);
+    const anchor = to === '/admin/' && b && b.request_key ? `#c-${b64urlText(b.request_key)}` : '';
+    return redirect(`${to}?${e ? 'e' : 'm'}=${encodeURIComponent(m)}${anchor}`);
   };
   if (!b || !/_takedown$/.test(b.kind)) return back('That is not a takedown booking.', true);
-  if (!undo && String(chicagoDate()) < String(b.date)) return back(`The takedown is booked for ${shortDate(b.date)}. Mark it done on or after that day.`, true);
   if (undo) await env.DB.prepare('UPDATE bookings SET done_at = NULL WHERE id = ?1').bind(id).run();
   else await env.DB.prepare("UPDATE bookings SET done_at = COALESCE(done_at, datetime('now')) WHERE id = ?1").bind(id).run();
   if (b.request_key) await logEvent(env.DB, b.request_key, undo ? 'Takedown done undone' : 'Takedown done ✓', 'admin');
   return back(undo ? 'Takedown done undone.' : 'Takedown done ✓');
+}
+
+// The inline takedown row on a card (owner, 18 Oct 2026): Save books / moves the porch or party
+// takedown (or the grazing pickup) right there, Remove takes it off the calendar. Never a rental.
+// Saving marks it her booking (edited_by_hand = 1, so an invoice re-send keeps her day), sets
+// takedown_plan = 'scheduled', writes one history line, never changes the request's status
+// (calendar.mjs SECOND_KINDS), and comes back to the same card with
+// "Takedown on the calendar for Tue 20 Oct ✓".
+export async function takedownInlineRoute(env, request) {
+  const form = await request.formData();
+  const rkIn = String(form.get('r') || '');
+  const key = decodeKey(rkIn);
+  const go = String(form.get('go') || 'save');
+  const backTo = (words, err = false) => redirect(err ? `/admin/?e=${encodeURIComponent(words)}#c-${rkIn}` : `/admin/?tdok=${encodeURIComponent(rkIn)}&tdm=${encodeURIComponent(words)}#c-${rkIn}`);
+  const { requests } = await requestsSafe(env);
+  const req = key ? requests.find((r) => r.key === key) : null;
+  if (!req) return redirect(`/admin/?e=${encodeURIComponent('That request could not be found.')}`);
+  const kind = inlineKindFor(servicesOf(req));
+  if (!kind || String(form.get('kind') || kind) !== kind) return backTo('This request has no takedown to book.', true);
+  const grazing = kind === 'grazing_pickup';
+  const noun = grazing ? 'Pickup' : 'Takedown';
+  const existing = await env.DB.prepare('SELECT * FROM bookings WHERE request_key = ?1 AND kind = ?2').bind(key, kind).first();
+  if (go === 'remove') {
+    if (existing) await C.deleteBooking(env.DB, existing.id);
+    // Clear the asked-for day too, so nothing books it again by itself; the row asks again.
+    if (!grazing) await env.DB.prepare("UPDATE requests SET takedown_date = '' WHERE request_key = ?1").bind(key).run();
+    await logEvent(env.DB, key, `${noun} taken off the calendar`, 'Valerie');
+    return backTo(`${noun} taken off the calendar.`);
+  }
+  const date = C.parseFormDate(form.get('date'));
+  if (!date) return backTo(`Pick a day for the ${noun.toLowerCase()}.`, true);
+  const t = String(form.get('time') || '').trim();
+  const time = /^\d{2}:\d{2}$/.test(t) ? t : null;
+  if (existing) await C.editBookingWhen(env.DB, existing.id, { date, time });
+  else {
+    const place = (req.decor || []).concat(req.other || []).find((x) => /^location|address|where/i.test(x.label));
+    await C.saveRequestBooking(env.DB, key, { kind, date, time, customer_name: req.name || '', phone: req.phone || '', email: req.email || '', place: place ? place.value : '',
+      items: kind === 'porch_takedown' ? 'Porch decorating' : (grazing ? 'Grazing table' : (req.eventType ? `Decor: ${req.eventType}` : 'Party decor')) });
+  }
+  if (!grazing) await env.DB.prepare("UPDATE requests SET takedown_plan = 'scheduled', takedown_date = ?2 WHERE request_key = ?1").bind(key, date).run();
+  const when = `${shortDate(date)}${time ? `, ${C.prettyTime(time)}` : ''}`;
+  await logEvent(env.DB, key, existing ? `${noun} moved to ${when}` : `${noun} booked for ${when}`, 'Valerie');
+  return backTo(`${noun} on the calendar for ${shortDate(date)} ✓`);
 }
 
 // ---- Notes ----------------------------------------------------------------------------

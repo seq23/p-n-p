@@ -170,6 +170,7 @@ export async function holdsWithButtons(env, back = '/admin/') {
 async function cardExtras(env, requests, statuses, holds) {
   const out = {};
   const msgs = {};
+  const bottom = {};
   const byKey = Object.fromEntries(holds.map((h) => [h.request_key, h]));
   for (const r of requests) {
     const rk = b64urlText(r.key);
@@ -185,7 +186,8 @@ async function cardExtras(env, requests, statuses, holds) {
     }
     if (st.job_done_at && st.status !== 'void' && r.source) {
       const ctx = await messageCtx(env.DB, r.key);
-      bits.push(VM2.thankYouBox(r, { rk, sms: ctx ? smsFor('thankyou', ctx) : null, canEmail: Boolean(ctx && hasEmail(ctx.email)) }));
+      // The thank-you is one small line at the BOTTOM of the card, just above Show details.
+      bottom[r.key] = VM2.thankYouBox(r, { rk, sms: ctx ? smsFor('thankyou', ctx) : null, canEmail: Boolean(ctx && hasEmail(ctx.email)) });
     }
     if (st.status === 'deposit_paid' || st.status === 'paid' || st.status === 'scheduled') {
       const ctx = await messageCtx(env.DB, r.key);
@@ -197,7 +199,7 @@ async function cardExtras(env, requests, statuses, holds) {
     }
     if (bits.length) out[r.key] = bits.join('');
   }
-  return { extras: out, msgs };
+  return { extras: out, msgs, bottom };
 }
 
 async function dashboard(env, url) {
@@ -213,7 +215,7 @@ async function dashboard(env, url) {
   const invoices = {};
   for (const [id, b] of Object.entries(bals)) invoices[id] = { ...b.invoice, total_cents: b.total, balance: b };
   const schedule = {};
-  const { results: booked } = await env.DB.prepare('SELECT request_key, MIN(date) AS date FROM bookings WHERE request_key IS NOT NULL GROUP BY request_key').all();
+  const { results: booked } = await env.DB.prepare("SELECT request_key, MIN(date) AS date FROM bookings WHERE request_key IS NOT NULL AND kind NOT IN ('porch_takedown','party_takedown','grazing_pickup','rental_return') GROUP BY request_key").all();
   for (const r of booked || []) schedule[r.request_key] = { date: r.date };
   const returns = await C.loadReturns(env.DB);
   const open = requests.filter((r) => !(statuses[r.key] && statuses[r.key].archived_at));
@@ -238,13 +240,14 @@ async function dashboard(env, url) {
   const idsReady = requests.filter((r) => idOnFile(r) && readyToDeleteId(r, statuses[r.key], statuses[r.key] && statuses[r.key].invoice_id ? invoices[statuses[r.key].invoice_id] : null, returns[r.key]));
   const week = weekCounts(requests, chicagoDate());
   const holds = await holdsWithButtons(env);
-  const { extras, msgs } = await cardExtras(env, open, statuses, holds);
+  const { extras, msgs, bottom } = await cardExtras(env, open, statuses, holds);
+  const tdKey = url.searchParams.get('tdok') ? decodeKey(url.searchParams.get('tdok')) : '';
   const soon = endingSoon(holds, Date.now(), settings);
   return htmlResponse(V.dashboardPage({ requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
-    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, bookings: bookingsBy, takedownInvoices: tdFacts.invoiceIds, today: chicagoDate(),
+    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, cardBottom: bottom, tdSaved: tdKey ? { key: tdKey, words: url.searchParams.get('tdm') || 'Saved ✓' } : null, bookings: bookingsBy, takedownInvoices: tdFacts.invoiceIds, today: chicagoDate(),
     archived, filter: url.searchParams.get('f') || 'all', openPutAway: url.searchParams.get('pa') === '1', kinds, events, notes,
     foodPerHead: SERVICES_DATA.services.grazing.foodPerHead || null, pickupPlace: PRICE_TABLE.pickupPlace,
-    holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length || Object.keys(msgs).length ? VM2.TAP_JS : ''}`,
+    holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length || Object.keys(msgs).length || Object.keys(bottom).length ? VM2.TAP_JS : ''}`,
     flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
     extraTop: `${VC.overdueBox(overdue)}${VC.remindersBox(reminders, tomorrowLabel)}` }));
 }
@@ -685,12 +688,15 @@ async function routeAdmin(context) {
     const key = decodeKey(form.get('r'));
     const plan = String(form.get('plan') || '');
     if (key && ['not_sure', 'customer_handles', ''].includes(plan)) {
-      const note = String(form.get('note') || '').trim().slice(0, 500);
-      await env.DB.prepare('UPDATE requests SET takedown_plan = ?2, takedown_note = ?3 WHERE request_key = ?1').bind(key, plan || null, plan ? note : '').run();
+      // The inline row sends no note: the one already on file stays.
+      const note = form.has('note') ? String(form.get('note') || '').trim().slice(0, 500) : null;
+      await env.DB.prepare('UPDATE requests SET takedown_plan = ?2, takedown_note = CASE WHEN ?2 IS NULL THEN \'\' ELSE COALESCE(?3, takedown_note) END WHERE request_key = ?1').bind(key, plan || null, note).run();
       await logEvent(env.DB, key, plan === 'not_sure' ? `Takedown: not decided yet${note ? ` (${note})` : ''}` : (plan ? `Takedown: the customer will handle it${note ? ` (${note})` : ''}` : 'Takedown question asked again'), 'admin');
     }
-    return redirect(`/admin/?m=${encodeURIComponent(plan === 'not_sure' ? 'Saved: takedown not decided yet.' : (plan ? 'Saved: the customer will handle the takedown.' : 'Saved ✓'))}`);
+    const words = plan === 'not_sure' ? 'Saved: takedown not decided yet.' : (plan ? 'Saved: the customer will handle the takedown.' : 'Saved ✓');
+    return redirect(key ? `/admin/?tdok=${encodeURIComponent(form.get('r'))}&tdm=${encodeURIComponent(words)}#c-${form.get('r')}` : `/admin/?m=${encodeURIComponent(words)}`);
   }
+  if (segs[0] === 'requests' && segs[1] === 'takedown-inline' && method === 'POST') return AC.takedownInlineRoute(env, request);
   // "Change anything on this request" (owner, 18 Oct 2026): one page, one Save per section, at any stage.
   if (segs[0] === 'requests' && segs[1] === 'edit') {
     if (segs.length === 2 && method === 'GET') return AE.editPage(env, url);

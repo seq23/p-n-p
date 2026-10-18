@@ -30,7 +30,10 @@ const TODAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', ye
 
 // ---- 1. the rules table --------------------------------------------------------------
 const SINGLE = [['porch'], ['party'], ['grazing'], ['rentals'], ['porch', 'rentals'], ['party', 'grazing', 'rentals']];
-const NEVER_RENTAL = ['card.checklist', 'card.printChecklist', 'card.schedInstall', 'card.schedTakedown', 'card.schedSetup', 'card.schedGrazingPickup', 'card.jobDone', 'card.undoJobDone'];
+const NEVER_RENTAL = ['card.checklist', 'card.printChecklist', 'card.schedInstall', 'card.schedSetup', 'td.markDone', 'td.save', 'card.jobDone', 'card.undoJobDone'];
+// The second booking is booked on the card's inline row (owner, 18 Oct 2026): no button ever opens
+// another page for it any more.
+const DETOUR = /^card\.sched(Takedown|GrazingPickup)$/;
 const firstKind = { porch: 'porch_install', party: 'party_setup', grazing: 'grazing_setup', rentals: 'rental_pickup' };
 for (const services of SINGLE) {
   for (const stage of K.STAGES) {
@@ -41,12 +44,19 @@ for (const services of SINGLE) {
       const all = [out.primary, ...out.secondary, ...(out.more || [])].filter(Boolean).map((x) => x.split('|')[0]);
       const tag = `${services.join('+')} @ ${stage}${booked ? ' (booked)' : ''}`;
       if (services.length === 1 && services[0] === 'rentals') for (const k of NEVER_RENTAL) must(!all.includes(k), `${tag}: a rental shows ${k}`);
-      if (!services.includes('porch') && !services.includes('party')) must(!all.includes('card.schedTakedown'), `${tag}: takedown shown without porch or party`);
-      if (!services.includes('grazing')) must(!all.includes('card.schedGrazingPickup'), `${tag}: grazing pickup shown without grazing`);
+      must(!all.some((k) => DETOUR.test(k)), `${tag}: a "Schedule takedown / pickup" detour button is back`);
+      {
+        const row = K.inlineRowKind({ services, stage });
+        const want = ['void', 'finished', 'archived'].includes(stage) ? '' : (services.includes('porch') ? 'porch_takedown' : services.includes('party') ? 'party_takedown' : services.includes('grazing') ? 'grazing_pickup' : '');
+        must(row === want, `${tag}: inline row "${row}", expected "${want}" (porch/party takedown, grazing pickup, never a rental)`);
+        if (!services.includes('porch') && !services.includes('party')) must(!/_takedown$/.test(row), `${tag}: takedown row without porch or party`);
+        if (!services.includes('grazing') || services.includes('porch') || services.includes('party')) must(row !== 'grazing_pickup', `${tag}: grazing pickup row without grazing (or over a takedown)`);
+      }
       if (stage === 'void') must(out.primary === 'pay.unvoid' && out.secondary.join() === 'card.archive', `${tag}: void must show only Bring back + Put away (got ${all})`);
       else if (stage === 'finished') must(out.primary === 'card.archive' && !out.secondary.length, `${tag}: finished must show only Put away (got ${all})`);
       else if (stage === 'archived') must(out.primary === 'pa.bringBack' && !out.secondary.length, `${tag}: put away must show only Bring back (got ${all})`);
       else {
+        // job_done with a takedown open: the inline row's Save is the next step (tested in validate:admin-takedown-inline).
         must(Boolean(out.primary), `${tag}: no primary button`);
         // Calm cards (owner, 18 Oct 2026): Put away only on Finished/Void, at most 3 secondary
         // buttons visible (the rest under Show details), never a money button in the row.
@@ -56,19 +66,10 @@ for (const services of SINGLE) {
         must(![...out.secondary, ...out.more].some((k) => k.startsWith('pay.')), `${tag}: a money button in the secondary row`);
         const decor = services.some((k) => k !== 'rentals');
         must(!decor || (all.includes('card.checklist') && all.includes('card.printChecklist')), `${tag}: porch/party/grazing lacks the walk-through checklist`);
-        if (booked) {
-          for (const k of services.filter((x) => x === 'porch' || x === 'party')) {
-            for (const plan of ['', 'not_sure', 'customer_handles', 'scheduled']) {
-              const o2 = K.cardButtons({ services, stage, inv, kinds, sched: true, takedownPlan: plan });
-              const has = [...o2.secondary, ...o2.more].includes(`card.schedTakedown|${k}_takedown`);
-              must(plan === 'scheduled' ? has : !has, `${tag}: takedown plan "${plan}" ${plan === 'scheduled' ? 'lacks' : 'shows'} the Schedule takedown button`);
-              const box = K.takedownChoice({ services, kinds, takedownPlan: plan, stage });
-              must(box === ({ '': 'ask', not_sure: 'not_sure', customer_handles: 'customer_handles', scheduled: '' })[plan], `${tag}: takedown box for plan "${plan}" is "${box}"`);
-            }
-          }
+        for (const plan of ['', 'not_sure', 'customer_handles', 'scheduled']) {
+          const o2 = K.cardButtons({ services, stage, inv, kinds, sched: booked, takedownPlan: plan });
+          must(![o2.primary, ...o2.secondary, ...o2.more].some((k) => DETOUR.test(String(k).split('|')[0])), `${tag}: takedown plan "${plan}" brings back a Schedule takedown / pickup button`);
         }
-        if (booked && services.includes('grazing')) must([...out.secondary, ...out.more].includes('card.schedGrazingPickup|grazing_pickup'), `${tag}: no optional grazing pickup once the setup is booked`);
-        if (!booked) must(!all.includes('card.schedTakedown') && !all.includes('card.schedGrazingPickup'), `${tag}: the second booking is offered before the first`);
       }
     }
   }
@@ -195,7 +196,7 @@ must(/data-grazing-facts>Guests: 15–40 · Food estimate: \$180–\$720</.test(
 const rc = card(html, 'Rae Rent');
 must(/Pickup Fri 23 Oct/.test(rc) && /Pickup at Mt\. Moriah Station/.test(rc), 'rental key facts do not read the pickup day and place');
 for (const word of ['checklist', 'Schedule takedown', 'Schedule install', 'Mark job done']) must(!new RegExp(word, 'i').test(rc.replace(/<[^>]+>/g, ' ')) && !new RegExp(`data-help="(card\\.checklist|card\\.printChecklist|card\\.sched(Install|Takedown)|card\\.jobDone)"`).test(rc), `rental card shows "${word}"`);
-must(/data-owes>Owes \$500\.00/.test(rc), 'rental card with a sent unpaid invoice does not say what is owed');
+must(/data-pay-words>Invoice sent · owes \$500\.00/.test(rc) && !/data-owes|chip sched|data-paid-early/.test(rc), 'rental card with a sent unpaid invoice does not say what is owed in the Payment box (or a duplicate status pill is back)');
 must(/data-pay-state="sent"><p class="words" data-pay-words>Invoice sent · owes \$500\.00</.test(rc), 'sent card does not say "Invoice sent · owes $X"');
 must((rc.match(/<summary[^>]*data-help="pay\.deposit"/g) || []).length === 1 && !/data-help="pay\.paid"/.test(rc), 'sent card does not show exactly ONE Mark deposit received');
 // Deposit in / paid in full renders.
@@ -206,7 +207,10 @@ const yc = card(html2, 'Pia Party');
 must(/data-pay-state="deposit"><p class="words" data-pay-words>Deposit in · still owes \$250\.00</.test(yc), 'deposit card does not say "Deposit in · still owes $X"');
 must((yc.match(/data-help="pay\.paid"/g) || []).length === 1 && !/data-help="pay\.deposit"/.test(yc) && /<summary class="linkbtn" data-help="pay\.unpaid"[^>]*>That was a mistake: mark as not paid</.test(yc), 'deposit card lacks ONE Mark paid in full + the small undo link');
 const gc2 = card(html2, 'Gia Graze');
-must(/data-pay-words>Paid in full ✓</.test(gc2) && !/data-help="pay\.(deposit|paid)"/.test(beforeDetails(gc2)) && /class="linkbtn" data-help="pay\.unpaid"/.test(gc2), 'paid card is not "Paid in full ✓" + the undo link only');
+// Paid in full (owner, 18 Oct 2026): no Payment box at all (the progress line says it); the
+// undo is ONE small link on the progress line.
+must(!/data-payment/.test(gc2) && /<li class="done[^"]*"><span class="pn">✓<\/span> Paid in full/.test(gc2) && !/data-help="pay\.(deposit|paid)"/.test(beforeDetails(gc2))
+  && (gc2.match(/data-help="pay\.unpaid"/g) || []).length === 1 && /data-paid-undo><div class="act small"><details class="confirm"><summary class="linkbtn" data-help="pay\.unpaid"/.test(gc2), 'paid card still has a Payment box, or lacks the one small undo link on the progress line');
 for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].map((n) => [n, card(html, n)]), ['Pia Party (deposit)', yc], ['Gia Graze (paid)', gc2]]) {
   must(!/<summary class="btn danger"/.test(c) && !/<summary class="btn[^"]*"[^>]*data-help="pay\.void"/.test(c), `${nm}: a big danger button on the card (Void must be a small link)`);
   must(!/data-help="pay\.void"/.test(beforeDetails(c)), `${nm}: Void outside Show details`);
@@ -272,7 +276,7 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
   must(bigButtons(w1) === 1 && /data-primary>[\s\S]*data-msg-tap="pickupTime"[^>]*>Text about pickup time</.test(w1) && !/Mark returned</.test(w1), 'Weekend Renter (no pickup time): not ONE big Text about pickup time, or Mark returned shows');
   must(/data-messages><span class="mlabel">Messages<\/span><span class="msgpair" data-msg="confirmation"><a class="msglink"[^>]*>Text them it&#39;s confirmed<\/a>|data-messages><span class="mlabel">Messages<\/span><span class="msgpair" data-msg="confirmation"><a class="msglink"[^>]*>Text them it's confirmed<\/a>/.test(w1) && /data-msg="pickupTime">[^]*?>Email the pickup question</.test(w1), 'Weekend Renter: the confirmation + pickup email are not one small Messages line');
   const w2 = wrCard(true, '2026-10-18');
-  must(bigButtons(w2) === 0 && /data-next-wait="ret\.mark"[^>]*>Next: Mark returned, from pickup day \(Fri 30 Oct\)\./.test(w2) && /data-msg="pickupTime"><a class="msglink"[^>]*>Text about pickup time<\/a>[^]*?>Email it</.test(w2), 'Weekend Renter (pickup time set): something big before pickup day, or no quiet Next: line / small pickup pair');
+  must(bigButtons(w2) === 0 && /data-primary-wait data-next-wait="ret\.mark"[^>]*>Next: Mark returned, from pickup day \(Fri 30 Oct\)</.test(w2) && /data-msg="pickupTime"><a class="msglink"[^>]*>Text about pickup time<\/a>[^]*?>Email it</.test(w2), 'Weekend Renter (pickup time set): something big before pickup day, or no quiet Next: line / small pickup pair');
   const w3 = wrCard(true, '2026-10-30');
   must(bigButtons(w3) === 1 && /data-primary>[\s\S]*>Mark returned</.test(w3), 'Weekend Renter on pickup day: Mark returned is not the one primary');
   // Hold controls and the thank-you box on a card carry no big button of their own.
@@ -351,15 +355,15 @@ await s.post('/admin/requests/takedown', { r: prk, plan: '' });
 await s.post('/admin/calendar/bookings', { r: prk, kind: 'porch_install', date: '2030-10-24', customer_name: 'Pam Porch', phone: '901-555-0420', email: 'pam@example.com', place: 'Germantown', items: 'Porch' });
 const pamCard = async () => { const h = (await s.get('/admin/')).text; const i = h.indexOf('>Pam Porch</h3>'); return h.slice(h.lastIndexOf('<article', i), h.indexOf('</article>', i)); };
 let pc2 = await pamCard();
-must(/data-takedown="ask"/.test(pc2) && />Schedule it</.test(pc2) && />Not sure yet</.test(pc2) && />Customer will handle it</.test(pc2), 'an undecided booked porch does not ask Schedule it / Not sure yet / Customer will handle it');
+must(/data-takedown-row="open"/.test(pc2) && /name="date" value="2030-10-25"/.test(pc2) && /name="go" value="save"[^>]*>Save</.test(pc2) && />Not sure yet</.test(pc2) && />Customer will handle it</.test(pc2) && !/href="\/admin\/calendar\/new[^"]*kind=porch_takedown/.test(pc2), 'an undecided booked porch does not show the inline Takedown row (day after the install, Save · Not sure yet · Customer will handle it), or still detours to the booking page');
 await s.post('/admin/requests/takedown', { r: prk, plan: 'not_sure', note: 'after Halloween maybe' });
 const pamRow = await s.one('SELECT takedown_plan, takedown_note FROM requests WHERE request_key = ?1', porchReq.row.request_key);
 must(pamRow.takedown_plan === 'not_sure' && pamRow.takedown_note === 'after Halloween maybe', 'Not sure yet + note was not stored');
 pc2 = await pamCard();
-must(/class="notice warn tdbox" data-takedown="not_sure"><strong>Takedown: not decided yet\.<\/strong> after Halloween maybe/.test(pc2), 'not_sure is not shown in amber with its note');
+must(/class="tdrow amber" data-takedown-row="not_sure">[\s\S]*<span class="tdpill">Not decided yet<\/span> <em data-takedown-note>after Halloween maybe<\/em>/.test(pc2) && /name="go" value="save"/.test(pc2), 'not_sure is not shown in amber with its note, on the row that can still Save it');
 // Time-aware: no Mark job done before the event day (only the quiet "Next:" line); on the day
 // it is the one primary, and it prompts (once) about the undecided takedown.
-must(!/data-help="card\.jobDone"[^>]*>Mark job done/.test(pc2) && /data-next-wait="card\.jobDone"[^>]*>Next: Mark job done, on the event day \(Thu 24 Oct\)\./.test(pc2), 'Mark job done shows before the event day (or the quiet Next: line is missing)');
+must(!/data-help="card\.jobDone"[^>]*>Mark job done/.test(pc2) && /data-primary-wait data-next-wait="card\.jobDone"[^>]*>Next: Mark job done, on the event day \(Thu 24 Oct\)</.test(pc2), 'Mark job done shows before the event day (or the quiet Next: line is missing)');
 await s.db.prepare("UPDATE bookings SET date = ?2 WHERE request_key = ?1 AND kind = 'porch_install'").bind(porchReq.row.request_key, TODAY).run();
 pc2 = await pamCard();
 must(/The takedown is not decided yet for Pam Porch\. Mark the job done anyway\?/.test(pc2) && (bigButtons(pc2) === 1), 'Job done (on the event day) does not prompt (once) about the undecided takedown as the one primary');
@@ -370,7 +374,7 @@ must(jd.status === 303 && (await s.one('SELECT job_done_at FROM request_status W
 await s.post('/admin/requests/jobdone', { r: prk, undo: '1' });
 await s.post('/admin/requests/takedown', { r: prk, plan: 'customer_handles', note: 'their nephew' });
 pc2 = await pamCard();
-must(/data-takedown="customer_handles">Takedown: the customer will handle it \(their nephew\)/.test(pc2) && !/Schedule takedown|data-takedown="ask"/.test(pc2), 'customer_handles still nags or offers the takedown');
+must(/data-takedown-row="customer_handles"><span class="tdl">Takedown:<\/span> <span>The customer will handle it \(their nephew\)\.<\/span>/.test(pc2) && !/Schedule takedown|data-takedown-row="open"|name="go" value="save"/.test(pc2), 'customer_handles still nags or offers the takedown');
 { const c2 = (await s.get('/admin/calendar')).text; const i = c2.indexOf('id="still-to-decide"'); must(i < 0 || !c2.slice(i, c2.indexOf('</section>', i)).includes('Pam Porch'), 'customer_handles is still listed under Still to decide'); }
 must(!(await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind = 'porch_takedown'", porchReq.row.request_key)), 'customer_handles made a booking');
 await s.post('/admin/calendar/bookings', { r: prk, kind: 'porch_takedown', date: '2030-11-02', customer_name: 'Pam Porch', phone: '', email: '', place: '', items: 'Porch' });

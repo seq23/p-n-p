@@ -44,7 +44,17 @@ const recs = rows.map((r) => RQ.importRowFor(headers, r)).filter((r) => r && r.r
 if (recs.length !== 1) { console.error(`import: expected exactly one sheet row for that request, found ${recs.length}`); process.exit(1); }
 const rec = recs[0];
 const cols = Object.keys(rec);
-const sql = `INSERT OR IGNORE INTO requests (${cols.join(', ')}) VALUES (${cols.map((c) => (rec[c] === null || rec[c] === undefined ? 'NULL' : q(rec[c]))).join(', ')});`;
+let sql = `INSERT OR IGNORE INTO requests (${cols.join(', ')}) VALUES (${cols.map((c) => (rec[c] === null || rec[c] === undefined ? 'NULL' : q(rec[c]))).join(', ')});`;
+// A takedown date on the form books the takedown too (takedown.mjs autoTakedownRow): never a
+// duplicate (ON CONFLICT DO NOTHING + no takedown booking of either kind yet), never over hers.
+const TD = await mod('functions/_lib/takedown.mjs');
+const C = await mod('functions/_lib/calendar.mjs');
+const have = d1(`SELECT kind FROM bookings WHERE request_key = ${q(key)}`);
+const auto = TD.autoTakedownRow(RQ.fromRow({ ...rec, takedown_note: '' }), { bookings: have });
+if (auto) {
+  sql += `\nINSERT INTO bookings (request_key, kind, date, time, customer_name, phone, email, place, items, edited_by_hand, name_norm, phone_digits) VALUES (${[auto.request_key, auto.kind, auto.date].map(q).join(', ')}, NULL, ${[auto.customer_name, auto.phone, auto.email, auto.place, auto.items].map(q).join(', ')}, 0, ${q(C.normName(auto.customer_name))}, ${q(C.digitsOf(auto.phone))}) ON CONFLICT(request_key, kind) DO NOTHING;`;
+  sql += `\nINSERT INTO request_events (request_key, who, what) VALUES (${q(key)}, 'import', ${q(`${TD.AUTO_EVENT} (${auto.date})`)});`;
+}
 const before = d1(`SELECT COUNT(*) AS n FROM requests WHERE request_key = ${q(key)}`)[0].n;
 if (dry) { console.log(`import (dry run): 1 row found; already in D1: ${before}`); process.exit(0); }
 const file = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'pnp-import-')), 'import.sql');
@@ -53,4 +63,4 @@ try {
   execFileSync('npx', ['wrangler', 'd1', 'execute', 'pnp-admin', '--remote', '--file', file, '--yes'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
 } finally { fs.rmSync(path.dirname(file), { recursive: true, force: true }); }
 const after = d1(`SELECT r.source, rs.status, i.number FROM requests r LEFT JOIN request_status rs ON rs.request_key = r.request_key LEFT JOIN invoices i ON i.id = rs.invoice_id WHERE r.request_key = ${q(key)}`);
-console.log(`import: imported ${before ? 0 : 1} row (already there before: ${before}); now in D1: ${after.length}; source ${after[0] && after[0].source}; status ${after[0] && after[0].status}; invoice ${after[0] && after[0].number} linked`);
+console.log(`import: takedown auto-booked: ${auto ? 1 : 0}; imported ${before ? 0 : 1} row (already there before: ${before}); now in D1: ${after.length}; source ${after[0] && after[0].source}; status ${after[0] && after[0].status}; invoice ${after[0] && after[0].number} linked`);

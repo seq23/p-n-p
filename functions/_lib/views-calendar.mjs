@@ -7,7 +7,8 @@ import { esc, money, shortDate, prettyDate, b64urlText, STATUS_LABELS } from './
 import { tip, hint, stepsPanel } from './helptext.mjs';
 import { layout, act, chip, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS } from './views.mjs';
 import { KINDS, KIND_LABELS, prettyTime, addDays, returnKeyOf, firstLine, usageOn } from './calendar.mjs';
-import { serviceInfo, serviceKey } from './kinds.mjs';
+import { serviceInfo, serviceKey, SERVICE_KINDS } from './kinds.mjs';
+import { gamesAskedOn } from './requested.mjs';
 import { balanceWords, depositWords } from './ledger.mjs';
 import { reminderText, smsLink, normalizePhone, hasEmail } from './reminders.mjs';
 
@@ -53,7 +54,32 @@ const CAL_CSS = `
 .itemcheck.na{opacity:.45}
 .notes .n{padding:10px 0;border-bottom:1px solid var(--line)}
 .found h3{margin-bottom:2px}
-@media print{.sheet{font-size:14pt}.daytools,.notes form,.dayonly{display:none!important}.wrap{max-width:none;padding:0}}
+/* Requested (asked for, not booked): outlined, never filled. Words always shown. */
+.k.req{background:transparent!important;border-style:solid;border-width:2px 2px 2px 6px;font-weight:600}
+a.k.req{text-decoration:none;color:var(--ink)}
+.k.req[role=link]{cursor:pointer}
+.badge.asked{color:#4b3f8f}
+.fill-legend{margin:0 0 10px;font-size:.98rem}.fill-legend .k{margin-right:4px}
+.reqlist{display:flex;flex-wrap:wrap;gap:8px}.reqlist a.k{display:inline-flex;align-items:center;min-height:44px;padding:4px 12px;font-size:1rem}
+/* The Day sheet (owner, 18 Oct 2026: one simple block per job, one printed page). */
+.jobs{display:grid;gap:10px}
+.job{display:grid;grid-template-columns:34px 1fr;gap:10px;align-items:start;padding:8px 0;border-bottom:1px solid var(--line);break-inside:avoid}
+.job .box{width:26px;height:26px;border:2px solid var(--ink);border-radius:4px;display:inline-block;margin-top:2px}
+.job .jl{font-size:1.2rem;font-weight:700}.job .ji{font-size:1.05rem}.job .jn{font-style:italic}
+.job .jo{font-weight:700;color:#7a4a0c}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin:8px 0}
+.grid .tile{position:relative;border:1px solid;border-radius:10px;padding:8px;min-height:64px;overflow:hidden}
+.grid .tile strong{position:relative;display:block}.grid .tile span{position:relative;display:block;font-size:.95rem}
+.grid .tile.in{background:#e7f5e4;border-color:#9fcb97}
+.grid .tile.out{background:#fbe3e0;border-color:#e3a59b;background-image:linear-gradient(to top right,transparent calc(50% - 1px),rgba(143,52,39,.28) 50%,transparent calc(50% + 1px)),linear-gradient(to bottom right,transparent calc(50% - 1px),rgba(143,52,39,.28) 50%,transparent calc(50% + 1px))}
+.grid .tile.over{border-width:3px;border-color:#8f3427}
+@media print{
+  @page{size:Letter;margin:12mm}
+  .notice.ok,.notice.flash,[data-flash],.daytools,.notes form,.dayonly,.btn,.actions,button,form,nav,header.top,.back,.topsteps{display:none!important}
+  .wrap{max-width:none;padding:0}h1{font-size:20pt;margin:0 0 6px}h2{font-size:13pt;margin:8px 0 4px}
+  .job{padding:4px 0}.job .jl{font-size:13pt}.job .ji{font-size:11pt}
+  .grid{grid-template-columns:repeat(4,1fr);gap:4px}.grid .tile{min-height:0;padding:4px 6px;font-size:10pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 `;
 
 // ---- Tomorrow's reminders / Overdue returns (Requests and Calendar) -------------------------
@@ -107,6 +133,10 @@ const CAL_JS = `
     el.addEventListener('pointerdown',function(e){if(e.pointerType==='touch'||('draggable' in el&&e.pointerType==='mouse'))return;dragging=start(el);el.setPointerCapture(e.pointerId);});
     el.addEventListener('pointerup',function(e){if(!dragging)return;var t=document.elementFromPoint(e.clientX,e.clientY);var c=t&&t.closest('[data-day]');if(c)drop(c.getAttribute('data-day'),c);else dragging=null;});
   });
+  document.querySelectorAll('[data-open]').forEach(function(el){
+    function open(e){e.preventDefault();e.stopPropagation();go(el.getAttribute('data-open'));}
+    el.addEventListener('click',open);el.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' ')open(e);});
+  });
   document.querySelectorAll('[data-day]').forEach(function(c){
     c.addEventListener('dragover',function(e){if(!dragging)return;e.preventDefault();c.classList.add('over');});
     c.addEventListener('dragleave',function(){c.classList.remove('over');});
@@ -134,7 +164,22 @@ export function toScheduleBox(rows = []) {
         <div class="actions" style="grid-template-columns:1fr 1fr"><a class="btn primary" href="/admin/calendar/new?r=${esc(d.rk)}&amp;kind=${esc(d.kind)}${d.date ? `&amp;date=${esc(d.date)}` : ''}"${tip('cal.tdToSchedule')}>Schedule takedown${d.date ? ` (${esc(shortDate(d.date))})` : ''}</a><a class="btn ghost" href="/admin/#c-${esc(d.rk)}"${tip('cal.decideOpen')}>Open the request</a></div></div>`).join('')}</section>`;
 }
 
-export function calendarPage({ stillToDecide = [], toSchedule = [], month, today, bookings, all = bookings, ctx, windows, table, warnings, unscheduled, reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
+// One "Requested" chip: outlined in the service colour, the word Requested, first name + last
+// initial. Tap opens the request card. In a month cell (itself a link to the day) it is a
+// span with role=link (CAL_JS opens it); elsewhere a real link.
+export function requestedChip(c, tag = 'a') {
+  const href = `/admin/#c-${c.rk}`;
+  const words = `Requested · ${SERVICE_KINDS[c.service].short}: ${c.name}`;
+  const attrs = `class="k req ${esc(c.kind)}" style="border-color:${esc(c.color)}" data-requested="${esc(c.service)}"${tip('cal.requested')}`;
+  return tag === 'a' ? `<a ${attrs} href="${esc(href)}">${esc(words)}</a>` : `<span ${attrs} role="link" tabindex="0" data-open="${esc(href)}">${esc(words)}</span>`;
+}
+
+export function fillLegend() {
+  const s = SERVICE_KINDS.porch;
+  return `<div class="fill-legend" data-fill-legend${tip('cal.legend')}><span class="k porch_install">Booked</span><span class="k req" style="border-color:${s.bar}">Requested</span> Filled = booked · Outlined = asked for, not booked yet</div>`;
+}
+
+export function calendarPage({ stillToDecide = [], toSchedule = [], requested = [], month, today, bookings, all = bookings, ctx, windows, table, warnings, unscheduled, reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
   const [y, m] = month.split('-').map(Number);
   const first = `${month}-01`;
   const startPad = new Date(`${first}T12:00:00Z`).getUTCDay();
@@ -143,6 +188,8 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], month, today
   const next = new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 7);
   const byDay = {};
   for (const b of bookings) (byDay[b.date] = byDay[b.date] || []).push(b);
+  const reqByDay = {};
+  for (const c of requested) (reqByDay[c.date] = reqByDay[c.date] || []).push(c);
   const cells = [];
   for (let i = 0; i < 42; i += 1) {
     const day = addDays(gridStart, i);
@@ -156,9 +203,12 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], month, today
       ${list.map((b) => {
         const r = ctx(b).ret;
         const mark = b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : '';
-        return `<span class="k ${esc(b.kind)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}" data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip('cal.booking')}>${esc(KIND_LABELS[b.kind])}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
+        const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
+        return `<span class="k ${esc(b.kind)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(held ? 'cal.heldChip' : 'cal.booking')}>${held ? 'Held · ' : ''}${esc(KIND_LABELS[b.kind])}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
       }).join('')}
+      ${(reqByDay[day] || []).map((c) => requestedChip(c, 'span')).join('')}
       ${games ? `<span class="badge" data-games-out>${games} ${games === 1 ? 'game' : 'games'} out</span>` : ''}
+      ${gamesAskedOn(requested, day) ? `<span class="badge asked" data-games-asked${tip('cal.gamesAsked')}>${gamesAskedOn(requested, day)} ${gamesAskedOn(requested, day) === 1 ? 'game' : 'games'} asked for</span>` : ''}
       ${owes ? '<span class="due" data-due>$ due</span>' : ''}${late ? '<span class="late-dot">Not returned yet</span>' : ''}
     </a>`);
   }
@@ -197,6 +247,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], month, today
     </div>
     <div data-pane="held" hidden>${heldPane}</div>
     <div class="legend" data-service-key>${serviceKey()}</div>
+    ${fillLegend()}
     <div data-pane="list" hidden>${listView(all, today, ctx)}</div>
     <div data-pane="month">
     ${upcomingHtml}
@@ -261,7 +312,26 @@ function noteWhen(utc) {
   return `${date.replace(/^(\w+), (\w+) (\d+)$/, '$1 $3 $2')}, ${time}`;
 }
 
-export function dayPage({ tdToday = [], date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [], notPaid = null }) {
+// The words for one job on the Day sheet: "Game pickup", "Porch install", ...
+export const SHEET_WORDS = { rental_pickup: 'Game pickup', rental_return: 'Game return' };
+const firstOf = (name) => String(name || '').trim().split(/\s+/)[0] || 'No name';
+
+// The games grid: one tile per item, OUT = light red with a light diagonal X (the name stays
+// readable), IN = light green. The words are always there, so a black-and-white print reads.
+export function gamesGrid(u, table) {
+  const tiles = table.items.map((it) => {
+    const v = u.byItem[it.name];
+    const n = v ? v.who.length : 0;
+    const stock = v ? v.stock : (it.quantity || 1);
+    if (!n) return `<div class="tile in" data-tile="in"><strong>${esc(it.name)}</strong><span>In</span></div>`;
+    const who = v.who.map((w) => `Out · back ${shortDate(w.end)} · ${firstOf(w.name)}`).join('; ');
+    return `<div class="tile out${n > stock ? ' over' : ''}" data-tile="out"><strong>${esc(it.name)}</strong><span>${esc(who)}${stock > 1 ? ` (${n} of ${stock})` : ''}${n > stock ? ' · DOUBLE-BOOKED' : ''}</span></div>`;
+  });
+  const outTiles = table.items.filter((it) => u.byItem[it.name] && u.byItem[it.name].who.length).length;
+  return { html: `<div class="grid" data-strip>${tiles.join('')}</div>`, outTiles, total: table.items.length };
+}
+
+export function dayPage({ tdToday = [], requested = [], gamesAsked = 0, date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [], notPaid = null }) {
   const u = usageOn(windows, date, today, table);
   let owedTotal = 0; let depositTotal = 0;
   const rows = bookings.map((b) => {
@@ -271,26 +341,31 @@ export function dayPage({ tdToday = [], date, today, bookings, ctx, windows, tab
     return { b, c, owe };
   });
   const npLine = notPaid ? `<div class="notice warn" data-day-not-paid><strong>${notPaid.today} ${notPaid.today === 1 ? 'customer' : 'customers'} booked today still ${notPaid.today === 1 ? 'owes' : 'owe'} money.</strong> Not paid yet in all: ${notPaid.count} ${notPaid.count === 1 ? 'customer owes' : 'customers owe'} ${esc(money(notPaid.total))}. <a href="/admin/money#not-paid"${tip('np.filter')}>See Not paid yet</a></div>` : '';
-  const strip = `${npLine}<section class="card"><h2>Games: what is out on ${esc(shortDate(date))}</h2>
-    <p data-day-count><strong>${u.count} ${u.count === 1 ? 'game' : 'games'} out.</strong></p>
+  const g = gamesGrid(u, table);
+  const strip = `${npLine}<section class="card" data-games-grid><h2 data-day-count>${g.outTiles} of ${g.total} games out</h2>
     ${u.over.length ? `<div class="notice err" data-overlap><strong>Double-booked:</strong> ${u.over.map((o) => `${esc(o.item)} (you have ${o.stock}) is out with ${esc(o.who.map((w) => w.name).join(' and '))}.`).join(' ')}</div>` : ''}
-    <div class="strip" data-strip>${table.items.map((it) => { const v = u.byItem[it.name]; const n = v.who.length; return `<div class="it ${n > v.stock ? 'over' : (n ? 'out' : '')}"><strong>${esc(it.name)}</strong><br>${n ? `Out (${n} of ${v.stock})` : 'In'}${n ? `<div class="muted">${esc(v.who.map((w) => `${w.name}, back ${shortDate(w.end)}`).join('; '))}</div>` : ''}</div>`; }).join('')}</div>
-    ${u.out.some((w) => w.unnamed) ? `<p class="muted">${esc(u.out.filter((w) => w.unnamed).map((w) => `${w.name}: ${w.unnamed} game${w.unnamed === 1 ? '' : 's'} not picked yet`).join('; '))}</p>` : ''}
-    ${u.out.length ? `<div data-out-list>${u.out.flatMap((w) => w.names.map((n) => `<div>${esc(n)} — ${esc(w.name)}, back ${esc(shortDate(w.end))}</div>`)).join('')}</div>` : ''}</section>`;
+    ${g.html}
+    ${u.out.some((w) => w.unnamed) ? `<p class="muted">${esc(u.out.filter((w) => w.unnamed).map((w) => `${firstOf(w.name)}: ${w.unnamed} game${w.unnamed === 1 ? '' : 's'} not picked yet`).join('; '))}</p>` : ''}
+    ${gamesAsked ? `<div class="muted" data-games-asked${tip('cal.gamesAsked')}>${gamesAsked} ${gamesAsked === 1 ? 'game' : 'games'} asked for, not booked yet (not counted as out).</div>` : ''}</section>`;
   const holdsToday = holds.length ? `<section class="card" data-day-holds><h2>Holds ending this day</h2>${holds.map((h) => `<div><strong>${esc(h.timeLabel)}: ${esc(h.name || 'No name')}</strong> · ${esc(h.items || '')} · deposit not in yet</div>`).join('')}</section>` : '';
+  const askedToday = requested.length ? `<section class="card dayonly" data-day-requested><h2>Asked for, not booked yet</h2><div class="reqlist">${requested.map((c) => requestedChip(c, 'a')).join('')}</div></section>` : '';
+  // "Load these items" only when two or more jobs load that day (one job's block says it already).
   const loading = rows.filter((r) => r.b.kind === 'rental_pickup');
-  const load = loading.length ? `<section class="card" data-load><h2>Load these items</h2>${loading.map((r) => {
+  const load = loading.length >= 2 ? `<section class="card" data-load><h2>Load these items</h2>${loading.map((r) => {
     const w = windows.find((x) => x.key === (r.b.request_key || `m:${String(r.b.customer_name).toLowerCase()}|${String(r.b.items).toLowerCase()}`));
     const names = w ? w.names : [];
-    return `<div><strong>${esc(r.b.customer_name || 'No name')}:</strong> ${esc(names.join(', ') || r.b.items || '')}${w && w.unnamed ? `, plus ${w.unnamed} game${w.unnamed === 1 ? '' : 's'} they still need to pick` : ''}</div>`;
+    return `<div><strong>${esc(firstOf(r.b.customer_name))}:</strong> ${esc(names.join(', ') || r.b.items || '')}${w && w.unnamed ? `, plus ${w.unnamed} game${w.unnamed === 1 ? '' : 's'} they still need to pick` : ''}</div>`;
   }).join('')}</section>` : '';
-  const sheet = `<section class="card"><h2>Day sheet</h2><table class="sheet" data-day-sheet><thead><tr><th>✓</th><th>Time</th><th>What</th><th>Customer</th><th>Items and where</th><th>Still owed</th><th>Notes</th></tr></thead><tbody>
-    ${rows.map(({ b, c, owe }) => `<tr data-sheet-row="${b.id}"><td><span class="box"></span></td><td>${esc(b.time ? prettyTime(b.time) : 'Any time')}</td><td>${esc(`${serviceInfo(b.kind).short}: ${KIND_LABELS[b.kind]}`)}</td>
-      <td><strong>${esc(b.customer_name || 'No name')}</strong><br>${esc(b.phone || '')}</td><td>${esc(b.items || '')}${b.place ? `<br><span class="muted">${esc(b.place)}</span>` : ''}</td>
-      <td>${c.bal && !c.bal.void ? `${esc(owe > 0 ? money(owe) : 'Paid ✓')}${c.bal.refundable ? `<br><span class="muted">${esc(depositWords(c.bal))}</span>` : ''}` : ''}</td>
-      <td>${(c.notes || []).map((n) => `<div>${esc(n.body)}</div>`).join('')}</td></tr>`).join('') || '<tr><td colspan="7">Nothing booked this day.</td></tr>'}
-    </tbody></table>
-    <p style="font-size:1.15rem" data-day-total><strong>Still to collect today: ${esc(money(owedTotal))}</strong>${depositTotal ? ` plus ${esc(money(depositTotal))} in refundable damage deposits` : ''}</p></section>`;
+  // One block per job: checkbox + "Anytime · Game pickup · Ada"; items; place; Still owed only
+  // when > 0; notes in italics. Timed jobs first, Anytime last (daySort).
+  const sheet = `<section class="card"><h2>Day sheet</h2><div class="jobs" data-day-sheet>
+    ${rows.map(({ b, c, owe }) => `<div class="job" data-sheet-row="${b.id}"><span class="box" aria-hidden="true"></span><div>
+      <div class="jl">${esc([b.time ? prettyTime(b.time) : 'Anytime', SHEET_WORDS[b.kind] || KIND_LABELS[b.kind] || 'Booking', firstOf(b.customer_name)].join(' · '))}</div>
+      ${b.items ? `<div class="ji">${esc(b.items)}</div>` : ''}${b.place ? `<div class="muted">${esc(b.place)}</div>` : ''}
+      ${owe > 0 ? `<div class="jo" data-still-owed>Still owed ${esc(money(owe))}</div>` : ''}
+      ${(c.notes || []).map((n) => `<div class="jn">${esc(n.body)}</div>`).join('')}</div></div>`).join('') || '<p>Nothing booked this day.</p>'}
+    </div>
+    ${owedTotal > 0 ? `<p style="font-size:1.15rem" data-day-total><strong>Still to collect today: ${esc(money(owedTotal))}</strong>${depositTotal ? ` plus ${esc(money(depositTotal))} in refundable damage deposits` : ''}</p>` : ''}</section>`;
   const smsTo = normalizePhone(settings.day_list_phone || '901-355-1518');
   const tools = `<div class="actions three daytools">
     ${act(`<button type="button" class="btn" onclick="window.print()"${tip('day.print')}>Print this list</button>`, 'day.print')}
@@ -309,7 +384,7 @@ export function dayPage({ tdToday = [], date, today, bookings, ctx, windows, tab
       <div class="actions dayonly">
         ${tel(b.phone) ? act(`<a class="btn primary bigcall" href="${tel(b.phone)}"${tip('day.call')}>Call ${esc(b.phone)}</a>`, 'day.call') : '<p><strong>No phone on file.</strong></p>'}
         ${RENTAL.has(b.kind) && !returned ? act(`<a class="btn" href="/admin/returns?k=${esc(b64urlText(rk))}"${tip('ret.mark')}>Mark returned</a>`, 'ret.mark') : ''}
-        ${/_takedown$/.test(b.kind) && !b.done_at && String(today) >= String(b.date) ? `<form method="post" action="/admin/calendar/bookings/${b.id}/takedown-done">${act(`<button class="btn" type="submit"${tip('td.markDone')}>Mark takedown done</button>`, 'td.markDone')}</form>` : ''}
+        ${/_takedown$/.test(b.kind) && !b.done_at ? `<form method="post" action="/admin/calendar/bookings/${b.id}/takedown-done">${act(`<button class="btn" type="submit"${tip('td.markDone')}>Mark takedown done</button>`, 'td.markDone')}</form>` : ''}
         ${/_takedown$/.test(b.kind) && b.done_at ? `<p class="money ok" data-takedown-done>Takedown done ✓</p><form method="post" action="/admin/calendar/bookings/${b.id}/takedown-done">${hiddenInputs({ undo: '1' })}<button class="linkbtn" type="submit"${tip('td.undoDone')}>Undo takedown done</button></form>` : ''}
         ${RENTAL.has(b.kind) && returned ? act(`<a class="btn ghost" href="/admin/returns?k=${esc(b64urlText(rk))}"${tip('ret.see')}>See the check-in</a>`, 'ret.see') : ''}
         ${act(`<a class="btn ghost" href="/admin/calendar/bookings/${b.id}/move"${tip('bk.move')}>Move to another day</a>`, 'bk.move')}
@@ -321,10 +396,10 @@ export function dayPage({ tdToday = [], date, today, bookings, ctx, windows, tab
     </article>`;
   }).join('');
   return layout(`Day sheet ${date}`, `<style>${CAL_CSS}</style>
-    ${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+    ${flash ? `<div class="notice ok" data-flash>${esc(flash)}</div>` : ''}${error ? `<div class="notice err" data-flash>${esc(error)}</div>` : ''}
     <h1>${esc(prettyDate(date))}</h1>
     ${tools}
-    ${toScheduleBox(tdToday)}${holdsToday}${sheet}${load}${strip}
+    ${toScheduleBox(tdToday)}${holdsToday}${sheet}${load}${strip}${askedToday}
     <div class="dayonly">${entries}
     ${act(`<a class="btn" href="/admin/calendar/new?date=${esc(date)}"${tip('cal.add')}>Add a booking on this day</a>`, 'cal.add')}</div>`, { screen: 'day', back: { href: `/admin/calendar?month=${date.slice(0, 7)}`, label: 'Back to the calendar' } });
 }

@@ -6,7 +6,7 @@
 //
 // "Asked for a takedown" = takedown_plan is scheduled or not_sure (the form answer, mapped at
 // source), the invoice carries the takedown add-on, or a takedown booking exists.
-import { parseFormDate } from './calendar.mjs';
+import { parseFormDate, isISODate as isISO, addDays, normName, digitsOf } from './calendar.mjs';
 
 export const TAKEDOWN_KINDS = ['porch_takedown', 'party_takedown'];
 export const TAKEDOWN_STATUSES = ['none', 'customer_handles', 'done', 'to_schedule', 'not_sure', 'booked', 'due'];
@@ -37,8 +37,7 @@ function answerIn(r, re) {
 
 // Map a request's own answers at source: the old Google Form ("Need us to take it down
 // afterwards?" + "Takedown date") and the /request form ("Want us to take it down afterwards?",
-// no date). The date is only kept for a yes; it PREFILLS the Schedule takedown screen and never
-// creates a booking by itself.
+// no date). The date is only kept for a yes; autoTakedownRow (below) books it.
 //
 // A takedown date with a blank / "n/a" yes-no answer (the one real imported request, 18 Oct
 // 2026: "na" + a date) is a yes: the customer named the day. An explicit "No" or "Not sure"
@@ -136,4 +135,70 @@ export function backfillPlan(rows, marked = new Set()) {
     out.push({ key: r.key, plan: nextPlan || null, date: nextDate });
   }
   return out;
+}
+
+// ---- The inline takedown row (owner, 18 Oct 2026, JOB: fewer steps for Valerie) -------------
+// Every porch and party & decor card carries ONE line, "Takedown:", with the date box, an
+// optional time and Save · Not sure yet · Customer will handle it. Save books the takedown
+// right there (no extra page); once booked the line reads "Booked for Tue 20 Oct" with a
+// one-tap Mark takedown done (any day: the owner's word, 18 Oct 2026), Change and Remove.
+// Grazing gets the same line for its optional pickup (never required, no Not sure / Customer).
+export const INLINE_KINDS = { porch: 'porch_takedown', party: 'party_takedown', grazing: 'grazing_pickup' };
+const FIRST_OF = { porch_takedown: ['porch_install'], party_takedown: ['party_setup'], grazing_pickup: ['grazing_setup'] };
+
+// Which inline line a card shows: the takedown kind for porch / party, else the grazing pickup.
+// Never a rental (a rental-only card has no line at all).
+export function inlineKindFor(services = []) {
+  return takedownKindFor(services) || (services.includes('grazing') ? 'grazing_pickup' : '');
+}
+
+// The day the date box starts on: the booked day, else the form's / owner's takedown date,
+// else the day after the install / setup (booked, else the event date the form gave).
+export function inlineDefaultDate({ kind, bookings = [], takedownDate = '', eventDate = '' }) {
+  const own = (bookings || []).find((b) => b.kind === kind);
+  if (own && isISO(own.date)) return own.date;
+  if (kind !== 'grazing_pickup' && isISO(takedownDate)) return takedownDate;
+  const first = (bookings || []).filter((b) => (FIRST_OF[kind] || []).includes(b.kind)).map((b) => b.date).filter(isISO).sort()[0] || (isISO(eventDate) ? eventDate : '');
+  return first ? addDays(first, 1) : '';
+}
+
+// ---- Auto-book the form's takedown date ------------------------------------------------------
+// A request that arrives (site /request, the old Google Form import) with a takedown date gets
+// its takedown booking at once, and again when its install / setup is booked if it had none.
+// One pure rule decides it, so the arrival, the install hook and the backfill agree:
+//   porch / party, takedown_plan 'scheduled', a real takedown_date, not void / put away / test,
+//   and NO takedown booking of either kind yet (a booking she made or edited is never touched).
+// "Not sure yet" / "Customer will handle it" never book anything.
+export const AUTO_EVENT = 'Takedown booked from the date on the form';
+export function autoTakedownRow(r, { bookings = [], status = null } = {}) {
+  if (!r || r.isTest) return null;
+  if (status && (status.archived_at || status.status === 'void')) return null;
+  const kind = takedownKindFor(r.services || []);
+  if (!kind || r.takedownPlan !== 'scheduled' || !isISO(r.takedownDate)) return null;
+  if ((bookings || []).some((b) => TAKEDOWN_KINDS.includes(b.kind))) return null;
+  const place = answerIn(r, /^location|address|where/i);
+  const items = kind === 'porch_takedown' ? 'Porch decorating' : (r.eventType ? `Decor: ${r.eventType}` : 'Party decor');
+  return { request_key: r.key, kind, date: r.takedownDate, time: null, customer_name: r.name || '', phone: r.phone || '', email: r.email || '', place, items };
+}
+
+// The backfill as a plan: rows = requests (fromRow), bookingsBy = { key: [{ kind }] },
+// statuses = { key: request_status row }. Returns the rows to insert; idempotent by design.
+export function autoBookPlan(rows, bookingsBy = {}, statuses = {}) {
+  return (rows || []).map((r) => autoTakedownRow(r, { bookings: bookingsBy[r && r.key] || [], status: statuses[r && r.key] || null })).filter(Boolean);
+}
+
+// Insert it. ON CONFLICT DO NOTHING on (request_key, kind) and the either-kind check above mean
+// it can run on every arrival / install booking without ever duplicating or overriding a booking.
+export async function autoBookTakedown(db, r, { who = 'automatic' } = {}) {
+  if (!r || !r.key) return false;
+  const { results } = await db.prepare('SELECT kind FROM bookings WHERE request_key = ?1').bind(r.key).all();
+  const status = await db.prepare('SELECT status, archived_at FROM request_status WHERE request_key = ?1').bind(r.key).first();
+  const row = autoTakedownRow(r, { bookings: results || [], status });
+  if (!row) return false;
+  const res = await db.prepare(`INSERT INTO bookings (request_key, kind, date, time, customer_name, phone, email, place, items, edited_by_hand, name_norm, phone_digits)
+    VALUES (?1, ?2, ?3, NULL, ?4, ?5, ?6, ?7, ?8, 0, ?9, ?10) ON CONFLICT(request_key, kind) DO NOTHING`)
+    .bind(row.request_key, row.kind, row.date, row.customer_name, row.phone, row.email, row.place, row.items, normName(row.customer_name), digitsOf(row.phone)).run();
+  const made = Boolean(res && res.meta && res.meta.changes);
+  if (made) await db.prepare('INSERT INTO request_events (request_key, who, what) VALUES (?1, ?2, ?3)').bind(r.key, who, `${AUTO_EVENT} (${row.date})`).run();
+  return made;
 }
