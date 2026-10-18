@@ -30,7 +30,10 @@
 const fs = require('fs');
 const path = require('path');
 const brand = require('./lib/brand');
-const games = require('../data/rentals/games.json');
+const INV = require('./lib/inventory.js');
+const games = INV.resolve(require('../data/rentals/games.json'));
+// "an inflatable movie screen and a card table": the extras on offer (Settings -> Inventory).
+const RENTALS_LIST = INV.rentalsPhrase(games, { games: 'Giant yard games' });
 const areas = require('../data/service_areas/areas.json');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -57,7 +60,7 @@ const ROOT_PAGES = Object.freeze({
   'how-it-works.html': `How Porch & Party handles quotes, planning and setup for Memphis ${SERVICE_LIST}.`
 });
 
-const RENTALS_ENTITY = `- Party Game Rentals: Giant yard games, an inflatable movie screen and a card table, picked up and returned at ${PICKUP}. $${PRICES.gameDay} a game per day; bundles from $${PRICES.bundleFrom}. URL: ${DOMAIN}/rentals/`;
+const RENTALS_ENTITY = `- Party Game Rentals: ${RENTALS_LIST}, picked up and returned at ${PICKUP}. $${PRICES.gameDay} a game per day; bundles from $${PRICES.bundleFrom}. URL: ${DOMAIN}/rentals/`;
 const RENTALS_QA = `Q: Does Porch & Party rent party games?\nA: Yes. Porch & Party rents giant yard games for $${PRICES.gameDay} a game per day, with bundles from $${PRICES.bundleFrom}. You pick up and return them at ${PICKUP}.\nURL: ${DOMAIN}/rentals/`;
 
 const missingAnchor = [];
@@ -86,7 +89,7 @@ function setLd(html, pick, edit, label) {
   return out;
 }
 
-const rentalsCard = () => `<article class="card" data-brand="rentals-card"><div class="card-media"><img alt="${esc(games.hero.alt)}" src="${games.hero.file}"/></div><div class="card-body"><h3>Party Game Rentals</h3><p>Giant yard games, an inflatable movie screen and a card table for backyard parties, birthdays, reunions and school events, picked up and returned at ${esc(PICKUP)}.</p><p class="muted">Starting at $${PRICES.gameDay} a game per day. Bundles from $${PRICES.bundleFrom}.</p><p><a href="/rentals/"><strong>See party game rentals</strong></a></p></div></article>`;
+const rentalsCard = () => `<article class="card" data-brand="rentals-card"><div class="card-media"><img alt="${esc(games.hero.alt)}" src="${games.hero.file}"/></div><div class="card-body"><h3>Party Game Rentals</h3><p>${RENTALS_LIST} for backyard parties, birthdays, reunions and school events, picked up and returned at ${esc(PICKUP)}.</p><p class="muted">Starting at $${PRICES.gameDay} a game per day. Bundles from $${PRICES.bundleFrom}.</p><p><a href="/rentals/"><strong>See party game rentals</strong></a></p></div></article>`;
 const rentalsPrice = () => `<div class="pricing-card" data-brand="rentals-price"><h3>Party Game Rentals</h3><span class="price">$${PRICES.gameDay}</span><p>A game per day, $${games.rates.weekend} for a weekend. Bundles from $${PRICES.bundleFrom}.</p><p class="muted">Pick up and return at ${esc(PICKUP)}. $${games.damageDeposit} refundable damage deposit.</p></div>`;
 /** pricing.html variant: the page's cards use <h2> and each carries its own next-step link. */
 const rentalsPricingPage = () => `<div class="pricing-card" data-brand="rentals-price"><h2>Party Game Rentals</h2><span class="price">$${PRICES.gameDay}+</span><p>Starting at $${PRICES.gameDay} a game per day, $${games.rates.weekend} for a weekend. Bundles from $${PRICES.bundleFrom}.</p><p class="muted">Pick up and return at ${esc(PICKUP)}. $${games.damageDeposit} refundable damage deposit.</p><p class="pricing-tool"><a class="btn-secondary" href="/rentals/">See party game rentals</a></p></div>`;

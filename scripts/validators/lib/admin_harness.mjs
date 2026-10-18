@@ -9,10 +9,19 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
+// The rentals inventory is Valerie's to edit (Settings -> Inventory, 18 Oct 2026), so the
+// scenario validators run on a fixed copy of it, scripts/validators/fixtures/games.json (the
+// seed inventory: Cornhole 1 set, both Giant Color Stack sets, the admin-only Projector...),
+// and never break when an item is added or removed. The live file is held to its rules by
+// validate:admin-inventory and validate:rentals; PNP_INVENTORY_LIVE=1 loads it here instead.
+const GAMES_FILE = /\/data\/rentals\/games\.json$/;
+export const GAMES_FIXTURE = path.join(ROOT, 'scripts/validators/fixtures/games.json');
+const jsonUrl = (url) => (GAMES_FILE.test(url) && process.env.PNP_INVENTORY_LIVE !== '1' ? pathToFileURL(GAMES_FIXTURE) : new URL(url));
+
 // Sync hooks (module.registerHooks, Node >= 22.15) where available, else the async form.
 function loadAsModule(url) {
   if (!url.startsWith('file:') || url.includes('/node_modules/') || false) return null;
-  if (url.endsWith('.json')) return { format: 'module', source: `export default ${fs.readFileSync(new URL(url), 'utf8')};`, shortCircuit: true };
+  if (url.endsWith('.json')) return { format: 'module', source: `export default ${fs.readFileSync(jsonUrl(url), 'utf8')};`, shortCircuit: true };
   if (url.endsWith('.txt')) return { format: 'module', source: `export default ${JSON.stringify(fs.readFileSync(new URL(url), 'utf8'))};`, shortCircuit: true };
   return null;
 }
@@ -22,7 +31,9 @@ if (typeof module.registerHooks === 'function') {
   const HOOKS = `export async function load(url, context, next) {
     const { readFile } = await import('node:fs/promises');
     if (url.includes('/node_modules/')) return next(url, context);
-    if (url.endsWith('.json')) return { format: 'module', source: 'export default ' + await readFile(new URL(url), 'utf8') + ';', shortCircuit: true };
+    const live = ${JSON.stringify(process.env.PNP_INVENTORY_LIVE === '1')};
+    const fixture = ${JSON.stringify(pathToFileURL(path.join(ROOT, 'scripts/validators/fixtures/games.json')).href)};
+    if (url.endsWith('.json')) return { format: 'module', source: 'export default ' + await readFile(new URL(!live && /\\/data\\/rentals\\/games\\.json$/.test(url) ? fixture : url), 'utf8') + ';', shortCircuit: true };
     if (url.endsWith('.txt')) return { format: 'module', source: 'export default ' + JSON.stringify(await readFile(new URL(url), 'utf8')) + ';', shortCircuit: true };
     return next(url, context);
   }`;

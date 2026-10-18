@@ -24,7 +24,13 @@ const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js')
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js'));
 const siteIcons = require(path.join(ROOT, 'scripts/lib/site_icons.js'));
-const data = require(path.join(ROOT, 'data/rentals/games.json'));
+const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
+// Resolved (scripts/lib/inventory.js): the all-games bundles carry every available public game at
+// its quantity and say "All games (available now: N)"; a bundle whose items are removed is off.
+const RAW_TEXT = fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8');
+const data = INV.resolve(JSON.parse(RAW_TEXT));
+// The inventory version the admin waits for before it says "Live ✓" (functions/_lib/inventory.mjs).
+const INVENTORY_VERSION = INV.hash(JSON.stringify(INV.inventoryOf(data)));
 
 const OUT = path.join(ROOT, 'rentals', 'index.html');
 const DOMAIN = offers.domain;
@@ -42,11 +48,28 @@ const PLACE = PICK.place.split(',')[0];
 // never reach the page, its schema, the invoice prefill or the listings.
 const GAMES = data.games.filter((g) => g.availableNow);
 const EXTRAS = (data.extras || []).filter((x) => x.availableNow);
-const ITEMS = [...GAMES.map((g) => ({ ...g, dayPrice: RATE.day, weekendPrice: RATE.weekend })), ...EXTRAS];
+const ITEMS = [...GAMES.map((g) => ({ ...g, dayPrice: RATE.day, weekendPrice: RATE.weekend })), ...EXTRAS].map((i) => ({ ...i, deposit: INV.depositOf(data, i) }));
 const bySlug = Object.fromEntries(ITEMS.map((i) => [i.slug, i]));
-const BUNDLES = data.bundles;
+const BUNDLES = INV.offeredBundles(data);
+const has = (slug) => ITEMS.some((i) => i.slug === slug);
+const bySlugAny = (slug) => ITEMS.find((i) => i.slug === slug);
+// Some items ask for a bigger (or smaller) deposit than the usual one.
+const ODD_DEPOSIT = ITEMS.some((i) => i.deposit !== data.damageDeposit);
+// "Giant Color Stack is made for ages 6 and up, Giant Uno for 7 and up and Grab the Mic for 8 and up"
+const AGES = GAMES_FOR_AGES();
+function GAMES_FOR_AGES() {
+  const aged = data.games.filter((g) => g.availableNow).map((g) => ({ name: g.name, age: Number((String(g.size).match(/ages (\d+)\+/) || [])[1]) })).filter((g) => g.age).sort((a, b) => a.age - b.age);
+  if (!aged.length) return '';
+  return `${INV.joinAnd(aged.map((g, k) => (k === 0 ? `${g.name} is made for ages ${g.age} and up` : `${g.name} for ${g.age} and up`)))}; every other game suits older kids, teens and adults.`;
+}
+const MAX_UNITS = Math.max(...ITEMS.map((i) => i.quantity || 1));
+const UNITS_WORDS = MAX_UNITS <= 1 ? 'one unit' : MAX_UNITS === 2 ? 'one or two units' : `one to ${INV.words(MAX_UNITS)} units`;
+// The bundle that is every item on the page (The Whole Party), if it is on offer.
+const EVERYTHING = BUNDLES.find((b) => b.allGames && EXTRAS.every((x) => (b.items || []).includes(x.slug)));
+const PICK3 = BUNDLES.find((b) => b.slug === 'pick-3');
+const INDOOR_GAME = data.games.find((g) => g.availableNow && g.use === 'indoor');
 const cheapestBundle = Math.min(...BUNDLES.map((b) => b.dayPrice));
-const DESCRIPTION = `Giant yard games, a movie screen and a card table for rent in Memphis, ${money(RATE.day)} a game per day, bundles from ${money(cheapestBundle)}. Pick up and return at ${PLACE}.`;
+const DESCRIPTION = `${INV.rentalsPhrase(data, { short: true, games: 'Giant yard games' })} for rent in Memphis, ${money(RATE.day)} a game per day, bundles from ${money(cheapestBundle)}. Pick up and return at ${PLACE}.`;
 const H1 = 'Giant yard game rentals for Memphis parties, picked up and returned in Memphis';
 const AREAS = ['Memphis, TN', 'Olive Branch, MS', 'Southaven, MS'];
 
@@ -71,7 +94,7 @@ const PICKUP_RULES = [
   ['Where', `Pick up and return at ${PICK.place}, ${PICK.address}, a safe exchange zone. We do not bring rentals to you.`],
   ['When', `After payment, text or call ${PICK.phone} to set your pickup time. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.`],
   ['Pay', `${money(data.damageDeposit)} refundable damage deposit + ${data.holdPercent}% of the rental holds your date, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App on the spot (never cash). The deposit is refunded at return.`],
-  ['Bring', 'Your government photo ID (the name must match the invoice) and a car. Every game fits an SUV or a sedan with the seats down; the movie screen fits a trunk.']
+  ['Bring', `Your government photo ID (the name must match the invoice) and a car. Every game fits an SUV or a sedan with the seats down${has('inflatable-movie-screen') ? '; the movie screen fits a trunk' : ''}.`]
 ];
 
 const FAQ = [
@@ -80,23 +103,23 @@ const FAQ = [
   ['How do I pay?',
     `A ${money(data.damageDeposit)} refundable damage deposit plus ${data.holdPercent}% of the rental fee holds your date, paid by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App on the spot; we do not take cash. The damage deposit is refunded when you return everything.`],
   ['What do I need to bring?',
-    'Your government photo ID, with the same name as the invoice, and a car. Every game fits an SUV or a sedan with the seats down, and the movie screen fits a trunk.'],
+    `Your government photo ID, with the same name as the invoice, and a car. Every game fits an SUV or a sedan with the seats down${has('inflatable-movie-screen') ? ', and the movie screen fits a trunk' : ''}.`],
   ['How much do the games cost?',
     `Every game is ${money(RATE.day)} a day or ${money(RATE.weekend)} for a weekend. ${EXTRAS.map((x) => `The ${x.name.toLowerCase()} is ${money(x.dayPrice)} a day or ${money(x.weekendPrice)} for a weekend.`).join(' ')} Bundles: ${BUNDLES.map((b) => `${b.name} ${money(b.dayPrice)}${b.weekendPrice ? ` (${money(b.weekendPrice)} for a weekend)` : ''}`).join(', ')}. There is no minimum order.`],
   ['How long is a rental?',
     'A day rental is returned within 24 hours of pickup. A weekend rental is picked up Friday and returned Monday.'],
   ['What happens if it rains?',
-    'If rain or a storm is forecast for your date, we reschedule the rental free within 30 days. Every game also works indoors, so many hosts simply move the games inside, and Grab the Mic is a tabletop game made for an indoor party.'],
+    `If rain or a storm is forecast for your date, we reschedule the rental free within 30 days. Every game also works indoors, so many hosts simply move the games inside${INDOOR_GAME ? `, and ${INDOOR_GAME.name} is a tabletop game made for an indoor party` : ''}.`],
   ['Can we use the games indoors?',
-    'Yes. Every game works indoors on flat floor space; the Giant Connect Four stands 4 ft tall. The inflatable movie screen is outdoor only and needs a plug within 50 ft.'],
-  ['Do you have a projector?',
-    "Yes, we can include one with the movie screen. Just ask when you book; it's one projector, so ask early."],
+    `Yes. Every game works indoors on flat floor space${has('giant-connect-four') ? '; the Giant Connect Four stands 4 ft tall' : ''}.${EXTRAS.filter((x) => x.use === 'outdoor').map((x) => ` The ${x.name.toLowerCase()} is outdoor only${x.slug === 'inflatable-movie-screen' ? ' and needs a plug within 50 ft' : ''}.`).join('')}`],
+  ...(has('inflatable-movie-screen') && (data.adminItems || []).some((x) => x.slug === 'projector' && x.availableNow !== false) ? [['Do you have a projector?',
+    "Yes, we can include one with the movie screen. Just ask when you book; it's one projector, so ask early."]] : []),
   ['How far ahead should I book?',
-    'Two to three weeks ahead is safest for Saturdays and holiday weekends, because each item is limited to one or two units. Weekday and short-notice requests are fine to send; we confirm what is open for your date.'],
+    `Two to three weeks ahead is safest for Saturdays and holiday weekends, because each item is limited to ${UNITS_WORDS}. Weekday and short-notice requests are fine to send; we confirm what is open for your date.`],
   ['Can I cancel?',
     'Yes. Cancel 48 hours or more before your pickup time for a full refund.'],
   ['Are the games safe for kids, and who can rent?',
-    'The renter must be 18 or older and an adult should supervise play. Giant Color Stack is made for ages 6 and up, Giant Uno for 7 and up and Grab the Mic for 8 and up; every other game suits older kids, teens and adults. Games are wiped down between rentals.']
+    `The renter must be 18 or older and an adult should supervise play. ${AGES ? `${AGES} ` : ''}Games are wiped down between rentals.`]
 ];
 
 const STEPS = [
@@ -122,7 +145,7 @@ const TERMS = [
 
 function itemCard(i) {
   const qty = i.quantity > 1 ? ` ${i.quantity} available.` : '';
-  return `<article class="card" id="${i.slug}"><div class="card-media"><img src="/assets/rentals/${i.slug}.webp" alt="${esc(i.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(i.name)}</h3><p>${esc(i.blurb)}</p><ul><li><strong>Size:</strong> ${esc(i.size)}</li><li><strong>Use:</strong> ${useLabel(i.use)}</li><li><strong>Price:</strong> ${money(i.dayPrice)} a day &middot; ${money(i.weekendPrice)} a weekend</li></ul><p class="muted">Available now.${qty}</p><p><a href="${FORM_URL}" data-quote-cta="rentals-item-${i.slug}">Book the ${esc(i.name)}</a></p></div></article>`;
+  return `<article class="card" id="${i.slug}"><div class="card-media"><img src="/assets/rentals/${i.slug}.webp" alt="${esc(i.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(i.name)}</h3><p>${esc(i.blurb)}</p><ul><li><strong>Size:</strong> ${esc(i.size)}</li><li><strong>Use:</strong> ${useLabel(i.use)}</li><li><strong>Price:</strong> ${money(i.dayPrice)} a day &middot; ${money(i.weekendPrice)} a weekend</li>${i.deposit !== data.damageDeposit ? `<li><strong>Refundable deposit:</strong> ${money(i.deposit)}</li>` : ''}</ul><p class="muted">Available now.${qty}</p><p><a href="${FORM_URL}" data-quote-cta="rentals-item-${i.slug}">Book the ${esc(i.name)}</a></p></div></article>`;
 }
 
 function bundleCard(b) {
@@ -142,7 +165,7 @@ function jsonLd() {
     { '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, description: DESCRIPTION, url: URL,
       primaryImageOfPage: `${DOMAIN}${data.hero.file}` },
     { '@context': 'https://schema.org', '@type': 'Service', name: 'Party game rentals', serviceType: 'Party equipment rental',
-      description: `Giant yard game, inflatable movie screen and card table rentals for backyard parties, birthdays, reunions, church and school events. Pickup and return at ${PICK.place}, ${PICK.address}.`,
+      description: `${INV.joinAnd(['Giant yard game', ...EXTRAS.map((x) => INV.extraPhrase(x).replace(/^(a|an) /, ''))])} rentals for backyard parties, birthdays, reunions, church and school events. Pickup and return at ${PICK.place}, ${PICK.address}.`,
       url: URL, provider, areaServed: AREAS,
       offers: BUNDLES.map((b) => ({ '@type': 'Offer', name: `${b.name} bundle`, description: b.includes, price: b.dayPrice, priceCurrency: 'USD', url: `${URL}#bundle-${b.slug}`,
         priceSpecification: b.weekendPrice
@@ -188,6 +211,7 @@ function render() {
   <meta name="twitter:description" content="${esc(DESCRIPTION)}" />
   <meta name="twitter:image" content="${DOMAIN}${data.hero.file}" />
   <meta name="theme-color" content="#faf7f2" />
+  <meta name="pnp-inventory" content="${INVENTORY_VERSION}" />
   ${siteIcons.HEAD_ICON_LINKS}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -204,7 +228,7 @@ function render() {
         <div class="page-intro">
           <span class="eyebrow">Party Game Rentals in Memphis</span>
           <h1>${H1}</h1>
-          <p id="what-are-porch-and-party-rentals">Porch &amp; Party rents giant yard games, an inflatable movie screen and a card table for backyard parties, birthdays, family reunions, church and school events in Memphis, Olive Branch and Southaven. You pick up and return at ${esc(PICK.place)}, a safe exchange zone. Every game is ${money(RATE.day)} a day, or pick 3 for ${money(BUNDLES[0].dayPrice)}, with no minimum order.</p>
+          <p id="what-are-porch-and-party-rentals">Porch &amp; Party rents ${esc(INV.rentalsPhrase(data))} for backyard parties, birthdays, family reunions, church and school events in Memphis, Olive Branch and Southaven. You pick up and return at ${esc(PICK.place)}, a safe exchange zone. Every game is ${money(RATE.day)} a day${PICK3 ? `, or pick 3 for ${money(PICK3.dayPrice)}` : ''}, with no minimum order.</p>
           <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary" data-quote-cta="rentals-top">Book your games</a><a href="#games" class="btn-secondary">See the Rentals</a></div>
           <p class="muted" style="margin-top: 14px;"><a href="${C.telHref}">Call or text ${C.telephoneDisplay}</a></p>
         </div>
@@ -214,16 +238,16 @@ function render() {
 
     <section class="section section-soft" id="games">
       <div class="container">
-        <div class="answer-block"><span class="eyebrow">The Rentals</span><h2>${ITEMS.length} party rentals: ${GAMES.length} games at ${money(RATE.day)} a day, plus a movie screen and a card table</h2><p>A weekend (pick up Friday, return Monday) is ${money(RATE.weekend)} a game. Tap any item to book it.</p></div>
+        <div class="answer-block"><span class="eyebrow">The Rentals</span><h2>${ITEMS.length} party rentals: ${GAMES.length} ${GAMES.length === 1 ? 'game' : 'games'} at ${money(RATE.day)} a day${EXTRAS.length ? `, plus ${INV.joinAnd(EXTRAS.map(INV.extraShort))}` : ''}</h2><p>A weekend (pick up Friday, return Monday) is ${money(RATE.weekend)} a game. Tap any item to book it.</p></div>
         <div class="cards-grid">${ITEMS.map(itemCard).join('')}</div>
       </div>
     </section>
 
     <section class="section" id="bundles">
       <div class="container">
-        <div class="answer-block"><span class="eyebrow">Bundles</span><h2>${BUNDLES.length} bundles that save on day prices</h2><p>Mix any games you like. ${esc(BUNDLES[BUNDLES.length - 1].name)} is every item on this page, and the only bundle with a weekend price.</p></div>
+        <div class="answer-block"><span class="eyebrow">Bundles</span><h2>${BUNDLES.length} bundles that save on day prices</h2><p>Mix any games you like.${EVERYTHING ? ` ${esc(EVERYTHING.name)} is every item on this page${BUNDLES.filter((b) => b.weekendPrice).length === 1 ? ', and the only bundle with a weekend price' : ''}.` : ''}</p></div>
         <div class="pricing-grid">${BUNDLES.map(bundleCard).join('')}</div>
-        <p class="pricing-note muted">Every rental adds a ${money(data.damageDeposit)} damage deposit, refunded at return.</p>
+        <p class="pricing-note muted">Every rental adds a ${money(data.damageDeposit)} damage deposit, refunded at return.${ODD_DEPOSIT ? ' Some items have their own deposit; their cards say so, and an order pays the biggest one.' : ''}</p>
         <div class="btn-row centered-cta-row"><a href="${FORM_URL}" class="btn-primary" data-quote-cta="rentals-bundles">Book your games</a></div>
       </div>
     </section>
@@ -293,7 +317,7 @@ function finalHtml(before) {
   return html;
 }
 
-module.exports = { finalHtml, data, OUT, ITEMS, GAMES, EXTRAS, BUNDLES, bundleValue, FAQ };
+module.exports = { finalHtml, data, OUT, ITEMS, GAMES, EXTRAS, BUNDLES, bundleValue, FAQ, INVENTORY_VERSION };
 
 if (require.main === module) {
   const before = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;

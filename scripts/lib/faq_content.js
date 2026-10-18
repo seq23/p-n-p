@@ -13,7 +13,9 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '../..');
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const areas = require(path.join(ROOT, 'data/service_areas/areas.json'));
-const games = require(path.join(ROOT, 'data/rentals/games.json'));
+const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
+const games = INV.resolve(require(path.join(ROOT, 'data/rentals/games.json')));
+const HAS_SCREEN = INV.publicExtras(games).some((x) => x.slug === 'inflatable-movie-screen');
 const porchPackages = require(path.join(ROOT, 'data/offers/porch_packages.json'));
 const PP = require(path.join(ROOT, 'scripts/lib/porch_packages.js'));
 const { FAQ: RENTALS_FAQ } = require(path.join(ROOT, 'scripts/generators/build_rentals_page.js'));
@@ -129,8 +131,8 @@ const SECTIONS = [
   },
   {
     id: 'rentals', title: 'Party game rentals', eyebrow: 'Rentals',
-    lead: `Giant yard games and a movie screen, ${money(games.rates.day)} a game a day.`,
-    intro: `Giant yard games, an inflatable movie screen and a card table, ${money(games.rates.day)} a game a day, picked up and returned at ${PICK.place}. The same answers are on the rentals page.`,
+    lead: `Giant yard games${HAS_SCREEN ? ' and a movie screen' : ''}, ${money(games.rates.day)} a game a day.`,
+    intro: `${INV.rentalsPhrase(games, { games: 'Giant yard games' })}, ${money(games.rates.day)} a game a day, picked up and returned at ${PICK.place}. The same answers are on the rentals page.`,
     qa: [
       ...RENTALS_FAQ,
       ['Is this a sale?',

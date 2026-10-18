@@ -125,8 +125,25 @@ for (const [f, re] of Object.entries(FORM_ROUTES)) {
   const src = read(f);
   if (!re.test(src) || !/from '(\.\.\/)+_lib\/request-submit\.mjs'/.test(src) || src.split('\n').filter((l) => l.trim()).length !== 2) errors.push(`${f} must be the one-line call into request-submit.mjs`);
 }
+// The one public inventory route (Settings -> Inventory, 18 Oct 2026): photos by content hash for
+// the Inventory Publish workflow. A one-line call into inventory.mjs handlePhoto, which serves only
+// image bytes from inventory_photos with X-Robots-Tag: noindex (validate:admin-inventory drives it).
+// The inventory publish pipeline's public routes (no admin data): the pending change for the
+// Inventory Poll workflow and the workflow's signed report back.
+const PHOTO_ROUTES = {
+  [path.join('functions', 'api', 'inventory', 'photo', '[sha].js')]: /export const onRequestGet = \(context\) => handlePhoto\(context\);/,
+  [path.join('functions', 'api', 'inventory', 'pending.js')]: /export const onRequestGet = \(context\) => handlePending\(context\);/,
+  [path.join('functions', 'api', 'inventory', 'report.js')]: /export const onRequestPost = \(context\) => handleReportRoute\(context\);/,
+};
+for (const [f, re] of Object.entries(PHOTO_ROUTES)) {
+  if (!fs.existsSync(path.join(ROOT, f))) { errors.push(`${f} is missing (an inventory publish route)`); continue; }
+  const src = read(f);
+  if (!re.test(src) || !/from '(\.\.\/)+_lib\/inventory\.mjs'/.test(src) || src.split('\n').filter((l) => l.trim()).length !== 2) errors.push(`${f} must be the one-line call into inventory.mjs`);
+}
+if (!/const PUBLIC_HEADERS = \{ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' \}/.test(read(path.join('functions', '_lib', 'inventory.mjs')))) errors.push('inventory.mjs pending/report routes must answer no-store + noindex');
+if (!/X-Robots-Tag': 'noindex'[\s\S]*SELECT content_type, bytes FROM inventory_photos WHERE sha = \?1/.test(read(path.join('functions', '_lib', 'inventory.mjs')))) errors.push('inventory.mjs handlePhoto must answer noindex and read only inventory_photos by sha');
 const outside = routeFiles.filter((f) => !guardedDirs.some((d) => f.startsWith(d + path.sep)));
-for (const f of outside) if (![...icsFiles, ...syncFiles, ...Object.keys(FORM_ROUTES)].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed, the sync hook nor a request-form route`);
+for (const f of outside) if (![...icsFiles, ...syncFiles, ...Object.keys(FORM_ROUTES), ...Object.keys(PHOTO_ROUTES)].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed, the sync hook nor a request-form route`);
 
 if (errors.length) {
   console.error('VALIDATION FAIL: admin console noindex / guard');

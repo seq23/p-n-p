@@ -392,7 +392,9 @@ another tab/retry queue, the cron hook).
 - **Guard**: `npm run validate:request-form` and `npm run validate:request-messages` (in `validate:admin`).
 
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
-The Google Form is rebuilt by hand; the admin prefill maps these exact strings
+Legacy intake: the site's /request form replaced it and takes its choices from the live inventory.
+Old answers keep these strings forever, so each must still name an item (available or removed)
+or a bundle in games.json (`npm run validate:admin-prices`). The Google Form is rebuilt by hand; the admin prefill maps these exact strings
 (`formChoice` in `data/rentals/games.json`). `npm run validate:admin-prices` reads this list and
 fails if a string is missing from the data, maps to the wrong price, or names a hidden item.
 
@@ -417,6 +419,37 @@ fails if a string is missing from the data, maps to the wrong price, or names a 
 
 "Pickup date" replaces "Delivery date". The delivery address, city and pickup-time questions are
 gone: pickup and return are at Mt. Moriah Station, time set by text or call after payment.
+
+## Inventory (Settings, owner-approved 18 Oct 2026)
+Valerie adds, edits, removes and brings back rental items in **Settings -> Inventory** (also linked
+from the Settings top and the Day sheet games grid). Code: `functions/_lib/inventory.mjs`,
+`functions/_lib/views-inventory.mjs`; rules: `scripts/lib/inventory.js` (the same `validate()` CI runs).
+- **One source of truth.** D1 (`inventory_items`, migration 0013) is the live copy, seeded from
+  `data/rentals/games.json` on first use. Every admin page, the /request form, its availability
+  answer and the Monday summary read it straight away (`useInventory`). Each save is published back
+  into `games.json` by the **Inventory Publish** workflow (apply -> `npm run inventory:regenerate`
+  in the regenerate order, refreezing only the frozen pages it changed -> `validate:release` ->
+  push), which Cloudflare Pages deploys. Public pages stay pre-rendered.
+- **How a save reaches the website.** The **Inventory Poll** workflow (every 5 min) reads
+  `GET /api/inventory/pending` and starts Inventory Publish once per change with GitHub's own token.
+  Optional Pages secret `PNP_GITHUB_TOKEN` (Actions: write on seq23/p-n-p) starts it instantly.
+  The workflow reports back to `POST /api/inventory/report` (HMAC, `PNP_INVENTORY_REPORT_KEY` on both
+  GitHub and Pages). Settings shows "Website updating…", then "Live ✓" only when
+  porchandparty901.com/rentals/ carries the new `<meta name="pnp-inventory">` version; a failure
+  says so in plain words with **Try again**.
+- **Remove is soft** (`availableNow: false`): off the website, /request, availability and the
+  booking picker; old bookings keep it on their Day sheet and edit form; invoices keep their lines.
+  Remove says how many future bookings have it. **Show on website** off = admin only (like the
+  Projector): tracked, never priced or public.
+- **Bundles.** Whole Yard and The Whole Party (`allGames`) take every available public game at its
+  quantity and say "All games (available now: N)"; a bundle whose items are gone, or that would cost
+  more than the items, comes off by itself (`offBecause`). Every game shares the game price (its own
+  form in Inventory); an item may carry its own refundable deposit (one per order, the biggest).
+- **Photos** are shrunk to 1200x900 on the phone, EXIF-stripped on the server, kept in
+  `inventory_photos`, and converted to `assets/rentals/<slug>.webp` by the workflow.
+- Scenario validators run on `scripts/validators/fixtures/games.json` (the seed); the live file is
+  held to the rules by `validate:admin-inventory` and `validate:rentals`. Facebook listings are
+  hand-written: after an inventory change, `validate:rentals` lists the lines to update on Facebook.
 
 ## Where things live
 | Piece | Place |

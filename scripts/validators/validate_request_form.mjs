@@ -41,7 +41,8 @@ const S = await mod('functions/_lib/sheet.mjs');
 const AM = await mod('functions/_lib/admin-money.mjs');
 const { PRICE_TABLE } = await mod('functions/_lib/prices.mjs');
 const offers = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8'));
-const games = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8'));
+// The scenario inventory the form is driven with (the validator harness loads the same fixture).
+const games = JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/validators/fixtures/games.json'), 'utf8'));
 const games_ = games;
 // brand.js is CommonJS reading JSON; read it in a plain child process (this one hooks JSON).
 const { execFileSync } = await import('node:child_process');

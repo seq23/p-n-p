@@ -1,0 +1,50 @@
+name: Inventory Poll
+
+# Every 5 minutes: is a rental-inventory change from /admin Settings -> Inventory waiting for the
+# website? (GET /api/inventory/pending, functions/_lib/inventory.mjs.) If so, start Inventory Publish
+# with this workflow's own token, once per change (a run already titled "Inventory publish #<id>"
+# is never started twice). This is how a save reaches the website with no GitHub key in Cloudflare;
+# with the optional PNP_GITHUB_TOKEN Pages secret the admin starts it instantly instead.
+# Owner-approved auto-rebuild, 18 Oct 2026.
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: inventory-poll
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    timeout-minutes: 3  # one curl + one gh call; a fault detector, not a budget
+    runs-on: ubuntu-latest
+    steps:
+      - name: Start the website update a saved change is waiting for
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SITE: https://porchandparty901.com
+        run: |
+          if ! body=$(curl -fsS --max-time 20 "$SITE/api/inventory/pending"); then
+            echo "::warning::NAMED STOP: $SITE/api/inventory/pending did not answer; the next round tries again."
+            exit 0
+          fi
+          if [ "$(printf '%s' "$body" | jq -r '.pending')" != "true" ]; then
+            echo "Nothing waiting: the website matches the admin inventory."
+            exit 0
+          fi
+          id=$(printf '%s' "$body" | jq -r '.publish_id')
+          if gh run list -R "$GITHUB_REPOSITORY" --workflow inventory-publish.yml --limit 40 --json displayTitle -q '.[].displayTitle' | grep -qx "Inventory publish #$id"; then
+            echo "Inventory publish #$id is already running or done."
+            exit 0
+          fi
+          gh workflow run inventory-publish.yml -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" \
+            -f publish_id="$id" \
+            -f inventory="$(printf '%s' "$body" | jq -r '.inventory')" \
+            -f photos="$(printf '%s' "$body" | jq -c '.photos')"
+          echo "Started Inventory publish #$id."

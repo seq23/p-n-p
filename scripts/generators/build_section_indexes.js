@@ -38,7 +38,9 @@ const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const brand = require(path.join(ROOT, 'scripts/lib/brand.js'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
 const faqContent = require(path.join(ROOT, 'scripts/lib/faq_content.js'));
-const rentalRates = require(path.join(ROOT, 'data/rentals/games.json')).rates;
+const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
+const RENTALS_DATA = INV.resolve(require(path.join(ROOT, 'data/rentals/games.json')));
+const rentalRates = RENTALS_DATA.rates;
 const { nav, footer } = require(path.join(ROOT, 'templates/page-shell.js'));
 // Owner ruling 2026-10-15: every quote CTA opens the quote form directly, in a new tab.
 const { QUOTE, QUOTE_ATTRS } = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
@@ -112,7 +114,7 @@ function groupServices(pages) {
   // here. Missing file is a hard error, never a silently shorter index.
   groups.push({
     heading: `Party Game Rentals - from $${rentalRates.day} a game per day`,
-    blurb: 'Giant yard games, an inflatable movie screen and a card table for Memphis parties, picked up and returned at Mt. Moriah Station.',
+    blurb: `${INV.rentalsPhrase(RENTALS_DATA, { games: 'Giant yard games' })} for Memphis parties, picked up and returned at Mt. Moriah Station.`,
     pages: [readPage('rentals/index.html')]
   });
   return groups;

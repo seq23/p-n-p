@@ -14,6 +14,7 @@ import { chicagoDate, chicagoHour } from './reminders.mjs';
 import { balances } from './ledger.mjs';
 import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
 import { getSettings, money, esc, FROM_EMAIL } from './util.mjs';
+import { useInventory } from './inventory.mjs';
 import { TRACK_TABLE as PRICE_TABLE } from './prices.mjs';
 
 const SITE = 'https://porchandparty901.com';
@@ -153,6 +154,7 @@ export function renderSummary(d) {
 // claim the week). Returns { ok, skipped?, error? }.
 export async function sendWeeklySummary(env, { now = new Date(), force = false, send } = {}) {
   const db = env.DB;
+  await useInventory(env); // the games counts follow Settings -> Inventory
   const settings = await getSettings(db);
   if (!force && settings.weekly_summary === '0') return { ok: true, skipped: 'switched off in Settings' };
   const today = chicagoDate(now);

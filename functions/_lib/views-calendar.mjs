@@ -348,7 +348,9 @@ const firstOf = (name) => String(name || '').trim().split(/\s+/)[0] || 'No name'
 // The games grid: one tile per item, OUT = light red with a light diagonal X (the name stays
 // readable), IN = light green. The words are always there, so a black-and-white print reads.
 export function gamesGrid(u, table) {
-  const tiles = table.items.map((it) => {
+  // A removed item (Settings -> Inventory) shows only on a day it is still out for an old booking.
+  const shown = table.items.filter((it) => !it.removed || (u.byItem[it.name] && u.byItem[it.name].used));
+  const tiles = shown.map((it) => {
     const v = u.byItem[it.name];
     const n = v ? v.used : 0;
     const stock = v ? v.stock : (it.quantity || 1);
@@ -356,8 +358,8 @@ export function gamesGrid(u, table) {
     const who = v.who.map((w) => `Out · back ${shortDate(w.end)} · ${firstOf(w.name)}`).join('; ');
     return `<div class="tile out${n > stock ? ' over' : ''}" data-tile="out"><strong>${esc(it.name)}</strong><span>${esc(who)}${stock > 1 ? ` (${n} of ${stock})` : ''}${n > stock ? ' · DOUBLE-BOOKED' : ''}</span></div>`;
   });
-  const outTiles = table.items.filter((it) => u.byItem[it.name] && u.byItem[it.name].who.length).length;
-  return { html: `<div class="grid" data-strip>${tiles.join('')}</div>`, outTiles, total: table.items.length };
+  const outTiles = shown.filter((it) => u.byItem[it.name] && u.byItem[it.name].who.length).length;
+  return { html: `<div class="grid" data-strip>${tiles.join('')}</div>`, outTiles, total: shown.length };
 }
 
 export function dayPage({ tdToday = [], requested = [], gamesAsked = 0, date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [], notPaid = null }) {
@@ -375,6 +377,7 @@ export function dayPage({ tdToday = [], requested = [], gamesAsked = 0, date, to
     ${u.over.length ? `<div class="notice err" data-overlap><strong>Double-booked:</strong> ${u.over.map((o) => `${esc(o.item)} (you have ${o.stock}) is out with ${esc(o.who.map((w) => w.name).join(' and '))}.`).join(' ')}</div>` : ''}
     ${g.html}
     ${u.out.some((w) => w.unnamed) ? `<p class="muted">${esc(u.out.filter((w) => w.unnamed).map((w) => `${firstOf(w.name)}: ${w.unnamed} game${w.unnamed === 1 ? '' : 's'} not picked yet`).join('; '))}</p>` : ''}
+    <p class="noprint" style="margin:8px 0 0"><a href="/admin/settings#inventory"${tip('inv.fromGrid')}>Change the items (Inventory)</a></p>
     ${gamesAsked ? `<div class="muted" data-games-asked${tip('cal.gamesAsked')}>${gamesAsked} ${gamesAsked === 1 ? 'game' : 'games'} asked for, not booked yet (not counted as out).</div>` : ''}</section>`;
   const holdsToday = holds.length ? `<section class="card" data-day-holds><h2>Holds ending this day</h2>${holds.map((h) => `<div><strong>${esc(h.timeLabel)}: ${esc(h.name || 'No name')}</strong> · ${esc(h.items || '')} · deposit not in yet</div>`).join('')}</section>` : '';
   const askedToday = requested.length ? `<section class="card dayonly" data-day-requested><h2>Asked for, not booked yet</h2><div class="reqlist">${requested.map((c) => requestedChip(c, 'a')).join('')}</div></section>` : '';
@@ -451,12 +454,14 @@ const SVC_CSS = `.svcpicks{border:0;padding:0;margin:0 0 12px;display:grid;gap:8
 
 export function bookingFormPage({ booking, action, title, rk = '', isNew = true, returnDate = '', avail = null, windowsJson = '[]', table, ignoreKey = '', askService = false, service = '' }) {
   const rental = RENTAL.has(booking.kind);
-  const total = table.items.length;
-  const outCount = avail ? table.items.filter((it) => avail[it.name] <= 0).length : 0;
   const chosen = new Set(String(booking.items || '').toLowerCase().split(/,\s*/));
+  // The picker lists what can be booked; a removed item appears only on a booking that has it.
+  const picks = table.items.filter((it) => !it.removed || [...chosen].some((c) => c.includes(it.name.toLowerCase())));
+  const total = picks.length;
+  const outCount = avail ? picks.filter((it) => avail[it.name] <= 0).length : 0;
   const itemBoxes = `<fieldset id="rent-items" style="border:0;padding:0;margin:12px 0"${rental ? '' : ' hidden'}><legend style="font-weight:600">Which items</legend>
     <p data-avail-line><strong>On these dates: <span id="out-n">${outCount}</span> of ${total} items already out.</strong></p>
-    ${table.items.map((it) => { const na = avail && avail[it.name] <= 0; const on = [...chosen].some((c) => c.includes(it.name.toLowerCase())); return `<label class="itemcheck${na ? ' na' : ''}" data-item="${esc(it.name)}"><input type="checkbox" name="item" value="${esc(it.name)}"${on ? ' checked' : ''}${na && !on ? ' disabled' : ''}> ${esc(it.name)} <span class="muted" data-na>${na ? '(out on these dates)' : ''}</span></label>`; }).join('')}
+    ${picks.map((it) => { const na = avail && avail[it.name] <= 0; const on = [...chosen].some((c) => c.includes(it.name.toLowerCase())); return `<label class="itemcheck${na ? ' na' : ''}" data-item="${esc(it.name)}"><input type="checkbox" name="item" value="${esc(it.name)}"${on ? ' checked' : ''}${na && !on ? ' disabled' : ''}> ${esc(it.name)} <span class="muted" data-na>${na ? '(out on these dates)' : ''}</span></label>`; }).join('')}
   </fieldset>`;
   const js = `(function(){var W=${windowsJson},S=${JSON.stringify(table.items.map((i) => [i.name, i.quantity || 1]))},IGN=${JSON.stringify(ignoreKey)};
     var f=document.getElementById('bk'),kind=f.querySelector('[name=kind]'),d=f.querySelector('[name=date]'),r=f.querySelector('[name=return_date]');

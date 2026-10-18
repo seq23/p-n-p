@@ -945,6 +945,11 @@ export function helpPage() {
     <li>It is on the calendar and on <strong>Requests</strong> as a normal card with a <strong>From a phone call</strong> chip: steps, invoice, Edit and Not paid yet all work.</li>
   </ol><p>A phone booking has no ID or rules step (the card says <strong>ID: not collected (phone booking)</strong>; you can add their ID photo later), no hold and no automatic confirmation email. The thank-you and the day-before reminder still go out when there is an email on file. For a block with no customer, pick <strong>Just a calendar note (no customer)</strong>: it never reaches Requests.</p>
     <p>A rental card says how long from the booked days: <strong>pickup Sun 18 Oct, back Tue 20 Oct (2 days)</strong>. On a phone the month shows as a list of days.</p></section>
+  <section class="card" data-help-inventory><h2>Your rental items (Inventory, in Settings)</h2><ol class="steps">
+    <li>Open <strong>Settings</strong> and tap <strong>Inventory: your rental items</strong> (or <strong>Change the items</strong> under the games grid on a Day sheet).</li>
+    <li>Tap <strong>Add an item</strong>, or <strong>Edit</strong> on one. Type the name, how many you have and the price, add a photo and check its description, then tap <strong>Save</strong>.</li>
+    <li>The admin and the booking form use it straight away. The box at the top says <strong>Website updating…</strong>, then <strong>Live ✓</strong> about 5 minutes later.</li>
+  </ol><p><strong>Remove</strong> takes an item off the website, the booking form and the booking picker; bookings and invoices that have it keep it, and <strong>Bring back</strong> puts it back. Whole Yard and The Whole Party always include every game on the website. Switch <strong>Show on website</strong> off for something only you track, like the projector.</p></section>
   ${tab('Money', 'money', '<p>Tap any total to see the payments or jobs behind it. Damage deposits are never counted as income. Your Bookings tab in the request sheet updates by itself.</p>')}
   ${tab('Put away', 'archive')}
   ${tab('Invoice', 'invoice')}
@@ -961,9 +966,10 @@ export function helpPage() {
   ${helpGlossary()}`, { screen: 'help', back: BACK_REQUESTS });
 }
 
-export function settingsPage({ settings, flash, error, hasQr, categories = [], pendingSync = 0 }) {
+export function settingsPage({ settings, flash, error, hasQr, categories = [], pendingSync = 0, inventory = '' }) {
   return layout('Settings', `<h1>Settings</h1>
   ${flash ? `<div class="notice ok"><strong>${esc(flash)}</strong></div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+  ${inventory ? `<p data-inv-top>${act(`<a class="btn ghost" href="#inventory"${tip('set.inventoryLink')}>Inventory: your rental items &darr;</a>`, 'set.inventoryLink')}</p>` : ''}
   <form class="card" method="post" action="/admin/settings" enctype="multipart/form-data">
     <h2>How customers pay you</h2>
     <label for="z">Zelle (the email or phone number people send Zelle to)</label><input id="z" name="zelle" value="${esc(settings.zelle || '')}" autocomplete="off">
@@ -1013,6 +1019,7 @@ export function settingsPage({ settings, flash, error, hasQr, categories = [], p
     <label for="cats">One per line</label><textarea id="cats" name="categories" rows="8">${esc(categories.join('\n'))}</textarea>
     <div style="margin-top:12px">${act(`<button class="btn ghost" type="submit"${tip('set.categories')}>Save categories</button>`, 'set.categories')}</div>
   </form>
+  ${inventory}
   <details class="disclose card" style="padding-top:0"><summary${tip('set.password')}>Change password</summary>
   <form method="post" action="/admin/settings/password">
     <label for="cur">Current password</label><input id="cur" name="current" type="password" autocomplete="current-password" required>

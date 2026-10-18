@@ -29,8 +29,10 @@ import * as AC from './admin-calendar.mjs';
 import * as AM from './admin-money.mjs';
 import { balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines } from './ledger.mjs';
 import * as AE from './admin-edit.mjs';
+import * as INVD from './inventory.mjs';
+import * as VI from './views-inventory.mjs';
 import { categoriesFrom } from './expenses.mjs';
-import { CHECKLIST_SOURCE } from './checklist-source.mjs';
+import { liveChecklistSource } from './checklist-source.mjs';
 import { renderPrintPage, prefillFromRequest, renderOnlineSections, checklistState, invoiceFromChecklist, fieldIndex } from './checklist.mjs';
 
 const MAX_PHOTOS = 10;
@@ -108,11 +110,11 @@ async function findRequest(env, key) {
 
 async function checklistPrint(env, url) {
   const rkParam = url.searchParams.get('r');
-  if (!rkParam) return htmlResponse(renderPrintPage(CHECKLIST_SOURCE, {}));
+  if (!rkParam) return htmlResponse(renderPrintPage(liveChecklistSource(), {}));
   const key = decodeKey(rkParam);
   const request = await findRequest(env, key);
-  const values = { ...(request ? prefillFromRequest(CHECKLIST_SOURCE, request) : {}), ...((await savedChecklist(env, key)) || {}) };
-  return htmlResponse(renderPrintPage(CHECKLIST_SOURCE, values, { who: request ? request.name : key.split('|')[1] || 'this request', onlineHref: `/admin/checklist/online?r=${rkParam}` }));
+  const values = { ...(request ? prefillFromRequest(liveChecklistSource(), request) : {}), ...((await savedChecklist(env, key)) || {}) };
+  return htmlResponse(renderPrintPage(liveChecklistSource(), values, { who: request ? request.name : key.split('|')[1] || 'this request', onlineHref: `/admin/checklist/online?r=${rkParam}` }));
 }
 
 async function checklistOnline(env, url) {
@@ -121,10 +123,10 @@ async function checklistOnline(env, url) {
   if (!key) return redirect('/admin/');
   const request = (await findRequest(env, key)) || { key, name: key.split('|')[1] || '', rentals: [], decor: [], other: [] };
   const saved = await savedChecklist(env, key);
-  const values = saved || prefillFromRequest(CHECKLIST_SOURCE, request);
+  const values = saved || prefillFromRequest(liveChecklistSource(), request);
   const { results } = await env.DB.prepare('SELECT id FROM checklist_photos WHERE request_key = ?1 ORDER BY id').bind(key).all();
   const photos = (results || []).map((p) => ({ id: p.id, url: `/api/admin/checklist/photos/${p.id}` }));
-  return htmlResponse(V.checklistOnlinePage({ request, rk, sections: renderOnlineSections(CHECKLIST_SOURCE, values), photos, values, maxPhotos: MAX_PHOTOS }));
+  return htmlResponse(V.checklistOnlinePage({ request, rk, sections: renderOnlineSections(liveChecklistSource(), values), photos, values, maxPhotos: MAX_PHOTOS }));
 }
 
 async function folderUrl(env, settings, requests) {
@@ -271,7 +273,7 @@ async function newInvoice(env, url) {
   }
   let lines = request ? prefillLines(request, PRICE_TABLE) : [{ description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 }];
   let depositCents = null; let dueDate = todayISO(7);
-  const fromChecklist = key ? invoiceFromChecklist(CHECKLIST_SOURCE, await savedChecklist(env, key)) : null;
+  const fromChecklist = key ? invoiceFromChecklist(liveChecklistSource(), await savedChecklist(env, key)) : null;
   if (request && request.gamesAnswer && lines.some((l) => /^Game rental \(/.test(l.description))) warnings.push(`We could not match the games they picked ("${request.gamesAnswer}"). Check the first line under Change what goes into the total.`);
   if (request) warnings.push(...porchPrefill(request, PRICE_TABLE).warnings);
   if (request && lines.some((l) => /of your choice/i.test(l.description))) warnings.push('They picked a bundle without naming every game. Ask which games, then change the line under Change what goes into the total.');
@@ -637,6 +639,7 @@ export async function login(env, request) {
 // shortly" while one is waiting. Neither ever blocks or breaks the page.
 const NO_SYNC = /^\/admin\/(login|logout|settings\/password|settings\/sheet-sync)$/;
 export async function handleAdmin(context) {
+  await INVD.useInventory(context.env);
   let res = await routeAdmin(context);
   const { request, env } = context;
   const url = new URL(request.url);
@@ -849,9 +852,10 @@ async function routeAdmin(context) {
     if (segs[1] === 'online') return checklistOnline(env, url);
   }
   if (segs[0] === 'settings') {
+    if (segs[1] === 'inventory') return inventoryRoute(env, request, url, segs.slice(2), method);
     if (segs.length === 1 && method === 'GET') {
       const settings = await getSettings(env.DB);
-      return htmlResponse(V.settingsPage({ settings, hasQr: Boolean(settings.qr_png), categories: categoriesFrom(settings), pendingSync: await AM.pendingSync(env.DB), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+      return htmlResponse(V.settingsPage({ settings, inventory: await inventoryHtml(env), hasQr: Boolean(settings.qr_png), categories: categoriesFrom(settings), pendingSync: await AM.pendingSync(env.DB), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
     }
     if (segs.length === 1 && method === 'POST') return saveSettings(env, request);
     if (segs[1] === 'password' && method === 'POST') return changePassword(env, request);
@@ -882,6 +886,97 @@ async function routeAdmin(context) {
   return htmlResponse(V.layout('Not found', '<p>Nothing here.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
 }
 
+// ---- Settings -> Inventory (functions/_lib/inventory.mjs) ----------------------------------------
+async function futureCounts(env, state) {
+  const today = chicagoDate();
+  const out = {};
+  const { TRACK_TABLE } = await import('./prices.mjs');
+  for (const r of state.rows) {
+    const item = JSON.parse(r.data);
+    out[r.slug] = (await INVD.futureBookingsFor(env.DB, item.name, today, TRACK_TABLE)).length;
+  }
+  return out;
+}
+
+async function inventoryHtml(env) {
+  try {
+    const state = await INVD.loadInventory(env.DB);
+    const words = INVD.publishWords(await INVD.publishStatus(env));
+    return VI.inventorySection({ state: await INVD.loadInventory(env.DB), words, future: await futureCounts(env, state) });
+  } catch (e) {
+    return `<section class="card" id="inventory"><h2>Inventory: your rental items</h2><div class="notice err">The inventory could not load: ${esc(String(e && e.message ? e.message : e))}</div></section>`;
+  }
+}
+
+const invBack = (m, e = '') => redirect(`/admin/settings?${e ? `e=${encodeURIComponent(e)}` : `m=${encodeURIComponent(m)}`}#inventory`);
+const SAVED = 'Saved ✓ It counts in the admin now. The website updates by itself in about 5 minutes.';
+
+async function inventoryRoute(env, request, url, rest, method) {
+  const res = await inventoryRouteInner(env, request, url, rest, method);
+  // A save changes the tables this request already loaded: reload them for whatever runs next.
+  if (method === 'POST') await INVD.useInventory(env);
+  return res;
+}
+
+async function inventoryRouteInner(env, request, url, rest, method) {
+  const state = await INVD.loadInventory(env.DB);
+  const findRow = (slug) => state.rows.find((r) => r.slug === slug);
+  if (rest[0] === 'publish' && method === 'POST') {
+    const r = await INVD.startPublish(env, 'Try again');
+    return invBack(r.status === 'running' ? 'The website update started again. About 5 minutes.' : 'Saved. See the box below for the website update.');
+  }
+  if (rest[0] === 'rates' && method === 'POST') {
+    const r = await INVD.saveRates(env, await request.formData());
+    if (!r.ok) return invBack('', r.errors.join(' '));
+    await INVD.startPublish(env, 'game price');
+    return invBack(SAVED);
+  }
+  if (rest[0] === 'new' && rest.length === 1) {
+    if (method === 'GET') return htmlResponse(VI.itemFormPage({ isNew: true, data: state.data, section: 'games' }));
+    if (method === 'POST') {
+      const form = await request.formData();
+      const r = await INVD.saveItem(env, { form, photo: form.get('photo') });
+      if (!r.ok) return htmlResponse(VI.itemFormPage({ isNew: true, data: state.data, errors: r.errors, item: formItem(form), section: sectionOfForm(form) }), 422);
+      await INVD.startPublish(env, `add ${r.slug}`);
+      return invBack(SAVED);
+    }
+  }
+  const slug = rest[0] || '';
+  const row = findRow(slug);
+  if (!row) return htmlResponse(V.layout('Not found', '<p>That item is not in the inventory.</p>', { screen: 'notfound', back: { href: '/admin/settings#inventory', label: 'Back to Settings' } }), 404);
+  const item = JSON.parse(row.data);
+  const { TRACK_TABLE } = await import('./prices.mjs');
+  const future = (await INVD.futureBookingsFor(env.DB, item.name, chicagoDate(), TRACK_TABLE)).length;
+  if (rest.length === 1 && method === 'GET') return htmlResponse(VI.itemFormPage({ isNew: false, item, row, section: row.section, data: state.data, futureCount: future }));
+  if (rest.length === 1 && method === 'POST') {
+    const form = await request.formData();
+    const r = await INVD.saveItem(env, { slug, form, photo: form.get('photo') });
+    if (!r.ok) return htmlResponse(VI.itemFormPage({ isNew: false, item: { ...item, ...formItem(form), slug }, row, section: sectionOfForm(form), data: state.data, errors: r.errors, futureCount: future }), 422);
+    await INVD.startPublish(env, `edit ${slug}`);
+    return invBack(SAVED);
+  }
+  if ((rest[1] === 'remove' || rest[1] === 'restore') && method === 'POST') {
+    const on = rest[1] === 'restore';
+    const r = await INVD.setAvailable(env, slug, on);
+    if (!r.ok) return invBack('', r.errors.join(' '));
+    await INVD.startPublish(env, `${rest[1]} ${slug}`);
+    const kept = !on && future ? ` ${future} future ${future === 1 ? 'booking keeps' : 'bookings keep'} it.` : '';
+    return invBack(`${item.name} ${on ? 'is back' : 'is removed'} ✓${kept} The website updates by itself in about 5 minutes.`);
+  }
+  return htmlResponse(V.layout('Not found', '<p>Nothing here.</p>', { screen: 'notfound', back: { href: '/admin/settings#inventory', label: 'Back to Settings' } }), 404);
+}
+
+// What the form said, to show it again after a refused save.
+function formItem(form) {
+  const f = INVD.readForm(form);
+  return { name: f.name, quantity: Number.isNaN(f.quantity) ? '' : f.quantity, dayPrice: Number.isNaN(f.dayPrice) ? '' : f.dayPrice, weekendPrice: Number.isNaN(f.weekendPrice) ? '' : f.weekendPrice,
+    deposit: f.deposit, blurb: f.blurb, alt: f.alt, size: f.size, use: f.use, kind: f.kind };
+}
+function sectionOfForm(form) {
+  const f = INVD.readForm(form);
+  return f.onWebsite ? (f.kind === 'extra' ? 'extras' : 'games') : 'adminItems';
+}
+
 // Send one email through the MAILER service binding (the pnp-mailer Worker's /send).
 function viaMailer(env) {
   return async (m) => {
@@ -895,6 +990,10 @@ function viaMailer(env) {
 export async function handleApi(context) {
   const { request, env } = context;
   const url = new URL(request.url);
+  await INVD.useInventory(env);
+  if (url.pathname === '/api/admin/inventory/status' && request.method === 'GET') {
+    return Response.json(INVD.publishWords(await INVD.publishStatus(env)), { headers: { 'Cache-Control': 'no-store' } });
+  }
   if (url.pathname === '/api/admin/qr.png' && request.method === 'GET') {
     const settings = await getSettings(env.DB);
     if (!settings.qr_png) return new Response('no QR code yet', { status: 404, headers: { 'Cache-Control': 'no-cache' } });
@@ -906,7 +1005,7 @@ export async function handleApi(context) {
     if (!key) return Response.json({ error: 'which request?' }, { status: 400 });
     let body;
     try { body = await request.json(); } catch { return Response.json({ error: 'bad json' }, { status: 400 }); }
-    const allowed = new Set(fieldIndex(CHECKLIST_SOURCE).map((f) => f.id));
+    const allowed = new Set(fieldIndex(liveChecklistSource()).map((f) => f.id));
     const clean = {};
     for (const [k, v] of Object.entries(body || {})) {
       if (k === '_done') { if (v) clean._done = true; continue; }

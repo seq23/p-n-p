@@ -44,9 +44,11 @@ on:
   # commit_evidence, and what it commits includes the observed surfacing ledger
   # and the citation yield observations that the atlas and the yield scoreboard
   # are built from.
+  # "Inventory Publish" (Settings -> Inventory in /admin) pushes the rebuilt rentals pages the
+  # same way, so its commits are validated and announced here too.
   workflow_run:
     workflows:
-      ["Daily Authority Cycle", "Bounded Self-Healing", "Search Intelligence Cycle", "Paid Citation Probe"]
+      ["Daily Authority Cycle", "Bounded Self-Healing", "Search Intelligence Cycle", "Paid Citation Probe", "Inventory Publish"]
     types: [completed]
 
 permissions:

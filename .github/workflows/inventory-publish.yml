@@ -1,0 +1,102 @@
+name: Inventory Publish
+
+# Started for every rental-item save in /admin (Settings -> Inventory, functions/_lib/inventory.mjs):
+# by the Inventory Poll workflow within 5 minutes, or straight away by the admin when the optional
+# PNP_GITHUB_TOKEN Pages secret is set. It carries the whole inventory, writes data/rentals/games.json,
+# converts any new photo, re-renders every page that reads the file (scripts/inventory/regenerate.mjs),
+# runs validate:release and pushes one commit to main, which Cloudflare Pages deploys. The admin
+# shows "Website updating..." until /rentals/ carries the new inventory version, then "Live ✓".
+# Owner-approved 18 Oct 2026 (auto-rebuild, about 5 minutes, pages stay pre-rendered for Google).
+run-name: "Inventory publish #${{ inputs.publish_id }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_id:
+        description: "inventory_publishes.id in D1 (the admin shows its status)"
+        required: true
+      inventory:
+        description: "base64 JSON { rates, games, extras, adminItems }"
+        required: true
+      photos:
+        description: "JSON [{ slug, sha }] of photos the website does not have yet"
+        required: false
+        default: "[]"
+
+permissions:
+  contents: write
+
+# A newer save carries the whole inventory too, so it replaces a run still going.
+concurrency:
+  group: inventory-publish
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    timeout-minutes: 15  # ~4x a normal run (npm ci + regenerate + validate:release); a fault detector, not a budget
+    runs-on: ubuntu-latest
+    env:
+      REPORT_KEY: ${{ secrets.PNP_INVENTORY_REPORT_KEY }}
+      PUBLISH_ID: ${{ inputs.publish_id }}
+      RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # Tells the admin how it is going (POST /api/inventory/report, HMAC-signed). Without the
+      # key the admin still sees "Live ✓" from the live page; it only loses the early "failed".
+      - name: Report started
+        run: bash scripts/inventory/report.sh started
+
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Install the photo converter
+        if: inputs.photos != '[]' && inputs.photos != ''
+        run: python3 -m pip install --quiet pillow
+
+      - name: Write the inventory into games.json
+        env:
+          INVENTORY: ${{ inputs.inventory }}
+          PHOTOS: ${{ inputs.photos }}
+        run: node scripts/inventory/apply_publish.mjs
+
+      - name: Re-render every page that reads games.json
+        run: node scripts/inventory/regenerate.mjs
+
+      - name: Validate the release
+        run: |
+          npm run distribution:prepare
+          npm run validate:release
+
+      - name: Commit and push
+        run: |
+          git config user.name "pnp-inventory-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git checkout -- reports/validation 2>/dev/null || true
+          # Exactly what changed: the data file, new photos, the release registry and the pages
+          # scripts/inventory/regenerate.mjs listed in .build/inventory-changed.txt.
+          git add data/rentals/games.json assets/rentals data/cadence/lastmod_ledger.json data/release
+          if [ -s .build/inventory-changed.txt ]; then xargs -r git add -- < .build/inventory-changed.txt; fi
+          if git diff --cached --quiet; then
+            echo "Inventory publish #${PUBLISH_ID}: the website already matches; nothing to commit."
+            bash scripts/inventory/report.sh unchanged
+            exit 0
+          fi
+          git commit -m "Inventory: website update #${PUBLISH_ID} from Settings -> Inventory"
+          for i in 1 2 3; do
+            if git push origin "HEAD:$GITHUB_REF_NAME"; then bash scripts/inventory/report.sh pushed; exit 0; fi
+            git pull --rebase origin "$GITHUB_REF_NAME"
+          done
+          echo "::error::could not push the inventory update after 3 tries"
+          exit 1
+
+      - name: Report failed
+        if: failure()
+        run: bash scripts/inventory/report.sh failed
