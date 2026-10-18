@@ -9,6 +9,7 @@ import { layout, act, chip, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS }
 import { KINDS, KIND_LABELS, prettyTime, addDays, returnKeyOf, firstLine, usageOn } from './calendar.mjs';
 import { serviceInfo, serviceKey, SERVICE_KINDS } from './kinds.mjs';
 import { gamesAskedOn } from './requested.mjs';
+import { PHONE_SERVICES, PHONE_SERVICE_WORDS, NOTE_CHOICE, FIRST_KIND } from './phone-requests.mjs';
 import { balanceWords, depositWords } from './ledger.mjs';
 import { reminderText, smsLink, normalizePhone, hasEmail } from './reminders.mjs';
 
@@ -73,6 +74,15 @@ a.k.req{text-decoration:none;color:var(--ink)}
 .grid .tile.in{background:#e7f5e4;border-color:#9fcb97}
 .grid .tile.out{background:#fbe3e0;border-color:#e3a59b;background-image:linear-gradient(to top right,transparent calc(50% - 1px),rgba(143,52,39,.28) 50%,transparent calc(50% + 1px)),linear-gradient(to bottom right,transparent calc(50% - 1px),rgba(143,52,39,.28) 50%,transparent calc(50% + 1px))}
 .grid .tile.over{border-width:3px;border-color:#8f3427}
+/* Month on a phone: a day-by-day list, full chips (the grid stays from 700 px up). */
+.monthlist{display:none}
+@media(max-width:699px){.month{display:none}.monthlist{display:grid;gap:8px}}
+.mday{border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px 10px;display:grid;gap:6px;min-width:0}
+.mday.today{border:2px solid var(--accent)}
+.mday .mdh{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;min-height:44px;color:var(--ink);text-decoration:none;font-size:1.1rem}
+.mday .mdh .badge{display:inline;margin:0}
+.mday .k{display:block;min-height:44px;padding:8px 10px;font-size:1rem;line-height:1.35;text-decoration:none;color:var(--ink);overflow-wrap:anywhere;white-space:normal;max-width:100%;box-sizing:border-box}
+.mday .k .ki{font-weight:400}
 @media print{
   @page{size:Letter;margin:12mm}
   .notice.ok,.notice.flash,[data-flash],.daytools,.notes form,.dayonly,.btn,.actions,button,form,nav,header.top,.back,.topsteps{display:none!important}
@@ -212,6 +222,24 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
       ${owes ? '<span class="due" data-due>$ due</span>' : ''}${late ? '<span class="late-dot">Not returned yet</span>' : ''}
     </a>`);
   }
+  // Phones (< 700 px): the month as a simple day-by-day list with full, readable chips (owner,
+  // 18 Oct 2026: the 7-column grid was cramped at 390 px, worse with the outlined Requested
+  // chips). The grid stays as it was on a computer; CSS shows one or the other.
+  const listDays = [];
+  for (let day = first; day.slice(0, 7) === month; day = addDays(day, 1)) {
+    const list = byDay[day] || []; const asked = reqByDay[day] || [];
+    if (!list.length && !asked.length && day !== today) continue;
+    const games = usageOn(windows, day, today, table).count;
+    listDays.push(`<div class="mday${day === today ? ' today' : ''}" data-month-day="${day}"><a class="mdh" href="/admin/day/${day}"${tip('cal.day')}><strong>${esc(shortDate(day))}</strong>${day === today ? ' <span class="muted">today</span>' : ''}${games ? ` <span class="badge" data-games-out>${games} ${games === 1 ? 'game' : 'games'} out</span>` : ''}</a>
+      ${list.map((b) => {
+        const r = ctx(b).ret;
+        const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
+        return `<a class="k ${esc(b.kind)}" href="/admin/day/${day}" data-list-booking="${b.id}"${tip(held ? 'cal.heldChip' : 'cal.booking')}>${held ? 'Held · ' : ''}${esc(KIND_LABELS[b.kind])}${b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : ''}${b.time ? ` ${esc(prettyTime(b.time))}` : ''}: ${esc(b.customer_name || 'No name')}${b.items ? ` <span class="ki">· ${esc(firstLine(b.items, 80))}</span>` : ''}</a>`;
+      }).join('')}
+      ${asked.map((c) => requestedChip(c, 'a')).join('')}
+      ${!list.length && !asked.length ? '<p class="muted" style="margin:0">Nothing booked today.</p>' : ''}</div>`);
+  }
+  const monthList = `<div class="monthlist" data-month-list>${listDays.length ? listDays.join('') : '<p class="muted">Nothing booked this month.</p>'}</div>`;
   const upcoming = bookings.filter((b) => b.date >= today && b.date <= addDays(today, 14));
   const upcomingHtml = `<section class="card upcoming" data-upcoming><h2>Upcoming (next 14 days)</h2>${upcoming.length ? upcoming.map((b) => `<a class="item" href="/admin/day/${esc(b.date)}"${tip('cal.day')}>
       <strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind)} ${esc(b.customer_name || 'No name')}<br><span class="muted">${esc(b.items || '')}</span> ${statusBits(b, ctx(b))}</a>`).join('') : '<p class="muted" style="margin:0">Nothing in the next 14 days.</p>'}</section>`;
@@ -259,6 +287,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
       </div>
       <h2>${esc(new Date(`${first}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }))}</h2>
       <div class="month">${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => `<div class="dow">${d}</div>`).join('')}${cells.join('')}</div>
+      ${monthList}
     </section>${uns}</div></div>
     <form id="move-form" method="post" action="" hidden><input type="hidden" name="date" value=""></form>
     <script>${CAL_JS}${VIEW_JS}</script>`, { screen: '', back: BACK_REQUESTS, wide: true });
@@ -406,7 +435,21 @@ export function dayPage({ tdToday = [], requested = [], gamesAsked = 0, date, to
 
 // ---- Scheduling form ----------------------------------------------------------------------
 
-export function bookingFormPage({ booking, action, title, rk = '', isNew = true, returnDate = '', avail = null, windowsJson = '[]', table, ignoreKey = '' }) {
+// "Add a booking" with no request (owner, 18 Oct 2026): which service, in the four colours with
+// words, or "Just a calendar note (no customer)". A service makes a phone request on Save
+// (phone-requests.mjs); the note keeps the old request-less booking.
+export function serviceChoice(picked = '') {
+  const card = (value, label, style, key) => `<label class="svcpick" data-service-pick="${esc(value)}"${style ? ` style="${style}"` : ''}><input type="radio" name="service" value="${esc(value)}" required${picked === value ? ' checked' : ''}${tip(key)}> <span>${esc(label)}</span></label>`;
+  return `<fieldset class="svcpicks" data-service-choice><legend>Which service?</legend>
+    ${PHONE_SERVICES.map((k) => card(k, PHONE_SERVICE_WORDS[k], `border-color:${SERVICE_KINDS[k].bar};background:${SERVICE_KINDS[k].tint}`, 'bk.service')).join('')}
+    ${card(NOTE_CHOICE, 'Just a calendar note (no customer)', '', 'bk.note')}
+    <p class="muted" data-service-hint>A service adds the customer to Requests as a phone booking. A calendar note does not.</p></fieldset>`;
+}
+const SVC_CSS = `.svcpicks{border:0;padding:0;margin:0 0 12px;display:grid;gap:8px}.svcpicks legend{font-weight:700;margin-bottom:6px}
+.svcpick{display:flex;align-items:center;gap:10px;min-height:48px;margin:0;padding:6px 12px;border:2px solid var(--line);border-left-width:8px;border-radius:10px;background:#fff;color:var(--ink);font-weight:600;font-size:1.05rem}
+.svcpick input{width:24px;height:24px;min-height:24px;flex:none}.svcpick:has(input:checked){outline:3px solid var(--ink);outline-offset:1px}`;
+
+export function bookingFormPage({ booking, action, title, rk = '', isNew = true, returnDate = '', avail = null, windowsJson = '[]', table, ignoreKey = '', askService = false, service = '' }) {
   const rental = RENTAL.has(booking.kind);
   const total = table.items.length;
   const outCount = avail ? table.items.filter((it) => avail[it.name] <= 0).length : 0;
@@ -423,10 +466,16 @@ export function bookingFormPage({ booking, action, title, rk = '', isNew = true,
       var end=(r&&r.value&&r.value>=d.value)?r.value:d.value,n=0;S.forEach(function(p){var left=p[1];for(var day=d.value;day<=end;day=add(day,1)){var c=W.filter(function(w){return w.key!==IGN&&out(w,day)&&w.names.indexOf(p[0])>=0;}).length;left=Math.min(left,p[1]-c);}
         var lab=f.querySelector('[data-item="'+p[0].replace(/"/g,'\\\\"')+'"]'),box=lab.querySelector('input'),na=left<=0;if(na)n++;lab.classList.toggle('na',na);if(!box.checked)box.disabled=na;lab.querySelector('[data-na]').textContent=na?'(out on these dates)':'';});
       document.getElementById('out-n').textContent=n;}
-    f.addEventListener('change',upd);upd();})();`;
-  return layout(title, `<style>${CAL_CSS}</style><h1>${esc(title)}</h1>
+    var KS=${JSON.stringify(Object.fromEntries(PHONE_SERVICES.map((k) => [k, SERVICE_KINDS[k].kinds])))},FK=${JSON.stringify(FIRST_KIND)};
+    function svc(){var p=f.querySelector('[name=service]:checked');if(!p)return;var v=p.value,cn=f.querySelector('[name=customer_name]'),lab=f.querySelector('label[for=cn]');
+      Array.prototype.forEach.call(kind.options,function(o){o.hidden=v!=='${NOTE_CHOICE}'&&KS[v].indexOf(o.value)<0;});
+      if(v!=='${NOTE_CHOICE}'&&KS[v].indexOf(kind.value)<0)kind.value=FK[v];
+      if(cn){cn.required=v!=='${NOTE_CHOICE}';if(lab)lab.textContent=v==='${NOTE_CHOICE}'?'Name for the note (optional)':'Customer name';}}
+    f.addEventListener('change',function(e){if(e.target&&e.target.name==='service')svc();upd();});svc();upd();})();`;
+  return layout(title, `<style>${CAL_CSS}${askService ? SVC_CSS : ''}</style><h1>${esc(title)}</h1>
     <form id="bk" class="card" method="post" action="${esc(action)}">
       ${rk ? hiddenInputs({ r: rk }) : ''}
+      ${askService ? serviceChoice(service) : ''}
       <label for="kind">What kind of booking</label>
       <select id="kind" name="kind">${KINDS.map((k) => `<option value="${k}"${k === booking.kind ? ' selected' : ''}>${esc(KIND_LABELS[k])}</option>`).join('')}</select>
       <label for="date">Day</label><input id="date" name="date" type="date" required value="${esc(booking.date || '')}">
@@ -435,7 +484,7 @@ export function bookingFormPage({ booking, action, title, rk = '', isNew = true,
       <label for="time">Time (leave empty for all day)</label><input id="time" name="time" type="time" value="${esc(booking.time || '')}">
       <label for="cn">Customer name</label><input id="cn" name="customer_name" value="${esc(booking.customer_name || '')}" required>
       <label for="ph">Phone</label><input id="ph" name="phone" type="tel" value="${esc(booking.phone || '')}">
-      <label for="em">Email (for the automatic reminder)</label><input id="em" name="email" type="email" value="${esc(booking.email || '')}">
+      <label for="em">Email (optional, for the automatic reminder${askService ? ' and thank-you' : ''})</label><input id="em" name="email" type="email" value="${esc(booking.email || '')}">
       <label for="pl">Where</label><input id="pl" name="place" value="${esc(booking.place || '')}">
       ${itemBoxes}
       <label for="it">What (words)</label><textarea id="it" name="items" rows="3">${esc(booking.items || '')}</textarea>

@@ -10,6 +10,7 @@ import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 import { takedownState, takedownStepWords, inlineDefaultDate } from './takedown.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
+import { isPhone, rentalDates, rentalSpanWords } from './phone-requests.mjs';
 
 const CSS = `
 :root{--cream:#faf7f2;--ink:#3b302a;--accent:#b85f40;--line:#e3d8cb;--muted:#5f5148;--card:#fff;--ok:#3f6b3a;--warn:#8a5212}
@@ -36,6 +37,7 @@ html,body{overflow-x:hidden}main,article,.card{min-width:0;overflow-wrap:anywher
 .chip{display:inline-block;padding:4px 12px;border-radius:999px;font-size:.95rem;font-weight:600;border:1px solid var(--line);background:var(--cream);white-space:nowrap}
 .chip.new{background:#fde9e1;border-color:#e9b9a6;color:#7a3519}.chip.invoiced,.chip.sent{background:#e8eefa;border-color:#b9c7ea;color:#2a3b70}
 .chip.deposit_paid{background:#fff3dc;border-color:#ebcf96;color:var(--warn)}.chip.paid{background:#e4f1e1;border-color:#b2d3ab;color:var(--ok)}
+.chip.phone{background:#e6f2f5;border-color:#8fbfcc;color:#1d4652}.idup{margin:8px 0 0}.idup label{font-weight:600}
 .chip.done{background:#ececec;color:#444}.chip.void{background:#f4e1de;color:#8f3427}.chip.draft{background:#f3efe9;color:var(--ink)}
 .when{color:var(--muted)}.want{font-size:1.05rem;margin:6px 0 2px}
 dl.kv{display:grid;grid-template-columns:1fr;gap:2px 12px;margin:8px 0}dl.kv dt{color:var(--muted);font-size:.95rem}dl.kv dd{margin:0 0 8px;word-break:break-word}
@@ -191,12 +193,17 @@ function answerOf(r, re) {
 }
 
 // One plain sentence per request: what they want and when.
-export function wantSummary(r) {
+// bookings: the request's bookings ([{kind, date}]); a rental with both its pickup and its
+// return day says how long from those days (owner, 18 Oct 2026: Sun 18 -> Tue 20 read "for one
+// day"): "pickup Sun 18 Oct, back Tue 20 Oct (2 days)".
+export function wantSummary(r, bookings = []) {
   const parts = [];
   if (r.gamesAnswer) {
+    const { pickup, ret } = rentalDates(r, bookings);
+    const span = rentalSpanWords(pickup, ret);
     const how = /weekend/i.test(r.durationAnswer) ? 'for the weekend' : (r.durationAnswer ? 'for one day' : '');
     const when = answerOf(r, /pickup date|delivery date/i);
-    parts.push(`Games: ${r.gamesAnswer}${how ? ` ${how}` : ''}${when ? `, ${when}` : ''}`);
+    parts.push(span ? `Games: ${r.gamesAnswer}, ${span}` : `Games: ${r.gamesAnswer}${how ? ` ${how}` : ''}${when ? `, ${when}` : ''}`);
   } else if (r.wantsRentals) parts.push('Game rentals');
   if (r.wantsDecor) {
     const when = answerOf(r, /event date/i);
@@ -310,8 +317,16 @@ function memphisWhen(utc) {
   return `${day}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' })}`;
 }
 
+// A phone request has no ID on file at first (ID-for-everyone still stands): it says so, and
+// Valerie can add one later with the optional upload (admin.mjs addId).
+export function idUploadForm(rk) {
+  return `<form class="idup" method="post" action="/admin/requests/id/upload" enctype="multipart/form-data" data-id-upload>${hiddenInputs({ r: rk })}
+      <label for="idp-${esc(rk)}">Add their ID photo (optional)</label><input id="idp-${esc(rk)}" type="file" name="id_photo" accept="image/jpeg,image/png" required${tip('card.idUpload')}>
+      ${act(`<button class="btn ghost" type="submit"${tip('card.idUpload')}>Add ID photo</button>`, 'card.idUpload')}</form>`;
+}
 function idCell(r, rk) {
   if (r.idDeletedAt) return esc(`Deleted ${memphisWhen(r.idDeletedAt)}`);
+  if (isPhone(r) && !r.idObject) return `<span data-id-phone>Not collected (phone booking)</span>${idUploadForm(rk)}`;
   if (r.idObject) return `<a href="/admin/requests/id?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.idPhoto')}>Open ID photo</a>`;
   return r.idFile ? r.idFile.split(/,\s*/).map((u, i) => link(u, i ? `Open ID photo ${i + 1}` : 'Open ID photo', 'card.idPhoto')).join('<br>') : '';
 }
@@ -329,7 +344,7 @@ function requestDetailsBody(r, { referrers = {} } = {}) {
       ['Date of birth', r.dob],
       ['Social media', [r.social1, r.social2].filter(Boolean).map((u) => link(u, '', 'card.social')).join('<br>'), true],
       ['Photo ID', idCell(r, rk), true],
-      ['Rules', r.agreedAt ? `Agreed to rules on ${memphisWhen(r.agreedAt)} (version ${r.rulesVersion})` : ''],
+      ['Rules', r.agreedAt ? `Agreed to rules on ${memphisWhen(r.agreedAt)} (version ${r.rulesVersion})` : (isPhone(r) ? 'Not asked (phone booking)' : '')],
       ['Referred by', r.referredBy ? (referrers[r.referredBy] || 'a past customer') : ''],
       ['Robot check', r.robotCheck === 'no-js' ? 'Sent without the robot check (their phone had JavaScript off). Check it looks real.' : ''],
       ['Found us through', r.heard],
@@ -612,6 +627,7 @@ export function requestCard(r, o) {
   // Oct" repeated the progress line). Only what the progress line cannot say: Void (no progress
   // line), Finished, and Returned — check damage.
   const chips = [
+    isPhone(r) ? `<span class="chip phone" data-phone-chip${tip('card.phoneChip')}>From a phone call</span>` : '',
     pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : '',
     pr.finished && !pr.void ? '<span class="chip paid" data-step="paid">Finished: job done and paid</span>' : '',
     returned && ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : '',
@@ -630,7 +646,7 @@ export function requestCard(r, o) {
       ${badges(services)}
       <div class="spread"><h3 class="who">${esc(r.name || 'No name given')}</h3><div class="row">${chips}<a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a></div></div>
       ${factsLine(keyFacts(r, services, { pickupPlace }))}
-      ${wantSummary(r).map((w) => `<div class="want">${esc(w)}</div>`).join('')}${gLine}
+      ${wantSummary(r, bookings).map((w) => `<div class="want">${esc(w)}</div>`).join('')}${gLine}
       ${progress}
       ${quiet ? '' : extras}
       ${damage}${finishedNote}
@@ -923,6 +939,12 @@ export function helpPage() {
     <li>Tap <strong>Save</strong>: it is on the calendar. The card says <strong>Takedown on the calendar for Tue 20 Oct ✓</strong>. Or tap <strong>Not sure yet</strong> or <strong>Customer will handle it</strong>.</li>
     <li>When it is done, tap <strong>Mark takedown done</strong> on that line, any day. <strong>Change</strong> moves it, <strong>Remove</strong> takes it off.</li>
   </ol><p>A takedown date on the form is booked by itself. A grazing table has the same line for its optional pickup.</p></section>
+  <section class="card" data-help-phone><h2>A booking that came by phone</h2><ol class="steps">
+    <li>On <strong>Calendar</strong>, tap <strong>Add a booking</strong>. Pick the service: <strong>Porch</strong>, <strong>Party &amp; decor</strong>, <strong>Grazing</strong> or <strong>Game rentals</strong>.</li>
+    <li>Type the day, their name and phone (their email if you have it), then tap <strong>Save booking</strong>. A rental books its pickup and its return together.</li>
+    <li>It is on the calendar and on <strong>Requests</strong> as a normal card with a <strong>From a phone call</strong> chip: steps, invoice, Edit and Not paid yet all work.</li>
+  </ol><p>A phone booking has no ID or rules step (the card says <strong>ID: not collected (phone booking)</strong>; you can add their ID photo later), no hold and no automatic confirmation email. The thank-you and the day-before reminder still go out when there is an email on file. For a block with no customer, pick <strong>Just a calendar note (no customer)</strong>: it never reaches Requests.</p>
+    <p>A rental card says how long from the booked days: <strong>pickup Sun 18 Oct, back Tue 20 Oct (2 days)</strong>. On a phone the month shows as a list of days.</p></section>
   ${tab('Money', 'money', '<p>Tap any total to see the payments or jobs behind it. Damage deposits are never counted as income. Your Bookings tab in the request sheet updates by itself.</p>')}
   ${tab('Put away', 'archive')}
   ${tab('Invoice', 'invoice')}

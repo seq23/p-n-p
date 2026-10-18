@@ -1,7 +1,8 @@
 // Who gets which customer message, and when (owner, 18 Oct 2026). The words live in
 // messages.mjs; this file fills them from the request, its bookings and its invoice, and
 // keeps every "send once" promise with a claim-before-send timestamp on the request.
-//   confirmation  automatic email the moment a deposit is marked received (once);
+//   confirmation  automatic email the moment a deposit is marked received (once; never for a
+//                 phone request, source 'phone': they were confirmed on the call);
 //                 "Text them it's confirmed" is Valerie's one tap (sms:, free).
 //   holdEnding    automatic email reminderHours before a hold ends (once per end time);
 //                 "Text a reminder" is her one tap.
@@ -63,7 +64,8 @@ export async function messageCtx(db, key, { origin = 'https://porchandparty901.c
 // The automatic confirmation email when a deposit is marked received. Once per request.
 export async function autoConfirm(env, key) {
   const ctx = await messageCtx(env.DB, key);
-  if (!ctx || ctx.row.confirm_emailed_at || ctx.row.is_test || !hasEmail(ctx.email)) return { sent: false };
+  // A phone request (phone-requests.mjs) was confirmed on the call: never an automatic email.
+  if (!ctx || ctx.row.source === 'phone' || ctx.row.confirm_emailed_at || ctx.row.is_test || !hasEmail(ctx.email)) return { sent: false };
   const claim = await env.DB.prepare("UPDATE requests SET confirm_emailed_at = datetime('now') WHERE request_key = ?1 AND confirm_emailed_at IS NULL").bind(key).run();
   if (!(claim && claim.meta && claim.meta.changes)) return { sent: false };
   const out = await sendMessage(env, 'email', 'confirmation', ctx);

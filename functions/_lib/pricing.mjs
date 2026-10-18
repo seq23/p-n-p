@@ -13,6 +13,7 @@
 // for the season (scripts/lib/porch_packages.js invoiceLines, the same module the
 // public grid renders from), with the fall + Christmas bundle line when both are booked.
 import PP from '../../scripts/lib/porch_packages.js';
+import { rentalLength, rentalSpanWords } from './phone-requests.mjs';
 
 export function buildPriceTable(games, services, porchPackages = null) {
   const takedown = services && services.addOns && services.addOns.takedown;
@@ -151,7 +152,11 @@ export function prefillLines(request, table) {
   const { items, bundles: picked } = matchAnswer(request.gamesAnswer, table);
   if (request.wantsRentals || items.length || picked.length) {
     const weekend = isWeekend(request.durationAnswer);
-    const span = weekend ? 'weekend' : '1 day';
+    // Booked pickup + return days that span 2 or more days (not the weekend) say so on the
+    // line: "pickup Sun 18 Oct, back Tue 20 Oct (2 days)" (owner, 18 Oct 2026). The price stays
+    // the day price; she changes it if she charges more.
+    const booked = request.rentalPickup && request.rentalReturn ? rentalLength(request.rentalPickup, request.rentalReturn) : null;
+    const span = booked && booked.days >= 2 && !booked.weekend ? rentalSpanWords(request.rentalPickup, request.rentalReturn) : (weekend ? 'weekend' : '1 day');
     let named = items.filter((i) => i.kind === 'game').map((i) => i.name);
     const extras = new Set(items.filter((i) => i.kind === 'extra').map((i) => i.slug));
     // A ticked bundle asks for its slots: its extras, and enough games to fill it.

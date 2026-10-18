@@ -11,6 +11,8 @@ import { loadTakedownFacts } from './takedown.mjs';
 import { chicagoDate } from './reminders.mjs';
 import { expireHolds, confirmHold, extendHold, keepHolding, releaseHold, currentHolds, endingSoon, holdSettings, getHold, fromSql } from './holds.mjs';
 import { messageCtx, autoConfirm, smsFor } from './customer-messages.mjs';
+import { isPhone, rentalDates, PHONE_SOURCE } from './phone-requests.mjs';
+import { cleanImage } from './image-clean.mjs';
 import { sendMessage } from './messages.mjs';
 import * as VM2 from './views-messages.mjs';
 import { hasEmail } from './reminders.mjs';
@@ -191,9 +193,11 @@ async function cardExtras(env, requests, statuses, holds) {
     }
     if (st.status === 'deposit_paid' || st.status === 'paid' || st.status === 'scheduled') {
       const ctx = await messageCtx(env.DB, r.key);
-      if (ctx && (r.confirmEmailedAt || r.confirmedTextedAt)) bits.push(`<p class="money ok" data-confirm-sent>${r.confirmedTextedAt ? 'Confirmation sent ✓' : 'Confirmation email sent ✓'}</p>`);
+      // A phone request never gets (or shows) a confirmation email: they were confirmed on the call.
+      const phone = isPhone(r);
+      if (ctx && (r.confirmedTextedAt || (r.confirmEmailedAt && !phone))) bits.push(`<p class="money ok" data-confirm-sent>${r.confirmedTextedAt ? 'Confirmation sent ✓' : 'Confirmation email sent ✓'}</p>`);
       if (ctx) {
-        msgs[r.key] = { confirm: { sms: smsFor('confirmation', ctx), canEmail: hasEmail(ctx.email) } };
+        msgs[r.key] = { confirm: { sms: smsFor('confirmation', ctx), canEmail: !phone && hasEmail(ctx.email) } };
         if (ctx.service === 'rentals') msgs[r.key].pickup = { sms: smsFor('pickupTime', ctx), canEmail: hasEmail(ctx.email) };
       }
     }
@@ -258,6 +262,12 @@ async function newInvoice(env, url) {
   if (key) {
     try { request = (await loadRequests(env)).find((r) => r.key === key) || null; } catch (e) { warnings.push(e.message); }
     if (!request) warnings.push('That request could not be found, so this invoice starts empty.');
+  }
+  // A rental's booked pickup and return days (phone bookings, or days she changed) set its length.
+  if (request && request.wantsRentals) {
+    const { results: bk } = await env.DB.prepare("SELECT kind, date FROM bookings WHERE request_key = ?1 AND kind IN ('rental_pickup','rental_return')").bind(key).all();
+    const d = rentalDates(request, bk || []);
+    request = { ...request, rentalPickup: d.pickup, rentalReturn: d.ret };
   }
   let lines = request ? prefillLines(request, PRICE_TABLE) : [{ description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 }];
   let depositCents = null; let dueDate = todayISO(7);
@@ -502,9 +512,31 @@ async function deleteId(env, request) {
   if (row.id_object && env.IDS) await env.IDS.delete(row.id_object);
   await env.DB.prepare("UPDATE requests SET id_deleted_at = datetime('now'), id_object = NULL WHERE request_key = ?1").bind(key).run();
   const ip = request.headers.get('CF-Connecting-IP') || 'local';
-  await logEvent(env.DB, key, row.source === 'site' ? 'ID photo deleted for good from private storage' : 'ID marked deleted (the Drive copy is deleted by hand from the ID folder)', `signed-in admin (${ip})`);
-  const msg = row.source === 'site' ? 'ID deleted for good ✓' : 'ID removed from the card ✓ Also delete the photo from the ID folder in Google Drive (Open ID folder at the top).';
+  await logEvent(env.DB, key, row.source !== 'google_form' ? 'ID photo deleted for good from private storage' : 'ID marked deleted (the Drive copy is deleted by hand from the ID folder)', `signed-in admin (${ip})`);
+  const msg = row.source !== 'google_form' ? 'ID deleted for good ✓' : 'ID removed from the card ✓ Also delete the photo from the ID folder in Google Drive (Open ID folder at the top).';
   return redirect(`/admin/?m=${encodeURIComponent(msg)}`);
+}
+
+// "Add ID photo" on a request with no ID on file (a phone booking: ID-for-everyone still
+// stands, it just comes later). Same private bucket and the same cleaning (EXIF stripped) as
+// the site form; logged on the request.
+async function addId(env, request) {
+  const form = await request.formData();
+  const key = decodeKey(form.get('r'));
+  const back = key ? `#c-${b64urlText(key)}` : '';
+  const row = key ? await env.DB.prepare('SELECT source, id_object, id_file, id_deleted_at FROM requests WHERE request_key = ?1').bind(key).first() : null;
+  if (!row) return redirect(`/admin/?e=${encodeURIComponent('That request was not found.')}`);
+  if (row.id_object || (row.id_file && !row.id_deleted_at)) return redirect(`/admin/?m=${encodeURIComponent('An ID is already on file for this request.')}${back}`);
+  const file = form.get('id_photo');
+  if (!env.IDS || !file || typeof file !== 'object' || !file.size) return redirect(`/admin/?e=${encodeURIComponent('Pick a photo of their ID first.')}${back}`);
+  if (file.size > 10 * 1024 * 1024) return redirect(`/admin/?e=${encodeURIComponent('That photo is too big. Take it again with your phone camera.')}${back}`);
+  const image = cleanImage(new Uint8Array(await file.arrayBuffer()), file.type || 'image/jpeg');
+  if (!image) return redirect(`/admin/?e=${encodeURIComponent('That file is not a photo we can use. Use a JPG or PNG.')}${back}`);
+  const idObject = `ids/${[...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('')}.${image.type === 'image/png' ? 'png' : 'jpg'}`;
+  await env.IDS.put(idObject, image.bytes, { httpMetadata: { contentType: image.type } });
+  await env.DB.prepare('UPDATE requests SET id_object = ?1, id_type = ?2, id_size = ?3, id_deleted_at = NULL WHERE request_key = ?4').bind(idObject, image.type, image.bytes.length, key).run();
+  await logEvent(env.DB, key, 'ID photo added by Valerie (kept in private storage)', 'Valerie');
+  return redirect(`/admin/?m=${encodeURIComponent('ID photo added ✓')}${back}`);
 }
 
 const BACK_OK = (v) => (/^\/admin\/[A-Za-z0-9/_?=&.%-]*$/.test(String(v || '')) && !String(v).includes('//') ? String(v) : '/admin/');
@@ -546,6 +578,7 @@ async function emailMessage(env, request) {
   if (!key || !(template in MSG_TEMPLATES)) return redirect(`/admin/?e=${encodeURIComponent('That message could not be found.')}`);
   const ctx = await messageCtx(env.DB, key);
   if (!ctx) return redirect(`/admin/?e=${encodeURIComponent('That request was not found.')}`);
+  if (template === 'confirmation' && ctx.row.source === PHONE_SOURCE) return redirect(`/admin/?m=${encodeURIComponent('Phone bookings get no confirmation email. Text them instead.')}`);
   const col = MSG_TEMPLATES[template];
   if (col && ctx.row[col]) return redirect(`/admin/?m=${encodeURIComponent('That email was already sent ✓')}`);
   const out = await sendMessage(env, 'email', template, ctx);
@@ -568,7 +601,7 @@ async function confirmedScreen(env, url) {
   const ctx = key ? await messageCtx(env.DB, key) : null;
   const back = BACK_OK(url.searchParams.get('back'));
   if (!ctx) return redirect(back);
-  return htmlResponse(VM2.confirmedPage({ rk: b64urlText(key), name: ctx.name, sms: smsFor('confirmation', ctx), emailed: Boolean(ctx.row.confirm_emailed_at), texted: Boolean(ctx.row.confirmed_texted_at), canEmail: hasEmail(ctx.email), flash: url.searchParams.get('m') || '', back }));
+  return htmlResponse(VM2.confirmedPage({ rk: b64urlText(key), name: ctx.name, sms: smsFor('confirmation', ctx), emailed: ctx.row.source !== PHONE_SOURCE && Boolean(ctx.row.confirm_emailed_at), texted: Boolean(ctx.row.confirmed_texted_at), canEmail: ctx.row.source !== PHONE_SOURCE && hasEmail(ctx.email), phone: ctx.row.source === PHONE_SOURCE, flash: url.searchParams.get('m') || '', back }));
 }
 
 // After a deposit is marked received on a request: confirm its hold, email the confirmation
@@ -704,6 +737,7 @@ async function routeAdmin(context) {
   }
   if (segs[0] === 'requests' && segs[1] === 'id' && segs.length === 2 && method === 'GET') return idPhoto(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
+  if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'upload' && method === 'POST') return addId(env, request);
   if (segs[0] === 'requests' && segs[1] === 'archive' && method === 'POST') return AC.archiveRequest(env, request, true);
   if (segs[0] === 'requests' && segs[1] === 'unarchive' && method === 'POST') return AC.archiveRequest(env, request, false);
   // Put away left the main nav (JOB B): it is the collapsed section at the bottom of Requests.
