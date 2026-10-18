@@ -104,6 +104,12 @@ for (const [answer, plan] of [['Yes', 'scheduled'], ['yes please', 'scheduled'],
   must(ns && ns.takedown_plan === 'not_sure' && ns.takedown_date === '', 'old form "Not sure" did not map to not_sure (no date)');
   const no = RQ.importRowFor(headers, row({ ...base, 'Need us to take it down afterwards?': 'No' }));
   must(no && no.takedown_plan === 'customer_handles', 'old form "No" did not map to customer_handles');
+  for (const na of ['na', 'n/a', '']) {
+    const d = RQ.importRowFor(headers, row({ ...base, 'Need us to take it down afterwards?': na, 'Takedown date': '10/18/2026' }));
+    must(d && d.takedown_plan === 'scheduled' && d.takedown_date === '2026-10-18', `old form "${na}" + a Takedown date did not read as a takedown asked for 2026-10-18`);
+  }
+  const noDate = RQ.importRowFor(headers, row({ ...base, 'Need us to take it down afterwards?': 'No', 'Takedown date': '10/18/2026' }));
+  must(noDate && noDate.takedown_plan === 'customer_handles' && noDate.takedown_date === '', 'an explicit "No" lost to a stray Takedown date');
   const blank = RQ.importRowFor(headers, row(base));
   must(blank && blank.takedown_plan === null && blank.takedown_date === '', 'old form with no takedown answer was given a plan');
   // Read back through fromRow, the card shows the prompt dated Sun 18 Oct and is not Finished.

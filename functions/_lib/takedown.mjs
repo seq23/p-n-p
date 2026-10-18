@@ -39,10 +39,15 @@ function answerIn(r, re) {
 // afterwards?" + "Takedown date") and the /request form ("Want us to take it down afterwards?",
 // no date). The date is only kept for a yes; it PREFILLS the Schedule takedown screen and never
 // creates a booking by itself.
+//
+// A takedown date with a blank / "n/a" yes-no answer (the one real imported request, 18 Oct
+// 2026: "na" + a date) is a yes: the customer named the day. An explicit "No" or "Not sure"
+// always wins over a stray date.
 export function takedownFromAnswers(r) {
-  const plan = planFromAnswer(r && r.takedownAnswer);
-  const date = plan === 'scheduled' ? parseFormDate(answerIn(r || {}, /takedown date|take (it )?down.*(date|when)/i)) : '';
-  return { plan, date };
+  let plan = planFromAnswer(r && r.takedownAnswer);
+  const given = parseFormDate(answerIn(r || {}, /takedown date|take (it )?down.*(date|when)/i));
+  if (!plan && given) plan = 'scheduled';
+  return { plan, date: plan === 'scheduled' ? given : '' };
 }
 
 // facts: { services, takedownPlan, takedownDate, invoiceTakedown, bookings: [{ id, kind, date, done_at }], today }
