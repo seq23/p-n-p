@@ -69,7 +69,7 @@ function localBusinessNode(image) {
     name: offers.brandName,
     url: `${DOMAIN}/`,
     ...(image ? { image } : {}),
-    description: offers.primaryIdentity,
+    description: require('./lib/brand').IDENTITY_SENTENCE,
     areaServed: areas.areas,
     email: 'hello@porchandparty901.com',
     ...require('./lib/contact_surface').businessContactFields(),

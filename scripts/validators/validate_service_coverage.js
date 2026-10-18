@@ -20,6 +20,13 @@
  * porch and game prices from the data files and no phone number; the homepage
  * carries the fourth (Party Game Rentals) service card, pricing card and FAQ.
  *
+ * Retired identity: fails when any published html (scripts/install_brand_surfaces.js
+ * siteHtml: archived reports and build output excluded) carries a
+ * brand.STALE_IDENTITY_PHRASES phrase ("celebration styling company", "styled
+ * event tables") or a brand.STALE_IDENTITIES sentence, when it scans zero
+ * html files, or when data/offers/services.json carries a primaryIdentity
+ * (brand.IDENTITY_SENTENCE is the one source).
+ *
  * Hard-fails on zero surfaces checked. Self-test: broken copies held in
  * memory (a title without grazing, a services index without its rentals
  * card, a manifest without porch decorating, an empty file set) must FAIL.
@@ -29,7 +36,7 @@
 const fs = require('fs');
 const path = require('path');
 const brand = require('../lib/brand');
-const { HOME } = require('../install_brand_surfaces');
+const { HOME, siteHtml } = require('../install_brand_surfaces');
 
 const ROOT = path.resolve(__dirname, '../..');
 const FILES = ['index.html', 'site.webmanifest', 'llms.txt', 'llms-entities.txt', 'llms-answers.txt',
@@ -128,6 +135,31 @@ for (const rel of FILES) {
 }
 const result = check(files);
 
+/** Retired identity wording across every published html file. */
+function staleCheck(pages, offers) {
+  const errors = [];
+  const names = Object.keys(pages);
+  if (!names.length) errors.push('stale-identity: zero html files scanned');
+  for (const rel of names) {
+    const t = decode(pages[rel]);
+    for (const p of [...brand.STALE_IDENTITY_PHRASES, ...brand.STALE_IDENTITIES]) if (t.includes(p)) errors.push(`${rel} carries the retired identity wording "${p.slice(0, 60)}"`);
+  }
+  if (offers && Object.prototype.hasOwnProperty.call(offers, 'primaryIdentity')) errors.push('data/offers/services.json carries primaryIdentity; brand.IDENTITY_SENTENCE is the one source');
+  return errors;
+}
+const pages = {};
+for (const rel of siteHtml()) pages[rel] = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+const offers = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8'));
+result.errors.push(...staleCheck(pages, offers));
+const staleProbes = {
+  'an answer page whose business JSON-LD keeps the old identity': [{ ...pages, 'answers/probe.html': `<script type="application/ld+json">{"description":${JSON.stringify(brand.STALE_IDENTITIES[0])}}</script>` }, offers],
+  'a contact page that says styled event tables': [{ ...pages, 'contact.html': `${pages['contact.html'] || ''}<p>hotel-room decor, and styled event tables.</p>` }, offers],
+  'an html-escaped celebration styling company': [{ ...pages, 'probe.html': '<p>Porch &amp; Party is a Memphis-based porch decorating and celebration styling company</p>' }, offers],
+  'services.json with primaryIdentity back': [pages, { ...offers, primaryIdentity: brand.IDENTITY_SENTENCE }],
+  'zero html files': [{}, offers]
+};
+for (const [label, [p, o]] of Object.entries(staleProbes)) if (!staleCheck(p, o).length) result.errors.push(`self-test: "${label}" passed when it should fail`);
+
 // Self-test: each broken copy must fail.
 const probes = {
   'homepage title without grazing tables': { ...files, 'index.html': files['index.html'].replace(/<title>[^<]*<\/title>/, '<title>Memphis Porch Decorating, Party Planning &amp; Game Rentals | Porch &amp; Party</title>') },
@@ -140,4 +172,4 @@ const probes = {
 for (const [label, broken] of Object.entries(probes)) if (!check(broken).errors.length) result.errors.push(`self-test: "${label}" passed when it should fail`);
 
 if (result.errors.length) { console.error(`service-coverage: FAIL (${result.errors.length})`); result.errors.forEach((e) => console.error(`  - ${e}`)); process.exit(1); }
-console.log(`service-coverage: OK - ${result.checked} surface(s) name all ${brand.SERVICES.length} services (${brand.SERVICES.map((s) => s.label).join(' · ')}); ${Object.keys(probes).length} self-test probes fail as they should`);
+console.log(`service-coverage: OK - ${result.checked} surface(s) name all ${brand.SERVICES.length} services (${brand.SERVICES.map((s) => s.label).join(' · ')}); ${Object.keys(pages).length} html file(s) free of retired identity wording; ${Object.keys(probes).length + Object.keys(staleProbes).length} self-test probes fail as they should`);
