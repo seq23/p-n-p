@@ -12,6 +12,9 @@
  *                  FAQPage JSON-LD);
  *   pricing.html, contact.html, how-it-works.html   meta + og + twitter
  *                  descriptions and the WebPage JSON-LD description;
+ *                  pricing.html also the fourth pricing card (Party Game
+ *                  Rentals, linking /rentals/), so the page carries all four
+ *                  services;
  *   every other published html   a JSON-LD description equal to a retired
  *                  brand.STALE_IDENTITIES sentence becomes IDENTITY_SENTENCE
  *                  (the business node on the older frozen pages);
@@ -85,6 +88,8 @@ function setLd(html, pick, edit, label) {
 
 const rentalsCard = () => `<article class="card" data-brand="rentals-card"><div class="card-media"><img alt="${esc(games.hero.alt)}" src="${games.hero.file}"/></div><div class="card-body"><h3>Party Game Rentals</h3><p>Giant yard games, an inflatable movie screen and a card table for backyard parties, birthdays, reunions and school events, picked up and returned at ${esc(PICKUP)}.</p><p class="muted">Starting at $${PRICES.gameDay} a game per day. Bundles from $${PRICES.bundleFrom}.</p><p><a href="/rentals/"><strong>See party game rentals</strong></a></p></div></article>`;
 const rentalsPrice = () => `<div class="pricing-card" data-brand="rentals-price"><h3>Party Game Rentals</h3><span class="price">$${PRICES.gameDay}</span><p>A game per day, $${games.rates.weekend} for a weekend. Bundles from $${PRICES.bundleFrom}.</p><p class="muted">Pick up and return at ${esc(PICKUP)}. $${games.damageDeposit} refundable damage deposit.</p></div>`;
+/** pricing.html variant: the page's cards use <h2> and each carries its own next-step link. */
+const rentalsPricingPage = () => `<div class="pricing-card" data-brand="rentals-price"><h2>Party Game Rentals</h2><span class="price">$${PRICES.gameDay}+</span><p>Starting at $${PRICES.gameDay} a game per day, $${games.rates.weekend} for a weekend. Bundles from $${PRICES.bundleFrom}.</p><p class="muted">Pick up and return at ${esc(PICKUP)}. $${games.damageDeposit} refundable damage deposit.</p><p class="pricing-tool"><a class="btn-secondary" href="/rentals/">See party game rentals</a></p></div>`;
 const rentalsFaq = () => `<article class="faq-item" data-brand="rentals-faq"><h3>${esc(HOME.rentalsQ)}</h3><p>${esc(HOME.rentalsA)}</p></article>`;
 
 /** Puts `block` (marked data-brand=`mark`) as the last child of the first container opened by `openRe`. */
@@ -128,6 +133,10 @@ function rootPage(html, file) {
   let out = html;
   for (const [attr, key] of [['name', 'description'], ['property', 'og:description'], ['name', 'twitter:description']]) out = setMeta(out, attr, key, ROOT_PAGES[file], file);
   out = setLd(out, (n) => n['@type'] === 'WebPage', (n) => { n.description = ROOT_PAGES[file]; }, `${file} WebPage JSON-LD`);
+  if (file === 'pricing.html') {
+    out = out.replace(/<div class="pricing-grid(?: pricing-grid--four)?">/, '<div class="pricing-grid pricing-grid--four">');
+    out = ownLastChild(out, /<div class="pricing-grid pricing-grid--four">/, 'rentals-price', rentalsPricingPage(), 'div', `${file} pricing cards`);
+  }
   return staleIdentity(out);
 }
 

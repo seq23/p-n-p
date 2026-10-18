@@ -13,7 +13,13 @@
  *   site.webmanifest description; llms.txt Primary Identity line;
  *   llms-entities.txt; llms-answers.txt;
  *   services/index.html meta description and its card headings (together);
- *   pricing.html, contact.html, how-it-works.html meta descriptions.
+ *   pricing.html, contact.html, how-it-works.html meta descriptions;
+ *   pricing.html pricing cards: exactly four, their headings together
+ *                naming all four services, the Party Game Rentals card
+ *                quoting the data-file prices and linking /rentals/.
+ * pricing.html also links the FAQ page's two tools ("Price my porch" ->
+ * /faq/#porch-picker, "Estimate my grazing table" -> /faq/#grazing-estimator)
+ * as btn-secondary links, and both ids exist in faq/index.html.
  * Plus the pins that make those surfaces the approved ones: the homepage
  * title, og:title, H1, definition and Quick Answer openings are exactly the
  * brand.js strings; the homepage description is <=160 characters, quotes the
@@ -40,7 +46,12 @@ const { HOME, siteHtml } = require('../install_brand_surfaces');
 
 const ROOT = path.resolve(__dirname, '../..');
 const FILES = ['index.html', 'site.webmanifest', 'llms.txt', 'llms-entities.txt', 'llms-answers.txt',
-  'services/index.html', 'pricing.html', 'contact.html', 'how-it-works.html'];
+  'services/index.html', 'pricing.html', 'contact.html', 'how-it-works.html', 'faq/index.html'];
+/** The FAQ page's tools the pricing page links to (labels match the FAQ map cards). */
+const PRICING_TOOLS = Object.freeze([
+  Object.freeze({ label: 'Price my porch', id: 'porch-picker' }),
+  Object.freeze({ label: 'Estimate my grazing table', id: 'grazing-estimator' })
+]);
 const decode = (s) => String(s).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 const text = (s) => decode(String(s || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
 const meta = (html, attr, key) => {
@@ -123,6 +134,20 @@ function check(files) {
     surface(`${rel} meta description`, d);
     for (const [a, k] of [['property', 'og:description'], ['name', 'twitter:description']]) if (meta(files[rel], a, k) !== d) errors.push(`${rel} ${k} differs from the meta description`);
   }
+  const pricing = files['pricing.html'];
+  if (pricing != null) {
+    const grid = (pricing.match(/<div class="pricing-grid[^"]*">([\s\S]*?)<\/div><\/div>(?=<section|<p class="pricing-note)/) || [])[1] || '';
+    const cards = [...grid.matchAll(/<div class="pricing-card"[^>]*><h2>([^<]*)<\/h2>/g)].map((m) => decode(m[1]));
+    if (cards.length !== 4) errors.push(`pricing.html has ${cards.length} pricing card(s), want 4 (one per service)`);
+    else surface('pricing.html pricing card headings', cards.join(' | '));
+    const rc = (pricing.match(/<div class="pricing-card" data-brand="rentals-price">[\s\S]*?<\/div>/) || [])[0] || '';
+    if (!/<h2>Party Game Rentals<\/h2>/.test(rc) || !rc.includes(`$${brand.PRICES.gameDay} a game per day`) || !rc.includes(`Bundles from $${brand.PRICES.bundleFrom}`) || !rc.includes('href="/rentals/"')) errors.push(`pricing.html lacks the Party Game Rentals pricing card ($${brand.PRICES.gameDay} a game per day, bundles from $${brand.PRICES.bundleFrom}, /rentals/)`);
+    const faqPage = files['faq/index.html'];
+    for (const t of PRICING_TOOLS) {
+      if (!new RegExp(`<a class="btn-secondary" href="/faq/#${t.id}">${t.label}</a>`).test(pricing)) errors.push(`pricing.html lacks the "${t.label}" btn-secondary link to /faq/#${t.id}`);
+      if (faqPage == null || !new RegExp(`\\bid="${t.id}"`).test(faqPage)) errors.push(`faq/index.html has no id="${t.id}" for the pricing page's "${t.label}" link`);
+    }
+  }
   if (checked === 0) errors.push('zero surfaces checked');
   return { errors, checked };
 }
@@ -167,6 +192,11 @@ const probes = {
   'manifest without porch decorating': { ...files, 'site.webmanifest': files['site.webmanifest'].replace(/porch decorating, /, '') },
   'homepage without the fourth card': { ...files, 'index.html': files['index.html'].replace(/<article class="card" data-brand="rentals-card">[\s\S]*?<\/article>/, '') },
   'pricing description without game rentals': { ...files, 'pricing.html': files['pricing.html'].replace(/(name="description"|content=")([^"]*?)party game rentals/, '$1$2') },
+  'pricing page with three pricing cards': { ...files, 'pricing.html': files['pricing.html'].replace(/<div class="pricing-card" data-brand="rentals-price">[\s\S]*?<\/div>/, '') },
+  'pricing page without the porch tool link': { ...files, 'pricing.html': files['pricing.html'].replace('href="/faq/#porch-picker"', 'href="/faq/"') },
+  'pricing page without the grazing tool link': { ...files, 'pricing.html': files['pricing.html'].replace(/<a class="btn-secondary" href="\/faq\/#grazing-estimator">[^<]*<\/a>/, '') },
+  'faq page without the porch-picker id': { ...files, 'faq/index.html': files['faq/index.html'].replace(/\bid="porch-picker"/, 'id="porch-picker-old"') },
+  'faq page without the grazing-estimator id': { ...files, 'faq/index.html': files['faq/index.html'].replace(/\bid="grazing-estimator"/, 'id="x"') },
   'no files at all': {}
 };
 for (const [label, broken] of Object.entries(probes)) if (!check(broken).errors.length) result.errors.push(`self-test: "${label}" passed when it should fail`);
