@@ -36,7 +36,7 @@ const reqB = s.requests.find((r) => r.email === 'weekend.renter@example.com'); /
 const inv = await s.invoiceFor(reqA, { go: 'send' });
 await db.prepare("INSERT INTO payments (invoice_id, amount_cents, received_on, method, note, kind) VALUES (?1, 12300, '2026-10-15', 'zelle', 'deposit', 'payment'), (?1, 200, '2026-10-19', 'zelle', 'later', 'payment'), (?1, 300, '2026-10-11', 'zelle', 'earlier', 'payment')").bind(inv.id).run();
 await db.prepare("INSERT INTO expenses (vendor, date, total_cents, category, status) VALUES ('Party City', '2026-10-13', 4217, 'Supplies & decor', 'saved'), ('Old', '2026-10-05', 99999, 'Supplies & decor', 'saved'), ('Needs', '2026-10-14', 100, 'Supplies & decor', 'needs_check')").run();
-await db.prepare("INSERT INTO bookings (kind, date, customer_name, phone, items) VALUES ('porch_install', '2026-10-21', 'Paula Porchington', '901-555-0777', 'Porch'), ('rental_pickup', '2026-10-23', 'Gary Gameson', '901-555-0778', 'Giant Uno'), ('rental_return', '2026-10-26', 'Gary Gameson', '901-555-0778', 'Giant Uno')").run();
+await db.prepare("INSERT INTO bookings (kind, date, customer_name, phone, items) VALUES ('porch_install', '2026-10-21', 'Paula Porchington', '901-555-0777', 'Porch'), ('rental_pickup', '2026-10-23', 'Gary Gameson', '901-555-0778', 'Giant Uno'), ('rental_return', '2026-10-26', 'Gary Gameson', '901-555-0778', 'Giant Uno'), ('porch_install', '2026-11-02', 'Late Lateman', '901-555-0779', 'Porch')").run();
 await db.prepare("UPDATE requests SET takedown_plan = 'not_sure' WHERE request_key = ?1").bind(reqB.key).run();
 const d = await W.weeklyData(db, '2026-10-19', Date.parse('2026-10-19T12:00:00Z'));
 must(d.lastWeek.start === '2026-10-12' && d.lastWeek.end === '2026-10-18' && d.week.start === '2026-10-19' && d.week.end === '2026-10-25', `windows wrong: ${JSON.stringify([d.lastWeek, d.week])}`);
@@ -45,13 +45,15 @@ must(d.last.received === 12300, `money received last week ${d.last.received} (on
 must(d.last.expenses === 4217, `expenses last week ${d.last.expenses} (only saved, only in the window)`);
 must(d.this.days.some((x) => x.date === '2026-10-21' && x.bookings.some((b) => b.who === 'Paula P.')), 'this week does not list the porch install by date');
 must(d.this.days.some((x) => x.date === '2026-10-23' && x.games >= 1), 'games out per day missing');
-must(!d.this.days.some((x) => x.date === '2026-10-26'), 'a booking after Sunday is in this week');
+must(d.upcoming.start === '2026-10-19' && d.upcoming.end === '2026-11-01', `the next-14-days window is wrong: ${JSON.stringify(d.upcoming)}`);
+must(d.this.days.some((x) => x.date === '2026-10-26' && x.bookings.some((b) => b.who === 'Gary G.')), 'a booking in the second week is missing from the next 14 days');
+must(!d.this.days.some((x) => x.date === '2026-11-02'), 'a booking after the 14th day is in the list');
 must(d.needs.takedowns.includes('Weekend R.'), 'takedowns not decided missing');
 must(d.needs.noReply.includes('Weekend R.'), 'requests with no reply after 2 days missing');
 must(d.needs.receipts === 1, 'receipts needing checking missing');
 must(d.needs.notPaid.count >= 1 && d.needs.notPaid.total > 0, 'not paid yet missing');
 const msg = W.renderSummary(d);
-for (const h of ['LAST WEEK', 'THIS WEEK', 'NEEDS YOU']) must(msg.text.includes(h), `the summary has no "${h}" section`);
+for (const h of ['LAST WEEK', 'NEXT 14 DAYS', 'NEEDS YOU']) must(msg.text.includes(h), `the summary has no "${h}" section`);
 for (const line of ['New requests: 2', 'Jobs done:', 'Money received: $123.00', 'Expenses: $42.17', 'Still to collect', 'Takedowns not decided: 1 (Weekend R.)', 'No reply after 2 days', 'Receipts needing checking: 1', 'Not paid yet:']) must(msg.text.includes(line), `the summary lacks "${line}"`);
 must(/https:\/\/porchandparty901\.com\/admin\/day\/2026-10-21/.test(msg.text) && /href="https:\/\/porchandparty901\.com\/admin\/money#not-paid"/.test(msg.html), 'the summary does not link into /admin');
 // ---- 4. no PII ---------------------------------------------------------------------------------

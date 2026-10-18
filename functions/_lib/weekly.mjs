@@ -45,6 +45,8 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
   const lastMon = addDays(thisMon, -7);
   const lastSun = addDays(thisMon, -1);
   const thisSun = addDays(thisMon, 6);
+  // The bookings list covers the next 14 days (owner, 18 Oct 2026), like the calendar's Upcoming box.
+  const lastDay = addDays(thisMon, 13);
   const { results: rows } = await db.prepare('SELECT * FROM requests ORDER BY submitted_at DESC').all();
   const requests = (rows || []).map(fromRow).filter(Boolean);
   const { results: stRows } = await db.prepare('SELECT * FROM request_status').all();
@@ -58,14 +60,14 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
   const jobsDone = new Set((done || []).map((d) => d.request_key)).size + returnedLastWeek;
   const received = (await db.prepare("SELECT COALESCE(SUM(amount_cents), 0) AS c FROM payments WHERE voided_at IS NULL AND kind = 'payment' AND received_on BETWEEN ?1 AND ?2").bind(lastMon, lastSun).first()).c;
   const expenses = (await db.prepare("SELECT COALESCE(SUM(total_cents), 0) AS c FROM expenses WHERE status = 'saved' AND date BETWEEN ?1 AND ?2").bind(lastMon, lastSun).first()).c;
-  // This week.
+  // The next 14 days.
   const all = await listBookings(db);
   const voidKeys = new Set(Object.values(statuses).filter((s) => s.status === 'void').map((s) => s.request_key));
   const bookings = all.filter((b) => !(b.request_key && voidKeys.has(b.request_key)));
-  const week = bookings.filter((b) => b.date >= thisMon && b.date <= thisSun);
+  const week = bookings.filter((b) => b.date >= thisMon && b.date <= lastDay);
   const windows = rentalWindows(bookings, returns, PRICE_TABLE);
   const days = [];
-  for (let i = 0; i < 7; i += 1) {
+  for (let i = 0; i < 14; i += 1) {
     const d = addDays(thisMon, i);
     const list = week.filter((b) => b.date === d);
     const games = usageOn(windows, d, today, PRICE_TABLE).count;
@@ -96,7 +98,7 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
   });
   const receipts = (await db.prepare("SELECT COUNT(*) AS n FROM expenses WHERE status = 'needs_check'").first()).n;
   return {
-    week: { start: thisMon, end: thisSun }, lastWeek: { start: lastMon, end: lastSun },
+    week: { start: thisMon, end: thisSun }, upcoming: { start: thisMon, end: lastDay }, lastWeek: { start: lastMon, end: lastSun },
     last: { byService: wk.lastByService, total: wk.lastWeek.length, jobsDone, received, expenses },
     this: { days, toCollect: toCollect.reduce((s, r) => s + r.owed, 0), toCollectCount: toCollect.length },
     needs: {
@@ -119,13 +121,13 @@ export function renderSummary(d) {
   line(`Jobs done: ${d.last.jobsDone}`, '/admin/calendar');
   line(`Money received: ${money(d.last.received)}`, '/admin/money');
   line(`Expenses: ${money(d.last.expenses)}`, '/admin/money');
-  sec(`This week (${dayWord(d.week.start)} – ${dayWord(d.week.end)})`);
-  if (!d.this.days.length) line('Nothing booked this week.', '/admin/calendar');
+  sec(`Next 14 days (${dayWord(d.upcoming.start)} – ${dayWord(d.upcoming.end)})`);
+  if (!d.this.days.length) line('Nothing booked in the next 14 days.', '/admin/calendar');
   for (const day of d.this.days) {
     const what = day.bookings.map((b) => `${b.kind}: ${b.who}${b.time ? ` at ${b.time}` : ''}`).join('; ');
     line(`${dayWord(day.date)}: ${what || 'no bookings'}${day.games ? ` · ${day.games} ${day.games === 1 ? 'game' : 'games'} out` : ''}`, `/admin/day/${day.date}`);
   }
-  line(`Still to collect from this week's customers: ${money(d.this.toCollect)}${d.this.toCollectCount ? ` (${d.this.toCollectCount})` : ''}`, '/admin/money#not-paid');
+  line(`Still to collect from these customers: ${money(d.this.toCollect)}${d.this.toCollectCount ? ` (${d.this.toCollectCount})` : ''}`, '/admin/money#not-paid');
   sec('Needs you');
   const n = d.needs;
   const list = (label, names, href) => { if (names.length) line(`${label}: ${names.length} (${names.join(', ')})`, href); };
