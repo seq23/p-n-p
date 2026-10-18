@@ -173,6 +173,16 @@ jobs:
           npm run validate:cadence-integrity
           npm run cadence:gate
           npm run cadence:template-share
+      - name: Restore GSC inspection carry-over state
+        # URLs Search Console answered 5xx for last run are recorded deferred and
+        # inspected first this run; the same URL deferred 3 runs in a row fails.
+        if: github.event_name != 'pull_request'
+        uses: actions/cache/restore@v4
+        with:
+          path: .gsc-inspection-state
+          key: gsc-inspection-state-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: gsc-inspection-state-
+
       - name: Run validated distribution
         # Validation runs on every event this lane has. Distribution - IndexNow,
         # sitemap submission, GSC URL inspection - runs only for main: a push, a
@@ -181,6 +191,7 @@ jobs:
         if: github.event_name != 'pull_request'
         env:
           GSC_SITE_URL: ${{ secrets.GSC_SITE_URL }}
+          GSC_DEFERRED_STATE: ${{ github.workspace }}/.gsc-inspection-state/deferred.json
         run: |
           chmod +x distribution_scripts/*.sh distribution_scripts/*.py
           args=(--host porchandparty901.com --artifact-dir .build)
@@ -188,6 +199,13 @@ jobs:
             args+=(--creds "$RUNNER_TEMP/gsc-service-account.json" --gsc-site "$GSC_SITE_URL")
           fi
           ./distribution_scripts/deploy_distribution.sh "${args[@]}"
+
+      - name: Save GSC inspection carry-over state
+        if: always() && github.event_name != 'pull_request' && hashFiles('.gsc-inspection-state/deferred.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: .gsc-inspection-state
+          key: gsc-inspection-state-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Upload distribution evidence
         if: always()
@@ -198,4 +216,6 @@ jobs:
             .build/distribution-manifest.json
             .build/distribution-receipt.json
             .build/inspection-results.json
+            .build/inspection-deferred.json
+            .gsc-inspection-state/deferred.json
           if-no-files-found: warn

@@ -20,3 +20,6 @@ __pycache__/
 # wrangler pages dev / local D1 state for the /admin console (npm run admin:dev).
 .wrangler/
 .dev.vars
+
+# GSC URL-inspection carry-over state (restored/saved via actions/cache in deploy-distribution.yml).
+.gsc-inspection-state/
