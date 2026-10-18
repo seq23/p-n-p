@@ -209,7 +209,7 @@ td.blank{min-width:70px}
   <h2>Game rentals <small>blank if none · Pick 3 $110 · Pick 5 $175 · Whole Yard $195 · Movie Night $110 · Game Night $85 · Whole Party $235 / $350 weekend</small></h2>
   <ul class="ck" style="columns:4">
     <li>Giant Connect Four</li>
-    <li>Cornhole (2 sets)</li>
+    <li>Cornhole</li>
     <li>Giant Color Stack (2 sets)</li>
     <li>Giant Uno</li>
     <li>Grab the Mic</li>

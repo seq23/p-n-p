@@ -74,6 +74,11 @@ const games = ITEMS.filter((i) => data.games.some((g) => g.slug === i.slug));
 if (games.length !== V3.games) errors.push(`v3 has ${V3.games} games on offer, games.json shows ${games.length}`);
 const colorStack = data.games.find((g) => g.slug === 'giant-color-stack') || {};
 if (colorStack.quantity !== 2 || colorStack.bundleSets !== 2) errors.push('games.json Giant Color Stack is not quantity 2 with bundleSets 2 (owner, 18 Oct 2026: both sets count in "the 6 games")');
+// Owner, 18 Oct 2026: one cornhole set. No public copy may promise a second one.
+const cornhole = data.games.find((g) => g.slug === 'cornhole') || {};
+if (cornhole.quantity !== 1) errors.push(`games.json Cornhole quantity is ${cornhole.quantity}, the owner has 1 set (18 Oct 2026)`);
+const TWO_CORNHOLE = /two (cornhole )?sets available|sets? available for a tournament|cornhole \(2 sets\)|2 cornhole sets|two cornhole sets/i;
+for (const rel of ['rentals/index.html', 'llms.txt', 'llms-full.txt', 'llms-services.txt', 'faq/index.html', 'request.html', 'functions/_lib/assets/walkthrough-checklist.html.txt']) if (TWO_CORNHOLE.test(read(rel))) errors.push(`${rel} still says there are two cornhole sets; there is 1 (owner, 18 Oct 2026)`);
 const units = games.reduce((n, g) => n + ((data.games.find((x) => x.slug === g.slug) || {}).bundleSets || 1), 0);
 if (units !== V3.gameUnits) errors.push(`the games on offer count ${units} bundle games, the owner's count is ${V3.gameUnits}`);
 for (const b of BUNDLES.filter((x) => /^all /i.test(x.includes))) {

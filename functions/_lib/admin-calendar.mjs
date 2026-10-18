@@ -167,7 +167,7 @@ async function formExtras(env, date, returnDate, ignoreKey) {
   const windows = C.rentalWindows(all, returns, PRICE_TABLE);
   const today = chicagoDate();
   const avail = date ? C.availability(windows, date, returnDate || date, today, PRICE_TABLE, ignoreKey) : null;
-  const windowsJson = JSON.stringify(windows.map((w) => ({ key: w.key, start: w.start, last: w.end < today && !w.returnedDay ? today : w.end, returnedDay: w.returnedDay, names: w.names }))).replace(/</g, '\\u003c');
+  const windowsJson = JSON.stringify(windows.map((w) => ({ key: w.key, start: w.start, last: w.end < today && !w.returnedDay ? today : w.end, returnedDay: w.returnedDay, names: w.names, counts: w.counts }))).replace(/</g, '\\u003c');
   return { avail, windowsJson };
 }
 
@@ -428,7 +428,7 @@ export async function returnPage(env, url) {
   const t = await returnTarget(env, k);
   if (!t) return redirect('/admin/calendar?e=That rental could not be found.');
   const exp = C.expandItems(t.itemsText, PRICE_TABLE);
-  const items = [...exp.names, ...Array.from({ length: exp.unnamed }, (_, i) => `Game of their choice ${i + 1}`)];
+  const items = [...C.namesText(exp), ...Array.from({ length: exp.unnamed }, (_, i) => `Game of their choice ${i + 1}`)];
   const saved = (await C.loadReturns(env.DB))[t.returnKey] || null;
   const bals = t.invoiceId ? (await balances(env.DB))[t.invoiceId] : null;
   const photoKey = `return|${k}`;
@@ -444,7 +444,7 @@ export async function saveReturnRoute(env, request, url) {
   const back = new Set(form.getAll('back').map(String));
   const damaged = new Set(form.getAll('damaged').map(String));
   const exp = C.expandItems(t.itemsText, PRICE_TABLE);
-  const names = [...exp.names, ...Array.from({ length: exp.unnamed }, (_, i) => `Game of their choice ${i + 1}`)];
+  const names = [...C.namesText(exp), ...Array.from({ length: exp.unnamed }, (_, i) => `Game of their choice ${i + 1}`)];
   const items = names.map((name) => ({ name, back: back.has(name), damaged: damaged.has(name), note: String(form.get(`note_${name}`) || '').trim().slice(0, 1000) }));
   const res = await C.saveReturn(env.DB, { returnKey: t.returnKey, requestKey: t.requestKey, bookingId: t.bookingId, items, notes: String(form.get('notes') || '').trim().slice(0, 4000) });
   return redirect(`/admin/returns?k=${encodeURIComponent(k)}&m=${encodeURIComponent(res.damaged ? 'Saved. Returned — check damage.' : 'Returned ✓')}`);

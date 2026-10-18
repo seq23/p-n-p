@@ -175,9 +175,12 @@ async function submit(context) {
   if (services.includes('rentals') && clean.games && clean.games.length && clean.pickup_date && clean.duration && !errors.pickup_date) {
     await expireHolds(env.DB);
     const left = await availabilityFor(env.DB, clean.pickup_date, clean.return_date, today);
-    const busy = F.rentalItems(PRICE_TABLE).filter((i) => clean.games.includes(i.slug) && left[i.slug] !== undefined && left[i.slug] <= 0);
-    if (busy.length) errors.games = `${busy.map((i) => i.name).join(', ')} ${busy.length === 1 ? 'is' : 'are'} already booked for those dates. Untick ${busy.length === 1 ? 'it' : 'them'} or pick another date.`;
     quote = F.rentalQuote(clean.games, clean.duration, PRICE_TABLE, games.holdPercent);
+    // How many of each item the quote takes out: a Whole Yard it lands on carries both Giant
+    // Color Stack sets, so one set already out makes it unbookable (18 Oct 2026).
+    const takes = C.expandItems(quote ? quote.lines.filter((l) => !l.refundable).map((l) => l.description).join(', ') : '', PRICE_TABLE).counts;
+    const busy = F.rentalItems(PRICE_TABLE).filter((i) => clean.games.includes(i.slug) && left[i.slug] !== undefined && left[i.slug] < Math.max(1, takes[i.name] || 0));
+    if (busy.length) errors.games = `${busy.map((i) => i.name).join(', ')} ${busy.length === 1 ? 'is' : 'are'} already booked for those dates. Untick ${busy.length === 1 ? 'it' : 'them'} or pick another date.`;
   }
   if (Object.keys(errors).length) { delete values.id_photo; return formPage(env, url, { values, errors, status: 400 }); }
 

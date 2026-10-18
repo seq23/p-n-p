@@ -22,9 +22,10 @@
       "name": "Cornhole Set",
       "size": "Regulation, 2 boards + 8 bags",
       "use": "both",
-      "quantity": 2,
+      "quantity": 1,
+      "_quantityWhy": "Owner, 2026-10-18: one cornhole set (the data said 2). Two overlapping cornhole bookings double-book it.",
       "availableNow": true,
-      "blurb": "Two regulation boards and eight bags. Two sets available for a tournament.",
+      "blurb": "Two regulation boards and eight bags. Play one-on-one or in teams of two.",
       "alt": "Black woman tossing a bean bag at a wooden cornhole board on a green lawn at a backyard party",
       "formChoice": "Cornhole set"
     },

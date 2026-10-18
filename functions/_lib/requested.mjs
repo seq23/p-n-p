@@ -44,7 +44,7 @@ export function requestedChips(requests, statuses = {}, bookings = [], table = n
       const chip = { key: r.key, name: shortName(r.name), service, kind, date, color: serviceInfo(kind).bar, games: 0, returnDate: '' };
       if (service === 'rentals') {
         const ex = table ? expandItems(r.gamesAnswer || answerOf(r, /which games/i), table) : { names: [], unnamed: 0 };
-        chip.games = ex.names.length + ex.unnamed;
+        chip.games = ex.names.reduce((n, name) => n + ((ex.counts && ex.counts[name]) || 1), 0) + ex.unnamed;
         chip.returnDate = returnDateFor(date, r.durationAnswer) || addDays(date, 1);
       }
       out.push(chip);

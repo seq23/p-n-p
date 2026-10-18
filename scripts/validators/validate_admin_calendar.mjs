@@ -17,6 +17,7 @@ let checks = 0;
 const must = (cond, msg) => { checks += 1; if (!cond) errors.push(msg); };
 
 const C = await mod('functions/_lib/calendar.mjs');
+const VC = await mod('functions/_lib/views-calendar.mjs');
 const K = await mod('functions/_lib/kinds.mjs');
 const R = await mod('functions/_lib/reminders.mjs');
 const L = await mod('functions/_lib/ledger.mjs');
@@ -87,10 +88,44 @@ must(exp('Movie Night bundle, weekend: Inflatable Movie Screen, Giant Uno, Grab 
   must(C.usageOn(w2, '2026-11-08', '2026-11-01', PRICE_TABLE).count === 1, 'a rental returned early still counts as out');
   must(C.overlapWarnings(w2, PRICE_TABLE, { today: '2026-11-01' }).length === 0, 'a returned rental still blocks the item in the overlap check');
   const avail = C.availability(w, '2026-11-08', '2026-11-08', '2026-11-01', PRICE_TABLE);
-  must(avail['Giant Connect Four'] < 0 && avail['Cornhole Set'] === 2, 'availability per item is wrong');
+  must(avail['Giant Connect Four'] < 0 && avail['Cornhole Set'] === 1 && avail['Giant Color Stack'] === 2, 'availability per item is wrong (Cornhole stock 1, Giant Color Stack stock 2, owner 18 Oct 2026)');
   const overdue = C.overdueReturns(bk, {}, '2026-11-10');
   must(overdue.length === 2, 'overdue returns not detected');
   must(C.overdueReturns(bk, { a: { returned_at: 'x' } }, '2026-11-10').length === 1, 'a returned rental is reported overdue');
+}
+// An all-games bundle takes BOTH Giant Color Stack sets out (owner, 18 Oct 2026); typed words
+// "Giant Color Stack (2 sets)" count 2; Cornhole is 1 set, so two overlapping cornhole bookings
+// double-book it and the second finds none left.
+{
+  const CS = 'Giant Color Stack';
+  const two = (t, why) => { const e = exp(t); must(e.counts[CS] === 2, `${why}: Giant Color Stack counted ${e.counts[CS]} sets, expected 2`); return e; };
+  two('Whole Yard, all 6 games ($195)', 'Whole Yard form choice');
+  two('Whole Yard', 'typed "Whole Yard"');
+  two('The Whole Party, all 8 items ($235 day / $350 weekend)', 'The Whole Party form choice');
+  two('Giant Color Stack (2 sets)', 'typed "Giant Color Stack (2 sets)"');
+  two('2 Giant Color Stack', 'typed "2 Giant Color Stack"');
+  two('Whole Yard bundle, 1 day: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack (2 sets)', 'Whole Yard invoice line');
+  must(exp('Giant Color Stack').counts[CS] === 1 && exp('Pick 3 bundle ($110): Giant Color Stack, 2 games of your choice').counts[CS] === 1, 'one Giant Color Stack named counts more than 1 set');
+  must(exp('Pick 5 bundle ($175)').counts[CS] === 1, 'Pick 5 (5 games, one of each) takes more than one Giant Color Stack set');
+  must(C.itemsText(exp('Whole Yard')).includes('Giant Color Stack (2 sets)'), 'the saved booking words for a Whole Yard lose the second Color Stack set');
+  const bk = (id, key, who, from, to, items) => [
+    { id, request_key: key, kind: 'rental_pickup', date: from, customer_name: who, items },
+    { id: id + 1, request_key: key, kind: 'rental_return', date: to, customer_name: who, items },
+  ];
+  const T = '2026-11-01';
+  const wy = C.rentalWindows(bk(10, 'wy', 'Wy', '2026-11-14', '2026-11-15', 'Whole Yard, all 6 games ($195)'), {}, PRICE_TABLE);
+  const u = C.usageOn(wy, '2026-11-14', T, PRICE_TABLE);
+  must(u.byItem[CS].used === 2 && u.over.length === 0, `a Whole Yard marks ${u.byItem[CS].used} Giant Color Stack sets out, expected 2 of 2`);
+  must(u.count === 6, `a Whole Yard counts ${u.count} games out, expected 6 (both Color Stack sets)`);
+  must(C.availability(wy, '2026-11-14', '2026-11-14', T, PRICE_TABLE)[CS] === 0, 'a Whole Yard leaves a Giant Color Stack set free');
+  must(/Giant Color Stack<\/strong><span>[^<]*\(2 of 2\)/.test(VC.gamesGrid(u, PRICE_TABLE).html), 'the games-out grid does not show both Giant Color Stack sets out (2 of 2)');
+  const party = C.rentalWindows([...bk(10, 'wy', 'Wy', '2026-11-14', '2026-11-15', 'The Whole Party'), ...bk(20, 'cs', 'Cy', '2026-11-15', '2026-11-16', 'Giant Color Stack')], {}, PRICE_TABLE);
+  const up = C.usageOn(party, '2026-11-15', T, PRICE_TABLE);
+  must(up.over.some((o) => o.item === CS && o.used === 3), 'The Whole Party + one more Color Stack set is not flagged double-booked');
+  must(C.overlapWarnings(party, PRICE_TABLE, { today: T }).some((w) => w.item === CS), 'the overlap warning misses a third Color Stack set');
+  const ch = C.rentalWindows([...bk(30, 'c1', 'Ann', '2026-11-20', '2026-11-21', 'Cornhole set'), ...bk(40, 'c2', 'Bo', '2026-11-21', '2026-11-22', 'Cornhole set')], {}, PRICE_TABLE);
+  must(C.availability(ch.filter((w) => w.key === 'c1'), '2026-11-21', '2026-11-22', T, PRICE_TABLE)['Cornhole Set'] === 0, 'a second cornhole booking overlapping the first still finds a set free (stock 1)');
+  must(C.usageOn(ch, '2026-11-21', T, PRICE_TABLE).over.some((o) => o.item === 'Cornhole Set'), 'two overlapping cornhole bookings are not flagged double-booked');
 }
 // Every service has a kind; every kind has exactly one of the four colours; contrast.
 {
