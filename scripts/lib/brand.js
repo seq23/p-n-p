@@ -19,7 +19,9 @@
  */
 const path = require('path');
 const offers = require(path.join(__dirname, '../../data/offers/services.json'));
-const games = require(path.join(__dirname, '../../data/rentals/games.json'));
+const INV = require(path.join(__dirname, 'inventory.js'));
+// Resolved: a bundle whose items are removed in Settings -> Inventory is not offered (inventory.js).
+const games = INV.resolve(require(path.join(__dirname, '../../data/rentals/games.json')));
 
 const SERVICES = Object.freeze([
   Object.freeze({ key: 'porch', label: 'porch decorating', aliases: Object.freeze(['porch decorating', 'porch decorator', 'porch styling', 'porch decor']) }),
@@ -54,7 +56,7 @@ const PRICES = Object.freeze({
   party: dollars(offers.services.celebration.price),
   grazing: dollars(offers.services.grazing.price),
   gameDay: games.rates.day,
-  bundleFrom: Math.min(...games.bundles.map((b) => b.dayPrice))
+  bundleFrom: Math.min(...INV.offeredBundles(games).map((b) => b.dayPrice))
 });
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

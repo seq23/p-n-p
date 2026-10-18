@@ -13,17 +13,22 @@
 // for the season (scripts/lib/porch_packages.js invoiceLines, the same module the
 // public grid renders from), with the fall + Christmas bundle line when both are booked.
 import PP from '../../scripts/lib/porch_packages.js';
+import INV from '../../scripts/lib/inventory.js';
 import { rentalLength, rentalSpanWords } from './phone-requests.mjs';
 
-export function buildPriceTable(games, services, porchPackages = null) {
+export function buildPriceTable(source, services, porchPackages = null) {
+  // Resolved first (scripts/lib/inventory.js): the all-games bundles take every available public
+  // game at its quantity, and a bundle whose items are removed is not offered (owner, 18 Oct 2026).
+  const games = INV.resolve(source);
   const takedown = services && services.addOns && services.addOns.takedown;
   const cents = (d) => Math.round(d * 100);
+  const deposit = (i) => cents(INV.depositOf(games, i));
   const items = [
     ...(games.games || []).filter((g) => g.availableNow).map((g) => ({
-      slug: g.slug, name: g.name, choice: g.formChoice, kind: 'game', quantity: g.quantity || 1, sets: g.bundleSets || 1, dayCents: cents(games.rates.day), weekendCents: cents(games.rates.weekend),
+      slug: g.slug, name: g.name, choice: g.formChoice, kind: 'game', quantity: g.quantity || 1, sets: INV.setsOf(g), dayCents: cents(games.rates.day), weekendCents: cents(games.rates.weekend), depositCents: deposit(g),
     })),
     ...(games.extras || []).filter((x) => x.availableNow).map((x) => ({
-      slug: x.slug, name: x.name, choice: x.formChoice, kind: 'extra', quantity: x.quantity || 1, dayCents: cents(x.dayPrice), weekendCents: cents(x.weekendPrice),
+      slug: x.slug, name: x.name, choice: x.formChoice, kind: 'extra', quantity: x.quantity || 1, dayCents: cents(x.dayPrice), weekendCents: cents(x.weekendPrice), depositCents: deposit(x),
     })),
   ];
   const pickup = games.pickup || {};
@@ -31,7 +36,7 @@ export function buildPriceTable(games, services, porchPackages = null) {
     dayCents: cents(games.rates.day),
     weekendCents: cents(games.rates.weekend),
     items,
-    bundles: (games.bundles || []).map((b) => ({
+    bundles: INV.offeredBundles(games).map((b) => ({
       slug: b.slug, name: b.name, choice: b.formChoice, games: b.games, items: b.items || [],
       dayCents: cents(b.dayPrice), weekendCents: b.weekendPrice == null ? null : cents(b.weekendPrice),
     })),
@@ -53,7 +58,14 @@ export function buildPriceTable(games, services, porchPackages = null) {
 export function buildTrackTable(table, games) {
   const extra = (games.adminItems || []).filter((x) => x.admin_only && x.availableNow !== false)
     .map((x) => ({ slug: x.slug, name: x.name, choice: x.name, kind: 'admin', quantity: x.quantity || 1, dayCents: 0, weekendCents: 0, adminOnly: true }));
-  return { ...table, items: [...table.items, ...extra.filter((x) => !table.items.some((i) => i.slug === x.slug))] };
+  // Removed items (availableNow false, Settings -> Inventory "Remove") stay tracked so a booking
+  // made before the removal still lists them on its Day sheet and check-in; removed: true keeps
+  // them out of every picker, every bundle and the public pages.
+  const KIND = { games: 'game', extras: 'extra', adminItems: 'admin' };
+  const gone = ['games', 'extras', 'adminItems'].flatMap((s) => (games[s] || []).filter((x) => x.availableNow === false)
+    .map((x) => ({ slug: x.slug, name: x.name, choice: x.formChoice || x.name, kind: KIND[s], quantity: x.quantity || 1, dayCents: 0, weekendCents: 0, removed: true, ...(s === 'adminItems' ? { adminOnly: true } : {}) })));
+  const items = [...table.items, ...extra.filter((x) => !table.items.some((i) => i.slug === x.slug))];
+  return { ...table, items: [...items, ...gone.filter((x) => !items.some((i) => i.slug === x.slug))] };
 }
 
 const norm = (s) => String(s || '').toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/\bsets?\b/g, ' ').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
@@ -203,7 +215,7 @@ export function prefillLines(request, table) {
         lines.push({ description: `${p.extra.name} (${span})`, qty: 1, unit_cents: weekend ? p.extra.weekendCents : p.extra.dayCents, note: '', refundable: 0 });
       }
     }
-    lines.push({ description: 'Damage deposit (refundable)', qty: 1, unit_cents: table.damageDepositCents, note: 'Refunded at return if everything comes back undamaged', refundable: 1 });
+    lines.push({ description: 'Damage deposit (refundable)', qty: 1, unit_cents: orderDepositCents(lines, table), note: 'Refunded at return if everything comes back undamaged', refundable: 1 });
   }
   const porch = porchPrefill(request, table);
   lines.push(...porch.lines);
@@ -218,6 +230,22 @@ export function prefillLines(request, table) {
     }
   }
   return lines;
+}
+
+// One refundable deposit per order: the biggest deposit among the items its lines name (an item
+// carries the standard damageDeposit unless Settings -> Inventory gave it its own). A line naming
+// no item ("Game of your choice", "Game rental") counts at the standard deposit.
+export function orderDepositCents(lines, table) {
+  let best = 0; let unnamed = false; let found = false;
+  for (const l of lines || []) {
+    if (l.refundable) continue;
+    const d = String(l.description || '').toLowerCase();
+    const hits = table.items.filter((i) => d.includes(i.name.toLowerCase()));
+    if (!hits.length || /of your choice|game rental/.test(d)) unnamed = true;
+    for (const i of hits) { found = true; best = Math.max(best, i.depositCents == null ? table.damageDepositCents : i.depositCents); }
+  }
+  if (unnamed || !found) best = Math.max(best, table.damageDepositCents);
+  return best;
 }
 
 // The porch package lines (and any warnings) for a request; empty without a package season.

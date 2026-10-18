@@ -9,6 +9,7 @@
 // + a tighter rate limit) and the admin card says "sent without the robot check".
 import offers from '../../data/offers/services.json';
 import games from '../../data/rentals/games.json';
+import { useInventory } from './inventory.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 import * as F from './request-form.mjs';
 import * as C from './calendar.mjs';
@@ -115,6 +116,7 @@ export function chicagoWords(ms) {
 
 export async function handleRequestPage(context) {
   const { request, env } = context;
+  await useInventory(env); // Settings -> Inventory counts on the form straight away
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
   if (method === 'GET' || method === 'HEAD') {
@@ -286,6 +288,7 @@ export async function handleReceived({ request, env }) {
 // the exact total. Counts only: no names, no bookings.
 export async function handleAvailability({ request, env }) {
   const url = new URL(request.url);
+  await useInventory(env);
   const pickup = url.searchParams.get('pickup') || '';
   const duration = url.searchParams.get('duration') === 'weekend' ? 'weekend' : 'day';
   const slugs = String(url.searchParams.get('games') || '').split(',').filter((s) => /^[a-z0-9-]{1,60}$/.test(s));

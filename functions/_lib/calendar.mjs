@@ -380,7 +380,7 @@ export function expandItems(text, table) {
     if (!hit) continue;
     for (const slug of b.items) { const it = table.items.find((x) => x.slug === slug); if (it) need(it.name); }
     if (b.games >= table.gameNames.length) {
-      for (const it of table.items.filter((x) => x.kind === 'game')) need(it.name, b.games >= slots ? (it.sets || 1) : 1);
+      for (const it of table.items.filter((x) => x.kind === 'game' && !x.removed)) need(it.name, b.games >= slots ? (it.sets || 1) : 1);
     } else wantedGames += b.games;
   }
   const namedGames = table.items.filter((i) => i.kind === 'game' && counts[i.name]).reduce((n, i) => n + counts[i.name], 0);

@@ -28,7 +28,13 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const games = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8'));
+import { createRequire } from 'node:module';
+import { mod } from './lib/admin_harness.mjs';
+const INV = createRequire(import.meta.url)('../lib/inventory.js');
+// The live inventory (Settings -> Inventory edits it), resolved like every reader resolves it.
+const games = INV.resolve(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8')));
+// The seed inventory the owner's scenario pins were written for (scripts/validators/fixtures).
+const FIXTURE = INV.resolve(JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/validators/fixtures/games.json'), 'utf8')));
 const services = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8'));
 const { buildPriceTable, prefillLines, isRentalInvoice, pickupNote } = await import(pathToFileURL(path.join(ROOT, 'functions/_lib/pricing.mjs')).href);
 const errors = [];
@@ -47,23 +53,44 @@ const DAY = CONTRACT_HOW_LONG[0]; const WEEKEND = CONTRACT_HOW_LONG[1];
 
 const shown = [...games.games, ...(games.extras || [])].filter((i) => i.availableNow);
 const hidden = [...games.games, ...(games.extras || [])].filter((i) => !i.availableNow);
-const bundles = games.bundles || [];
+const bundles = INV.offeredBundles(games);
 if (!shown.length) errors.push('data/rentals/games.json lists 0 available items');
 if (!bundles.length) errors.push('data/rentals/games.json lists 0 bundles');
-if (bundles.length !== 6) errors.push(`data/rentals/games.json lists ${bundles.length} bundles; rentals v3 is 6`);
-const dataChoices = [...shown.map((i) => i.formChoice), ...bundles.map((b) => b.formChoice)];
-if (JSON.stringify([...dataChoices].sort()) !== JSON.stringify([...CONTRACT_GAMES].sort())) errors.push(`games.json formChoice strings differ from the quote form contract: ${JSON.stringify(dataChoices)}`);
-for (const h of hidden) if (h.formChoice) errors.push(`hidden item ${h.slug} still carries a formChoice; it would reach the form contract`);
+if ((games.bundles || []).length !== 6) errors.push(`data/rentals/games.json lists ${(games.bundles || []).length} bundles; rentals v3 is 6`);
+// The Google Form contract is the legacy intake (the /request form replaced it; its choices come
+// from the live price table). Old answers carry these exact strings forever, so every one must
+// still name an item (available or removed: Remove never deletes) or a bundle in games.json, and
+// an item Valerie adds carries its own formChoice (its name). A removed item is never priced
+// (scenario "hidden item ... is priced by the prefill" below).
+const everyItem = INV.allItems(games).map(({ item }) => item);
+for (const cs of CONTRACT_GAMES) {
+  if (!everyItem.some((i) => i.formChoice === cs) && !(games.bundles || []).some((b) => b.formChoice === cs)) errors.push(`quote form contract string "${cs}" no longer names an item or bundle in games.json; old answers would stop matching`);
+}
+for (const i of shown) if (!i.formChoice) errors.push(`available item ${i.slug} has no formChoice; the request form and old answers match on it`);
 
 const doc = fs.readFileSync(path.join(ROOT, 'docs/admin-console.md'), 'utf8');
 const docSec = (doc.split('## Quote form contract')[1] || '').split(/\n## /)[0];
 const docList = [...docSec.matchAll(/^- `([^`]+)`$/gm)].map((m) => m[1]);
 if (JSON.stringify(docList) !== JSON.stringify([...CONTRACT_GAMES, ...CONTRACT_HOW_LONG])) errors.push('docs/admin-console.md "Quote form contract" does not list exactly the 14 + 2 contract strings, in order');
-for (const h of hidden) if (docSec.toLowerCase().includes(h.name.toLowerCase())) errors.push(`docs/admin-console.md form contract names hidden item ${h.name}`);
 
 // ---- 3/4. Prefill scenarios, on the live and a perturbed table --------------
 const c = (d) => Math.round(d * 100);
 const sumRental = (lines) => lines.filter((l) => !l.refundable && l.description !== 'Takedown').reduce((s, l) => s + Math.round(l.qty * l.unit_cents), 0);
+
+// One deposit per order: the biggest among the items its lines name (an item's own deposit, else
+// the standard one); a line naming no item ("of your choice") counts at the standard deposit.
+function expectedDeposit(lines, g) {
+  const items = [...g.games, ...(g.extras || [])].filter((i) => i.availableNow);
+  let best = 0; let unnamed = false; let found = false;
+  for (const l of lines.filter((x) => !x.refundable)) {
+    const d = l.description.toLowerCase();
+    const hits = items.filter((i) => d.includes(i.name.toLowerCase()));
+    if (!hits.length || /of your choice|game rental/.test(d)) unnamed = true;
+    for (const i of hits) { found = true; best = Math.max(best, c(INV.depositOf(g, i))); }
+  }
+  if (unnamed || !found) best = Math.max(best, c(g.damageDeposit));
+  return best;
+}
 
 function scenarios(table, g, s) {
   const out = [];
@@ -74,7 +101,8 @@ function scenarios(table, g, s) {
     const lines = prefillLines({ wantsRentals: true, gamesAnswer: answer, durationAnswer: howLong }, table);
     if (lines.some((l) => /deliver/i.test(l.description) || /deliver/i.test(l.note))) errors.push(`${label}: prefill has a delivery line`);
     const dep = lines.filter((l) => l.refundable);
-    if (dep.length !== 1 || dep[0].unit_cents !== c(g.damageDeposit)) errors.push(`${label}: prefill lacks the one refundable $${g.damageDeposit} damage deposit`);
+    const want = expectedDeposit(lines, g);
+    if (dep.length !== 1 || dep[0].unit_cents !== want) errors.push(`${label}: prefill lacks the one refundable $${want / 100} damage deposit`);
     if (!isRentalInvoice(lines, table)) errors.push(`${label}: prefill is not recognised as a rental invoice`);
     if (pickupNote(lines, table) !== table.pickupLine) errors.push(`${label}: rental invoice does not carry the pickup line`);
     if (lines.some((l) => /^Game rental \(/.test(l.description))) errors.push(`${label}: "${answer}" was not matched (fell back to "Game rental")`);
@@ -84,7 +112,7 @@ function scenarios(table, g, s) {
     out.push([`${i.formChoice} day`, sumRental(run(i.formChoice, DAY, i.formChoice)), c(itemDay(i))]);
     out.push([`${i.formChoice} weekend`, sumRental(run(i.formChoice, WEEKEND, i.formChoice)), c(itemWk(i))]);
   }
-  for (const b of g.bundles) {
+  for (const b of INV.offeredBundles(g)) {
     const lines = run(b.formChoice, DAY, b.formChoice);
     out.push([`${b.formChoice} day`, sumRental(lines), c(b.dayPrice)]);
     if (!lines[0].description.startsWith(`${b.name} bundle`)) errors.push(`${b.formChoice}: first line is "${lines[0].description}", not the ${b.name} bundle`);
@@ -94,14 +122,14 @@ function scenarios(table, g, s) {
   }
   const everything = avail.map((i) => i.formChoice).join(', ');
   // Owner, 18 Oct 2026: a game with bundleSets 2 (Giant Color Stack) fills two slots of an all-games bundle.
-  const slotsAll = avail.reduce((n, i) => n + (g.games.includes(i) ? (i.bundleSets || 1) : 1), 0);
-  const all = g.bundles.find((b) => b.games + b.items.length === slotsAll);
+  const slotsAll = avail.reduce((n, i) => n + (g.games.includes(i) ? INV.setsOf(i) : 1), 0);
+  const all = INV.offeredBundles(g).find((b) => b.games + b.items.length === slotsAll);
   if (!all) errors.push('no bundle covers every available item');
   else {
     out.push(['all items ticked, day', sumRental(run(everything, DAY, 'all items day')), c(all.dayPrice)]);
     out.push(['all items ticked, weekend', sumRental(run(everything, WEEKEND, 'all items weekend')), c(all.weekendPrice)]);
   }
-  const pick3 = g.bundles.find((b) => b.games === 3 && !b.items.length);
+  const pick3 = INV.offeredBundles(g).find((b) => b.games === 3 && !b.items.length);
   const gameChoices = g.games.filter((x) => x.availableNow).map((x) => x.formChoice);
   if (pick3) out.push(['three named games, day', sumRental(run(gameChoices.slice(0, 3).join(', '), DAY, 'three games')), c(pick3.dayPrice)]);
   const decor = prefillLines({ wantsDecor: true, eventType: 'Birthday', takedownAnswer: 'Yes' }, table);
@@ -137,24 +165,22 @@ for (const [label, got, want] of [...live, ...perturbed.map(([l, g, w]) => [`${l
 if (!live.length) errors.push('no price scenarios ran');
 
 // ---- 5. The checklist's printed prices --------------------------------------
-const checklist = fs.readFileSync(path.join(ROOT, 'functions/_lib/assets/walkthrough-checklist.html.txt'), 'utf8');
+// The checklist as the admin prints it: page 4 follows the live inventory (checklist-source.mjs).
+const { liveChecklistSource } = await mod('functions/_lib/checklist-source.mjs');
+const checklist = liveChecklistSource(games, fs.readFileSync(path.join(ROOT, 'functions/_lib/assets/walkthrough-checklist.html.txt'), 'utf8'));
 const page4 = checklist.split('<!-- PAGE 4')[1] || '';
 const ex = Object.fromEntries((games.extras || []).map((x) => [x.slug, x]));
 const bb = Object.fromEntries(bundles.map((b) => [b.slug, b]));
 const expectInChecklist = [
   [`Day ($${games.rates.day} each) or weekend ($${games.rates.weekend} each)`, 'day / weekend rates'],
   [`×$${games.rates.day} day / ×$${games.rates.weekend} weekend`, 'quote worksheet game rates'],
-  [`screen $${ex['inflatable-movie-screen'].dayPrice} / $${ex['inflatable-movie-screen'].weekendPrice}`, 'worksheet movie screen'],
-  [`card table $${ex['card-table'].dayPrice} / $${ex['card-table'].weekendPrice}`, 'worksheet card table'],
-  [`Pick 3 $${bb['pick-3'].dayPrice}`, 'Pick 3'],
-  [`Pick 5 $${bb['pick-5'].dayPrice}`, 'Pick 5'],
-  [`Whole Yard $${bb['whole-yard'].dayPrice}`, 'Whole Yard'],
-  [`Movie Night $${bb['movie-night'].dayPrice}`, 'Movie Night'],
-  [`Game Night $${bb['game-night'].dayPrice}`, 'Game Night'],
-  [`Whole Party $${bb['whole-party'].dayPrice} / $${bb['whole-party'].weekendPrice} weekend`, 'The Whole Party'],
+  ...(ex['inflatable-movie-screen'] && ex['inflatable-movie-screen'].availableNow ? [[`screen $${ex['inflatable-movie-screen'].dayPrice} / $${ex['inflatable-movie-screen'].weekendPrice}`, 'worksheet movie screen']] : []),
+  ...(ex['card-table'] && ex['card-table'].availableNow ? [[`card table $${ex['card-table'].dayPrice} / $${ex['card-table'].weekendPrice}`, 'worksheet card table']] : []),
+  ...bundles.map((b) => [`${b.name.replace(/^The /, '')} $${b.dayPrice}${b.weekendPrice != null ? ` / $${b.weekendPrice} weekend` : ''}`, b.name]),
   [`$${games.damageDeposit} damage deposit + ${games.holdPercent}% holds the date`, 'damage deposit + hold'],
   [`Takedown starts at $${services.addOns.takedown.fromPrice}`, 'takedown'],
 ];
+if (liveChecklistSource(FIXTURE, fs.readFileSync(path.join(ROOT, 'functions/_lib/assets/walkthrough-checklist.html.txt'), 'utf8')) !== fs.readFileSync(path.join(ROOT, 'functions/_lib/assets/walkthrough-checklist.html.txt'), 'utf8')) errors.push('the live checklist differs from the approved file for the seed inventory: checklist-source.mjs changed the approved wording');
 for (const [needle, what] of expectInChecklist) {
   if (!checklist.includes(needle.replace(/&/g, '&amp;'))) errors.push(`walk-through checklist ${what} wording drifted from the data files: expected "${needle}"`);
 }
@@ -175,7 +201,8 @@ for (const step of ['Payment confirmed before leaving', 'Photo ID matches the in
 
 // ---- Both Giant Color Stack sets in an all-games bundle (owner, 18 Oct 2026) ----------------
 {
-  const T = buildPriceTable(games, services);
+  // Owner's scenario pins, on the seed inventory (Valerie's edits change the live one).
+  const T = buildPriceTable(FIXTURE, services);
   if (T.gameSlots !== 6 || T.gameNames.length !== 5 || T.gameNames.includes('Giant Checkers')) errors.push(`price table counts ${T.gameSlots} bundle games over ${T.gameNames.length} kinds; want 6 over 5, no Giant Checkers`);
   const allChoices = T.items.filter((i) => i.kind === 'game').map((i) => i.choice).join(', ');
   const wy = prefillLines({ wantsRentals: true, gamesAnswer: 'Whole Yard, all 6 games ($195)', durationAnswer: DAY }, T);

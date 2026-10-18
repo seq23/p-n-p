@@ -78,6 +78,8 @@ const screens = [
   ['/admin/invoices'], ['/admin/invoices/new'], [`/admin/invoices/new?r=${s.rk(reqA.key)}`],
   [`/admin/invoices/${invA.id}`], [`/admin/invoices/${invB.id}`], [`/admin/invoices/${draftWithEmail.id}`], [`/admin/invoices/${v.id}`], [`/admin/invoices/${paidInv.id}`], [`/admin/invoices/${invA.id}/edit`],
   ['/admin/settings'], ['/admin/help', { help: true }], ['/admin/packages'],
+  // Settings -> Inventory (18 Oct 2026): the Add and Edit forms.
+  ['/admin/settings/inventory/new'], ['/admin/settings/inventory/giant-uno'],
   [`/admin/confirmed?r=${s.rk(heldReq.row.request_key)}&m=Deposit%20received&back=/admin/`],
   [`/admin/checklist/online?r=${s.rk(reqA.key)}`], ['/admin/checklist', { print: true }], [`/admin/checklist?r=${s.rk(reqA.key)}`, { print: true }],
   ['/admin/search'], ['/admin/search?q=renter'], ['/admin/search?q=zzzz'],
@@ -89,6 +91,10 @@ const screens = [
 // Archive one so Put away has rows (after the dashboard renders above are collected below).
 const pages = [...early];
 for (const [p, o = {}] of screens) pages.push([p, o, await s.get(p, { auth: o.auth !== false })]);
+// An inventory save whose website update failed: the box says so and offers Try again.
+await s.post('/admin/settings/inventory/rates', { rate_day: '40', rate_weekend: '60' });
+await s.db.prepare("UPDATE inventory_publishes SET status = 'failed', detail = 'The website did not update.' WHERE id = (SELECT MAX(id) FROM inventory_publishes)").run();
+pages.push(['/admin/settings (website update failed)', {}, await s.get('/admin/settings')]);
 await s.post('/admin/requests/archive', { r: s.rk(reqB.key) });
 {
   const old = await s.get('/admin/archive');
