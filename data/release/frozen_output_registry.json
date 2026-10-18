@@ -718,9 +718,9 @@
       "route": "/faq/index",
       "rendered_file": "faq/index.html",
       "state": "FROZEN",
-      "accepted_sha256": "cf5178d359bc1eeac8658ae6097243c69fd1e7a45916708d77c575c3fe3dfd5e",
-      "cache_file": "data/release/frozen_accepted_outputs/cf5178d359bc1eeac8658ae6097243c69fd1e7a45916708d77c575c3fe3dfd5e.html.gz",
-      "cache_sha256": "35a587bc3b2f609fe1602456ca088306e71fdfef5a5f5dc105883ae96f879eac",
+      "accepted_sha256": "bd28370ab691e7bfea9735727ea80d341e269addcb9117e5566e933eaa501929",
+      "cache_file": "data/release/frozen_accepted_outputs/bd28370ab691e7bfea9735727ea80d341e269addcb9117e5566e933eaa501929.html.gz",
+      "cache_sha256": "adc6b15c4b395862b525a0c63e64c7fbdbda248e7bef3b74be79dc6cf727f060",
       "accepted_at": "2026-07-24"
     },
     {

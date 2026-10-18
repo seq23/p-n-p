@@ -57,7 +57,7 @@ const dplus = (n) => { const d = new Date(`${F.chicagoToday()}T12:00:00Z`); d.se
 const heldReq = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', pickup_date: dplus(12), name: 'Hana Held', phone: '901-555-0177', email: 'hana@example.com' });
 await s.db.prepare("UPDATE holds SET until = datetime('now', '+2 hours') WHERE request_key = ?1").bind(heldReq.row.request_key).run();
 await s.db.prepare("INSERT INTO settings (key, value) VALUES ('hold_auto_expire', '0')").run();
-const handReq = await s.siteRequest({ service: 'rentals', games: ['giant-checkers'], duration: 'day', pickup_date: dplus(13), name: 'Hal Hand', phone: '901-555-0178', email: 'hal@example.com' });
+const handReq = await s.siteRequest({ service: 'rentals', games: ['cornhole'], duration: 'day', pickup_date: dplus(13), name: 'Hal Hand', phone: '901-555-0178', email: 'hal@example.com' });
 await s.db.prepare("DELETE FROM settings WHERE key = 'hold_auto_expire'").run();
 const tyReq = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', event_date: dplus(3), location: 'Germantown', name: 'Tia Thanks', phone: '901-555-0179', email: 'tia@example.com' });
 await s.post('/admin/requests/jobdone', { r: s.rk(tyReq.row.request_key) });

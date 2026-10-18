@@ -399,7 +399,6 @@ fails if a string is missing from the data, maps to the wrong price, or names a 
 "Which games?" (checkboxes):
 - `Giant Connect Four`
 - `Cornhole set`
-- `Giant Checkers`
 - `Giant Color Stack`
 - `Giant Uno`
 - `Grab the Mic`

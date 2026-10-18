@@ -39,7 +39,7 @@ if (!/import services from '\.\.\/\.\.\/data\/offers\/services\.json';/.test(pri
 if (!/buildPriceTable\(games, services, porchPackages\)/.test(pricesSrc) || !/import porchPackages from '\.\.\/\.\.\/data\/offers\/porch_packages\.json'/.test(pricesSrc)) errors.push('functions/_lib/prices.mjs does not build the table from the three data files (games, services, porch packages)');
 
 // ---- 2. The quote form contract ---------------------------------------------
-const CONTRACT_GAMES = ['Giant Connect Four', 'Cornhole set', 'Giant Checkers', 'Giant Color Stack', 'Giant Uno', 'Grab the Mic',
+const CONTRACT_GAMES = ['Giant Connect Four', 'Cornhole set', 'Giant Color Stack', 'Giant Uno', 'Grab the Mic',
   'Inflatable movie screen', 'Card table with cup holders', 'Pick 3 bundle ($110)', 'Pick 5 bundle ($175)', 'Whole Yard, all 6 games ($195)',
   'Movie Night, screen + 2 games ($110)', 'Game Night, card table + 2 games ($85)', 'The Whole Party, all 8 items ($235 day / $350 weekend)'];
 const CONTRACT_HOW_LONG = ['One day (24 hours)', 'Weekend (Friday pickup, Monday return)'];
@@ -93,7 +93,9 @@ function scenarios(table, g, s) {
     out.push([`${b.formChoice} weekend`, sumRental(run(b.formChoice, WEEKEND, `${b.formChoice} weekend`)), c(b.weekendPrice != null ? b.weekendPrice : slotsWk)]);
   }
   const everything = avail.map((i) => i.formChoice).join(', ');
-  const all = g.bundles.find((b) => b.games + b.items.length === avail.length);
+  // Owner, 18 Oct 2026: a game with bundleSets 2 (Giant Color Stack) fills two slots of an all-games bundle.
+  const slotsAll = avail.reduce((n, i) => n + (g.games.includes(i) ? (i.bundleSets || 1) : 1), 0);
+  const all = g.bundles.find((b) => b.games + b.items.length === slotsAll);
   if (!all) errors.push('no bundle covers every available item');
   else {
     out.push(['all items ticked, day', sumRental(run(everything, DAY, 'all items day')), c(all.dayPrice)]);
@@ -169,6 +171,19 @@ for (const i of shown) if (!page4.toLowerCase().includes((i.formChoice || i.name
 for (const h of hidden) if (page4.toLowerCase().includes(h.name.toLowerCase())) errors.push(`checklist rentals page lists hidden item ${h.name}`);
 for (const step of ['Payment confirmed before leaving', 'Photo ID matches the invoice name', 'Photo of the loaded car', 'Return check', 'Damage deposit refunded the same day']) {
   if (!page4.includes(step)) errors.push(`checklist meet-up steps lack "${step}"`);
+}
+
+// ---- Both Giant Color Stack sets in an all-games bundle (owner, 18 Oct 2026) ----------------
+{
+  const T = buildPriceTable(games, services);
+  if (T.gameSlots !== 6 || T.gameNames.length !== 5 || T.gameNames.includes('Giant Checkers')) errors.push(`price table counts ${T.gameSlots} bundle games over ${T.gameNames.length} kinds; want 6 over 5, no Giant Checkers`);
+  const allChoices = T.items.filter((i) => i.kind === 'game').map((i) => i.choice).join(', ');
+  const wy = prefillLines({ wantsRentals: true, gamesAnswer: 'Whole Yard, all 6 games ($195)', durationAnswer: DAY }, T);
+  if (!/^Whole Yard bundle, 1 day: .*Giant Color Stack \(2 sets\)/.test(wy[0].description) || wy[0].unit_cents !== 19500) errors.push(`a Whole Yard ask does not invoice both Color Stack sets at $195: "${wy[0].description}"`);
+  const five = prefillLines({ wantsRentals: true, gamesAnswer: allChoices, durationAnswer: DAY }, T);
+  if (!five[0].description.startsWith('Pick 5 bundle') || five[0].unit_cents !== 17500 || /2 sets/.test(five[0].description)) errors.push(`all five games ticked (one each) is not the cheaper Pick 5: "${five[0].description}"`);
+  const party = prefillLines({ wantsRentals: true, gamesAnswer: `${allChoices}, Inflatable movie screen, Card table with cup holders`, durationAnswer: DAY }, T);
+  if (!/^The Whole Party bundle, 1 day: .*Giant Color Stack \(2 sets\)/.test(party[0].description) || party[0].unit_cents !== 23500) errors.push(`every item ticked is not The Whole Party with both Color Stack sets: "${party[0].description}"`);
 }
 
 if (errors.length) {

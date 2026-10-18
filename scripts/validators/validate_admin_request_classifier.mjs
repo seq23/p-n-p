@@ -46,7 +46,7 @@ for (const na of ['', 'n/a', 'N/A', 'na', ' NA ', 'none', 'None', 'no', 'No.', '
   const [r] = rowsToRequests([headers, row({ ...base, 'What do you need?': 'Game rentals', 'Which games?': 'n/a' })]);
   check(r && !r.wantsRentals, 'a "Game rentals" tick with no real game made a rental (never inferred without a real game)');
 }
-for (const games of ['Giant Uno', 'Cornhole set, Giant Checkers', 'Pick 3 bundle ($110)', 'The Whole Party, all 8 items ($235 day / $350 weekend)']) {
+for (const games of ['Giant Uno', 'Cornhole set, Giant Uno', 'Pick 3 bundle ($110)', 'The Whole Party, all 8 items ($235 day / $350 weekend)']) {
   const [r] = rowsToRequests([headers, row({ ...base, 'What do you need?': 'Game rentals, Event decor', 'Which games?': games })]);
   check(r && r.wantsRentals && r.wantsDecor && r.gamesAnswer === games, `decor + ${JSON.stringify(games)} is not both rental and decor`);
 }

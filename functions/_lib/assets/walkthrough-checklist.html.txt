@@ -210,7 +210,6 @@ td.blank{min-width:70px}
   <ul class="ck" style="columns:4">
     <li>Giant Connect Four</li>
     <li>Cornhole (2 sets)</li>
-    <li>Giant Checkers</li>
     <li>Giant Color Stack (2 sets)</li>
     <li>Giant Uno</li>
     <li>Grab the Mic</li>

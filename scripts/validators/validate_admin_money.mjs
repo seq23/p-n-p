@@ -33,7 +33,7 @@ must(R.chicagoDate(new Date('2027-01-01T05:30:00Z')) === '2026-12-31', 'a paymen
     { id: 3, number: 'PNP-2026-0003', customer_name: 'Cy', issue_date: '2026-10-05', status: 'deposit_paid', deposit_due_cents: 10000 },
   ];
   const lines = [
-    { invoice_id: 1, description: 'Pick 3 bundle, 1 day: Giant Uno, Giant Checkers, Grab the Mic', qty: 1, unit_cents: 11000, refundable: 0 },
+    { invoice_id: 1, description: 'Pick 3 bundle, 1 day: Giant Uno, Giant Color Stack, Grab the Mic', qty: 1, unit_cents: 11000, refundable: 0 },
     { invoice_id: 1, description: 'Damage deposit (refundable)', qty: 1, unit_cents: 5000, refundable: 1 },
     { invoice_id: 2, description: 'Porch decorating', qty: 1, unit_cents: 50000, refundable: 0 },
     { invoice_id: 3, description: 'Decor: Birthday party', qty: 1, unit_cents: 15001, refundable: 0 },

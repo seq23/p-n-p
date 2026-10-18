@@ -84,7 +84,7 @@ await s.post('/admin/holds/extend', { r: s.rk(e1.request_key), hours: '24' });
 must((await H.getHold(s.db, e1.request_key)).state === 'held' && (await s.all('SELECT kind FROM bookings WHERE request_key = ?1', e1.request_key)).length === 2, 'more time on an expired hold did not put its games back');
 
 // ---- 2. Hold reminder: once per end time --------------------------------------------------
-const b = await rental(3, ['giant-checkers']);
+const b = await rental(3, ['cornhole']);
 await s.db.prepare("UPDATE holds SET until = ?2 WHERE request_key = ?1").bind(b.request_key, H.sqlTime(Date.now() + 3 * 3600000)).run();
 const sentBefore = s.env.sent.length;
 let hr = await CM.sendHoldReminders(s.env);

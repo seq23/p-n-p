@@ -20,7 +20,7 @@ export function buildPriceTable(games, services, porchPackages = null) {
   const cents = (d) => Math.round(d * 100);
   const items = [
     ...(games.games || []).filter((g) => g.availableNow).map((g) => ({
-      slug: g.slug, name: g.name, choice: g.formChoice, kind: 'game', quantity: g.quantity || 1, dayCents: cents(games.rates.day), weekendCents: cents(games.rates.weekend),
+      slug: g.slug, name: g.name, choice: g.formChoice, kind: 'game', quantity: g.quantity || 1, sets: g.bundleSets || 1, dayCents: cents(games.rates.day), weekendCents: cents(games.rates.weekend),
     })),
     ...(games.extras || []).filter((x) => x.availableNow).map((x) => ({
       slug: x.slug, name: x.name, choice: x.formChoice, kind: 'extra', quantity: x.quantity || 1, dayCents: cents(x.dayPrice), weekendCents: cents(x.weekendPrice),
@@ -40,6 +40,9 @@ export function buildPriceTable(games, services, porchPackages = null) {
     pickupLine: `Pay the rest at pickup. Text or call ${pickup.phone} to set your pickup time at ${String(pickup.place || '').split(',')[0]}.`,
     pickupPlace: String(pickup.place || '').split(',')[0],
     gameNames: items.filter((i) => i.kind === 'game').map((i) => i.name),
+    // The games an all-games bundle counts (owner, 18 Oct 2026: "the 6 games" are both Giant
+    // Color Stack sets + four others), so a game with bundleSets 2 fills two of its slots.
+    gameSlots: items.filter((i) => i.kind === 'game').reduce((n, i) => n + i.sets, 0),
     porchPackages,
   };
 }
@@ -168,8 +171,19 @@ export function prefillLines(request, table) {
     if (!named.length && !open && !extras.size) {
       lines.push({ description: `Game rental (${span})`, qty: 1, unit_cents: weekend ? table.weekendCents : table.dayCents, note: '', refundable: 0 });
     } else {
-      const plan = cheapestPlan(named.length + open, [...extras], table, weekend);
+      let plan = cheapestPlan(named.length + open, [...extras], table, weekend);
       const queue = [...named, ...Array(open).fill(null)];
+      // Every game named: an all-games bundle (Whole Yard, The Whole Party) also carries the
+      // second set of a multi-set game. Used when it was asked for or costs no more.
+      const units = table.gameSlots || table.gameNames.length;
+      if (units > queue.length && named.length >= table.gameNames.length) {
+        const all = cheapestPlan(units, [...extras], table, weekend);
+        if (all && (wanted >= units || all.cents <= plan.cents)) {
+          plan = all;
+          for (const i of table.items.filter((x) => x.kind === 'game' && x.sets > 1)) for (let k = 1; k < i.sets; k += 1) queue.push(i.name);
+        }
+      }
+      const sets = (list) => list.filter((n, k) => list.indexOf(n) === k).map((n) => { const c = list.filter((x) => x === n).length; return c > 1 ? `${n} (${c} sets)` : n; });
       const take = (n) => {
         const got = queue.splice(0, n);
         const real = got.filter(Boolean); const choice = got.length - real.length;
@@ -178,7 +192,7 @@ export function prefillLines(request, table) {
       const byName = (slug) => table.items.find((i) => i.slug === slug).name;
       for (const p of plan.picks.filter((x) => x.bundle)) {
         const b = p.bundle;
-        const what = [...b.items.map(byName), ...take(b.games)];
+        const what = [...b.items.map(byName), ...sets(take(b.games))];
         lines.push({ description: `${b.name} bundle, ${span}: ${what.join(', ')}`, qty: 1, unit_cents: weekend ? b.weekendCents : b.dayCents, note: '', refundable: 0 });
       }
       for (const p of plan.picks.filter((x) => x.game)) {

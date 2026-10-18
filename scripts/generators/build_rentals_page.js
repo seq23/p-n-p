@@ -89,6 +89,8 @@ const FAQ = [
     'If rain or a storm is forecast for your date, we reschedule the rental free within 30 days. Every game also works indoors, so many hosts simply move the games inside, and Grab the Mic is a tabletop game made for an indoor party.'],
   ['Can we use the games indoors?',
     'Yes. Every game works indoors on flat floor space; the Giant Connect Four stands 4 ft tall. The inflatable movie screen is outdoor only and needs a plug within 50 ft.'],
+  ['Do you have a projector?',
+    "Yes, we can include one with the movie screen. Just ask when you book; it's one projector, so ask early."],
   ['How far ahead should I book?',
     'Two to three weeks ahead is safest for Saturdays and holiday weekends, because each item is limited to one or two units. Weekday and short-notice requests are fine to send; we confirm what is open for your date.'],
   ['Can I cancel?',
