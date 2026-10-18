@@ -167,11 +167,12 @@ export async function saveRequestBooking(db, key, b) {
 // booking one of them never changes the request's status.
 export const SECOND_KINDS = new Set(['porch_takedown', 'party_takedown', 'grazing_pickup', 'rental_return']);
 
-// A booking typed in by hand (no request).
+// A booking typed in by hand with no request: "Just a calendar note (no customer)" (calendar_note
+// = 1, migration 0012). A booking with a customer gets a phone request first (phone-requests.mjs).
 export async function createBooking(db, b) {
-  const row = await db.prepare(`INSERT INTO bookings (request_key, kind, date, time, customer_name, phone, email, place, items, edited_by_hand, name_norm, phone_digits)
-    VALUES (NULL, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 1, ?9, ?10) RETURNING id`)
-    .bind(b.kind, b.date, b.time, b.customer_name, b.phone, b.email || '', b.place, b.items, normName(b.customer_name), digitsOf(b.phone)).first();
+  const row = await db.prepare(`INSERT INTO bookings (request_key, kind, date, time, customer_name, phone, email, place, items, edited_by_hand, name_norm, phone_digits, calendar_note)
+    VALUES (NULL, ?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, 1, ?9, ?10, ?11) RETURNING id`)
+    .bind(b.kind, b.date, b.time, b.customer_name, b.phone, b.email || '', b.place, b.items, normName(b.customer_name), digitsOf(b.phone), b.calendar_note ? 1 : 0).first();
   return row.id;
 }
 

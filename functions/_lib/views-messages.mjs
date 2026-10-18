@@ -76,11 +76,11 @@ export function heldPane(holds, { now = Date.now() } = {}) {
 }
 
 // After "Mark deposit received": the big "Text them it's confirmed" button.
-export function confirmedPage({ rk, name, sms, emailed, texted, canEmail, flash, back }) {
+export function confirmedPage({ rk, name, sms, emailed, texted, canEmail, flash, back, phone = false }) {
   return layout('Deposit received', `${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}<h1>${esc(name || 'They')} ${name ? 'is' : 'are'} booked</h1>
     <section class="card" data-confirmed><p>Let them know it is confirmed.</p>
       ${twinButtons({ sms, rk, template: 'confirmation', textKey: 'conf.text', emailKey: 'conf.email', textLabel: "Text them it's confirmed", emailLabel: 'Email them', canEmail: canEmail && !emailed })}
-      ${emailed ? '<p class="money ok" data-confirm-emailed>Confirmation email sent ✓</p>' : (canEmail ? '' : '<p class="muted">No email on file, so no confirmation email.</p>')}
+      ${emailed ? '<p class="money ok" data-confirm-emailed>Confirmation email sent ✓</p>' : (phone ? '<p class="muted" data-phone-no-confirm>Phone booking: no confirmation email is sent. Text them if you want to.</p>' : (canEmail ? '' : '<p class="muted">No email on file, so no confirmation email.</p>'))}
       ${texted ? '<p class="money ok" data-confirm-texted>Confirmation sent ✓</p>' : ''}</section>
     <div class="actions">${act(`<a class="btn ghost" href="${esc(back || '/admin/')}"${tip('conf.back')}>Done</a>`, 'conf.back')}</div>${TAP_JS}`, { screen: 'confirmed', back: { href: back || '/admin/', label: 'Back' } });
 }

@@ -196,6 +196,34 @@ scheduling links).
   payment is removed or the total goes up.
 - Proof: `npm run validate:admin-edit` (in validate:admin).
 
+## Phone requests (owner-approved 18 Oct 2026, migration 0012)
+Valerie added a phone-call booking with "Add a booking" and it never reached Requests: a
+hand-added booking had `request_key` NULL and no request. Now (`functions/_lib/phone-requests.mjs`):
+- **Add a booking** (no request) asks **Which service?**: Porch · Party & decor · Grazing · Game
+  rentals (the four service colours, words shown), plus name, phone and email (optional). Saving
+  makes a request with `source = 'phone'` (migration 0012 rebuilt the `requests` CHECK to allow
+  it, every row and index kept) and books it with `saveRequestBooking`, so it is Scheduled and a
+  rental keeps its pickup + return pair. It lands on Requests as a normal card with a **From a
+  phone call** chip: steps, invoice, Edit, Not paid yet. History: "Added from a phone call by Valerie".
+- **Just a calendar note (no customer)** keeps the old request-less booking, marked
+  `bookings.calendar_note = 1` so the backfill never turns it into a request.
+- A phone request has **no ID/rules prompts**: "ID: not collected (phone booking)" with an
+  optional **Add ID photo** upload (`POST /admin/requests/id/upload`, same private bucket and EXIF
+  stripping as the site form, logged); Rules "Not asked (phone booking)". **No hold** (holds are
+  made only by the site form) and **no automatic confirmation email** (`autoConfirm` and the
+  Email-it twin refuse source 'phone'); a phone card never shows "Confirmation email sent". The
+  thank-you and the day-before reminders work as for any request with an email on file.
+- **Rental length from the booked days**: a rental card (and a new invoice's lines) with both a
+  pickup and a return day says "pickup Sun 18 Oct, back Tue 20 Oct (2 days)", never "for one day".
+- **Month on a phone**: under 700 px the month is a day-by-day list with full chips (bookings and
+  outlined Requested chips); the 7-column grid stays from 700 px up.
+- **Backfill**: `npm run admin:backfill-phone [-- --dry-run]` makes a phone request for every
+  request-less booking with a customer name (a rental pickup + return, or an install + its
+  takedown, become one request), and converts a request already added by hand as source 'site'
+  with "How it came in: Phone call" to 'phone', clearing the `confirm_emailed_at` that was set
+  only to stop the automatic email (history line; no email is sent). Idempotent; counts only.
+- Proof: `npm run validate:admin-phone` (in validate:admin).
+
 ## Calendar & Bookings, Put away, Void (migration 0004, owner-approved 18 Oct 2026)
 Built for Valerie on a phone: plain words, 48 px+ buttons, a Back link and a numbered 1-2-3 at
 the top of every screen, and a printable guide at `/admin/help`.

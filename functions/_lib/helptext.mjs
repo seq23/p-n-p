@@ -33,7 +33,7 @@ export const STEPS = {
   requests: ['See who\'s asking.', 'Send a quote or invoice.', 'Plan your day and get paid.'],
   calendar: ['See what\'s coming up.', 'Put a request on the calendar.', 'Plan your day.'],
   day: ['Read who is coming and what they need.', 'Tap Call to ring them.', 'Tap Change this booking if something moved.'],
-  booking: ['Pick what kind of booking it is.', 'Check the day, name and phone.', 'Tap Save booking.'],
+  booking: ['Pick the service (or Just a calendar note).', 'Check the day, name and phone.', 'Tap Save booking: a customer goes on Requests too.'],
   move: ['Pick the new day.', 'Check it is the right booking.', 'Tap Move it.'],
   signin: ['Type the password.', 'Tap Sign in.', 'You stay signed in for 30 days.'],
   archive: ['These are finished requests.', 'Tap Bring back if you need one again.', 'Nothing here is ever deleted.'],
@@ -89,6 +89,8 @@ export const HELP = {
   'card.printChecklist': H('card', 'Print checklist', 'Opens this customer\'s checklist, filled in so far, ready to print.', '', 'The paper version of the checklist, with their answers already on it.'),
   'card.archive': H('card', 'Done — put away', 'Takes this finished request off the list and keeps it under Put away.', 'Nothing is deleted. You can bring it back.', 'Shows only once the job is Finished (done and paid in full) or Void. The request moves to Put away. Nothing is deleted and the Google Sheet is not touched.'),
   'card.jobDone': H('card', 'Mark job done', 'Records that the porch, party or grazing job is over.', 'Then mark it paid in full when the money is in.', 'Rentals use Mark returned instead. The card then shows step 5, Job done.'),
+  'card.phoneChip': H('card', 'From a phone call', 'This request came by phone or text: you added it with Add a booking.', '', 'A phone request has no ID or rules step, no hold and no automatic confirmation email. The thank-you and the day-before reminder still go out when there is an email on file.'),
+  'card.idUpload': H('card', 'Add ID photo', 'Adds a photo of their ID to this request, if you get one later.', '', 'Optional on a phone booking. The photo is kept in private storage like the ones from the website form, and Delete this ID removes it.'),
   'card.edit': H('card', 'Edit', 'Opens one page where you can change anything on this request: bookings, done dates, invoice, payments, status and customer details.', '', 'Always on the card, at every step, also on Finished, Void and Put away requests. Nothing is sent to the customer.'),
   // Change anything on this request (/admin/requests/edit)
   'edit.saveBooking': H('edit', 'Save this booking', 'Saves the day, time, done tick and notes of this booking.', 'The calendar, Google Calendar and the reminder move with it.', 'A new day gets the day-before reminder again. The Bookings tab of the Google Sheet updates by itself.'),
@@ -233,7 +235,7 @@ export const HELP = {
   'rem.text': H('calendar', 'Text reminder', 'Opens Messages with a friendly reminder for this customer already typed in.', 'Check it, then tap Send in Messages.', 'Tapping it also marks the reminder as sent. Reminders only talk about the booking, as your terms allow.'),
   'rem.email': H('calendar', 'Email reminder', 'Opens your email app with the reminder typed in, for customers with no phone.', '', 'Only shows when there is no phone on file.'),
   'rem.mark': H('calendar', 'Mark reminded', 'Records that you reminded this customer, so the row says Reminder sent.', '', 'Use it if you reminded them some other way.'),
-  'cal.add': H('calendar', 'Add a booking', 'Adds a booking by hand, for jobs that came by phone or text.', 'For bookings that came by phone.', 'Bookings from invoices appear by themselves. Use this for everything else.'),
+  'cal.add': H('calendar', 'Add a booking', 'Adds a booking by hand, for jobs that came by phone or text: it also adds the customer to Requests.', 'For bookings that came by phone.', 'Pick the service, then the name and phone (email if you have it). Bookings from invoices appear by themselves. For a block with no customer, pick Just a calendar note.'),
   'cal.link': H('calendar', 'Link my Google Calendar', 'Shows how to put these bookings into your Google Calendar.', 'One time setup, on a computer.', 'Step-by-step instructions and a Copy link button.'),
   'day.call': H('calendar', 'Call', 'Calls this customer from your phone.', '', 'Big button on each booking for the day.'),
   'day.edit': H('calendar', 'Change this booking', 'Opens this booking so you can change the day, time or details.', '', 'Your changes stay even if the invoice is sent again.'),
@@ -253,6 +255,8 @@ export const HELP = {
   'ret.save': H('returns', 'Save: it is returned', 'Saves the check-in and marks the rental as returned.', '', 'If anything is missing or damaged the request reads Returned — check damage, with a reminder about the damage deposit. No money moves by itself.'),
   'ret.undo': H('returns', 'Undo returned', 'Puts the rental back to not returned. It asks you to be sure first.', '', 'The request gets back the status it had.'),
   'ret.undoYes': H('returns', 'Yes, undo returned', 'Undoes the check-in now.', '', ''),
+  'bk.service': H('calendar', 'Which service', 'Pick the service this booking is for: Porch, Party & decor, Grazing or Game rentals.', '', 'Saving adds the customer to Requests as a phone booking (with a From a phone call chip) and puts the booking on the calendar.'),
+  'bk.note': H('calendar', 'Just a calendar note (no customer)', 'A block on the calendar with no customer, such as a day off or a supply run.', '', 'It does not make a request and never reaches Requests.'),
   'bk.save': H('calendar', 'Save booking', 'Saves this booking on the calendar.', '', 'It shows on the admin Calendar at once, and in Google Calendar after Google refreshes.'),
 
   // Money

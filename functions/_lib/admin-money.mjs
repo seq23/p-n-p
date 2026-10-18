@@ -222,7 +222,7 @@ export async function sheetRows(env) {
   for (const p of data.payments) years.add(String(p.received_on).slice(0, 4));
   for (const b of all) years.add(String(b.date).slice(0, 4));
   const monthly = [...years].filter((y) => /^\d{4}$/.test(y)).sort().flatMap((y) => S.monthlyRows(data, y));
-  const { results: site } = await env.DB.prepare("SELECT * FROM requests WHERE source = 'site' ORDER BY submitted_at").all();
+  const { results: site } = await env.DB.prepare("SELECT * FROM requests WHERE source IN ('site', 'phone') ORDER BY submitted_at").all();
   const names = {};
   for (const r of site || []) if (r.referral_code) names[r.referral_code] = r.name;
   const siteRequests = (site || []).map((r) => S.siteRequestRow(r, { status: statuses[r.request_key] ? statuses[r.request_key].status : 'new', referrer: r.referred_by ? (names[r.referred_by] || r.referred_by) : '' }));

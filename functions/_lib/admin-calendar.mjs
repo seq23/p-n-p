@@ -17,6 +17,8 @@ import * as V from './views.mjs';
 import * as VC from './views-calendar.mjs';
 import * as VM2 from './views-messages.mjs';
 import { expireHolds, endingSoon, holdSettings, currentHolds } from './holds.mjs';
+import { choiceFrom, createPhoneRequest, NOTE_CHOICE } from './phone-requests.mjs';
+import { serviceOfKind } from './kinds.mjs';
 
 const decodeKey = (v) => { try { return fromB64urlText(v); } catch { return ''; } };
 const wantsJson = (request) => request.headers.get('X-Pnp-Fetch') === '1';
@@ -200,7 +202,10 @@ export async function newBookingPage(env, url) {
   }
   const returnDate = booking.date ? C.returnDateFor(booking.date, req ? req.durationAnswer : '') : '';
   const extras = await formExtras(env, booking.date, returnDate, key);
-  return htmlResponse(VC.bookingFormPage({ booking, action: '/admin/calendar/bookings', title, rk, isNew: true, returnDate, table: PRICE_TABLE, ignoreKey: key, ...extras }));
+  // No request: ask which service (a phone request on Save) or Just a calendar note.
+  const askService = !req;
+  const pre = serviceOfKind(booking.kind);
+  return htmlResponse(VC.bookingFormPage({ booking, action: '/admin/calendar/bookings', title, rk: req ? rk : '', isNew: true, returnDate, table: PRICE_TABLE, ignoreKey: key, askService, service: askService && pre !== 'other' ? pre : '', ...extras }));
 }
 
 function itemsFromForm(form, b) {
@@ -216,12 +221,22 @@ export async function createBookingRoute(env, request) {
   const form = await request.formData();
   const b = C.parseBookingForm(form);
   if (!b.date) return redirect(`/admin/calendar?e=${encodeURIComponent('Pick a day for the booking.')}`);
+  let key = form.get('r') ? decodeKey(form.get('r')) : '';
+  // No request yet (owner, 18 Oct 2026): a service + a customer makes a phone request, so the
+  // booking lands on Requests; "Just a calendar note (no customer)" stays request-less.
+  const choice = key ? null : choiceFrom(form, b.kind);
+  if (choice) { b.kind = choice.kind; b.calendar_note = choice.service === NOTE_CHOICE ? 1 : 0; }
   b.items = itemsFromForm(form, b);
-  const key = form.get('r') ? decodeKey(form.get('r')) : '';
   const ret = C.parseFormDate(form.get('return_date'));
   // Rentals are a pair: the return is always booked with the pickup (its TIME may be "not sure yet").
   if (b.kind === 'rental_pickup' && !(ret && ret > b.date)) {
     return redirect(`/admin/calendar?e=${encodeURIComponent('A game pickup needs its return day too: pick a return day after the pickup day.')}`);
+  }
+  const phone = Boolean(choice && choice.service !== NOTE_CHOICE);
+  if (phone && !b.customer_name) return redirect(`/admin/calendar?e=${encodeURIComponent('Type the customer name, or pick Just a calendar note.')}`);
+  if (phone) {
+    const planned = [{ ...b }, ...(b.kind === 'rental_pickup' ? [{ ...b, kind: 'rental_return', date: ret }] : [])];
+    key = await createPhoneRequest(env.DB, { service: choice.service, name: b.customer_name, phone: b.phone, email: b.email, bookings: planned });
   }
   let id;
   if (key) id = await C.saveRequestBooking(env.DB, key, b);
@@ -240,6 +255,7 @@ export async function createBookingRoute(env, request) {
     const req = requests.find((r) => r.key === key);
     if (req) await autoBookTakedown(env.DB, req);
   }
+  if (phone) return redirect(`/admin/?m=${encodeURIComponent('Saved ✓ On Requests as a phone booking, and on the calendar.')}#c-${b64urlText(key)}`);
   return redirect(`/admin/day/${b.date}?m=${encodeURIComponent(key ? 'Saved ✓ The request is marked Scheduled.' : 'Saved ✓')}`);
 }
 
