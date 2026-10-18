@@ -69,8 +69,6 @@ li { margin-bottom: 8px; }
 .footer-title { font-family: "Cormorant Garamond", serif; font-size: 1.45rem; margin-bottom: 10px; }
 .footer-list { display: grid; gap: 8px; color: var(--text-muted); }
 .legal { padding-top: 18px; border-top: 1px solid var(--border-soft); color: var(--text-muted); font-size: 0.94rem; }
-.legal-links { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; }
-.legal-links a { color: var(--text-muted); text-decoration: underline; text-underline-offset: 2px; }
 .cards-grid--four, .pricing-grid--four { grid-template-columns: repeat(4, 1fr); }
 @media (max-width: 1180px) { .cards-grid--four, .pricing-grid--four { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 980px) { .cards-grid, .pricing-grid, .steps, .footer-grid, .two-col-text, .content-grid { grid-template-columns: 1fr; } }

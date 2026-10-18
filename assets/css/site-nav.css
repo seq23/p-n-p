@@ -119,3 +119,8 @@ html.pnp-lock, html.pnp-lock body { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .pnp-header *, .pnp-header *::after { transition: none !important; }
 }
+
+/* Footer legal row (scripts/lib/site_chrome.js legal()): here, not in styles.css,
+   because the root and legal pages carry only inline styles plus this file. */
+.legal-links { display: flex; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; }
+.legal-links a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
