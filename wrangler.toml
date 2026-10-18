@@ -18,3 +18,14 @@ migrations_dir = "migrations"
 [[services]]
 binding = "MAILER"
 service = "pnp-mailer"
+
+# Receipts for expenses (docs/admin-console.md): private R2 bucket, no public URL; served only
+# through the signed-in /admin/money/expenses/<id>/receipt route.
+[[r2_buckets]]
+binding = "RECEIPTS"
+bucket_name = "pnp-receipts"
+
+# Workers AI reads receipts ($0 posture: capped at 25 a day, inside the free daily allocation;
+# functions/_lib/expenses.mjs). No other AI service ever sees a receipt.
+[ai]
+binding = "AI"

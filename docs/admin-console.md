@@ -105,6 +105,50 @@ void, scheduling and unscheduling, move + ICS, notes kept out of customer output
 (Memphis date boundary, sms: encoding, no double email), check-in, games out, search. It needs
 Node >= 22.13 (`node:sqlite`); CI runs Node 22.
 
+## Money, taxes, expenses and the Google Sheet (migration 0005, owner-approved 18 Oct 2026)
+- **Money tab** `/admin/money?month=YYYY-MM`: "Money received" (payments whose `received_on`,
+  a Memphis date, falls in the month), "Still owed for this month's jobs", "Jobs this month",
+  income by service (Rentals / Porch decorating / Party & decor / Grazing tables / Other, from
+  each invoice's lines through `kinds.mjs`), damage deposits held / refunded / kept, Expenses and
+  "Left after expenses" (a simple difference, not profit or tax). Every total opens the rows
+  behind it. A 12-month list with a year switcher. Pure sums in `functions/_lib/money.mjs`: a
+  payment covers charges first, the rest is a damage deposit held (never income); refunds and
+  deposits kept for damage are their own `payments.kind` rows; void invoices are never counted.
+- **Damage deposit** box on an invoice: "Refund the damage deposit" / "Keep some for damage"
+  (confirmations, amount, method). Records only; no money moves.
+- **Year-end summary for taxes** `/admin/money/year?year=`: Porch & Party / Kerseta LLC, money
+  received by month, service and payment method, refunds, deposits kept (income), deposits held
+  at year end (liability), jobs, expenses by category and month with the itemised list, every
+  invoice (number, date, customer, total, paid) and voided invoices apart. "Download PDF",
+  "Download spreadsheet (CSV)" (UTF-8 with BOM), "Email it to me" (PDF + CSV attached, to the
+  day-list email), "Write the Year tab in the Google Sheet", "Download all receipts (zip)". Footer
+  on all: "Prepared from Porch & Party's admin records for your tax preparer. This is a summary,
+  not tax advice." No tax is computed.
+- **Expenses**: "Add a receipt" (camera or files, several at once; photos shrink to 1600 px on the
+  phone; PDFs too) stores the original in the private R2 bucket `pnp-receipts` (binding
+  `RECEIPTS`, no public URL, served only by the signed-in `/admin/money/expenses/<id>/receipt`).
+  Workers AI (binding `AI`, `@cf/meta/llama-3.2-11b-vision-instruct`; PDFs go through
+  `AI.toMarkdown` first) reads vendor/date/total/tax/category as strict JSON, parsed defensively;
+  every receipt lands as "Needs checking" with low-confidence fields in amber ("Please check
+  this"); nothing counts until she taps Save. $0 posture: 25 reads a Memphis day (`ai_usage`),
+  well inside the free daily allocation; on failure or the cap the form opens empty with a plain
+  message. "Type it in instead" always works. Categories are editable in Settings.
+- **Google Sheet sync** (`functions/_lib/sheets-sync.mjs`): tabs "Bookings" (one row per booking,
+  upserted by Booking ID), "Monthly totals" (rewritten), "Expenses" (upserted by Expense ID) and
+  "Year YYYY" (on demand) in the request sheet, as gsc-bot with the spreadsheets scope. Every
+  range passes `rangeFor()`, which refuses any other tab ("Form Responses 1" is never touched).
+  After every admin change the sync runs in the background (`waitUntil`); a failure goes to
+  `sync_queue`, pages say "Google Sheet will catch up shortly" and retry, Settings has "Update the
+  Google Sheet now", and the pnp-mailer cron asks for a full resync daily through
+  `POST /api/sync/<settings.sync_token>` (outside the guard like the ICS feed: wrong token 404,
+  noindex, POST only; `validate:admin-noindex`). The sheet must be shared with
+  `gsc-bot@gsc-automation-493801.iam.gserviceaccount.com` as Editor.
+
+Proof: `npm run validate:admin-money` (Memphis month/year boundaries, deposits apart from income,
+void excluded, categories reconcile with the year, CSV/PDF, receipts never auto-saved, AI fallback
+and cap, receipts private, zip holds only the year's receipts, sheet sync upsert/idempotent/never
+another tab/retry queue, the cron hook).
+
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 The Google Form is rebuilt by hand; the admin prefill maps these exact strings
 (`formChoice` in `data/rentals/games.json`). `npm run validate:admin-prices` reads this list and
@@ -139,6 +183,7 @@ gone: pickup and return are at Mt. Moriah Station, time set by text or call afte
 | Routes | `functions/admin/[[path]].js`, `functions/api/admin/[[path]].js`, code in `functions/_lib/` |
 | Guard (auth, noindex, same-origin POST) | `functions/_lib/guard.mjs`, run by both `_middleware.js` |
 | D1 | `pnp-admin`, binding `DB`, schema in `migrations/`. Pages deploys do NOT apply migrations: after a merge that adds one, run `npm run admin:migrate` (additive migrations only) |
+| Receipts | R2 bucket `pnp-receipts` (binding `RECEIPTS`, private), Workers AI binding `AI` (wrangler.toml) |
 | Reminders cron | `workers/pnp-mailer` `scheduled` handler, crons 15:00 + 16:00 UTC gated to 10 AM Memphis, D1 binding `DB` |
 | Email | Cloudflare Email Service. Pages cannot hold `send_email`, so the private Worker `workers/pnp-mailer` holds it and Pages calls it through the `MAILER` service binding (`npm run mailer:deploy`) |
 | Secrets (Pages, production) | `PNP_ADMIN_PASSWORD` (bootstrap password), `PNP_ADMIN_SESSION_KEY` (cookie signing), `GOOGLE_SA_JSON` (service-account key) |

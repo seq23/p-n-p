@@ -121,7 +121,7 @@ ${kindCss()}
 
 export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false } = {}) {
   const nav = authed ? `<nav aria-label="Main">
-    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/archive"${tip('nav.archive')}>Put away</a>
+    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${tip('nav.money')}>Money</a><a href="/admin/archive"${tip('nav.archive')}>Put away</a>
     <a href="/admin/invoices"${tip('nav.invoices')}>Invoices</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>How to use this</a>
     <form method="post" action="/admin/logout" style="display:inline"><button type="submit"${tip('nav.signout')}>Sign out</button></form></nav>` : '';
   const backLink = back ? `<a class="back" href="${esc(back.href)}"${tip('nav.back')}>&larr; ${esc(back.label || 'Back')}</a>` : '';
@@ -224,7 +224,7 @@ function confirmStep({ key, yesKey, label, question, action, hidden, danger = fa
       <form method="post" action="${esc(action)}">${hidden}${extra}<button class="btn${danger ? ' danger' : ''}" type="submit"${tip(yesKey)}>${esc(LABEL[yesKey])}</button></form>
       <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('pay.no')}>No, go back</button></div></div></details>${hint(key)}</div>`;
 }
-const LABEL = { 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
+const LABEL = { 'dep.refundYes': 'Yes, record the refund', 'dep.keepYes': 'Yes, keep it for damage', 'exp.deleteYes': 'Yes, delete the expense', 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
   'day.deleteYes': 'Yes, delete it', 'set.newTokenYes': 'Yes, make a new link', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
 
 const hiddenInputs = (obj) => Object.entries(obj).map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(v)}">`).join('');
@@ -591,6 +591,7 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
   ${invoice.status === 'draft' ? preview : ''}
   ${main}
   ${payment}
+  ${depositBox(invoice, balance)}
   ${invoice.status !== 'draft' ? preview : ''}
   <details class="disclose"><summary${tip('iv.more')}>More options</summary>
     <div class="actions">
@@ -608,6 +609,21 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
   <script>${SHARE_JS}</script>`, { screen: 'invoice', back: { href: '/admin/invoices', label: 'Back to invoices' } });
 }
 
+// Damage deposit after the event: refund it, or keep some for damage. Own rows, never "owed".
+function depositBox(invoice, bal) {
+  if (!bal || bal.void || !bal.refundable) return '';
+  const collected = bal.refundable - bal.depositOwed;
+  const held = Math.max(0, collected - (bal.refunded || 0) - (bal.kept || 0));
+  const who = invoice.customer_name || 'the customer';
+  const amount = (id) => `<label for="${id}">Amount ($)</label><input id="${id}" name="amount" inputmode="decimal" value="${esc((held / 100).toFixed(2))}">${methodPicker()}`;
+  return `<section class="paybox" data-deposit-box><h3>Damage deposit</h3>
+    <p class="words">Damage deposit ${esc(money(bal.refundable))}, refundable. ${collected ? `You hold ${esc(money(held))}.` : 'Not collected yet.'}${bal.refunded ? ` Refunded ${esc(money(bal.refunded))}.` : ''}${bal.kept ? ` Kept for damage ${esc(money(bal.kept))}.` : ''}</p>
+    ${held > 0 ? `<div class="actions">
+      ${confirmStep({ key: 'dep.refund', yesKey: 'dep.refundYes', label: 'Refund the damage deposit', question: `Record a damage-deposit refund to ${who}? Send the money yourself first; this only records it.`, action: `/admin/invoices/${invoice.id}/deposit`, hidden: hiddenInputs({ kind: 'refund' }), extra: amount(`ra-${invoice.id}`) })}
+      ${confirmStep({ key: 'dep.keep', yesKey: 'dep.keepYes', label: 'Keep some for damage', question: `Keep part of ${who}'s damage deposit for damage? It counts as income on the Money tab.`, action: `/admin/invoices/${invoice.id}/deposit`, hidden: hiddenInputs({ kind: 'deposit_kept' }), extra: amount(`ka-${invoice.id}`) })}
+    </div>` : ''}</section>`;
+}
+
 // ---- How to use this (/admin/help): printable, every button from the one map --------------
 export function helpPage() {
   const tab = (name, screen, extra = '') => `<section class="card"><h2>${esc(name)}</h2><ol class="steps">${STEPS[screen].map((s) => `<li>${esc(s)}</li>`).join('')}</ol>${extra}</section>`;
@@ -615,6 +631,7 @@ export function helpPage() {
   <p class="noprint">${act(`<button type="button" class="btn ghost inline" onclick="window.print()"${tip('help.print')}>Print this page</button>`, 'help.print')}</p>
   ${tab('Requests', 'requests', '<p>Each request has a <strong>Payment</strong> box. Money buttons always ask "Are you sure?" first. When a job is over, tap <strong>Done — put away</strong>.</p>')}
   ${tab('Calendar', 'calendar', '<p>Bookings from invoices appear by themselves. A booking you make or change by hand keeps your date, even if the invoice is sent again.</p>')}
+  ${tab('Money', 'money', '<p>Tap any total to see the payments or jobs behind it. Damage deposits are never counted as income. Your Bookings tab in the request sheet updates by itself.</p>')}
   ${tab('Put away', 'archive')}
   ${tab('Invoice', 'invoice')}
   ${tab('Settings', 'settings')}
@@ -630,7 +647,7 @@ export function helpPage() {
   ${helpGlossary()}`, { screen: 'help', back: BACK_REQUESTS });
 }
 
-export function settingsPage({ settings, flash, error, hasQr }) {
+export function settingsPage({ settings, flash, error, hasQr, categories = [], pendingSync = 0 }) {
   return layout('Settings', `<h1>Settings</h1>
   ${flash ? `<div class="notice ok"><strong>${esc(flash)}</strong></div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
   <form class="card" method="post" action="/admin/settings" enctype="multipart/form-data">
@@ -659,6 +676,14 @@ export function settingsPage({ settings, flash, error, hasQr }) {
     <label for="dlp">My phone number for my day list</label><input id="dlp" name="day_list_phone" type="tel" value="${esc(settings.day_list_phone || '901-355-1518')}">
     <label for="dle">My email for my day list</label><input id="dle" name="day_list_email" type="email" value="${esc(settings.day_list_email || 'hello@porchandparty901.com')}">
     <div style="margin-top:12px">${act(`<button class="btn" type="submit"${tip('set.saveDayList')}>Save my day list details</button>`, 'set.saveDayList')}</div>
+  </form>
+  <section class="card"><h2>Google Sheet</h2>
+    <p>Your Bookings, Monthly totals and Expenses tabs in the request sheet update by themselves.${settings.sheet_synced_at ? ` Last updated ${esc(prettyDate(settings.sheet_synced_at.slice(0, 10)))}.` : ''}${pendingSync ? ' <strong>An update is waiting and will be tried again.</strong>' : ''}</p>
+    <form method="post" action="/admin/settings/sheet-sync">${act(`<button class="btn ghost" type="submit"${tip('set.sheetSync')}>Update the Google Sheet now</button>`, 'set.sheetSync')}</form>
+  </section>
+  <form class="card" method="post" action="/admin/settings/categories"><h2>Expense categories</h2>
+    <label for="cats">One per line</label><textarea id="cats" name="categories" rows="8">${esc(categories.join('\n'))}</textarea>
+    <div style="margin-top:12px">${act(`<button class="btn ghost" type="submit"${tip('set.categories')}>Save categories</button>`, 'set.categories')}</div>
   </form>
   <details class="disclose card" style="padding-top:0"><summary${tip('set.password')}>Change password</summary>
   <form method="post" action="/admin/settings/password">

@@ -21,7 +21,19 @@ async function sendOne(env, msg) {
 
 export async function runReminders(env, now = new Date()) {
   if (chicagoHour(now) !== 10) return { skipped: `not 10 AM in Memphis (hour ${chicagoHour(now)})` };
-  return sendEmailReminders(env.DB, (m) => sendOne(env, m), now, FROM.email);
+  const reminders = await sendEmailReminders(env.DB, (m) => sendOne(env, m), now, FROM.email);
+  return { reminders, sheet: await askForSheetResync(env) };
+}
+
+// Daily full Google Sheet resync: the site holds the Google key, so the cron just asks it,
+// with the token both read from the same D1 settings table (migration 0005).
+async function askForSheetResync(env, site = 'https://porchandparty901.com') {
+  const row = await env.DB.prepare("SELECT value FROM settings WHERE key = 'sync_token'").first();
+  if (!row || !/^[a-f0-9]{64}$/.test(row.value)) return { skipped: 'no sync_token in settings' };
+  try {
+    const res = await fetch(`${site}/api/sync/${row.value}`, { method: 'POST' });
+    return { status: res.status, body: (await res.text()).slice(0, 300) };
+  } catch (e) { return { error: String(e && e.message ? e.message : e) }; }
 }
 
 export default {

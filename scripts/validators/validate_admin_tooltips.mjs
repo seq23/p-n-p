@@ -42,6 +42,10 @@ await s.post(`/admin/invoices/${v.id}/status`, { action: 'void' });
 const paidInv = await s.invoiceFor(reqA, { go: 'send' });
 await s.post(`/admin/invoices/${paidInv.id}/status`, { action: 'paid', method: 'cash' });
 const draftWithEmail = await s.invoiceFor(reqA, { go: 'save' });
+const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+const up1 = await s.upload(PNG, 'image/jpeg');
+const up2 = await s.upload(PNG, 'image/jpeg');
+await s.post(`/admin/money/expenses/${up2.json.id}`, { vendor: 'Party City', date: '2026-10-12', total: '42.17', tax: '3.17', category: 'Supplies & decor', payment_method: 'card', note: '' });
 
 const screens = [
   ['/admin', { auth: false, home: true }],
@@ -59,6 +63,9 @@ const screens = [
   [`/admin/checklist/online?r=${s.rk(reqA.key)}`], ['/admin/checklist', { print: true }], [`/admin/checklist?r=${s.rk(reqA.key)}`, { print: true }],
   ['/admin/search'], ['/admin/search?q=renter'], ['/admin/search?q=zzzz'],
   ['/admin/nothing-here'],
+  ['/admin/money'], ['/admin/money?month=2026-10'], ['/admin/money/year?year=2026'], ['/admin/money/expenses/new'],
+  [`/admin/money/expenses/${up1.json.id}`], [`/admin/money/expenses/${up2.json.id}`],
+  ...['received', 'owed', 'jobs', 'expenses', 'deposits', 'category:rentals'].map((w) => [`/admin/money/detail?month=2026-10&what=${w}`]),
 ];
 // Archive one so Put away has rows (after the dashboard renders above are collected below).
 const pages = [...early];

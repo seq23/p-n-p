@@ -22,6 +22,10 @@ export async function session({ db = makeDb() } = {}) {
     const r = await call(routed, env, 'POST', p, { form, headers: { ...(auth ? { Cookie: cookie } : {}), ...headers } });
     return { status: r.status, location: r.headers.get('Location') || '', text: await r.text() };
   };
+  const upload = async (bytes, type) => {
+    const r = await call(routed, env, 'POST', '/api/admin/receipts', { raw: bytes, headers: { Cookie: cookie, 'Content-Type': type } });
+    return { status: r.status, json: await r.json().catch(() => ({})) };
+  };
   const requests = await loadRequests(env);
   const rk = (key) => util.b64urlText(key);
   // Create an invoice from a fixture request the way the editor posts it.
@@ -39,5 +43,5 @@ export async function session({ db = makeDb() } = {}) {
   }
   const one = async (sql, ...args) => db.prepare(sql).bind(...args).first();
   const all = async (sql, ...args) => (await db.prepare(sql).bind(...args).all()).results;
-  return { env, db, A, get, post, requests, rk, invoiceFor, one, all, PRICE_TABLE, util, cookie };
+  return { env, db, A, get, post, upload, routed, requests, rk, invoiceFor, one, all, PRICE_TABLE, util, cookie };
 }
