@@ -121,7 +121,7 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   America/Chicago from the pnp-mailer hourly cron `0 * * * *` (the run whose Memphis weekday is
   Monday and hour is 7: 12:00 UTC in daylight time, 13:00 UTC in standard time, so daylight saving
   needs no change), to the Settings day-list email. Last week (new requests by service, jobs done,
-  money received, expenses), This week (bookings by date, games out per day, still to collect),
+  money received, expenses), Next 14 days (bookings by date, games out per day, still to collect),
   Needs you (holds ending soon, overdue returns, damage to decide, takedowns not decided, requests
   with no reply after 2 days, IDs ready to delete, receipts needing checking, not paid yet). First
   name + last initial only; every line links into /admin. Idempotent per week (claims
