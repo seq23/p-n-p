@@ -76,12 +76,6 @@ async function underCap(db) {
   return true;
 }
 
-function bytesToB64(bytes) {
-  let s = '';
-  for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
-  return btoa(s);
-}
-
 async function runModel(ai, input) {
   try { return await ai.run(VISION_MODEL, input); } catch (e) {
     // The Llama 3.2 vision licence is accepted once per account by sending "agree".
@@ -107,9 +101,19 @@ export async function extractReceipt(env, { bytes, type, name = 'receipt' }, cat
       if (!body.trim()) return { ...empty, message: 'This PDF has no text the reader can see. Please type the details in.' };
       out = await runModel(env.AI, { messages: [{ role: 'user', content: `${PROMPT(categories)}\n\nReceipt text:\n${body}` }], max_tokens: 700 });
     } else {
-      out = await runModel(env.AI, { messages: [{ role: 'user', content: PROMPT(categories) }], image: `data:${type};base64,${bytesToB64(bytes)}`, max_tokens: 700 });
+      // The vision model wants the image as a byte array next to a system + user message; an
+      // older input shape (prompt + image) is tried if the account's model version refuses it.
+      const image = [...bytes];
+      try {
+        out = await runModel(env.AI, { messages: [{ role: 'system', content: 'You read receipts and answer only with JSON.' }, { role: 'user', content: PROMPT(categories) }], image, max_tokens: 700 });
+      } catch (e) {
+        if (!/message|input|image/i.test(String(e && e.message ? e.message : e))) throw e;
+        out = await runModel(env.AI, { prompt: PROMPT(categories), image, max_tokens: 700 });
+      }
     }
-    const raw = typeof out === 'string' ? out : (out && (out.response || out.result || JSON.stringify(out))) || '';
+    // Workers AI hands back { response: "text" }, or { response: {...} } when the text was JSON.
+    const body = typeof out === 'string' ? out : (out && (out.response !== undefined ? out.response : (out.result !== undefined ? out.result : out)));
+    const raw = typeof body === 'string' ? body : JSON.stringify(body || '');
     const extraction = parseExtraction(raw, categories);
     return { extraction, raw: String(raw).slice(0, 8000), message: extraction.ok ? '' : 'The reader could not make out this receipt. Please type the details in.' };
   } catch (e) {

@@ -103,6 +103,14 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   await s.post(`/admin/money/expenses/${up.json.id}`, { vendor: 'Party City', date: '2026-10-12', total: '42.17', tax: '3.17', category: 'Supplies & decor', payment_method: 'card', note: '' });
   must((await s.one('SELECT status FROM expenses WHERE id = ?1', up.json.id)).status === 'saved', 'Save does not save');
   must((await s.get('/admin/money?month=2026-10')).text.includes('Expenses: $42.17'), 'a saved expense is not in the month');
+  // Workers AI answers { response: {...} } (an object) when the model's text was JSON.
+  s.env.aiReply.value = { vendor: 'Sample Party Supply Co', date: '2026-10-12', total: 30.44, tax: 2.7, suggested_category: 'Supplies & decor', confidence: { vendor: 1, date: 1, total: 1, tax: 1 } };
+  const obj = await s.upload(PNG, 'image/jpeg');
+  const objRow = await s.one('SELECT vendor, total_cents, tax_cents, status FROM expenses WHERE id = ?1', obj.json.id);
+  must(obj.json.read && objRow.vendor === 'Sample Party Supply Co' && objRow.total_cents === 3044 && objRow.tax_cents === 270 && objRow.status === 'needs_check', `an object-shaped AI answer is not read: ${JSON.stringify(objRow)}`);
+  const lastCall = s.env.aiCalls[s.env.aiCalls.length - 1].input;
+  must(Array.isArray(lastCall.image) && lastCall.messages && lastCall.messages.some((m) => m.role === 'user'), 'the vision call does not send the image as bytes with a user message');
+  await s.post(`/admin/money/expenses/${obj.json.id}/delete`, {});
   // AI garbage / failure / cap -> empty form with a plain message, nothing breaks.
   s.env.aiReply.value = 'no idea';
   const g = await s.upload(PNG, 'image/jpeg');
