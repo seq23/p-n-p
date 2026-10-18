@@ -10,6 +10,8 @@
 import { rowsToRequests } from './sheet.mjs';
 import { normName, digitsOf } from './calendar.mjs';
 import fixture from '../../data/admin/fixture-request.json';
+import porchPackages from '../../data/offers/porch_packages.json';
+import PP from '../../scripts/lib/porch_packages.js';
 
 // The four services in the canonical order of scripts/lib/brand.js SERVICES.
 export const SERVICE_KEYS = ['porch', 'party', 'grazing', 'rentals'];
@@ -64,7 +66,7 @@ export function fromRow(row) {
   const get = (re) => { const a = answers.find((x) => re.test(x.label)); return a ? a.value : ''; };
   const group = (g) => answers.filter((x) => x.group === g && x.value).map((x) => ({ label: x.label, value: x.value }));
   const services = common.services;
-  return {
+  const out = {
     ...common,
     key: row.request_key,
     timestamp: row.submitted_at,
@@ -78,8 +80,18 @@ export function fromRow(row) {
     takedownAnswer: get(/take (it )?down/i),
     wantsRentals: services.includes('rentals'),
     wantsDecor: services.some((k) => k !== 'rentals'),
+    // Porch packages (18 Oct 2026): the season, the "How much decor are you picturing?"
+    // answer, "Book both seasons" and the unpriced add-ons, read by the card line and the
+    // invoice prefill (scripts/lib/porch_packages.js).
+    porchSeason: services.includes('porch') ? get(/^what season or occasion/i) : '',
+    porchDecor: services.includes('porch') ? get(/^how much decor/i) : '',
+    porchBoth: services.includes('porch') && /^yes/i.test(get(/^book both seasons/i)),
+    porchAddOns: services.includes('porch') ? get(/^add-ons/i) : '',
     rentals: group('rentals'), decor: group('decor'), other: group('other'),
   };
+  // "Fall · picturing a full porch (Classic, from $N)" for the card.
+  out.porchLine = out.porchSeason ? PP.cardLine(porchPackages, { season: out.porchSeason, decor: out.porchDecor, both: out.porchBoth }) : '';
+  return out;
 }
 
 export async function loadRequestsFromDb(db) {

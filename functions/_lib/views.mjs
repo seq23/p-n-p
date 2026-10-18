@@ -7,6 +7,7 @@ import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABE
 import { tip, hint, stepsBar, helpGlossary, STEPS } from './helptext.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
+import PP from '../../scripts/lib/porch_packages.js';
 
 const CSS = `
 :root{--cream:#faf7f2;--ink:#3b302a;--accent:#b85f40;--line:#e3d8cb;--muted:#5f5148;--card:#fff;--ok:#3f6b3a;--warn:#8a5212}
@@ -199,7 +200,9 @@ export function wantSummary(r) {
   if (r.wantsDecor) {
     const when = answerOf(r, /event date/i);
     const take = /^\s*yes/i.test(r.takedownAnswer) ? ', with takedown' : '';
-    parts.push(`Decor: ${r.eventType || 'setup'}${when ? `, ${when}` : ''}${take}`);
+    // A site porch request reads as its package: "Porch: Fall · picturing a full porch (Classic, from $N)".
+    if (r.porchLine) parts.push(`Porch: ${r.porchLine}${when ? `, ${when}` : ''}${take}${r.porchAddOns ? `. Add-ons: ${r.porchAddOns}` : ''}`);
+    if (!r.porchLine || (r.services || []).some((k) => k === 'party' || k === 'grazing')) parts.push(`Decor: ${r.porchLine ? 'party or grazing setup' : (r.eventType || 'setup')}${when ? `, ${when}` : ''}${r.porchLine ? '' : take}`);
   }
   if (!parts.length && r.need) parts.push(r.need);
   return parts;
@@ -292,7 +295,17 @@ function subnav() {
     ${act(`<a class="btn ghost" href="/admin/?fresh=1"${tip('sub.refresh')}>Check for new requests now</a>`, 'sub.refresh')}
     ${act(`<a class="btn ghost" href="/admin/day/today"${tip('sub.today')}>Today's list</a>`, 'sub.today')}
     ${act(`<a class="btn ghost" href="/admin/search"${tip('sub.find')}>Find a customer</a>`, 'sub.find')}
+    ${act(`<a class="btn ghost" href="/admin/packages"${tip('sub.packages')}>Porch packages</a>`, 'sub.packages')}
   </div>`;
+}
+
+// The Porch packages reference (owner, 18 Oct 2026): the SAME grid the website shows
+// (scripts/lib/porch_packages.js gridHtml, from data/offers/porch_packages.json), without the
+// customer "Request this package" links.
+export function porchPackagesPage(pk) {
+  return layout('Porch packages', `<h1>Porch packages</h1>
+    <p class="hint">Starting prices per season. A porch invoice starts at the package the customer picked; change it after the walk-through.</p>
+    <div class="card"><style>${PP.GRID_CSS}</style>${PP.gridHtml(pk)}</div>`, { screen: 'packages', back: BACK_REQUESTS });
 }
 
 // "Sun 26 Oct, 3:00 PM" (Memphis) for a D1 UTC datetime.
@@ -583,6 +596,7 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
       <div data-lines>${lines.map(lineEditor).join('')}</div>
       <template id="line-tpl">${lineEditor(blank)}</template>
       <button type="button" class="btn ghost" id="add-line"${tip('ed.addLine')}>Add a line</button>
+      <p style="margin:10px 0 0"><a href="/admin/packages" target="_blank" rel="noopener"${tip('ed.packages')}>See the porch packages</a></p>
       <label for="nt">Message to the customer (optional)</label><textarea id="nt" name="notes">${esc(invoice.notes)}</textarea>
       <div style="margin-top:12px"><button class="btn ghost" type="submit" name="go" value="save"${tip('ed.saveOnly')}>Save without sending</button></div>
     </details>

@@ -12,6 +12,7 @@
 // EXIF), and rentals show live availability and the exact total.
 import { esc } from './util.mjs';
 import { prefillLines } from './pricing.mjs';
+import PP from '../../scripts/lib/porch_packages.js';
 import { returnDateFor, isISODate, weekday } from './calendar.mjs';
 
 export const RULES_VERSION = '2026-10-18';
@@ -43,15 +44,28 @@ export const TAKEDOWN_PLAN = { yes: 'scheduled', no: 'customer_handles', not_sur
 export const HEARD = ['Facebook', 'Google', 'Instagram', 'Friend or family', 'Saw your work', 'Other'];
 export const DURATIONS = [['day', 'One day (24 hours)'], ['weekend', 'Weekend (Friday pickup, Monday return)']];
 
+// The porch path (owner, 18 Oct 2026; data/offers/porch_packages.json): the season, then
+// "How much decor are you picturing?" with the package names and NO tier prices (only the
+// from-price and range per season, the final-quote line and a "See examples and prices"
+// link to the calculator), "Book both seasons", the unpriced add-ons and notes.
+export function porchQuestions(pk, td) {
+  const seasons = pk.seasons.map((x) => x.formChoice);
+  const decorHelp = `<span class="rq-range">${PP.formRangeLines(pk).map((l) => esc(l)).join('<br>')}</span><br>${esc(pk.finalQuoteLine)} <a href="${esc(pk.form.examplesHref)}" target="_blank" rel="noopener" data-porch-examples>${esc(pk.form.examplesLink)}</a>`;
+  return [
+    { name: 'porch_season', label: 'What season or occasion?', type: 'radio', required: true, group: 'decor', choices: [...seasons, 'Spring / Easter', 'Birthday or special moment', 'Other'] },
+    { name: 'porch_decor', label: pk.form.question, type: 'radio', group: 'decor', helpHtml: decorHelp, choices: PP.decorChoices(pk) },
+    { name: 'porch_both', label: pk.bundle.checkbox, type: 'check', group: 'decor', help: pk.form.bothSeasonsHelp },
+    { name: 'porch_addons', label: 'Add-ons', type: 'checks', group: 'decor', help: 'Want more? Tick anything you would like us to add. We price add-ons with your quote.', choices: pk.addOns.formItems },
+    { name: 'porch_takedown', label: 'Want us to take it down afterwards?', type: 'radio', group: 'decor', choices: TAKEDOWN(td) },
+    { name: 'porch_notes', label: 'Notes about your porch or the look you want', type: 'textarea', group: 'decor', help: 'Steps, columns, colors, a link to a photo. Optional.' },
+  ];
+}
+
 // Every question, by section. group decides where the admin card shows the answer.
 export function questions(offers, table) {
   const td = offers.addOns && offers.addOns.takedown ? offers.addOns.takedown.fromPrice : 75;
   return {
-    porch: [
-      { name: 'porch_season', label: 'What season or occasion?', type: 'radio', required: true, group: 'decor', choices: ['Fall / Halloween', 'Christmas & holidays', 'Spring / Easter', 'Birthday or special moment', 'Other'] },
-      { name: 'porch_takedown', label: 'Want us to take it down afterwards?', type: 'radio', group: 'decor', choices: TAKEDOWN(td) },
-      { name: 'porch_budget', label: 'Budget', type: 'radio', group: 'decor', choices: ['$350–$500', '$500–$800', '$800+', 'Not sure yet'] },
-    ],
+    porch: porchQuestions(table.porchPackages, td),
     party: [
       { name: 'party_event', label: "What's the event type?", type: 'radio', required: true, group: 'decor', choices: EVENT_TYPES },
       { name: 'party_where', label: 'Where is it?', type: 'radio', required: true, group: 'decor', choices: ['Hotel room', 'Home', 'Event space or venue', 'Backyard or outdoors', 'Not sure yet'] },
@@ -139,7 +153,14 @@ export function validateSubmission(fields, { offers, table, today, file = null }
   const ask = (q) => {
     const raw = fields[q.name];
     if (q.type === 'games') return;
+    if (q.type === 'checks') {
+      const picked = (Array.isArray(raw) ? raw : [raw]).filter(Boolean).map(String).filter((v) => q.choices.includes(v));
+      const value = picked.join(', ');
+      if (value && q.group) answers.push({ group: q.group, label: q.label, value });
+      return value;
+    }
     let value = String(raw == null ? '' : raw).trim().slice(0, 2000);
+    if (q.type === 'check') value = value === 'yes' ? 'Yes' : '';
     if (q.type === 'radio') {
       const v = choiceValue(q, value);
       if (v === null) { errors[q.name] = 'Please pick one of the choices.'; return; }
@@ -187,13 +208,13 @@ function fieldError(name, errors) {
   return errors[name] ? `<p class="rq-error" id="err-${esc(name)}">${esc(errors[name])}</p>` : '';
 }
 function describedBy(name, q, errors) {
-  const ids = [q.help ? `help-${name}` : '', errors[name] ? `err-${name}` : ''].filter(Boolean);
+  const ids = [q.help || q.helpHtml ? `help-${name}` : '', errors[name] ? `err-${name}` : ''].filter(Boolean);
   return ids.length ? ` aria-describedby="${ids.join(' ')}"` : '';
 }
 
 function renderQuestion(q, values, errors) {
   const v = values[q.name];
-  const help = q.help ? `<p class="rq-help" id="help-${esc(q.name)}">${esc(q.help)}</p>` : '';
+  const help = q.helpHtml ? `<p class="rq-help" id="help-${esc(q.name)}">${q.helpHtml}</p>` : q.help ? `<p class="rq-help" id="help-${esc(q.name)}">${esc(q.help)}</p>` : '';
   const invalid = errors[q.name] ? ' aria-invalid="true"' : '';
   const opt = q.required ? '' : ' <span class="rq-opt">(optional)</span>';
   if (q.type === 'radio') {
@@ -202,6 +223,14 @@ function renderQuestion(q, values, errors) {
       return `<label class="rq-choice"><input type="radio" name="${esc(q.name)}" value="${esc(val)}"${String(v) === String(val) ? ' checked' : ''}${q.required ? ' required' : ''}> <span>${esc(label)}</span></label>`;
     }).join('');
     return `<fieldset class="rq-q${errors[q.name] ? ' rq-bad' : ''}" id="q-${esc(q.name)}" data-q="${esc(q.name)}"${describedBy(q.name, q, errors)}><legend>${esc(q.label)}${q.required ? req : opt}</legend>${help}${fieldError(q.name, errors)}${radios}</fieldset>`;
+  }
+  if (q.type === 'check') {
+    return `<div class="rq-q" id="q-${esc(q.name)}" data-q="${esc(q.name)}"><label class="rq-choice"><input type="checkbox" name="${esc(q.name)}" value="yes"${v === 'yes' ? ' checked' : ''}${describedBy(q.name, q, errors)}> <span><strong>${esc(q.label)}</strong></span></label>${help}</div>`;
+  }
+  if (q.type === 'checks') {
+    const picked = Array.isArray(v) ? v : (v ? [v] : []);
+    const boxes = q.choices.map((c) => `<label class="rq-choice"><input type="checkbox" name="${esc(q.name)}" value="${esc(c)}"${picked.includes(c) ? ' checked' : ''}> <span>${esc(c)}</span></label>`).join('');
+    return `<fieldset class="rq-q" id="q-${esc(q.name)}" data-q="${esc(q.name)}"${describedBy(q.name, q, errors)}><legend>${esc(q.label)}${opt}</legend>${help}${boxes}</fieldset>`;
   }
   const id = `f-${q.name}`;
   const common = `id="${esc(id)}" name="${esc(q.name)}"${q.required ? ' required' : ''}${q.autocomplete ? ` autocomplete="${esc(q.autocomplete)}"` : ''}${invalid}${describedBy(q.name, q, errors)}`;
@@ -264,7 +293,7 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
   <style>${FORM_CSS}</style><script>${FORM_JS}</script><!--/request-form-->`;
 }
 
-const FORM_CSS = `.rq-wrap{max-width:680px;margin:0 auto}.rq-form{display:block}.rq-section{background:#fff;border:1px solid #e8dfd4;border-radius:16px;padding:18px 16px;margin:16px 0}
+const FORM_CSS = `.rq-range{font-weight:600;color:#3b302a}.rq-wrap{max-width:680px;margin:0 auto}.rq-form{display:block}.rq-section{background:#fff;border:1px solid #e8dfd4;border-radius:16px;padding:18px 16px;margin:16px 0}
 .rq-section h2{font-size:1.5rem;margin:0 0 8px}.rq-for{font-size:.95rem;font-weight:400;color:#6b5c52}.rq-q{border:0;margin:0 0 18px;padding:0;min-width:0}
 .rq-q legend,.rq-q>label{display:block;font-weight:600;font-size:1.05rem;margin-bottom:6px;padding:0}.rq-req{color:#a8442b;margin-left:3px}.rq-opt{font-weight:400;color:#6b5c52;font-size:.95rem}
 .rq-help{margin:2px 0 8px;color:#5f5148;font-size:.95rem}.rq-note{font-weight:400;color:#5f5148}.rq-choice{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:8px 10px;border:1px solid #e8dfd4;border-radius:10px;margin:0 0 8px;cursor:pointer;font-size:1rem;line-height:1.35}

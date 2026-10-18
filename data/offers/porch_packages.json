@@ -1,0 +1,135 @@
+{
+  "_why": "THE one source of the porch packages (owner-approved 18 Oct 2026; spec ~/porch-and-party/porch-packages.md, read to the end). Every surface reads this file through scripts/lib/porch_packages.js: the FAQ Price my porch calculator, the full grid + Offer schema on the porch service pages, /pricing and the porch articles (scripts/install_porch_packages.js), the /request porch question (no tier prices there, only the from-price and range lines), the admin card line, the invoice prefill and the admin Porch packages reference grid. A price typed anywhere else fails npm run validate:porch-packages.",
+  "currency": "USD",
+  "tierOrder": [
+    "stoop",
+    "classic",
+    "grand",
+    "showstopper"
+  ],
+  "tiers": {
+    "stoop": {
+      "name": "Stoop",
+      "picturing": "a simple touch",
+      "formAnswer": "A simple touch: a few pumpkins or holiday greenery + a door accent (our Stoop package)",
+      "sizeHint": "Small stoop"
+    },
+    "classic": {
+      "name": "Classic",
+      "picturing": "a full porch",
+      "formAnswer": "A full porch (our Classic package)",
+      "sizeHint": "Standard porch"
+    },
+    "grand": {
+      "name": "Grand",
+      "picturing": "porch and steps",
+      "formAnswer": "Porch and steps (our Grand package)",
+      "sizeHint": "Large porch or steps"
+    },
+    "showstopper": {
+      "name": "Showstopper",
+      "picturing": "the works: porch, steps and walkway",
+      "formAnswer": "The works: porch, steps and walkway (our Showstopper package)",
+      "sizeHint": ""
+    }
+  },
+  "seasons": [
+    {
+      "key": "fall",
+      "name": "Fall / Halloween",
+      "short": "Fall",
+      "covers": "Fall, Halloween and Thanksgiving",
+      "formChoice": "Fall / Halloween",
+      "rangeNoun": "fall porches",
+      "tiers": {
+        "stoop": {
+          "from": 350,
+          "includes": "8–10 pumpkins and gourds, door accent."
+        },
+        "classic": {
+          "from": 550,
+          "includes": "A fuller porch display: more pumpkins and gourds in mixed sizes, door accent, layered height."
+        },
+        "grand": {
+          "from": 750,
+          "includes": "A large display across the porch and steps with a statement piece."
+        },
+        "showstopper": {
+          "from": 1200,
+          "includes": "Porch, steps and walkway, fully layered, our most dramatic look."
+        }
+      },
+      "customLine": "Every porch is a custom design. We add accents like mums, hay, cornstalks, lanterns, wreaths and lighting to fit your porch and your style.",
+      "image": "/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg",
+      "imageAlt": "A Memphis-area front porch decorated for fall with pumpkins and layered seasonal styling"
+    },
+    {
+      "key": "christmas",
+      "name": "Winter / Christmas",
+      "short": "Christmas",
+      "covers": "Christmas and the winter holidays",
+      "formChoice": "Christmas & holidays",
+      "rangeNoun": "Christmas porches",
+      "tiers": {
+        "stoop": {
+          "from": 450,
+          "includes": "Wreath and door accent."
+        },
+        "classic": {
+          "from": 750,
+          "includes": "Wreath, door garland and a pair of porch accents."
+        },
+        "grand": {
+          "from": 1050,
+          "includes": "Garland across the door and railings, wreaths, lit accents, steps styled."
+        },
+        "showstopper": {
+          "from": 1600,
+          "includes": "The full porch: lit garland everywhere, windows, statement pieces."
+        }
+      },
+      "customLine": "Every porch is a custom design. We add accents like garland, wreaths, lit trees, lanterns, ribbon and poinsettias to fit your porch and your style.",
+      "image": "/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg",
+      "imageAlt": "A Collierville front door decorated for Christmas with a wreath and garland"
+    }
+  ],
+  "addOns": {
+    "line": "Want more? Ask about add-ons: takedown, extra pumpkins or accents, a Thanksgiving refresh, lighting, matching windows or a lamp post.",
+    "formItems": [
+      "Extra pumpkins or accents",
+      "A Thanksgiving refresh",
+      "Lighting",
+      "Matching windows",
+      "A lamp post"
+    ],
+    "priced": false
+  },
+  "bundle": {
+    "percentOff": 10,
+    "appliesTo": "christmas",
+    "line": "Book fall and Christmas together and save 10% on your Christmas package.",
+    "checkbox": "Book both seasons",
+    "invoiceLine": "-10% fall + Christmas bundle"
+  },
+  "estimateLine": "Rough estimate; final price after a quick look at your porch.",
+  "finalQuoteLine": "Your final quote depends on the design you want, your porch size and how much decor. We'll confirm it after a quick look.",
+  "form": {
+    "question": "How much decor are you picturing?",
+    "notSure": "Not sure yet, help me decide",
+    "examplesLink": "See examples and prices",
+    "examplesHref": "/faq/#porch-picker",
+    "bothSeasonsHelp": "Book fall and Christmas together and save 10% on your Christmas package."
+  },
+  "sizeHint": "Not sure which one? A small stoop is usually our Stoop package, a standard porch our Classic, and a large porch or one with steps our Grand.",
+  "pages": [
+    "services/porch-decorating.html",
+    "services/fall-porch-decorating.html",
+    "services/christmas-porch-decorating.html",
+    "services/small-porch-decorating.html",
+    "services/front-door-styling.html",
+    "pricing.html",
+    "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html"
+  ],
+  "pagesWhy": "Every page that carries the full porch package grid + Offer schema (scripts/install_porch_packages.js stamps it; validate:porch-packages checks each one). New porch articles add their path here.",
+  "provenance": "Owner, 18 Oct 2026: FINAL prices fall 350/550/750/1,200 and Christmas 450/750/1,050/1,600, seasonal, shown as from-prices. Full grid on website pages and articles (corrected ruling); the request form carries no tier prices, only the from-price + range lines; add-ons named, never priced; 10% off the Christmas package when fall and Christmas are booked together. Replaces the 17 Oct small stoop / standard porch / large porch tiers ($350/$600/$800)."
+}

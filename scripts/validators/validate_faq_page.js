@@ -13,7 +13,13 @@
  *   - every dollar amount on the page is a price in services.json (tiers,
  *     travel fee, starting prices, takedown, food per head) or games.json
  *     (rates, deposit, bundles); a typed-in price fails here;
- *   - the porch picker shows the three tiers with their pictures and prices,
+ *   - the Price my porch calculator (#porch-picker) is exactly
+ *     scripts/lib/porch_packages.js calculatorHtml(data/offers/porch_packages.json):
+ *     a season toggle with both seasons, all four packages per season at
+ *     their from-prices, the size hint, the custom-design, add-ons, bundle
+ *     and rough-estimate lines and a "Request this package" link per tier and
+ *     season preselecting both on /request (owner, 2026-10-18; replaced the
+ *     three porch-size pictures);
  *     the grazing estimator carries the four tiers + per-head range as its
  *     data-config, and the food line says it is a separate rough estimate;
  *   - the travel answer names every city in areas.json and the $75 fee;
@@ -43,6 +49,8 @@ const ROOT = path.resolve(__dirname, '../..');
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const games = require(path.join(ROOT, 'data/rentals/games.json'));
+const porchPackages = require(path.join(ROOT, 'data/offers/porch_packages.json'));
+const PP = require(path.join(ROOT, 'scripts/lib/porch_packages.js'));
 const areas = require(path.join(ROOT, 'data/service_areas/areas.json'));
 const { FAQ: RENTALS_FAQ } = require(path.join(ROOT, 'scripts/generators/build_rentals_page.js'));
 
@@ -57,6 +65,7 @@ function allowedPrices() {
   const n = new Set();
   const add = (v) => { if (v == null) return; const m = String(v).match(/\d[\d,]*/g); if (m) m.forEach((x) => n.add(Number(x.replace(/,/g, '')))); };
   for (const k of Object.keys(S)) { add(S[k].price); (S[k].tiers || []).forEach((t) => add(t.from)); }
+  porchPackages.seasons.forEach((x) => Object.values(x.tiers).forEach((t) => add(t.from)));
   add(S.grazing.foodPerHead.low); add(S.grazing.foodPerHead.high);
   add(offers.addOns.takedown.fromPrice); add(offers.travel.extendedFee);
   add(games.rates.day); add(games.rates.weekend); add(games.damageDeposit);
@@ -157,10 +166,22 @@ function checkFaqPage(html) {
   const seen = new Set((t.match(/\$\d[\d,]*/g) || []).map((x) => Number(x.slice(1).replace(/,/g, ''))));
   for (const n of seen) if (!allowed.has(n)) fail(`faq/index.html quotes $${n}, which is not a price in services.json or games.json`);
   if (!seen.size) fail('faq/index.html quotes no prices at all');
-  // Porch picker.
-  for (const tier of offers.services.porch.tiers) {
-    if (!html.includes(`<img src="${tier.image}"`)) fail(`faq/index.html: porch picker lacks the ${tier.name} picture`);
-    if (!t.includes(`${tier.name}`) || !t.includes(`From $${tier.from}`)) fail(`faq/index.html: porch picker lacks "${tier.name}" at From $${tier.from}`);
+  // Price my porch calculator.
+  if (!html.includes(PP.calculatorHtml(porchPackages))) fail('faq/index.html: the Price my porch calculator is not the one scripts/lib/porch_packages.js renders from data/offers/porch_packages.json');
+  const calc = (html.match(/<div class="faq-tool" id="porch-picker">[\s\S]*?<\/script><\/div>/) || [''])[0];
+  const toggles = (calc.match(/<input type="radio" name="pkg-season" value="([a-z]+)"/g) || []).length;
+  if (toggles !== porchPackages.seasons.length) fail(`faq/index.html: the calculator season toggle has ${toggles} choice(s), want ${porchPackages.seasons.length}`);
+  for (const season of porchPackages.seasons) {
+    for (const k of porchPackages.tierOrder) {
+      const name = porchPackages.tiers[k].name;
+      const card = `<article class="pkg-tier" data-tier="${k}"><h4>${name}</h4><p class="pkg-price">${PP.money(season.tiers[k].from)}+</p>`;
+      const block = calc.slice(calc.indexOf(`data-season="${season.key}"`));
+      if (!calc.includes(`data-season="${season.key}"`) || !block.slice(0, block.indexOf('pkg-custom')).includes(card)) fail(`faq/index.html: calculator lacks ${season.name} ${name} at ${PP.money(season.tiers[k].from)}+`);
+      if (!calc.includes(`href="${PP.requestHref(porchPackages, season.key, k)}"`)) fail(`faq/index.html: calculator lacks "Request this package" for ${season.name} ${name}`);
+    }
+  }
+  for (const [label, line] of [['size hint', porchPackages.sizeHint], ['add-ons', porchPackages.addOns.line], ['bundle', porchPackages.bundle.line], ['rough-estimate', porchPackages.estimateLine]]) {
+    if (!calc.includes(PP.esc(line))) fail(`faq/index.html: calculator lacks the ${label} line`);
   }
   // Grazing estimator.
   const est = html.match(/data-estimator="grazing" data-config='([^']*)'/);
@@ -210,10 +231,13 @@ probe('jump nav without its label', html.replace('<span class="faq-jump__label">
 probe('a question as an <article>', html.replace(/<details class="faq-item"><summary><h3>([\s\S]*?)<\/h3><\/summary>(<p>[\s\S]*?<\/p>)<\/details>/, '<article class="faq-item"><h3>$1</h3>$2</article>'));
 probe('two open questions in a section', html.replace(/(<section class="faq-section" id="party">[\s\S]*?<details class="faq-item" open>[\s\S]*?)<details class="faq-item">/, '$1<details class="faq-item" open>'));
 probe('porch picker after the questions', html.replace(sectionOf('porch'), sectionOf('porch').replace('<div class="faq-tool" id="porch-picker">', '<div class="faq-tool" id="porch-picker-moved">').replace('<p class="faq-cta">', '<div class="faq-tool" id="porch-picker"></div><p class="faq-cta">')));
+probe('calculator with a typed-in tier price', html.replace('<p class="pkg-price">$550+</p>', '<p class="pkg-price">$600+</p>'));
+probe('calculator without the bundle line', html.replace(`<p class="pkg-bundle">${PP.esc(porchPackages.bundle.line)}</p>`, ''));
+probe('calculator with one season only', html.replace(/<label><input type="radio" name="pkg-season" value="christmas"> [^<]*<\/label>/, ''));
 probe('an extra quote link in main', html.replace('<p class="faq-hero-note">', `<p><a href="${FORM}">Request a quote</a></p><p class="faq-hero-note">`));
 probe('a section without Back to top', html.replace(/<p class="faq-next"><a href="#top">[^<]*<\/a>/, '<p class="faq-next">'));
 probe('a section without its Next link', html.replace(/<a href="#party">Next: [^<]+<\/a>/, ''));
 probe('FAQPage with a question the page does not render', html.replace(/<details class="faq-item"><summary>[\s\S]*?<\/details>/, ''));
 
 if (errors.length) { console.error(`validate_faq_page: FAIL\n - ${errors.join('\n - ')}`); process.exit(1); }
-console.log(`validate_faq_page: OK - /faq/ has ${SECTIONS.length} sections, ${(html.match(/<details class="faq-item"/g) || []).length} questions as accordions (first open per section), a 7-card map, a sticky Jump-to nav, 6 quote buttons, the porch picker (${offers.services.porch.tiers.length} tiers), the grazing estimator (${offers.services.grazing.tiers.length} tiers, food separate), the $${offers.travel.extendedFee} travel line; rentals page links it and has 2 Check My Date buttons`);
+console.log(`validate_faq_page: OK - /faq/ has ${SECTIONS.length} sections, ${(html.match(/<details class="faq-item"/g) || []).length} questions as accordions (first open per section), a 7-card map, a sticky Jump-to nav, 6 quote buttons, the Price my porch calculator (${porchPackages.seasons.length} seasons x ${porchPackages.tierOrder.length} packages), the grazing estimator (${offers.services.grazing.tiers.length} tiers, food separate), the $${offers.travel.extendedFee} travel line; rentals page links it and has 2 Check My Date buttons`);

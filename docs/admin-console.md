@@ -37,6 +37,24 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   from Settings (Zelle, Cash App, QR as an inline CID image, which Gmail renders; Gmail strips
   data: URIs). A test send goes to hello@ only with a `TEST` subject and changes nothing.
 
+## Porch packages (owner-approved 18 Oct 2026)
+- **One source**: `data/offers/porch_packages.json` (Stoop / Classic / Grand / Showstopper per
+  season, fall and Christmas; inclusions; custom-design line; add-ons named, never priced; the
+  10% fall + Christmas bundle). `scripts/lib/porch_packages.js` renders every surface from it.
+- **Website**: the full grid + Offer / PriceSpecification schema on every page in the data file's
+  `pages` (porch service pages, /pricing, porch articles), stamped by `npm run porch:install`
+  (`scripts/install_porch_packages.js`, part of build:all); the FAQ "Price my porch" calculator
+  (`/faq/#porch-picker`: season toggle, size hint, "Request this package").
+- **/request porch path**: season, "How much decor are you picturing?" (the five owner answers),
+  only the from-price and range per season (never a tier price), the final-quote line, "See
+  examples and prices" (new tab), "Book both seasons", unpriced add-ons, notes.
+  `/request?service=porch&season=fall&decor=classic` preselects both answers.
+- **Admin**: the card reads e.g. "Porch: Fall · picturing a full porch (Classic, from $N)"; the
+  invoice starts at that tier's minimum, and with both seasons adds the other season's package
+  and an editable "-10% fall + Christmas bundle" line; `/admin/packages` shows the same grid,
+  linked from Requests and the invoice screen. No migration: answers live in `requests.answers`.
+- **Guard**: `npm run validate:porch-packages` (in validate:admin).
+
 ## Calendar & Bookings, Put away, Void (migration 0004, owner-approved 18 Oct 2026)
 Built for Valerie on a phone: plain words, 48 px+ buttons, a Back link and a numbered 1-2-3 at
 the top of every screen, and a printable guide at `/admin/help`.

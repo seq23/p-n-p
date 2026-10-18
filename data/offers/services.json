@@ -56,30 +56,8 @@
         "Takedown starts at $75, quoted with your setup.",
         "Final pricing depends on scale, material choice, and setup complexity."
       ],
-      "tiers": [
-        {
-          "slug": "stoop",
-          "name": "Small stoop",
-          "describe": "One door, a step or two, little or no railing.",
-          "from": 350,
-          "image": "/assets/img/porch/bartlett-small-front-porch-styling-under-500.jpg"
-        },
-        {
-          "slug": "standard",
-          "name": "Standard porch",
-          "describe": "One door, 8 to 15 ft wide, columns or railings.",
-          "from": 600,
-          "image": "/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg"
-        },
-        {
-          "slug": "large",
-          "name": "Large or wraparound porch",
-          "describe": "Wider than 15 ft, two entries, or a wraparound.",
-          "from": 800,
-          "image": "/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg"
-        }
-      ],
-      "tiersProvenance": "Owner-approved 2026-10-17: from $350 small stoop, from $600 standard porch, from $800 large or wraparound. Shown as three pictures on /faq/ (people do not know their porch dimensions); the exact quote follows a porch photo on the form."
+      "packages": "data/offers/porch_packages.json",
+      "packagesProvenance": "Owner-approved 2026-10-18: the porch is priced by seasonal package (Stoop, Classic, Grand, Showstopper; fall and Christmas), defined only in data/offers/porch_packages.json. Replaces the 2026-10-17 small stoop / standard porch / large porch tiers."
     },
     "celebration": {
       "name": "Celebration Setups",
