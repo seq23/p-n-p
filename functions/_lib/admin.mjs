@@ -8,9 +8,13 @@ import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLi
 import { loadRequests, driveFileId, idFolderId } from './sheet.mjs';
 import { PRICE_TABLE, CONTACT } from './prices.mjs';
 import { renderInvoicePdf, textMessage } from './pdf.mjs';
-import { prefillLines, pickupNote } from './pricing.mjs';
+import { prefillLines, pickupNote, isRentalInvoice } from './pricing.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
+import * as VC from './views-calendar.mjs';
+import * as C from './calendar.mjs';
+import * as AC from './admin-calendar.mjs';
+import { balances, recordPayment, voidPayments, balanceWords, depositWords } from './ledger.mjs';
 import { CHECKLIST_SOURCE } from './checklist-source.mjs';
 import { renderPrintPage, prefillFromRequest, renderOnlineSections, checklistState, invoiceFromChecklist, fieldIndex } from './checklist.mjs';
 
@@ -18,7 +22,20 @@ const MAX_PHOTOS = 10;
 const PHOTO_MAX_BYTES = 1500000;
 
 const QR_MAX_BYTES = 1024 * 1024;
-const REQUEST_STATUS = { sent: 'invoiced', deposit_paid: 'deposit_paid', paid: 'paid', done: 'done' };
+const REQUEST_STATUS = { sent: 'invoiced', deposit_paid: 'deposit_paid', paid: 'paid', done: 'job_done' };
+
+// Bookings an invoice makes for its request (rental pickup + return, porch / party / grazing
+// jobs). Upserted by (request_key, kind): re-sending never duplicates, and a booking she
+// scheduled by hand keeps her date. Never blocks the invoice: a sheet outage just adds nothing.
+async function syncInvoiceBookings(env, id) {
+  try {
+    const loaded = await loadInvoice(env.DB, id);
+    if (!loaded || !loaded.invoice.request_key || loaded.invoice.status === 'void') return 0;
+    const request = await findRequest(env, loaded.invoice.request_key);
+    const rows = C.bookingsFromInvoice({ invoice: loaded.invoice, lines: loaded.lines, request, table: PRICE_TABLE, isRental: isRentalInvoice(loaded.lines, PRICE_TABLE) });
+    return await C.upsertBookings(env.DB, rows);
+  } catch { return 0; }
+}
 
 function decodeKey(value) {
   try { return fromB64urlText(value); } catch { return ''; }
@@ -123,13 +140,22 @@ async function dashboard(env, url) {
   const settings = await getSettings(env.DB);
   let requests = []; let sheetError = '';
   try { requests = await loadRequests(env, { fresh: url.searchParams.get('fresh') === '1' }); } catch (e) { sheetError = e.message || String(e); }
-  const { results } = await env.DB.prepare('SELECT request_key, status, invoice_id FROM request_status').all();
-  const statuses = {};
-  for (const row of results || []) statuses[row.request_key] = row;
+  const statuses = await AC.statusMap(env.DB);
   const checklists = {};
   const saved = await env.DB.prepare('SELECT request_key, data FROM request_checklist').all();
   for (const row of saved.results || []) { try { checklists[row.request_key] = checklistState(JSON.parse(row.data)); } catch { /* unreadable row: no badge */ } }
-  return htmlResponse(V.dashboardPage({ requests, statuses, checklists, folderUrl: await folderUrl(env, settings, requests), sheetError, flash: url.searchParams.get('m') || '', missingPayment: paymentStatus(settings).missing }));
+  const bals = await balances(env.DB);
+  const invoices = {};
+  for (const [id, b] of Object.entries(bals)) invoices[id] = { ...b.invoice, total_cents: b.total, balance: b };
+  const schedule = {};
+  const { results: booked } = await env.DB.prepare('SELECT request_key, MIN(date) AS date FROM bookings WHERE request_key IS NOT NULL GROUP BY request_key').all();
+  for (const r of booked || []) schedule[r.request_key] = { date: r.date };
+  const returns = await C.loadReturns(env.DB);
+  const open = requests.filter((r) => !(statuses[r.key] && statuses[r.key].archived_at));
+  const { reminders, tomorrowLabel, overdue } = await AC.remindersAndOverdue(env.DB);
+  return htmlResponse(V.dashboardPage({ requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError,
+    flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
+    extraTop: `${VC.overdueBox(overdue)}${VC.remindersBox(reminders, tomorrowLabel)}` }));
 }
 
 async function newInvoice(env, url) {
@@ -172,9 +198,9 @@ async function createInvoice(env, request) {
   let id = null;
   for (let attempt = 0; attempt < 3 && id === null; attempt += 1) {
     try {
-      const row = await env.DB.prepare(`INSERT INTO invoices (number, request_key, customer_name, customer_email, customer_phone, issue_date, due_date, deposit_due_cents, notes, status, pay_plan)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'draft', ?10) RETURNING id`).bind(number, key, invoice.customer_name, invoice.customer_email,
-        invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, invoice.pay_plan).first();
+      const row = await env.DB.prepare(`INSERT INTO invoices (number, request_key, customer_name, customer_email, customer_phone, issue_date, due_date, deposit_due_cents, notes, status, pay_plan, name_norm)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'draft', ?10, ?11) RETURNING id`).bind(number, key, invoice.customer_name, invoice.customer_email,
+        invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, invoice.pay_plan, C.normName(invoice.customer_name)).first();
       id = row.id;
     } catch (e) {
       if (!/UNIQUE/i.test(String(e))) throw e;
@@ -184,8 +210,9 @@ async function createInvoice(env, request) {
   await saveLines(env.DB, id, lines);
   if (key) {
     const existing = await env.DB.prepare('SELECT status FROM request_status WHERE request_key = ?1').bind(key).first();
-    await setRequestStatus(env.DB, key, existing ? existing.status : 'new', id);
+    await setRequestStatus(env.DB, key, existing && existing.status !== 'void' ? existing.status : 'new', id);
   }
+  await syncInvoiceBookings(env, id);
   if (form.get('go') === 'send') return afterSend(id, await deliver(env, id, false));
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(afterSaveMessage(form.get('go')))}`);
 }
@@ -198,8 +225,10 @@ function afterSaveMessage(go) {
 async function updateInvoice(env, request, id) {
   const form = await request.formData();
   const { invoice, lines } = parseInvoiceForm(form);
-  await env.DB.prepare(`UPDATE invoices SET customer_name=?1, customer_email=?2, customer_phone=?3, issue_date=?4, due_date=?5, deposit_due_cents=?6, notes=?7, pay_plan=?9, updated_at=datetime('now') WHERE id=?8`)
-    .bind(invoice.customer_name, invoice.customer_email, invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, id, invoice.pay_plan).run();
+  const current = await env.DB.prepare('SELECT status FROM invoices WHERE id = ?1').bind(id).first();
+  if (current && current.status === 'void') return redirect(`/admin/invoices/${id}?e=${encodeURIComponent('This invoice is void. Bring it back first (Payment box), then change it.')}`);
+  await env.DB.prepare(`UPDATE invoices SET customer_name=?1, customer_email=?2, customer_phone=?3, issue_date=?4, due_date=?5, deposit_due_cents=?6, notes=?7, pay_plan=?9, name_norm=?10, updated_at=datetime('now') WHERE id=?8`)
+    .bind(invoice.customer_name, invoice.customer_email, invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, id, invoice.pay_plan, C.normName(invoice.customer_name)).run();
   await saveLines(env.DB, id, lines);
   if (form.get('go') === 'send') return afterSend(id, await deliver(env, id, false));
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(afterSaveMessage(form.get('go')))}`);
@@ -219,7 +248,7 @@ async function deliver(env, id, test) {
   const loaded = await loadInvoice(env.DB, id);
   if (!loaded) return { ok: false, error: 'That invoice was not found.' };
   const { invoice, lines } = loaded;
-  if (invoice.status === 'void') return { ok: false, error: 'This invoice is cancelled. Bring it back under More before sending.' };
+  if (invoice.status === 'void') return { ok: false, error: 'This invoice is void, so it cannot be sent. Tap Bring back (undo Void) in the Payment box first.' };
   if (!test && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(invoice.customer_email)) return { ok: false, error: 'No working email on this invoice. Tap Text the invoice (PDF) instead, or add the email under Change the invoice.' };
   if (!lines.length) return { ok: false, error: 'This invoice has no lines yet. Add what they are paying for under Change the invoice, Change what goes into the total.' };
   const unpriced = lines.filter(needsPrice);
@@ -245,6 +274,7 @@ async function deliver(env, id, test) {
   const status = invoice.status === 'draft' ? 'sent' : invoice.status;
   await env.DB.prepare("UPDATE invoices SET status=?1, sent_at=datetime('now'), updated_at=datetime('now') WHERE id=?2").bind(status, id).run();
   if (invoice.request_key && invoice.status === 'draft') await setRequestStatus(env.DB, invoice.request_key, 'invoiced', id);
+  await syncInvoiceBookings(env, id);
   return { ok: true, message: `Sent ✓ to ${invoice.customer_email}` };
 }
 
@@ -257,32 +287,49 @@ async function sendInvoice(env, request, id) {
   return afterSend(id, await deliver(env, id, form.get('test') === '1'));
 }
 
+const MONEY_ACTIONS = new Set(['deposit_paid', 'paid', 'texted', 'done', 'unpaid']);
+const safeBack = (v) => (/^\/admin\/[A-Za-z0-9/_?=&.%-]*$/.test(String(v || '')) && !String(v).includes('//') ? String(v) : '');
+
 async function changeStatus(env, request, id) {
   const form = await request.formData();
   const action = String(form.get('action') || '');
+  const back = safeBack(form.get('back'));
+  const go = (key, msg) => redirect(`${back || `/admin/invoices/${id}`}${(back || '').includes('?') ? '&' : '?'}${key}=${encodeURIComponent(msg)}`);
   const loaded = await loadInvoice(env.DB, id);
-  if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
-  const { invoice } = loaded;
-  const next = { texted: 'sent', deposit_paid: 'deposit_paid', paid: 'paid', done: 'done', void: 'void', unvoid: 'draft' }[action];
+  if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>', { screen: 'notfound', back: { href: '/admin/invoices', label: 'Back to invoices' } }), 404);
+  const { invoice, lines } = loaded;
+  const next = { texted: 'sent', deposit_paid: 'deposit_paid', paid: 'paid', done: 'done', void: 'void', unvoid: 'draft', unpaid: 'sent' }[action];
   if (!next) return redirect(`/admin/invoices/${id}`);
+  if (invoice.status === 'void' && action !== 'unvoid') return go('e', 'This invoice is void. It cannot be sent or marked paid. Tap Bring back (undo Void) first.');
+  if (invoice.status !== 'void' && action === 'unvoid') return go('m', 'This invoice is not void.');
+  const method = String(form.get('method') || '').slice(0, 20);
+  let recorded = 0;
+  if (action === 'deposit_paid') recorded = await recordPayment(env.DB, invoice, lines, 'deposit', method);
+  if (action === 'paid') recorded = await recordPayment(env.DB, invoice, lines, 'full', method);
+  if (action === 'unpaid') await voidPayments(env.DB, id);
   if (action === 'texted') await env.DB.prepare("UPDATE invoices SET status='sent', sent_at=datetime('now'), updated_at=datetime('now') WHERE id=?1").bind(id).run();
   else await env.DB.prepare("UPDATE invoices SET status=?1, updated_at=datetime('now') WHERE id=?2").bind(next, id).run();
+  if (action === 'void') await C.removeInvoiceBookings(env.DB, id);
   if (invoice.request_key) {
-    if (next === 'void') {
-      await env.DB.prepare("UPDATE request_status SET status='new', invoice_id=NULL, updated_at=datetime('now') WHERE request_key=?1 AND invoice_id=?2").bind(invoice.request_key, id).run();
-    } else if (next === 'draft') {
-      await setRequestStatus(env.DB, invoice.request_key, 'new', id);
-    } else {
-      await setRequestStatus(env.DB, invoice.request_key, REQUEST_STATUS[next], id);
-    }
+    if (next === 'void') await setRequestStatus(env.DB, invoice.request_key, 'void', id);
+    else if (next === 'draft') await setRequestStatus(env.DB, invoice.request_key, 'new', id);
+    else if (action === 'unpaid') await setRequestStatus(env.DB, invoice.request_key, invoice.sent_at ? 'invoiced' : 'new', id);
+    else await setRequestStatus(env.DB, invoice.request_key, REQUEST_STATUS[next], id);
+    if (action === 'done') await env.DB.prepare("UPDATE request_status SET job_done_at = COALESCE(job_done_at, datetime('now')) WHERE request_key = ?1").bind(invoice.request_key).run();
   }
-  const label = { sent: 'Marked as sent by text ✓', deposit_paid: 'Deposit received ✓', paid: 'Paid in full ✓', done: 'Marked done ✓', void: 'Invoice cancelled.', draft: 'Invoice brought back. It is not sent yet.' }[next];
-  return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(label)}`);
+  if (action === 'texted') await syncInvoiceBookings(env, id);
+  const money = (c) => `$${(c / 100).toFixed(2)}`;
+  const label = {
+    texted: 'Marked as sent by text ✓', deposit_paid: `Deposit received ✓${recorded ? ` (${money(recorded)} recorded)` : ''}`, paid: `Paid in full ✓${recorded ? ` (${money(recorded)} recorded)` : ''}`,
+    done: 'Marked done ✓', void: `Invoice ${invoice.number} is void. Its bookings are off the calendar.`, unvoid: 'Invoice brought back. It is not sent yet. Send it again to put it back on the calendar.',
+    unpaid: 'Marked as not paid.',
+  }[action];
+  return go('m', label);
 }
 
 async function saveSettings(env, request) {
   const form = await request.formData();
-  for (const key of ['zelle', 'cashapp', 'business_name', 'business_address', 'id_folder_url']) {
+  for (const key of ['zelle', 'cashapp', 'business_name', 'business_address', 'id_folder_url', 'day_list_phone', 'day_list_email']) {
     await putSetting(env.DB, key, String(form.get(key) || '').trim());
   }
   if (form.get('remove_qr') === '1') {
@@ -337,11 +384,62 @@ export async function handleAdmin(context) {
   }
   if (segs[0] === 'logout' && method === 'POST') return redirect('/admin', { 'Set-Cookie': clearCookie() });
   if (segs[0] === 'requests' && segs[1] === 'status' && method === 'POST') {
+    // A request with no invoice: its Payment box (deposit / paid / not paid / Void / Bring back).
     const form = await request.formData();
     const key = decodeKey(form.get('r'));
-    const status = String(form.get('status') || '');
-    if (key && ['new', 'invoiced', 'deposit_paid', 'paid', 'done'].includes(status)) await setRequestStatus(env.DB, key, status, null);
-    return redirect('/admin/?m=Status saved ✓');
+    const want = String(form.get('status') || '');
+    const current = key ? await env.DB.prepare('SELECT status FROM request_status WHERE request_key = ?1').bind(key).first() : null;
+    const isVoid = current && current.status === 'void';
+    if (isVoid && want !== 'unvoid') return redirect(`/admin/?e=${encodeURIComponent('This request is void, so it cannot be marked paid. Tap Bring back (undo Void) first.')}`);
+    const status = { deposit_paid: 'deposit_paid', paid: 'paid', unpaid: 'new', void: 'void', unvoid: 'new' }[want];
+    if (key && status) await setRequestStatus(env.DB, key, status, null);
+    return redirect(`/admin/?m=${encodeURIComponent(status === 'void' ? 'Request is void.' : 'Saved ✓')}`);
+  }
+  if (segs[0] === 'requests' && segs[1] === 'jobdone' && method === 'POST') {
+    // "Mark job done" / "Undo job done" for a porch, party or grazing job (rentals use Mark returned).
+    const form = await request.formData();
+    const key = decodeKey(form.get('r'));
+    const undo = form.get('undo') === '1';
+    if (key) {
+      if (undo) await env.DB.prepare("UPDATE request_status SET job_done_at = NULL, status = COALESCE(prev_status, status), prev_status = NULL, updated_at = datetime('now') WHERE request_key = ?1").bind(key).run();
+      else await env.DB.prepare(`INSERT INTO request_status (request_key, status, job_done_at, prev_status, updated_at) VALUES (?1, 'job_done', datetime('now'), 'new', datetime('now'))
+        ON CONFLICT(request_key) DO UPDATE SET prev_status = CASE WHEN request_status.status = 'job_done' THEN request_status.prev_status ELSE request_status.status END,
+          status = 'job_done', job_done_at = COALESCE(request_status.job_done_at, datetime('now')), updated_at = datetime('now')`).bind(key).run();
+    }
+    return redirect(`/admin/?m=${encodeURIComponent(undo ? 'Job done undone.' : 'Job done ✓')}`);
+  }
+  if (segs[0] === 'requests' && segs[1] === 'archive' && method === 'POST') return AC.archiveRequest(env, request, true);
+  if (segs[0] === 'requests' && segs[1] === 'unarchive' && method === 'POST') return AC.archiveRequest(env, request, false);
+  if (segs[0] === 'archive' && segs.length === 1 && method === 'GET') return AC.archivePage(env, url);
+  if (segs[0] === 'search' && method === 'GET') return AC.searchRoute(env, url);
+  if (segs[0] === 'day' && segs[1]) {
+    if (segs.length === 2 && method === 'GET') return AC.dayPage(env, url, segs[1]);
+    if (segs[2] === 'email' && method === 'POST') return AC.emailDay(env, url, segs[1]);
+  }
+  if (segs[0] === 'returns') {
+    if (segs.length === 1 && method === 'GET') return AC.returnPage(env, url);
+    if (segs.length === 1 && method === 'POST') return AC.saveReturnRoute(env, request, url);
+    if (segs[1] === 'undo' && method === 'POST') return AC.undoReturnRoute(env, url);
+  }
+  if (segs[0] === 'notes' && /^\d+$/.test(segs[1] || '') && method === 'POST') return AC.editNoteRoute(env, request, Number(segs[1]), segs[2] === 'delete');
+  if (segs[0] === 'calendar') {
+    if (segs.length === 1 && method === 'GET') return AC.calendarPage(env, url);
+    if (segs[1] === 'day' && segs[2]) return redirect(`/admin/day/${segs[2]}`);
+    if (segs[1] === 'link' && method === 'GET') return AC.linkPage(env, url);
+    if (segs[1] === 'new' && method === 'GET') return AC.newBookingPage(env, url);
+    if (segs[1] === 'bookings') {
+      if (segs.length === 2 && method === 'POST') return AC.createBookingRoute(env, request);
+      const bid = Number(segs[2]);
+      if (Number.isInteger(bid) && bid > 0) {
+        if (segs.length === 3 && method === 'POST') return AC.updateBookingRoute(env, request, bid);
+        if (segs[3] === 'edit' && method === 'GET') return AC.editBookingPage(env, bid);
+        if (segs[3] === 'delete' && method === 'POST') return AC.deleteBookingRoute(env, bid);
+        if (segs[3] === 'move' && method === 'GET') return AC.movePage(env, bid);
+        if (segs[3] === 'move' && method === 'POST') return AC.moveRoute(env, request, bid);
+        if (segs[3] === 'reminded' && method === 'POST') return AC.remindedRoute(env, request, bid);
+        if (segs[3] === 'notes' && method === 'POST') return AC.addNoteRoute(env, request, bid);
+      }
+    }
   }
   if (segs[0] === 'invoices') {
     if (segs.length === 1 && method === 'GET') {
@@ -355,16 +453,17 @@ export async function handleAdmin(context) {
     if (Number.isInteger(id) && id > 0) {
       if (segs.length === 2 && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
-        if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
+        if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>', { screen: 'notfound', back: { href: '/admin/invoices', label: 'Back to invoices' } }), 404);
         const settings = await getSettings(env.DB);
         const emailHtml = (await emailParts(env, loaded.invoice, loaded.lines, settings, true)).html;
         const pickup = pickupNote(loaded.lines, PRICE_TABLE);
         const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings, pickup });
-        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pickup, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+        const balance = (await balances(env.DB))[id];
+        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pickup, balance, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
       }
       if (segs[2] === 'edit' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
-        if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>'), 404);
+        if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>', { screen: 'notfound', back: { href: '/admin/invoices', label: 'Back to invoices' } }), 404);
         const pay = paymentStatus(await getSettings(env.DB));
         return htmlResponse(V.invoiceEditorPage({ invoice: { ...loaded.invoice, pay_plan: payPlanOf(loaded.invoice, invoiceTotal(loaded.lines)) }, lines: loaded.lines, request: null,
           action: `/admin/invoices/${id}`, title: `Change invoice for ${V.firstName(loaded.invoice.customer_name)}`, pay, mode: 'edit' }));
@@ -399,8 +498,9 @@ export async function handleAdmin(context) {
     }
     if (segs.length === 1 && method === 'POST') return saveSettings(env, request);
     if (segs[1] === 'password' && method === 'POST') return changePassword(env, request);
+    if (segs[1] === 'calendar-token' && method === 'POST') return AC.regenerateToken(env);
   }
-  return htmlResponse(V.layout('Not found', `<p>Nothing here. <a href="/admin/">Back to requests</a>.</p>`), 404);
+  return htmlResponse(V.layout('Not found', '<p>Nothing here.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
 }
 
 export async function handleApi(context) {
