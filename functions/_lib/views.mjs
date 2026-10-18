@@ -347,7 +347,8 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
     const returned = ret && ret.returned_at;
     const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
     const chips = [
-      pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : `<span class="chip ${pr.current === 'paid' ? 'paid' : (pr.damaged && pr.current === 'job_done' ? 'deposit_paid' : 'step')}" data-step="${pr.current}">${esc(pr.finished ? 'Finished: job done and paid' : pr.label)}</span>`,
+      // A scheduled card shows only the dated "Scheduled for …" chip, never a bare "Scheduled" too.
+      pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : (pr.current === 'scheduled' && sched && !pr.finished ? '' : `<span class="chip ${pr.current === 'paid' ? 'paid' : (pr.damaged && pr.current === 'job_done' ? 'deposit_paid' : 'step')}" data-step="${pr.current}">${esc(pr.finished ? 'Finished: job done and paid' : pr.label)}</span>`),
       pr.paidEarly ? '<span class="chip paid" data-paid-early>Paid in full ✓</span>' : '',
       sched && !pr.void ? `<span class="chip sched" data-scheduled>Scheduled for ${esc(shortDate(sched.date))}</span>` : '',
       returned ? (ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : `<span class="chip paid" data-returned>Returned ${esc(shortDate(String(returned).slice(0, 10)))}</span>`) : '',
