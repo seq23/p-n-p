@@ -250,7 +250,7 @@ Reserve your date at porchandparty901.com/request. See what's free and hold it f
 
 Pick 3 bundle: any 3 games, $110 a day. You save $10 on day prices ($120 separately).
 
-Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Giant Checkers, Grab the Mic, Giant Color Stack.
+Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets.
 
 Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
 
@@ -277,7 +277,7 @@ Reserve your date at porchandparty901.com/request. See what's free and hold it f
 
 Pick 5 bundle: any 5 games, $175 a day. You save $25 on day prices ($200 separately).
 
-Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Giant Checkers, Grab the Mic, Giant Color Stack.
+Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets.
 
 Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
 
@@ -304,7 +304,7 @@ Reserve your date at porchandparty901.com/request. See what's free and hold it f
 
 Whole Yard bundle: all 6 games, $195 a day. You save $45 on day prices ($240 separately).
 
-Games included: Giant Connect Four, Cornhole Set, Giant Uno, Giant Checkers, Grab the Mic, Giant Color Stack.
+Games included: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets.
 
 Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
 
@@ -331,7 +331,7 @@ Reserve your date at porchandparty901.com/request. See what's free and hold it f
 
 Movie Night bundle: the inflatable movie screen + any 2 games, $110 a day. You save $20 on day prices ($130 separately).
 
-Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Giant Checkers, Grab the Mic, Giant Color Stack. Included: Inflatable Movie Screen.
+Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets. Included: Inflatable Movie Screen.
 
 Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
 
@@ -358,7 +358,7 @@ Reserve your date at porchandparty901.com/request. See what's free and hold it f
 
 Game Night bundle: the card table + any 2 games, $85 a day. You save $10 on day prices ($95 separately).
 
-Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Giant Checkers, Grab the Mic, Giant Color Stack. Included: Card Table with Cup Holders.
+Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets. Included: Card Table with Cup Holders.
 
 Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
 
@@ -385,7 +385,7 @@ Reserve your date at porchandparty901.com/request. See what's free and hold it f
 
 The Whole Party bundle: all 6 games, the movie screen and the card table, $235 a day or $350 for a weekend. You save $70 on day prices ($305 separately); a weekend saves $110 ($460 separately).
 
-Games included: Giant Connect Four, Cornhole Set, Giant Uno, Giant Checkers, Grab the Mic, Giant Color Stack. Included: Inflatable Movie Screen and Card Table with Cup Holders.
+Games included: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets. Included: Inflatable Movie Screen and Card Table with Cup Holders.
 
 Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
 
