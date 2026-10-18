@@ -73,9 +73,41 @@ for (const name of ['functions', 'migrations', 'workers', 'wrangler.toml']) {
   }
 }
 
+// 5. The private ICS feed (/api/calendar/<token>.ics) is the ONE admin route outside the
+//    session guard: Google fetches it with no cookie, so its 64-hex token is the auth. It must
+//    stay a single GET/HEAD route file that runs the shared handler, answer noindex, compare
+//    the token in constant time, 404 on a wrong token, and never be announced.
+const icsFiles = routeFiles.filter((f) => f.startsWith(path.join('functions', 'api', 'calendar') + path.sep));
+if (icsFiles.length !== 1 || path.basename(icsFiles[0]) !== '[token].js') errors.push(`functions/api/calendar must hold exactly one route file, [token].js (found: ${icsFiles.join(', ') || 'none'})`);
+else {
+  const src = read(icsFiles[0]);
+  if (!/import \{ handleIcs \} from '\.\.\/\.\.\/_lib\/ics-route\.mjs';/.test(src) || !/export const onRequest = \(context\) => handleIcs\(context\);/.test(src)) errors.push(`${icsFiles[0]} does not just run the shared ICS handler`);
+}
+const ics = read('functions/_lib/ics-route.mjs');
+for (const [re, why] of [
+  [/'X-Robots-Tag': 'noindex, nofollow'/, 'the ICS feed does not answer X-Robots-Tag: noindex'],
+  [/safeEqual\(m\[1\], token\)/, 'the ICS token is not compared in constant time'],
+  [/\^\(\[a-f0-9\]\{64\}\)\\\.ics\$/, 'the ICS route accepts something other than a 64-hex token'],
+  [/token\.length !== 64/, 'the ICS route serves when no token is set'],
+  [/method !== 'GET' && method !== 'HEAD'/, 'the ICS route accepts methods other than GET/HEAD'],
+]) if (!re.test(ics)) errors.push(why);
+for (const file of announced) if (/\/api\/calendar/.test(read(file))) errors.push(`${file} announces the private calendar feed`);
+{
+  const { handleIcs } = await import(new URL('../../functions/_lib/ics-route.mjs', import.meta.url).href);
+  const settings = { calendar_token: 'a'.repeat(64) };
+  const db = { prepare: () => ({ bind: () => ({ all: async () => ({ results: [] }), first: async () => null }), all: async () => ({ results: Object.entries(settings).map(([key, value]) => ({ key, value })) }) }) };
+  const ask = async (tok, method = 'GET') => handleIcs({ request: new Request(`https://porchandparty901.com/api/calendar/${tok}`, { method }), env: { DB: db }, params: { token: tok } });
+  const wrong = await ask(`${'b'.repeat(64)}.ics`);
+  if (wrong.status !== 404 || wrong.headers.get('X-Robots-Tag') !== 'noindex, nofollow') errors.push(`a wrong ICS token answered ${wrong.status} (want 404, noindex)`);
+  if ((await ask('short.ics')).status !== 404) errors.push('a malformed ICS token is not 404');
+  if ((await ask(`${'a'.repeat(64)}.ics`, 'POST')).status !== 405) errors.push('the ICS route accepts POST');
+  const right = await ask(`${'a'.repeat(64)}.ics`);
+  if (right.status !== 200 || right.headers.get('X-Robots-Tag') !== 'noindex, nofollow' || !/text\/calendar/.test(right.headers.get('Content-Type') || '')) errors.push(`the right ICS token answered ${right.status} without noindex text/calendar`);
+}
+
 if (errors.length) {
   console.error('VALIDATION FAIL: admin console noindex / guard');
   for (const e of errors) console.error(`- ${e}`);
   process.exit(1);
 }
-console.log(`Admin noindex OK: ${announced.length} announcement files carry no admin URL; ${adminRoutes} admin route files all behind the guard.`);
+console.log(`Admin noindex OK: ${announced.length} announcement files carry no admin URL; ${adminRoutes} admin route files all behind the guard; the private ICS feed answers noindex and 404s a wrong token.`);

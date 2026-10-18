@@ -99,6 +99,15 @@ export function safeEqual(a, b) {
   return diff === 0;
 }
 
+// Short day for chips and questions: "Sat 25 Oct".
+export function shortDate(iso) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return iso || '';
+  return `${d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })} ${d.getUTCDate()} ${d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })}`;
+}
+
+export const REQUEST_STATUSES = ['new', 'invoiced', 'deposit_paid', 'scheduled', 'job_done', 'paid', 'void'];
+
 export function todayISO(offsetDays = 0) {
   const d = new Date(Date.now() + offsetDays * 86400000);
   return d.toISOString().slice(0, 10);
@@ -132,8 +141,8 @@ export async function putSetting(db, key, value) {
 }
 
 export const STATUS_LABELS = {
-  new: 'New', invoiced: 'Invoiced', deposit_paid: 'Deposit paid', paid: 'Paid', done: 'Done',
-  draft: 'Not sent yet', sent: 'Invoiced', void: 'Cancelled',
+  new: 'New', invoiced: 'Invoiced', deposit_paid: 'Deposit paid', paid: 'Paid', done: 'Job done', job_done: 'Job done', scheduled: 'Scheduled',
+  draft: 'Not sent yet', sent: 'Invoiced', void: 'Void',
 };
 
 // A $0 line the customer would see as "Free" when nobody meant it: the decor line before

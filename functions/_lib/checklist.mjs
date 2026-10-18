@@ -6,6 +6,7 @@
 // online form are both built from that single walk, so an online field cannot exist without
 // its printed label (validate:admin-checklist holds both to it). Pure: no bindings, no imports
 // of data files, so the validator runs it under Node.
+import { tip, stepsBar } from './helptext.mjs';
 import { esc } from './util.mjs';
 
 const TOKEN = /<h2>([\s\S]*?)<\/h2>|<ul class="ck[^"]*"[^>]*>([\s\S]*?)<\/ul>|<div class="f"><label>([\s\S]*?)<\/label><div class="w( tall)?"><\/div><\/div>|<div class="lines([^"]*)"><\/div>|<table>([\s\S]*?)<\/table>|<div class="note">([\s\S]*?)<\/div>/g;
@@ -107,13 +108,15 @@ td[data-field]{font-family:var(--serif);font-size:13px}
 .pp-toolbar button,.pp-toolbar a{min-height:44px;padding:10px 16px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;font:600 15px var(--sans);text-decoration:none;cursor:pointer;display:inline-flex;align-items:center}
 .pp-toolbar a{background:transparent;color:var(--accent)}
 .pp-toolbar span{color:var(--muted);font-size:13px}
+.pp-toolbar .topsteps{flex-basis:100%;list-style:none;margin:6px 0 0;padding:0;display:flex;flex-wrap:wrap;gap:6px 14px;font-size:15px}.pp-toolbar .topsteps .n{display:inline-block;width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;text-align:center;font-weight:700;margin-right:4px}
 @media print{.pp-toolbar{display:none}}
 `;
 
 export function renderPrintPage(source, values = {}, { who = '', onlineHref = '' } = {}) {
   const { html } = annotate(source, values);
-  const toolbar = `<div class="pp-toolbar"><button type="button" onclick="window.print()">Print</button>
-<a href="/admin/">Back to requests</a>${onlineHref ? `<a href="${esc(onlineHref)}">Open online checklist</a>` : ''}
+  const toolbar = `<div class="pp-toolbar"><a href="/admin/"${tip('nav.back')}>&larr; Back to requests</a><button type="button" onclick="window.print()"${tip('cl.printNow')}>Print</button>
+${onlineHref ? `<a href="${esc(onlineHref)}"${tip('cl.openOnline')}>Open online checklist</a>` : ''}<a href="/admin/help"${tip('nav.help')}>How to use this</a>
+${stepsBar('checklistPrint')}
 <span>${who ? `Pre-filled for ${esc(who)}` : 'Blank checklist'}</span></div>`;
   const firstPage = html.indexOf('<section class="page">');
   const head = html.slice(0, firstPage).replace('</style>', `${PRINT_CSS}</style>`);
@@ -194,7 +197,7 @@ export function renderOnlineSections(source, values = {}) {
       return `<div class="quote">${b.rows.map((r) => `<div class="qrow"><div class="qlabel">${esc(r.label)}</div>
         ${r.notesId ? `<div>${input(byId[r.notesId], values[r.notesId])}</div>` : ''}${r.amountId ? `<div>${input(byId[r.amountId], values[r.amountId])}</div>` : ''}</div>`).join('')}</div>`;
     }).join('');
-    return `<details class="card sec"${i === 0 ? ' open' : ''}><summary><span>Page ${page.n}</span> ${esc(page.title)}</summary>${body}</details>`;
+    return `<details class="card sec"${i === 0 ? ' open' : ''}><summary${tip('cl.section')}><span>Page ${page.n}</span> ${esc(page.title)}</summary>${body}</details>`;
   }).join('');
 }
 

@@ -54,12 +54,13 @@ for (const [plan, now] of Object.entries(plans)) {
   must(mail.text.includes('Due October 22, 2026'), `${plan}: email lacks the due date`);
   if (plan === 'full') {
     must(mail.text.includes('Amount due: $170.00') && !/Deposit due now/.test(mail.text), `${plan}: email should ask for the whole total, no deposit`);
-    must(page.includes('Full amount due by') && !page.includes('Deposit received'), `${plan}: invoice page still shows deposit rows or the deposit button`);
+    must(page.includes('Full amount due by') && !page.includes('Mark deposit received'), `${plan}: invoice page still shows deposit rows or the deposit button`);
+    must(page.includes('Mark paid in full') && page.includes('Only do this after the money is in your account.'), `${plan}: Payment box lacks Mark paid in full with its confirmation`);
   } else {
     const rest = total - now;
     must(mail.text.includes(`Deposit due now: ${util.money(now)}`), `${plan}: email does not ask for the deposit now`);
     must(mail.text.includes(`The rest, ${util.money(rest)}, is due by October 22, 2026`), `${plan}: email lacks total minus deposit with its due date`);
-    must(page.includes('Rest after the deposit') && page.includes(util.money(rest)) && page.includes('Deposit received'), `${plan}: invoice page lacks the rest-after-deposit row or the deposit button`);
+    must(page.includes('Rest after the deposit') && page.includes(util.money(rest)) && page.includes('Mark deposit received') && page.includes(`Mark Jane Doe&#39;s deposit as received? Only do this after the money is in your account.`), `${plan}: invoice page lacks the rest-after-deposit row or the deposit button with its confirmation`);
   }
   must(page.includes('srcdoc=') && page.includes('The email the customer gets'), `${plan}: invoice page has no inline email preview`);
   must(page.includes('What goes into the total') || editor.includes('What goes into the total'), `${plan}: no "what goes into the total" section`);

@@ -13,10 +13,10 @@ export function buildPriceTable(games, services) {
   const cents = (d) => Math.round(d * 100);
   const items = [
     ...(games.games || []).filter((g) => g.availableNow).map((g) => ({
-      slug: g.slug, name: g.name, choice: g.formChoice, kind: 'game', dayCents: cents(games.rates.day), weekendCents: cents(games.rates.weekend),
+      slug: g.slug, name: g.name, choice: g.formChoice, kind: 'game', quantity: g.quantity || 1, dayCents: cents(games.rates.day), weekendCents: cents(games.rates.weekend),
     })),
     ...(games.extras || []).filter((x) => x.availableNow).map((x) => ({
-      slug: x.slug, name: x.name, choice: x.formChoice, kind: 'extra', dayCents: cents(x.dayPrice), weekendCents: cents(x.weekendPrice),
+      slug: x.slug, name: x.name, choice: x.formChoice, kind: 'extra', quantity: x.quantity || 1, dayCents: cents(x.dayPrice), weekendCents: cents(x.weekendPrice),
     })),
   ];
   const pickup = games.pickup || {};
@@ -31,6 +31,7 @@ export function buildPriceTable(games, services) {
     damageDepositCents: cents(games.damageDeposit),
     takedownCents: cents(takedown.fromPrice),
     pickupLine: `Pay the rest at pickup. Text or call ${pickup.phone} to set your pickup time at ${String(pickup.place || '').split(',')[0]}.`,
+    pickupPlace: String(pickup.place || '').split(',')[0],
     gameNames: items.filter((i) => i.kind === 'game').map((i) => i.name),
   };
 }

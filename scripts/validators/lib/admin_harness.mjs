@@ -1,0 +1,95 @@
+// Test harness for the /admin console validators: loads functions/_lib with JSON imports
+// (a loader hook turns `import x from './a.json'` into a module), and gives the code a real
+// SQLite database behind a D1-shaped adapter, with every migration applied in order.
+// Node >= 22.13 (node:sqlite). No network: the sheet reads the fixture (PNP_SHEET_FIXTURE=1).
+import fs from 'node:fs';
+import path from 'node:path';
+import module from 'node:module';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+
+export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
+
+// Sync hooks (module.registerHooks, Node >= 22.15) where available, else the async form.
+function loadAsModule(url) {
+  if (!url.startsWith('file:') || url.includes('/node_modules/') || false) return null;
+  if (url.endsWith('.json')) return { format: 'module', source: `export default ${fs.readFileSync(new URL(url), 'utf8')};`, shortCircuit: true };
+  if (url.endsWith('.txt')) return { format: 'module', source: `export default ${JSON.stringify(fs.readFileSync(new URL(url), 'utf8'))};`, shortCircuit: true };
+  return null;
+}
+if (typeof module.registerHooks === 'function') {
+  module.registerHooks({ load(url, context, next) { return (context.format !== 'commonjs' && loadAsModule(url)) || next(url, context); } });
+} else {
+  const HOOKS = `export async function load(url, context, next) {
+    const { readFile } = await import('node:fs/promises');
+    if (url.includes('/node_modules/')) return next(url, context);
+    if (url.endsWith('.json')) return { format: 'module', source: 'export default ' + await readFile(new URL(url), 'utf8') + ';', shortCircuit: true };
+    if (url.endsWith('.txt')) return { format: 'module', source: 'export default ' + JSON.stringify(await readFile(new URL(url), 'utf8')) + ';', shortCircuit: true };
+    return next(url, context);
+  }`;
+  module.register(`data:text/javascript,${encodeURIComponent(HOOKS)}`, import.meta.url);
+}
+
+export const mod = (p) => import(pathToFileURL(path.join(ROOT, p)).href);
+
+let sqlite;
+try { sqlite = await import('node:sqlite'); } catch {
+  console.error('VALIDATION FAIL: node:sqlite is not available (needs Node >= 22.13); the admin validators cannot run');
+  process.exit(1);
+}
+
+class Stmt {
+  constructor(db, sql, args = []) { this.db = db; this.sql = sql; this.args = args; }
+  bind(...args) { return new Stmt(this.db, this.sql, args.map((a) => (a === undefined ? null : a))); }
+  _p() { return this.db.prepare(this.sql); }
+  async first() { const r = this._p().get(...this.args); return r === undefined ? null : { ...r }; }
+  async all() { return { results: this._p().all(...this.args).map((r) => ({ ...r })) }; }
+  async run() { const r = this._p().run(...this.args); return { meta: { changes: Number(r.changes), last_row_id: Number(r.lastInsertRowid) } }; }
+  _sync() {
+    if (/^\s*(SELECT|WITH)|RETURNING/i.test(this.sql)) return { results: this._p().all(...this.args) };
+    const r = this._p().run(...this.args); return { meta: { changes: Number(r.changes) } };
+  }
+}
+
+export function makeDb({ upTo = Infinity } = {}) {
+  const raw = new sqlite.DatabaseSync(':memory:');
+  const d1 = {
+    raw,
+    prepare: (sql) => new Stmt(raw, sql),
+    async batch(stmts) { raw.exec('BEGIN'); try { const out = stmts.map((s) => s._sync()); raw.exec('COMMIT'); return out; } catch (e) { raw.exec('ROLLBACK'); throw e; } },
+    exec: async (sql) => raw.exec(sql),
+  };
+  const dir = path.join(ROOT, 'migrations');
+  for (const f of fs.readdirSync(dir).filter((x) => /^\d{4}_.*\.sql$/.test(x)).sort()) {
+    if (Number(f.slice(0, 4)) > upTo) break;
+    raw.exec(fs.readFileSync(path.join(dir, f), 'utf8'));
+  }
+  return d1;
+}
+
+export function applyMigration(d1, number) {
+  const dir = path.join(ROOT, 'migrations');
+  const f = fs.readdirSync(dir).find((x) => x.startsWith(String(number).padStart(4, '0')));
+  d1.raw.exec(fs.readFileSync(path.join(dir, f), 'utf8'));
+}
+
+// An env like production's, with a fake mailer that records what it was asked to send.
+export function makeEnv(db) {
+  const sent = [];
+  return {
+    DB: db, PNP_SHEET_FIXTURE: '1', PNP_ADMIN_PASSWORD: 'local-test-pass', PNP_ADMIN_SESSION_KEY: 'test-session-key',
+    MAILER: { fetch: async (_u, init) => { sent.push(JSON.parse(init.body)); return Response.json({ ok: true, messageId: 'x' }); } },
+    sent,
+  };
+}
+
+// Drive the real router: { method, path, form, headers } -> Response.
+export async function call(handler, env, method, p, { form = null, headers = {} } = {}) {
+  const url = `https://porchandparty901.com${p}`;
+  let body;
+  if (form) { body = new FormData(); for (const [k, v] of Object.entries(form)) (Array.isArray(v) ? v : [v]).forEach((x) => body.append(k, x)); }
+  const request = new Request(url, { method, body, headers: { Origin: 'https://porchandparty901.com', ...headers } });
+  const params = {};
+  const m = p.match(/^\/api\/calendar\/([^/?]+)/);
+  if (m) params.token = m[1];
+  return handler({ request, env, params, next: async () => new Response('next') });
+}

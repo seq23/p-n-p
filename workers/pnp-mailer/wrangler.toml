@@ -11,3 +11,14 @@ preview_urls = false
 [[send_email]]
 name = "EMAIL"
 allowed_sender_addresses = ["hello@porchandparty901.com"]
+
+# Day-before reminders (functions/_lib/reminders.mjs): 10 AM America/Chicago all year. Two UTC
+# crons because of daylight saving; the handler runs only the one that is 10 AM in Memphis.
+[triggers]
+crons = ["0 15 * * *", "0 16 * * *"]
+
+# The admin console's database: reminders read tomorrow's bookings and record email_reminded_at.
+[[d1_databases]]
+binding = "DB"
+database_name = "pnp-admin"
+database_id = "a78e157d-177d-44a0-9418-dcfa6e735bd0"

@@ -1,7 +1,12 @@
 // Server-rendered pages for the /admin console. Built for one non-technical person on a phone:
 // plain words, one obvious button per step, big tap targets (48 px+), 16 px+ type, no hover-only
-// controls, no framework, no analytics. Secondary things fold under "More".
-import { esc, money, lineTotal, invoiceTotal, prettyDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
+// controls, no framework, no analytics. Every button and link carries data-help + a title from
+// the one map in helptext.mjs, primary actions carry a visible helper line under them, every
+// screen opens with a numbered 1-2-3 and (except Requests itself) a Back link.
+import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
+import { tip, hint, stepsBar, helpGlossary, STEPS } from './helptext.mjs';
+import { kindCss } from './kinds.mjs';
+import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 
 const CSS = `
 :root{--cream:#faf7f2;--ink:#3b302a;--accent:#b85f40;--line:#e3d8cb;--muted:#5f5148;--card:#fff;--ok:#3f6b3a;--warn:#8a5212}
@@ -61,17 +66,80 @@ table.list a{display:inline-block;min-height:32px}
 .pic{pointer-events:none;margin:8px 0;max-width:320px;padding:8px;border:1px dashed #cbbcad;border-radius:16px;background:var(--cream)}
 `;
 
-export function layout(title, body, { authed = true } = {}) {
-  const nav = authed ? `<nav><a href="/admin/">Requests</a><a href="/admin/invoices">Invoices</a><a href="/admin/settings">Settings</a><a href="/admin/help">How this works</a>
-    <form method="post" action="/admin/logout" style="display:inline"><button type="submit">Sign out</button></form></nav>` : '';
+const EXTRA_CSS = `
+.back{display:inline-flex;align-items:center;min-height:48px;font-weight:600;font-size:1.05rem;text-decoration:none;margin:0 0 4px}
+.topsteps{list-style:none;margin:0 0 16px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;display:grid;gap:8px}
+.topsteps li{display:flex;gap:10px;align-items:flex-start;font-size:1.05rem}
+.topsteps .n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
+.hint{margin:4px 2px 0;color:var(--muted);font-size:.95rem;line-height:1.35}
+.act{min-width:0}
+.subnav{display:flex;flex-wrap:wrap;gap:8px;padding:10px 16px;background:#f3ece3;border-bottom:1px solid var(--line)}
+.subnav .act{flex:1 1 220px}
+@media(max-width:560px){.subnav .act{flex-basis:100%}}
+details.confirm>summary,details.disclose>summary{list-style:none}
+details.confirm>summary::-webkit-details-marker,details.disclose>summary::-webkit-details-marker{display:none}
+details.disclose{margin-top:12px;border-top:1px solid var(--line)}
+details.disclose>summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600;color:var(--accent)}
+details.disclose>summary::before{content:"\\25B8";display:inline-block;width:1.2em}
+details.disclose[open]>summary::before{content:"\\25BE"}
+.confirmbox{margin-top:10px;padding:14px;border:2px solid var(--warn);border-radius:12px;background:#fff8ea}
+.confirmbox p{margin:0 0 10px;font-size:1.05rem}
+.confirmbox .actions{margin-top:0}
+.paybox{border:2px solid var(--line);border-radius:14px;padding:14px;margin-top:14px;background:#fff}
+.paybox h3{margin:0 0 4px}.paybox .words{font-size:1.1rem;font-weight:600;margin:0 0 10px}
+.chip.void{background:#e6e6e6;border-color:#c4c4c4;color:#444}.chip.step{background:#e8eefa;border-color:#b9c7ea;color:#2a3b70}.chip.job_done{background:#ececec;color:#333}
+.progress{list-style:none;padding:0;margin:10px 0;display:flex;flex-wrap:wrap;gap:6px}
+.progress li{display:inline-flex;align-items:center;gap:4px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:.95rem;color:var(--muted)}
+.progress li.done{color:#2f5a2b;background:#eef6ec;border-color:#b2d3ab}.progress li.now{color:#fff;background:var(--accent);border-color:var(--accent);font-weight:700}
+.progress .pn{font-weight:700}
+.chip.scheduled,.chip.sched{background:#e3f0f4;border-color:#a9cfdb;color:#1f5566}
+.stamp{display:block;text-align:center;font:700 4rem/1 Inter,Arial,sans-serif;letter-spacing:.2em;color:#8f3427;border:6px solid #8f3427;border-radius:14px;padding:10px 0;margin:10px 0 14px;transform:rotate(-4deg);opacity:.85}
+.undo-slot{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:0 12px 12px}
+.undo-slot .notice{max-width:760px;margin:0 auto;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;font-size:1.15rem;box-shadow:0 4px 18px rgba(0,0,0,.15)}
+.undo-slot form{margin:0}
+.gloss dl{margin:0}.gloss .g{padding:10px 0;border-bottom:1px solid var(--line);break-inside:avoid}.gloss dt{font-size:1.05rem}.gloss dd{margin:2px 0 0}
+.gwarn{margin-top:4px;color:#8f3427;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.k{display:inline-block;padding:2px 8px;border-radius:8px;font-size:.85rem;font-weight:600;border-left:6px solid;background:#fff;line-height:1.3}
+${kindCss()}
+.calwrap{display:grid;gap:16px}@media(min-width:960px){.wrap.wide{max-width:1180px}.calwrap{grid-template-columns:1fr 300px}}
+.monthbar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 0 10px}
+.month{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.month .dow{text-align:center;font-weight:600;color:var(--muted);font-size:.85rem;padding:4px 0}
+.month .day{display:block;min-height:76px;background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px;text-decoration:none;color:var(--ink);overflow:hidden}
+.month .day.out{opacity:.45}.month .day.today{border:2px solid var(--accent)}
+.month .day .d{font-weight:700;font-size:1.05rem}
+.month .day .k{display:block;margin-top:2px;font-size:.72rem;padding:1px 4px;overflow-wrap:anywhere}
+.month .day.over{outline:3px dashed var(--accent);outline-offset:-3px}
+@media(min-width:700px){.month .day{min-height:110px}.month .day .k{font-size:.8rem}}
+.upcoming .item,.booking{display:block;padding:12px 0;border-bottom:1px solid var(--line)}
+.unsched .u{background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px;margin:0 0 8px}
+.unsched .u[draggable=true]{cursor:grab}
+.bigcall{font-size:1.25rem}
+@media print{header.top,.subnav,.noprint,.back,.topsteps{display:none!important}body{background:#fff}.card{border:0;padding:0;margin:0 0 10px}.gloss .g{padding:4px 0}}
+`;
+
+export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false } = {}) {
+  const nav = authed ? `<nav aria-label="Main">
+    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/archive"${tip('nav.archive')}>Put away</a>
+    <a href="/admin/invoices"${tip('nav.invoices')}>Invoices</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>How to use this</a>
+    <form method="post" action="/admin/logout" style="display:inline"><button type="submit"${tip('nav.signout')}>Sign out</button></form></nav>` : '';
+  const backLink = back ? `<a class="back" href="${esc(back.href)}"${tip('nav.back')}>&larr; ${esc(back.label || 'Back')}</a>` : '';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <meta name="format-detection" content="telephone=no">
 <title>${esc(title)} · Porch &amp; Party</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-<style>${CSS}</style></head><body>
-<header class="top"><a class="brand" href="/admin/">Porch &amp; Party</a>${nav}</header>
-<main class="wrap">${body}</main></body></html>`;
+<style>${CSS}${EXTRA_CSS}</style></head><body>
+<header class="top"><a class="brand" href="/admin/"${tip('nav.brand')}>Porch &amp; Party</a>${nav}</header>${subnav}
+<main class="wrap${wide ? ' wide' : ''}">${backLink}${screen ? stepsBar(screen) : ''}${body}</main></body></html>`;
+}
+
+const BACK_REQUESTS = { href: '/admin/', label: 'Back to requests' };
+
+// A button/link with its helper line underneath.
+function act(html, key) {
+  return `<div class="act">${html}${hint(key)}</div>`;
 }
 
 export function loginPage({ error = '', disabled = false } = {}) {
@@ -82,18 +150,18 @@ export function loginPage({ error = '', disabled = false } = {}) {
   <form method="post" action="/admin/login">
     <label for="pw">Password</label>
     <input id="pw" name="password" type="password" autocomplete="current-password" required autofocus>
-    <div style="margin-top:16px"><button class="btn primary" type="submit">Sign in</button></div>
-  </form></div>`, { authed: false });
+    <div style="margin-top:16px"><button class="btn primary" type="submit"${tip('login.submit')}>Sign in</button></div>
+  </form></div>`, { authed: false, screen: 'signin' });
 }
 
 function chip(status) {
   return `<span class="chip ${esc(status)}">${esc(STATUS_LABELS[status] || status)}</span>`;
 }
 
-function link(url, label) {
+function link(url, label, key) {
   if (!url) return '';
   const safe = /^https?:\/\//i.test(url) ? url : `https://${url.replace(/^\/+/, '')}`;
-  return `<a href="${esc(safe)}" target="_blank" rel="noopener noreferrer">${esc(label || url)}</a>`;
+  return `<a href="${esc(safe)}" target="_blank" rel="noopener noreferrer"${tip(key)}>${esc(label || url)}</a>`;
 }
 
 function kv(items) {
@@ -140,71 +208,220 @@ export function wantSummary(r) {
 export function setupBanner(missing) {
   if (!missing.length) return '';
   return `<div class="notice warn"><strong>Finish setup: add your payment details.</strong><br>Customers need your ${esc(missing.join(', ').replace(/, ([^,]*)$/, ' and $1'))} to pay you.
-    <div style="margin-top:10px"><a class="btn inline" href="/admin/settings">Open Settings</a></div></div>`;
+    <div style="margin-top:10px"><a class="btn inline" href="/admin/settings"${tip('settings.open')}>Open Settings</a></div></div>`;
 }
 
-export function dashboardPage({ requests, statuses, checklists = {}, folderUrl, sheetError, flash, missingPayment = [] }) {
+// ---- Payment box (request card and invoice page) ---------------------------------------
+// Money actions live here, never under "More options". Each one asks first, in words.
+const METHODS = [['zelle', 'Zelle'], ['cashapp', 'Cash App'], ['cash', 'Cash'], ['card', 'Card'], ['other', 'Other']];
+function methodPicker() {
+  return `<label>How did they pay?</label><select name="method">${METHODS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>`;
+}
+
+function confirmStep({ key, yesKey, label, question, action, hidden, danger = false, extra = '' }) {
+  return `<div class="act"><details class="confirm"><summary class="btn ${danger ? 'danger' : 'ghost'}"${tip(key)}>${esc(label)}</summary>
+    <div class="confirmbox"><p><strong>${esc(question)}</strong></p><div class="actions">
+      <form method="post" action="${esc(action)}">${hidden}${extra}<button class="btn${danger ? ' danger' : ''}" type="submit"${tip(yesKey)}>${esc(LABEL[yesKey])}</button></form>
+      <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('pay.no')}>No, go back</button></div></div></details>${hint(key)}</div>`;
+}
+const LABEL = { 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
+  'day.deleteYes': 'Yes, delete it', 'set.newTokenYes': 'Yes, make a new link', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
+
+const hiddenInputs = (obj) => Object.entries(obj).map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(v)}">`).join('');
+
+export function payWords(status, { rest = 0, hasInvoice = true } = {}) {
+  return ({
+    new: hasInvoice ? 'Invoice made, not sent yet. Nothing paid.' : 'No invoice yet. Nothing paid.',
+    draft: 'Not sent yet. Nothing paid.',
+    scheduled: 'On the calendar. Nothing paid yet.',
+    invoiced: 'Invoice sent. Not paid yet.', sent: 'Invoice sent. Not paid yet.',
+    deposit_paid: rest > 0 ? `Deposit received. ${money(rest)} is still owed.` : 'Deposit received. The rest is still owed.',
+    paid: 'Paid in full.', done: 'Job finished.',
+    void: 'Void. Nothing is owed. The customer was not told.',
+  })[status] || STATUS_LABELS[status] || status;
+}
+
+// target: { action, field, extra } where field is 'action' (invoice) or 'status' (request).
+export function paymentBox({ who, status, plan = 'half', rest = 0, hasInvoice = true, number = '', target, balanceLine = '' }) {
+  const send = (value) => hiddenInputs({ ...target.extra, [target.field]: value });
+  const isInvoice = target.field === 'action';
+  const v = (inv, req) => (isInvoice ? inv : req);
+  const out = [];
+  if (status === 'void') {
+    out.push(act(`<form method="post" action="${esc(target.action)}">${send(v('unvoid', 'unvoid'))}<button class="btn ghost" type="submit"${tip('pay.unvoid')}>Bring back (undo Void)</button></form>`, 'pay.unvoid'));
+  } else {
+    const paid = status === 'paid' || status === 'done';
+    if (!paid && status !== 'deposit_paid' && plan !== 'full') {
+      out.push(confirmStep({ key: 'pay.deposit', yesKey: 'pay.depositYes', label: 'Mark deposit received', question: `Mark ${who}'s deposit as received? Only do this after the money is in your account.`, action: target.action, hidden: send('deposit_paid'), extra: isInvoice ? methodPicker() : '' }));
+    }
+    if (!paid) {
+      out.push(confirmStep({ key: 'pay.paid', yesKey: 'pay.paidYes', label: 'Mark paid in full', question: `Mark ${who} as paid in full? Only do this after the money is in your account.`, action: target.action, hidden: send('paid'), extra: isInvoice ? methodPicker() : '' }));
+    }
+    if (status === 'deposit_paid' || status === 'paid') {
+      out.push(confirmStep({ key: 'pay.unpaid', yesKey: 'pay.unpaidYes', label: 'That was a mistake: mark as not paid', question: `Mark ${who} as not paid? Only do this to fix a mistake.`, action: target.action, hidden: send(v('unpaid', 'unpaid')) }));
+    }
+    const voidQ = number ? `Void invoice ${number} for ${who}? The customer is not told. Use this when the job is cancelled or the invoice was a mistake.`
+      : `Void the request from ${who}? The customer is not told. Use this when the job is cancelled or the request was a mistake.`;
+    out.push(confirmStep({ key: 'pay.void', yesKey: 'pay.voidYes', label: 'Void', question: voidQ, action: target.action, hidden: send('void'), danger: true }));
+  }
+  return `<section class="paybox" data-payment><h3>Payment</h3><p class="words" data-pay-words>${esc(payWords(status, { rest, hasInvoice }))}</p>${balanceLine ? `<p data-balance>${balanceLine}</p>` : ''}<div class="actions">${out.join('')}</div></section>`;
+}
+
+// ---- Requests --------------------------------------------------------------------------
+const DASH_JS = `
+(function(){
+  var tpl=document.getElementById('undo-tpl'),slot=document.getElementById('undo-slot');if(!slot)return;
+  function post(f){return fetch(f.action,{method:'POST',body:new FormData(f),headers:{'X-Pnp-Fetch':'1'},credentials:'same-origin'});}
+  function wire(banner){var f=banner.querySelector('form'),t=setTimeout(function(){banner.remove();},6000);
+    f.addEventListener('submit',function(e){e.preventDefault();clearTimeout(t);post(f).then(function(){location.href='/admin/';}).catch(function(){f.submit();});});}
+  document.addEventListener('submit',function(e){var f=e.target;if(!f.matches('[data-archive]'))return;e.preventDefault();var b=f.querySelector('button');b.disabled=true;
+    post(f).then(function(r){if(!r.ok)throw new Error(String(r.status));var card=f.closest('[data-card]');if(card)card.remove();
+      slot.innerHTML=tpl.innerHTML;var banner=slot.firstElementChild;banner.querySelector('[name=r]').value=f.querySelector('[name=r]').value;wire(banner);})
+    .catch(function(){f.submit();});});
+  var pre=slot.querySelector('[data-autohide]');if(pre)wire(pre);
+})();`;
+
+function undoBanner(rk) {
+  return `<div class="notice ok" data-autohide><strong>Put away.</strong><form method="post" action="/admin/requests/unarchive">${hiddenInputs({ r: rk })}<button class="btn inline" type="submit"${tip('req.undo')}>Undo</button></form></div>`;
+}
+
+function subnav() {
+  return `<div class="subnav" aria-label="Also on this page">
+    ${act(`<a class="btn ghost" href="/admin/invoices/new"${tip('sub.blankInvoice')}>Start a blank invoice</a>`, 'sub.blankInvoice')}
+    ${act(`<a class="btn ghost" href="/admin/checklist" target="_blank" rel="noopener"${tip('sub.blankChecklist')}>Print a blank checklist</a>`, 'sub.blankChecklist')}
+    ${act(`<a class="btn ghost" href="/admin/?fresh=1"${tip('sub.refresh')}>Check for new requests now</a>`, 'sub.refresh')}
+    ${act(`<a class="btn ghost" href="/admin/day/today"${tip('sub.today')}>Today's list</a>`, 'sub.today')}
+    ${act(`<a class="btn ghost" href="/admin/search"${tip('sub.find')}>Find a customer</a>`, 'sub.find')}
+  </div>`;
+}
+
+function requestDetails(r) {
+  return `<details class="disclose"><summary${tip('card.details')}>Show phone, email, ID and all answers</summary>
+    ${kv([
+      ['Phone', r.phone ? `<a href="tel:${esc(r.phone.replace(/[^\d+]/g, ''))}"${tip('card.phone')}>${esc(r.phone)}</a>` : '', true],
+      ['Email', r.email ? `<a href="mailto:${esc(r.email)}"${tip('card.email')}>${esc(r.email)}</a>` : '', true],
+      ['Date of birth', r.dob],
+      ['Social media', [r.social1, r.social2].filter(Boolean).map((u) => link(u, '', 'card.social')).join('<br>'), true],
+      ['Photo ID', r.idFile ? r.idFile.split(/,\s*/).map((u, i) => link(u, i ? `Open ID photo ${i + 1}` : 'Open ID photo', 'card.idPhoto')).join('<br>') : '', true],
+      ['Found us through', r.heard],
+      ['What they picked', r.need],
+      ...r.rentals.map((x) => [x.label, x.value]),
+      ...r.decor.map((x) => [x.label, x.value]),
+      ...r.other.map((x) => [x.label, x.value]),
+    ])}
+  </details>`;
+}
+
+function requestPayment(r, st, inv) {
+  const who = r.name || 'this customer';
+  if (inv) {
+    const total = inv.total_cents || 0;
+    const bal = inv.balance;
+    return paymentBox({ who, status: inv.status, plan: payPlanOf(inv, total), rest: bal ? bal.remaining : total - (inv.deposit_due_cents || 0), number: inv.number,
+      balanceLine: bal && !bal.void ? esc([bal.owed > 0 ? `Owes ${money(bal.owed)}` : 'Paid in full ✓', bal.refundable ? `Damage deposit ${money(bal.refundable)}, refundable` : ''].filter(Boolean).join(' · ')) : '',
+      target: { action: `/admin/invoices/${inv.id}/status`, field: 'action', extra: { back: '/admin/' } } });
+  }
+  return paymentBox({ who, status: st.status, hasInvoice: false, target: { action: '/admin/requests/status', field: 'status', extra: { r: b64urlText(r.key) } } });
+}
+
+// schedule: { [request_key]: { date, id } } earliest booking per request.
+export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '' }) {
   const top = `<div class="big-buttons">
-    <a class="btn ghost" href="${esc(SHEET_URL)}" target="_blank" rel="noopener noreferrer">Open responses sheet</a>
-    <a class="btn ghost" href="${esc(folderUrl)}" target="_blank" rel="noopener noreferrer">Open ID folder</a>
+    ${act(`<a class="btn ghost" href="${esc(SHEET_URL)}" target="_blank" rel="noopener noreferrer"${tip('req.sheet')}>Open responses sheet</a>`, 'req.sheet')}
+    ${act(`<a class="btn ghost" href="${esc(folderUrl)}" target="_blank" rel="noopener noreferrer"${tip('req.idFolder')}>Open ID folder</a>`, 'req.idFolder')}
   </div>`;
   const err = sheetError ? `<div class="notice err"><strong>The requests could not be loaded right now.</strong> ${/not shared/i.test(sheetError)
     ? `The responses sheet needs to be shared with the site. In Google Sheets tap Share and add <code>${esc(SA_EMAIL)}</code> as a Viewer.`
     : 'Please try again in a minute.'}<div class="muted" style="margin-top:6px;font-size:.95rem">Details: ${esc(sheetError)}</div></div>` : '';
   const cards = requests.map((r) => {
     const st = statuses[r.key] || { status: 'new' };
+    const inv = st.invoice_id ? invoices[st.invoice_id] : null;
     const rk = b64urlText(r.key);
     const cl = checklists[r.key];
     const want = wantSummary(r);
-    return `<article class="card">
-      <div class="spread"><h3 style="margin:0">${esc(r.name || 'No name given')}</h3>${chip(st.invoice_id && st.status === 'new' ? 'draft' : st.status)}</div>
+    const sched = schedule[r.key];
+    const ret = returns[r.key];
+    const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
+    const anyRental = Boolean(r.gamesAnswer) || r.wantsRentals;
+    const pr = deriveProgress({ st, inv, scheduled: Boolean(sched), ret, rental });
+    const returned = ret && ret.returned_at;
+    const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
+    const chips = [
+      pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : `<span class="chip ${pr.current === 'paid' ? 'paid' : (pr.damaged && pr.current === 'job_done' ? 'deposit_paid' : 'step')}" data-step="${pr.current}">${esc(pr.finished ? 'Finished: job done and paid' : pr.label)}</span>`,
+      pr.paidEarly ? '<span class="chip paid" data-paid-early>Paid in full ✓</span>' : '',
+      sched && !pr.void ? `<span class="chip sched" data-scheduled>Scheduled for ${esc(shortDate(sched.date))}</span>` : '',
+      returned ? (ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : `<span class="chip paid" data-returned>Returned ${esc(shortDate(String(returned).slice(0, 10)))}</span>`) : '',
+    ].join('');
+    const progress = pr.void ? '' : `<ol class="progress" data-progress>${pr.steps.map((x) => `<li class="${x.done ? 'done' : ''}${x.key === pr.current ? ' now' : ''}"><span class="pn">${x.done ? '✓' : x.n}</span> ${esc(x.label)}</li>`).join('')}</ol>`;
+    // The next step's button is the big one.
+    const next = pr.void ? '' : ({
+      new: inv ? act(`<a class="btn primary" href="/admin/invoices/${inv.id}"${tip('card.openInvoice')}>Open invoice</a>`, 'card.openInvoice') : act(`<a class="btn primary" href="/admin/invoices/new?r=${rk}"${tip('card.createInvoice')}>Create invoice</a>`, 'card.createInvoice'),
+      invoiced: '<p class="hint" style="margin:0">Next: when the deposit arrives, tap <strong>Mark deposit received</strong> in the Payment box below.</p>',
+      deposit_paid: act(`<a class="btn primary" href="/admin/calendar/new?r=${rk}"${tip('card.schedule')}>Put on the calendar</a>`, 'card.schedule'),
+      scheduled: anyRental ? act(`<a class="btn primary" href="/admin/returns?k=${rk}"${tip('ret.mark')}>Mark returned</a>`, 'ret.mark')
+        : `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk })}${act(`<button class="btn primary" type="submit"${tip('card.jobDone')}>Mark job done</button>`, 'card.jobDone')}</form>`,
+      job_done: '<p class="hint" style="margin:0">Next: when the rest of the money arrives, tap <strong>Mark paid in full</strong> in the Payment box below.</p>',
+      paid: '',
+    })[pr.current] || '';
+    const finishedPrompt = pr.finished ? `<div class="notice ok" data-put-away-prompt><strong>Finished: the job is done and it is paid in full.</strong> Put it away?
+      <form method="post" action="/admin/requests/archive" data-archive style="margin-top:8px">${hiddenInputs({ r: rk })}${act(`<button class="btn" type="submit"${tip('card.archive')}>Done — put away</button>`, 'card.archive')}</form></div>` : '';
+    return `<article class="card" data-card="${esc(rk)}">
+      <div class="spread"><h3 style="margin:0">${esc(r.name || 'No name given')}</h3><div class="row">${chips}</div></div>
       <div class="when">${esc(friendlyWhen(r))}</div>
       ${want.map((w) => `<div class="want">${esc(w)}</div>`).join('')}
       ${cl && cl !== 'none' ? `<div class="muted" style="margin-top:4px">Checklist ${cl === 'done' ? 'done ✓' : 'started'}</div>` : ''}
+      ${progress}
+      ${returned && ret.damaged ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : ''}
+      ${finishedPrompt}
+      <div class="actions">${next}</div>
       <div class="actions three">
-        <a class="btn ghost" href="/admin/checklist/online?r=${rk}">Open checklist</a>
-        ${st.invoice_id ? `<a class="btn" href="/admin/invoices/${st.invoice_id}">Open invoice</a>` : `<a class="btn" href="/admin/invoices/new?r=${rk}">Create invoice</a>`}
-        <a class="btn ghost" href="/admin/checklist?r=${rk}" target="_blank" rel="noopener">Print checklist</a>
+        ${act(`<a class="btn ghost" href="/admin/checklist/online?r=${rk}"${tip('card.checklist')}>Open checklist</a>`, 'card.checklist')}
+        ${inv && pr.current !== 'new' ? act(`<a class="btn ghost" href="/admin/invoices/${inv.id}"${tip('card.openInvoice')}>Open invoice</a>`, 'card.openInvoice') : ''}
+        ${!inv && pr.current !== 'new' ? act(`<a class="btn ghost" href="/admin/invoices/new?r=${rk}"${tip('card.createInvoice')}>Create invoice</a>`, 'card.createInvoice') : ''}
+        ${act(`<a class="btn ghost" href="/admin/checklist?r=${rk}" target="_blank" rel="noopener"${tip('card.printChecklist')}>Print checklist</a>`, 'card.printChecklist')}
+        ${pr.current !== 'deposit_paid' && !pr.void ? act(`<a class="btn ghost" href="/admin/calendar/new?r=${rk}"${tip('card.schedule')}>Put on the calendar</a>`, 'card.schedule') : ''}
+        ${sched ? act(`<a class="btn ghost" href="/admin/day/${esc(sched.date)}"${tip('card.seeCal')}>See it on the calendar (${esc(shortDate(sched.date))})</a>`, 'card.seeCal') : ''}
+        ${returned ? act(`<a class="btn ghost" href="/admin/returns?k=${rk}"${tip('ret.see')}>See the check-in</a>`, 'ret.see') : ''}
+        ${anyRental && !returned && pr.current !== 'scheduled' && sched ? act(`<a class="btn ghost" href="/admin/returns?k=${rk}"${tip('ret.mark')}>Mark returned</a>`, 'ret.mark') : ''}
+        ${st.job_done_at && !returned ? `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk, undo: '1' })}${act(`<button class="btn ghost" type="submit"${tip('card.undoJobDone')}>Undo job done</button>`, 'card.undoJobDone')}</form>` : ''}
       </div>
-      <details class="more"><summary>More</summary>
-        ${kv([
-          ['Phone', r.phone ? `<a href="tel:${esc(r.phone.replace(/[^\d+]/g, ''))}">${esc(r.phone)}</a>` : '', true],
-          ['Email', r.email ? `<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>` : '', true],
-          ['Date of birth', r.dob],
-          ['Social media', [r.social1, r.social2].filter(Boolean).map((u) => link(u)).join('<br>'), true],
-          ['Photo ID', r.idFile ? r.idFile.split(/,\s*/).map((u, i) => link(u, i ? `Open ID photo ${i + 1}` : 'Open ID photo')).join('<br>') : '', true],
-          ['Found us through', r.heard],
-          ['What they picked', r.need],
-          ...r.rentals.map((x) => [x.label, x.value]),
-          ...r.decor.map((x) => [x.label, x.value]),
-          ...r.other.map((x) => [x.label, x.value]),
-        ])}
-        <form method="post" action="/admin/requests/status">
-          <input type="hidden" name="r" value="${rk}">
-          <label for="st-${rk}">Change status by hand</label>
-          <select id="st-${rk}" name="status">
-            ${['new', 'invoiced', 'deposit_paid', 'paid', 'done'].map((s) => `<option value="${s}"${s === st.status ? ' selected' : ''}>${STATUS_LABELS[s]}</option>`).join('')}
-          </select><div style="margin-top:10px"><button class="btn ghost" type="submit">Save status</button></div>
-        </form>
-      </details>
+      ${requestPayment(r, st, inv)}
+      ${pr.finished ? '' : `<form method="post" action="/admin/requests/archive" data-archive style="margin-top:12px">${hiddenInputs({ r: rk })}
+        ${act(`<button class="btn ghost" type="submit"${tip('card.archive')}>Done — put away</button>`, 'card.archive')}</form>`}
+      ${requestDetails(r)}
     </article>`;
   }).join('');
-  return layout('Requests', `${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${setupBanner(missingPayment)}${top}${err}
-    <h1>Requests</h1>
-    ${requests.length ? cards : (sheetError ? '' : '<div class="card"><p style="margin:0">No requests yet. New ones from the website form show up here within a minute.</p></div>')}
-    <details class="more"><summary>More</summary>
-      <div class="actions"><a class="btn ghost" href="/admin/invoices/new">Start a blank invoice</a>
-      <a class="btn ghost" href="/admin/checklist" target="_blank" rel="noopener">Print a blank checklist</a>
-      <a class="btn ghost" href="/admin/?fresh=1">Check for new requests now</a></div>
-    </details>`);
+  return layout('Requests', `${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}${setupBanner(missingPayment)}
+    <h1>Requests</h1>${extraTop}${top}${err}
+    ${requests.length ? cards : (sheetError ? '' : '<div class="card"><p style="margin:0">No requests waiting. New ones from the website form show up here within a minute. Finished ones are under Put away.</p></div>')}
+    <template id="undo-tpl">${undoBanner('')}</template>
+    <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
+    <script>${DASH_JS}</script>`, { screen: 'requests', subnav: subnav() });
+}
+
+export function archivePage({ requests, statuses, flash = '' }) {
+  const rows = requests.map((r) => {
+    const st = statuses[r.key] || { status: 'new' };
+    const rk = b64urlText(r.key);
+    const label = st.status === 'void' ? 'Void — cancelled' : (STATUS_LABELS[st.status] || st.status);
+    return `<article class="card" data-archived="${esc(rk)}"><div class="spread"><h3 style="margin:0">${esc(r.name || 'No name given')}</h3><span class="chip ${esc(st.status)}">${esc(label)}</span></div>
+      <div class="when">${esc(friendlyWhen(r))}${st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</div>
+      ${wantSummary(r).map((w) => `<div class="want">${esc(w)}</div>`).join('')}
+      <div class="actions">
+        <form method="post" action="/admin/requests/unarchive">${hiddenInputs({ r: rk })}${act(`<button class="btn" type="submit"${tip('pa.bringBack')}>Bring back</button>`, 'pa.bringBack')}</form>
+        ${st.invoice_id ? act(`<a class="btn ghost" href="/admin/invoices/${st.invoice_id}"${tip('card.openInvoice')}>Open invoice</a>`, 'card.openInvoice') : ''}
+      </div></article>`;
+  }).join('');
+  return layout('Put away', `${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}<h1>Put away</h1>
+    ${requests.length ? rows : '<div class="card"><p style="margin:0">Nothing put away yet. Tap <strong>Done — put away</strong> on a finished request to move it here.</p></div>'}`, { screen: 'archive', back: BACK_REQUESTS });
 }
 
 export function invoicesPage({ invoices }) {
-  const rows = invoices.map((i) => `<tr><td><a href="/admin/invoices/${i.id}"><strong>${esc(i.customer_name || 'No name')}</strong></a><div class="muted">${esc(i.number)}</div></td>
+  const rows = invoices.map((i) => `<tr><td><a href="/admin/invoices/${i.id}"${tip('inv.row')}><strong>${esc(i.customer_name || 'No name')}</strong></a><div class="muted">${esc(i.number)}</div></td>
     <td>${chip(i.status)}</td><td class="right">${money(i.total_cents)}</td></tr>`).join('');
   return layout('Invoices', `<h1>Invoices</h1>
     ${invoices.length ? `<div class="card"><table class="list">${rows}</table></div>` : '<div class="card"><p style="margin:0">No invoices yet. Tap <strong>Create invoice</strong> on a request to make one.</p></div>'}
-    <a class="btn ghost" href="/admin/invoices/new">Start a blank invoice</a>`);
+    ${act(`<a class="btn ghost" href="/admin/invoices/new"${tip('sub.blankInvoice')}>Start a blank invoice</a>`, 'sub.blankInvoice')}`, { screen: 'invoices', back: BACK_REQUESTS });
 }
 
 function lineEditor(line) {
@@ -216,7 +433,7 @@ function lineEditor(line) {
       <div class="full"><label>Given back after the event?</label><select name="line_refundable"><option value="0"${line.refundable ? '' : ' selected'}>No</option><option value="1"${line.refundable ? ' selected' : ''}>Yes, it is a refundable deposit</option></select></div>
       <div class="full"><label>Note on this line (optional)</label><input name="line_note" value="${esc(line.note)}"></div>
     </div>
-    <div style="margin-top:10px"><button type="button" class="btn danger" data-remove>Remove this line</button></div>
+    <div style="margin-top:10px"><button type="button" class="btn danger" data-remove${tip('ed.removeLine')}>Remove this line</button></div>
   </div>`;
 }
 
@@ -273,12 +490,12 @@ const SHARE_JS = `
 function paymentWarning(pay) {
   if (pay.complete) return '';
   return `<div class="notice warn"><strong>Payment details are missing.</strong> Add your ${esc(pay.missing.join(', ').replace(/, ([^,]*)$/, ' and $1'))} in Settings before sending, so the customer knows how to pay. If you send now, the email says "Payment details coming".
-    <div style="margin-top:10px"><a class="btn inline ghost" href="/admin/settings">Open Settings</a></div></div>`;
+    <div style="margin-top:10px"><a class="btn inline ghost" href="/admin/settings"${tip('settings.open')}>Open Settings</a></div></div>`;
 }
 
 // One screen: the prefilled invoice as the customer will see it, and ONE button that sends it.
-// Changing anything is possible (under "Change the invoice") but never required.
-export function invoiceEditorPage({ invoice, lines, request, action, title, warnings = [], pay, mode = 'new' }) {
+// Changing anything is possible (under "Change what goes into the total") but never required.
+export function invoiceEditorPage({ invoice, lines, request, action, title, warnings = [], pay, mode = 'new', backHref = '/admin/' }) {
   const blank = { description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 };
   const who = firstName(invoice.customer_name);
   const sendLabel = mode === 'new' ? `Send to ${who}` : `Save and send to ${who}`;
@@ -314,46 +531,49 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
       <label for="dd">Due date</label><input id="dd" name="due_date" type="date" value="${esc(invoice.due_date)}">
       <input type="hidden" name="issue_date" value="${esc(invoice.issue_date)}">
     </div>
-    <details class="more card" style="padding-top:0"${lines.some((l) => l.description && needsPrice(l)) ? ' open' : ''}><summary>Change what goes into the total</summary>
+    <details class="more card" style="padding-top:0"${lines.some((l) => l.description && needsPrice(l)) ? ' open' : ''}><summary${tip('ed.change')}>Change what goes into the total</summary>
       <label for="cn">Customer name</label><input id="cn" name="customer_name" value="${esc(invoice.customer_name)}">
       <label for="ce">Customer email (leave blank if you only text them)</label><input id="ce" name="customer_email" type="email" value="${esc(invoice.customer_email)}">
       <label for="cp">Customer phone</label><input id="cp" name="customer_phone" type="tel" value="${esc(invoice.customer_phone)}">
       <h3 style="margin-top:18px">Lines</h3>
       <div data-lines>${lines.map(lineEditor).join('')}</div>
       <template id="line-tpl">${lineEditor(blank)}</template>
-      <button type="button" class="btn ghost" id="add-line">Add a line</button>
+      <button type="button" class="btn ghost" id="add-line"${tip('ed.addLine')}>Add a line</button>
       <label for="nt">Message to the customer (optional)</label><textarea id="nt" name="notes">${esc(invoice.notes)}</textarea>
-      <div style="margin-top:12px"><button class="btn ghost" type="submit" name="go" value="save">Save without sending</button></div>
+      <div style="margin-top:12px"><button class="btn ghost" type="submit" name="go" value="save"${tip('ed.saveOnly')}>Save without sending</button></div>
     </details>
-    <button class="btn primary" type="submit" name="go" value="preview">See it before sending</button>
-    <button class="btn ghost" type="submit" name="go" value="send" style="margin-top:10px">${esc(sendLabel)} now</button>
+    ${act(`<button class="btn primary" type="submit" name="go" value="preview"${tip('ed.preview')}>See it before sending</button>`, 'ed.preview')}
+    <div style="margin-top:10px">${act(`<button class="btn ghost" type="submit" name="go" value="send"${tip('ed.sendNow')}>${esc(sendLabel)} now</button>`, 'ed.sendNow')}</div>
   </form>
-  <script>${EDITOR_JS}</script>`);
+  <script>${EDITOR_JS}</script>`, { screen: 'invoiceEdit', back: { href: backHref, label: 'Back' } });
 }
 
-export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml = '', smsText = '', pickup = '' }) {
+export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml = '', smsText = '', pickup = '', balance = null }) {
   const total = invoiceTotal(lines);
   const plan = payPlanOf(invoice, total);
   const now = plan === 'full' ? total : invoice.deposit_due_cents;
   const id = invoice.id;
   const who = firstName(invoice.customer_name);
-  const act = (action, label, cls = 'ghost') => `<form method="post" action="/admin/invoices/${id}/status"><input type="hidden" name="action" value="${action}"><button class="btn ${cls}" type="submit">${label}</button></form>`;
-  const sendForm = (label, cls, test = false) => `<form method="post" action="/admin/invoices/${id}/send">${test ? '<input type="hidden" name="test" value="1">' : ''}<button class="btn ${cls}" type="submit">${label}</button></form>`;
+  const status = (action, label, key, cls = 'ghost') => `<form method="post" action="/admin/invoices/${id}/status"><input type="hidden" name="action" value="${action}"><button class="btn ${cls}" type="submit"${tip(key)}>${label}</button></form>`;
+  const sendForm = (label, cls, key, test = false) => `<form method="post" action="/admin/invoices/${id}/send">${test ? '<input type="hidden" name="test" value="1">' : ''}<button class="btn ${cls}" type="submit"${tip(key)}>${label}</button></form>`;
   const voided = invoice.status === 'void';
   const hasEmail = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(invoice.customer_email || '');
   const pdfUrl = `/admin/invoices/${id}/invoice.pdf`;
   const pdfName = `Porch-and-Party-Invoice-${invoice.number}.pdf`;
-  const textBtn = (cls) => `<button type="button" class="btn ${cls}" data-share-pdf="${pdfUrl}" data-name="${esc(pdfName)}" data-text="${esc(smsText)}">Text the invoice (PDF)</button>`;
+  const textBtn = (cls) => `<button type="button" class="btn ${cls}" data-share-pdf="${pdfUrl}" data-name="${esc(pdfName)}" data-text="${esc(smsText)}"${tip('iv.text')}>Text the invoice (PDF)</button>`;
   let main = '';
-  if (voided) main = `<div class="actions">${act('unvoid', 'Bring this invoice back')}</div>`;
-  else if (invoice.status === 'draft' && !hasEmail) main = `<p class="muted" style="margin:0 0 8px">No email on this invoice, so send the PDF by text. Then tap Mark as sent.</p><div class="actions">${textBtn('primary')}${act('texted', 'Mark as sent by text')}</div>`;
-  else if (invoice.status === 'draft') main = `<div class="actions">${sendForm(`Send invoice to ${esc(who)}`, 'primary')}${textBtn('ghost')}${act('texted', 'Mark as sent by text')}</div>`;
-  else if (plan === 'full') main = `<div class="actions">${act('paid', 'Paid in full', invoice.status === 'sent' ? '' : 'ghost')}${sendForm('Resend', 'ghost')}</div>`;
-  else main = `<div class="actions three">${act('deposit_paid', 'Deposit received', invoice.status === 'sent' ? '' : 'ghost')}${act('paid', 'Paid in full', invoice.status === 'deposit_paid' ? '' : 'ghost')}${sendForm('Resend', 'ghost')}</div>`;
+  if (voided) main = '';
+  else if (invoice.status === 'draft' && !hasEmail) main = `<p class="muted" style="margin:0 0 8px">No email on this invoice, so send the PDF by text. Then tap Mark as sent.</p><div class="actions">${act(textBtn('primary'), 'iv.text')}${act(status('texted', 'Mark as sent by text', 'iv.texted'), 'iv.texted')}</div>`;
+  else if (invoice.status === 'draft') main = `<div class="actions">${act(sendForm(`Send invoice to ${esc(who)}`, 'primary', 'iv.send'), 'iv.send')}${act(textBtn('ghost'), 'iv.text')}${act(status('texted', 'Mark as sent by text', 'iv.texted'), 'iv.texted')}</div>`;
+  else main = `<div class="actions">${act(sendForm('Resend', 'ghost', 'iv.resend'), 'iv.resend')}${act(textBtn('ghost'), 'iv.text')}</div>`;
+  const payment = paymentBox({ who: invoice.customer_name || 'this customer', status: invoice.status, plan, rest: balance ? balance.remaining : total - now, number: invoice.number,
+    balanceLine: balance && !balance.void ? esc([balance.owed > 0 ? `Owes ${money(balance.owed)}` : 'Paid in full ✓', balance.paid ? `${money(balance.paid)} received` : '', balance.refundable ? `Damage deposit ${money(balance.refundable)}, refundable` : ''].filter(Boolean).join(' · ')) : '',
+    target: { action: `/admin/invoices/${id}/status`, field: 'action', extra: {} } });
   const preview = emailHtml && !voided ? `<div class="card" style="padding:0;overflow:hidden"><div class="muted" style="padding:10px 14px;border-bottom:1px solid var(--line)">The email the customer gets</div>
     <iframe class="emailframe" title="Invoice email" srcdoc="${esc(emailHtml)}" onload="try{this.style.height=(this.contentDocument.documentElement.scrollHeight+24)+'px'}catch(e){}"></iframe></div>` : '';
   return layout(invoice.customer_name || invoice.number, `<div class="spread"><h1 style="margin:0">${esc(invoice.customer_name || 'Invoice')}</h1>${chip(invoice.status)}</div>
   <p class="muted" style="margin-top:4px">Invoice ${esc(invoice.number)}${invoice.sent_at ? ` · last sent ${esc(prettyDate(invoice.sent_at.slice(0, 10)))}` : ' · not sent yet'}</p>
+  ${voided ? '<div class="stamp" data-void-stamp aria-label="This invoice is void">VOID</div><div class="notice warn">This invoice is void. It cannot be sent or marked paid, and it is off the calendar. It keeps its number.</div>' : ''}
   ${flash ? `<div class="notice ok" style="font-size:1.1rem"><strong>${esc(flash)}</strong></div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
   ${!voided && invoice.status === 'draft' ? paymentWarning(pay) : ''}
   <div class="card"><table class="sumlines">
@@ -370,41 +590,44 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
   </div>
   ${invoice.status === 'draft' ? preview : ''}
   ${main}
-  ${voided || invoice.status === 'draft' ? '' : `<div class="actions" style="margin-top:8px">${textBtn('ghost')}</div>`}
+  ${payment}
   ${invoice.status !== 'draft' ? preview : ''}
-  <details class="more"><summary>More</summary>
+  <details class="disclose"><summary${tip('iv.more')}>More options</summary>
     <div class="actions">
-      ${voided ? '' : `<a class="btn ghost" href="/admin/invoices/${id}/edit">Change the invoice</a>`}
-      <a class="btn ghost" href="/admin/invoices/${id}/preview" target="_blank" rel="noopener">See the email</a>
-      <a class="btn ghost" href="${pdfUrl}?dl=1" download="${esc(pdfName)}">Download the PDF</a>
-      <a class="btn ghost" href="${pdfUrl}" target="_blank" rel="noopener">Open the PDF</a>
-      ${voided ? '' : sendForm('Send a test copy to hello@porchandparty901.com', 'ghost', true)}
-      ${voided || invoice.status === 'done' ? '' : act('done', 'Job finished (mark done)')}
-      ${voided ? '' : act('void', 'Cancel this invoice (void)', 'danger')}
+      ${voided ? '' : `<a class="btn ghost" href="/admin/invoices/${id}/edit"${tip('iv.edit')}>Change the invoice</a>`}
+      <a class="btn ghost" href="/admin/invoices/${id}/preview" target="_blank" rel="noopener"${tip('iv.seeEmail')}>See the email</a>
+      <a class="btn ghost" href="${pdfUrl}?dl=1" download="${esc(pdfName)}"${tip('iv.downloadPdf')}>Download the PDF</a>
+      <a class="btn ghost" href="${pdfUrl}" target="_blank" rel="noopener"${tip('iv.openPdf')}>Open the PDF</a>
+      ${voided ? '' : sendForm('Send a test copy to hello@porchandparty901.com', 'ghost', 'iv.test', true)}
+      ${voided || invoice.status === 'done' ? '' : status('done', 'Job finished (mark done)', 'iv.done')}
     </div>
     <p class="muted">Email: ${esc(invoice.customer_email || 'none')}${invoice.customer_phone ? ` · Phone: ${esc(invoice.customer_phone)}` : ''}</p>
     <label for="sms">Text message to send with the PDF</label><textarea id="sms" readonly rows="4">${esc(smsText)}</textarea>
-    <button type="button" class="btn ghost" data-copy="sms">Copy the message</button>
+    <button type="button" class="btn ghost" data-copy="sms"${tip('iv.copySms')}>Copy the message</button>
   </details>
-  <script>${SHARE_JS}</script>`);
+  <script>${SHARE_JS}</script>`, { screen: 'invoice', back: { href: '/admin/invoices', label: 'Back to invoices' } });
 }
 
+// ---- How to use this (/admin/help): printable, every button from the one map --------------
 export function helpPage() {
-  const pic = (label, cls = '') => `<div class="pic"><span class="btn ${cls}">${esc(label)}</span></div>`;
-  return layout('How this works', `<h1>How this works</h1>
-  <div class="card"><ol class="steps">
-    <li><strong>A request comes in.</strong> It shows up under Requests within a minute, newest at the top, marked <span class="chip new">New</span>.</li>
-    <li><strong>Visit or call, and fill the checklist.</strong> Tap ${pic('Open checklist', 'ghost')} It saves by itself as you type. Or tap ${pic('Print checklist', 'ghost')} for the paper version.</li>
-    <li><strong>Send the invoice.</strong> Tap ${pic('Create invoice')} Prices are already filled in. Check what goes into the total, pick <strong>Half now</strong>, <strong>Full amount</strong> or <strong>Other deposit</strong>, set the due date, then tap ${pic('See it before sending', 'primary')} The email shows on screen. When it looks right, tap ${pic('Send invoice to Jane', 'primary')}</li>
-    <li><strong>When money arrives, tap one button.</strong> ${pic('Deposit received', 'ghost')} ${pic('Paid in full', 'ghost')} If they lost the email, tap ${pic('Resend', 'ghost')}</li>
-  </ol></div>
-  <div class="card"><h2>Good to know</h2>
-    <p>Add your Zelle, Cash App and QR code once in Settings. They go on every invoice.</p><a class="btn ghost" href="/admin/settings">Open Settings</a>
-    <p>Anything less common (change prices, cancel an invoice, see the email) is under <strong>More</strong>.</p>
-    <p>A line that says <strong style="color:#8f3427">Price needed</strong> (usually decor) needs its price typed in under <strong>Change what goes into the total</strong> before it can be sent.</p>
-    <p><strong>No email?</strong> Leave the email blank, save the invoice, then tap <strong>Text the invoice (PDF)</strong>. On your phone that opens Messages with the PDF and a short message attached. Tap <strong>Mark as sent by text</strong> so the dashboard knows.</p>
-    <p>With a deposit, the email asks for the deposit right away and shows the rest (total minus deposit) and its due date. With Full amount, it asks for the whole total by the due date.</p>
-    <p style="margin-bottom:0">Every invoice is also copied to hello@porchandparty901.com.</p></div>`);
+  const tab = (name, screen, extra = '') => `<section class="card"><h2>${esc(name)}</h2><ol class="steps">${STEPS[screen].map((s) => `<li>${esc(s)}</li>`).join('')}</ol>${extra}</section>`;
+  return layout('How to use this', `<h1>How to use this</h1>
+  <p class="noprint">${act(`<button type="button" class="btn ghost inline" onclick="window.print()"${tip('help.print')}>Print this page</button>`, 'help.print')}</p>
+  ${tab('Requests', 'requests', '<p>Each request has a <strong>Payment</strong> box. Money buttons always ask "Are you sure?" first. When a job is over, tap <strong>Done — put away</strong>.</p>')}
+  ${tab('Calendar', 'calendar', '<p>Bookings from invoices appear by themselves. A booking you make or change by hand keeps your date, even if the invoice is sent again.</p>')}
+  ${tab('Put away', 'archive')}
+  ${tab('Invoice', 'invoice')}
+  ${tab('Settings', 'settings')}
+  <section class="card"><h2>Put the bookings in your Google Calendar (one time, on a computer)</h2><ol class="steps">
+    <li>In this console, open <strong>Calendar</strong>, then <strong>Link my Google Calendar</strong>, and tap <strong>Copy link</strong>.</li>
+    <li>On a computer, go to <strong>calendar.google.com</strong> and sign in as valeriektaylor13@gmail.com.</li>
+    <li>On the left, next to <strong>Other calendars</strong>, click the <strong>+</strong>, then <strong>From URL</strong>.</li>
+    <li>Paste the link into the box and click <strong>Add calendar</strong>. It now shows on your phone too.</li>
+  </ol><p>Google refreshes linked calendars on its own schedule, which can take several hours. A brand-new booking is always on the admin <strong>Calendar</strong> tab straight away.</p></section>
+  <section class="card" data-status-meanings><h2>What each status means</h2><table class="sumlines">${STATUS_MEANINGS.map(([k, v], i) => `<tr><td><strong>${i < 6 ? `${i + 1}. ` : ''}${esc(k)}</strong></td><td>${esc(v)}</td></tr>`).join('')}</table>
+    <p style="margin-bottom:0">Payment and the job are tracked separately, so a card can say <strong>Scheduled</strong> and <strong>Paid in full ✓</strong> at the same time. It is <strong>Finished</strong> when the job is done and it is paid in full.</p></section>
+  <h2 style="margin-top:22px">Every button, screen by screen</h2>
+  ${helpGlossary()}`, { screen: 'help', back: BACK_REQUESTS });
 }
 
 export function settingsPage({ settings, flash, error, hasQr }) {
@@ -418,21 +641,33 @@ export function settingsPage({ settings, flash, error, hasQr }) {
     ${hasQr ? '<div style="margin:6px 0"><img src="/api/admin/qr.png" alt="Your QR code" width="160" height="160" style="border:1px solid var(--line);border-radius:10px"></div>' : '<div class="muted">No QR code yet.</div>'}
     <input id="q" name="qr" type="file" accept="image/png,image/jpeg">
     ${hasQr ? '<label class="row" style="color:var(--ink);gap:10px;min-height:48px"><input type="checkbox" name="remove_qr" value="1" style="width:24px;min-height:24px"> Remove the QR code</label>' : ''}
-    <details class="more"><summary>More</summary>
+    <details class="disclose"><summary${tip('set.business')}>Business name and address</summary>
       <label for="bn">Business name on invoices</label><input id="bn" name="business_name" value="${esc(settings.business_name || 'Porch & Party')}">
       <label for="ba">Address line on invoices</label><input id="ba" name="business_address" placeholder="Memphis, Tennessee" value="${esc(settings.business_address || '')}">
       <label for="f">Link to the Google Drive folder with ID photos (only if the button on Requests opens the wrong place)</label><input id="f" name="id_folder_url" value="${esc(settings.id_folder_url || '')}">
     </details>
-    <div style="margin-top:16px"><button class="btn primary" type="submit">Save</button></div>
+    <input type="hidden" name="day_list_phone" value="${esc(settings.day_list_phone || '901-355-1518')}"><input type="hidden" name="day_list_email" value="${esc(settings.day_list_email || 'hello@porchandparty901.com')}">
+    <div style="margin-top:16px">${act(`<button class="btn primary" type="submit"${tip('set.save')}>Save</button>`, 'set.save')}</div>
   </form>
-  <details class="more card" style="padding-top:0"><summary>Change password</summary>
+  <section class="card"><h2>Google Calendar</h2>
+    ${act(`<a class="btn" href="/admin/calendar/link"${tip('cal.link')}>Link my Google Calendar</a>`, 'cal.link')}
+    <div style="margin-top:12px">${confirmStep({ key: 'set.newToken', yesKey: 'set.newTokenYes', label: 'Make a new private calendar link', question: 'Make a new calendar link? The old link stops working, so Google Calendar stops updating until you add the new link there again.', action: '/admin/settings/calendar-token', hidden: '', danger: true })}</div>
+  </section>
+  <form class="card" method="post" action="/admin/settings" enctype="multipart/form-data">
+    <h2>My day list</h2>
+    ${['zelle', 'cashapp', 'business_name', 'business_address', 'id_folder_url'].map((k) => `<input type="hidden" name="${k}" value="${esc(settings[k] || (k === 'business_name' ? 'Porch & Party' : ''))}">`).join('')}
+    <label for="dlp">My phone number for my day list</label><input id="dlp" name="day_list_phone" type="tel" value="${esc(settings.day_list_phone || '901-355-1518')}">
+    <label for="dle">My email for my day list</label><input id="dle" name="day_list_email" type="email" value="${esc(settings.day_list_email || 'hello@porchandparty901.com')}">
+    <div style="margin-top:12px">${act(`<button class="btn" type="submit"${tip('set.saveDayList')}>Save my day list details</button>`, 'set.saveDayList')}</div>
+  </form>
+  <details class="disclose card" style="padding-top:0"><summary${tip('set.password')}>Change password</summary>
   <form method="post" action="/admin/settings/password">
     <label for="cur">Current password</label><input id="cur" name="current" type="password" autocomplete="current-password" required>
     <label for="np">New password (at least 10 letters or numbers)</label><input id="np" name="next" type="password" autocomplete="new-password" minlength="10" required>
     <label for="np2">New password again</label><input id="np2" name="confirm" type="password" autocomplete="new-password" minlength="10" required>
     <p class="muted">Changing it signs out every other phone or computer.</p>
-    <button class="btn" type="submit">Change password</button>
-  </form></details>`);
+    <button class="btn" type="submit"${tip('set.passwordSave')}>Change password</button>
+  </form></details>`, { screen: 'settings', back: BACK_REQUESTS });
 }
 
 const CHECKLIST_CSS = `
@@ -470,7 +705,8 @@ const CHECKLIST_JS = `
     img.onerror=function(){rej(new Error('could not read that image'));};img.src=URL.createObjectURL(f);});}
   if(file)file.addEventListener('change',function(){var files=[].slice.call(file.files);file.value='';(function next(){var f=files.shift();if(!f){pstate.textContent='';return;}
     pstate.textContent='Uploading…';shrink(f).then(function(b){return fetch(photosUrl,{method:'POST',headers:{'Content-Type':'image/jpeg'},body:b,credentials:'same-origin'});})
-    .then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||r.status);grid.insertAdjacentHTML('beforeend','<figure data-photo="'+j.id+'"><a href="'+j.url+'" target="_blank" rel="noopener"><img src="'+j.url+'" alt="Walk-through photo" loading="lazy"></a><button type="button" class="btn danger" data-del="'+j.url+'">Delete</button></figure>');});})
+    .then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||r.status);var fig=document.createElement('figure');fig.setAttribute('data-photo',j.id);fig.innerHTML=document.getElementById('photo-tpl').innerHTML+document.getElementById('del-tpl').innerHTML;
+      var a=fig.querySelector('a');a.href=j.url;a.innerHTML='<img src="'+j.url+'" alt="Walk-through photo" loading="lazy">';fig.querySelector('[data-del]').setAttribute('data-del',j.url);grid.appendChild(fig);});})
     .then(next).catch(function(e){pstate.textContent='Photo not added: '+e.message;});})();});
   if(grid)grid.addEventListener('click',function(e){var u=e.target.dataset&&e.target.dataset.del;if(!u||!confirm('Delete this photo?'))return;
     fetch(u,{method:'DELETE',credentials:'same-origin'}).then(function(r){if(r.ok)e.target.closest('figure').remove();});});
@@ -478,6 +714,7 @@ const CHECKLIST_JS = `
 
 export function checklistOnlinePage({ request, rk, sections, photos, values, maxPhotos }) {
   const done = Boolean(values && values._done);
+  const del = (url) => `<button type="button" class="btn danger" data-del="${esc(url)}"${tip('cl.deletePhoto')}>Delete</button>`;
   return layout(`Checklist · ${request.name || 'request'}`, `<style>${CHECKLIST_CSS}</style>
   <div id="cl" data-save="/api/admin/checklist?r=${esc(rk)}" data-photos="/api/admin/checklist/photos?r=${esc(rk)}">
     <div class="savebar"><div><strong>${esc(request.name || 'No name given')}</strong> <span class="muted">· checklist</span></div>
@@ -485,13 +722,16 @@ export function checklistOnlinePage({ request, rk, sections, photos, values, max
       </div></div>
     ${sections}
     <div class="card"><h3 style="margin-top:0">Photos <small class="muted">up to ${maxPhotos}</small></h3>
-      <div class="photos" id="photos">${photos.map((p) => `<figure data-photo="${p.id}"><a href="${esc(p.url)}" target="_blank" rel="noopener"><img src="${esc(p.url)}" alt="Walk-through photo" loading="lazy"></a><button type="button" class="btn danger" data-del="${esc(p.url)}">Delete</button></figure>`).join('')}</div>
-      <label class="btn ghost" style="color:var(--accent);margin:0">Add photos<input id="photo-input" type="file" accept="image/*" multiple style="display:none"></label>
+      <div class="photos" id="photos">${photos.map((p) => `<figure data-photo="${p.id}"><a href="${esc(p.url)}" target="_blank" rel="noopener"${tip('cl.photo')}><img src="${esc(p.url)}" alt="Walk-through photo" loading="lazy"></a>${del(p.url)}</figure>`).join('')}</div>
+      ${act(`<label class="btn ghost" style="color:var(--accent);margin:0"${tip('cl.addPhotos')}>Add photos<input id="photo-input" type="file" accept="image/*" multiple style="display:none"></label>`, 'cl.addPhotos')}
+      <template id="del-tpl">${del('')}</template><template id="photo-tpl"><a href="" target="_blank" rel="noopener"${tip('cl.photo')}></a></template>
       <div id="photo-state" class="muted" style="margin-top:6px"></div></div>
     <div class="card"><label class="ckl"><input type="checkbox" id="cl-done"${done ? ' checked' : ''}><span><strong>Checklist done</strong></span></label></div>
-    <div class="actions three"><a class="btn" href="/admin/invoices/new?r=${esc(rk)}">Create invoice</a>
-      <a class="btn ghost" href="/admin/checklist?r=${esc(rk)}" target="_blank" rel="noopener">Print checklist</a>
-      <a class="btn ghost" href="/admin/">Back to requests</a></div>
+    <div class="actions three">${act(`<a class="btn" href="/admin/invoices/new?r=${esc(rk)}"${tip('card.createInvoice')}>Create invoice</a>`, 'card.createInvoice')}
+      ${act(`<a class="btn ghost" href="/admin/checklist?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.printChecklist')}>Print checklist</a>`, 'card.printChecklist')}
+      <a class="btn ghost" href="/admin/"${tip('nav.back')}>Back to requests</a></div>
   </div>
-  <script>${CHECKLIST_JS}</script>`);
+  <script>${CHECKLIST_JS}</script>`, { screen: 'checklist', back: BACK_REQUESTS });
 }
+
+export { act, chip, confirmStep, hiddenInputs, BACK_REQUESTS };

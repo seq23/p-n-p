@@ -3,7 +3,7 @@
 // for now under the pay plan, how to pay with the QR code, the note, the footer.
 // pdf-lib is pure JavaScript and runs in Pages Functions; standard fonts only, so text
 // is reduced to WinAnsi before drawing.
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib';
+import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
 import { money, lineTotal, invoiceTotal, prettyDate, payPlanOf, needsPrice, FROM_EMAIL } from './util.mjs';
 
 const INK = rgb(0.23, 0.19, 0.16);
@@ -159,5 +159,13 @@ export async function renderInvoicePdf({ invoice, lines, settings, contact, pick
   text(`${business}  |  ${footerLine}`, left, fy + 12, { size: 8.5, color: MUTED });
   text(`Questions? Write ${FROM_EMAIL}${phone ? ` or call or text ${phone}` : ''}.`, left, fy, { size: 8.5, color: MUTED });
 
+  // A voided invoice keeps its number and gets a large VOID stamp on every page.
+  if (invoice.status === 'void') {
+    for (const p of doc.getPages()) {
+      const size = 150; const w = sansBold.widthOfTextAtSize('VOID', size);
+      p.drawText('VOID', { x: (PAGE.w - w * 0.82) / 2, y: PAGE.h / 2 - 120, size, font: sansBold, color: rgb(0.56, 0.2, 0.15), opacity: 0.35, rotate: degrees(30) });
+    }
+    doc.setSubject('VOID');
+  }
   return doc.save();
 }
