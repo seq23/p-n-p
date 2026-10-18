@@ -179,6 +179,14 @@ if (PHONE.test(listing)) errors.push('facebook-marketplace.md carries a phone nu
 if (RETIRED.test(listing)) errors.push('facebook-marketplace.md still quotes retired zones, the 1.5x weekend rate or free delivery');
 if (DELIVERY.test(listing)) errors.push('facebook-marketplace.md mentions delivery; rentals v3 is pickup and return only');
 hiddenIn(listing, 'facebook-marketplace.md');
+// Live Marketplace wording (owner, 18 Oct 2026): all-games bundles list "2 Giant Color Stack sets",
+// and every quote link goes to the site request page, never a Google Form.
+for (const bn of ['Whole Yard', 'The Whole Party']) {
+  const b = blocks.find((x) => x.startsWith(`${bn} bundle\n`)) || '';
+  if (!/Games included: [^\n]*, 2 Giant Color Stack sets\./.test(b)) errors.push(`${bn} bundle: "Games included" does not say "2 Giant Color Stack sets" (live Marketplace wording)`);
+}
+if (/Color Stack \(both sets\)/.test(listing)) errors.push('facebook-marketplace.md says "Giant Color Stack (both sets)"; live listings say "2 Giant Color Stack sets"');
+for (const f of ['facebook-marketplace.md', 'facebook-page.md', 'bark.md', 'thumbtack.md']) if (/forms\.gle|docs\.google\.com\/forms/.test(read(`docs/listings/${f}`))) errors.push(`docs/listings/${f} links a Google Form; quote links go to https://porchandparty901.com/request (owner, 18 Oct 2026)`);
 pricesOnlyFromData(blocks.join('## '), 'facebook-marketplace.md');
 // ---- Request-page lines (owner-approved wording, 2026-10-18) -------------------
 // Line 2 of every live Marketplace description points at the site request page;
