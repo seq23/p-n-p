@@ -34,6 +34,19 @@ const SERVICE_SENTENCE = `Memphis ${SERVICE_LIST}.`;
 const IDENTITY_SENTENCE = `Porch & Party is a Memphis-based company for ${SERVICE_LIST}.`;
 const CITY_LINE = 'Memphis, TN · by appointment';
 
+/**
+ * Retired identity wording. scripts/install_brand_surfaces.js rewrites any
+ * business JSON-LD description equal to a STALE_IDENTITIES sentence to
+ * IDENTITY_SENTENCE; scripts/validators/validate_service_coverage.js fails
+ * when any published html still carries a STALE_IDENTITIES sentence or a
+ * STALE_IDENTITY_PHRASES phrase.
+ */
+const STALE_IDENTITIES = Object.freeze([
+  'Porch & Party is a Memphis-based porch decorating and celebration styling company offering seasonal front porch decorating, hotel-room decor, party decor, and grazing table setups in the Memphis metro area.',
+  'Memphis porch decorating, party decor, hotel-room decor, celebration setups, and grazing table styling.'
+]);
+const STALE_IDENTITY_PHRASES = Object.freeze(['celebration styling company', 'styled event tables']);
+
 /** Whole-dollar starting numbers, read from the data files ("$350+" -> 350). */
 const dollars = (p) => Number(String(p).replace(/[^0-9.]/g, ''));
 const PRICES = Object.freeze({
@@ -54,4 +67,4 @@ function names(text, service) {
 /** The services `text` does not name. */
 const missing = (text) => SERVICES.filter((s) => !names(text, s));
 
-module.exports = { SERVICES, SERVICE_LIST, SERVICE_SENTENCE, IDENTITY_SENTENCE, CITY_LINE, PRICES, esc, names, missing };
+module.exports = { SERVICES, SERVICE_LIST, SERVICE_SENTENCE, IDENTITY_SENTENCE, STALE_IDENTITIES, STALE_IDENTITY_PHRASES, CITY_LINE, PRICES, esc, names, missing };

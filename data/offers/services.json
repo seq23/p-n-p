@@ -184,7 +184,6 @@
       "provenance": "Owner-approved 2026-10-14 ($75, corrected from $95 the same day). Takedown is quoted with the porch or event-decor setup; scripts/validators/validate_contact_surface.js pins this line on every page that quotes it."
     }
   },
-  "primaryIdentity": "Porch & Party is a Memphis-based porch decorating and celebration styling company offering seasonal front porch decorating, hotel-room decor, party decor, and grazing table setups in the Memphis metro area.",
   "travel": {
     "includedAreasFrom": "data/service_areas/areas.json",
     "extendedFee": 75,

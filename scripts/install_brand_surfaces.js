@@ -10,7 +10,11 @@
  *                  JSON-LD descriptions, the fourth service card and pricing
  *                  card (Party Game Rentals) and the rentals FAQ (visible +
  *                  FAQPage JSON-LD);
- *   pricing.html, contact.html, how-it-works.html   meta + og + twitter descriptions;
+ *   pricing.html, contact.html, how-it-works.html   meta + og + twitter
+ *                  descriptions and the WebPage JSON-LD description;
+ *   every other published html   a JSON-LD description equal to a retired
+ *                  brand.STALE_IDENTITIES sentence becomes IDENTITY_SENTENCE
+ *                  (the business node on the older frozen pages);
  *   site.webmanifest  description = SERVICE_SENTENCE;
  *   llms.txt, llms-full.txt, llms-entities.txt, llms-answers.txt   identity
  *                  line, the Party Game Rentals entity line and the rentals Q&A.
@@ -123,6 +127,23 @@ function home(html) {
 function rootPage(html, file) {
   let out = html;
   for (const [attr, key] of [['name', 'description'], ['property', 'og:description'], ['name', 'twitter:description']]) out = setMeta(out, attr, key, ROOT_PAGES[file], file);
+  out = setLd(out, (n) => n['@type'] === 'WebPage', (n) => { n.description = ROOT_PAGES[file]; }, `${file} WebPage JSON-LD`);
+  return staleIdentity(out);
+}
+
+/** Retired identity sentences in JSON-LD become IDENTITY_SENTENCE; nothing else on the page moves. */
+function staleIdentity(html) {
+  let out = html;
+  for (const old of brand.STALE_IDENTITIES) out = out.split(`"description":${JSON.stringify(old)}`).join(`"description":${JSON.stringify(IDENTITY_SENTENCE)}`);
+  return out;
+}
+
+const SKIP_DIRS = new Set(['node_modules', '.git', '.pages-output', 'reports']);
+/** Every html file the site publishes (repo-relative), archived reports and build output excluded. */
+function siteHtml(dir = ROOT, out = []) {
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (e.isDirectory()) { if (!SKIP_DIRS.has(e.name)) siteHtml(path.join(dir, e.name), out); } else if (e.name.endsWith('.html')) out.push(path.relative(ROOT, path.join(dir, e.name)));
+  }
   return out;
 }
 
@@ -156,6 +177,7 @@ function main() {
   const jobs = [
     ['index.html', home],
     ...Object.keys(ROOT_PAGES).map((f) => [f, (t) => rootPage(t, f)]),
+    ...siteHtml().filter((f) => f !== 'index.html' && !(f in ROOT_PAGES)).map((f) => [f, staleIdentity]),
     ['site.webmanifest', manifest],
     ...['llms.txt', 'llms-full.txt', 'llms-entities.txt', 'llms-answers.txt'].map((f) => [f, (t) => llms(t, f)])
   ];
@@ -173,4 +195,4 @@ function main() {
 }
 
 if (require.main === module) main();
-module.exports = { HOME, ROOT_PAGES, RENTALS_ENTITY, RENTALS_QA };
+module.exports = { HOME, ROOT_PAGES, RENTALS_ENTITY, RENTALS_QA, siteHtml };
