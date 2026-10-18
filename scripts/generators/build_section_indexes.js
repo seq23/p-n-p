@@ -527,6 +527,39 @@ for (const section of SECTIONS) {
   written.push(`${section.dir}/index.html (${pages.length} pages)`);
 }
 
+// The HTML sitemap (/sitemap, linked from every footer, owner-approved
+// 2026-10-18) is the index of these indexes: its link lists are regenerated
+// here from the routes just built, so it can never list a section that is not
+// on disk or miss one that is. Only the page's <div class="content-wrap"> is
+// written; the rest of the page (head, chrome, related nav) belongs to the
+// passes that own it. It is recorded below as a section index for the same
+// reason the indexes are: it introduces no subject matter of its own.
+const HTML_SITEMAP = 'sitemap.html';
+const siteChrome = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
+function htmlSitemapBody(indexRoutes) {
+  const ul = (items) => `<ul>${items.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join('')}</ul>`;
+  const extra = ['answers/index.html'].filter((rel) => fs.existsSync(path.join(ROOT, rel))).map((rel) => `/${rel}`);
+  const indexes = [...new Set([...indexRoutes, ...extra])].filter((r) => r !== '/services/index.html' && r !== '/faq/index.html').sort()
+    .map((r) => [r.replace(/index\.html$/, ''), esc(readPage(r.slice(1)).h1)]);
+  return '<span class="eyebrow">Sitemap</span><h1>Sitemap</h1>'
+    + '<p>Every section of the Porch &amp; Party website in one place.</p>'
+    + '<h2>Services and booking</h2>' + ul([['/', 'Home'], ['/services/', 'Services'], ['/rentals/', 'Party Game Rentals'], ['/pricing', 'Pricing'],
+      ['/faq/', 'Frequently asked questions'], ['/how-it-works', 'How It Works'], ['/contact', 'Contact']])
+    + '<h2>Guides and answers</h2>' + ul(indexes)
+    + '<h2>Legal</h2>' + ul(siteChrome.LEGAL_LINKS.filter((l) => l.href !== '/sitemap').map((l) => [l.href, l.label]))
+    + '<p class="muted">For search engines: <a href="/sitemap.xml">sitemap.xml</a>.</p>';
+}
+if (!CHECK) {
+  const abs = path.join(ROOT, HTML_SITEMAP);
+  if (!fs.existsSync(abs)) throw new Error(`${HTML_SITEMAP} is missing: the footer links /sitemap`);
+  const before = fs.readFileSync(abs, 'utf8');
+  const re = /(<div class="content-wrap">)[\s\S]*?(<\/div><\/div><\/section>)/;
+  if (!re.test(before)) throw new Error(`${HTML_SITEMAP} has no content-wrap to write the link lists into`);
+  const after = before.replace(re, (w, a, b) => a + htmlSitemapBody(routes) + b);
+  if (after !== before) fs.writeFileSync(abs, after);
+  routes.push(`/${HTML_SITEMAP.replace(/\.html$/, '')}`); // the served path; the sitemap.xml loc is /sitemap
+}
+
 // Record which routes are section indexes rather than publications, so
 // scripts/cadence_gate.js can tell the two apart. The generator is the only
 // thing that knows, and writing it here keeps the list from drifting away from
