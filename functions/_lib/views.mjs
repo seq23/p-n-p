@@ -225,7 +225,7 @@ function confirmStep({ key, yesKey, label, question, action, hidden, danger = fa
       <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('pay.no')}>No, go back</button></div></div></details>${hint(key)}</div>`;
 }
 const LABEL = { 'dep.refundYes': 'Yes, record the refund', 'dep.keepYes': 'Yes, keep it for damage', 'exp.deleteYes': 'Yes, delete the expense', 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
-  'day.deleteYes': 'Yes, delete it', 'set.newTokenYes': 'Yes, make a new link', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
+  'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'set.newTokenYes': 'Yes, make a new link', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
 
 const hiddenInputs = (obj) => Object.entries(obj).map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(v)}">`).join('');
 
@@ -295,21 +295,63 @@ function subnav() {
   </div>`;
 }
 
-function requestDetails(r) {
+// "Sun 26 Oct, 3:00 PM" (Memphis) for a D1 UTC datetime.
+function memphisWhen(utc) {
+  const d = new Date(`${String(utc || '').replace(' ', 'T')}Z`);
+  if (Number.isNaN(d.getTime())) return String(utc || '');
+  const day = d.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'America/Chicago' });
+  return `${day}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' })}`;
+}
+
+function idCell(r, rk) {
+  if (r.idDeletedAt) return esc(`Deleted ${memphisWhen(r.idDeletedAt)}`);
+  if (r.idObject) return `<a href="/admin/requests/id?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.idPhoto')}>Open ID photo</a>`;
+  return r.idFile ? r.idFile.split(/,\s*/).map((u, i) => link(u, i ? `Open ID photo ${i + 1}` : 'Open ID photo', 'card.idPhoto')).join('<br>') : '';
+}
+
+function deleteIdStep(r, rk) {
+  if (r.idDeletedAt || !(r.idObject || r.idFile)) return '';
+  return confirmStep({ key: 'card.idDelete', yesKey: 'card.idDeleteYes', label: 'Delete this ID', question: `Delete ${r.name || 'this customer'}'s ID photo for good? It cannot be brought back.`, action: '/admin/requests/id/delete', hidden: hiddenInputs({ r: rk }), danger: true });
+}
+
+function requestDetails(r, { referrers = {} } = {}) {
+  const rk = b64urlText(r.key);
   return `<details class="disclose"><summary${tip('card.details')}>Show phone, email, ID and all answers</summary>
     ${kv([
       ['Phone', r.phone ? `<a href="tel:${esc(r.phone.replace(/[^\d+]/g, ''))}"${tip('card.phone')}>${esc(r.phone)}</a>` : '', true],
       ['Email', r.email ? `<a href="mailto:${esc(r.email)}"${tip('card.email')}>${esc(r.email)}</a>` : '', true],
       ['Date of birth', r.dob],
       ['Social media', [r.social1, r.social2].filter(Boolean).map((u) => link(u, '', 'card.social')).join('<br>'), true],
-      ['Photo ID', r.idFile ? r.idFile.split(/,\s*/).map((u, i) => link(u, i ? `Open ID photo ${i + 1}` : 'Open ID photo', 'card.idPhoto')).join('<br>') : '', true],
+      ['Photo ID', idCell(r, rk), true],
+      ['Rules', r.agreedAt ? `Agreed to rules on ${memphisWhen(r.agreedAt)} (version ${r.rulesVersion})` : ''],
+      ['Referred by', r.referredBy ? (referrers[r.referredBy] || 'a past customer') : ''],
+      ['Robot check', r.robotCheck === 'no-js' ? 'Sent without the robot check (their phone had JavaScript off). Check it looks real.' : ''],
       ['Found us through', r.heard],
       ['What they picked', r.need],
       ...r.rentals.map((x) => [x.label, x.value]),
       ...r.decor.map((x) => [x.label, x.value]),
       ...r.other.map((x) => [x.label, x.value]),
     ])}
+    ${deleteIdStep(r, rk)}
   </details>`;
+}
+
+// Top of Requests: this week (Mon–Sun, Memphis) by service, and last week.
+export function weekBox(w) {
+  const n = w.thisWeek.length;
+  const parts = [['porch', 'porch'], ['party', 'party & decor'], ['grazing', 'grazing'], ['rentals', 'rentals']].filter(([k]) => w.byService[k]).map(([k, word]) => `${w.byService[k]} ${word}`);
+  const list = w.thisWeek.map((r) => `<li>${esc(r.name || 'No name given')} <span class="muted">${esc(shortDate(new Date(r.sortTime).toISOString().slice(0, 10)))}</span></li>`).join('');
+  return `<section class="card" data-week-counts><p class="weekline"><strong>This week: ${n} new request${n === 1 ? '' : 's'}</strong>${parts.length ? ` (${esc(parts.join(', '))})` : ''}</p>
+    <p class="muted" style="margin:0">Last week: ${w.lastWeek.length}</p>
+    ${n ? `<details class="disclose" data-week-list><summary${tip('req.weekList')}>See this week's requests</summary><ul>${list}</ul></details>` : ''}</section>`;
+}
+
+// A gentle list: requests paid in full (and for rentals, returned) that still hold an ID photo.
+export function idsReadyBox(rows) {
+  if (!rows.length) return '';
+  return `<section class="card" data-ids-ready><h2>IDs ready to delete <small class="muted">${rows.length}</small></h2>
+    <p class="muted" style="margin:0 0 8px">These are paid in full${rows.some((r) => r.wantsRentals) ? ' (rentals: returned)' : ''}. Nothing is ever deleted by itself: tap Delete this ID when you are ready.</p>
+    ${rows.map((r) => `<div class="booking" data-id-ready><strong>${esc(r.name || 'No name given')}</strong>${deleteIdStep(r, b64urlText(r.key))}</div>`).join('')}</section>`;
 }
 
 function requestPayment(r, st, inv) {
@@ -325,7 +367,7 @@ function requestPayment(r, st, inv) {
 }
 
 // schedule: { [request_key]: { date, id } } earliest booking per request.
-export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '' }) {
+export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '' }) {
   const top = `<div class="big-buttons">
     ${act(`<a class="btn ghost" href="${esc(SHEET_URL)}" target="_blank" rel="noopener noreferrer"${tip('req.sheet')}>Open responses sheet</a>`, 'req.sheet')}
     ${act(`<a class="btn ghost" href="${esc(folderUrl)}" target="_blank" rel="noopener noreferrer"${tip('req.idFolder')}>Open ID folder</a>`, 'req.idFolder')}
@@ -389,11 +431,11 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
       ${requestPayment(r, st, inv)}
       ${pr.finished ? '' : `<form method="post" action="/admin/requests/archive" data-archive style="margin-top:12px">${hiddenInputs({ r: rk })}
         ${act(`<button class="btn ghost" type="submit"${tip('card.archive')}>Done — put away</button>`, 'card.archive')}</form>`}
-      ${requestDetails(r)}
+      ${requestDetails(r, { referrers })}
     </article>`;
   }).join('');
   return layout('Requests', `${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}${setupBanner(missingPayment)}
-    <h1>Requests</h1>${extraTop}${top}${err}
+    <h1>Requests</h1>${week}${extraTop}${top}${err}${idsBox}
     ${requests.length ? cards : (sheetError ? '' : '<div class="card"><p style="margin:0">No requests waiting. New ones from the website form show up here within a minute. Finished ones are under Put away.</p></div>')}
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>

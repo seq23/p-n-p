@@ -136,6 +136,13 @@ function norm(s) {
   return text(s).toLowerCase().replace(/\([^)]*\)/g, ' ').replace(/\bsets?\b/g, ' ').replace(/[^a-z0-9 ]/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+// A Google Forms checkbox answer -> its choices. Forms joins choices with ", ", and a choice can
+// hold commas inside its parentheses ("Party planning & decor (hotel-room surprises, home ...)"),
+// so only a comma outside parentheses separates two choices.
+export function splitChoices(answer) {
+  return String(answer || '').split(/,\s*(?![^()]*\))/).map((c) => c.trim()).filter(Boolean);
+}
+
 export function prefillFromRequest(source, request) {
   const fields = fieldIndex(source);
   const values = {};
@@ -153,8 +160,14 @@ export function prefillFromRequest(source, request) {
   set(1, /how they found us/i, request.heard);
   const need = String(request.need || '');
   const tick = (re, on) => { const f = byLabel(1, re); if (f && on) values[f.id] = true; };
-  tick(/^party \/ event decor/i, /party|event|celebration|hotel|decor(?!.*porch)/i.test(need.replace(/porch[^,]*/i, '')));
-  tick(/^porch decor/i, /porch/i.test(need));
+  // Which services: the site form stores them (request.services); an old Google Form answer is
+  // split into its choices first (choices carry commas inside their parentheses, so a plain
+  // split on ", " broke them), and the game-rentals choice ("Party game rentals ...") never
+  // ticks the decor box.
+  const svc = Array.isArray(request.services) && request.services.length ? request.services : null;
+  const picks = splitChoices(need).filter((c) => !/game rentals?|^rentals?$/i.test(c));
+  tick(/^party \/ event decor/i, svc ? svc.includes('party') : picks.some((c) => !/porch/i.test(c) && /party|event|celebration|hotel|decor/i.test(c)));
+  tick(/^porch decor/i, svc ? svc.includes('porch') : picks.some((c) => /porch/i.test(c)));
   tick(/^game rentals/i, Boolean(request.wantsRentals || request.gamesAnswer));
   const games = ` ${norm(request.gamesAnswer)} `;
   if (games.trim()) {

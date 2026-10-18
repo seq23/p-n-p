@@ -112,8 +112,21 @@ if (syncFiles.length !== 1 || path.basename(syncFiles[0]) !== '[token].js' || !/
 const syncSrc = read('functions/_lib/sync-route.mjs');
 for (const [re, why] of [[/'X-Robots-Tag': 'noindex, nofollow'/, 'the sync hook does not answer noindex'], [/safeEqual\(tok, token\)/, 'the sync token is not compared in constant time'], [/!== 'POST'/, 'the sync hook accepts methods other than POST'], [/token\.length !== 64/, 'the sync hook runs when no token is set']]) if (!re.test(syncSrc)) errors.push(why);
 for (const file of announced) if (/\/api\/sync/.test(read(file))) errors.push(`${file} announces the sheet-resync hook`);
+// The public request form (porchandparty901.com/request): exactly these four routes, each a
+// one-line call into functions/_lib/request-submit.mjs, none of them able to reach /admin.
+const FORM_ROUTES = {
+  [path.join('functions', 'request', 'index.js')]: /export const onRequest = \(context\) => handleRequestPage\(context\);/,
+  [path.join('functions', 'request', 'received.js')]: /export const onRequestGet = \(context\) => handleReceived\(context\);/,
+  [path.join('functions', 'api', 'request', 'availability.js')]: /export const onRequestGet = \(context\) => handleAvailability\(context\);/,
+  [path.join('functions', 'r', '[code].js')]: /export const onRequestGet = \(context\) => handleReferral\(context\);/,
+};
+for (const [f, re] of Object.entries(FORM_ROUTES)) {
+  if (!fs.existsSync(path.join(ROOT, f))) { errors.push(`${f} is missing (the request form route)`); continue; }
+  const src = read(f);
+  if (!re.test(src) || !/from '(\.\.\/)+_lib\/request-submit\.mjs'/.test(src) || src.split('\n').filter((l) => l.trim()).length !== 2) errors.push(`${f} must be the one-line call into request-submit.mjs`);
+}
 const outside = routeFiles.filter((f) => !guardedDirs.some((d) => f.startsWith(d + path.sep)));
-for (const f of outside) if (![...icsFiles, ...syncFiles].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed nor the sync hook`);
+for (const f of outside) if (![...icsFiles, ...syncFiles, ...Object.keys(FORM_ROUTES)].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed, the sync hook nor a request-form route`);
 
 if (errors.length) {
   console.error('VALIDATION FAIL: admin console noindex / guard');

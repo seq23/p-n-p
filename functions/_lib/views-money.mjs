@@ -31,7 +31,7 @@ const UPLOAD_JS = `
       .then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||r.status);if(!first)first=j.id;});}).then(next).catch(function(e){st.textContent='Receipt not added: '+e.message;});})();});
 })();`;
 
-export function moneyPage({ month, year, t, months, needs, recent, depositsHeld, flash = '', error = '' }) {
+export function moneyPage({ month, year, requestsThisMonth = 0, t, months, needs, recent, depositsHeld, flash = '', error = '' }) {
   const tot = (what, label, value, sub = '') => `<a class="tot" href="/admin/money/detail?month=${month}&amp;what=${what}"${tip('mon.total')}><div class="muted">${esc(label)}</div><div class="big" data-total="${what}">${esc(value)}${sub ? `<small>${esc(sub)}</small>` : ''}</div></a>`;
   const max = Math.max(1, ...months.map((m) => m.received));
   return layout('Money', `<style>${MONEY_CSS}</style>
@@ -46,6 +46,7 @@ export function moneyPage({ month, year, t, months, needs, recent, depositsHeld,
       ${tot('received', 'Money received', `Money received: ${money(t.received)}`, t.depositsIn ? `includes ${money(t.depositsIn)} of damage deposits (not income)` : '')}
       ${tot('owed', "Still owed for this month's jobs", `Still owed for this month's jobs: ${money(t.owed)}`)}
       ${tot('jobs', 'Jobs this month', `Jobs this month: ${t.jobs}`)}
+      <div class="tot" data-requests-month><div class="muted">New requests that came in this month</div><div class="big">Requests this month: ${esc(String(requestsThisMonth))}</div></div>
       ${tot('expenses', 'Expenses', `Expenses: ${money(t.expenses)}`)}
       <div class="tot" data-left><div class="muted">A simple difference (income minus expenses), not profit or tax</div><div class="big">Left after expenses: ${esc(money(t.left))}</div></div>
       <h3>By service</h3>

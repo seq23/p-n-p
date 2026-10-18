@@ -29,3 +29,16 @@ bucket_name = "pnp-receipts"
 # functions/_lib/expenses.mjs). No other AI service ever sees a receipt.
 [ai]
 binding = "AI"
+
+# ID photos from the site request form (porchandparty901.com/request): private R2 bucket, no
+# public URL (r2.dev off, no custom domain). The only reader is the signed-in
+# /admin/requests/id route; "Delete this ID" removes an object; nothing deletes one by itself.
+[[r2_buckets]]
+binding = "IDS"
+bucket_name = "pnp-ids"
+
+# Cloudflare Turnstile (free) on the request form. The site key is public by design; the
+# secret is the Pages secret TURNSTILE_SECRET. Empty = no widget (honeypot, signed timing and the
+# per-IP limit still apply).
+[vars]
+TURNSTILE_SITEKEY = ""

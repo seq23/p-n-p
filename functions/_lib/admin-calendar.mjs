@@ -3,7 +3,7 @@
 // private ICS feed token. Auth is enforced before this runs (guard.mjs), except the ICS feed,
 // which lives in functions/api/calendar/ and checks its own token.
 import { redirect, htmlResponse, getSettings, putSetting, fromB64urlText, b64urlText, shortDate, todayISO, FROM_EMAIL } from './util.mjs';
-import { loadRequests } from './sheet.mjs';
+import { loadRequests } from './requests.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 import * as C from './calendar.mjs';
 import { balances, balanceWords, depositWords } from './ledger.mjs';

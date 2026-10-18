@@ -47,6 +47,9 @@ const SKIP_FILES = new Set([
   // Footer legal row (2026-10-18): the accessibility statement and the HTML
   // sitemap are legal / navigation surfaces like the two above, not answers.
   'accessibility.html', 'sitemap.html',
+  // The request form and the rules it agrees to (2026-10-18): a transactional form and a
+  // legal page, like contact.html and the Terms.
+  'request.html', 'rules.html',
 ]);
 
 const text = (html) => html.replace(/<script[\s\S]*?<\/script>/gi, ' ')

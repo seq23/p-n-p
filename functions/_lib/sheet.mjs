@@ -194,6 +194,6 @@ export function rowsToRequests(values) {
   return out;
 }
 
-export async function loadRequests(env, opts) {
-  return rowsToRequests(await readSheetValues(env, opts));
-}
+// The console no longer reads requests from the sheet: requests live in D1
+// (functions/_lib/requests.mjs loadRequests). readSheetValues stays for the one-time import
+// of the Google Form request and as the archive reader.
