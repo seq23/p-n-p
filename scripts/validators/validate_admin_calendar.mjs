@@ -201,8 +201,13 @@ const cardsOf = (html) => html.split('<article class="card" data-card=').slice(1
   // The request cards (the weekly count box above them lists every request of the week, put away or not).
   const cards = cardsOf(dash);
   must(!cards.includes('Weekend Renter') && cards.includes('Test Renter'), 'an archived request is still on the main list');
-  const put = (await s.get('/admin/archive')).text;
-  must(put.includes('Weekend Renter') && put.includes('Bring back'), 'Put away tab does not list the archived request');
+  // Put away left the nav (JOB B): the old route opens the collapsed section at the bottom of Requests.
+  const oldRoute = await s.get('/admin/archive');
+  must(oldRoute.status === 303 && oldRoute.location === '/admin/?pa=1#put-away', '/admin/archive does not redirect to the opened Put away section');
+  const put = (await s.get('/admin/?pa=1')).text;
+  const section = put.slice(put.indexOf('id="put-away-section"'));
+  must(/<details[^>]*id="put-away"[^>]*\bopen\b/.test(put) && /Put away \(1\)/.test(section) && section.includes('Weekend Renter') && /data-archived=[\s\S]*Bring back/.test(section), 'the Put away section does not list the archived request with Bring back');
+  must(!/<details[^>]*id="put-away"[^>]*\bopen\b/.test(dash), 'the Put away section is open by default');
   const undo = (await s.get(`/admin/?put=${s.rk(reqB.key)}`)).text;
   must(/Put away\.<\/strong><form method="post" action="\/admin\/requests\/unarchive">/.test(undo) && undo.includes('data-autohide'), 'no "Put away. Undo" banner after archiving');
   await s.post('/admin/requests/unarchive', { r: s.rk(reqB.key) });

@@ -4,7 +4,8 @@
 // the one map in helptext.mjs, primary actions carry a visible helper line under them, every
 // screen opens with a numbered 1-2-3 and (except Requests itself) a Back link.
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
-import { tip, hint, stepsBar, helpGlossary, STEPS } from './helptext.mjs';
+import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
+import { servicesOf, cardStage, cardButtons, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS } from './cards.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
@@ -120,10 +121,9 @@ ${kindCss()}
 @media print{header.top,.subnav,.noprint,.back,.topsteps{display:none!important}body{background:#fff}.card{border:0;padding:0;margin:0 0 10px}.gloss .g{padding:4px 0}}
 `;
 
-export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false } = {}) {
+export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false, panelWide = false } = {}) {
   const nav = authed ? `<nav aria-label="Main">
-    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${tip('nav.money')}>Money</a><a href="/admin/archive"${tip('nav.archive')}>Put away</a>
-    <a href="/admin/invoices"${tip('nav.invoices')}>Invoices</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>How to use this</a>
+    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${tip('nav.money')}>Money</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>Help</a>
     <form method="post" action="/admin/logout" style="display:inline"><button type="submit"${tip('nav.signout')}>Sign out</button></form></nav>` : '';
   const backLink = back ? `<a class="back" href="${esc(back.href)}"${tip('nav.back')}>&larr; ${esc(back.label || 'Back')}</a>` : '';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -133,7 +133,7 @@ export function layout(title, body, { authed = true, screen = '', back = null, s
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>${CSS}${EXTRA_CSS}</style></head><body>
 <header class="top"><a class="brand" href="/admin/"${tip('nav.brand')}>Porch &amp; Party</a>${nav}</header>${subnav}
-<main class="wrap${wide ? ' wide' : ''}">${backLink}${screen ? stepsBar(screen) : ''}${body}</main></body></html>`;
+<main class="wrap${wide ? ' wide' : ''}${panelWide ? ' panelwide' : ''}">${backLink}${screen ? stepsBar(screen) : ''}${body}</main></body></html>`;
 }
 
 const BACK_REQUESTS = { href: '/admin/', label: 'Back to requests' };
@@ -221,8 +221,8 @@ function methodPicker() {
   return `<label>How did they pay?</label><select name="method">${METHODS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>`;
 }
 
-function confirmStep({ key, yesKey, label, question, action, hidden, danger = false, extra = '' }) {
-  return `<div class="act"><details class="confirm"><summary class="btn ${danger ? 'danger' : 'ghost'}"${tip(key)}>${esc(label)}</summary>
+function confirmStep({ key, yesKey, label, question, action, hidden, danger = false, extra = '', cls = '' }) {
+  return `<div class="act"><details class="confirm"><summary class="btn ${danger ? 'danger' : (cls || 'ghost')}"${tip(key)}>${esc(label)}</summary>
     <div class="confirmbox"><p><strong>${esc(question)}</strong></p><div class="actions">
       <form method="post" action="${esc(action)}">${hidden}${extra}<button class="btn${danger ? ' danger' : ''}" type="submit"${tip(yesKey)}>${esc(LABEL[yesKey])}</button></form>
       <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('pay.no')}>No, go back</button></div></div></details>${hint(key)}</div>`;
@@ -245,7 +245,7 @@ export function payWords(status, { rest = 0, hasInvoice = true } = {}) {
 }
 
 // target: { action, field, extra } where field is 'action' (invoice) or 'status' (request).
-export function paymentBox({ who, status, plan = 'half', rest = 0, hasInvoice = true, number = '', target, balanceLine = '' }) {
+export function paymentBox({ who, status, plan = 'half', rest = 0, hasInvoice = true, number = '', target, balanceLine = '', omit = '' }) {
   const send = (value) => hiddenInputs({ ...target.extra, [target.field]: value });
   const isInvoice = target.field === 'action';
   const v = (inv, req) => (isInvoice ? inv : req);
@@ -254,10 +254,10 @@ export function paymentBox({ who, status, plan = 'half', rest = 0, hasInvoice = 
     out.push(act(`<form method="post" action="${esc(target.action)}">${send(v('unvoid', 'unvoid'))}<button class="btn ghost" type="submit"${tip('pay.unvoid')}>Bring back (undo Void)</button></form>`, 'pay.unvoid'));
   } else {
     const paid = status === 'paid' || status === 'done';
-    if (!paid && status !== 'deposit_paid' && plan !== 'full') {
+    if (!paid && status !== 'deposit_paid' && plan !== 'full' && omit !== 'pay.deposit') {
       out.push(confirmStep({ key: 'pay.deposit', yesKey: 'pay.depositYes', label: 'Mark deposit received', question: `Mark ${who}'s deposit as received? Only do this after the money is in your account.`, action: target.action, hidden: send('deposit_paid'), extra: isInvoice ? methodPicker() : '' }));
     }
-    if (!paid) {
+    if (!paid && omit !== 'pay.paid') {
       out.push(confirmStep({ key: 'pay.paid', yesKey: 'pay.paidYes', label: 'Mark paid in full', question: `Mark ${who} as paid in full? Only do this after the money is in your account.`, action: target.action, hidden: send('paid'), extra: isInvoice ? methodPicker() : '' }));
     }
     if (status === 'deposit_paid' || status === 'paid') {
@@ -288,17 +288,6 @@ function undoBanner(rk) {
   return `<div class="notice ok" data-autohide><strong>Put away.</strong><form method="post" action="/admin/requests/unarchive">${hiddenInputs({ r: rk })}<button class="btn inline" type="submit"${tip('req.undo')}>Undo</button></form></div>`;
 }
 
-function subnav() {
-  return `<div class="subnav" aria-label="Also on this page">
-    ${act(`<a class="btn ghost" href="/admin/invoices/new"${tip('sub.blankInvoice')}>Start a blank invoice</a>`, 'sub.blankInvoice')}
-    ${act(`<a class="btn ghost" href="/admin/checklist" target="_blank" rel="noopener"${tip('sub.blankChecklist')}>Print a blank checklist</a>`, 'sub.blankChecklist')}
-    ${act(`<a class="btn ghost" href="/admin/?fresh=1"${tip('sub.refresh')}>Check for new requests now</a>`, 'sub.refresh')}
-    ${act(`<a class="btn ghost" href="/admin/day/today"${tip('sub.today')}>Today's list</a>`, 'sub.today')}
-    ${act(`<a class="btn ghost" href="/admin/search"${tip('sub.find')}>Find a customer</a>`, 'sub.find')}
-    ${act(`<a class="btn ghost" href="/admin/packages"${tip('sub.packages')}>Porch packages</a>`, 'sub.packages')}
-  </div>`;
-}
-
 // The Porch packages reference (owner, 18 Oct 2026): the SAME grid the website shows
 // (scripts/lib/porch_packages.js gridHtml, from data/offers/porch_packages.json), without the
 // customer "Request this package" links.
@@ -327,10 +316,9 @@ function deleteIdStep(r, rk) {
   return confirmStep({ key: 'card.idDelete', yesKey: 'card.idDeleteYes', label: 'Delete this ID', question: `Delete ${r.name || 'this customer'}'s ID photo for good? It cannot be brought back.`, action: '/admin/requests/id/delete', hidden: hiddenInputs({ r: rk }), danger: true });
 }
 
-function requestDetails(r, { referrers = {} } = {}) {
+function requestDetailsBody(r, { referrers = {} } = {}) {
   const rk = b64urlText(r.key);
-  return `<details class="disclose"><summary${tip('card.details')}>Show phone, email, ID and all answers</summary>
-    ${kv([
+  return `${kv([
       ['Phone', r.phone ? `<a href="tel:${esc(r.phone.replace(/[^\d+]/g, ''))}"${tip('card.phone')}>${esc(r.phone)}</a>` : '', true],
       ['Email', r.email ? `<a href="mailto:${esc(r.email)}"${tip('card.email')}>${esc(r.email)}</a>` : '', true],
       ['Date of birth', r.dob],
@@ -345,8 +333,7 @@ function requestDetails(r, { referrers = {} } = {}) {
       ...r.decor.map((x) => [x.label, x.value]),
       ...r.other.map((x) => [x.label, x.value]),
     ])}
-    ${deleteIdStep(r, rk)}
-  </details>`;
+    ${deleteIdStep(r, rk)}`;
 }
 
 // Top of Requests: this week (Mon–Sun, Memphis) by service, and last week.
@@ -367,110 +354,203 @@ export function idsReadyBox(rows) {
     ${rows.map((r) => `<div class="booking" data-id-ready><strong>${esc(r.name || 'No name given')}</strong>${deleteIdStep(r, b64urlText(r.key))}</div>`).join('')}</section>`;
 }
 
-function requestPayment(r, st, inv) {
+function requestPayment(r, st, inv, omit = '') {
   const who = r.name || 'this customer';
   if (inv) {
     const total = inv.total_cents || 0;
     const bal = inv.balance;
     return paymentBox({ who, status: inv.status, plan: payPlanOf(inv, total), rest: bal ? bal.remaining : total - (inv.deposit_due_cents || 0), number: inv.number,
       balanceLine: bal && !bal.void ? esc([bal.owed > 0 ? `Owes ${money(bal.owed)}` : 'Paid in full ✓', bal.refundable ? `Damage deposit ${money(bal.refundable)}, refundable` : ''].filter(Boolean).join(' · ')) : '',
-      target: { action: `/admin/invoices/${inv.id}/status`, field: 'action', extra: { back: '/admin/' } } });
+      target: { action: `/admin/invoices/${inv.id}/status`, field: 'action', extra: { back: '/admin/' } }, omit });
   }
-  return paymentBox({ who, status: st.status, hasInvoice: false, target: { action: '/admin/requests/status', field: 'status', extra: { r: b64urlText(r.key) } } });
+  return paymentBox({ who, status: st.status, hasInvoice: false, target: { action: '/admin/requests/status', field: 'status', extra: { r: b64urlText(r.key) } }, omit });
 }
 
-// schedule: { [request_key]: { date, id } } earliest booking per request.
-export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '' }) {
-  const top = `<div class="big-buttons">
-    ${act(`<a class="btn ghost" href="${esc(SHEET_URL)}" target="_blank" rel="noopener noreferrer"${tip('req.sheet')}>Open responses sheet</a>`, 'req.sheet')}
-    ${act(`<a class="btn ghost" href="${esc(folderUrl)}" target="_blank" rel="noopener noreferrer"${tip('req.idFolder')}>Open ID folder</a>`, 'req.idFolder')}
-  </div>`;
+// ---- Request cards (JOB B, owner-approved 18 Oct 2026) -----------------------------------
+// One rules table (cards.mjs) decides the buttons; this only draws them. Service badge(s) with
+// words and a coloured left border, name large, ONE key-facts line, a compact 1-6 line, ONE big
+// primary button, a tidy secondary row, the Payment box, and everything else to read behind
+// "Show details".
+export const CARD_CSS = `
+.svcs{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 6px}
+.svc{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;font:700 1rem Inter,Arial,sans-serif;border:2px solid;color:#2b2420}
+article[data-reqcard]{border-left-width:8px}
+article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin:6px 0 2px;font-size:1.05rem}
+.facts .call{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;background:var(--ok);color:#fff;font-weight:700;text-decoration:none}
+.progress.mini{gap:4px;margin:8px 0}.progress.mini li{padding:1px 8px;font-size:.82rem}
+.secrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.secrow>*{min-width:0}
+.secrow .btn{min-height:48px;font-size:.98rem;padding:8px 10px}
+@media(min-width:700px){.secrow{grid-template-columns:repeat(3,1fr)}}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.filters a{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--ink);font-weight:600;text-decoration:none}
+.filters a[aria-current=true]{background:var(--ink);border-color:var(--ink);color:#fff}
+.stepspanel{gap:12px}
+.stepspanel li{align-items:flex-start}.stepspanel .sp{min-width:0;flex:1}
+.stepspanel .spt{display:block;font-size:1.15rem}.stepspanel .spl{margin:2px 0 8px;color:var(--muted)}
+.stepspanel .spb{display:grid;gap:8px}.stepspanel .spb .btn{min-height:48px}
+.stepspanel .sps{margin:8px 0 0;font-size:.95rem}.stepspanel .sps a{display:inline-flex;min-height:32px;align-items:center;margin-right:12px}
+@media(min-width:900px){.wrap.panelwide{max-width:1080px}.stepspanel{grid-template-columns:repeat(3,1fr)}}
+.putaway{margin-top:24px}
+`;
+
+function badges(services) {
+  return `<div class="svcs" data-badges>${services.map((k) => { const b = serviceBadge(k); return b ? `<span class="svc" data-service="${k}" style="border-color:${b.bar};background:${b.tint}">${esc(b.label)}</span>` : ''; }).join('')}</div>`;
+}
+
+function factsLine(f) {
+  const bits = [];
+  if (f.date) bits.push(`<span data-fact-date>${esc(f.dateWord)} ${esc(shortDate(f.date))}</span>`);
+  if (f.where) bits.push(`<span data-fact-where>${esc(f.where)}</span>`);
+  const call = f.phone ? `<a class="call" href="tel:${esc(f.phone.replace(/[^\d+]/g, ''))}"${tip('card.call')}>Call</a>` : '';
+  return bits.length || call ? `<div class="facts" data-facts>${bits.join('<span class="muted">·</span>')}${call}</div>` : '';
+}
+
+const CARD_LABEL = {
+  'card.createInvoice': 'Create invoice', 'card.openInvoice': 'Open invoice', 'card.seeCal': 'See it on the calendar',
+  'card.checklist': 'Walk-through checklist', 'card.printChecklist': 'Print checklist', 'ret.mark': 'Mark returned', 'ret.see': 'See the check-in',
+  'card.schedInstall': 'Schedule install', 'card.schedSetup': 'Schedule setup', 'card.schedPickup': 'Schedule pickup + return',
+  'card.schedTakedown': 'Schedule takedown', 'card.schedGrazingPickup': 'Schedule pickup (optional)',
+};
+
+// One button from the rules table. ctx: { rk, inv, st, sched, payTarget, who, plan }.
+function cardButton(keyKind, ctx, primary) {
+  const [key, kind] = keyKind.split('|');
+  const cls = primary ? 'btn primary' : 'btn ghost';
+  const wrap = (html) => (primary ? act(html, key) : `<div class="act">${html}</div>`);
+  const a = (href, label, extra = '') => wrap(`<a class="${cls}" href="${esc(href)}"${extra}${tip(key)}>${esc(label)}</a>`);
+  const { rk, inv, sched } = ctx;
+  switch (key) {
+    case 'card.createInvoice': return a(`/admin/invoices/new?r=${rk}`, CARD_LABEL[key]);
+    case 'card.openInvoice': return a(`/admin/invoices/${inv.id}`, primary && inv.status === 'draft' ? 'Open and send the invoice' : CARD_LABEL[key]);
+    case 'card.seeCal': return a(`/admin/day/${sched.date}`, `${CARD_LABEL[key]} (${shortDate(sched.date)})`);
+    case 'card.checklist': return a(`/admin/checklist/online?r=${rk}`, CARD_LABEL[key]);
+    case 'card.printChecklist': return a(`/admin/checklist?r=${rk}`, CARD_LABEL[key], ' target="_blank" rel="noopener"');
+    case 'ret.mark': case 'ret.see': return a(`/admin/returns?k=${rk}`, CARD_LABEL[key]);
+    case 'card.schedInstall': case 'card.schedSetup': case 'card.schedPickup': case 'card.schedTakedown': case 'card.schedGrazingPickup':
+      return a(`/admin/calendar/new?r=${rk}&kind=${kind}`, CARD_LABEL[key]);
+    case 'card.jobDone': return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Mark job done</button>`)}</form>`;
+    case 'card.undoJobDone': return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk, undo: '1' })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Undo job done</button>`)}</form>`;
+    case 'card.archive': return `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}${wrap(`<button class="${primary ? 'btn primary' : 'btn ghost'}" type="submit"${tip(key)}>Done — put away</button>`)}</form>`;
+    case 'pa.bringBack': return `<form method="post" action="/admin/requests/unarchive">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Bring back</button>`)}</form>`;
+    case 'pay.unvoid': { const t = ctx.payTarget; return `<form method="post" action="${esc(t.action)}">${hiddenInputs({ ...t.extra, [t.field]: 'unvoid' })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Bring back (undo Void)</button>`)}</form>`; }
+    case 'pay.deposit': case 'pay.paid': {
+      const t = ctx.payTarget;
+      const isInvoice = t.field === 'action';
+      const dep = key === 'pay.deposit';
+      return confirmStep({ key, yesKey: dep ? 'pay.depositYes' : 'pay.paidYes', label: dep ? 'Mark deposit received' : 'Mark paid in full', cls: primary ? 'primary' : 'ghost',
+        question: dep ? `Mark ${ctx.who}'s deposit as received? Only do this after the money is in your account.` : `Mark ${ctx.who} as paid in full? Only do this after the money is in your account.`,
+        action: t.action, hidden: hiddenInputs({ ...t.extra, [t.field]: dep ? 'deposit_paid' : 'paid' }), extra: isInvoice ? methodPicker() : '' });
+    }
+    default: return '';
+  }
+}
+
+function payTargetFor(r, inv) {
+  return inv ? { action: `/admin/invoices/${inv.id}/status`, field: 'action', extra: { back: '/admin/' } } : { action: '/admin/requests/status', field: 'status', extra: { r: b64urlText(r.key) } };
+}
+
+function historyHtml(events = [], notes = []) {
+  const ev = events.map((e) => `<li><span class="muted">${esc(memphisWhen(e.at))}</span> ${esc(e.what)}</li>`).join('');
+  const nt = notes.map((n) => `<li>${esc(n.body)}</li>`).join('');
+  return `${nt ? `<h4>Notes (only you see these)</h4><ul data-notes>${nt}</ul>` : ''}${ev ? `<h4>History</h4><ul data-history>${ev}</ul>` : ''}`;
+}
+
+// One request card. o: everything dashboardPage knows about this request.
+export function requestCard(r, o) {
+  const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace } = o;
+  const rk = b64urlText(r.key);
+  const services = servicesOf(r);
+  const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
+  const pr = deriveProgress({ st, inv, scheduled: Boolean(sched), ret, rental });
+  const stage = cardStage({ pr, inv, archived });
+  const returned = Boolean(ret && ret.returned_at);
+  const plan = inv ? payPlanOf(inv, inv.total_cents || 0) : 'half';
+  const rules = cardButtons({ services, stage, inv, plan, sched: Boolean(sched), kinds, returned, jobDoneAt: Boolean(st.job_done_at) });
+  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv) };
+  const first = serviceBadge(services[0]);
+  const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
+  const chips = [
+    pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : (pr.current === 'scheduled' && sched && !pr.finished ? '' : `<span class="chip ${pr.current === 'paid' ? 'paid' : (pr.damaged && pr.current === 'job_done' ? 'deposit_paid' : 'step')}" data-step="${pr.current}">${esc(pr.finished ? 'Finished: job done and paid' : pr.label)}</span>`),
+    pr.paidEarly ? '<span class="chip paid" data-paid-early>Paid in full ✓</span>' : '',
+    sched && !pr.void ? `<span class="chip sched" data-scheduled>Scheduled for ${esc(shortDate(sched.date))}</span>` : '',
+    returned ? (ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : `<span class="chip paid" data-returned>Returned ${esc(shortDate(String(ret.returned_at).slice(0, 10)))}</span>`) : '',
+    notPaidYet(inv) ? `<span class="chip deposit_paid" data-owes>Owes ${esc(money(inv.balance.owed))}</span>` : '',
+  ].join('');
+  const progress = pr.void || archived ? '' : `<ol class="progress mini" data-progress aria-label="Step ${pr.steps.findIndex((x) => x.key === pr.current) + 1} of 6">${pr.steps.map((x) => `<li class="${x.done ? 'done' : ''}${x.key === pr.current ? ' now' : ''}"><span class="pn">${x.done ? '✓' : x.n}</span> ${esc(x.label)}</li>`).join('')}</ol>`;
+  const g = services.includes('grazing') ? grazingFacts(r, foodPerHead) : null;
+  const gLine = g && (g.guests || g.estimate) ? `<div class="want" data-grazing-facts>${esc([g.guests ? `Guests: ${g.guests}` : '', g.estimate].filter(Boolean).join(' · '))}</div>` : '';
+  const quiet = ['void', 'finished', 'archived'].includes(stage);
+  const finishedNote = stage === 'finished' ? '<div class="notice ok" data-put-away-prompt><strong>Finished: the job is done and it is paid in full.</strong> Put it away?</div>' : '';
+  const damage = returned && ret.damaged && stage !== 'archived' && stage !== 'void' ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : '';
+  const payment = quiet ? '' : requestPayment(r, st, inv, rules.primary);
+  return `<article class="card" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" data-reqcard data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
+      ${badges(services)}
+      <div class="spread"><h3 class="who">${esc(r.name || 'No name given')}</h3><div class="row">${chips}</div></div>
+      ${factsLine(keyFacts(r, services, { pickupPlace }))}
+      ${wantSummary(r).map((w) => `<div class="want">${esc(w)}</div>`).join('')}${gLine}
+      ${progress}
+      ${quiet ? '' : extras}
+      ${damage}${finishedNote}
+      ${rules.primary ? `<div class="actions" data-primary>${cardButton(rules.primary, ctx, true)}</div>` : ''}
+      ${rules.secondary.length ? `<div class="secrow" data-secondary>${rules.secondary.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
+      ${payment}
+      <details class="disclose" data-details><summary${tip('card.details')}>Show details</summary>
+        <div class="muted" style="margin-top:4px">${esc(friendlyWhen(r))}${archived && st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</div>
+        ${cl && cl !== 'none' ? `<div class="muted" style="margin-top:4px">Checklist ${cl === 'done' ? 'done ✓' : 'started'}</div>` : ''}
+        ${requestDetailsBody(r, { referrers })}
+        ${historyHtml(events, notes)}
+      </details>
+    </article>`;
+}
+
+function filterChips(filter, base = '/admin/') {
+  return `<nav class="filters" aria-label="Show only" data-filters>${FILTERS.map(([k, label]) => `<a href="${base}${k === 'all' ? '' : `?f=${k}`}"${k === filter ? ' aria-current="true"' : ''} data-filter="${k}"${tip('req.filter')}>${esc(label)}</a>`).join('')}</nav>`;
+}
+
+export function requestsPanel(folderUrl) {
+  const b = (href, label, key, extra = '') => `<a class="btn ghost" href="${esc(href)}"${extra}${tip(key)}>${esc(label)}</a>`;
+  return stepsPanel('requests', [
+    [b('/admin/?fresh=1', 'Check for new requests', 'sub.refresh'), b('/admin/search', 'Find a customer', 'sub.find')],
+    [b('/admin/invoices/new', 'Start a blank invoice', 'sub.blankInvoice'), b('/admin/checklist', 'Print a blank checklist', 'sub.blankChecklist', ' target="_blank" rel="noopener"')],
+    [b('/admin/day/today', "Today's list", 'sub.today'), b('/admin/calendar', 'Calendar & Bookings', 'nav.calendar')],
+  ], [
+    `<a href="${esc(SHEET_URL)}" target="_blank" rel="noopener noreferrer"${tip('req.sheet')}>Open responses sheet</a> <a href="${esc(folderUrl)}" target="_blank" rel="noopener noreferrer"${tip('req.idFolder')}>Open ID folder</a>`,
+    `<a href="/admin/packages"${tip('sub.packages')}>Porch packages</a>`,
+    '',
+  ]);
+}
+
+// schedule: { [request_key]: { date } } earliest booking per request; kinds: { [request_key]: [kind] }.
+export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '',
+  archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station' }) {
   const err = sheetError ? `<div class="notice err"><strong>The requests could not be loaded right now.</strong> ${/not shared/i.test(sheetError)
     ? `The responses sheet needs to be shared with the site. In Google Sheets tap Share and add <code>${esc(SA_EMAIL)}</code> as a Viewer.`
     : 'Please try again in a minute.'}<div class="muted" style="margin-top:6px;font-size:.95rem">Details: ${esc(sheetError)}</div></div>` : '';
-  const cards = requests.map((r) => {
+  const f = FILTERS.some(([k]) => k === filter) ? filter : 'all';
+  const one = (r, isArchived) => {
     const st = statuses[r.key] || { status: 'new' };
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
-    const rk = b64urlText(r.key);
-    const cl = checklists[r.key];
-    const want = wantSummary(r);
-    const sched = schedule[r.key];
-    const ret = returns[r.key];
-    const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
-    const anyRental = Boolean(r.gamesAnswer) || r.wantsRentals;
-    const pr = deriveProgress({ st, inv, scheduled: Boolean(sched), ret, rental });
-    const returned = ret && ret.returned_at;
-    const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
-    const chips = [
-      // A scheduled card shows only the dated "Scheduled for …" chip, never a bare "Scheduled" too.
-      pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : (pr.current === 'scheduled' && sched && !pr.finished ? '' : `<span class="chip ${pr.current === 'paid' ? 'paid' : (pr.damaged && pr.current === 'job_done' ? 'deposit_paid' : 'step')}" data-step="${pr.current}">${esc(pr.finished ? 'Finished: job done and paid' : pr.label)}</span>`),
-      pr.paidEarly ? '<span class="chip paid" data-paid-early>Paid in full ✓</span>' : '',
-      sched && !pr.void ? `<span class="chip sched" data-scheduled>Scheduled for ${esc(shortDate(sched.date))}</span>` : '',
-      returned ? (ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : `<span class="chip paid" data-returned>Returned ${esc(shortDate(String(returned).slice(0, 10)))}</span>`) : '',
-    ].join('');
-    const progress = pr.void ? '' : `<ol class="progress" data-progress>${pr.steps.map((x) => `<li class="${x.done ? 'done' : ''}${x.key === pr.current ? ' now' : ''}"><span class="pn">${x.done ? '✓' : x.n}</span> ${esc(x.label)}</li>`).join('')}</ol>`;
-    // The next step's button is the big one.
-    const next = pr.void ? '' : ({
-      new: inv ? act(`<a class="btn primary" href="/admin/invoices/${inv.id}"${tip('card.openInvoice')}>Open invoice</a>`, 'card.openInvoice') : act(`<a class="btn primary" href="/admin/invoices/new?r=${rk}"${tip('card.createInvoice')}>Create invoice</a>`, 'card.createInvoice'),
-      invoiced: '<p class="hint" style="margin:0">Next: when the deposit arrives, tap <strong>Mark deposit received</strong> in the Payment box below.</p>',
-      deposit_paid: act(`<a class="btn primary" href="/admin/calendar/new?r=${rk}"${tip('card.schedule')}>Put on the calendar</a>`, 'card.schedule'),
-      scheduled: anyRental ? act(`<a class="btn primary" href="/admin/returns?k=${rk}"${tip('ret.mark')}>Mark returned</a>`, 'ret.mark')
-        : `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk })}${act(`<button class="btn primary" type="submit"${tip('card.jobDone')}>Mark job done</button>`, 'card.jobDone')}</form>`,
-      job_done: '<p class="hint" style="margin:0">Next: when the rest of the money arrives, tap <strong>Mark paid in full</strong> in the Payment box below.</p>',
-      paid: '',
-    })[pr.current] || '';
-    const finishedPrompt = pr.finished ? `<div class="notice ok" data-put-away-prompt><strong>Finished: the job is done and it is paid in full.</strong> Put it away?
-      <form method="post" action="/admin/requests/archive" data-archive style="margin-top:8px">${hiddenInputs({ r: rk })}${act(`<button class="btn" type="submit"${tip('card.archive')}>Done — put away</button>`, 'card.archive')}</form></div>` : '';
-    return `<article class="card" data-card="${esc(rk)}">
-      <div class="spread"><h3 style="margin:0">${esc(r.name || 'No name given')}</h3><div class="row">${chips}</div></div>
-      <div class="when">${esc(friendlyWhen(r))}</div>
-      ${want.map((w) => `<div class="want">${esc(w)}</div>`).join('')}
-      ${cl && cl !== 'none' ? `<div class="muted" style="margin-top:4px">Checklist ${cl === 'done' ? 'done ✓' : 'started'}</div>` : ''}
-      ${progress}
-      ${cardExtras[r.key] || ''}
-      ${returned && ret.damaged ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : ''}
-      ${finishedPrompt}
-      <div class="actions">${next}</div>
-      <div class="actions three">
-        ${act(`<a class="btn ghost" href="/admin/checklist/online?r=${rk}"${tip('card.checklist')}>Open checklist</a>`, 'card.checklist')}
-        ${inv && pr.current !== 'new' ? act(`<a class="btn ghost" href="/admin/invoices/${inv.id}"${tip('card.openInvoice')}>Open invoice</a>`, 'card.openInvoice') : ''}
-        ${!inv && pr.current !== 'new' ? act(`<a class="btn ghost" href="/admin/invoices/new?r=${rk}"${tip('card.createInvoice')}>Create invoice</a>`, 'card.createInvoice') : ''}
-        ${act(`<a class="btn ghost" href="/admin/checklist?r=${rk}" target="_blank" rel="noopener"${tip('card.printChecklist')}>Print checklist</a>`, 'card.printChecklist')}
-        ${pr.current !== 'deposit_paid' && !pr.void ? act(`<a class="btn ghost" href="/admin/calendar/new?r=${rk}"${tip('card.schedule')}>Put on the calendar</a>`, 'card.schedule') : ''}
-        ${sched ? act(`<a class="btn ghost" href="/admin/day/${esc(sched.date)}"${tip('card.seeCal')}>See it on the calendar (${esc(shortDate(sched.date))})</a>`, 'card.seeCal') : ''}
-        ${returned ? act(`<a class="btn ghost" href="/admin/returns?k=${rk}"${tip('ret.see')}>See the check-in</a>`, 'ret.see') : ''}
-        ${anyRental && !returned && pr.current !== 'scheduled' && sched ? act(`<a class="btn ghost" href="/admin/returns?k=${rk}"${tip('ret.mark')}>Mark returned</a>`, 'ret.mark') : ''}
-        ${st.job_done_at && !returned ? `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk, undo: '1' })}${act(`<button class="btn ghost" type="submit"${tip('card.undoJobDone')}>Undo job done</button>`, 'card.undoJobDone')}</form>` : ''}
-      </div>
-      ${requestPayment(r, st, inv)}
-      ${pr.finished ? '' : `<form method="post" action="/admin/requests/archive" data-archive style="margin-top:12px">${hiddenInputs({ r: rk })}
-        ${act(`<button class="btn ghost" type="submit"${tip('card.archive')}>Done — put away</button>`, 'card.archive')}</form>`}
-      ${requestDetails(r, { referrers })}
-    </article>`;
-  }).join('');
-  return layout('Requests', `${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}${setupBanner(missingPayment)}
-    <h1>Requests</h1>${holdsBox}${week}${extraTop}${top}${err}${idsBox}
-    ${requests.length ? cards : (sheetError ? '' : '<div class="card"><p style="margin:0">No requests waiting. New ones from the website form show up here within a minute. Finished ones are under Put away.</p></div>')}
+    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace }) };
+  };
+  const shown = requests.map((r) => one(r, false)).filter((x) => matchesFilter(f, x));
+  const putRows = archived.map((r) => one(r, true)).filter((x) => matchesFilter(f, x));
+  const empty = f === 'all'
+    ? '<div class="card"><p style="margin:0">No requests waiting. New ones from the website form show up here within a minute. Finished ones are in Put away at the bottom.</p></div>'
+    : '<div class="card"><p style="margin:0">Nothing here for this filter. Tap All to see every request.</p></div>';
+  const putSection = `<section class="putaway" id="put-away-section" data-put-away><h2>Put away (${putRows.length})</h2>
+    <details class="disclose" id="put-away"${openPutAway ? ' open' : ''}><summary${tip('pa.show')}>Show put-away requests</summary>
+      ${putRows.length ? putRows.map((x) => x.html()).join('') : '<p class="muted">Nothing put away yet. Tap <strong>Done — put away</strong> on a finished request to move it here.</p>'}
+    </details></section>`;
+  return layout('Requests', `<style>${CARD_CSS}</style>${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}${setupBanner(missingPayment)}
+    ${requestsPanel(folderUrl)}
+    <h1>Requests</h1>${week}${holdsBox}${extraTop}${err}${idsBox}
+    ${filterChips(f)}
+    ${shown.length ? shown.map((x) => x.html()).join('') : (sheetError ? '' : empty)}
+    ${putSection}
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
-    <script>${DASH_JS}</script>`, { screen: 'requests', subnav: subnav() });
-}
-
-export function archivePage({ requests, statuses, flash = '' }) {
-  const rows = requests.map((r) => {
-    const st = statuses[r.key] || { status: 'new' };
-    const rk = b64urlText(r.key);
-    const label = st.status === 'void' ? 'Void — cancelled' : (STATUS_LABELS[st.status] || st.status);
-    return `<article class="card" data-archived="${esc(rk)}"><div class="spread"><h3 style="margin:0">${esc(r.name || 'No name given')}</h3><span class="chip ${esc(st.status)}">${esc(label)}</span></div>
-      <div class="when">${esc(friendlyWhen(r))}${st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</div>
-      ${wantSummary(r).map((w) => `<div class="want">${esc(w)}</div>`).join('')}
-      <div class="actions">
-        <form method="post" action="/admin/requests/unarchive">${hiddenInputs({ r: rk })}${act(`<button class="btn" type="submit"${tip('pa.bringBack')}>Bring back</button>`, 'pa.bringBack')}</form>
-        ${st.invoice_id ? act(`<a class="btn ghost" href="/admin/invoices/${st.invoice_id}"${tip('card.openInvoice')}>Open invoice</a>`, 'card.openInvoice') : ''}
-      </div></article>`;
-  }).join('');
-  return layout('Put away', `${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}<h1>Put away</h1>
-    ${requests.length ? rows : '<div class="card"><p style="margin:0">Nothing put away yet. Tap <strong>Done — put away</strong> on a finished request to move it here.</p></div>'}`, { screen: 'archive', back: BACK_REQUESTS });
+    <script>${DASH_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { screen: '', panelWide: true });
 }
 
 export function invoicesPage({ invoices }) {

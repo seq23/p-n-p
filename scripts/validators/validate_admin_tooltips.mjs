@@ -9,7 +9,10 @@
  *  2. a key used on a screen is missing from /admin/help, or a map entry is never rendered;
  *  3. a screen lacks the numbered 1-2-3 steps, or a Back link (Requests and Sign in excepted),
  *     or the link to How to use this;
- *  4. the Requests screen has any "More" disclosure (its menu became a visible sub-nav).
+ *  4. the Requests screen has any "More" disclosure, or any disclosure with an id outside the
+ *     whitelist (only #put-away, the collapsed Put away section), or lacks the steps panel with
+ *     each button in its owner-approved step (JOB B, 18 Oct 2026); Calendar & Bookings and Money
+ *     carry the same panel; /admin/archive redirects to the opened Put away section.
  * Rule 0: fewer than 20 screens or 150 controls checked is a failure.
  */
 import { mod } from './lib/admin_harness.mjs';
@@ -87,16 +90,28 @@ const screens = [
 const pages = [...early];
 for (const [p, o = {}] of screens) pages.push([p, o, await s.get(p, { auth: o.auth !== false })]);
 await s.post('/admin/requests/archive', { r: s.rk(reqB.key) });
-pages.push(['/admin/archive', {}, await s.get('/admin/archive')]);
+{
+  const old = await s.get('/admin/archive');
+  if (old.status !== 303 || old.location !== '/admin/?pa=1#put-away') errors.push(`/admin/archive must redirect to /admin/?pa=1#put-away (got ${old.status} ${old.location})`);
+  pages.push(['/admin/?pa=1', { home: true, putAwayOpen: true }, await s.get('/admin/?pa=1')]);
+  pages.push(['/admin/?f=porch', { home: true }, await s.get('/admin/?f=porch')]);
+  pages.push(['/admin/?f=unpaid', { home: true }, await s.get('/admin/?f=unpaid')]);
+}
 pages.push(['/admin/search?partial=1&q=renter', { partial: true }, await s.get('/admin/search?partial=1&q=renter')]);
 // A porch job (no rental) on the calendar, then done: Mark job done / Undo job done.
 {
   const views = await mod('functions/_lib/views.mjs');
-  const porch = { ...reqA, key: 'porch|x', name: 'Pat Porch', gamesAnswer: '', wantsRentals: false, wantsDecor: true, need: 'Porch decorating', rentals: [], decor: [], other: [] };
+  const porch = { ...reqA, key: 'porch|x', name: 'Pat Porch', gamesAnswer: '', wantsRentals: false, wantsDecor: true, need: 'Porch decorating', services: ['porch'], rentals: [], decor: [], other: [] };
   const base = { requests: [porch], invoices: {}, checklists: {}, returns: {}, folderUrl: 'https://drive.google.com/x', sheetError: '', flash: '', missingPayment: [] };
   for (const st of [{ status: 'scheduled' }, { status: 'job_done', job_done_at: '2026-10-18 10:00:00' }]) {
-    pages.push([`dashboardPage(${st.status})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, statuses: { 'porch|x': st }, schedule: { 'porch|x': { date: '2026-10-24' } } }) }]);
+    pages.push([`dashboardPage(${st.status})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, statuses: { 'porch|x': st }, schedule: { 'porch|x': { date: '2026-10-24' } }, kinds: { 'porch|x': ['porch_install'] } }) }]);
   }
+  // Grazing and party once their setup is on the calendar: the optional second booking buttons.
+  const graze = { ...porch, key: 'graze|x', name: 'Gia Graze', services: ['grazing'], need: 'grazing', decor: [{ label: 'How many guests?', value: '15–40' }, { label: 'Should we source the food?', value: 'Yes, include food in my quote' }] };
+  const party = { ...porch, key: 'party|x', name: 'Pia Party', services: ['party'], need: 'party & decor' };
+  pages.push(['dashboardPage(grazing+party scheduled, one put away)', { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [graze, party, { ...reqA, key: 'rent|x', name: 'Rae Rent', services: ['rentals'] }], archived: [{ ...porch, key: 'old|x' }],
+    statuses: { 'graze|x': { status: 'scheduled' }, 'party|x': { status: 'scheduled' }, 'rent|x': { status: 'deposit_paid' }, 'old|x': { status: 'paid', archived_at: '2026-10-01 10:00:00' } },
+    schedule: { 'graze|x': { date: '2026-10-24' }, 'party|x': { date: '2026-10-25' } }, kinds: { 'graze|x': ['grazing_setup'], 'party|x': ['party_setup'] }, foodPerHead: { low: 12, high: 18 } }) }]);
 }
 
 const used = new Set();
@@ -117,16 +132,30 @@ for (const [p, o, res] of pages) {
     used.add(key);
   }
   if (o.partial) continue;
-  const steps = (html.match(/<ol class="topsteps" data-steps="[^"]+">([\s\S]*?)<\/ol>/) || [])[1];
+  const steps = (html.match(/<ol class="topsteps[^"]*" data-steps="[^"]+"[^>]*>([\s\S]*?)<\/ol>/) || [])[1];
   if (!steps || (steps.match(/<li>/g) || []).length !== 3) errors.push(`${p}: no numbered 1-2-3 steps at the top`);
+  if (/class="subnav"/.test(html)) errors.push(`${p}: the old sub-nav button row is back (the steps panel replaced it)`);
+  if (/^\/admin\/(calendar|money)(\?|$)/.test(p) && !/data-steps-panel/.test(html)) errors.push(`${p}: no steps panel (3 steps, each with its buttons)`);
   if (!o.home && !/class="back"|&larr; Back to requests/.test(html)) errors.push(`${p}: no Back link`);
   if (o.auth !== false && !o.print && !/href="\/admin\/help"/.test(html)) errors.push(`${p}: no link to How to use this`);
   if (o.print && !/href="\/admin\/help"/.test(html)) errors.push(`${p}: print page has no link to How to use this`);
   if (o.home && o.auth !== false) {
     if (/<summary[^>]*>[^<]*\bMore\b/.test(html)) errors.push(`${p}: the Requests screen still has a "More" toggle`);
-    for (const label of ['Start a blank invoice', 'Print a blank checklist', 'Check for new requests now']) {
-      if (!new RegExp(`class="subnav"[\\s\\S]*${label}`).test(html)) errors.push(`${p}: "${label}" is not in the visible sub-nav`);
-    }
+    const DISCLOSURE_WHITELIST = ['put-away'];
+    for (const m of html.matchAll(/<details\b[^>]*\bid="([^"]+)"/g)) if (!DISCLOSURE_WHITELIST.includes(m[1])) errors.push(`${p}: disclosure #${m[1]} is not on the whitelist (only the Put away section may be one)`);
+    const lis = steps ? steps.split('<li>').slice(1) : [];
+    const PANEL = [['See who&#39;s asking.|See who\'s asking.', ['Check for new requests', 'Find a customer', 'Open responses sheet', 'Open ID folder']],
+      ['Send a quote or invoice.', ['Start a blank invoice', 'Print a blank checklist', 'Porch packages']], ['Plan your day and get paid.', ["Today's list|Today&#39;s list", 'Calendar &amp; Bookings']]];
+    PANEL.forEach(([title, labels], i) => {
+      const li = lis[i] || '';
+      if (!new RegExp(title).test(li)) errors.push(`${p}: step ${i + 1} of the panel is not "${title.split('|')[0]}"`);
+      for (const label of labels) if (!new RegExp(`>(${label})<`).test(li)) errors.push(`${p}: "${label.split('|')[0]}" is not in step ${i + 1} of the panel`);
+    });
+    const pa = (html.match(/<details[^>]*id="put-away"[^>]*>/) || [])[0];
+    if (!pa || !/Put away \(\d+\)/.test(html) || !/Show put-away requests/.test(html)) errors.push(`${p}: no collapsed "Put away (N)" section with "Show put-away requests"`);
+    else if (Boolean(o.putAwayOpen) !== /\sopen\b/.test(pa)) errors.push(`${p}: the Put away section is ${o.putAwayOpen ? 'not opened by the old route' : 'open by default'}`);
+    if (!o.direct && !/data-filters/.test(html)) errors.push(`${p}: no filter chips`);
+    if (/href="\/admin\/archive"/.test(html)) errors.push(`${p}: Put away is still linked as its own page`);
     if (!/class="hint"/.test(html)) errors.push(`${p}: no visible helper lines under the actions`);
   }
 }

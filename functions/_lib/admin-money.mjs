@@ -1,7 +1,9 @@
 // Money tab, year-end summary for taxes, expenses with receipts, damage-deposit outcomes and
 // the Google Sheet sync (docs/admin-console.md). Auth is enforced before this runs.
-import { loadRequests, monthCount } from './requests.mjs';
-import { redirect, htmlResponse, getSettings, putSetting, toCents, FROM_EMAIL, bytesToB64 } from './util.mjs';
+import { loadRequests, monthCount, logEvent } from './requests.mjs';
+import { notPaidYet } from './notpaid.mjs';
+import { sendMessage } from './messages.mjs';
+import { redirect, htmlResponse, getSettings, putSetting, toCents, FROM_EMAIL, bytesToB64, money, shortDate } from './util.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 import { isRentalInvoice } from './pricing.mjs';
 import { chicagoDate } from './reminders.mjs';
@@ -28,7 +30,24 @@ export async function moneyPage(env, url) {
   const { results: needs } = await env.DB.prepare("SELECT * FROM expenses WHERE status = 'needs_check' ORDER BY id DESC").all();
   const { results: recent } = await env.DB.prepare("SELECT * FROM expenses WHERE status = 'saved' ORDER BY date DESC, id DESC LIMIT 30").all();
   const requests = await loadRequests(env).catch(() => []);
-  return htmlResponse(VM.moneyPage({ month, year, requestsThisMonth: monthCount(requests, month), t: M.periodTotals(data, month), months: M.yearSummary(data, year).months, needs: needs || [], recent: recent || [], depositsHeld: M.depositsHeldAt(data, `${month}-31`), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  const notPaid = await notPaidYet(env.DB, requests, chicagoDate());
+  return htmlResponse(VM.moneyPage({ notPaid, month, year, requestsThisMonth: monthCount(requests, month), t: M.periodTotals(data, month), months: M.yearSummary(data, year).months, needs: needs || [], recent: recent || [], depositsHeld: M.depositsHeldAt(data, `${month}-31`), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+}
+
+// "Email a reminder" on Not paid yet: one tap, from hello@, logs reminded_at on the invoice.
+export async function remindRoute(env, request) {
+  const form = await request.formData();
+  const id = Number(form.get('invoice'));
+  const requests = await loadRequests(env).catch(() => []);
+  const np = await notPaidYet(env.DB, requests, chicagoDate());
+  const row = np.owed.find((r) => r.id === id);
+  if (!row) return redirect(`/admin/money?e=${encodeURIComponent('That invoice has nothing owed on it any more.')}#not-paid`);
+  const ctx = { name: row.name, email: row.email, phone: row.phone, amount: money(row.owed), due: row.due ? shortDate(row.due) : '', late: row.tone === 'late', number: row.number };
+  const sent = await sendMessage(env, 'email', 'paymentReminder', ctx);
+  if (!sent.ok) return redirect(`/admin/money?e=${encodeURIComponent(`The reminder did not go out: ${sent.error}`)}#not-paid`);
+  await env.DB.prepare("UPDATE invoices SET reminded_at = datetime('now') WHERE id = ?1").bind(id).run();
+  if (row.requestKey) await logEvent(env.DB, row.requestKey, `Payment reminder emailed (${money(row.owed)} owed on ${row.number})`, 'admin');
+  return redirect(`/admin/money?m=${encodeURIComponent(`Reminder emailed to ${row.name.split(/\s+/)[0]} ✓`)}#not-paid`);
 }
 
 export async function moneyDetail(env, url) {

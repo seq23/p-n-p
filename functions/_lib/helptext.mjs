@@ -20,7 +20,7 @@ export const SCREENS = [
   ['holds', 'Held games (rental holds)'],
   ['messages', 'Texts and emails to customers'],
   ['money', 'Money'],
-  ['archive', 'Put away'],
+  ['archive', 'Put away (at the bottom of Requests)'],
   ['settings', 'Settings'],
   ['gcal', 'Link my Google Calendar'],
   ['help', 'This help page'],
@@ -29,8 +29,8 @@ export const SCREENS = [
 
 // The 1-2-3 at the top of each screen.
 export const STEPS = {
-  requests: ['Read new requests.', 'Send the invoice.', 'When they pay, mark it paid.'],
-  calendar: ['Pick a request from the list.', 'Drag it onto a day (or tap Schedule).', 'Check the details and tap Save — the request is marked Scheduled.'],
+  requests: ['See who\'s asking.', 'Send a quote or invoice.', 'Plan your day and get paid.'],
+  calendar: ['See what\'s coming up.', 'Put a request on the calendar.', 'Plan your day.'],
   day: ['Read who is coming and what they need.', 'Tap Call to ring them.', 'Tap Change this booking if something moved.'],
   booking: ['Pick what kind of booking it is.', 'Check the day, name and phone.', 'Tap Save booking.'],
   move: ['Pick the new day.', 'Check it is the right booking.', 'Tap Move it.'],
@@ -46,7 +46,7 @@ export const STEPS = {
   search: ['Type part of a name, a phone number or an email.', 'Read their bookings and what they paid.', 'Tap Open to go to one.'],
   checklistPrint: ['Tap Print.', 'Take the paper to the visit and fill it in by hand.', 'Or tap Open online checklist to fill it in on your phone.'],
   notfound: ['This page does not exist.', 'Tap Back to requests.', 'Or tap How to use this at the top.'],
-  money: ['Pick a month.', 'See what came in and what is still owed.', 'Tap a line to see the booking.'],
+  money: ['See who still owes you.', 'See what came in this month.', 'Keep receipts for taxes.'],
   moneyDetail: ['Read the payments or jobs behind the total.', 'Tap a name to open it.', 'Tap Back to Money when done.'],
   expense: ['Take a photo of the receipt (or pick one).', 'Check what the computer read — fix anything wrong.', 'Tap Save.'],
   year: ['Pick the year.', 'Download the PDF and the spreadsheet, or email them to yourself.', 'Give them to your tax preparer.'],
@@ -63,10 +63,8 @@ export const HELP = {
   'nav.requests': H('every', 'Requests', 'Shows the new requests people sent from the website form.', '', 'The main list. New requests from the website form show up here within a minute.'),
   'nav.calendar': H('every', 'Calendar & Bookings', 'Shows every booking for all four services, as a month or as a list.', '', 'Porch decorating, party decor, grazing tables and game rentals, all in one place.'),
   'nav.money': H('every', 'Money', 'Shows money received, what is still owed, expenses and the year-end summary for taxes.', '', 'Month by month, in plain numbers.'),
-  'nav.archive': H('every', 'Put away', 'Shows the finished requests you put away.', '', 'Finished requests live here. You can bring any of them back.'),
-  'nav.invoices': H('every', 'Invoices', 'Shows every invoice you have made, newest first.', '', 'A list of all invoices with their status and total.'),
   'nav.settings': H('every', 'Settings', 'Opens your payment details, password and calendar link.', '', 'Your Zelle, Cash App, QR code, password and the Google Calendar link.'),
-  'nav.help': H('every', 'How to use this', 'Opens a one-page guide to every button. You can print it.', '', 'This page. Every button in the console is explained here.'),
+  'nav.help': H('every', 'Help', 'Opens a one-page guide to every button. You can print it.', '', 'This page. Every button in the console is explained here.'),
   'nav.signout': H('every', 'Sign out', 'Signs this phone or computer out of the console.', '', 'Use it on a shared computer. You will need the password to get back in.'),
   'nav.back': H('every', 'Back', 'Goes back to the screen you came from.', '', 'Every screen has a Back link at the top. It never changes anything.'),
   'settings.open': H('every', 'Open Settings', 'Opens Settings so you can add your Zelle, Cash App and QR code.', 'Customers need these to pay you.', 'Shows up in a yellow box when your payment details are missing.'),
@@ -74,7 +72,7 @@ export const HELP = {
   // Requests screen
   'sub.blankInvoice': H('requests', 'Start a blank invoice', 'Makes a new empty invoice for a customer who did not use the website form.', 'For someone who called or texted you.', 'Use it when a customer called or texted instead of filling in the form. You type everything in.'),
   'sub.blankChecklist': H('requests', 'Print a blank checklist', 'Opens an empty walk-through checklist you can print on paper.', 'A paper copy to take to a visit.', 'Opens the four-page checklist with nothing filled in, ready to print.'),
-  'sub.refresh': H('requests', 'Check for new requests now', 'Reloads the list straight from the Google Sheet, so a brand-new request shows up.', 'Use it if you are waiting for someone.', 'The list already updates every minute. This button asks the Google Sheet right now.'),
+  'sub.refresh': H('requests', 'Check for new requests', 'Reloads the list straight from the Google Sheet, so a brand-new request shows up.', 'Use it if you are waiting for someone.', 'The list already updates every minute. This button asks the Google Sheet right now.'),
   'sub.today': H('requests', "Today's list", "Opens today's Day sheet: every booking today, what to load and what to collect.", 'Print it or text it to yourself.', 'The same page as tapping today on the calendar.'),
   'sub.packages': H('requests', 'Porch packages', 'Opens the porch package prices for fall and Christmas: Stoop, Classic, Grand and Showstopper.', 'The same prices customers see on the website.', 'A reference grid with what each package includes and its starting price per season, plus the add-ons and the fall + Christmas bundle. It changes nothing.'),
   'sub.find': H('requests', 'Find a customer', 'Opens the search to find any customer by name, phone or email.', 'Past, upcoming and put-away customers.', 'Searches every booking and every request.'),
@@ -88,11 +86,25 @@ export const HELP = {
   'card.openInvoice': H('card', 'Open invoice', 'Opens the invoice you already made for this customer.', 'Send it, resend it, or see if it is paid.', 'Shows once an invoice exists for the request.'),
   'card.printChecklist': H('card', 'Print checklist', 'Opens this customer\'s checklist, filled in so far, ready to print.', '', 'The paper version of the checklist, with their answers already on it.'),
   'card.archive': H('card', 'Done — put away', 'Takes this finished request off the list and keeps it under Put away.', 'Nothing is deleted. You can bring it back.', 'Use it when the job is over (or voided). The request moves to Put away. Nothing is deleted and the Google Sheet is not touched.'),
-  'card.schedule': H('card', 'Put on the calendar', 'Opens a scheduling screen filled in from this request, so you can pick the day and save it.', 'Pick the day; the request is marked Scheduled.', 'Name, phone, what they asked for and the date they asked for are filled in. Change anything, then tap Save booking.'),
   'card.jobDone': H('card', 'Mark job done', 'Records that the porch, party or grazing job is over.', 'Then mark it paid in full when the money is in.', 'Rentals use Mark returned instead. The card then shows step 5, Job done.'),
   'card.undoJobDone': H('card', 'Undo job done', 'Takes back Job done if you tapped it by mistake.', '', ''),
   'card.seeCal': H('card', 'See it on the calendar', 'Opens the calendar day this request is booked on.', '', 'Shows on a card once it is scheduled.'),
-  'card.details': H('card', 'Show phone, email, ID and all answers', 'Opens everything this customer typed into the form.', '', 'Their phone, email, date of birth, social media, photo ID and every answer.'),
+  'card.details': H('card', 'Show details', 'Opens everything this customer typed into the form, their ID, the checklist and the history.', '', 'Reading only: their phone, email, date of birth, social media, photo ID, every answer, the checklist and what happened so far. Every button stays on the card.'),
+  'card.call': H('card', 'Call', 'Calls this customer from your phone.', '', 'On the key-facts line under their name, with the date and where.'),
+  'card.schedInstall': H('card', 'Schedule install', 'Opens the scheduling screen for the porch install, filled in from this request.', 'Pick the day; the request is marked Scheduled.', 'The first step for a porch. The takedown comes after, and is never required.'),
+  'card.schedSetup': H('card', 'Schedule setup', 'Opens the scheduling screen for the party or grazing setup, filled in from this request.', 'Pick the day; the request is marked Scheduled.', 'The first step for party decor and grazing tables.'),
+  'card.schedPickup': H('card', 'Schedule pickup + return', 'Opens the scheduling screen for the game pickup, with the return day filled in from how long they rent.', 'The return day is filled in; you can change it.', 'Rentals always have a pickup and a return, booked as a pair.'),
+  'card.schedTakedown': H('card', 'Schedule takedown', 'Opens the scheduling screen for the takedown after the porch or party.', 'Optional. Never required to finish the job.', 'Shows once the install or setup is on the calendar.'),
+  'card.schedGrazingPickup': H('card', 'Schedule pickup (optional)', 'Opens the scheduling screen to collect the grazing table things after the event.', 'Optional. Never required to finish the job.', 'Shows once the grazing setup is on the calendar.'),
+  'req.filter': H('requests', 'Filter (All, Porch, Party & decor, Grazing, Rentals, Not paid yet)', 'Shows only the requests for that service, or only the customers who still owe money.', '', 'The chips above the list. All shows everything again. The Put away section at the bottom follows the same filter.'),
+  'pa.show': H('archive', 'Show put-away requests', 'Opens the list of requests you put away, at the bottom of Requests.', '', 'Closed until you tap it. Each one has Bring back.'),
+  'np.call': H('money', 'Call (Not paid yet)', 'Calls this customer about what they still owe.', '', 'On each row of Not paid yet at the top of Money.'),
+  'np.text': H('money', 'Text a reminder', 'Opens a text to this customer with the amount, the due date and the invoice number filled in.', '', 'It is sent from your own phone, so it is free. Read it before you tap send.'),
+  'np.email': H('money', 'Email a reminder', 'Emails this customer a friendly reminder of what they owe, from hello@, at once.', '', 'One tap. The date it went out is shown on the row.'),
+  'np.open': H('money', 'Open invoice (Not paid yet)', 'Opens this customer\'s invoice.', '', 'Send it again, or see every payment.'),
+  'np.paid': H('money', 'Mark paid', 'Records that this customer has now paid everything they owe. It asks you first.', '', 'Use it only after the money is in your account.', 'This records money as received. Only tap Yes when the money is in your account.'),
+  'np.filter': H('money', 'Not paid yet on Requests', 'Shows only the request cards of customers who still owe money.', '', 'The same list as the top of Money, as cards.'),
+  'money.invoices': H('money', 'All invoices', 'Shows every invoice you have made, newest first.', '', 'A list of all invoices with their status and total.'),
   'card.phone': H('card', 'Phone number', 'Calls this customer from your phone.', '', 'Tap the number to ring them.'),
   'card.email': H('card', 'Email address', 'Starts an email to this customer.', '', 'Tap it to write to them from your email app.'),
   'card.social': H('card', 'Social media link', 'Opens the social media page they gave on the form.', '', 'A quick way to check who they are.'),
@@ -272,6 +284,20 @@ export function hint(key) {
   const entry = HELP[key];
   if (!entry) throw new Error(`helptext: no entry for ${key}`);
   return entry.helper ? `<p class="hint" data-hint="${esc(key)}">${esc(entry.helper)}</p>` : '';
+}
+
+// The steps panel (Requests, Calendar & Bookings, Money): the same numbered 1-2-3, each step
+// with a line and its buttons. 3 columns on a computer, stacked on a phone.
+export const PANELS = {
+  requests: ['New requests are listed below.', 'Open a request below and tap Create invoice — or, for someone who called or texted you:', 'When money comes in, tap Mark paid on that card.'],
+  calendar: ['Every booking for all four services, by month or as a list.', 'Drag one from Unscheduled requests onto a day on a computer, or tap Schedule — or add one that came by phone:', 'Open a day to see who is coming, what to load and what to collect.'],
+  money: ['Not paid yet is listed below, most overdue first.', 'Money received, still owed and jobs for the month you pick.', 'Snap each receipt; the year-end summary is ready for your tax preparer.'],
+};
+export function stepsPanel(screen, buttons = [[], [], []], small = ['', '', '']) {
+  const steps = STEPS[screen];
+  const lines = PANELS[screen];
+  if (!steps || !lines) throw new Error(`helptext: no steps panel for ${screen}`);
+  return `<ol class="topsteps stepspanel" data-steps="${esc(screen)}" data-steps-panel>${steps.map((s, i) => `<li><span class="n">${i + 1}</span><div class="sp"><strong class="spt">${esc(s)}</strong><p class="spl">${esc(lines[i])}</p>${buttons[i] && buttons[i].length ? `<div class="spb">${buttons[i].join('')}</div>` : ''}${small[i] ? `<p class="sps">${small[i]}</p>` : ''}</div></li>`).join('')}</ol>`;
 }
 
 export function stepsBar(screen) {
