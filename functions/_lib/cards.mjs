@@ -74,6 +74,7 @@ export const SERVICE_ONLY = {
   'card.schedPickup': ['rentals'],
   'ret.mark': ['rentals'],
   'ret.see': ['rentals'],
+  'msg.pickupText': ['rentals'],
   'card.jobDone': ['porch', 'party', 'grazing'],
   'card.undoJobDone': ['porch', 'party', 'grazing'],
 };
@@ -90,7 +91,15 @@ const rank = (k) => { const i = SECONDARY_ORDER.indexOf(k.split('|')[0]); return
 // MAX_SECONDARY, shown on the card), more: [key, ...] (under Show details) } where a key
 // may carry a booking kind as "key|kind". "Done — put away" is only ever on a Finished or
 // Void card; money buttons live in the Payment box (cardPayment), never in the secondary row.
-export function cardButtons({ services, stage, inv = null, plan = 'half', sched = false, kinds = [], returned = false, jobDoneAt = false, takedownPlan = '' }) {
+//
+// Time-aware (owner, 18 Oct 2026): "Mark returned" only on/after the pickup date and "Mark job
+// done" only on/after the event date (America/Chicago; cardDates). Before that the primary is
+// the next real step; a booked rental with no pickup time set yet may have "Text about pickup
+// time" as its primary (msg.pickupText, needs canText); with a pickup time set, nothing big
+// until pickup day (primary '' and the card shows the quiet "Next:" line: cardWaiting).
+// Exactly ONE big button whenever there is a step to take; never more than one.
+export function cardButtons({ services, stage, inv = null, plan = 'half', sched = false, kinds = [], returned = false, jobDoneAt = false, takedownPlan = '',
+  eventReached = true, pickupReached = true, pickupTimeSet = false, canText = true }) {
   const has = (k) => services.includes(k);
   const decorish = services.filter((k) => k !== 'rentals');
   if (stage === 'archived') return { primary: 'pa.bringBack', secondary: [], more: [] };
@@ -101,9 +110,16 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
   if (stage === 'new') primary = 'card.createInvoice';
   else if (stage === 'draft') primary = 'card.openInvoice';
   else if (stage === 'invoiced') primary = plan === 'full' ? 'pay.paid' : 'pay.deposit';
-  else if (stage === 'deposit_paid') primary = firstSched[0] || (decorish.length ? 'card.jobDone' : 'ret.mark');
-  else if (stage === 'scheduled') primary = decorish.length && !jobDoneAt ? 'card.jobDone' : (has('rentals') && !returned ? 'ret.mark' : 'pay.paid');
-  else if (stage === 'job_done') primary = 'pay.paid';
+  else if (stage === 'deposit_paid' || stage === 'scheduled') {
+    const jobLeft = decorish.length && !jobDoneAt;
+    const backLeft = has('rentals') && !returned;
+    if (stage === 'deposit_paid' && firstSched[0]) primary = firstSched[0];
+    else if (jobLeft && eventReached) primary = 'card.jobDone';
+    else if (backLeft && pickupReached) primary = 'ret.mark';
+    else if (firstSched[0]) primary = firstSched[0];
+    else if (backLeft && !pickupTimeSet && canText) primary = 'msg.pickupText';
+    else if (!jobLeft && !backLeft) primary = 'pay.paid';
+  } else if (stage === 'job_done') primary = 'pay.paid';
   const sec = [];
   if (inv && primary !== 'card.openInvoice') sec.push('card.openInvoice');
   if (!inv && primary !== 'card.createInvoice') sec.push('card.createInvoice');
@@ -120,14 +136,40 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
     if (!sec.includes(`${second[0]}|${second[1]}`)) sec.push(`${second[0]}|${second[1]}`);
   }
   if (has('rentals') && returned) sec.push('ret.see');
-  if (has('rentals') && !returned && sched && primary !== 'ret.mark') sec.push('ret.mark');
+  if (has('rentals') && !returned && sched && pickupReached && primary !== 'ret.mark') sec.push('ret.mark');
   if (decorish.length && jobDoneAt && !returned) sec.push('card.undoJobDone');
   if (decorish.length) sec.push('card.checklist', 'card.printChecklist');
   // The never-rules, applied last so no branch above can break them.
   const allowed = (key) => { const only = SERVICE_ONLY[key.split('|')[0]]; return !only || only.some((k) => has(k)); };
   const all = [...new Set(sec)].filter(allowed).filter((k) => k !== primary && k !== 'card.archive' && !k.startsWith('pay.'))
     .map((k, i) => [k, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(([k]) => k);
-  return { primary: allowed(primary) ? primary : '', secondary: all.slice(0, MAX_SECONDARY), more: all.slice(MAX_SECONDARY) };
+  // The date rules, applied last too: never Mark returned before pickup day, never Mark job
+  // done before the event day, on any branch above.
+  const early = (k) => (k === 'ret.mark' && !pickupReached) || (k === 'card.jobDone' && !eventReached);
+  const shown = all.filter((k) => !early(k));
+  const p = allowed(primary) && !early(primary) ? primary : '';
+  return { primary: p, secondary: shown.slice(0, MAX_SECONDARY), more: shown.slice(MAX_SECONDARY) };
+}
+
+// The dates the time rules read, from the bookings first, then the form answers. A date we do
+// not know cannot be "before", so it counts as reached. today: YYYY-MM-DD in America/Chicago.
+//   bookings: [{ kind, date, time }]
+export function cardDates({ r, services, bookings = [], today }) {
+  const booked = (kind) => bookings.filter((b) => b.kind === kind).map((b) => String(b.date || '')).filter(Boolean).sort()[0] || '';
+  const decorKinds = services.filter((k) => k !== 'rentals').map((k) => SCHEDULE_FIRST[k][1]);
+  const eventDate = decorKinds.map(booked).filter(Boolean).sort()[0] || iso(answerOf(r, /event date/i)) || iso(answerOf(r, /pickup date|delivery date/i));
+  const pickupDate = booked('rental_pickup') || iso(answerOf(r, /pickup date|delivery date/i)) || iso(answerOf(r, /event date/i));
+  const pickupTimeSet = bookings.some((b) => b.kind === 'rental_pickup' && String(b.time || '').trim());
+  const reached = (d) => !d || !today || String(today) >= d;
+  return { eventDate, pickupDate, eventReached: reached(eventDate), pickupReached: reached(pickupDate), pickupTimeSet };
+}
+
+// The quiet "Next:" line on a card with nothing big to tap yet (waiting for the day).
+export function cardWaiting({ services, stage, primary, returned = false, jobDoneAt = false, dates }) {
+  if (primary || !['deposit_paid', 'scheduled'].includes(stage)) return null;
+  if (services.some((k) => k !== 'rentals') && !jobDoneAt && !dates.eventReached) return { key: 'card.jobDone', date: dates.eventDate, words: 'Mark job done, on the event day' };
+  if (services.includes('rentals') && !returned && !dates.pickupReached) return { key: 'ret.mark', date: dates.pickupDate, words: 'Mark returned, from pickup day' };
+  return null;
 }
 
 // The Payment box on a card, by where the money stands (owner, 18 Oct 2026):

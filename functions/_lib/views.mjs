@@ -5,7 +5,7 @@
 // screen opens with a numbered 1-2-3 and (except Requests itself) a Back link.
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
-import { servicesOf, cardStage, cardButtons, cardPayment, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, takedownChoice } from './cards.mjs';
+import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, cardWaiting, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, takedownChoice } from './cards.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
@@ -418,6 +418,11 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .payacts{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}.payacts .act{margin:0}
 .act.small{margin:0}.linkbtn.danger{color:#8f3427}
 .voidlink{margin-top:12px;border-top:1px solid var(--line);padding-top:4px}
+.msgline{display:flex;flex-wrap:wrap;align-items:center;gap:0 14px;margin:10px 0 0;padding:4px 0;border-top:1px solid var(--line)}
+.msgline .msgsep{color:var(--line)}.msgline .mlabel{font-weight:700;color:var(--muted);margin-right:2px}
+.msgpair{display:inline-flex;flex-wrap:wrap;align-items:center;gap:0 6px}.msgpair form{display:inline;margin:0}
+.msglink{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline}
+.nextline{margin:12px 2px 0;font-size:1rem}
 .tdbox{margin:10px 0}.tdbox .secrow{margin-top:8px}.linkbtn{background:none;border:0;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}
 `;
 
@@ -454,6 +459,7 @@ function cardButton(keyKind, ctx, primary, { helper = true } = {}) {
     case 'card.checklist': return a(`/admin/checklist/online?r=${rk}`, CARD_LABEL[key]);
     case 'card.printChecklist': return a(`/admin/checklist?r=${rk}`, CARD_LABEL[key], ' target="_blank" rel="noopener"');
     case 'ret.mark': case 'ret.see': return a(`/admin/returns?k=${rk}`, CARD_LABEL[key]);
+    case 'msg.pickupText': { const m = ctx.msgs && ctx.msgs.pickup; return m && m.sms ? a(m.sms.href, 'Text about pickup time', ` data-msg-tap="pickupTime" data-rk="${esc(rk)}"`) : ''; }
     case 'card.schedInstall': case 'card.schedSetup': case 'card.schedPickup': case 'card.schedTakedown': case 'card.schedGrazingPickup':
       return a(`/admin/calendar/new?r=${rk}&kind=${kind}`, CARD_LABEL[key]);
     case 'card.jobDone':
@@ -503,9 +509,36 @@ function historyHtml(events = [], notes = []) {
   return `${nt ? `<h4>Notes (only you see these)</h4><ul data-notes>${nt}</ul>` : ''}${ev ? `<h4>History</h4><ul data-history>${ev}</ul>` : ''}`;
 }
 
+// A message pair as small links, never a big button (owner, 18 Oct 2026): "Text about pickup
+// time · Email it". The text is a free sms: link from Valerie's phone (tap logged by TAP_JS);
+// the email twin sends at once from hello@. showText: false leaves only the email link (when
+// the text is already the card's one primary button).
+export function msgPair({ sms, rk, template, textKey, emailKey, textLabel, emailLabel = 'Email it', canEmail = true, showText = true }) {
+  const text = showText && sms ? `<a class="msglink" href="${esc(sms.href)}" data-msg-tap="${esc(template)}" data-rk="${esc(rk)}"${tip(textKey)}>${esc(textLabel)}</a>` : '';
+  const email = canEmail ? `<form method="post" action="/admin/msg/email">${hiddenInputs({ r: rk, template })}<button class="linkbtn" type="submit"${tip(emailKey)}>${esc(emailLabel)}</button></form>` : '';
+  if (!text && !email) return showText ? '<span class="muted">No mobile number on file.</span>' : '';
+  return `<span class="msgpair" data-msg="${esc(template)}">${[text, email].filter(Boolean).join('<span class="muted">·</span>')}</span>`;
+}
+
+// The small "Messages" line on a card: the confirmation and the pickup-time question.
+function messagesLine(msgs, { rk, services, primary, returned, quiet }) {
+  if (!msgs || quiet) return '';
+  const out = [];
+  if (msgs.confirm) out.push(msgPair({ sms: msgs.confirm.sms, rk, template: 'confirmation', textKey: 'conf.text', emailKey: 'conf.email', textLabel: "Text them it's confirmed", canEmail: msgs.confirm.canEmail }));
+  if (msgs.pickup && services.includes('rentals') && !returned) {
+    const isPrimary = String(primary).split('|')[0] === 'msg.pickupText';
+    out.push(msgPair({ sms: msgs.pickup.sms, rk, template: 'pickupTime', textKey: 'msg.pickupText', emailKey: 'msg.pickupEmail', textLabel: 'Text about pickup time', emailLabel: isPrimary ? 'Email the pickup question' : 'Email it', canEmail: msgs.pickup.canEmail, showText: !isPrimary }));
+  }
+  const pairs = out.filter(Boolean);
+  return pairs.length ? `<div class="msgline" data-messages><span class="mlabel">Messages</span>${pairs.join('<span class="msgsep" aria-hidden="true">|</span>')}</div>` : '';
+}
+
+const chicagoToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+
 // One request card. o: everything dashboardPage knows about this request.
 export function requestCard(r, o) {
-  const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace } = o;
+  const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace,
+    bookings = [], today = chicagoToday(), msgs = null } = o;
   const rk = b64urlText(r.key);
   const services = servicesOf(r);
   const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
@@ -513,9 +546,12 @@ export function requestCard(r, o) {
   const stage = cardStage({ pr, inv, archived });
   const returned = Boolean(ret && ret.returned_at);
   const plan = inv ? payPlanOf(inv, inv.total_cents || 0) : 'half';
-  const rules = cardButtons({ services, stage, inv, plan, sched: Boolean(sched), kinds, returned, jobDoneAt: Boolean(st.job_done_at), takedownPlan: r.takedownPlan });
+  const dates = cardDates({ r, services, bookings: bookings.length ? bookings : (sched ? kinds.map((kind) => ({ kind, date: sched.date })) : []), today });
+  const rules = cardButtons({ services, stage, inv, plan, sched: Boolean(sched), kinds, returned, jobDoneAt: Boolean(st.job_done_at), takedownPlan: r.takedownPlan,
+    eventReached: dates.eventReached, pickupReached: dates.pickupReached, pickupTimeSet: dates.pickupTimeSet, canText: Boolean(msgs && msgs.pickup && msgs.pickup.sms) });
+  const waiting = cardWaiting({ services, stage, primary: rules.primary, returned, jobDoneAt: Boolean(st.job_done_at), dates });
   const td = takedownChoice({ services, kinds, takedownPlan: r.takedownPlan, stage });
-  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: td === 'not_sure' };
+  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: td === 'not_sure', msgs };
   const first = serviceBadge(services[0]);
   const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
   const chips = [
@@ -542,7 +578,9 @@ export function requestCard(r, o) {
       ${damage}${finishedNote}
       ${td ? takedownBox(td, r, rk, services) : ''}
       ${rules.primary ? `<div class="actions" data-primary>${cardButton(rules.primary, ctx, true)}</div>` : ''}
+      ${waiting ? `<p class="nextline muted" data-next-wait="${esc(waiting.key)}"${tip(waiting.key)}>Next: ${esc(waiting.words)}${waiting.date ? ` (${esc(shortDate(waiting.date))})` : ''}.</p>` : ''}
       ${rules.secondary.length ? `<div class="secrow" data-secondary>${rules.secondary.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
+      ${messagesLine(msgs, { rk, services, primary: rules.primary, returned, quiet })}
       ${payment}
       <details class="disclose" data-details><summary${tip('card.details')}>Show details</summary>
         <div class="muted" style="margin-top:4px">${esc(friendlyWhen(r))}${archived && st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</div>
@@ -574,7 +612,7 @@ export function requestsPanel(folderUrl) {
 
 // schedule: { [request_key]: { date } } earliest booking per request; kinds: { [request_key]: [kind] }.
 export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '',
-  archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station' }) {
+  cardMsgs = {}, bookings = {}, today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station' }) {
   const err = sheetError ? `<div class="notice err"><strong>The requests could not be loaded right now.</strong> ${/not shared/i.test(sheetError)
     ? `The responses sheet needs to be shared with the site. In Google Sheets tap Share and add <code>${esc(SA_EMAIL)}</code> as a Viewer.`
     : 'Please try again in a minute.'}<div class="muted" style="margin-top:6px;font-size:.95rem">Details: ${esc(sheetError)}</div></div>` : '';
@@ -582,7 +620,7 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
   const one = (r, isArchived) => {
     const st = statuses[r.key] || { status: 'new' };
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
-    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace }) };
+    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null }) };
   };
   const shown = requests.map((r) => one(r, false)).filter((x) => matchesFilter(f, x));
   const putRows = archived.map((r) => one(r, true)).filter((x) => matchesFilter(f, x));

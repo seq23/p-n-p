@@ -23,6 +23,10 @@ const { SERVICE_KINDS } = await mod('functions/_lib/kinds.mjs');
 const errors = [];
 let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
+// Big buttons a viewer sees on a card: filled .btn / .btn primary, not counting the "Yes, …"
+// buttons inside a closed confirm box.
+const bigButtons = (h) => (String(h).replace(/<div class="confirmbox">[\s\S]*?<\/details>/g, '').match(/class="btn( primary)?"/g) || []).length;
+const TODAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 
 // ---- 1. the rules table --------------------------------------------------------------
 const SINGLE = [['porch'], ['party'], ['grazing'], ['rentals'], ['porch', 'rentals'], ['party', 'grazing', 'rentals']];
@@ -79,6 +83,65 @@ must(P(['party'], 'deposit_paid') === 'card.schedSetup|party_setup' && P(['grazi
 must(P(['rentals'], 'deposit_paid') === 'card.schedPickup|rental_pickup', 'rentals deposit paid: primary is not Schedule pickup + return');
 must(P(['porch'], 'scheduled', { sched: true, kinds: ['porch_install'] }) === 'card.jobDone' && P(['rentals'], 'scheduled', { sched: true }) === 'ret.mark', 'scheduled: primary is not Mark job done / Mark returned');
 must(P(['porch'], 'job_done', { jobDoneAt: true }) === 'pay.paid', 'job done: primary is not Mark paid in full');
+// ---- 1b. ONE big button, time-aware (owner, 18 Oct 2026) ---------------------------------
+// "Mark returned" only on/after the pickup date and "Mark job done" only on/after the event date
+// (America/Chicago). Before that the primary is the next real step; a booked rental with no
+// pickup time yet may lead with "Text about pickup time"; with a time set, nothing big until
+// pickup day (the quiet "Next:" line instead). Every live card shows exactly ONE big button
+// whenever there is a step to take, and never more than one.
+const WHEN = { before: '2026-10-20', on: '2026-10-24', after: '2026-10-27' };
+const ALL_SETS = [['porch'], ['party'], ['grazing'], ['rentals'], ['porch', 'rentals'], ['party', 'rentals'], ['party', 'grazing', 'rentals'], ['porch', 'party', 'grazing', 'rentals']];
+const LIVE = K.STAGES.filter((x) => !['void', 'finished', 'archived'].includes(x));
+let matrix = 0;
+for (const services of ALL_SETS) {
+  for (const stage of K.STAGES) {
+    for (const [when, today] of Object.entries(WHEN)) {
+      for (const timeSet of [false, true]) {
+        for (const booked of [false, true]) {
+          const kinds = booked ? services.map((k) => firstKind[k]) : [];
+          const bookings = kinds.map((kind) => ({ kind, date: '2026-10-24', time: kind === 'rental_pickup' && timeSet ? '14:00' : null }));
+          const r = { rentals: [], decor: [{ label: 'Event date', value: '2026-10-24' }], other: [] };
+          const dates = K.cardDates({ r, services, bookings, today });
+          const inv = stage === 'new' ? null : { id: 1, status: stage === 'draft' ? 'draft' : 'sent' };
+          const out = K.cardButtons({ services, stage, inv, kinds, sched: booked, jobDoneAt: stage === 'job_done', eventReached: dates.eventReached, pickupReached: dates.pickupReached, pickupTimeSet: dates.pickupTimeSet, canText: true });
+          const all = [out.primary, ...out.secondary, ...out.more].filter(Boolean).map((x) => x.split('|')[0]);
+          const tag = `${services.join('+')} @ ${stage} ${when}${booked ? ' booked' : ''}${timeSet ? ' time set' : ''}`;
+          matrix += 1;
+          must(dates.eventReached === (when !== 'before') && dates.pickupReached === (when !== 'before'), `${tag}: the date rule reads the wrong day`);
+          if (when === 'before') {
+            must(!all.includes('ret.mark'), `${tag}: Mark returned before the pickup date`);
+            must(!all.includes('card.jobDone'), `${tag}: Mark job done before the event date`);
+          }
+          if (!LIVE.includes(stage)) { must(Boolean(out.primary), `${tag}: no primary on a closed card`); continue; }
+          const waiting = K.cardWaiting({ services, stage, primary: out.primary, jobDoneAt: stage === 'job_done', dates });
+          // Exactly one: a primary, or (only before the day, waiting on it) the quiet Next: line.
+          must(Boolean(out.primary) !== Boolean(waiting), `${tag}: ${out.primary ? 'a primary AND a waiting line' : 'no primary and no waiting line'}`);
+          must(!waiting || when === 'before', `${tag}: waiting for a day that has come`);
+          if (when !== 'before' && (stage === 'scheduled' || (stage === 'deposit_paid' && booked))) {
+            const decor = services.some((k) => k !== 'rentals');
+            must(out.primary === (decor ? 'card.jobDone' : 'ret.mark'), `${tag}: on/after the day the primary is not ${decor ? 'Mark job done' : 'Mark returned'} (got ${out.primary})`);
+          }
+          if (when === 'before' && stage === 'scheduled' && services.includes('rentals') && booked) {
+            must(out.primary === (timeSet ? '' : 'msg.pickupText'), `${tag}: before pickup day the primary is "${out.primary}" (want ${timeSet ? 'nothing big' : 'Text about pickup time'})`);
+          }
+          if (out.primary === 'msg.pickupText') must(services.includes('rentals') && !dates.pickupTimeSet && !dates.pickupReached, `${tag}: Text about pickup time is primary with a time set or on pickup day`);
+        }
+      }
+    }
+  }
+}
+must(matrix === ALL_SETS.length * K.STAGES.length * 3 * 2 * 2, `the one-primary matrix ran ${matrix} cases`);
+// A rental with a pickup time but no way to text (no mobile on file) still never shows Mark returned early.
+must(!K.cardButtons({ services: ['rentals'], stage: 'scheduled', inv: { id: 1, status: 'deposit_paid' }, sched: true, kinds: ['rental_pickup'], pickupReached: false, canText: false }).primary, 'no-mobile rental before pickup day has a primary');
+must(K.cardButtons({ services: ['rentals'], stage: 'scheduled', inv: { id: 1, status: 'deposit_paid' }, sched: true, kinds: ['rental_pickup'], pickupReached: true }).primary === 'ret.mark', 'rental on pickup day: primary is not Mark returned');
+// Test Renter (decor + rentals, invoice sent, deposit not paid, booked): no Mark returned today.
+{ const o = K.cardButtons({ services: ['party', 'rentals'], stage: 'invoiced', inv: { id: 1, status: 'sent' }, sched: true, kinds: ['party_setup', 'rental_pickup'], eventReached: false, pickupReached: false });
+  must(o.primary === 'pay.deposit' && ![...o.secondary, ...o.more].includes('ret.mark'), `Test Renter shape: Mark returned before the pickup date (${o.secondary})`); }
+// cardDates reads the bookings first, then the form, in America/Chicago.
+must(K.cardDates({ r: { rentals: [{ label: 'Pickup date', value: '10/30/2026' }], decor: [], other: [] }, services: ['rentals'], bookings: [], today: '2026-10-29' }).pickupReached === false
+  && K.cardDates({ r: { rentals: [{ label: 'Pickup date', value: '10/30/2026' }], decor: [], other: [] }, services: ['rentals'], bookings: [], today: '2026-10-30' }).pickupReached === true, 'cardDates does not read the form pickup date (MM/DD/YYYY)');
+must(K.cardDates({ r: { rentals: [], decor: [], other: [] }, services: ['rentals'], bookings: [{ kind: 'rental_pickup', date: '2026-11-01', time: '' }], today: '2026-10-31' }).pickupTimeSet === false, 'an empty time counts as a pickup time');
+
 // The Payment box by money state: no invoice = no money buttons; ONE button at most; never
 // the same button as the primary; undo only once something is paid; Void never in the box.
 const CP = (inv, extra = {}) => K.cardPayment({ inv, ...extra });
@@ -151,6 +214,71 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
   must(!row || (row[1].match(/class="btn /g) || []).length <= 3, `${nm}: more than 3 secondary buttons visible`);
   must((beforeDetails(c).match(/class="hint"/g) || []).length <= 1, `${nm}: more than one helper line on the card`);
   must(!/Done — put away/.test(c), `${nm}: Done — put away on a live card`);
+}
+// The rendered card: every service set x money/job state x before/on/after the day x pickup
+// time set or not, with the message links on. Exactly ONE big button, or none and the quiet
+// "Next:" line while it waits for the day; Mark returned / Mark job done never before the day;
+// the messages (confirmation, pickup time) are small links, never big.
+{
+  const VM = await mod('functions/_lib/views-messages.mjs');
+  const sms = (b) => ({ href: `sms:9015550100?&body=${b}` });
+  const msgs = { confirm: { sms: sms('ok'), canEmail: true }, pickup: { sms: sms('time'), canEmail: true } };
+  const bal = (status, paid) => ({ id: 1, number: 'PNP-1', status, total_cents: 20000, deposit_due_cents: 10000, pay_plan: 'half', balance: { total: 20000, charges: 20000, paid, owed: 20000 - paid, remaining: 20000 - paid, refundable: 0, void: false } });
+  const STATES = [
+    ['new', { status: 'new' }, null, false, null, false],
+    ['draft', { status: 'new' }, bal('draft', 0), false, null, false],
+    ['sent', { status: 'invoiced' }, bal('sent', 0), false, null, false],
+    ['sent+booked', { status: 'invoiced' }, bal('sent', 0), true, null, false],
+    ['deposit', { status: 'deposit_paid' }, bal('deposit_paid', 10000), false, null, false],
+    ['scheduled', { status: 'scheduled' }, bal('deposit_paid', 10000), true, null, false],
+    ['job done', { status: 'job_done', job_done_at: '2026-10-24 12:00:00' }, bal('deposit_paid', 10000), true, { returned_at: '2026-10-25 12:00:00' }, false],
+    ['paid', { status: 'paid', job_done_at: '2026-10-24 12:00:00' }, bal('paid', 20000), true, { returned_at: '2026-10-25 12:00:00' }, false],
+    ['void', { status: 'void', void: 1 }, null, false, null, false],
+    ['put away', { status: 'paid', archived_at: '2026-10-26 00:00:00' }, bal('paid', 20000), true, { returned_at: '2026-10-25 12:00:00' }, true],
+  ];
+  const seen = new Set();
+  let rendered = 0;
+  for (const services of ALL_SETS) {
+    const r = { ...mk(`m-${services.join('-')}`, 'Mo Matrix', services, [{ label: 'Event date', value: '2026-10-24' }], services.includes('rentals') ? [{ label: 'Pickup date', value: '2026-10-24' }] : []) };
+    for (const [name, st, inv, booked, ret, archived] of STATES) {
+      for (const [when, today] of Object.entries(WHEN)) {
+        for (const timeSet of [false, true]) {
+          const kinds = booked ? services.map((k) => firstKind[k]) : [];
+          const bookings = kinds.map((kind) => ({ kind, date: '2026-10-24', time: kind === 'rental_pickup' && timeSet ? '14:00' : null }));
+          const c = V.requestCard(r, { st, inv, sched: booked ? { date: '2026-10-24' } : null, ret, kinds, bookings, today, archived, msgs, takedownPlan: 'scheduled' });
+          const stage = (c.match(/data-stage="([^"]+)"/) || [])[1];
+          seen.add(stage);
+          rendered += 1;
+          const tag = `rendered ${services.join('+')} ${name} (${stage}) ${when}${timeSet ? ' time set' : ''}`;
+          const top = c.slice(0, c.indexOf('data-details'));
+          const wait = /data-next-wait=/.test(top);
+          const big = bigButtons(top);
+          must(wait ? big === 0 : big === 1, `${tag}: ${big} big buttons${wait ? ' while waiting for the day' : ''} (want exactly one)`);
+          must(bigButtons(c.slice(c.indexOf('data-details'))) === 0, `${tag}: a big button under Show details`);
+          if (when === 'before') must(!/>Mark returned<|>Mark job done</.test(c) && !/data-help="(ret\.mark|card\.jobDone)"[^>]*class="btn|class="btn[^"]*"[^>]*data-help="(ret\.mark|card\.jobDone)"/.test(c), `${tag}: Mark returned / Mark job done before the day`);
+          must(!/class="btn[^"]*"[^>]*data-msg-tap="confirmation"/.test(c) && !/<button class="btn[^"]*" type="submit" data-help="(conf|msg)\.(email|pickupEmail)"/.test(c), `${tag}: a message button is big`);
+          if (!['void', 'finished', 'archived'].includes(stage) && services.includes('rentals') && !ret) must(/data-messages>[\s\S]*data-msg="pickupTime"/.test(top), `${tag}: no small pickup-time message line`);
+        }
+      }
+    }
+  }
+  must(rendered === ALL_SETS.length * STATES.length * 6, `rendered matrix ran ${rendered} cards`);
+  for (const stg of K.STAGES) if (stg !== 'job_done') must(seen.has(stg), `rendered matrix never reached stage ${stg} (saw ${[...seen]})`);
+  // The Weekend Renter shape (rental, deposit in, booked, pickup in 12 days): before, three big
+  // buttons (Text about pickup time, Email them, Mark returned). Now one, or none with a time set.
+  const wr = { ...mk('wr', 'Wendy Weekend', ['rentals'], [], [{ label: 'Pickup date', value: '2026-10-30' }]) };
+  const wrCard = (timeSet, today) => V.requestCard(wr, { st: { status: 'scheduled' }, inv: bal('deposit_paid', 10000), sched: { date: '2026-10-30' }, kinds: ['rental_pickup', 'rental_return'], bookings: [{ kind: 'rental_pickup', date: '2026-10-30', time: timeSet ? '15:00' : null }], today, msgs });
+  const w1 = wrCard(false, '2026-10-18');
+  must(bigButtons(w1) === 1 && /data-primary>[\s\S]*data-msg-tap="pickupTime"[^>]*>Text about pickup time</.test(w1) && !/Mark returned</.test(w1), 'Weekend Renter (no pickup time): not ONE big Text about pickup time, or Mark returned shows');
+  must(/data-messages><span class="mlabel">Messages<\/span><span class="msgpair" data-msg="confirmation"><a class="msglink"[^>]*>Text them it&#39;s confirmed<\/a>|data-messages><span class="mlabel">Messages<\/span><span class="msgpair" data-msg="confirmation"><a class="msglink"[^>]*>Text them it's confirmed<\/a>/.test(w1) && /data-msg="pickupTime">[^]*?>Email the pickup question</.test(w1), 'Weekend Renter: the confirmation + pickup email are not one small Messages line');
+  const w2 = wrCard(true, '2026-10-18');
+  must(bigButtons(w2) === 0 && /data-next-wait="ret\.mark"[^>]*>Next: Mark returned, from pickup day \(Fri 30 Oct\)\./.test(w2) && /data-msg="pickupTime"><a class="msglink"[^>]*>Text about pickup time<\/a>[^]*?>Email it</.test(w2), 'Weekend Renter (pickup time set): something big before pickup day, or no quiet Next: line / small pickup pair');
+  const w3 = wrCard(true, '2026-10-30');
+  must(bigButtons(w3) === 1 && /data-primary>[\s\S]*>Mark returned</.test(w3), 'Weekend Renter on pickup day: Mark returned is not the one primary');
+  // Hold controls and the thank-you box on a card carry no big button of their own.
+  const hc = VM.holdControls({ name: 'H', untilMs: Date.now() + 7200000, items: 'Giant Uno', phone: '901-555-0100' }, { rk: 'x', sms: sms('r'), canEmail: true, depositTarget: null, compact: true });
+  must(bigButtons(hc) === 0 && /data-msg="holdEnding"><a class="msglink"[^>]*>Text a reminder</.test(hc), 'hold controls on a card carry a big button (or lose Text a reminder)');
+  must(bigButtons(VM.thankYouBox({ thankyouEmailedAt: '' }, { rk: 'x', sms: sms('t'), canEmail: true })) === 0, 'the thank-you box carries a big button');
 }
 must(/data-week-counts|data-filters/.test(html) && (html.match(/data-filter="/g) || []).length === 6, 'the six filter chips are missing');
 for (const [k, label] of K.FILTERS) must(html.includes(`data-filter="${k}"`) && html.includes(`>${label.replace('&', '&amp;')}</a>`), `filter chip ${label} missing`);
@@ -229,7 +357,12 @@ const pamRow = await s.one('SELECT takedown_plan, takedown_note FROM requests WH
 must(pamRow.takedown_plan === 'not_sure' && pamRow.takedown_note === 'after Halloween maybe', 'Not sure yet + note was not stored');
 pc2 = await pamCard();
 must(/class="notice warn tdbox" data-takedown="not_sure"><strong>Takedown: not decided yet\.<\/strong> after Halloween maybe/.test(pc2), 'not_sure is not shown in amber with its note');
-must(/The takedown is not decided yet for Pam Porch\. Mark the job done anyway\?/.test(pc2), 'Job done does not prompt (once) about the undecided takedown');
+// Time-aware: no Mark job done before the event day (only the quiet "Next:" line); on the day
+// it is the one primary, and it prompts (once) about the undecided takedown.
+must(!/data-help="card\.jobDone"[^>]*>Mark job done/.test(pc2) && /data-next-wait="card\.jobDone"[^>]*>Next: Mark job done, on the event day \(Thu 24 Oct\)\./.test(pc2), 'Mark job done shows before the event day (or the quiet Next: line is missing)');
+await s.db.prepare("UPDATE bookings SET date = ?2 WHERE request_key = ?1 AND kind = 'porch_install'").bind(porchReq.row.request_key, TODAY).run();
+pc2 = await pamCard();
+must(/The takedown is not decided yet for Pam Porch\. Mark the job done anyway\?/.test(pc2) && (bigButtons(pc2) === 1), 'Job done (on the event day) does not prompt (once) about the undecided takedown as the one primary');
 const cal = (await s.get('/admin/calendar')).text;
 must(/id="still-to-decide"[\s\S]*Pam Porch[\s\S]*after Halloween maybe[\s\S]*kind=porch_takedown/.test(cal), 'Still to decide on Calendar & Bookings does not list the undecided takedown');
 const jd = await s.post('/admin/requests/jobdone', { r: prk });
