@@ -8,6 +8,42 @@
 - **Photos:** the listed file (an item photo under `assets/rentals/`, or a bundle collage under `assets/rentals/bundles/`), then `assets/rentals/hero.webp`. The movie screen, card table and bundle collages are the current product shots; the game photos are AI-generated placeholders until real photos replace them.
 - **Contact:** email only. No phone number goes in any Facebook copy (owner ruling, 14 Oct 2026); the website keeps the phone.
 
+### Live on Marketplace (18 Oct 2026)
+
+Marketplace holds only the six bundle listings below plus the two decor service listings in this section (single-item listings were removed on the owner's word, 15 Oct 2026; the item blocks below stay as reference copy). Every live listing is edited in place, never deleted and re-added. Line 2 of every description sends people to the site request page, https://porchandparty901.com/request (owner-approved wording, 18 Oct 2026): bundles hold a date for 24 hours there; decor gets a quote. Bundle titles start "RENTAL ONLY:" and their description opens with the rental-not-sale line.
+
+### Decor: Porch Decor, Fall & Winter
+
+**Title:** Porch Decor, Fall & Winter (Halloween, Thanksgiving, Christmas). From $350, Memphis  
+**Category:** Miscellaneous · **Condition:** New  
+**Price:** $350
+
+**Description:**
+
+DECOR SERVICE, not an item for sale: we come to you and style your porch.
+Request your date at porchandparty901.com/request. We reply with a quote.
+
+Fall and winter porch decorating for Halloween, Thanksgiving and Christmas: pumpkins and mums, wreaths and garlands, lanterns, planters, signs and lights, styled to your front door. We design it, bring everything and set it up; you come home to a finished porch. From $350; takedown starts at $75, quoted with your setup.
+
+Memphis, Olive Branch and Southaven. Holiday weekends book first, so send your date early. Tell us your porch size and the look you want, and we send a quote within one business day.
+
+### Decor: Room Decor Setup (home or hotel)
+
+**Title:** Room Decor Setup (home or hotel): birthday, anniversary, proposal. From $300, Memphis  
+**Category:** Miscellaneous · **Condition:** New  
+**Price:** $300
+
+**Description:**
+
+DECOR SERVICE, not an item for sale: we come to you and set it up.
+Request your date at porchandparty901.com/request. We reply with a quote.
+
+Room decor for birthdays, anniversaries, proposals, baby showers and surprise moments, at your home or in a hotel room. Balloon arches and garlands, backdrops, rose petals and candles, table styling, signs and the little touches that make the room. From $300; takedown starts at $75, quoted with your setup.
+
+Memphis, Olive Branch and Southaven. Tell us the date, the room and the vibe, and we send a quote within one business day.
+
+Both decor listings end with the email-only contact lines (website https://porchandparty901.com/services/, hello@porchandparty901.com, the Facebook Page).
+
 ## Giant Connect Four
 
 **Title:** Giant Connect Four rental, $40/day, Memphis pickup  
@@ -202,12 +238,15 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 ## Pick 3 bundle
 
-**Title:** Pick 3 Yard Games Bundle, $110/day, Memphis pickup  
+**Title:** RENTAL ONLY: Pick 3 Yard Games Bundle, $110/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $110 (per day)  
 **Photo:** `assets/rentals/bundles/bundle-pick-3.jpg`
 
 **Description:**
+
+RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
 
 Pick 3 bundle: any 3 games, $110 a day. You save $10 on day prices ($120 separately).
 
@@ -226,12 +265,15 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 ## Pick 5 bundle
 
-**Title:** Pick 5 Yard Games Bundle, $175/day, Memphis pickup  
+**Title:** RENTAL ONLY: Pick 5 Yard Games Bundle, $175/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $175 (per day)  
 **Photo:** `assets/rentals/bundles/bundle-pick-5.jpg`
 
 **Description:**
+
+RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
 
 Pick 5 bundle: any 5 games, $175 a day. You save $25 on day prices ($200 separately).
 
@@ -250,12 +292,15 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 ## Whole Yard bundle
 
-**Title:** Whole Yard Bundle, all 6 games, $195/day, Memphis pickup  
+**Title:** RENTAL ONLY: Whole Yard Bundle, all 6 games, $195/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $195 (per day)  
 **Photo:** `assets/rentals/bundles/bundle-whole-yard.jpg`
 
 **Description:**
+
+RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
 
 Whole Yard bundle: all 6 games, $195 a day. You save $45 on day prices ($240 separately).
 
@@ -274,12 +319,15 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 ## Movie Night bundle
 
-**Title:** Movie Night Bundle, screen + 2 games, $110/day, Memphis pickup  
+**Title:** RENTAL ONLY: Movie Night Bundle, screen + 2 games, $110/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $110 (per day)  
 **Photo:** `assets/rentals/bundles/bundle-movie-night.jpg`
 
 **Description:**
+
+RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
 
 Movie Night bundle: the inflatable movie screen + any 2 games, $110 a day. You save $20 on day prices ($130 separately).
 
@@ -298,12 +346,15 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 ## Game Night bundle
 
-**Title:** Game Night Bundle, card table + 2 games, $85/day, Memphis pickup  
+**Title:** RENTAL ONLY: Game Night Bundle, card table + 2 games, $85/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $85 (per day)  
 **Photo:** `assets/rentals/bundles/bundle-game-night.jpg`
 
 **Description:**
+
+RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
 
 Game Night bundle: the card table + any 2 games, $85 a day. You save $10 on day prices ($95 separately).
 
@@ -322,12 +373,15 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 ## The Whole Party bundle
 
-**Title:** The Whole Party Bundle, all 8 items, $235/day, Memphis pickup  
+**Title:** RENTAL ONLY: The Whole Party Bundle, all 8 items, $235/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $235 (per day)  
 **Photo:** `assets/rentals/bundles/bundle-whole-party.jpg`
 
 **Description:**
+
+RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
 
 The Whole Party bundle: all 6 games, the movie screen and the card table, $235 a day or $350 for a weekend. You save $70 on day prices ($305 separately); a weekend saves $110 ($460 separately).
 

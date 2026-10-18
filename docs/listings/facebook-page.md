@@ -12,7 +12,9 @@ Porch and Party
 (If a name reads slightly differently in Facebook's category search, pick the closest match it suggests.)
 
 ## About (short bio, 255 characters max)
-Memphis party planning, decor and party rentals: giant yard games $40 a day, a movie screen and a card table. Pick up and return at Mt. Moriah Station. hello@porchandparty901.com
+Memphis party planning, decor and party rentals: giant yard games $40 a day, a movie screen and a card table. Pick up and return at Mt. Moriah Station. hello@porchandparty901.com Reserve online: porchandparty901.com/request
+
+Live bio (18 Oct 2026; the phone went back on the Page bio and Contact info on 15 Oct, never on the cover or Marketplace) ends with its own line `Reserve online: porchandparty901.com/request`.
 
 ## About (long description)
 Porch and Party is a Memphis party planning and decor company, and now a party rental service. We plan and install parties for kids and adults, hotel-room surprises, baby and bridal showers, grazing tables and seasonal porch decorating across the Memphis metro.
@@ -33,7 +35,7 @@ See every rental and book at https://porchandparty901.com/rentals/ or email hell
 Memphis, TN; Olive Branch, MS; Southaven, MS.
 
 ## Action button
-**Book now** or **Send message**, linked to https://porchandparty901.com/rentals/
+**Learn more**, linked to https://porchandparty901.com/request (live 18 Oct 2026). Facebook's **Book now** only connects its own scheduling tool or a listed booking app (Acuity, Square, Setmore…), with no plain website option, so Learn more is the button that opens the site request page.
 
 ## Photos (from `assets/rentals/`)
 - Cover photo: `assets/rentals/hero.webp`
