@@ -217,6 +217,10 @@ for (const i of ITEMS) {
   const b = blocks.find((x) => x.startsWith(`${i.name}\n`));
   checkListing(b, i.name, `${i.name} rental`, i.dayPrice, i.slug);
   if (b && !b.includes(`${money(i.weekendPrice)} for a weekend`)) errors.push(`${i.name}: Marketplace listing lacks its ${money(i.weekendPrice)} weekend price`);
+  // The count in the copy is the count we own (owner, 18 Oct 2026: Cornhole is 1 set).
+  const owned = (b || '').match(/(\d+) available\./);
+  if (b && owned && Number(owned[1]) !== (i.quantity || 1)) errors.push(`${i.name}: Marketplace listing says "${owned ? owned[0] : 'no count'}", games.json has ${i.quantity || 1}`);
+  if (b && (i.quantity || 1) === 1 && /two sets|2 sets/i.test(b)) errors.push(`${i.name}: Marketplace listing mentions two sets, games.json has 1`);
 }
 for (const bd of BUNDLES) {
   const b = blocks.find((x) => x.startsWith(`${bd.name} bundle\n`));

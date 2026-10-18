@@ -77,7 +77,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 **Description:**
 
-AVAILABLE NOW. Cornhole Set for your party. Two regulation boards and eight bags. Two sets available for a tournament. Size: Regulation, 2 boards + 8 bags. 2 available.
+AVAILABLE NOW. Cornhole Set for your party. Two regulation boards and eight bags. Size: Regulation, 2 boards + 8 bags. 1 available.
 
 $40 a day (back within 24 hours), or $60 for a weekend (pick up Friday, return Monday). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
 
