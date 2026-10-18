@@ -45,6 +45,8 @@ export function cardStage({ pr, inv = null, archived = false }) {
     stage = s.key;
   }
   if (stage === 'new' && inv) return 'draft';
+  // Job done and paid, but the takedown they asked for is still open: not Finished yet.
+  if (stage === 'paid') return 'job_done';
   return stage;
 }
 export const STAGES = ['new', 'draft', ...STEP_KEYS.slice(1, -1), 'finished', 'void', 'archived']; // 'paid' as the last step done is always Finished
@@ -76,6 +78,7 @@ export const SERVICE_ONLY = {
   'ret.see': ['rentals'],
   'msg.pickupText': ['rentals'],
   'card.jobDone': ['porch', 'party', 'grazing'],
+  'td.markDone': ['porch', 'party'],
   'card.undoJobDone': ['porch', 'party', 'grazing'],
 };
 
@@ -98,8 +101,12 @@ const rank = (k) => { const i = SECONDARY_ORDER.indexOf(k.split('|')[0]); return
 // time" as its primary (msg.pickupText, needs canText); with a pickup time set, nothing big
 // until pickup day (primary '' and the card shows the quiet "Next:" line: cardWaiting).
 // Exactly ONE big button whenever there is a step to take; never more than one.
+//
+// Takedown (owner, 18 Oct 2026): after Job done on a porch/party the customer asked to take down,
+// the primary is "Schedule takedown" (not booked yet) or "Mark takedown done" (booked, on/after
+// its day); before its day nothing big (the "Next:" line waits for it). takedown = takedownState().
 export function cardButtons({ services, stage, inv = null, plan = 'half', sched = false, kinds = [], returned = false, jobDoneAt = false, takedownPlan = '',
-  eventReached = true, pickupReached = true, pickupTimeSet = false, canText = true }) {
+  eventReached = true, pickupReached = true, pickupTimeSet = false, canText = true, takedown = null, paidFull = false }) {
   const has = (k) => services.includes(k);
   const decorish = services.filter((k) => k !== 'rentals');
   if (stage === 'archived') return { primary: 'pa.bringBack', secondary: [], more: [] };
@@ -119,7 +126,13 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
     else if (firstSched[0]) primary = firstSched[0];
     else if (backLeft && !pickupTimeSet && canText) primary = 'msg.pickupText';
     else if (!jobLeft && !backLeft) primary = 'pay.paid';
-  } else if (stage === 'job_done') primary = 'pay.paid';
+  } else if (stage === 'job_done') {
+    const td = takedown && takedown.pending ? takedown : null;
+    if (td && (td.status === 'to_schedule' || td.status === 'not_sure')) primary = `card.schedTakedown|${td.kind}`;
+    else if (td && td.status === 'due') primary = 'td.markDone';
+    else if (td && td.status === 'booked') primary = paidFull ? '' : 'pay.paid';
+    else primary = 'pay.paid';
+  }
   const sec = [];
   if (inv && primary !== 'card.openInvoice') sec.push('card.openInvoice');
   if (!inv && primary !== 'card.createInvoice') sec.push('card.createInvoice');
@@ -165,7 +178,8 @@ export function cardDates({ r, services, bookings = [], today }) {
 }
 
 // The quiet "Next:" line on a card with nothing big to tap yet (waiting for the day).
-export function cardWaiting({ services, stage, primary, returned = false, jobDoneAt = false, dates }) {
+export function cardWaiting({ services, stage, primary, returned = false, jobDoneAt = false, dates, takedown = null }) {
+  if (!primary && stage === 'job_done' && takedown && takedown.status === 'booked') return { key: 'td.markDone', date: takedown.date, words: 'Mark takedown done, from the takedown day' };
   if (primary || !['deposit_paid', 'scheduled'].includes(stage)) return null;
   if (services.some((k) => k !== 'rentals') && !jobDoneAt && !dates.eventReached) return { key: 'card.jobDone', date: dates.eventDate, words: 'Mark job done, on the event day' };
   if (services.includes('rentals') && !returned && !dates.pickupReached) return { key: 'ret.mark', date: dates.pickupDate, words: 'Mark returned, from pickup day' };

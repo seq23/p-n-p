@@ -9,6 +9,7 @@
 // the source except the ID (private R2 photo vs Drive link).
 import { rowsToRequests } from './sheet.mjs';
 import { normName, digitsOf } from './calendar.mjs';
+import { takedownFromAnswers } from './takedown.mjs';
 import fixture from '../../data/admin/fixture-request.json';
 import porchPackages from '../../data/offers/porch_packages.json';
 import PP from '../../scripts/lib/porch_packages.js';
@@ -49,7 +50,7 @@ export function fromRow(row) {
     source: row.source, services: parse(row.services, []), agreedAt: row.agreed_at || '', rulesVersion: row.rules_version || '',
     agreedName: row.agreed_name || '', referredBy: row.referred_by || '', referralCode: row.referral_code || '', robotCheck: row.robot_check || '',
     idObject: row.id_object || '', idDeletedAt: row.id_deleted_at || '', isTest: Boolean(row.is_test), submittedAt: row.submitted_at,
-    takedownPlan: row.takedown_plan || '', takedownNote: row.takedown_note || '',
+    takedownPlan: row.takedown_plan || '', takedownNote: row.takedown_note || '', takedownDate: row.takedown_date || '',
     confirmEmailedAt: row.confirm_emailed_at || '', confirmedTextedAt: row.confirmed_texted_at || '', thankyouEmailedAt: row.thankyou_emailed_at || '',
     thankyouTextedAt: row.thankyou_texted_at || '', thankyouSkip: Boolean(row.thankyou_skip), holdTextedAt: row.hold_texted_at || '',
   };
@@ -112,10 +113,13 @@ export function importRowFor(headers, row) {
     request_key: r.key, source: 'google_form', submitted_at: submitted, services: JSON.stringify(servicesOf(r)),
     name: r.name, email: r.email, phone: r.phone, dob: r.dob, social: [r.social1, r.social2].filter(Boolean).join(' '), heard: r.heard,
     raw_row: JSON.stringify({ headers, row }), id_file: r.idFile || '', name_norm: normName(r.name), phone_digits: digitsOf(r.phone),
+    // The takedown answers mapped at source ("Need us to take it down afterwards?" + "Takedown
+    // date"): yes + date prefills Schedule takedown, never a booking by itself.
+    ...(() => { const td = servicesOf(r).some((k) => k === 'porch' || k === 'party') ? takedownFromAnswers(r) : { plan: '', date: '' }; return { takedown_plan: td.plan || null, takedown_date: td.date || '' }; })(),
   };
 }
 
-const IMPORT_COLS = ['request_key', 'source', 'submitted_at', 'services', 'name', 'email', 'phone', 'dob', 'social', 'heard', 'raw_row', 'id_file', 'name_norm', 'phone_digits'];
+const IMPORT_COLS = ['request_key', 'source', 'submitted_at', 'services', 'name', 'email', 'phone', 'dob', 'social', 'heard', 'raw_row', 'id_file', 'name_norm', 'phone_digits', 'takedown_plan', 'takedown_date'];
 export function importStatement(db, rec) {
   return db.prepare(`INSERT OR IGNORE INTO requests (${IMPORT_COLS.join(', ')}) VALUES (${IMPORT_COLS.map((_, i) => `?${i + 1}`).join(', ')})`)
     .bind(...IMPORT_COLS.map((c) => rec[c]));

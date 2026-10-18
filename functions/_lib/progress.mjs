@@ -2,7 +2,8 @@
 // chip: 1 New -> 2 Invoice sent -> 3 Deposit paid -> 4 Scheduled -> 5 Job done ("Returned" for
 // a rental-only request) -> 6 Paid in full. Void sits off the line. Money (payments) and job
 // progress (bookings, job_done_at) are independent; a request is Finished only when the job is
-// done AND it is paid in full. "Put away" is a separate flag.
+// done AND it is paid in full AND, when the customer asked for a porch/party takedown, the
+// takedown is resolved (functions/_lib/takedown.mjs). "Put away" is a separate flag.
 
 export const STEP_KEYS = ['new', 'invoiced', 'deposit_paid', 'scheduled', 'job_done', 'paid'];
 
@@ -12,14 +13,15 @@ export const STATUS_MEANINGS = [
   ['Deposit paid', 'The deposit is in your account.'],
   ['Scheduled', 'It is on the calendar.'],
   ['Job done (Returned for rentals)', 'The job is over. For a game rental this is set when you tap Mark returned.'],
-  ['Paid in full', 'All the money is in. With Job done this means Finished.'],
+  ['Paid in full', 'All the money is in. With Job done (and the takedown done, when they asked for one) this means Finished.'],
   ['Void — cancelled', 'Cancelled. The customer was not told. It is off the calendar and nothing is owed.'],
   ['Put away', 'Not a status: a finished request you moved off the main list. Tap Bring back to see it again.'],
 ];
 
 // st: request_status row ({status, job_done_at, invoice_id}); inv: invoice row with .balance;
-// scheduled: has any booking; ret: rental check-in row; rental: rental-only request.
-export function deriveProgress({ st = {}, inv = null, scheduled = false, ret = null, rental = false }) {
+// scheduled: has any booking; ret: rental check-in row; rental: rental-only request;
+// takedown: takedownState() (takedown.mjs), its .pending holds Finished back.
+export function deriveProgress({ st = {}, inv = null, scheduled = false, ret = null, rental = false, takedown = null }) {
   const bal = inv && inv.balance ? inv.balance : null;
   const isVoid = st.status === 'void' || (inv && inv.status === 'void');
   const sent = inv ? ['sent', 'deposit_paid', 'paid', 'done'].includes(inv.status) : ['invoiced', 'deposit_paid', 'paid'].includes(st.status);
@@ -36,10 +38,11 @@ export function deriveProgress({ st = {}, inv = null, scheduled = false, ret = n
   const labels = { new: 'New', invoiced: 'Invoice sent', deposit_paid: 'Deposit paid', scheduled: 'Scheduled', job_done: jobLabel, paid: 'Paid in full' };
   let current = 'new';
   for (const k of STEP_KEYS) if (done[k]) current = k;
-  const finished = jobDone && paidFull && !isVoid;
+  const takedownPending = Boolean(takedown && takedown.pending);
+  const finished = jobDone && paidFull && !isVoid && !takedownPending;
   return {
     void: isVoid, current: isVoid ? 'void' : current, label: isVoid ? 'Void — cancelled' : labels[current],
     steps: STEP_KEYS.map((k, i) => ({ key: k, n: i + 1, label: labels[k], done: done[k] })),
-    paidEarly: paidFull && !jobDone && !isVoid, finished, damaged, jobLabel, rental,
+    paidEarly: paidFull && !jobDone && !isVoid, finished, damaged, jobLabel, rental, takedown, takedownPending,
   };
 }

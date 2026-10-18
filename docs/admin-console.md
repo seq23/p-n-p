@@ -98,6 +98,23 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   `takedown_note` (`POST /admin/requests/takedown`). Booking a takedown sets the plan to
   `scheduled`. The form's takedown answer maps straight in (yes → scheduled, no →
   customer_handles, not sure → not_sure). Job done never needs a takedown.
+- **The takedown gates Finished** (owner, 18 Oct 2026; migration 0010 adds
+  `requests.takedown_date` and `bookings.done_at`; `functions/_lib/takedown.mjs`, the one place
+  every screen asks). A porch/party request whose customer asked for a takedown (takedown_plan
+  scheduled / not_sure, the takedown add-on on the invoice, or a takedown booking) is not Finished,
+  gets no "Put it away?", until the takedown booking is marked done ("Mark takedown done" on the
+  card and the Day sheet, from the takedown day; `POST /admin/calendar/bookings/:id/takedown-done`,
+  `undo=1` takes it back) or takedown_plan = customer_handles. After Job done the one big button is
+  Schedule takedown (not booked) or Mark takedown done (its day reached); the progress line reads
+  "Job done ✓ · Takedown: Sun 18 Oct" / "Takedown done ✓". The old Google Form's "Need us to take it
+  down afterwards?" + "Takedown date" map at source (the import) into takedown_plan +
+  takedown_date; the date only PREFILLS Schedule takedown, nothing is booked until she saves it.
+  Asked-for, not booked: amber "Takedown requested for Sun 18 Oct — tap to schedule" on the card,
+  "Takedowns to schedule" at the top of Calendar & Bookings, on that day's Day sheet and in the
+  Monday summary's Needs you. Existing rows: `npm run admin:backfill-takedown` (idempotent; a row
+  with any "Takedown…" event is never touched again; `--invoice PNP-… --owner-date YYYY-MM-DD`
+  records the owner's day). The thank-you email still follows Job done. "IDs ready to delete" is
+  the last box on Requests, after Put away. Proof: `npm run validate:admin-takedown`.
 - **Day sheet**: when a customer with a balance is booked that day, a line gives the Not paid yet
   count and total, linking to Money.
 - **Monday summary email** (`functions/_lib/weekly.mjs`): automatic every Monday 7:00 AM

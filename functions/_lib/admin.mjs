@@ -7,6 +7,7 @@ import {
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
 import { driveFileId, idFolderId } from './sheet.mjs';
 import { loadRequests, weekCounts, monthCount, idOnFile, logEvent } from './requests.mjs';
+import { loadTakedownFacts } from './takedown.mjs';
 import { chicagoDate } from './reminders.mjs';
 import { expireHolds, confirmHold, extendHold, keepHolding, releaseHold, currentHolds, endingSoon, holdSettings, getHold, fromSql } from './holds.mjs';
 import { messageCtx, autoConfirm, smsFor } from './customer-messages.mjs';
@@ -234,10 +235,10 @@ async function dashboard(env, url) {
     .sort((a, b) => String(statuses[b.key].archived_at).localeCompare(String(statuses[a.key].archived_at)));
   const kinds = {};
   const bookingsBy = {};
-  const { results: kindRows } = await env.DB.prepare('SELECT request_key, kind, date, time FROM bookings WHERE request_key IS NOT NULL').all();
-  for (const k of kindRows || []) {
-    (kinds[k.request_key] = kinds[k.request_key] || []).push(k.kind);
-    (bookingsBy[k.request_key] = bookingsBy[k.request_key] || []).push({ kind: k.kind, date: k.date, time: k.time });
+  const tdFacts = await loadTakedownFacts(env.DB);
+  for (const [key, rows] of Object.entries(tdFacts.bookingsBy)) {
+    kinds[key] = rows.map((k) => k.kind);
+    bookingsBy[key] = rows.map((k) => ({ id: k.id, kind: k.kind, date: k.date, time: k.time, done_at: k.done_at }));
   }
   const events = {};
   const { results: evRows } = await env.DB.prepare('SELECT request_key, at, what FROM request_events ORDER BY id').all();
@@ -254,7 +255,7 @@ async function dashboard(env, url) {
   const { extras, msgs } = await cardExtras(env, open, statuses, holds);
   const soon = endingSoon(holds, Date.now(), settings);
   return htmlResponse(V.dashboardPage({ requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
-    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, bookings: bookingsBy, today: chicagoDate(),
+    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, bookings: bookingsBy, takedownInvoices: tdFacts.invoiceIds, today: chicagoDate(),
     archived, filter: url.searchParams.get('f') || 'all', openPutAway: url.searchParams.get('pa') === '1', kinds, events, notes,
     foodPerHead: SERVICES_DATA.services.grazing.foodPerHead || null, pickupPlace: PRICE_TABLE.pickupPlace,
     holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length || Object.keys(msgs).length ? VM2.TAP_JS : ''}`,
@@ -757,6 +758,7 @@ async function routeAdmin(context) {
         if (segs[3] === 'move' && method === 'GET') return AC.movePage(env, bid);
         if (segs[3] === 'move' && method === 'POST') return AC.moveRoute(env, request, bid);
         if (segs[3] === 'reminded' && method === 'POST') return AC.remindedRoute(env, request, bid);
+        if (segs[3] === 'takedown-done' && method === 'POST') return AC.takedownDoneRoute(env, request, bid);
         if (segs[3] === 'email-reminder' && method === 'POST') return emailReminder(env, bid);
         if (segs[3] === 'notes' && method === 'POST') return AC.addNoteRoute(env, request, bid);
       }
