@@ -10,11 +10,14 @@
 //                (customer-messages.mjs sendThankYous) and the daily Google Sheet resync;
 //   Monday 7 AM Memphis (12:00 UTC in daylight time, 13:00 UTC in standard time: only the run
 //                whose Memphis weekday is Monday and hour is 7) - Valerie's weekly summary
-//                (functions/_lib/weekly.mjs), claimed per week so it never sends twice.
+//                (functions/_lib/weekly.mjs), claimed per week so it never sends twice;
+//   9 AM Memphis every 7th day from 16 Oct 2026 - the owner's Marketplace "Renew listing"
+//                reminder (functions/_lib/marketplace-renew.mjs), claimed per due date.
 import { sendEmailReminders, chicagoHour } from '../../../functions/_lib/reminders.mjs';
 import { expireHolds } from '../../../functions/_lib/holds.mjs';
 import { sendThankYous, sendHoldReminders } from '../../../functions/_lib/customer-messages.mjs';
 import { sendWeeklySummary, isSummaryHour } from '../../../functions/_lib/weekly.mjs';
+import { sendMarketplaceRenew } from '../../../functions/_lib/marketplace-renew.mjs';
 
 const FROM = { email: 'hello@porchandparty901.com', name: 'Porch & Party' };
 
@@ -36,6 +39,7 @@ const mailEnv = (env) => ({ ...env, MAILER: { fetch: (url, init) => worker.fetch
 export async function runReminders(env, now = new Date()) {
   const hourly = { expiredHolds: await expireHolds(env.DB, now.getTime()), holdReminders: await sendHoldReminders(mailEnv(env), now.getTime()) };
   if (isSummaryHour(now)) hourly.weekly = await sendWeeklySummary(env, { now, send: (m) => sendOne(env, m) });
+  hourly.marketplaceRenew = await sendMarketplaceRenew(env, { now, send: (m) => sendOne(env, m) });
   if (chicagoHour(now) !== 10) return { ...hourly, daily: `not 10 AM in Memphis (hour ${chicagoHour(now)})` };
   const reminders = await sendEmailReminders(env.DB, (m) => sendOne(env, m), now, FROM.email);
   const thankYous = await sendThankYous(mailEnv(env), now);
