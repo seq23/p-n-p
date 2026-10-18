@@ -47,7 +47,17 @@ for (const services of SINGLE) {
         must(out.secondary.includes('card.archive'), `${tag}: no Put away in the secondary row`);
         const decor = services.some((k) => k !== 'rentals');
         must(!decor || (all.includes('card.checklist') && all.includes('card.printChecklist')), `${tag}: porch/party/grazing lacks the walk-through checklist`);
-        if (booked) for (const k of services.filter((x) => x === 'porch' || x === 'party')) must(out.secondary.includes(`card.schedTakedown|${k}_takedown`), `${tag}: no Schedule takedown for ${k} once it is booked`);
+        if (booked) {
+          for (const k of services.filter((x) => x === 'porch' || x === 'party')) {
+            for (const plan of ['', 'not_sure', 'customer_handles', 'scheduled']) {
+              const o2 = K.cardButtons({ services, stage, inv, kinds, sched: true, takedownPlan: plan });
+              const has = o2.secondary.includes(`card.schedTakedown|${k}_takedown`);
+              must(plan === 'scheduled' ? has : !has, `${tag}: takedown plan "${plan}" ${plan === 'scheduled' ? 'lacks' : 'shows'} the Schedule takedown button`);
+              const box = K.takedownChoice({ services, kinds, takedownPlan: plan, stage });
+              must(box === ({ '': 'ask', not_sure: 'not_sure', customer_handles: 'customer_handles', scheduled: '' })[plan], `${tag}: takedown box for plan "${plan}" is "${box}"`);
+            }
+          }
+        }
         if (booked && services.includes('grazing')) must(out.secondary.includes('card.schedGrazingPickup|grazing_pickup'), `${tag}: no optional grazing pickup once the setup is booked`);
         if (!booked) must(!all.includes('card.schedTakedown') && !all.includes('card.schedGrazingPickup'), `${tag}: the second booking is offered before the first`);
       }
@@ -156,11 +166,61 @@ await s.post(`/admin/invoices/${inv.id}/status`, { action: 'paid', method: 'cash
 must(!(await s.get('/admin/money')).text.includes('data-not-paid="'), 'a customer paid in full is still on Not paid yet');
 must(!cardNames((await s.get('/admin/?f=unpaid')).text).includes('Test Renter'), 'a paid customer is still under the Not paid yet chip');
 // Contextual scheduling: the kind on the link preselects the booking screen.
+// The form's takedown answer maps straight into takedown_plan.
+for (const [answer, plan] of [['yes', 'scheduled'], ['no', 'customer_handles'], ['not_sure', 'not_sure']]) {
+  const r = await s.siteRequest({ service: 'party', party_event: 'Birthday', party_where: 'Home', party_takedown: answer, event_date: '2030-11-02', location: 'Bartlett', name: `Tess ${answer}`, phone: '901-555-0430', email: `tess.${answer}@example.com` });
+  must(r.row && r.row.takedown_plan === plan, `form takedown "${answer}" did not store takedown_plan ${plan} (got ${r.row && r.row.takedown_plan})`);
+}
 const porchReq = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', event_date: '2030-10-24', location: 'Germantown', porch_takedown: 'not_sure', name: 'Pam Porch', phone: '901-555-0420', email: 'pam@example.com' });
 const prk = s.rk(porchReq.row.request_key);
 const td = (await s.get(`/admin/calendar/new?r=${prk}&kind=porch_takedown`)).text;
 must(/<option value="porch_takedown" selected/.test(td) || /value="porch_takedown"[^>]*selected/.test(td), 'Schedule takedown does not open the booking screen on Porch takedown');
 must(/Schedule the takedown for Pam/.test(td), 'the takedown screen is not titled for the takedown');
+// The takedown paths end to end on a booked porch: ask -> not sure (amber + Still to decide +
+// a Job done prompt) -> customer handles it (no booking, no nagging) -> change -> scheduled.
+await s.post('/admin/requests/takedown', { r: prk, plan: '' });
+await s.post('/admin/calendar/bookings', { r: prk, kind: 'porch_install', date: '2030-10-24', customer_name: 'Pam Porch', phone: '901-555-0420', email: 'pam@example.com', place: 'Germantown', items: 'Porch' });
+const pamCard = async () => { const h = (await s.get('/admin/')).text; const i = h.indexOf('>Pam Porch</h3>'); return h.slice(h.lastIndexOf('<article', i), h.indexOf('</article>', i)); };
+let pc2 = await pamCard();
+must(/data-takedown="ask"/.test(pc2) && />Schedule it</.test(pc2) && />Not sure yet</.test(pc2) && />Customer will handle it</.test(pc2), 'an undecided booked porch does not ask Schedule it / Not sure yet / Customer will handle it');
+await s.post('/admin/requests/takedown', { r: prk, plan: 'not_sure', note: 'after Halloween maybe' });
+const pamRow = await s.one('SELECT takedown_plan, takedown_note FROM requests WHERE request_key = ?1', porchReq.row.request_key);
+must(pamRow.takedown_plan === 'not_sure' && pamRow.takedown_note === 'after Halloween maybe', 'Not sure yet + note was not stored');
+pc2 = await pamCard();
+must(/class="notice warn tdbox" data-takedown="not_sure"><strong>Takedown: not decided yet\.<\/strong> after Halloween maybe/.test(pc2), 'not_sure is not shown in amber with its note');
+must(/The takedown is not decided yet for Pam Porch\. Mark the job done anyway\?/.test(pc2), 'Job done does not prompt (once) about the undecided takedown');
+const cal = (await s.get('/admin/calendar')).text;
+must(/id="still-to-decide"[\s\S]*Pam Porch[\s\S]*after Halloween maybe[\s\S]*kind=porch_takedown/.test(cal), 'Still to decide on Calendar & Bookings does not list the undecided takedown');
+const jd = await s.post('/admin/requests/jobdone', { r: prk });
+must(jd.status === 303 && (await s.one('SELECT job_done_at FROM request_status WHERE request_key = ?1', porchReq.row.request_key)).job_done_at, 'Job done is blocked by an undecided takedown');
+await s.post('/admin/requests/jobdone', { r: prk, undo: '1' });
+await s.post('/admin/requests/takedown', { r: prk, plan: 'customer_handles', note: 'their nephew' });
+pc2 = await pamCard();
+must(/data-takedown="customer_handles">Takedown: the customer will handle it \(their nephew\)/.test(pc2) && !/Schedule takedown|data-takedown="ask"/.test(pc2), 'customer_handles still nags or offers the takedown');
+{ const c2 = (await s.get('/admin/calendar')).text; const i = c2.indexOf('id="still-to-decide"'); must(i < 0 || !c2.slice(i, c2.indexOf('</section>', i)).includes('Pam Porch'), 'customer_handles is still listed under Still to decide'); }
+must(!(await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind = 'porch_takedown'", porchReq.row.request_key)), 'customer_handles made a booking');
+await s.post('/admin/calendar/bookings', { r: prk, kind: 'porch_takedown', date: '2030-11-02', customer_name: 'Pam Porch', phone: '', email: '', place: '', items: 'Porch' });
+must((await s.one('SELECT takedown_plan FROM requests WHERE request_key = ?1', porchReq.row.request_key)).takedown_plan === 'scheduled', 'booking the takedown does not set takedown_plan = scheduled');
+must(!/data-takedown=/.test(await pamCard()), 'a booked takedown still shows the takedown box');
+// Rentals: the return is always booked with the pickup; its time may be "not sure yet".
+const noRet = await s.post('/admin/calendar/bookings', { kind: 'rental_pickup', date: '2030-12-04', customer_name: 'Rex Return', phone: '901-555-0440', items: 'Giant Uno' });
+must(/needs%20its%20return%20day/.test(noRet.location) && !(await s.one("SELECT id FROM bookings WHERE customer_name = 'Rex Return'")), 'a rental pickup was saved without its return');
+await s.post('/admin/calendar/bookings', { kind: 'rental_pickup', date: '2030-12-04', return_date: '2030-12-05', return_time: '', customer_name: 'Rex Return', phone: '901-555-0440', items: 'Giant Uno' });
+const rex = await s.one("SELECT time FROM bookings WHERE customer_name = 'Rex Return' AND kind = 'rental_return' AND date = '2030-12-05'");
+must(rex && rex.time === null, 'a return with "not sure yet" time was not booked as all day');
+await s.post('/admin/calendar/bookings', { kind: 'rental_pickup', date: '2030-12-11', return_date: '2030-12-12', return_time: '17:30', customer_name: 'Rhea Return', phone: '901-555-0441', items: 'Giant Uno' });
+must((await s.one("SELECT time FROM bookings WHERE customer_name = 'Rhea Return' AND kind = 'rental_return'")).time === '17:30', 'the return time typed was not saved');
+const CAL = await mod('functions/_lib/calendar.mjs');
+must(CAL.returnDateFor('2030-12-06', 'Weekend (Friday pickup, Monday return)') === '2030-12-09' && CAL.returnDateFor('2030-12-04', 'One day (24 hours)') === '2030-12-05', 'return-date defaults (one day = next day, weekend = Monday) changed');
+const rq = s.requests.find((r) => r.email === 'weekend.renter@example.com');
+must(new RegExp(`name="return_date" type="date" value="${CAL.returnDateFor(CAL.bookingFromRequest(rq, s.PRICE_TABLE).date, rq.durationAnswer)}"`).test((await s.get(`/admin/calendar/new?r=${s.rk(rq.key)}&kind=rental_pickup`)).text), 'the pickup screen does not prefill the return day from the length');
+// Day sheet: a customer with a balance booked that day -> the Not paid yet count + total.
+const owe = await s.invoiceFor(reqA, { go: 'send' });
+const pick = await s.one("SELECT date FROM bookings WHERE request_key = ?1 AND kind = 'rental_pickup'", reqA.key);
+const daySheet = (await s.get(`/admin/day/${pick.date}`)).text;
+must(owe.id && /data-day-not-paid>[\s\S]*Not paid yet in all: \d+ customers? owes? \$/.test(daySheet), 'the Day sheet does not show the Not paid yet count + total when a customer with a balance is booked');
+must(!/data-day-not-paid/.test((await s.get('/admin/day/2030-12-25')).text), 'the Day sheet shows the Not paid yet line on a day with nobody owing');
+
 function cardNames(h) { return [...h.matchAll(/<article class="card" data-card=[\s\S]*?<h3 class="who">([^<]*)<\/h3>/g)].map((m) => m[1]); }
 
 if (checks < 150) errors.push(`Rule 0: only ${checks} checks ran`);

@@ -7,10 +7,14 @@
 //   10 AM Memphis (15:00 UTC in daylight time, 16:00 UTC in standard time: only the run whose
 //                Memphis hour is 10 does it) - the day-before booking reminders
 //                (reminders.mjs), the thank-you emails for jobs marked done before today
-//                (customer-messages.mjs sendThankYous) and the daily Google Sheet resync.
+//                (customer-messages.mjs sendThankYous) and the daily Google Sheet resync;
+//   Monday 7 AM Memphis (12:00 UTC in daylight time, 13:00 UTC in standard time: only the run
+//                whose Memphis weekday is Monday and hour is 7) - Valerie's weekly summary
+//                (functions/_lib/weekly.mjs), claimed per week so it never sends twice.
 import { sendEmailReminders, chicagoHour } from '../../../functions/_lib/reminders.mjs';
 import { expireHolds } from '../../../functions/_lib/holds.mjs';
 import { sendThankYous, sendHoldReminders } from '../../../functions/_lib/customer-messages.mjs';
+import { sendWeeklySummary, isSummaryHour } from '../../../functions/_lib/weekly.mjs';
 
 const FROM = { email: 'hello@porchandparty901.com', name: 'Porch & Party' };
 
@@ -31,6 +35,7 @@ const mailEnv = (env) => ({ ...env, MAILER: { fetch: (url, init) => worker.fetch
 
 export async function runReminders(env, now = new Date()) {
   const hourly = { expiredHolds: await expireHolds(env.DB, now.getTime()), holdReminders: await sendHoldReminders(mailEnv(env), now.getTime()) };
+  if (isSummaryHour(now)) hourly.weekly = await sendWeeklySummary(env, { now, send: (m) => sendOne(env, m) });
   if (chicagoHour(now) !== 10) return { ...hourly, daily: `not 10 AM in Memphis (hour ${chicagoHour(now)})` };
   const reminders = await sendEmailReminders(env.DB, (m) => sendOne(env, m), now, FROM.email);
   const thankYous = await sendThankYous(mailEnv(env), now);

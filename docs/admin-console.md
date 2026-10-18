@@ -87,7 +87,34 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   invoice · Mark paid, and a total line. Drafts are listed apart as "Invoice not sent yet"; the
   refundable damage deposit is never owed. The Requests chip uses the same rule (`notPaidYet`).
 
-Proof: `npm run validate:admin-cards` (rules table over every service x stage, colours, key facts,
+- **Contextual scheduling** (migration 0009 adds `requests.takedown_note`): Porch → Schedule
+  install, then takedown; Party & decor → Schedule setup, then takedown; Grazing → Schedule setup,
+  then pickup (optional); Rentals → Schedule pickup + return as a pair (the return day defaults from
+  the length, editable; the return is always required, its time may be left empty = not sure yet).
+  The takedown is never required: once the install/setup is booked, the card asks "Takedown
+  afterwards?" with Schedule it · Not sure yet (amber "Takedown: not decided yet" + note, listed in
+  "Still to decide" on Calendar & Bookings, and Mark job done asks once) · Customer will handle it
+  (no booking, no nagging), each with a note, stored as `requests.takedown_plan` +
+  `takedown_note` (`POST /admin/requests/takedown`). Booking a takedown sets the plan to
+  `scheduled`. The form's takedown answer maps straight in (yes → scheduled, no →
+  customer_handles, not sure → not_sure). Job done never needs a takedown.
+- **Day sheet**: when a customer with a balance is booked that day, a line gives the Not paid yet
+  count and total, linking to Money.
+- **Monday summary email** (`functions/_lib/weekly.mjs`): automatic every Monday 7:00 AM
+  America/Chicago from the pnp-mailer hourly cron `0 * * * *` (the run whose Memphis weekday is
+  Monday and hour is 7: 12:00 UTC in daylight time, 13:00 UTC in standard time, so daylight saving
+  needs no change), to the Settings day-list email. Last week (new requests by service, jobs done,
+  money received, expenses), This week (bookings by date, games out per day, still to collect),
+  Needs you (holds ending soon, overdue returns, damage to decide, takedowns not decided, requests
+  with no reply after 2 days, IDs ready to delete, receipts needing checking, not paid yet). First
+  name + last initial only; every line links into /admin. Idempotent per week (claims
+  `settings.weekly_summary_week` before sending; released if the send fails). Settings: on/off
+  (`weekly_summary`, default on) and "Send me this week's summary now". Redeploy the Worker with
+  `npm run mailer:deploy` after a change; `npx wrangler@4.151.0 deployments list` (in
+  workers/pnp-mailer) or the dashboard's Triggers tab shows the cron.
+
+Proof: `npm run validate:admin-weekly` (CDT/CST hours, windows, once per week, off switch, send
+now, no PII, sections and links) and `npm run validate:admin-cards` (rules table over every service x stage, colours, key facts,
 filters, Put away section, Not paid yet math and the Money list end to end, reminders, contextual
 scheduling links).
 
@@ -254,7 +281,8 @@ another tab/retry queue, the cron hook).
   deposit line only after a clean return. It carries the referral block (four services, Text /
   Email a friend, Share on Facebook, the customer's /r/<code>). No review ask, no discount.
 - **Mailer cron** (`workers/pnp-mailer`, `npm run mailer:deploy`): hourly `0 * * * *` UTC: hold
-  expiry and hold reminders; at 10 AM Memphis: day-before reminders, thank-yous, sheet resync.
+  expiry and hold reminders; at 10 AM Memphis: day-before reminders, thank-yous, sheet resync;
+  Monday 7 AM Memphis: Valerie's weekly summary.
 - **Guard**: `npm run validate:request-form` and `npm run validate:request-messages` (in `validate:admin`).
 
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)

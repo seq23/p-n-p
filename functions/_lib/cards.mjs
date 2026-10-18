@@ -81,7 +81,7 @@ export const SERVICE_ONLY = {
 // The rules table. facts: { services, stage, inv, plan, sched, kinds (booked kinds),
 // returned, jobDoneAt }. Returns { primary: key|'', secondary: [key, ...] } where a key
 // may carry a booking kind as "key|kind".
-export function cardButtons({ services, stage, inv = null, plan = 'half', sched = false, kinds = [], returned = false, jobDoneAt = false }) {
+export function cardButtons({ services, stage, inv = null, plan = 'half', sched = false, kinds = [], returned = false, jobDoneAt = false, takedownPlan = '' }) {
   const has = (k) => services.includes(k);
   const decorish = services.filter((k) => k !== 'rentals');
   if (stage === 'archived') return { primary: 'pa.bringBack', secondary: [] };
@@ -100,10 +100,15 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
   if (!inv && primary !== 'card.createInvoice') sec.push('card.createInvoice');
   for (const s of firstSched) if (s !== primary) sec.push(s);
   if (sched) sec.push('card.seeCal');
-  // The second booking: once the first one is on the calendar, and not booked yet.
+  // The second booking: once the first one is on the calendar, and not booked yet. A porch or
+  // party takedown shows as a button only when the plan is "scheduled" (the form said yes);
+  // undecided, the takedown box on the card asks (takedownChoice); "customer will handle it"
+  // shows nothing (no booking, no nagging). The grazing pickup is always just optional.
   for (const k of decorish) {
     const second = SCHEDULE_SECOND[k];
-    if (second && kinds.includes(SCHEDULE_FIRST[k][1]) && !kinds.includes(second[1]) && !sec.includes(`${second[0]}|${second[1]}`)) sec.push(`${second[0]}|${second[1]}`);
+    if (!second || !kinds.includes(SCHEDULE_FIRST[k][1]) || kinds.includes(second[1])) continue;
+    if (k !== 'grazing' && takedownPlan !== 'scheduled') continue;
+    if (!sec.includes(`${second[0]}|${second[1]}`)) sec.push(`${second[0]}|${second[1]}`);
   }
   if (has('rentals') && returned) sec.push('ret.see');
   if (has('rentals') && !returned && sched && primary !== 'ret.mark') sec.push('ret.mark');
@@ -114,6 +119,17 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
   const allowed = (key) => { const only = SERVICE_ONLY[key.split('|')[0]]; return !only || only.some((k) => has(k)); };
   return { primary: allowed(primary) ? primary : '', secondary: [...new Set(sec)].filter(allowed).filter((k) => k !== primary) };
 }
+
+// The takedown box: which porch/party takedown still needs a decision on this card.
+// Returns '' (nothing to show), 'ask' (no plan yet), 'not_sure', or 'customer_handles'.
+export function takedownChoice({ services, kinds = [], takedownPlan = '', stage }) {
+  if (['void', 'finished', 'archived'].includes(stage)) return '';
+  const k = services.find((x) => (x === 'porch' || x === 'party') && kinds.includes(SCHEDULE_FIRST[x][1]) && !kinds.includes(SCHEDULE_SECOND[x][1]));
+  if (!k) return '';
+  if (takedownPlan === 'scheduled') return '';
+  return takedownPlan === 'not_sure' || takedownPlan === 'customer_handles' ? takedownPlan : 'ask';
+}
+export const TAKEDOWN_PLANS = ['scheduled', 'not_sure', 'customer_handles'];
 
 // ---- Key facts: the one line under the name (date, where, Call) -----------------------
 const iso = (s) => { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})$/) || String(s || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if (!m) return ''; return m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`; };

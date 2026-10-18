@@ -5,7 +5,7 @@
 // screen opens with a numbered 1-2-3 and (except Requests itself) a Back link.
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
-import { servicesOf, cardStage, cardButtons, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS } from './cards.mjs';
+import { servicesOf, cardStage, cardButtons, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, takedownChoice } from './cards.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
@@ -228,7 +228,7 @@ function confirmStep({ key, yesKey, label, question, action, hidden, danger = fa
       <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('pay.no')}>No, go back</button></div></div></details>${hint(key)}</div>`;
 }
 const LABEL = { 'dep.refundYes': 'Yes, record the refund', 'dep.keepYes': 'Yes, keep it for damage', 'exp.deleteYes': 'Yes, delete the expense', 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
-  'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'hold.releaseYes': 'Yes, release the games', 'hold.depositYes': 'Yes, mark deposit received', 'set.newTokenYes': 'Yes, make a new link', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
+  'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'hold.releaseYes': 'Yes, release the games', 'hold.depositYes': 'Yes, mark deposit received', 'set.newTokenYes': 'Yes, make a new link', 'td.jobDoneYes': 'Yes, mark job done', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
 
 const hiddenInputs = (obj) => Object.entries(obj).map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(v)}">`).join('');
 
@@ -392,6 +392,7 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .stepspanel .sps{margin:8px 0 0;font-size:.95rem}.stepspanel .sps a{display:inline-flex;min-height:32px;align-items:center;margin-right:12px}
 @media(min-width:900px){.wrap.panelwide{max-width:1080px}.stepspanel{grid-template-columns:repeat(3,1fr)}}
 .putaway{margin-top:24px}
+.tdbox{margin:10px 0}.tdbox .secrow{margin-top:8px}.linkbtn{background:none;border:0;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}
 `;
 
 function badges(services) {
@@ -429,7 +430,10 @@ function cardButton(keyKind, ctx, primary) {
     case 'ret.mark': case 'ret.see': return a(`/admin/returns?k=${rk}`, CARD_LABEL[key]);
     case 'card.schedInstall': case 'card.schedSetup': case 'card.schedPickup': case 'card.schedTakedown': case 'card.schedGrazingPickup':
       return a(`/admin/calendar/new?r=${rk}&kind=${kind}`, CARD_LABEL[key]);
-    case 'card.jobDone': return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Mark job done</button>`)}</form>`;
+    case 'card.jobDone':
+      // Takedown not decided yet: ask once, at the moment of Job done; never blocks it.
+      if (ctx.tdNotSure) return confirmStep({ key, yesKey: 'td.jobDoneYes', label: 'Mark job done', cls: primary ? 'primary' : 'ghost', question: `The takedown is not decided yet for ${ctx.who}. Mark the job done anyway? You can still schedule the takedown later.`, action: '/admin/requests/jobdone', hidden: hiddenInputs({ r: rk }) });
+      return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Mark job done</button>`)}</form>`;
     case 'card.undoJobDone': return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk, undo: '1' })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Undo job done</button>`)}</form>`;
     case 'card.archive': return `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}${wrap(`<button class="${primary ? 'btn primary' : 'btn ghost'}" type="submit"${tip(key)}>Done — put away</button>`)}</form>`;
     case 'pa.bringBack': return `<form method="post" action="/admin/requests/unarchive">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Bring back</button>`)}</form>`;
@@ -444,6 +448,23 @@ function cardButton(keyKind, ctx, primary) {
     }
     default: return '';
   }
+}
+
+// The takedown box (porch/party, once the install/setup is booked): the second step is never
+// required. "Schedule it" · "Not sure yet" (amber, listed in Still to decide on the calendar) ·
+// "Customer will handle it" (no booking, no nagging), each with a note.
+function takedownBox(td, r, rk, services) {
+  const k = services.includes('porch') ? 'porch' : 'party';
+  const sched = `<a class="btn ghost" href="/admin/calendar/new?r=${rk}&kind=${k}_takedown"${tip('td.schedule')}>Schedule it</a>`;
+  const choose = (plans) => `<form method="post" action="/admin/requests/takedown" class="tdform">${hiddenInputs({ r: rk })}
+      <label for="tdn-${esc(rk)}">Note (optional)</label><input id="tdn-${esc(rk)}" name="note" value="${esc(r.takedownNote || '')}" placeholder="e.g. they will tell us after the party">
+      <div class="secrow"><div class="act">${sched}</div>${plans.map(([v, key, label]) => `<div class="act"><button class="btn ghost" type="submit" name="plan" value="${v}"${tip(key)}>${label}</button></div>`).join('')}</div></form>`;
+  if (td === 'customer_handles') return `<div class="tdbox muted" data-takedown="customer_handles">Takedown: the customer will handle it${r.takedownNote ? ` (${esc(r.takedownNote)})` : ''}.
+    <form method="post" action="/admin/requests/takedown" style="display:inline">${hiddenInputs({ r: rk, plan: '' })}<button class="linkbtn" type="submit"${tip('td.change')}>Change</button></form></div>`;
+  if (td === 'not_sure') return `<div class="notice warn tdbox" data-takedown="not_sure"><strong>Takedown: not decided yet.</strong>${r.takedownNote ? ` ${esc(r.takedownNote)}` : ''}
+    ${choose([['customer_handles', 'td.customer', 'Customer will handle it']])}</div>`;
+  return `<div class="tdbox card" style="background:var(--cream)" data-takedown="ask"><strong>Takedown afterwards?</strong> <span class="muted">Never required.</span>
+    ${choose([['not_sure', 'td.notSure', 'Not sure yet'], ['customer_handles', 'td.customer', 'Customer will handle it']])}</div>`;
 }
 
 function payTargetFor(r, inv) {
@@ -466,8 +487,9 @@ export function requestCard(r, o) {
   const stage = cardStage({ pr, inv, archived });
   const returned = Boolean(ret && ret.returned_at);
   const plan = inv ? payPlanOf(inv, inv.total_cents || 0) : 'half';
-  const rules = cardButtons({ services, stage, inv, plan, sched: Boolean(sched), kinds, returned, jobDoneAt: Boolean(st.job_done_at) });
-  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv) };
+  const rules = cardButtons({ services, stage, inv, plan, sched: Boolean(sched), kinds, returned, jobDoneAt: Boolean(st.job_done_at), takedownPlan: r.takedownPlan });
+  const td = takedownChoice({ services, kinds, takedownPlan: r.takedownPlan, stage });
+  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: td === 'not_sure' };
   const first = serviceBadge(services[0]);
   const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
   const chips = [
@@ -484,7 +506,7 @@ export function requestCard(r, o) {
   const finishedNote = stage === 'finished' ? '<div class="notice ok" data-put-away-prompt><strong>Finished: the job is done and it is paid in full.</strong> Put it away?</div>' : '';
   const damage = returned && ret.damaged && stage !== 'archived' && stage !== 'void' ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : '';
   const payment = quiet ? '' : requestPayment(r, st, inv, rules.primary);
-  return `<article class="card" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" data-reqcard data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
+  return `<article class="card" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
       ${badges(services)}
       <div class="spread"><h3 class="who">${esc(r.name || 'No name given')}</h3><div class="row">${chips}</div></div>
       ${factsLine(keyFacts(r, services, { pickupPlace }))}
@@ -492,6 +514,7 @@ export function requestCard(r, o) {
       ${progress}
       ${quiet ? '' : extras}
       ${damage}${finishedNote}
+      ${td ? takedownBox(td, r, rk, services) : ''}
       ${rules.primary ? `<div class="actions" data-primary>${cardButton(rules.primary, ctx, true)}</div>` : ''}
       ${rules.secondary.length ? `<div class="secrow" data-secondary>${rules.secondary.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
       ${payment}
@@ -815,6 +838,11 @@ export function settingsPage({ settings, flash, error, hasQr, categories = [], p
     <label for="dle">My email for my day list</label><input id="dle" name="day_list_email" type="email" value="${esc(settings.day_list_email || 'hello@porchandparty901.com')}">
     <div style="margin-top:12px">${act(`<button class="btn" type="submit"${tip('set.saveDayList')}>Save my day list details</button>`, 'set.saveDayList')}</div>
   </form>
+  <section class="card" data-weekly-settings><h2>Monday summary email</h2>
+    <p>Every Monday at 7 AM: last week, this week and what needs you, to ${esc(settings.day_list_email || 'hello@porchandparty901.com')}. It is ${settings.weekly_summary === '0' ? '<strong>off</strong>' : '<strong>on</strong>'}.</p>
+    <form method="post" action="/admin/settings/weekly">${hiddenInputs({ weekly_summary: settings.weekly_summary === '0' ? '1' : '0' })}${act(`<button class="btn ghost" type="submit"${tip('set.weeklyToggle')}>${settings.weekly_summary === '0' ? 'Turn the Monday summary on' : 'Turn the Monday summary off'}</button>`, 'set.weeklyToggle')}</form>
+    <form method="post" action="/admin/settings/weekly-now" style="margin-top:10px">${act(`<button class="btn" type="submit"${tip('set.weeklyNow')}>Send me this week's summary now</button>`, 'set.weeklyNow')}</form>
+  </section>
   <section class="card"><h2>Google Sheet</h2>
     <p>Your Bookings, Monthly totals and Expenses tabs in the request sheet update by themselves.${settings.sheet_synced_at ? ` Last updated ${esc(prettyDate(settings.sheet_synced_at.slice(0, 10)))}.` : ''}${pendingSync ? ' <strong>An update is waiting and will be tried again.</strong>' : ''}</p>
     <form method="post" action="/admin/settings/sheet-sync">${act(`<button class="btn ghost" type="submit"${tip('set.sheetSync')}>Update the Google Sheet now</button>`, 'set.sheetSync')}</form>
