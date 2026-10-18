@@ -5,7 +5,7 @@
 // 48 px targets, every control carries data-help + its title from helptext.mjs.
 import { esc, b64urlText } from './util.mjs';
 import { tip } from './helptext.mjs';
-import { act, confirmStep, hiddenInputs, layout } from './views.mjs';
+import { act, confirmStep, hiddenInputs, layout, msgPair } from './views.mjs';
 
 const MS_H = 3600000;
 
@@ -30,8 +30,10 @@ export function twinButtons({ sms, rk, template, textKey, emailKey, textLabel, e
 
 export const TAP_JS = `<script>(function(){document.addEventListener('click',function(e){var a=e.target.closest('[data-msg-tap]');if(!a)return;var f=new FormData();f.append('r',a.getAttribute('data-rk'));f.append('template',a.getAttribute('data-msg-tap'));try{fetch('/admin/msg/tapped',{method:'POST',body:f,headers:{'X-Pnp-Fetch':'1'},credentials:'same-origin',keepalive:true});}catch(err){}});})();</script>`;
 
-// The hold controls for one held rental (request card, holds box, calendar).
-export function holdControls(h, { rk, sms = null, canEmail = false, now = Date.now(), depositTarget = null, back = '/admin/' }) {
+// The hold controls for one held rental (request card, holds box, calendar). compact: on a
+// request card, where the card's ONE big button is its primary, so the reminder is a small
+// "Text a reminder · Email it" pair.
+export function holdControls(h, { rk, sms = null, canEmail = false, now = Date.now(), depositTarget = null, back = '/admin/', compact = false }) {
   const ends = h.by_hand ? { text: 'Held by hand (no end time)', level: 'amber' } : endsWords(h.untilMs, now);
   const hidden = hiddenInputs({ r: rk, back });
   const more = `<details class="disclose" data-hold-more><summary${tip('hold.more')}>Give them more time</summary>
@@ -47,7 +49,8 @@ export function holdControls(h, { rk, sms = null, canEmail = false, now = Date.n
   return `<div class="hold" data-hold="${esc(rk)}"><p><span class="chip deposit_paid" data-held>Held — waiting for deposit</span> <strong class="ends ${ends.level}" data-hold-ends>${esc(ends.text)}</strong></p>
     ${h.items ? `<p class="muted" style="margin:0">${esc(h.items)}</p>` : ''}
     ${h.phone ? act(`<a class="btn ghost" href="tel:${esc(String(h.phone).replace(/[^\d+]/g, ''))}"${tip('hold.call')}>Call</a>`, 'hold.call') : ''}
-    ${twinButtons({ sms, rk, template: 'holdEnding', textKey: 'hold.text', emailKey: 'hold.email', textLabel: 'Text a reminder', canEmail })}
+    ${compact ? `<div class="msgline" data-messages>${msgPair({ sms, rk, template: 'holdEnding', textKey: 'hold.text', emailKey: 'hold.email', textLabel: 'Text a reminder', canEmail })}</div>`
+    : twinButtons({ sms, rk, template: 'holdEnding', textKey: 'hold.text', emailKey: 'hold.email', textLabel: 'Text a reminder', canEmail })}
     <div class="actions">${deposit}${keep}${release}</div>${more}</div>`;
 }
 
@@ -82,11 +85,13 @@ export function confirmedPage({ rk, name, sms, emailed, texted, canEmail, flash,
     <div class="actions">${act(`<a class="btn ghost" href="${esc(back || '/admin/')}"${tip('conf.back')}>Done</a>`, 'conf.back')}</div>${TAP_JS}`, { screen: 'confirmed', back: { href: back || '/admin/', label: 'Back' } });
 }
 
-// The thank-you box on a request whose job is done / games are back.
+// The thank-you box on a request whose job is done / games are back (on the card: small links,
+// never a second big button).
 export function thankYouBox(r, { rk, sms, canEmail, now = Date.now() }) {
   const sentWords = r.thankyouEmailedAt ? 'Thank-you email sent ✓' : r.thankyouSkip ? 'No thank-you email (you chose not to send one).' : canEmail ? 'Thank-you email goes out tomorrow morning.' : 'No email on file, so no thank-you email.';
   const toggle = `<form method="post" action="/admin/requests/thankyou-skip">${hiddenInputs({ r: rk, skip: r.thankyouSkip ? '0' : '1' })}${act(`<button class="btn ghost" type="submit"${tip(r.thankyouSkip ? 'ty.unskip' : 'ty.skip')}>${r.thankyouSkip ? 'Send the thank-you after all' : "Don't send a thank-you"}</button>`, r.thankyouSkip ? 'ty.unskip' : 'ty.skip')}</form>`;
   return `<section class="paybox" data-thankyou><h3>Send a thank-you</h3><p class="words" data-thankyou-state>${esc(sentWords)}</p>
-    ${twinButtons({ sms, rk, template: 'thankyou', textKey: 'ty.text', emailKey: 'ty.email', textLabel: 'Text a thank-you', emailLabel: 'Email it now', canEmail: canEmail && !r.thankyouEmailedAt, sent: r.thankyouTextedAt ? 'Thank-you text sent ✓' : '' })}
+    <div class="msgline" data-messages>${msgPair({ sms, rk, template: 'thankyou', textKey: 'ty.text', emailKey: 'ty.email', textLabel: 'Text a thank-you', emailLabel: 'Email it now', canEmail: canEmail && !r.thankyouEmailedAt })}</div>
+    ${r.thankyouTextedAt ? '<p class="money ok" style="margin:4px 0 0">Thank-you text sent ✓</p>' : ''}
     ${r.thankyouEmailedAt ? '' : toggle}</section>`;
 }

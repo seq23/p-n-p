@@ -4,7 +4,6 @@ import {
   SHEET_URL, FROM_EMAIL, esc, redirect, htmlResponse, getSettings, putSetting, toCents, invoiceTotal,
   halfDeposit, PAY_PLANS, payPlanOf, amountDueNow, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice, b64urlText,
 } from './util.mjs';
-import { tip } from './helptext.mjs';
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
 import { driveFileId, idFolderId } from './sheet.mjs';
 import { loadRequests, weekCounts, monthCount, idOnFile, logEvent } from './requests.mjs';
@@ -178,16 +177,21 @@ export async function holdsWithButtons(env, back = '/admin/') {
   return holds;
 }
 
-// Per-card extras: the hold controls on a held rental, "Hold expired", and the thank-you box.
+// Per-card extras: the hold controls on a held rental, "Hold expired", and the thank-you box;
+// msgs: the confirmation and pickup-time messages, drawn by the card as small links (or the
+// pickup text as the card's one primary, by the rules table).
 async function cardExtras(env, requests, statuses, holds) {
   const out = {};
+  const msgs = {};
   const byKey = Object.fromEntries(holds.map((h) => [h.request_key, h]));
   for (const r of requests) {
     const rk = b64urlText(r.key);
     const st = statuses[r.key] || {};
     const bits = [];
     const h = byKey[r.key];
-    if (h) bits.push(`<style>${VM2.HOLD_CSS}</style>${VM2.holdControls(h, { rk, sms: h.sms, canEmail: h.canEmail, depositTarget: h.depositTarget })}`);
+    // On the card the hold's deposit button shows only when there is no invoice: with one, the
+    // card's primary / Payment box already carries Mark deposit received.
+    if (h) bits.push(`<style>${VM2.HOLD_CSS}</style>${VM2.holdControls(h, { rk, sms: h.sms, canEmail: h.canEmail, depositTarget: st.invoice_id ? null : h.depositTarget, compact: true })}`);
     else {
       const old = r.source === 'site' && r.wantsRentals ? await getHold(env.DB, r.key) : null;
       if (old && old.state === 'expired') bits.push('<div class="notice warn" data-hold-expired><strong>Hold expired.</strong> No deposit came in by the end time, so the games were freed. Use Give them more time on a new request, or book it by hand.</div>');
@@ -199,12 +203,14 @@ async function cardExtras(env, requests, statuses, holds) {
     if (st.status === 'deposit_paid' || st.status === 'paid' || st.status === 'scheduled') {
       const ctx = await messageCtx(env.DB, r.key);
       if (ctx && (r.confirmEmailedAt || r.confirmedTextedAt)) bits.push(`<p class="money ok" data-confirm-sent>${r.confirmedTextedAt ? 'Confirmation sent ✓' : 'Confirmation email sent ✓'}</p>`);
-      if (ctx) bits.push(`<details class="disclose" data-confirm-resend><summary${tip('conf.text')}>Text them it's confirmed</summary>${VM2.twinButtons({ sms: smsFor('confirmation', ctx), rk, template: 'confirmation', textKey: 'conf.text', emailKey: 'conf.email', textLabel: "Text them it's confirmed", canEmail: hasEmail(ctx.email) })}</details>`);
-      if (ctx && ctx.service === 'rentals') bits.push(VM2.twinButtons({ sms: smsFor('pickupTime', ctx), rk, template: 'pickupTime', textKey: 'msg.pickupText', emailKey: 'msg.pickupEmail', textLabel: 'Text about pickup time', canEmail: hasEmail(ctx.email) }));
+      if (ctx) {
+        msgs[r.key] = { confirm: { sms: smsFor('confirmation', ctx), canEmail: hasEmail(ctx.email) } };
+        if (ctx.service === 'rentals') msgs[r.key].pickup = { sms: smsFor('pickupTime', ctx), canEmail: hasEmail(ctx.email) };
+      }
     }
     if (bits.length) out[r.key] = bits.join('');
   }
-  return out;
+  return { extras: out, msgs };
 }
 
 async function dashboard(env, url) {
@@ -227,8 +233,12 @@ async function dashboard(env, url) {
   const archived = requests.filter((r) => statuses[r.key] && statuses[r.key].archived_at)
     .sort((a, b) => String(statuses[b.key].archived_at).localeCompare(String(statuses[a.key].archived_at)));
   const kinds = {};
-  const { results: kindRows } = await env.DB.prepare('SELECT request_key, kind FROM bookings WHERE request_key IS NOT NULL').all();
-  for (const k of kindRows || []) (kinds[k.request_key] = kinds[k.request_key] || []).push(k.kind);
+  const bookingsBy = {};
+  const { results: kindRows } = await env.DB.prepare('SELECT request_key, kind, date, time FROM bookings WHERE request_key IS NOT NULL').all();
+  for (const k of kindRows || []) {
+    (kinds[k.request_key] = kinds[k.request_key] || []).push(k.kind);
+    (bookingsBy[k.request_key] = bookingsBy[k.request_key] || []).push({ kind: k.kind, date: k.date, time: k.time });
+  }
   const events = {};
   const { results: evRows } = await env.DB.prepare('SELECT request_key, at, what FROM request_events ORDER BY id').all();
   for (const e of evRows || []) (events[e.request_key] = events[e.request_key] || []).push(e);
@@ -241,13 +251,13 @@ async function dashboard(env, url) {
   const idsReady = requests.filter((r) => idOnFile(r) && readyToDeleteId(r, statuses[r.key], statuses[r.key] && statuses[r.key].invoice_id ? invoices[statuses[r.key].invoice_id] : null, returns[r.key]));
   const week = weekCounts(requests, chicagoDate());
   const holds = await holdsWithButtons(env);
-  const extras = await cardExtras(env, open, statuses, holds);
+  const { extras, msgs } = await cardExtras(env, open, statuses, holds);
   const soon = endingSoon(holds, Date.now(), settings);
   return htmlResponse(V.dashboardPage({ requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
-    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady), cardExtras: extras,
+    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, bookings: bookingsBy, today: chicagoDate(),
     archived, filter: url.searchParams.get('f') || 'all', openPutAway: url.searchParams.get('pa') === '1', kinds, events, notes,
     foodPerHead: SERVICES_DATA.services.grazing.foodPerHead || null, pickupPlace: PRICE_TABLE.pickupPlace,
-    holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length ? VM2.TAP_JS : ''}`,
+    holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length || Object.keys(msgs).length ? VM2.TAP_JS : ''}`,
     flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
     extraTop: `${VC.overdueBox(overdue)}${VC.remindersBox(reminders, tomorrowLabel)}` }));
 }

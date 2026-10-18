@@ -104,7 +104,15 @@ pages.push(['/admin/search?partial=1&q=renter', { partial: true }, await s.get('
   const porch = { ...reqA, key: 'porch|x', name: 'Pat Porch', gamesAnswer: '', wantsRentals: false, wantsDecor: true, need: 'Porch decorating', services: ['porch'], rentals: [], decor: [], other: [] };
   const base = { requests: [porch], invoices: {}, checklists: {}, returns: {}, folderUrl: 'https://drive.google.com/x', sheetError: '', flash: '', missingPayment: [] };
   for (const st of [{ status: 'scheduled' }, { status: 'job_done', job_done_at: '2026-10-18 10:00:00' }]) {
-    pages.push([`dashboardPage(${st.status})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, statuses: { 'porch|x': st }, schedule: { 'porch|x': { date: '2026-10-24' } }, kinds: { 'porch|x': ['porch_install'] } }) }]);
+    pages.push([`dashboardPage(${st.status})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, statuses: { 'porch|x': st }, schedule: { 'porch|x': { date: '2026-10-24' } }, kinds: { 'porch|x': ['porch_install'] }, today: '2026-10-24' }) }]);
+  }
+  // A booked rental before pickup day with no pickup time yet: "Text about pickup time" is the
+  // card's one primary, its email twin a small link (time-aware primary, 18 Oct 2026).
+  {
+    const rent = { ...reqA, key: 'rentp|x', name: 'Ria Pickup', services: ['rentals'] };
+    pages.push(['dashboardPage(rental before pickup, no time)', { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [rent], statuses: { 'rentp|x': { status: 'scheduled' } },
+      schedule: { 'rentp|x': { date: '2026-10-30' } }, kinds: { 'rentp|x': ['rental_pickup', 'rental_return'] }, bookings: { 'rentp|x': [{ kind: 'rental_pickup', date: '2026-10-30', time: null }] }, today: '2026-10-18',
+      cardMsgs: { 'rentp|x': { confirm: { sms: { href: 'sms:9015550100?&body=ok' }, canEmail: true }, pickup: { sms: { href: 'sms:9015550100?&body=time' }, canEmail: true } } } }) }]);
   }
   // Grazing and party once their setup is on the calendar: the optional second booking buttons.
   const graze = { ...porch, key: 'graze|x', name: 'Gia Graze', services: ['grazing'], need: 'grazing', decor: [{ label: 'How many guests?', value: '15–40' }, { label: 'Should we source the food?', value: 'Yes, include food in my quote' }] };
@@ -112,7 +120,7 @@ pages.push(['/admin/search?partial=1&q=renter', { partial: true }, await s.get('
   // The takedown in each state: scheduled (button), not sure (amber + Job done prompt), the customer handles it.
   for (const plan of ['scheduled', 'not_sure', 'customer_handles']) {
     const p2 = { ...porch, key: `td|${plan}`, name: `Td ${plan}`, takedownPlan: plan, takedownNote: 'note' };
-    pages.push([`dashboardPage(takedown ${plan})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [p2], statuses: { [p2.key]: { status: 'scheduled' } }, schedule: { [p2.key]: { date: '2026-10-24' } }, kinds: { [p2.key]: ['porch_install'] } }) }]);
+    pages.push([`dashboardPage(takedown ${plan})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [p2], statuses: { [p2.key]: { status: 'scheduled' } }, schedule: { [p2.key]: { date: '2026-10-24' } }, kinds: { [p2.key]: ['porch_install'] }, today: '2026-10-24' }) }]);
   }
   {
     // Render the calendar with one undecided takedown through the real route.

@@ -137,7 +137,7 @@ export const HELP = {
   'ty.email': H('messages', 'Email it now', 'Sends the thank-you email right now instead of tomorrow morning.', '', 'It is only ever sent once.'),
   'ty.skip': H('messages', "Don't send a thank-you", 'Stops the automatic thank-you email for this request.', '', 'Tap Send the thank-you after all to change your mind.'),
   'ty.unskip': H('messages', 'Send the thank-you after all', 'Turns the automatic thank-you email back on for this request.', '', 'It goes out the next morning at about 10 AM.'),
-  'msg.pickupText': H('messages', 'Text about pickup time', 'Opens a text from your phone asking what pickup time works for them.', '', 'Free: it is your own phone.'),
+  'msg.pickupText': H('messages', 'Text about pickup time', 'Opens a text from your phone asking what pickup time works for them.', 'Then put the time on the pickup booking.', 'Free: it is your own phone. Once the pickup booking has a time, the card waits quietly until pickup day.'),
   'msg.pickupEmail': H('messages', 'Email them', 'Emails them the same question now, from hello@porchandparty901.com.', '', 'One tap.'),
   'rem.emailNow': H('calendar', 'Email them', "Emails tomorrow's reminder now, from hello@porchandparty901.com.", '', 'The same words as the text. Customers with an email also get it by themselves at about 10 AM.'),
   'cal.viewHeld': H('calendar', 'Held', 'Shows every game rental hold waiting for a deposit, with its end time.', '', 'Holds kept by hand (no end time) are listed apart.'),
