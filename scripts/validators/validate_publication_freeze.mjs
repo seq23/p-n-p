@@ -43,7 +43,7 @@ else {
 // ------------------------------------------------------------ 2. behaviour
 const COPY = [
   'scripts/authority_scale/publish_governed_queue.mjs', 'templates', 'scripts/lib',
-  'data/offers', 'data/ops', 'data/service_areas', 'data/queries/query_universe.json',
+  'data/offers', 'data/rentals', 'data/ops', 'data/service_areas', 'data/queries/query_universe.json',
   'data/authority_scale/velocity_decision.json', 'data/authority_scale/citation_yield_contract.json',
   'data/published_manifest/published_manifest.json', 'data/slug_registry/slug_registry.json'
 ];

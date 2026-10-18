@@ -20,7 +20,7 @@
     "authority:yield:build": "node scripts/authority_scale/build_citation_yield_feedback.mjs && node scripts/authority_scale/evaluate_velocity.mjs",
     "baseline": "node scripts/baseline.mjs",
     "build:404": "PAGES_OUT_DIR=. node scripts/build_404.js",
-    "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/build_rentals_page.js && node scripts/generators/build_section_indexes.js && node scripts/generators/update_sitemap.js && node scripts/install_clarity.js && node scripts/install_site_icons.js && node scripts/install_contact_surface.js && node scripts/install_site_chrome.js && node scripts/normalize_public_urls.js",
+    "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/build_rentals_page.js && node scripts/generators/build_section_indexes.js && node scripts/install_brand_surfaces.js && node scripts/generators/update_sitemap.js && node scripts/install_clarity.js && node scripts/install_site_icons.js && node scripts/install_contact_surface.js && node scripts/install_site_chrome.js && node scripts/normalize_public_urls.js",
     "build:answers": "node scripts/generators/build_pages.js faq",
     "build:authority": "node scripts/generators/build_pages.js authority",
     "build:comparisons": "node scripts/generators/build_pages.js comparisons",
@@ -104,7 +104,7 @@
     "validate:page-quality": "node scripts/authority_scale/validate_page_quality_contract.mjs",
     "validate:contact-surface": "node scripts/validators/validate_contact_surface.js",
     "validate:business-entity": "node scripts/validators/validate_business_entity.js",
-    "validate:pnp-phase": "npm run validate:contact-surface && npm run validate:business-entity && npm run validate:site-chrome && npm run validate:faq-page && npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:no-instruction-leak && npm run validate:no-empty-cells && npm run validate:retrofit-integrity && npm run validate:canonical-resolves && npm run validate:content-pattern && npm run validate:all && npm run validate:atlas-units",
+    "validate:pnp-phase": "npm run validate:contact-surface && npm run validate:business-entity && npm run validate:site-chrome && npm run validate:faq-page && npm run validate:service-coverage && npm run validate:profile-purity && npm run validate:tree-hygiene && npm run validate:local-authority && npm run validate:no-instruction-leak && npm run validate:no-empty-cells && npm run validate:retrofit-integrity && npm run validate:canonical-resolves && npm run validate:content-pattern && npm run validate:all && npm run validate:atlas-units",
     "validate:profile-purity": "node scripts/validation/validate_profile_purity.js",
     "validate:query-atlas": "node scripts/atlas/validate_query_atlas.mjs",
     "validate:release": "npm run validate:zero-paid-llm && npm run validate:admin && npm run validate:pnp-phase && npm run validate:max-fanout && npm run validate:authority-scale && npm run validate:kpi-truth && npm run validate:yield && npm run validate:page-quality && npm run validate:improvements && npm run validate:territories && npm run validate:distribution-contract && npm run validate:search-intelligence && npm run validate:workflow-lanes && npm run validate:provider-transport && npm run validate:cadence-policy && npm run validate:cadence-ledger-identity && npm run validate:evidence-openness && npm run validate:operator-doc-currency && npm run validate:content-pattern-reaches-plan && npm run validate:backlog-reaches-builder && npm run validate:sitemap-lastmod && npm run validate:publication-freeze && npm run validate:index-coverage && npm run validate:site-icons && npm run validate:homepage-definition && npm run validate:rentals && npm run validate:engine-key-file && npm run validate:sitemap-registration && npm run pages:assemble",
@@ -139,6 +139,8 @@
     "chrome:install": "node scripts/install_site_chrome.js",
     "validate:site-chrome": "node scripts/validators/validate_site_chrome.js",
     "validate:faq-page": "node scripts/validators/validate_faq_page.js",
+    "validate:service-coverage": "node scripts/validators/validate_service_coverage.js",
+    "brand:install": "node scripts/install_brand_surfaces.js",
     "cloudflare:www-redirect": "node scripts/cloudflare/ensure_www_redirect.mjs"
   },
   "dependencies": {

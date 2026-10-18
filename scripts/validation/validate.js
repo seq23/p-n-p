@@ -2,6 +2,8 @@
 const fs = require('fs');
 const path = require('path');
 const { siteUrlForFile } = require('../lib/site_url');
+const brand = require('../lib/brand');
+const chrome = require('../lib/site_chrome');
 
 const root = path.resolve(__dirname, '..', '..');
 let failed = false;
@@ -13,6 +15,8 @@ const requiredFiles = [
   'contact.html',
   'privacy-policy.html',
   'terms-and-conditions.html',
+  'accessibility.html',
+  'sitemap.html',
   'robots.txt',
   'sitemap.xml',
   'llms.txt',
@@ -105,7 +109,21 @@ for (const file of htmlFiles) {
   if (!noindex && (!robots || !/index/i.test(robots) || !/follow/i.test(robots))) fail(`${rel} missing index/follow robots meta`);
   if (!/<script type=["']application\/ld\+json["']>[\s\S]*?<\/script>/i.test(html)) fail(`${rel} missing JSON-LD`);
   if (!/hello@porchandparty901\.com/i.test(html)) fail(`${rel} missing contact email`);
-  if (!/Kerseta LLC/i.test(html)) fail(`${rel} missing operating entity footer`);
+  // Footer (owner-approved 2026-10-18, scripts/lib/site_chrome.js): the
+  // service sentence, the city line, the copyright and every legal link. The
+  // legal entity is named in visible text ONLY in the Terms and the Privacy
+  // Policy (as Kerseta LLC ("Porch & Party", ...)); JSON-LD parentOrganization
+  // is schema, not footer prose, so <script> blocks are not visible text. The
+  // business is not insured, so no page may say "insured".
+  if (!html.includes(chrome.footerAbout())) fail(`${rel} footer lacks the service sentence and city line: ${brand.SERVICE_SENTENCE}`);
+  if (!html.includes(chrome.legal())) fail(`${rel} footer lacks the copyright and legal links row`);
+  for (const l of chrome.LEGAL_LINKS) if (!html.includes(`<a href="${l.href}">${l.label}</a>`)) fail(`${rel} footer lacks the ${l.label} link`);
+  const visible = html.replace(/<script\b[\s\S]*?<\/script>/gi, '').replace(/<[^>]+>/g, ' ');
+  const legalPage = rel === 'terms-and-conditions.html' || rel === 'privacy-policy.html';
+  if (legalPage && !visible.includes('Kerseta LLC ("Porch &amp; Party", "we", "us")')) fail(`${rel} does not open by naming Kerseta LLC ("Porch & Party", "we", "us")`);
+  if (!legalPage && /Kerseta/i.test(visible)) fail(`${rel} names Kerseta in visible text; only the Terms and the Privacy Policy may`);
+  if (/operated by|d\/b\/a|a brand of/i.test(visible)) fail(`${rel} carries "operated by" / "d/b/a" / "a brand of" wording`);
+  if (/\binsured\b/i.test(html)) fail(`${rel} says "insured"; the business is not insured`);
   // These used to demand the `.html` form specifically. The origin 308s
   // /privacy-policy.html to /privacy-policy, so the form this check required
   // was the redirecting one - the validator was holding the defect in place.
@@ -157,7 +175,7 @@ for (const file of htmlFiles) {
 }
 
 const llms = fs.existsSync(path.join(root, 'llms.txt')) ? fs.readFileSync(path.join(root, 'llms.txt'), 'utf8') : '';
-if (!/Memphis-based porch decorating and celebration styling company/i.test(llms)) fail('llms.txt missing primary entity sentence');
+if (!llms.includes(`Primary Identity:\n${brand.IDENTITY_SENTENCE}\n`)) fail(`llms.txt Primary Identity is not brand.IDENTITY_SENTENCE: ${brand.IDENTITY_SENTENCE}`);
 if (!/hotel-room decor/i.test(llms)) fail('llms.txt missing hotel decor service surface');
 if (!/party decor/i.test(llms)) fail('llms.txt missing party decor service surface');
 if (!/grazing table setups/i.test(llms)) fail('llms.txt missing grazing table service surface');
@@ -166,6 +184,20 @@ if (!/Hotel-room decor/i.test(llms) && !/hotel room decor/i.test(llms)) fail('ll
 if (!/Celebration setups start at \$300\+/i.test(llms)) fail('llms.txt missing party decor pricing extraction');
 if (!/Grazing table styling starts at \$250\+/i.test(llms)) fail('llms.txt missing grazing table pricing extraction');
 
+// Legal pages the footer links to (owner-approved 2026-10-18).
+const readRoot = (rel) => (fs.existsSync(path.join(root, rel)) ? fs.readFileSync(path.join(root, rel), 'utf8') : '');
+const terms = readRoot('terms-and-conditions.html');
+if (!/<h2 id="rental-cancellation">Rental &amp; Cancellation Policy<\/h2>/.test(terms)) fail('terms-and-conditions.html has no #rental-cancellation Rental & Cancellation Policy section');
+if (!/Mt\. Moriah Station/.test(terms)) fail('terms-and-conditions.html rental policy does not name the Mt. Moriah Station pickup and return');
+if (!/<h2 id="text-messages">/.test(terms) || !/Reply STOP to opt out/.test(terms) || !/Message and data rates may apply/.test(terms)) fail('terms-and-conditions.html lacks the text-message consent clause (STOP opt-out, message and data rates)');
+if (!/governed by the laws of the State of Tennessee/.test(terms)) fail('terms-and-conditions.html lacks the Tennessee governing-law clause');
+const privacy = readRoot('privacy-policy.html');
+if (!/<h2 id="privacy-choices">/.test(privacy) || !/Microsoft Clarity/.test(privacy) || !/opt out/i.test(privacy)) fail('privacy-policy.html lacks the #privacy-choices section (Microsoft Clarity, how to opt out)');
+for (const rel of ['terms-and-conditions.html', 'privacy-policy.html']) if (!/Kerseta LLC \("Porch &amp; Party"\)<br>/.test(readRoot(rel)) || !readRoot(rel).includes('hello@porchandparty901.com')) fail(`${rel} contact block does not name Kerseta LLC with hello@porchandparty901.com`);
+if (!/WCAG\) 2\.1 at level AA/.test(readRoot('accessibility.html'))) fail('accessibility.html does not state the WCAG 2.1 AA target');
+const sitemapPage = readRoot('sitemap.html');
+for (const href of ['/services/', '/rentals/', '/pricing', '/faq/', '/how-it-works', '/contact', '/answers/', '/local/', '/areas/', '/events/', '/sitemap.xml']) if (!sitemapPage.includes(`href="${href}"`)) fail(`sitemap.html does not link ${href}`);
+for (const rel of ['llms.txt', 'llms-full.txt', 'llms-entities.txt', 'llms-answers.txt', 'llms-services.txt', 'site.webmanifest']) if (/\binsured\b/i.test(readRoot(rel))) fail(`${rel} says "insured"; the business is not insured`);
 
 if (failed) process.exit(1);
 console.log(`Core validation OK: ${htmlFiles.length} HTML files checked with simplified matrix.`);

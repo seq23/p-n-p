@@ -35,6 +35,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
+const brand = require(path.join(ROOT, 'scripts/lib/brand.js'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
 const faqContent = require(path.join(ROOT, 'scripts/lib/faq_content.js'));
 const rentalRates = require(path.join(ROOT, 'data/rentals/games.json')).rates;
@@ -110,7 +111,7 @@ function groupServices(pages) {
   // page lives at /rentals/ rather than under services/, so it is read by path
   // here. Missing file is a hard error, never a silently shorter index.
   groups.push({
-    heading: `Party Game Rentals - $${rentalRates.day} a game per day`,
+    heading: `Party Game Rentals - from $${rentalRates.day} a game per day`,
     blurb: 'Giant yard games, an inflatable movie screen and a card table for Memphis parties, picked up and returned at Mt. Moriah Station.',
     pages: [readPage('rentals/index.html')]
   });
@@ -153,9 +154,10 @@ const SECTIONS = [
     eyebrow: 'Services',
     crumb: 'Services',
     h1: 'Porch &amp; Party services in the Memphis metro area',
-    title: 'Porch &amp; Party Services in Memphis | Porch, Party &amp; Grazing',
-    description: 'Every Porch & Party service in one place: porch decorating from $350+, celebration setups from $300+, and grazing-table styling from $250+ in Memphis.',
-    lead: `Porch &amp; Party publishes three service families: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, and ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}. Every styling page below sits inside one of those three, so start with the family that matches the setup you need and open the page that names it. Party game rentals, $${rentalRates.day} a game per day, are listed last.`,
+    // Owner-approved 2026-10-18: the four services (scripts/lib/brand.js) in the title and description.
+    title: 'Memphis Porch, Party, Grazing &amp; Game Rentals | Porch &amp; Party',
+    description: `Porch & Party services in Memphis: ${brand.SERVICES[0].label} from $${brand.PRICES.porch}, ${brand.SERVICES[1].label} from $${brand.PRICES.party}, ${brand.SERVICES[2].label} from $${brand.PRICES.grazing}, and ${brand.SERVICES[3].label} from $${brand.PRICES.gameDay}.`,
+    lead: `Porch &amp; Party offers four services: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}, and party game rentals from $${rentalRates.day} a game per day. Every styling page below sits inside one of the first three, so start with the family that matches the setup you need and open the page that names it. Party game rentals are listed last.`,
     summary: 'Pick the service family first - porch, celebration, or grazing - then open the page for the specific setup. Starting prices are published on each page and the exact quote depends on scope, date, location, and materials.',
     group: groupServices,
     faq: [
