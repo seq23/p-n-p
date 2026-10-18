@@ -47,7 +47,7 @@ const COPY = [
   'data/authority_scale/velocity_decision.json', 'data/authority_scale/citation_yield_contract.json',
   'data/published_manifest/published_manifest.json', 'data/slug_registry/slug_registry.json'
 ];
-function sandboxRun({ frozen, measuredRoute }) {
+function sandboxRun({ frozen, measuredRoute, allowance = 5, alsoUnmeasured = false }) {
   const box = fs.mkdtempSync(path.join(os.tmpdir(), 'pnp-freeze-'));
   for (const rel of COPY) {
     fs.mkdirSync(path.dirname(path.join(box, rel)), { recursive: true });
@@ -57,15 +57,16 @@ function sandboxRun({ frozen, measuredRoute }) {
   const sample = universe.find((u) => u.folder && u.slug);
   const fixture = { ...sample, slug: `${sample.slug}-freeze-fixture` };
   const w = (rel, doc) => { fs.mkdirSync(path.dirname(path.join(box, rel)), { recursive: true }); fs.writeFileSync(path.join(box, rel), JSON.stringify(doc, null, 2)); };
-  w('data/queries/query_universe.json', [...universe, fixture]);
-  w('data/publish_queue/publish_queue.json', [{ slug: fixture.slug, folder: fixture.folder, status: 'queued' }]);
+  const other = { ...sample, slug: `${sample.slug}-freeze-fixture-unmeasured` };
+  w('data/queries/query_universe.json', [...universe, fixture, ...(alsoUnmeasured ? [other] : [])]);
+  w('data/publish_queue/publish_queue.json', [...(alsoUnmeasured ? [{ slug: other.slug, folder: other.folder, status: 'queued' }] : []), { slug: fixture.slug, folder: fixture.folder, status: 'queued' }]);
   w('data/cadence/policy.json', { ...policy, new_page_publication: { ...(freeze || {}), frozen } });
   const route = `/${fixture.folder}/${fixture.slug}`;
   w('data/search_intelligence/target_query_set.json', { targets: measuredRoute ? [{ query: 'fixture', expected_owned_route: route, source: 'gsc_export', measurement: { metric: 'impressions_28d', value: 5 } }] : [] });
   // The gate is stubbed with headroom so only the freeze can hold the page; --max=0
   // stops the unfrozen runs before they render, which is all the negative needs.
   fs.mkdirSync(path.join(box, 'scripts'), { recursive: true });
-  fs.writeFileSync(path.join(box, 'scripts/cadence_gate.js'), 'console.log(JSON.stringify({publication_allowance:5,new_publications_since_last_run:0,ledger_baseline_date:"2026-01-01"}))');
+  fs.writeFileSync(path.join(box, 'scripts/cadence_gate.js'), `console.log(JSON.stringify({publication_allowance:${allowance},new_publications_since_last_run:0,ledger_baseline_date:"2026-01-01"}))`);
   const args = ['scripts/authority_scale/publish_governed_queue.mjs', ...(frozen && !measuredRoute ? [] : ['--max=0'])];
   let out = '';
   try {
@@ -86,6 +87,11 @@ const open = sandboxRun({ frozen: false, measuredRoute: false });
 if (open.json.held_by_freeze !== 0 || open.json.stop_reason === 'PUBLICATION_FROZEN_UNMEASURED_DEMAND') fail('negative proof failed: with the flag off the publisher still held the page, so the test cannot tell the flag is what holds it');
 const released = sandboxRun({ frozen: true, measuredRoute: true });
 if (released.json.held_by_freeze !== 0) fail('a queued page whose route has a measured target was still held by the freeze');
+// A measured page waiting on the weekly cap must be named as the cap holding, never as
+// "no measured demand" (the porch price articles wait a week each this way).
+const capped = sandboxRun({ frozen: true, measuredRoute: true, allowance: 0, alsoUnmeasured: true });
+if (capped.written || capped.json.published) fail('a measured page published with no cadence headroom');
+if (capped.json.stop_reason !== 'CADENCE_CEILING_REACHED') fail(`a measured page waiting on the weekly cap was named ${capped.json.stop_reason}, expected CADENCE_CEILING_REACHED`);
 
 // ------------------------------------------------------------- 3. history
 const targets = read('data/search_intelligence/target_query_set.json', { targets: [] }).targets || [];

@@ -3,6 +3,7 @@ const contactSurface = require('../scripts/lib/contact_surface');
 const siteIcons = require('../scripts/lib/site_icons');
 const siteChrome = require('../scripts/lib/site_chrome');
 const areas = require('../data/service_areas/areas.json');
+const PP = require('../scripts/lib/porch_packages');
 
 const fs = require('fs');
 const path = require('path');
@@ -140,15 +141,18 @@ function articleJsonLd(url, headline, description, image, pathUrl) {
   };
 }
 
-function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl, image) {
+function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl, image, extra = {}) {
+  const webPage = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: title,
+    description,
+    url
+  };
+  // Speakable (opt-in per entry): the answer-first blocks a voice assistant may read aloud.
+  if (Array.isArray(extra.speakable) && extra.speakable.length) webPage.speakable = { '@type': 'SpeakableSpecification', cssSelector: extra.speakable };
   const blocks = [
-    {
-      '@context': 'https://schema.org',
-      '@type': 'WebPage',
-      name: title,
-      description,
-      url
-    },
+    webPage,
     {
       '@context': 'https://schema.org',
       '@type': 'Service',
@@ -169,7 +173,8 @@ function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl, im
           '@type': 'Question',
           name: faqQuestion,
           acceptedAnswer: { '@type': 'Answer', text: faqAnswer }
-        }
+        },
+        ...(extra.faqs || []).map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } }))
       ]
     });
   }
@@ -314,7 +319,26 @@ function quoteEventScript() {
   return `<script data-quote-event>(function(d,w){d.addEventListener("click",function(e){var t=e.target;var a=t&&t.closest?t.closest("[data-quote-cta]"):null;if(!a)return;if(typeof w.clarity!=="function")return;w.clarity("set","quote_intent_page",d.location.pathname);w.clarity("set","quote_intent_cta",a.getAttribute("data-quote-cta")||"unlabelled");w.clarity("event","quote_request_click")},true)})(document,window)</script>`;
 }
 
-function renderPage(entry) {
+// Porch price articles (owner-approved 18 Oct 2026): an entry with `porchPackages: true`
+// types no price. Its {{tokens}} are filled from data/offers/porch_packages.json and its
+// comparison table is built from the same file (scripts/lib/porch_packages.js), and
+// scripts/install_porch_packages.js stamps the full grid + Offer schema after publishing.
+const PORCH_PACKAGES_PATH = path.join(__dirname, '..', 'data', 'offers', 'porch_packages.json');
+function porchEntry(entry, pk) {
+  const data = pk || JSON.parse(fs.readFileSync(PORCH_PACKAGES_PATH, 'utf8'));
+  const filled = PP.fillEntry(entry, data);
+  if (!filled.costTable) filled.costTable = PP.comparisonTable(data);
+  return filled;
+}
+
+/** Extra questions, shown on the page and carried in the FAQPage node with the main one. */
+function faqList(faqs) {
+  if (!Array.isArray(faqs) || !faqs.length) return '';
+  return `<div class="info-panel porch-faq" data-content-block="faq"><h2>Common questions</h2>${faqs.map((f) => `<h3>${f.q}</h3><p>${f.a}</p>`).join('')}</div>`;
+}
+
+function renderPage(input, opts = {}) {
+  const entry = input.porchPackages ? porchEntry(input, opts.porchPackages) : input;
   const service = offers.services[entry.serviceKey];
   const pathUrl = `/${entry.folder}/${entry.slug}.html`;
   const fullUrl = `${offers.domain}${pathUrl}`;
@@ -362,7 +386,7 @@ function renderPage(entry) {
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/css/styles.css" />
   ${siteChrome.cssLink()}
-  ${pageJsonLd(fullUrl, entry.h1, entry.description, entry.faqQuestion, entry.faqAnswer, pathUrl, socialImage.url)}
+  ${pageJsonLd(fullUrl, entry.h1, entry.description, entry.faqQuestion, entry.faqAnswer, pathUrl, socialImage.url, { faqs: entry.faqs, speakable: entry.speakable })}
 </head>
 <body>
   ${nav(pathUrl)}
@@ -407,7 +431,7 @@ function renderPage(entry) {
             <h2>What this means in practice</h2>
             <p>${entry.practical}</p>
           </div>
-          ${entry.authority ? `<div class="info-panel"><h2>Why this page exists</h2><p>${entry.authority}</p></div>` : ''}${opt(sourceBlock(entry.sources))}
+          ${entry.authority ? `<div class="info-panel"><h2>Why this page exists</h2><p>${entry.authority}</p></div>` : ''}${opt(faqList(entry.faqs))}${opt(sourceBlock(entry.sources))}
           ${relatedLinks(entry.related)}
           ${midCta}
         </div>
@@ -445,7 +469,7 @@ function renderPage(entry) {
 // other generated page, rather than keeping a second copy of that markup that
 // could drift.
 module.exports = {
-  renderPage: (entry) => normalizeHtmlUrls(renderPage(entry)),
+  renderPage: (entry, opts) => normalizeHtmlUrls(renderPage(entry, opts)),
   nav: (currentPath) => normalizeHtmlUrls(nav(currentPath)),
   footer: () => normalizeHtmlUrls(footer()),
   // Exported for scripts/generators/build_rentals_page.js so its data-quote-cta

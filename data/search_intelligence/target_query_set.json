@@ -13,12 +13,13 @@
     "end_date": "2026-10-15",
     "collected_at": "2026-10-18T15:12:28.553185+00:00"
   },
-  "target_count": 21,
+  "target_count": 23,
   "targets_by_source": {
+    "measured_demand": 2,
     "gsc_export": 21
   },
   "party_planner_family_count": 16,
-  "anchored_to_admitted_route_count": 21,
+  "anchored_to_admitted_route_count": 23,
   "truth_boundary": "A target query is something this loop intends to observe. Its number is the measurement that admitted it, not evidence of ranking, indexing, surfacing, or citation.",
   "dropped_count": 12,
   "dropped": [
@@ -84,6 +85,42 @@
     }
   ],
   "targets": [
+    {
+      "target_id": "pnp_sq_5574414d6c67",
+      "query": "porch decorating service",
+      "source": "measured_demand",
+      "family": "other_measured",
+      "volume": 90,
+      "measurement": {
+        "metric": "search_volume_monthly",
+        "value": 90,
+        "source_type": "dataforseo_search_volume",
+        "observed_at": "2026-10-18"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_demand_record",
+      "expected_owned_route": "/guides/porch-decorating-packages-memphis",
+      "expected_owned_url": "https://porchandparty901.com/guides/porch-decorating-packages-memphis",
+      "owned_route_is_admitted": true
+    },
+    {
+      "target_id": "pnp_sq_d4054a8c7790",
+      "query": "holiday porch decorating service",
+      "source": "measured_demand",
+      "family": "other_measured",
+      "volume": 20,
+      "measurement": {
+        "metric": "search_volume_monthly",
+        "value": 20,
+        "source_type": "dataforseo_search_volume",
+        "observed_at": "2026-10-18"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_demand_record",
+      "expected_owned_route": "/guides/holiday-porch-decorating-service-memphis",
+      "expected_owned_url": "https://porchandparty901.com/guides/holiday-porch-decorating-service-memphis",
+      "owned_route_is_admitted": true
+    },
     {
       "target_id": "pnp_sq_a97d97ff7d71",
       "query": "birthday party planner",

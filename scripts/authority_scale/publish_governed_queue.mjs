@@ -44,9 +44,15 @@ for(const item of queue){if(item.status!=='queued')continue;const key=`${item.fo
 // then re-accepts and authority:scale:clear-scope closes, both later in the cycle.
 if(published){const run=(args)=>execFileSync('node',args,{cwd:ROOT,stdio:'inherit'});const rels=publishedRoutes.map(r=>`${r.slice(1)}.html`);run(['scripts/generators/update_sitemap.js']);
   const linkIn=JSON.parse(execFileSync('node',['scripts/build_related_navigation.js',`--link-in=${rels.join(',')}`,'--list-link-in'],{cwd:ROOT,encoding:'utf8'}));
-  const scopeRoutes=[...publishedRoutes,...linkIn.link_in_writers.map(r=>`/${r.replace(/\.html$/,'')}`)];
+  // A porch price article (data/offers/porch_packages.json `articles`) also gets the full
+  // package grid + Offer schema, and every porch page, the other published articles and
+  // the FAQ porch section link to it the same day (scripts/install_porch_packages.js).
+  // Those pages are written under the same exact mutation scope.
+  const porchPk=JSON.parse(fs.readFileSync(path.join(ROOT,'data/offers/porch_packages.json'),'utf8'));const porchArticles=(porchPk.articles||[]).map(a=>a.path);const porchPublished=rels.some(r=>porchArticles.includes(r));
+  const porchWriters=porchPublished?[...porchPk.pages,...porchArticles.filter(p=>fs.existsSync(path.join(ROOT,p))),'faq/index.html'].map(r=>`/${r.replace(/\.html$/,'')}`):[];
+  const scopeRoutes=[...new Set([...publishedRoutes,...linkIn.link_in_writers.map(r=>`/${r.replace(/\.html$/,'')}`),...porchWriters])];
   run(['scripts/authority_scale/frozen_outputs.mjs','prepare-scope',...scopeRoutes]);
-  run(['scripts/build_related_navigation.js','--write',`--only=${rels.join(',')}`,`--link-in=${rels.join(',')}`]);run(['scripts/install_clarity.js']);run(['scripts/normalize_public_urls.js']);}
+  run(['scripts/build_related_navigation.js','--write',`--only=${rels.join(',')}`,`--link-in=${rels.join(',')}`]);if(porchPublished)run(['scripts/install_porch_packages.js']);run(['scripts/install_clarity.js']);run(['scripts/normalize_public_urls.js']);}
 if(published){ledger.days=ledger.days||{};ledger.days[day]={new_pages:used+published,ceiling,routes:[...(ledger.days[day]?.routes||[]),...publishedRoutes],publication_frozen:frozen,updated_at:new Date().toISOString()};fs.writeFileSync(queuePath,JSON.stringify(queue,null,2)+'\n');fs.writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(slugPath,JSON.stringify(slugs.sort(),null,2)+'\n');fs.writeFileSync(ledgerPath,JSON.stringify(ledger,null,2)+'\n');}
 // Rule 0: no stage may exit 0 having done nothing. Publishing zero pages is often
 // legitimate here, but "success" with no explanation is how a create stage reports
@@ -57,8 +63,12 @@ if(published){ledger.days=ledger.days||{};ledger.days[day]={new_pages:used+publi
 const queuedRemaining=queue.filter(x=>x.status==='queued').length;
 const statusCounts=queue.reduce((acc,x)=>{acc[x.status||'unknown']=(acc[x.status||'unknown']||0)+1;return acc;},{});
 let stop_reason=null,stop_detail=null;
+// A measured page waiting on the weekly cap is the cap holding, not the freeze: naming
+// it PUBLICATION_FROZEN_UNMEASURED_DEMAND would say it has no measured demand.
+const measuredWaiting=queuedRemaining-heldByFreeze;
 if(!published){
-  if(frozen&&heldByFreeze){stop_reason='PUBLICATION_FROZEN_UNMEASURED_DEMAND';stop_detail=`${heldByFreeze} queued page(s) held: data/cadence/policy.json new_page_publication.frozen is true (since ${freeze.frozen_at}) and none of them is the owned route of a measured target in data/search_intelligence/target_query_set.json (${measuredRoutes.size} measured routes). Existing pages are still improved; a queued page publishes automatically once its query has measured demand.`;}
+  if(measuredWaiting>0&&remaining<=0){stop_reason='CADENCE_CEILING_REACHED';stop_detail=`${measuredWaiting} measured page(s) stay queued for the next weekly slot${heldByFreeze?` (${heldByFreeze} more held by the publication freeze: no measured target)`:''}. Limits: ${used} of ${ceiling} daily used on ${day}; ${weekUsed} of ${weeklyRate} weekly used over the trailing 7 days; ${gateNote}. The cap is holding, which is the intended behaviour.`;}
+  else if(frozen&&heldByFreeze){stop_reason='PUBLICATION_FROZEN_UNMEASURED_DEMAND';stop_detail=`${heldByFreeze} queued page(s) held: data/cadence/policy.json new_page_publication.frozen is true (since ${freeze.frozen_at}) and none of them is the owned route of a measured target in data/search_intelligence/target_query_set.json (${measuredRoutes.size} measured routes). Existing pages are still improved; a queued page publishes automatically once its query has measured demand.`;}
   else if(!queue.length){stop_reason='QUEUE_EMPTY';stop_detail='data/publish_queue/publish_queue.json holds no items at all.';}
   else if(!queuedRemaining){stop_reason='QUEUE_EXHAUSTED_NOTHING_REFILLS_IT';stop_detail=`All ${queue.length} publish-queue items are already published (${JSON.stringify(statusCounts)}) and no stage adds new ones. This stage cannot publish until the queue is refilled from evidence-backed demand in data/authority_scale/query_atlas.json. Reported as a named stop, not as a successful publication run.`;}
   else if(remaining<=0){stop_reason='CADENCE_CEILING_REACHED';stop_detail=`${queuedRemaining} item(s) stay queued. Limits: ${used} of ${ceiling} daily used on ${day}; ${weekUsed} of ${weeklyRate} weekly used over the trailing 7 days; ${gateNote}. The cap is holding, which is the intended behaviour.`;}

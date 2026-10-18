@@ -195,7 +195,79 @@ function schemaNode(pk, { domain, url }) {
 /** Every tier price as the site prints it ("$550"), for the no-tier-price checks. */
 const tierPriceStrings = (pk) => [...new Set(pk.seasons.flatMap((s) => tierKeys(pk).map((t) => money(s.tiers[t].from))))];
 
+// ---- Porch price articles (owner-approved 18 Oct 2026) ------------------------------
+// Article drafts in data/queries/query_universe.json never type a price. They carry
+// {{tokens}} filled from this data file at render time (templates/page-shell.js), so a
+// price change is still one edit in data/offers/porch_packages.json.
+//   {{from:fall.classic}} "$N" (the tier price)   {{includes:fall.classic}}   {{request:fall.classic}} the preselecting link
+//   {{low:fall}} {{high:fall}}     {{range:fall}} "from $LOW (most fall porches $LOW–$HIGH)"
+//   {{custom:fall}} {{season:fall}} {{covers:fall}} {{tier:classic}}
+//   {{bundle}} {{bundlePct}} {{addOns}} {{estimate}} {{finalQuote}} {{sizeHint}}
+// An unknown or malformed token throws: a page never ships with a raw {{...}} in it.
+function fillTokens(str, pk) {
+  return String(str).replace(/\{\{([a-zA-Z]+)(?::([a-z]+)(?:\.([a-z]+))?)?\}\}/g, (all, name, a, b) => {
+    const s = a ? seasonOf(pk, a) : null;
+    const tierOk = (k) => Boolean(k && pk.tiers[k]);
+    switch (name) {
+      case 'from': if (s && tierOk(b)) return money(s.tiers[b].from); break;
+      case 'includes': if (s && tierOk(b)) return s.tiers[b].includes; break;
+      case 'request': if (s && tierOk(b)) return requestHref(pk, s.key, b); break;
+      case 'low': if (s && !b) return money(lowHigh(s, pk)[0]); break;
+      case 'high': if (s && !b) return money(lowHigh(s, pk)[1]); break;
+      case 'range': if (s && !b) return rangeLine(pk, s.key); break;
+      case 'custom': if (s && !b) return s.customLine; break;
+      case 'season': if (s && !b) return s.name; break;
+      case 'covers': if (s && !b) return s.covers; break;
+      case 'tier': if (tierOk(a) && !b) return pk.tiers[a].name; break;
+      case 'bundle': if (!a) return pk.bundle.line; break;
+      case 'bundlePct': if (!a) return `${pk.bundle.percentOff}%`; break;
+      case 'addOns': if (!a) return pk.addOns.line; break;
+      case 'estimate': if (!a) return pk.estimateLine; break;
+      case 'finalQuote': if (!a) return pk.finalQuoteLine; break;
+      case 'sizeHint': if (!a) return pk.sizeHint; break;
+      default: break;
+    }
+    throw new Error(`porch_packages: unknown or malformed token ${all}`);
+  });
+}
+
+/** A whole query-universe entry with every string's tokens filled (arrays and objects too). */
+function fillEntry(entry, pk) {
+  const walk = (v) => {
+    if (typeof v === 'string') return fillTokens(v, pk);
+    if (Array.isArray(v)) return v.map(walk);
+    if (v && typeof v === 'object') return Object.fromEntries(Object.entries(v).map(([k, x]) => [k, walk(x)]));
+    return v;
+  };
+  return walk(entry);
+}
+
+/** The package comparison table (the costTable shape templates/page-shell.js renders), from the data. */
+function comparisonTable(pk) {
+  const [first, second] = pk.seasons;
+  const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+  return {
+    title: 'Porch packages compared',
+    caption: `Porch &amp; Party porch packages by size of look and season. From-prices in USD. ${esc(pk.bundle.line)}`,
+    columns: ['Package', 'What you are picturing', `${esc(first.name)} from`, `${esc(second.name)} from`, 'Usually fits'],
+    rows: tierKeys(pk).map((t) => [esc(pk.tiers[t].name), esc(cap(pk.tiers[t].picturing)), `${money(first.tiers[t].from)}+`, `${money(second.tiers[t].from)}+`, esc(pk.tiers[t].sizeHint ? `A ${pk.tiers[t].sizeHint.charAt(0).toLowerCase()}${pk.tiers[t].sizeHint.slice(1)}` : 'A porch with steps and a walkway')]),
+    note: `${esc(pk.estimateLine)} ${esc(pk.addOns.line)}`,
+  };
+}
+
+/**
+ * The "Porch price guides" line: every article in porch_packages.json `articles` that is
+ * published (its file exists), minus the page itself. Empty markers when none is.
+ */
+function articleLinksHtml(pk, publishedRels, selfRel, { wrap = true } = {}) {
+  const items = (pk.articles || []).filter((a) => publishedRels.includes(a.path) && a.path !== selfRel);
+  const line = `<p class="pkg-articles"><strong>Porch price guides:</strong> ${items.map((a) => `<a href="/${a.path.replace(/\.html$/, '')}">${esc(a.title)}</a>`).join(' · ')}</p>`;
+  const inner = !items.length ? '' : wrap ? `<div class="container">${line}</div>` : line;
+  return `<!--porch-articles-->${inner}<!--/porch-articles-->`;
+}
+
 module.exports = {
   esc, money, tierKeys, seasonOf, priceOf, rangeLine, formRangeLines, decorChoices, tierFromAnswer, seasonFromAnswer,
   cardLine, invoiceLines, seasonHtml, gridHtml, pageBlockHtml, calculatorHtml, schemaNode, requestHref, tierPriceStrings, GRID_CSS,
+  fillTokens, fillEntry, comparisonTable, articleLinksHtml,
 };

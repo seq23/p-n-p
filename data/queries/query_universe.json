@@ -1542,5 +1542,231 @@
     "localContext": "Porch & Party decorates homes, porches and backyards for celebrations across Memphis, Germantown, Collierville, and Bartlett. Graduation season falls in the Memphis heat, which decides when outdoor decor can be installed.",
     "beforeBook": "Before requesting a quote, know the date and hours, whether guests will be indoors or out, the school colours, and which of the entry, photo spot and food table you want styled.",
     "nextStep": "Use the quote form with the date, the party hours, the school colours, and which spaces you want decorated, with a photo of the porch or room if you have one."
+  },
+  {
+    "slug": "porch-decorating-packages-memphis",
+    "folder": "guides",
+    "porchPackages": true,
+    "conversionEvents": true,
+    "eyebrow": "Porch decorating packages",
+    "title": "Porch Decorating Service Prices in Memphis (2026) | Porch & Party",
+    "h1": "Porch decorating service in Memphis: the four packages and what each costs",
+    "description": "Porch decorating service packages in Memphis with 2026 prices: Stoop, Classic, Grand and Showstopper for fall and Christmas, and what each includes.",
+    "serviceKey": "porch",
+    "intent": "commercial",
+    "intro": "Porch &amp; Party prices porch decorating by package. There are four, {{tier:stoop}}, {{tier:classic}}, {{tier:grand}} and {{tier:showstopper}}, for fall and for Christmas, and each one has a published starting price. This page lists all eight, what each looks like, and how the final quote is set.",
+    "quickAnswer": "A porch decorating service from Porch &amp; Party costs {{range:fall}} for fall and {{range:christmas}} for Christmas. {{tier:stoop}} is a simple touch ({{from:fall.stoop}} fall, {{from:christmas.stoop}} Christmas), {{tier:classic}} a full porch ({{from:fall.classic}} / {{from:christmas.classic}}), {{tier:grand}} the porch and steps ({{from:fall.grand}} / {{from:christmas.grand}}) and {{tier:showstopper}} the porch, steps and walkway ({{from:fall.showstopper}} / {{from:christmas.showstopper}}). {{bundle}}",
+    "forWho": "Memphis-area homeowners comparing porch decorating services who want to see a real price before they ask for a quote.",
+    "definition": {
+      "term": "What a porch package is",
+      "text": "A porch package is a starting size of look with a from-price, not a fixed kit. {{sizeHint}} {{custom:fall}}"
+    },
+    "includes": [
+      "All four porch packages for fall and for Christmas, with their from-prices",
+      "What each package looks like on the porch",
+      "Which package usually fits your porch size",
+      "Add-ons, the fall + Christmas bundle, and how the final quote is confirmed"
+    ],
+    "protocol": {
+      "title": "Choosing a porch package",
+      "steps": [
+        {
+          "step": "Pick the season.",
+          "detail": "The fall package covers {{covers:fall}}; the Christmas package covers {{covers:christmas}}."
+        },
+        {
+          "step": "Picture how much decor you want.",
+          "detail": "{{sizeHint}}"
+        },
+        {
+          "step": "Read the from-price.",
+          "detail": "Fall runs {{range:fall}}; Christmas runs {{range:christmas}}."
+        },
+        {
+          "step": "Ask about add-ons.",
+          "detail": "{{addOns}} Add-ons are priced with your quote."
+        },
+        {
+          "step": "Book both seasons if you want both.",
+          "detail": "{{bundle}}"
+        },
+        {
+          "step": "Request the package.",
+          "detail": "Send the season and the package on the <a href=\"/request?service=porch#request-form\">porch request form</a>. {{finalQuote}}"
+        }
+      ],
+      "note": "{{estimate}}"
+    },
+    "practical": "The from-price is where a package starts. The quote moves with the design you want, the size of your porch and how much decor goes on it, so it is confirmed after a quick look rather than promised up front. If you are between two packages, say so on the form and we will help you decide. For the general cost question, see <a href=\"/answers/how-much-does-porch-decorating-cost-in-memphis\">how much porch decorating costs in Memphis</a>.",
+    "authority": "This page exists so you can see the real package prices before you ask. They are Porch &amp; Party’s own published from-prices, the same ones the quote starts from.",
+    "trust": {
+      "author": "Porch &amp; Party",
+      "credential": "a Memphis-based company for porch decorating, party planning &amp; decor, grazing tables, and party game rentals",
+      "basis": "Every price on this page is Porch & Party’s own published porch package from-price, read from the same price list the request form and the quote use. These are not market averages."
+    },
+    "faqQuestion": "How much does a porch decorating service cost in Memphis?",
+    "faqAnswer": "With Porch & Party, fall porches start at {{low:fall}} and most land between {{low:fall}} and {{high:fall}}; Christmas porches start at {{low:christmas}} and most land between {{low:christmas}} and {{high:christmas}}. {{estimate}}",
+    "faqs": [
+      {
+        "q": "What does the {{tier:stoop}} porch package include?",
+        "a": "A simple touch. Fall: {{includes:fall.stoop}} From {{from:fall.stoop}}. Christmas: {{includes:christmas.stoop}} From {{from:christmas.stoop}}."
+      },
+      {
+        "q": "What does the {{tier:classic}} porch package include?",
+        "a": "A full porch. Fall: {{includes:fall.classic}} From {{from:fall.classic}}. Christmas: {{includes:christmas.classic}} From {{from:christmas.classic}}."
+      },
+      {
+        "q": "What does the {{tier:grand}} porch package include?",
+        "a": "The porch and the steps. Fall: {{includes:fall.grand}} From {{from:fall.grand}}. Christmas: {{includes:christmas.grand}} From {{from:christmas.grand}}."
+      },
+      {
+        "q": "What does the {{tier:showstopper}} porch package include?",
+        "a": "The works: porch, steps and walkway. Fall: {{includes:fall.showstopper}} From {{from:fall.showstopper}}. Christmas: {{includes:christmas.showstopper}} From {{from:christmas.showstopper}}."
+      },
+      {
+        "q": "Which porch package do I need?",
+        "a": "{{sizeHint}} If you are not sure, pick “Not sure yet, help me decide” on the request form."
+      },
+      {
+        "q": "Is there a discount for booking fall and Christmas?",
+        "a": "Yes. {{bundle}}"
+      },
+      {
+        "q": "Are add-ons included in the package price?",
+        "a": "No. {{addOns}} Add-ons are priced with your quote."
+      }
+    ],
+    "speakable": [
+      "#recommendation-summary",
+      ".porch-faq"
+    ],
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN"
+    ],
+    "related": [
+      "/services/porch-decorating.html",
+      "/services/fall-porch-decorating.html",
+      "/services/christmas-porch-decorating.html",
+      "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
+      "/pricing.html",
+      "/contact.html"
+    ],
+    "localContext": "Porch &amp; Party decorates front porches across Memphis, Germantown, Collierville and Bartlett. The packages are the same everywhere in the service area; what changes the quote is the porch itself and the design you want.",
+    "beforeBook": "Know the season, roughly how much decor you are picturing, and whether you want fall and Christmas both. A photo of the porch helps us confirm the package after a quick look.",
+    "nextStep": "Pick the package closest to what you want and send it on the <a href=\"/request?service=porch#request-form\">porch request form</a>. We confirm the final quote after a quick look at your porch."
+  },
+  {
+    "slug": "holiday-porch-decorating-service-memphis",
+    "folder": "guides",
+    "porchPackages": true,
+    "conversionEvents": true,
+    "eyebrow": "Holiday porch decorating",
+    "title": "Holiday Porch Decorating Service in Memphis | Porch & Party",
+    "h1": "Holiday porch decorating service in Memphis: fall, Halloween, Thanksgiving and Christmas",
+    "description": "Holiday porch decorating in Memphis from fall to Christmas: what the two packages cover, 2026 prices, and the saving when you book both seasons.",
+    "serviceKey": "porch",
+    "intent": "commercial",
+    "intro": "A holiday porch from Porch &amp; Party runs on two seasonal packages: one for {{covers:fall}}, and one for {{covers:christmas}}. Each comes in four sizes with a published starting price, and booking both takes {{bundlePct}} off the Christmas package.",
+    "quickAnswer": "Porch &amp; Party holiday porch decorating uses two packages. The fall package covers {{covers:fall}} and costs {{range:fall}}. The Christmas package covers {{covers:christmas}} and costs {{range:christmas}}. {{bundle}} A Thanksgiving refresh and takedown are add-ons, quoted with your setup.",
+    "forWho": "Memphis-area homeowners who want their porch decorated for the whole holiday season, not just one holiday.",
+    "definition": {
+      "term": "What a holiday porch decorating service covers",
+      "text": "One company designs, brings and installs your porch decor for each season: {{covers:fall}} with the fall package, then {{covers:christmas}} with the Christmas package. Everything we install is yours to keep."
+    },
+    "includes": [
+      "What the fall package covers, Halloween and Thanksgiving included",
+      "The Christmas package sizes and prices",
+      "Booking both seasons and the {{bundlePct}} saving on Christmas",
+      "When to book each season"
+    ],
+    "protocol": {
+      "title": "Planning a porch for the whole holiday season",
+      "steps": [
+        {
+          "step": "Book fall two to three weeks ahead.",
+          "detail": "Halloween and the week before Thanksgiving fill first."
+        },
+        {
+          "step": "Choose your fall package.",
+          "detail": "{{tier:stoop}} from {{from:fall.stoop}} up to {{tier:showstopper}} from {{from:fall.showstopper}}. {{custom:fall}}"
+        },
+        {
+          "step": "Decide on a Thanksgiving refresh.",
+          "detail": "The fall package already covers Thanksgiving. A refresh is an add-on if you want the look changed for it."
+        },
+        {
+          "step": "Tick “Book both seasons”.",
+          "detail": "{{bundle}}"
+        },
+        {
+          "step": "Choose your Christmas package.",
+          "detail": "{{tier:stoop}} from {{from:christmas.stoop}} up to {{tier:showstopper}} from {{from:christmas.showstopper}}. {{custom:christmas}}"
+        },
+        {
+          "step": "Decide on takedown.",
+          "detail": "Everything we install is yours to keep. Takedown is an add-on, quoted with your setup, if you want it gone after the season."
+        }
+      ],
+      "note": "{{estimate}}"
+    },
+    "practical": "Booking the two seasons together means both porches are planned in one conversation and the Christmas package costs {{bundlePct}} less. The fall and Christmas looks are separate designs, each quoted from its package’s from-price after a quick look. To compare the four package sizes side by side, see <a href=\"/guides/porch-decorating-packages-memphis\">the porch decorating packages guide</a>.",
+    "authority": "This page exists so you can plan and price a whole holiday season of porch decorating before you ask. The prices are Porch &amp; Party’s own published from-prices.",
+    "trust": {
+      "author": "Porch &amp; Party",
+      "credential": "a Memphis-based company for porch decorating, party planning &amp; decor, grazing tables, and party game rentals",
+      "basis": "Every price on this page is Porch & Party’s own published porch package from-price, read from the same price list the request form and the quote use. These are not market averages."
+    },
+    "faqQuestion": "How much does a holiday porch decorating service cost in Memphis?",
+    "faqAnswer": "With Porch & Party, the fall package starts at {{low:fall}} (most fall porches {{low:fall}} to {{high:fall}}) and the Christmas package at {{low:christmas}} (most Christmas porches {{low:christmas}} to {{high:christmas}}). {{bundle}} {{estimate}}",
+    "faqs": [
+      {
+        "q": "Does the fall package cover Halloween and Thanksgiving?",
+        "a": "Yes. The fall package covers {{covers:fall}}. A Thanksgiving refresh is an add-on if you want the look changed for Thanksgiving."
+      },
+      {
+        "q": "How much do I save booking fall and Christmas together?",
+        "a": "{{bundle}} The saving is taken off the Christmas package."
+      },
+      {
+        "q": "How far ahead should I book a holiday porch?",
+        "a": "Two to three weeks for fall and Christmas. Halloween and the week before Thanksgiving fill first."
+      },
+      {
+        "q": "Do I keep the decor?",
+        "a": "Yes, everything we install is yours to keep. Takedown is an add-on, quoted with your setup, if you want it gone after the season."
+      },
+      {
+        "q": "Do I need to be home?",
+        "a": "No. We can work from the street side with your okay. Christmas lights that need an outlet need the outlet switched on."
+      },
+      {
+        "q": "Are add-ons included in the package price?",
+        "a": "No. {{addOns}} Add-ons are priced with your quote."
+      }
+    ],
+    "speakable": [
+      "#recommendation-summary",
+      ".porch-faq"
+    ],
+    "cities": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN"
+    ],
+    "related": [
+      "/services/fall-porch-decorating.html",
+      "/services/christmas-porch-decorating.html",
+      "/seasonal/halloween-porch-decorating-memphis.html",
+      "/seasonal/christmas-porch-decorating-memphis.html",
+      "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
+      "/contact.html"
+    ],
+    "localContext": "Porch &amp; Party decorates front porches across Memphis, Germantown, Collierville and Bartlett for fall, Halloween, Thanksgiving and Christmas. The busiest weeks are Halloween and the week before Thanksgiving.",
+    "beforeBook": "Know which seasons you want, roughly how much decor you are picturing for each, and whether you want a Thanksgiving refresh or takedown. A photo of the porch helps us confirm both packages.",
+    "nextStep": "Send the season, the package and “Book both seasons” on the <a href=\"/request?service=porch#request-form\">porch request form</a>. We confirm the final quote after a quick look at your porch."
   }
 ]
