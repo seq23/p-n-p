@@ -35,6 +35,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
+const brand = require(path.join(ROOT, 'scripts/lib/brand.js'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
 const faqContent = require(path.join(ROOT, 'scripts/lib/faq_content.js'));
 const rentalRates = require(path.join(ROOT, 'data/rentals/games.json')).rates;
@@ -110,7 +111,7 @@ function groupServices(pages) {
   // page lives at /rentals/ rather than under services/, so it is read by path
   // here. Missing file is a hard error, never a silently shorter index.
   groups.push({
-    heading: `Party Game Rentals - $${rentalRates.day} a game per day`,
+    heading: `Party Game Rentals - from $${rentalRates.day} a game per day`,
     blurb: 'Giant yard games, an inflatable movie screen and a card table for Memphis parties, picked up and returned at Mt. Moriah Station.',
     pages: [readPage('rentals/index.html')]
   });
@@ -153,9 +154,10 @@ const SECTIONS = [
     eyebrow: 'Services',
     crumb: 'Services',
     h1: 'Porch &amp; Party services in the Memphis metro area',
-    title: 'Porch &amp; Party Services in Memphis | Porch, Party &amp; Grazing',
-    description: 'Every Porch & Party service in one place: porch decorating from $350+, celebration setups from $300+, and grazing-table styling from $250+ in Memphis.',
-    lead: `Porch &amp; Party publishes three service families: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, and ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}. Every styling page below sits inside one of those three, so start with the family that matches the setup you need and open the page that names it. Party game rentals, $${rentalRates.day} a game per day, are listed last.`,
+    // Owner-approved 2026-10-18: the four services (scripts/lib/brand.js) in the title and description.
+    title: 'Memphis Porch, Party, Grazing &amp; Game Rentals | Porch &amp; Party',
+    description: `Porch & Party services in Memphis: ${brand.SERVICES[0].label} from $${brand.PRICES.porch}, ${brand.SERVICES[1].label} from $${brand.PRICES.party}, ${brand.SERVICES[2].label} from $${brand.PRICES.grazing}, and ${brand.SERVICES[3].label} from $${brand.PRICES.gameDay}.`,
+    lead: `Porch &amp; Party offers four services: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}, and party game rentals from $${rentalRates.day} a game per day. Every styling page below sits inside one of the first three, so start with the family that matches the setup you need and open the page that names it. Party game rentals are listed last.`,
     summary: 'Pick the service family first - porch, celebration, or grazing - then open the page for the specific setup. Starting prices are published on each page and the exact quote depends on scope, date, location, and materials.',
     group: groupServices,
     faq: [
@@ -523,6 +525,39 @@ for (const section of SECTIONS) {
   if (CHECK) { console.error(`would rewrite ${section.dir}/index.html`); process.exitCode = 1; continue; }
   fs.writeFileSync(out, html);
   written.push(`${section.dir}/index.html (${pages.length} pages)`);
+}
+
+// The HTML sitemap (/sitemap, linked from every footer, owner-approved
+// 2026-10-18) is the index of these indexes: its link lists are regenerated
+// here from the routes just built, so it can never list a section that is not
+// on disk or miss one that is. Only the page's <div class="content-wrap"> is
+// written; the rest of the page (head, chrome, related nav) belongs to the
+// passes that own it. It is recorded below as a section index for the same
+// reason the indexes are: it introduces no subject matter of its own.
+const HTML_SITEMAP = 'sitemap.html';
+const siteChrome = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
+function htmlSitemapBody(indexRoutes) {
+  const ul = (items) => `<ul>${items.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join('')}</ul>`;
+  const extra = ['answers/index.html'].filter((rel) => fs.existsSync(path.join(ROOT, rel))).map((rel) => `/${rel}`);
+  const indexes = [...new Set([...indexRoutes, ...extra])].filter((r) => r !== '/services/index.html' && r !== '/faq/index.html').sort()
+    .map((r) => [r.replace(/index\.html$/, ''), esc(readPage(r.slice(1)).h1)]);
+  return '<span class="eyebrow">Sitemap</span><h1>Sitemap</h1>'
+    + '<p>Every section of the Porch &amp; Party website in one place.</p>'
+    + '<h2>Services and booking</h2>' + ul([['/', 'Home'], ['/services/', 'Services'], ['/rentals/', 'Party Game Rentals'], ['/pricing', 'Pricing'],
+      ['/faq/', 'Frequently asked questions'], ['/how-it-works', 'How It Works'], ['/contact', 'Contact']])
+    + '<h2>Guides and answers</h2>' + ul(indexes)
+    + '<h2>Legal</h2>' + ul(siteChrome.LEGAL_LINKS.filter((l) => l.href !== '/sitemap').map((l) => [l.href, l.label]))
+    + '<p class="muted">For search engines: <a href="/sitemap.xml">sitemap.xml</a>.</p>';
+}
+if (!CHECK) {
+  const abs = path.join(ROOT, HTML_SITEMAP);
+  if (!fs.existsSync(abs)) throw new Error(`${HTML_SITEMAP} is missing: the footer links /sitemap`);
+  const before = fs.readFileSync(abs, 'utf8');
+  const re = /(<div class="content-wrap">)[\s\S]*?(<\/div><\/div><\/section>)/;
+  if (!re.test(before)) throw new Error(`${HTML_SITEMAP} has no content-wrap to write the link lists into`);
+  const after = before.replace(re, (w, a, b) => a + htmlSitemapBody(routes) + b);
+  if (after !== before) fs.writeFileSync(abs, after);
+  routes.push(`/${HTML_SITEMAP.replace(/\.html$/, '')}`); // the served path; the sitemap.xml loc is /sitemap
 }
 
 // Record which routes are section indexes rather than publications, so

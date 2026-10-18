@@ -34,6 +34,7 @@
  */
 const path = require('path');
 const offers = require(path.join(__dirname, '../../data/offers/services.json'));
+const brand = require('./brand');
 
 const C = offers.contact;
 
@@ -60,7 +61,10 @@ const MARK = Object.freeze({
   css: 'data-site-chrome="css"',
   fonts: 'data-site-chrome="fonts"',
   footerRentals: 'data-footer-link="rentals"',
-  footerFaq: 'data-footer-link="faq"'
+  footerFaq: 'data-footer-link="faq"',
+  footerAbout: 'data-site-chrome="footer-about"',
+  footerCity: 'data-site-chrome="footer-city"',
+  legal: 'data-site-chrome="legal"'
 });
 
 const CSS_HREF = '/assets/css/site-nav.css';
@@ -68,6 +72,31 @@ const FONTS_HREF = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:
 const RENTALS_FOOTER = `<a href="/rentals/" ${MARK.footerRentals}>Party Game Rentals</a>`;
 // Owner ruling 2026-10-17: the consolidated FAQ page is in the header and the footer of every page.
 const FAQ_FOOTER = `<a href="/faq/" ${MARK.footerFaq}>FAQ</a>`;
+
+/*
+ * Footer identity and legal row (owner-approved 2026-10-18, professional
+ * service-site standard): the description line is brand.SERVICE_SENTENCE, a
+ * city line (no hours were given, so none are shown), then the copyright and
+ * the legal links. The legal entity (Kerseta LLC) is named only in the Terms
+ * and the Privacy Policy, never in the footer. scripts/validation/validate.js
+ * pins this on every page.
+ */
+const LEGAL_YEAR = 2026;
+const LEGAL_LINKS = Object.freeze([
+  { href: '/privacy-policy', label: 'Privacy Policy' },
+  { href: '/terms-and-conditions', label: 'Terms &amp; Conditions' },
+  { href: '/terms-and-conditions#rental-cancellation', label: 'Rental &amp; Cancellation Policy' },
+  { href: '/accessibility', label: 'Accessibility' },
+  { href: '/sitemap', label: 'Sitemap' },
+  { href: '/privacy-policy#privacy-choices', label: 'Privacy Choices' }
+]);
+const footerAbout = () => `<p class="muted" ${MARK.footerAbout}>${brand.esc(brand.SERVICE_SENTENCE)}</p><p class="muted" ${MARK.footerCity}>${brand.esc(brand.CITY_LINE)}</p>`;
+const legal = () => `<div class="legal" ${MARK.legal}>© ${LEGAL_YEAR} Porch &amp; Party. All rights reserved.`
+  + `<nav class="legal-links" aria-label="Legal">${LEGAL_LINKS.map((l) => `<a href="${l.href}">${l.label}</a>`).join('')}</nav></div>`;
+const FOOTER_ABOUT_RE = /(<div class="footer-title">Porch &amp; Party<\/div>)<p class="muted"[^>]*>[^<]*<\/p>(?:<p class="muted" data-site-chrome="footer-city">[^<]*<\/p>)?/;
+const LEGAL_RE = /<div class="legal"[^>]*>[\s\S]*?<\/div>/;
+// Privacy and Terms moved from the Explore list to the legal row.
+const EXPLORE_LEGAL_RE = /<a href="\/(?:privacy-policy|terms-and-conditions)(?:\.html)?">(?:Privacy Policy|Terms &amp; Conditions)<\/a>/g;
 
 const PHONE_SVG = '<svg class="pnp-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>';
 const BURGER_SVG = '<svg class="pnp-burger" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path class="pnp-burger-open" d="M4 7h16M4 12h16M4 17h16"/><path class="pnp-burger-close" d="M6 6l12 12M18 6L6 18"/></svg>';
@@ -189,6 +218,15 @@ function applySiteChrome(html, rel) {
     next = next.slice(0, at) + FAQ_FOOTER + next.slice(at);
     out = out.slice(0, ex2.index) + ex2[1] + next + ex2[3] + out.slice(ex2.index + ex2[0].length);
   }
+  const ex3 = EXPLORE_RE.exec(out);
+  if (EXPLORE_LEGAL_RE.test(ex3[2])) {
+    out = out.slice(0, ex3.index) + ex3[1] + ex3[2].replace(EXPLORE_LEGAL_RE, '') + ex3[3] + out.slice(ex3.index + ex3[0].length);
+  }
+  EXPLORE_LEGAL_RE.lastIndex = 0;
+  if (!FOOTER_ABOUT_RE.test(out)) throw new Error(`${rel}: footer has no Porch & Party description line`);
+  out = out.replace(FOOTER_ABOUT_RE, (w, title) => title + footerAbout());
+  if (!LEGAL_RE.test(out)) throw new Error(`${rel}: footer has no legal row`);
+  out = out.replace(LEGAL_RE, () => legal());
   return out;
 }
 
@@ -199,12 +237,15 @@ function withoutChrome(html) {
     .replace(/<link\b[^>]*data-site-chrome="(?:css|fonts)"[^>]*>/g, '')
     .replace(RENTALS_ANY_RE, '')
     .replace(FAQ_ANY_RE, '')
+    .replace(FOOTER_ABOUT_RE, '$1')
+    .replace(LEGAL_RE, '')
+    .replace(EXPLORE_LEGAL_RE, '')
     .replace(ANCHOR_RE, (whole, attrs, inner) => (isQuoteCta(attrs, inner)
       ? `<a${attrs.replace(/\s+(?:href|target|rel)="[^"]*"/g, '')} data-quote-target>${inner}</a>` : whole));
 }
 
 module.exports = {
-  NAV_ITEMS, QUOTE, CALL_LABEL, MARK, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, HEADER_RE, EXPLORE_RE,
+  NAV_ITEMS, QUOTE, CALL_LABEL, MARK, LEGAL_LINKS, LEGAL_YEAR, footerAbout, legal, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, HEADER_RE, EXPLORE_RE,
   header, cssLink, fontsLink, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
   isQuoteCta, retargetQuoteCtas
 };

@@ -1,7 +1,7 @@
 # Porch & Party — Answer Feed
 
 Q: What is Porch & Party?
-A: Porch & Party is a Memphis-based porch decorating and celebration styling company offering seasonal front porch decorating, hotel-room decor, party decor, and grazing table setups in the Memphis metro area.
+A: Porch & Party is a Memphis-based company for porch decorating, party planning & decor, grazing tables, and party game rentals.
 URL: https://porchandparty901.com/
 
 Q: Does Porch & Party do hotel decor and party decor?
@@ -11,6 +11,10 @@ URL: https://porchandparty901.com/services/celebration-setups.html
 Q: Does Porch & Party do grazing table setups?
 A: Yes. Porch & Party offers grazing table setups and styled event presentation starting at $250+ for styling only. Food is not included by default, but food sourcing may be requested for an additional fee.
 URL: https://porchandparty901.com/services/grazing-and-event-styling.html
+
+Q: Does Porch & Party rent party games?
+A: Yes. Porch & Party rents giant yard games for $40 a game per day, with bundles from $85. You pick up and return them at Mt. Moriah Station, Memphis Police Department.
+URL: https://porchandparty901.com/rentals/
 
 Q: How much does porch decorating cost in Memphis?
 A: Seasonal porch decorating from Porch & Party starts at $350+. Final pricing depends on porch size, season, materials, setup complexity, location, and optional takedown. Takedown starts at $75, quoted with your setup.

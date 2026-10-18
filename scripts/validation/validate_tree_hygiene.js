@@ -25,6 +25,7 @@ const allowedRootFiles = new Set([
   'apple-touch-icon.png',
   'favicon.ico',
   'site.webmanifest',
+  'accessibility.html',
   'contact.html',
   'how-it-works.html',
   'index.html',
@@ -38,6 +39,7 @@ const allowedRootFiles = new Set([
   'pricing.html',
   'privacy-policy.html',
   'robots.txt',
+  'sitemap.html',
   'sitemap.xml',
   'terms-and-conditions.html',
   // Cloudflare Pages config for the /admin invoicing console: declares the

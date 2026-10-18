@@ -46,6 +46,12 @@ const TITLE_MAX = 70;
 const DESC_MIN = 110;
 const DESC_MAX = 160;
 const MIN_PUBLISHED = 20;
+// The one owner-ruled exception (2026-10-18): the homepage title names all four
+// services and is approved verbatim at 87 characters. It is pinned EXACTLY to
+// scripts/install_brand_surfaces.js HOME.title, so the homepage is held to a
+// stricter rule than the range (one string, nothing else); every other page
+// keeps the 30-70 range.
+const HOME_TITLE = require('../install_brand_surfaces').HOME.title;
 
 const decode = (s) => String(s)
   .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
@@ -98,7 +104,9 @@ for (const loc of locs) {
   else {
     titles += 1;
     const title = decode(t[1]);
-    if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
+    if (rel === 'index.html' && title.length > TITLE_MAX) {
+      if (title !== HOME_TITLE) fail(`${rel}: title is ${title.length} characters; above ${TITLE_MAX} only the owner-approved "${HOME_TITLE}" is allowed: "${title}"`);
+    } else if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
       fail(`${rel}: title is ${title.length} characters, must be ${TITLE_MIN}-${TITLE_MAX}: "${title}"`);
     }
     if (!byTitle.has(title)) byTitle.set(title, []);
