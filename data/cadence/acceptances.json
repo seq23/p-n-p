@@ -131,6 +131,25 @@
         "https://porchandparty901.com/accessibility",
         "https://porchandparty901.com/sitemap"
       ]
+    },
+    {
+      "accepted_at": "2026-10-18",
+      "reason": "Owner-approved 18 Oct 2026: /request (the site quote and booking form) and /rules (the Rules & Responsibilities the form's required checkbox agrees to) are transactional and legal pages, not content publication; they consume no refresh capacity of the answer library.",
+      "urls_total_after": 121,
+      "accepted_count": 2,
+      "accepted_publications": 2,
+      "accepted_section_indexes": 0,
+      "weekly_cap": 1,
+      "publication_allowance": 1,
+      "ledger_baseline_date": "2026-10-18",
+      "accrual_weeks": 1,
+      "over_cap_by": 1,
+      "maintainable_ceiling": 104,
+      "library_over_ceiling_by": 17,
+      "accepted_urls": [
+        "https://porchandparty901.com/request",
+        "https://porchandparty901.com/rules"
+      ]
     }
   ]
 }
