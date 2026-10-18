@@ -109,6 +109,17 @@ pages.push(['/admin/search?partial=1&q=renter', { partial: true }, await s.get('
   // Grazing and party once their setup is on the calendar: the optional second booking buttons.
   const graze = { ...porch, key: 'graze|x', name: 'Gia Graze', services: ['grazing'], need: 'grazing', decor: [{ label: 'How many guests?', value: '15–40' }, { label: 'Should we source the food?', value: 'Yes, include food in my quote' }] };
   const party = { ...porch, key: 'party|x', name: 'Pia Party', services: ['party'], need: 'party & decor' };
+  // The takedown in each state: scheduled (button), not sure (amber + Job done prompt), the customer handles it.
+  for (const plan of ['scheduled', 'not_sure', 'customer_handles']) {
+    const p2 = { ...porch, key: `td|${plan}`, name: `Td ${plan}`, takedownPlan: plan, takedownNote: 'note' };
+    pages.push([`dashboardPage(takedown ${plan})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [p2], statuses: { [p2.key]: { status: 'scheduled' } }, schedule: { [p2.key]: { date: '2026-10-24' } }, kinds: { [p2.key]: ['porch_install'] } }) }]);
+  }
+  {
+    // Render the calendar with one undecided takedown through the real route.
+    const sr = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', porch_takedown: 'not_sure', event_date: '2030-10-24', location: 'Germantown', name: 'Una Decided', phone: '901-555-0901', email: 'una@example.com' });
+    if (sr.status !== 303) errors.push('the not-sure takedown request did not go through');
+    pages.push(['/admin/calendar (still to decide)', {}, await s.get('/admin/calendar')]);
+  }
   pages.push(['dashboardPage(grazing+party scheduled, one put away)', { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [graze, party, { ...reqA, key: 'rent|x', name: 'Rae Rent', services: ['rentals'] }], archived: [{ ...porch, key: 'old|x' }],
     statuses: { 'graze|x': { status: 'scheduled' }, 'party|x': { status: 'scheduled' }, 'rent|x': { status: 'deposit_paid' }, 'old|x': { status: 'paid', archived_at: '2026-10-01 10:00:00' } },
     schedule: { 'graze|x': { date: '2026-10-24' }, 'party|x': { date: '2026-10-25' } }, kinds: { 'graze|x': ['grazing_setup'], 'party|x': ['party_setup'] }, foodPerHead: { low: 12, high: 18 } }) }]);

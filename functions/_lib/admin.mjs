@@ -19,6 +19,7 @@ import { renderInvoicePdf, textMessage } from './pdf.mjs';
 import { prefillLines, porchPrefill, pickupNote, isRentalInvoice } from './pricing.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
+import { sendWeeklySummary } from './weekly.mjs';
 import SERVICES_DATA from '../../data/offers/services.json';
 import * as VC from './views-calendar.mjs';
 import * as C from './calendar.mjs';
@@ -681,6 +682,18 @@ async function routeAdmin(context) {
     if (key) await env.DB.prepare('UPDATE requests SET thankyou_skip = ?2 WHERE request_key = ?1').bind(key, form.get('skip') === '1' ? 1 : 0).run();
     return redirect(`/admin/?m=${encodeURIComponent(form.get('skip') === '1' ? 'No thank-you email will be sent for this request.' : 'The thank-you email will go out tomorrow morning.')}`);
   }
+  if (segs[0] === 'requests' && segs[1] === 'takedown' && method === 'POST') {
+    // The takedown is never required: Not sure yet / Customer will handle it (+ note), or '' to ask again.
+    const form = await request.formData();
+    const key = decodeKey(form.get('r'));
+    const plan = String(form.get('plan') || '');
+    if (key && ['not_sure', 'customer_handles', ''].includes(plan)) {
+      const note = String(form.get('note') || '').trim().slice(0, 500);
+      await env.DB.prepare('UPDATE requests SET takedown_plan = ?2, takedown_note = ?3 WHERE request_key = ?1').bind(key, plan || null, plan ? note : '').run();
+      await logEvent(env.DB, key, plan === 'not_sure' ? `Takedown: not decided yet${note ? ` (${note})` : ''}` : (plan ? `Takedown: the customer will handle it${note ? ` (${note})` : ''}` : 'Takedown question asked again'), 'admin');
+    }
+    return redirect(`/admin/?m=${encodeURIComponent(plan === 'not_sure' ? 'Saved: takedown not decided yet.' : (plan ? 'Saved: the customer will handle the takedown.' : 'Saved ✓'))}`);
+  }
   if (segs[0] === 'requests' && segs[1] === 'id' && segs.length === 2 && method === 'GET') return idPhoto(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
   if (segs[0] === 'requests' && segs[1] === 'archive' && method === 'POST') return AC.archiveRequest(env, request, true);
@@ -801,6 +814,16 @@ async function routeAdmin(context) {
     if (segs[1] === 'password' && method === 'POST') return changePassword(env, request);
     if (segs[1] === 'calendar-token' && method === 'POST') return AC.regenerateToken(env);
     if (segs[1] === 'sheet-sync' && method === 'POST') return AM.syncNowRoute(env, url);
+    if (segs[1] === 'weekly' && method === 'POST') {
+      const form = await request.formData();
+      const on = form.get('weekly_summary') !== '0';
+      await putSetting(env.DB, 'weekly_summary', on ? '1' : '0');
+      return redirect(`/admin/settings?m=${encodeURIComponent(on ? 'The Monday summary is on ✓' : 'The Monday summary is off.')}`);
+    }
+    if (segs[1] === 'weekly-now' && method === 'POST') {
+      const r = await sendWeeklySummary(env, { force: true, send: viaMailer(env) });
+      return redirect(r.ok ? `/admin/settings?m=${encodeURIComponent(`This week's summary is on its way to ${r.to} ✓`)}` : `/admin/settings?e=${encodeURIComponent(`The summary did not go out: ${r.error}`)}`);
+    }
     if (segs[1] === 'categories' && method === 'POST') return AM.saveCategories(env, request);
     if (segs[1] === 'holds' && method === 'POST') {
       const form = await request.formData();
@@ -814,6 +837,16 @@ async function routeAdmin(context) {
     }
   }
   return htmlResponse(V.layout('Not found', '<p>Nothing here.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
+}
+
+// Send one email through the MAILER service binding (the pnp-mailer Worker's /send).
+function viaMailer(env) {
+  return async (m) => {
+    if (!env.MAILER) throw new Error('Email is not connected on this copy of the site.');
+    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(m) });
+    const out = await res.json().catch(() => ({}));
+    return res.ok && out.ok;
+  };
 }
 
 export async function handleApi(context) {

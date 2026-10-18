@@ -6,6 +6,7 @@ import { redirect, htmlResponse, getSettings, putSetting, fromB64urlText, b64url
 import { loadRequests } from './requests.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 import * as C from './calendar.mjs';
+import { notPaidYet } from './notpaid.mjs';
 import { balances, balanceWords, depositWords } from './ledger.mjs';
 import { tomorrowsBookings, tomorrowChicago, chicagoDate } from './reminders.mjs';
 import * as V from './views.mjs';
@@ -86,7 +87,10 @@ export async function calendarPage(env, url) {
   const settings = await getSettings(env.DB);
   const holds = await holdsWithButtons(env, '/admin/calendar');
   const soon = endingSoon(holds, Date.now(), settings);
-  return htmlResponse(VC.calendarPage({
+  // "Still to decide": porch/party takedowns marked Not sure yet (not put away, not void).
+  const stillToDecide = requests.filter((r) => r.takedownPlan === 'not_sure' && !(statuses[r.key] && (statuses[r.key].archived_at || statuses[r.key].status === 'void')))
+    .map((r) => ({ name: r.name, note: r.takedownNote, rk: b64urlText(r.key), kind: (r.services || []).includes('porch') ? 'porch_takedown' : 'party_takedown' }));
+  return htmlResponse(VC.calendarPage({ stillToDecide,
     holdsBox: VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours, back: '/admin/calendar' }), heldPane: VM2.heldPane(holds),
     month, today, bookings: visible, all, ctx, windows, table: PRICE_TABLE, warnings: C.overlapWarnings(windows, PRICE_TABLE, { today }),
     unscheduled, reminders, tomorrowLabel, overdue, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '',
@@ -113,7 +117,10 @@ export async function dayPage(env, url, date) {
   const settings = await getSettings(env.DB);
   const { ctx, windows, bookings, rows, holds } = await daySheetData(env, date);
   const sheetText = C.daySheetText(date, rows, { host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date), holds });
-  return htmlResponse(VC.dayPage({ holds, date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  // A customer with a balance is booked today: say how much is not paid yet in all.
+  const np = await notPaidYet(env.DB, (await requestsSafe(env)).requests, chicagoDate());
+  const owingToday = np.owed.filter((r) => bookings.some((b) => (b.request_key && b.request_key === r.requestKey) || (b.invoice_id && b.invoice_id === r.id)));
+  return htmlResponse(VC.dayPage({ notPaid: owingToday.length ? { today: owingToday.length, count: np.count, total: np.total } : null, holds, date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
 }
 
 // "Email it to me": the full day list to the Settings address, through the mailer.
@@ -195,15 +202,21 @@ export async function createBookingRoute(env, request) {
   if (!b.date) return redirect(`/admin/calendar?e=${encodeURIComponent('Pick a day for the booking.')}`);
   b.items = itemsFromForm(form, b);
   const key = form.get('r') ? decodeKey(form.get('r')) : '';
+  const ret = C.parseFormDate(form.get('return_date'));
+  // Rentals are a pair: the return is always booked with the pickup (its TIME may be "not sure yet").
+  if (b.kind === 'rental_pickup' && !(ret && ret > b.date)) {
+    return redirect(`/admin/calendar?e=${encodeURIComponent('A game pickup needs its return day too: pick a return day after the pickup day.')}`);
+  }
   let id;
   if (key) id = await C.saveRequestBooking(env.DB, key, b);
   else id = await C.createBooking(env.DB, b);
-  const ret = C.parseFormDate(form.get('return_date'));
-  if (b.kind === 'rental_pickup' && ret && ret > b.date) {
-    const r = { ...b, kind: 'rental_return', date: ret, time: null };
+  const retTime = String(form.get('return_time') || '').trim();
+  if (b.kind === 'rental_pickup') {
+    const r = { ...b, kind: 'rental_return', date: ret, time: /^\d{2}:\d{2}$/.test(retTime) ? retTime : null };
     if (key) await C.saveRequestBooking(env.DB, key, r); else await C.createBooking(env.DB, r);
   }
   if (b.note) await C.addNote(env.DB, { id, request_key: key || null }, b.note);
+  if (key && /_takedown$/.test(b.kind)) await env.DB.prepare("UPDATE requests SET takedown_plan = 'scheduled' WHERE request_key = ?1").bind(key).run();
   return redirect(`/admin/day/${b.date}?m=${encodeURIComponent(key ? 'Saved ✓ The request is marked Scheduled.' : 'Saved ✓')}`);
 }
 

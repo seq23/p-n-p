@@ -314,7 +314,7 @@ let invA;
   st = await s.one('SELECT status FROM request_status WHERE request_key = ?1', reqB.key);
   must(st.status !== 'scheduled', `unscheduling left the request Scheduled (${st.status})`);
   must((await s.one('SELECT COUNT(*) AS n FROM booking_notes WHERE request_key = ?1', reqB.key)).n === 1, 'unscheduling lost the request notes');
-  await s.post('/admin/calendar/bookings', { r: s.rk(reqB.key), kind: 'rental_pickup', date: '2026-10-30', customer_name: 'Weekend Renter', phone: '', email: '', place: '', items: 'Giant Checkers' });
+  await s.post('/admin/calendar/bookings', { r: s.rk(reqB.key), kind: 'rental_pickup', date: '2026-10-30', return_date: '2026-11-02', customer_name: 'Weekend Renter', phone: '', email: '', place: '', items: 'Giant Checkers' });
   must((await s.get('/admin/day/2026-10-30')).text.includes('SECRETNOTE'), 'rescheduling did not bring the notes back');
   await s.post(`/admin/notes/${note.id}/delete`, { back: '/admin/day/2026-10-30' });
   must(!(await s.one('SELECT id FROM booking_notes WHERE id = ?1', note.id)), 'deleting a note did not persist');

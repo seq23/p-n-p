@@ -125,7 +125,7 @@ export function searchBox(q = '') {
       fetch('/admin/search?partial=1&q='+encodeURIComponent(q),{credentials:'same-origin'}).then(function(r){return r.text();}).then(function(h){if(i.value.trim()===q)out.innerHTML=h;});},300);});})();</script>`;
 }
 
-export function calendarPage({ month, today, bookings, all = bookings, ctx, windows, table, warnings, unscheduled, reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
+export function calendarPage({ stillToDecide = [], month, today, bookings, all = bookings, ctx, windows, table, warnings, unscheduled, reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
   const [y, m] = month.split('-').map(Number);
   const first = `${month}-01`;
   const startPad = new Date(`${first}T12:00:00Z`).getUTCDay();
@@ -171,6 +171,9 @@ export function calendarPage({ month, today, bookings, all = bookings, ctx, wind
     <h1>Calendar</h1>
     ${searchBox()}
     ${holdsBox}
+    ${stillToDecide.length ? `<section class="card" id="still-to-decide" data-still-to-decide><h2>Still to decide</h2><p class="muted">Takedowns marked Not sure yet. Nothing is required: schedule it, or tell the card the customer will handle it.</p>
+      ${stillToDecide.map((d) => `<div class="u"><strong>${esc(d.name || 'No name')}</strong> <span class="muted">${esc(KIND_LABELS[d.kind])}${d.note ? ` · ${esc(d.note)}` : ''}</span>
+        <div class="actions" style="grid-template-columns:1fr 1fr"><a class="btn ghost" href="/admin/calendar/new?r=${esc(d.rk)}&amp;kind=${esc(d.kind)}"${tip('cal.decide')}>Schedule it</a><a class="btn ghost" href="/admin/#c-${esc(d.rk)}"${tip('cal.decideOpen')}>Open the request</a></div></div>`).join('')}</section>` : ''}
     ${overdueBox(overdue)}
     ${remindersBox(reminders, tomorrowLabel)}
     ${warn}
@@ -248,7 +251,7 @@ function noteWhen(utc) {
   return `${date.replace(/^(\w+), (\w+) (\d+)$/, '$1 $3 $2')}, ${time}`;
 }
 
-export function dayPage({ date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [] }) {
+export function dayPage({ date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [], notPaid = null }) {
   const u = usageOn(windows, date, today, table);
   let owedTotal = 0; let depositTotal = 0;
   const rows = bookings.map((b) => {
@@ -257,7 +260,8 @@ export function dayPage({ date, today, bookings, ctx, windows, table, sheetText,
     if (b.kind === 'rental_pickup' || !RENTAL.has(b.kind)) { owedTotal += owe; depositTotal += c.bal && !c.bal.void ? c.bal.depositOwed : 0; }
     return { b, c, owe };
   });
-  const strip = `<section class="card"><h2>Games: what is out on ${esc(shortDate(date))}</h2>
+  const npLine = notPaid ? `<div class="notice warn" data-day-not-paid><strong>${notPaid.today} ${notPaid.today === 1 ? 'customer' : 'customers'} booked today still ${notPaid.today === 1 ? 'owes' : 'owe'} money.</strong> Not paid yet in all: ${notPaid.count} ${notPaid.count === 1 ? 'customer owes' : 'customers owe'} ${esc(money(notPaid.total))}. <a href="/admin/money#not-paid"${tip('np.filter')}>See Not paid yet</a></div>` : '';
+  const strip = `${npLine}<section class="card"><h2>Games: what is out on ${esc(shortDate(date))}</h2>
     <p data-day-count><strong>${u.count} ${u.count === 1 ? 'game' : 'games'} out.</strong></p>
     ${u.over.length ? `<div class="notice err" data-overlap><strong>Double-booked:</strong> ${u.over.map((o) => `${esc(o.item)} (you have ${o.stock}) is out with ${esc(o.who.map((w) => w.name).join(' and '))}.`).join(' ')}</div>` : ''}
     <div class="strip" data-strip>${table.items.map((it) => { const v = u.byItem[it.name]; const n = v.who.length; return `<div class="it ${n > v.stock ? 'over' : (n ? 'out' : '')}"><strong>${esc(it.name)}</strong><br>${n ? `Out (${n} of ${v.stock})` : 'In'}${n ? `<div class="muted">${esc(v.who.map((w) => `${w.name}, back ${shortDate(w.end)}`).join('; '))}</div>` : ''}</div>`; }).join('')}</div>
@@ -339,7 +343,8 @@ export function bookingFormPage({ booking, action, title, rk = '', isNew = true,
       <label for="kind">What kind of booking</label>
       <select id="kind" name="kind">${KINDS.map((k) => `<option value="${k}"${k === booking.kind ? ' selected' : ''}>${esc(KIND_LABELS[k])}</option>`).join('')}</select>
       <label for="date">Day</label><input id="date" name="date" type="date" required value="${esc(booking.date || '')}">
-      <div id="ret-wrap"${booking.kind === 'rental_pickup' && isNew ? '' : ' hidden'}><label for="ret">Return day (a Rental return is added for this day)</label><input id="ret" name="return_date" type="date" value="${esc(returnDate)}"></div>
+      <div id="ret-wrap"${booking.kind === 'rental_pickup' && isNew ? '' : ' hidden'}><label for="ret">Return day (always booked with the pickup; filled in from how long they rent, change it if needed)</label><input id="ret" name="return_date" type="date" value="${esc(returnDate)}">
+        <label for="rett">Return time (leave empty if not sure yet)</label><input id="rett" name="return_time" type="time" value=""></div>
       <label for="time">Time (leave empty for all day)</label><input id="time" name="time" type="time" value="${esc(booking.time || '')}">
       <label for="cn">Customer name</label><input id="cn" name="customer_name" value="${esc(booking.customer_name || '')}" required>
       <label for="ph">Phone</label><input id="ph" name="phone" type="tel" value="${esc(booking.phone || '')}">
