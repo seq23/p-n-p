@@ -53,6 +53,29 @@ export function matchAnswer(answer, table) {
   return { items, bundles };
 }
 
+// "No games" answers an old form row can carry in the rentals questions (Aashish Ali's
+// decor-only request had "n/a" there, 18 Oct 2026). Case- and space-insensitive.
+// isNoAnswer: blank, "n/a", "na", "none", "-", "not needed" (never shown on a card).
+// isNoGames: those plus "no" / "nope" / "nothing" (a "no" is a real answer elsewhere, e.g.
+// "Grazing table? No", so it only means "no games" in the games question).
+export const NO_ANSWER = /^\s*(n\s*\/?\s*a|none|-+|not needed|not applicable)?\s*\.?\s*$/i;
+const NO_GAMES = /^\s*(no|nope|nothing|no games?|no thanks?)\s*\.?\s*$/i;
+export function isNoAnswer(value) {
+  return NO_ANSWER.test(String(value == null ? '' : value));
+}
+export function isNoGames(value) {
+  return isNoAnswer(value) || NO_GAMES.test(String(value == null ? '' : value));
+}
+
+// THE rental classifier: a request rents games only when its games answer names at least one
+// real item or bundle from data/rentals/games.json (formChoice or name). Never inferred from
+// "How long?" or from a "Game rentals" tick alone. Returns the cleaned answer ('' for none).
+export function realGamesAnswer(answer, table) {
+  if (isNoGames(answer)) return '';
+  const { items, bundles } = matchAnswer(answer, table);
+  return items.length || bundles.length ? String(answer).trim() : '';
+}
+
 export function matchGames(answer, table) {
   return matchAnswer(answer, table).items.map((i) => i.name);
 }

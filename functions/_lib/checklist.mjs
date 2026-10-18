@@ -155,7 +155,7 @@ export function prefillFromRequest(source, request) {
   const tick = (re, on) => { const f = byLabel(1, re); if (f && on) values[f.id] = true; };
   tick(/^party \/ event decor/i, /party|event|celebration|hotel|decor(?!.*porch)/i.test(need.replace(/porch[^,]*/i, '')));
   tick(/^porch decor/i, /porch/i.test(need));
-  tick(/^game rentals/i, /game|rental/i.test(need) || Boolean(request.gamesAnswer));
+  tick(/^game rentals/i, Boolean(request.wantsRentals || request.gamesAnswer));
   const games = ` ${norm(request.gamesAnswer)} `;
   if (games.trim()) {
     const gameHeading = fields.filter((f) => f.page === 4 && f.kind === 'check' && /game rentals/i.test(f.heading));

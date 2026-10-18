@@ -2,6 +2,8 @@
 // (JWT signed here with WebCrypto RS256, scope spreadsheets.readonly). Cached 60 s.
 import { SHEET_ID, SHEET_TAB, b64url, b64urlText } from './util.mjs';
 import fixture from '../../data/admin/fixture-request.json';
+import { PRICE_TABLE } from './prices.mjs';
+import { realGamesAnswer, isNoAnswer } from './pricing.mjs';
 
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/drive.metadata.readonly';
 const tokenCache = {};
@@ -155,13 +157,15 @@ export function rowsToRequests(values) {
     const rentals = []; const decor = []; const other = [];
     headers.forEach((h, i) => {
       const value = String(row[i] || '').trim();
-      if (!value || (known.has(i) && !['games', 'duration', 'eventType', 'takedown'].some((f) => map[f] === i))) return;
+      // "n/a", "none", "-" and blanks are not answers: they never show on a card.
+      if (isNoAnswer(value) || (known.has(i) && !['games', 'duration', 'eventType', 'takedown'].some((f) => map[f] === i))) return;
       const item = { label: h, value };
       if (decorStart >= 0 && i >= decorStart && i < end) decor.push(item);
       else if (rentalsStart >= 0 && i >= rentalsStart && i < (decorStart > rentalsStart ? decorStart : end)) rentals.push(item);
       else if (i !== map.confirm) other.push(item);
     });
     const need = get('need');
+    const gamesAnswer = realGamesAnswer(get('games'), PRICE_TABLE);
     out.push({
       key: `${timestamp}|${email}`,
       timestamp,
@@ -175,11 +179,13 @@ export function rowsToRequests(values) {
       idFile: get('idFile'),
       heard: get('heard'),
       need,
-      gamesAnswer: get('games'),
-      durationAnswer: get('duration'),
+      gamesAnswer,
+      // How long? only means something when real games were picked (the old form defaulted it).
+      durationAnswer: gamesAnswer ? get('duration') : '',
       eventType: get('eventType'),
       takedownAnswer: get('takedown'),
-      wantsRentals: /game|rental/i.test(need) || Boolean(get('games')),
+      // A rental only when a real game or bundle is named (pricing.mjs realGamesAnswer).
+      wantsRentals: Boolean(gamesAnswer),
       wantsDecor: /decor|porch|event|setup|grazing/i.test(need) || Boolean(get('eventType')),
       rentals, decor, other,
     });
