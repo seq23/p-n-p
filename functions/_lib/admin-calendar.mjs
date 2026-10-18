@@ -3,7 +3,8 @@
 // private ICS feed token. Auth is enforced before this runs (guard.mjs), except the ICS feed,
 // which lives in functions/api/calendar/ and checks its own token.
 import { redirect, htmlResponse, getSettings, putSetting, fromB64urlText, b64urlText, shortDate, todayISO, FROM_EMAIL } from './util.mjs';
-import { loadRequests } from './requests.mjs';
+import { loadRequests, logEvent } from './requests.mjs';
+import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 import * as C from './calendar.mjs';
 import { notPaidYet } from './notpaid.mjs';
@@ -90,7 +91,10 @@ export async function calendarPage(env, url) {
   // "Still to decide": porch/party takedowns marked Not sure yet (not put away, not void).
   const stillToDecide = requests.filter((r) => r.takedownPlan === 'not_sure' && !(statuses[r.key] && (statuses[r.key].archived_at || statuses[r.key].status === 'void')))
     .map((r) => ({ name: r.name, note: r.takedownNote, rk: b64urlText(r.key), kind: (r.services || []).includes('porch') ? 'porch_takedown' : 'party_takedown' }));
-  return htmlResponse(VC.calendarPage({ stillToDecide,
+  // "Takedowns to schedule": the customer asked for a takedown that is not booked yet; the day
+  // they named prefills the booking screen, nothing is booked until she saves it.
+  const toSchedule = takedownsToSchedule(requests, statuses, await loadTakedownFacts(env.DB), today).map((t) => ({ ...t, rk: b64urlText(t.key) }));
+  return htmlResponse(VC.calendarPage({ stillToDecide, toSchedule,
     holdsBox: VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours, back: '/admin/calendar' }), heldPane: VM2.heldPane(holds),
     month, today, bookings: visible, all, ctx, windows, table: PRICE_TABLE, warnings: C.overlapWarnings(windows, PRICE_TABLE, { today }),
     unscheduled, reminders, tomorrowLabel, overdue, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '',
@@ -118,9 +122,11 @@ export async function dayPage(env, url, date) {
   const { ctx, windows, bookings, rows, holds } = await daySheetData(env, date);
   const sheetText = C.daySheetText(date, rows, { host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date), holds });
   // A customer with a balance is booked today: say how much is not paid yet in all.
-  const np = await notPaidYet(env.DB, (await requestsSafe(env)).requests, chicagoDate());
+  const { requests } = await requestsSafe(env);
+  const np = await notPaidYet(env.DB, requests, chicagoDate());
+  const tdToday = takedownsToSchedule(requests, await statusMap(env.DB), await loadTakedownFacts(env.DB), chicagoDate()).filter((t) => t.date === date).map((t) => ({ ...t, rk: b64urlText(t.key) }));
   const owingToday = np.owed.filter((r) => bookings.some((b) => (b.request_key && b.request_key === r.requestKey) || (b.invoice_id && b.invoice_id === r.id)));
-  return htmlResponse(VC.dayPage({ notPaid: owingToday.length ? { today: owingToday.length, count: np.count, total: np.total } : null, holds, date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  return htmlResponse(VC.dayPage({ tdToday, notPaid: owingToday.length ? { today: owingToday.length, count: np.count, total: np.total } : null, holds, date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
 }
 
 // "Email it to me": the full day list to the Settings address, through the mailer.
@@ -177,7 +183,8 @@ export async function newBookingPage(env, url) {
     if (req && /_takedown$|^grazing_pickup$/.test(wantKind) && !url.searchParams.get('date')) {
       const { results } = await env.DB.prepare('SELECT kind, date FROM bookings WHERE request_key = ?1').bind(key).all();
       const first = (results || []).find((b) => /_install$|_setup$/.test(b.kind));
-      booking.date = C.secondDateFor(req, first ? first.date : booking.date);
+      // The day the owner set, or the form's "Takedown date", or the day after the install/setup.
+      booking.date = (/_takedown$/.test(wantKind) && C.isISODate(req.takedownDate) ? req.takedownDate : '') || C.secondDateFor(req, first ? first.date : booking.date);
     }
     if (/_takedown$/.test(wantKind)) title = `Schedule the takedown for ${V.firstName(req ? req.name : booking.customer_name)}`;
     if (wantKind === 'grazing_pickup') title = `Schedule the pickup for ${V.firstName(req ? req.name : booking.customer_name)}`;
@@ -267,6 +274,25 @@ export async function remindedRoute(env, request, id) {
   if (wantsJson(request)) return okJson();
   const ref = request.headers.get('Referer') || '';
   return redirect(/\/admin\/calendar/.test(ref) ? '/admin/calendar?m=Reminder marked ✓' : '/admin/?m=Reminder marked ✓');
+}
+
+// "Mark takedown done" / "Undo takedown done" on a porch/party takedown booking. Time-aware: only
+// on/after the takedown day. With Job done and Paid in full, the request is then Finished.
+export async function takedownDoneRoute(env, request, id) {
+  const form = await request.formData();
+  const undo = form.get('undo') === '1';
+  const b = await env.DB.prepare('SELECT id, request_key, kind, date FROM bookings WHERE id = ?1').bind(id).first();
+  const back = (m, e = false) => {
+    const ref = request.headers.get('Referer') || '';
+    const to = /\/admin\/day\//.test(ref) && b ? `/admin/day/${b.date}` : '/admin/';
+    return redirect(`${to}?${e ? 'e' : 'm'}=${encodeURIComponent(m)}`);
+  };
+  if (!b || !/_takedown$/.test(b.kind)) return back('That is not a takedown booking.', true);
+  if (!undo && String(chicagoDate()) < String(b.date)) return back(`The takedown is booked for ${shortDate(b.date)}. Mark it done on or after that day.`, true);
+  if (undo) await env.DB.prepare('UPDATE bookings SET done_at = NULL WHERE id = ?1').bind(id).run();
+  else await env.DB.prepare("UPDATE bookings SET done_at = COALESCE(done_at, datetime('now')) WHERE id = ?1").bind(id).run();
+  if (b.request_key) await logEvent(env.DB, b.request_key, undo ? 'Takedown done undone' : 'Takedown done ✓', 'admin');
+  return back(undo ? 'Takedown done undone.' : 'Takedown done ✓');
 }
 
 // ---- Notes ----------------------------------------------------------------------------

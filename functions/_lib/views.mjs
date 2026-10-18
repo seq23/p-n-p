@@ -8,6 +8,7 @@ import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext
 import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, cardWaiting, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, takedownChoice } from './cards.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
+import { takedownState, takedownStepWords } from './takedown.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
 
 const CSS = `
@@ -423,7 +424,7 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .msgpair{display:inline-flex;flex-wrap:wrap;align-items:center;gap:0 6px}.msgpair form{display:inline;margin:0}
 .msglink{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline}
 .nextline{margin:12px 2px 0;font-size:1rem}
-.tdbox{margin:10px 0}.tdbox .secrow{margin-top:8px}.linkbtn{background:none;border:0;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}
+.tdsub{font-weight:600;color:#92400e}.tdsub.done{color:inherit;font-weight:400}.tdbox{margin:10px 0}.tdbox .secrow{margin-top:8px}.linkbtn{background:none;border:0;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}
 `;
 
 function badges(services) {
@@ -442,7 +443,7 @@ const CARD_LABEL = {
   'card.createInvoice': 'Create invoice', 'card.openInvoice': 'Open invoice', 'card.seeCal': 'See it on the calendar',
   'card.checklist': 'Walk-through checklist', 'card.printChecklist': 'Print checklist', 'ret.mark': 'Mark returned', 'ret.see': 'See the check-in',
   'card.schedInstall': 'Schedule install', 'card.schedSetup': 'Schedule setup', 'card.schedPickup': 'Schedule pickup + return',
-  'card.schedTakedown': 'Schedule takedown', 'card.schedGrazingPickup': 'Schedule pickup (optional)',
+  'card.schedTakedown': 'Schedule takedown', 'card.schedGrazingPickup': 'Schedule pickup (optional)', 'td.markDone': 'Mark takedown done',
 };
 
 // One button from the rules table. ctx: { rk, inv, st, sched, payTarget, who, plan }.
@@ -461,7 +462,8 @@ function cardButton(keyKind, ctx, primary, { helper = true } = {}) {
     case 'ret.mark': case 'ret.see': return a(`/admin/returns?k=${rk}`, CARD_LABEL[key]);
     case 'msg.pickupText': { const m = ctx.msgs && ctx.msgs.pickup; return m && m.sms ? a(m.sms.href, 'Text about pickup time', ` data-msg-tap="pickupTime" data-rk="${esc(rk)}"`) : ''; }
     case 'card.schedInstall': case 'card.schedSetup': case 'card.schedPickup': case 'card.schedTakedown': case 'card.schedGrazingPickup':
-      return a(`/admin/calendar/new?r=${rk}&kind=${kind}`, CARD_LABEL[key]);
+      return a(`/admin/calendar/new?r=${rk}&kind=${kind}${key === 'card.schedTakedown' && ctx.td && ctx.td.date && !ctx.td.booking ? `&date=${ctx.td.date}` : ''}`, CARD_LABEL[key]);
+    case 'td.markDone': return ctx.td && ctx.td.booking ? `<form method="post" action="/admin/calendar/bookings/${ctx.td.booking.id}/takedown-done">${wrap(`<button class="${cls}" type="submit"${tip(key)}>Mark takedown done</button>`)}</form>` : '';
     case 'card.jobDone':
       // Takedown not decided yet: ask once, at the moment of Job done; never blocks it.
       if (ctx.tdNotSure) return confirmStep({ key, yesKey: 'td.jobDoneYes', label: 'Mark job done', cls: primary ? 'primary' : 'ghost', question: `The takedown is not decided yet for ${ctx.who}. Mark the job done anyway? You can still schedule the takedown later.`, action: '/admin/requests/jobdone', hidden: hiddenInputs({ r: rk }), helper: primary });
@@ -497,6 +499,13 @@ function takedownBox(td, r, rk, services) {
     ${choose([['customer_handles', 'td.customer', 'Customer will handle it']])}</div>`;
   return `<div class="tdbox card" style="background:var(--cream)" data-takedown="ask"><strong>Takedown afterwards?</strong> <span class="muted">Never required.</span>
     ${choose([['not_sure', 'td.notSure', 'Not sure yet'], ['customer_handles', 'td.customer', 'Customer will handle it']])}</div>`;
+}
+
+// Asked for, not booked yet: the amber prompt (owner, 18 Oct 2026). The date is the form's or
+// the owner's and only PREFILLS the booking screen; nothing is booked until she confirms it.
+function takedownRequested(td, rk) {
+  const words = td.date ? `Takedown requested for ${shortDate(td.date)} — tap to schedule` : 'Takedown requested — tap to schedule';
+  return `<div class="notice warn tdbox" data-takedown="requested"><a href="/admin/calendar/new?r=${rk}&amp;kind=${td.kind}${td.date ? `&amp;date=${td.date}` : ''}"${tip('td.requested')}><strong>${esc(words)}</strong></a></div>`;
 }
 
 function payTargetFor(r, inv) {
@@ -538,20 +547,23 @@ const chicagoToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America
 // One request card. o: everything dashboardPage knows about this request.
 export function requestCard(r, o) {
   const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace,
-    bookings = [], today = chicagoToday(), msgs = null } = o;
+    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false } = o;
   const rk = b64urlText(r.key);
   const services = servicesOf(r);
   const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
-  const pr = deriveProgress({ st, inv, scheduled: Boolean(sched), ret, rental });
+  const tdS = takedownState({ services, takedownPlan: r.takedownPlan, takedownDate: r.takedownDate, invoiceTakedown, bookings, today });
+  const pr = deriveProgress({ st, inv, scheduled: Boolean(sched), ret, rental, takedown: tdS });
   const stage = cardStage({ pr, inv, archived });
   const returned = Boolean(ret && ret.returned_at);
   const plan = inv ? payPlanOf(inv, inv.total_cents || 0) : 'half';
   const dates = cardDates({ r, services, bookings: bookings.length ? bookings : (sched ? kinds.map((kind) => ({ kind, date: sched.date })) : []), today });
   const rules = cardButtons({ services, stage, inv, plan, sched: Boolean(sched), kinds, returned, jobDoneAt: Boolean(st.job_done_at), takedownPlan: r.takedownPlan,
-    eventReached: dates.eventReached, pickupReached: dates.pickupReached, pickupTimeSet: dates.pickupTimeSet, canText: Boolean(msgs && msgs.pickup && msgs.pickup.sms) });
-  const waiting = cardWaiting({ services, stage, primary: rules.primary, returned, jobDoneAt: Boolean(st.job_done_at), dates });
-  const td = takedownChoice({ services, kinds, takedownPlan: r.takedownPlan, stage });
-  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: td === 'not_sure', msgs };
+    eventReached: dates.eventReached, pickupReached: dates.pickupReached, pickupTimeSet: dates.pickupTimeSet, canText: Boolean(msgs && msgs.pickup && msgs.pickup.sms),
+    takedown: tdS, paidFull: pr.steps.some((x) => x.key === 'paid' && x.done) || pr.paidEarly });
+  const waiting = cardWaiting({ services, stage, primary: rules.primary, returned, jobDoneAt: Boolean(st.job_done_at), dates, takedown: tdS });
+  const quietStage = ['void', 'finished', 'archived'].includes(stage);
+  const td = tdS.status === 'to_schedule' && !quietStage ? 'requested' : takedownChoice({ services, kinds, takedownPlan: r.takedownPlan, stage });
+  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: td === 'not_sure', msgs, td: tdS };
   const first = serviceBadge(services[0]);
   const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
   const chips = [
@@ -561,7 +573,7 @@ export function requestCard(r, o) {
     returned ? (ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : `<span class="chip paid" data-returned>Returned ${esc(shortDate(String(ret.returned_at).slice(0, 10)))}</span>`) : '',
     notPaidYet(inv) ? `<span class="chip deposit_paid" data-owes>Owes ${esc(money(inv.balance.owed))}</span>` : '',
   ].join('');
-  const progress = pr.void || archived ? '' : `<ol class="progress mini" data-progress aria-label="Step ${pr.steps.findIndex((x) => x.key === pr.current) + 1} of 6">${pr.steps.map((x) => `<li class="${x.done ? 'done' : ''}${x.key === pr.current ? ' now' : ''}"><span class="pn">${x.done ? '✓' : x.n}</span> ${esc(x.label)}</li>`).join('')}</ol>`;
+  const progress = pr.void || archived ? '' : `<ol class="progress mini" data-progress aria-label="Step ${pr.steps.findIndex((x) => x.key === pr.current) + 1} of 6">${pr.steps.map((x) => `<li class="${x.done ? 'done' : ''}${x.key === pr.current ? ' now' : ''}"><span class="pn">${x.done ? '✓' : x.n}</span> ${esc(x.label)}${x.key === 'job_done' && tdS.status !== 'none' ? `<span class="tdsub${tdS.pending ? '' : ' done'}" data-takedown-step="${esc(tdS.status)}"> · ${esc(takedownStepWords(tdS, shortDate))}</span>` : ''}</li>`).join('')}</ol>`;
   const g = services.includes('grazing') ? grazingFacts(r, foodPerHead) : null;
   const gLine = g && (g.guests || g.estimate) ? `<div class="want" data-grazing-facts>${esc([g.guests ? `Guests: ${g.guests}` : '', g.estimate].filter(Boolean).join(' · '))}</div>` : '';
   const quiet = ['void', 'finished', 'archived'].includes(stage);
@@ -576,7 +588,7 @@ export function requestCard(r, o) {
       ${progress}
       ${quiet ? '' : extras}
       ${damage}${finishedNote}
-      ${td ? takedownBox(td, r, rk, services) : ''}
+      ${td === 'requested' ? takedownRequested(tdS, rk) : (td ? takedownBox(td, r, rk, services) : '')}
       ${rules.primary ? `<div class="actions" data-primary>${cardButton(rules.primary, ctx, true)}</div>` : ''}
       ${waiting ? `<p class="nextline muted" data-next-wait="${esc(waiting.key)}"${tip(waiting.key)}>Next: ${esc(waiting.words)}${waiting.date ? ` (${esc(shortDate(waiting.date))})` : ''}.</p>` : ''}
       ${rules.secondary.length ? `<div class="secrow" data-secondary>${rules.secondary.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
@@ -612,7 +624,7 @@ export function requestsPanel(folderUrl) {
 
 // schedule: { [request_key]: { date } } earliest booking per request; kinds: { [request_key]: [kind] }.
 export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '',
-  cardMsgs = {}, bookings = {}, today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station' }) {
+  cardMsgs = {}, bookings = {}, takedownInvoices = new Set(), today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station' }) {
   const err = sheetError ? `<div class="notice err"><strong>The requests could not be loaded right now.</strong> ${/not shared/i.test(sheetError)
     ? `The responses sheet needs to be shared with the site. In Google Sheets tap Share and add <code>${esc(SA_EMAIL)}</code> as a Viewer.`
     : 'Please try again in a minute.'}<div class="muted" style="margin-top:6px;font-size:.95rem">Details: ${esc(sheetError)}</div></div>` : '';
@@ -620,7 +632,7 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
   const one = (r, isArchived) => {
     const st = statuses[r.key] || { status: 'new' };
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
-    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null }) };
+    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)) }) };
   };
   const shown = requests.map((r) => one(r, false)).filter((x) => matchesFilter(f, x));
   const putRows = archived.map((r) => one(r, true)).filter((x) => matchesFilter(f, x));
@@ -633,10 +645,11 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
     </details></section>`;
   return layout('Requests', `<style>${CARD_CSS}</style>${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}${setupBanner(missingPayment)}
     ${requestsPanel(folderUrl)}
-    <h1>Requests</h1>${week}${holdsBox}${extraTop}${err}${idsBox}
+    <h1>Requests</h1>${week}${holdsBox}${extraTop}${err}
     ${filterChips(f)}
     ${shown.length ? shown.map((x) => x.html()).join('') : (sheetError ? '' : empty)}
     ${putSection}
+    ${idsBox}
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
     <script>${DASH_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { screen: '', panelWide: true });

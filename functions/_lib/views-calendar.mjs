@@ -125,7 +125,16 @@ export function searchBox(q = '') {
       fetch('/admin/search?partial=1&q='+encodeURIComponent(q),{credentials:'same-origin'}).then(function(r){return r.text();}).then(function(h){if(i.value.trim()===q)out.innerHTML=h;});},300);});})();</script>`;
 }
 
-export function calendarPage({ stillToDecide = [], month, today, bookings, all = bookings, ctx, windows, table, warnings, unscheduled, reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
+// "Takedowns to schedule" (owner, 18 Oct 2026): the customer asked for a takedown that is not
+// on the calendar yet. Their day prefills the booking screen; nothing is booked until she saves.
+export function toScheduleBox(rows = []) {
+  if (!rows.length) return '';
+  return `<section class="card notice warn" id="takedowns-to-schedule" data-takedowns-to-schedule><h2>Takedowns to schedule</h2><p class="muted">The customer asked for a takedown. The job is not Finished until it is done. Tap to book it on the day they asked for.</p>
+      ${rows.map((d) => `<div class="u" data-td-to-schedule><strong>${esc(d.name || 'No name')}</strong> <span class="muted">${esc(KIND_LABELS[d.kind])}${d.date ? ` · asked for ${esc(shortDate(d.date))}` : ' · no day given yet'}${d.note ? ` · ${esc(d.note)}` : ''}</span>
+        <div class="actions" style="grid-template-columns:1fr 1fr"><a class="btn primary" href="/admin/calendar/new?r=${esc(d.rk)}&amp;kind=${esc(d.kind)}${d.date ? `&amp;date=${esc(d.date)}` : ''}"${tip('cal.tdToSchedule')}>Schedule takedown${d.date ? ` (${esc(shortDate(d.date))})` : ''}</a><a class="btn ghost" href="/admin/#c-${esc(d.rk)}"${tip('cal.decideOpen')}>Open the request</a></div></div>`).join('')}</section>`;
+}
+
+export function calendarPage({ stillToDecide = [], toSchedule = [], month, today, bookings, all = bookings, ctx, windows, table, warnings, unscheduled, reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
   const [y, m] = month.split('-').map(Number);
   const first = `${month}-01`;
   const startPad = new Date(`${first}T12:00:00Z`).getUTCDay();
@@ -171,6 +180,7 @@ export function calendarPage({ stillToDecide = [], month, today, bookings, all =
     <h1>Calendar</h1>
     ${searchBox()}
     ${holdsBox}
+    ${toScheduleBox(toSchedule)}
     ${stillToDecide.length ? `<section class="card" id="still-to-decide" data-still-to-decide><h2>Still to decide</h2><p class="muted">Takedowns marked Not sure yet. Nothing is required: schedule it, or tell the card the customer will handle it.</p>
       ${stillToDecide.map((d) => `<div class="u"><strong>${esc(d.name || 'No name')}</strong> <span class="muted">${esc(KIND_LABELS[d.kind])}${d.note ? ` · ${esc(d.note)}` : ''}</span>
         <div class="actions" style="grid-template-columns:1fr 1fr"><a class="btn ghost" href="/admin/calendar/new?r=${esc(d.rk)}&amp;kind=${esc(d.kind)}"${tip('cal.decide')}>Schedule it</a><a class="btn ghost" href="/admin/#c-${esc(d.rk)}"${tip('cal.decideOpen')}>Open the request</a></div></div>`).join('')}</section>` : ''}
@@ -251,7 +261,7 @@ function noteWhen(utc) {
   return `${date.replace(/^(\w+), (\w+) (\d+)$/, '$1 $3 $2')}, ${time}`;
 }
 
-export function dayPage({ date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [], notPaid = null }) {
+export function dayPage({ tdToday = [], date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [], notPaid = null }) {
   const u = usageOn(windows, date, today, table);
   let owedTotal = 0; let depositTotal = 0;
   const rows = bookings.map((b) => {
@@ -299,6 +309,8 @@ export function dayPage({ date, today, bookings, ctx, windows, table, sheetText,
       <div class="actions dayonly">
         ${tel(b.phone) ? act(`<a class="btn primary bigcall" href="${tel(b.phone)}"${tip('day.call')}>Call ${esc(b.phone)}</a>`, 'day.call') : '<p><strong>No phone on file.</strong></p>'}
         ${RENTAL.has(b.kind) && !returned ? act(`<a class="btn" href="/admin/returns?k=${esc(b64urlText(rk))}"${tip('ret.mark')}>Mark returned</a>`, 'ret.mark') : ''}
+        ${/_takedown$/.test(b.kind) && !b.done_at && String(today) >= String(b.date) ? `<form method="post" action="/admin/calendar/bookings/${b.id}/takedown-done">${act(`<button class="btn" type="submit"${tip('td.markDone')}>Mark takedown done</button>`, 'td.markDone')}</form>` : ''}
+        ${/_takedown$/.test(b.kind) && b.done_at ? `<p class="money ok" data-takedown-done>Takedown done ✓</p><form method="post" action="/admin/calendar/bookings/${b.id}/takedown-done">${hiddenInputs({ undo: '1' })}<button class="linkbtn" type="submit"${tip('td.undoDone')}>Undo takedown done</button></form>` : ''}
         ${RENTAL.has(b.kind) && returned ? act(`<a class="btn ghost" href="/admin/returns?k=${esc(b64urlText(rk))}"${tip('ret.see')}>See the check-in</a>`, 'ret.see') : ''}
         ${act(`<a class="btn ghost" href="/admin/calendar/bookings/${b.id}/move"${tip('bk.move')}>Move to another day</a>`, 'bk.move')}
         ${act(`<a class="btn ghost" href="/admin/calendar/bookings/${b.id}/edit"${tip('day.edit')}>Change this booking</a>`, 'day.edit')}
@@ -312,7 +324,7 @@ export function dayPage({ date, today, bookings, ctx, windows, table, sheetText,
     ${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
     <h1>${esc(prettyDate(date))}</h1>
     ${tools}
-    ${holdsToday}${sheet}${load}${strip}
+    ${toScheduleBox(tdToday)}${holdsToday}${sheet}${load}${strip}
     <div class="dayonly">${entries}
     ${act(`<a class="btn" href="/admin/calendar/new?date=${esc(date)}"${tip('cal.add')}>Add a booking on this day</a>`, 'cal.add')}</div>`, { screen: 'day', back: { href: `/admin/calendar?month=${date.slice(0, 7)}`, label: 'Back to the calendar' } });
 }

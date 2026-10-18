@@ -118,9 +118,23 @@ pages.push(['/admin/search?partial=1&q=renter', { partial: true }, await s.get('
   const graze = { ...porch, key: 'graze|x', name: 'Gia Graze', services: ['grazing'], need: 'grazing', decor: [{ label: 'How many guests?', value: '15–40' }, { label: 'Should we source the food?', value: 'Yes, include food in my quote' }] };
   const party = { ...porch, key: 'party|x', name: 'Pia Party', services: ['party'], need: 'party & decor' };
   // The takedown in each state: scheduled (button), not sure (amber + Job done prompt), the customer handles it.
-  for (const plan of ['scheduled', 'not_sure', 'customer_handles']) {
-    const p2 = { ...porch, key: `td|${plan}`, name: `Td ${plan}`, takedownPlan: plan, takedownNote: 'note' };
-    pages.push([`dashboardPage(takedown ${plan})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [p2], statuses: { [p2.key]: { status: 'scheduled' } }, schedule: { [p2.key]: { date: '2026-10-24' } }, kinds: { [p2.key]: ['porch_install'] }, today: '2026-10-24' }) }]);
+  // '' = not asked yet (the ask box), scheduled with no booking = "Takedown requested".
+  for (const plan of ['', 'scheduled', 'not_sure', 'customer_handles']) {
+    const p2 = { ...porch, key: `td|${plan}`, name: `Td ${plan}`, takedownPlan: plan, takedownNote: 'note', takedownDate: plan === 'scheduled' ? '2026-10-25' : '' };
+    pages.push([`dashboardPage(takedown ${plan || 'ask'})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [p2], statuses: { [p2.key]: { status: 'scheduled' } }, schedule: { [p2.key]: { date: '2026-10-24' } }, kinds: { [p2.key]: ['porch_install'] }, bookings: { [p2.key]: [{ id: 1, kind: 'porch_install', date: '2026-10-24' }] }, today: '2026-10-24' }) }]);
+  }
+  {
+    // Job done + paid, takedown booked and its day reached: "Mark takedown done" is the one big button.
+    const p3 = { ...porch, key: 'td|due', name: 'Td due', takedownPlan: 'scheduled' };
+    pages.push(['dashboardPage(takedown due)', { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [p3], statuses: { [p3.key]: { status: 'paid', job_done_at: '2026-10-24 12:00:00' } }, schedule: { [p3.key]: { date: '2026-10-24' } }, kinds: { [p3.key]: ['porch_install', 'porch_takedown'] }, bookings: { [p3.key]: [{ id: 1, kind: 'porch_install', date: '2026-10-24' }, { id: 2, kind: 'porch_takedown', date: '2026-10-25' }] }, today: '2026-10-25' }) }]);
+    // The day sheet with a takedown marked done (Undo takedown done), through the real routes.
+    const today = s.util.todayISO ? s.util.todayISO() : new Date().toISOString().slice(0, 10);
+    const tr = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', porch_takedown: 'yes', event_date: '2030-10-24', location: 'Germantown', name: 'Tad Takedown', phone: '901-555-0902', email: 'tad.takedown@example.com' });
+    await s.post('/admin/calendar/bookings', { r: s.rk(tr.row.request_key), kind: 'porch_takedown', date: today, customer_name: 'Tad Takedown', phone: '', email: '', place: '', items: 'Porch' });
+    const tb = await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind = 'porch_takedown'", tr.row.request_key);
+    pages.push([`/admin/day/${today} (takedown due)`, {}, await s.get(`/admin/day/${today}`)]);
+    await s.post(`/admin/calendar/bookings/${tb.id}/takedown-done`, {});
+    pages.push([`/admin/day/${today} (takedown done)`, {}, await s.get(`/admin/day/${today}`)]);
   }
   {
     // Render the calendar with one undecided takedown through the real route.

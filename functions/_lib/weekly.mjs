@@ -12,6 +12,7 @@ import { KIND_LABELS } from './kinds.mjs';
 import { currentHolds, endingSoon } from './holds.mjs';
 import { chicagoDate, chicagoHour } from './reminders.mjs';
 import { balances } from './ledger.mjs';
+import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
 import { getSettings, money, esc, FROM_EMAIL } from './util.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 
@@ -83,6 +84,7 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
   const decided = new Set((depRows || []).map((x) => x.invoice_id));
   const damage = requests.filter((r) => returns[r.key] && returns[r.key].returned_at && returns[r.key].damaged && statuses[r.key] && statuses[r.key].invoice_id && !decided.has(statuses[r.key].invoice_id));
   const notDecided = requests.filter((r) => live(r) && r.takedownPlan === 'not_sure');
+  const toSchedule = takedownsToSchedule(requests.filter(live), statuses, await loadTakedownFacts(db), today);
   const twoDaysAgo = addDays(today, -2);
   const noReply = requests.filter((r) => live(r) && !r.isTest && (!statuses[r.key] || (statuses[r.key].status === 'new' && !statuses[r.key].invoice_id)) && r.sortTime && new Date(r.sortTime).toISOString().slice(0, 10) <= twoDaysAgo);
   const idsReady = requests.filter((r) => {
@@ -99,7 +101,7 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
     this: { days, toCollect: toCollect.reduce((s, r) => s + r.owed, 0), toCollectCount: toCollect.length },
     needs: {
       holds: holds.map((h) => shortName(h.name)), overdue: overdue.map((b) => shortName(b.customer_name)), damage: damage.map((r) => shortName(r.name)),
-      takedowns: notDecided.map((r) => shortName(r.name)), noReply: noReply.map((r) => shortName(r.name)), idsReady: idsReady.map((r) => shortName(r.name)),
+      takedowns: notDecided.map((r) => shortName(r.name)), takedownsToSchedule: toSchedule.map((t) => `${shortName(t.name)}${t.date ? ` ${dayWord(t.date)}` : ''}`), noReply: noReply.map((r) => shortName(r.name)), idsReady: idsReady.map((r) => shortName(r.name)),
       receipts, notPaid: { count: np.count, total: np.total },
     },
   };
@@ -130,6 +132,7 @@ export function renderSummary(d) {
   list('Holds ending soon', n.holds, '/admin/calendar');
   list('Games not returned yet', n.overdue, '/admin/calendar');
   list('Damage to decide (refund or keep the deposit)', n.damage, '/admin/');
+  list('Takedowns to schedule', n.takedownsToSchedule || [], '/admin/calendar#takedowns-to-schedule');
   list('Takedowns not decided', n.takedowns, '/admin/calendar#still-to-decide');
   list('No reply after 2 days', n.noReply, '/admin/');
   list('IDs ready to delete', n.idsReady, '/admin/');
