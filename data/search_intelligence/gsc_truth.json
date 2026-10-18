@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "provider_truth",
-  "generated_at": "2026-10-17T15:12:26.359Z",
+  "generated_at": "2026-10-18T15:12:28.553Z",
   "own_site_google_performance_authority": "google_search_console",
   "provider_state": "OK",
   "provider_states": [
@@ -11,7 +11,7 @@
       "provider_id": "google_search_console",
       "state": "OK",
       "reason": "REAL_EXPORT_INGESTED",
-      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-10-17T15:12:26.359308+00:00 rows={\"by_query\":22,\"by_page\":2,\"by_query_page\":24}"
+      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-10-18T15:12:28.553185+00:00 rows={\"by_query\":21,\"by_page\":2,\"by_query_page\":23}"
     }
   ],
   "overall_status": "OK",
@@ -19,27 +19,27 @@
   "export_path": "data/search_intelligence/gsc_search_analytics_export.json",
   "export_problem": null,
   "export_window": {
-    "start_date": "2026-09-17",
-    "end_date": "2026-10-14"
+    "start_date": "2026-09-18",
+    "end_date": "2026-10-15"
   },
-  "export_collected_at": "2026-10-17T15:12:26.359308+00:00",
+  "export_collected_at": "2026-10-18T15:12:28.553185+00:00",
   "export_counts": {
-    "by_query": 22,
+    "by_query": 21,
     "by_page": 2,
-    "by_query_page": 24
+    "by_query_page": 23
   },
-  "requested_for_date": "2026-10-17",
-  "target_count": 22,
-  "targets_with_gsc_rows": 22,
-  "total_impressions": 56,
+  "requested_for_date": "2026-10-18",
+  "target_count": 21,
+  "targets_with_gsc_rows": 21,
+  "total_impressions": 54,
   "total_clicks": 0,
   "site_totals": {
     "basis": "by_page rows of the Search Console export (complete; by_query omits anonymised queries)",
     "clicks": 0,
-    "impressions": 56,
+    "impressions": 54,
     "pages_with_impressions": 2,
-    "queries_with_impressions": 22,
-    "query_row_impressions": 49,
+    "queries_with_impressions": 21,
+    "query_row_impressions": 48,
     "query_row_clicks": 0,
     "top_queries": [
       {
@@ -104,7 +104,7 @@
       }
     ]
   },
-  "target_impressions": 49,
+  "target_impressions": 48,
   "target_clicks": 0,
   "unavailable_note": null,
   "truth_boundary": "Google Search Console is the only authority for own-site Google impressions, clicks, CTR, average position, and indexation in this repo.",
@@ -291,23 +291,6 @@
         "impressions": 1,
         "ctr": 0,
         "gsc_average_position": 19
-      },
-      "page_metrics": null,
-      "own_site_performance_basis": "google_search_console",
-      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
-    },
-    {
-      "target_id": "pnp_sq_78c45308a948",
-      "query": "party planners memphis",
-      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "truth_source": "google_search_console",
-      "truth_state": "GSC_ROW_PRESENT",
-      "query_metrics": {
-        "gsc_query": "party planners memphis",
-        "clicks": 0,
-        "impressions": 1,
-        "ctr": 0,
-        "gsc_average_position": 36
       },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",

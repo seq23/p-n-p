@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-09-17",
-  "end_date": "2026-10-14",
-  "collected_at": "2026-10-17T15:12:26.359308+00:00",
+  "start_date": "2026-09-18",
+  "end_date": "2026-10-15",
+  "collected_at": "2026-10-18T15:12:28.553185+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -196,15 +196,6 @@
     },
     {
       "keys": [
-        "party planners memphis"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 36
-    },
-    {
-      "keys": [
         "party planners near me"
       ],
       "clicks": 0,
@@ -228,9 +219,9 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 52,
+      "impressions": 50,
       "ctr": 0,
-      "position": 27.23076923076923
+      "position": 27.26
     }
   ],
   "by_query_page": [
@@ -456,16 +447,6 @@
     },
     {
       "keys": [
-        "party planners memphis",
-        "https://www.porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 36
-    },
-    {
-      "keys": [
         "party planners near me",
         "https://www.porchandparty901.com/"
       ],
@@ -476,9 +457,9 @@
     }
   ],
   "counts": {
-    "by_query": 22,
+    "by_query": 21,
     "by_page": 2,
-    "by_query_page": 24
+    "by_query_page": 23
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
