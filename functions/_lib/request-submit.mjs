@@ -16,7 +16,8 @@ import { getSettings, esc, sha256Hex, b64url, safeEqual } from './util.mjs';
 import { availabilityFor } from './availability.mjs';
 import { cleanImage } from './image-clean.mjs';
 import { createHold, expireHolds, sqlTime } from './holds.mjs';
-import { logEvent } from './requests.mjs';
+import { logEvent, fromRow } from './requests.mjs';
+import { autoBookTakedown } from './takedown.mjs';
 import { sendMessage } from './messages.mjs';
 import { createDraftInvoice } from './admin.mjs';
 import { syncSafely } from './admin-money.mjs';
@@ -202,6 +203,10 @@ async function submit(context) {
       JSON.stringify([...answers, ...extra]), idObject, image.type, image.bytes.length, F.RULES_VERSION, ip, clean.takedown_plan || null, code, referredBy, receipt,
       robot.used ? 'turnstile' : 'no-js', C.normName(clean.name), C.digitsOf(clean.phone)).run();
   await logEvent(env.DB, key, `Agreed to the Rules & Responsibilities (version ${F.RULES_VERSION}) and the Terms & Conditions, as "${clean.name}"`, 'website form');
+  // A takedown date on the request books the takedown at once (takedown.mjs autoTakedownRow:
+  // porch/party, "yes", a real date, never a duplicate). "Not sure" / "No" book nothing.
+  const stored = await env.DB.prepare('SELECT * FROM requests WHERE request_key = ?1').bind(key).first();
+  if (stored) await autoBookTakedown(env.DB, fromRow(stored), { who: 'website form' });
 
   let rentals = null;
   if (quote) {

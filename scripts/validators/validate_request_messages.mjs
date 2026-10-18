@@ -148,7 +148,13 @@ const day0 = new Date();
 const tenAm = (offsetDays) => { const d = new Date(`${plus(offsetDays)}T15:00:00Z`); return d; };
 await s.post('/admin/requests/jobdone', { r: s.rk(p1.row.request_key) });
 dash = (await s.get('/admin/')).text;
-must(dash.includes('Thank-you email goes out tomorrow morning.') && dash.includes('Text a thank-you') && dash.includes("Don't send a thank-you"), 'a job marked done does not say the thank-you goes out tomorrow');
+{
+  // ONE small line at the bottom of the card, just above Show details (owner, 18 Oct 2026).
+  const card = dash.slice(dash.lastIndexOf('<article', dash.indexOf('data-thankyou')), dash.indexOf('</article>', dash.indexOf('data-thankyou')));
+  const line = (card.match(/<div class="tyline" data-thankyou>[\s\S]*?<\/div>/) || [''])[0];
+  must(/Thank-you email goes out tomorrow morning/.test(line) && /Text a thank-you/.test(line) && /Email it now/.test(line) && />Don't send</.test(line) && !/class="btn/.test(line), 'a job marked done does not say, on one small line, the thank-you goes out tomorrow · Text · Email · Don\'t send');
+  must(card.indexOf('data-thankyou') > card.indexOf('data-progress') && card.indexOf('data-thankyou') < card.indexOf('data-details') && !/<section class="paybox" data-thankyou/.test(card), 'the thank-you is not the last line above Show details');
+}
 let ty = await CM.sendThankYous(s.env, day0);
 must(!s.env.sent.some((m) => m.to === 'pia@example.com' && /Thank you/.test(m.subject)), 'the thank-you went out the same day the job was marked done');
 const q1 = await s.siteRequest({ service: 'party', party_event: 'Birthday', party_where: 'Home', event_date: plus(21), location: 'Bartlett', name: 'Quinn Undo', phone: '901-555-0302', email: 'quinn@example.com' });

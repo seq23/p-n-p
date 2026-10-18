@@ -259,8 +259,10 @@ let invA;
 {
   await s.post('/admin/settings', { day_list_email: 'valeriektaylor13@gmail.com', day_list_phone: '901-355-1518', business_name: 'Porch & Party', zelle: '', cashapp: '', business_address: '', id_folder_url: '' });
   const day = (await s.get('/admin/day/2026-10-24')).text;
-  must(day.includes('data-day-sheet') && day.includes('Load these items') && day.includes('data-strip'), 'day sheet, load list or availability strip missing');
-  must(/data-day-total><strong>Still to collect today: \$0\.00/.test(day), 'day total wrong after paid in full');
+  // Day sheet (owner, 18 Oct 2026): one block per job; "Load these items" only with 2+ pickups.
+  const pickups = (day.match(/· Game pickup ·/g) || []).length;
+  must(day.includes('data-day-sheet') && day.includes('data-strip') && pickups >= 1 && (pickups >= 2) === day.includes('Load these items'), 'day sheet, games grid, or the load list rule (only with 2+ pickups) wrong');
+  must(!/Still to collect today/.test(day) && !/\$0\.00/.test(day), 'a "Still to collect today: $0.00" line shows after paid in full');
   must(/(\d+) games out/.test(day) || /data-day-count><strong>\d+ games? out/.test(day), 'games-out count missing on the day');
   must(day.includes(`sms:9013551518?&amp;body=`), 'Text it to me is not an sms: link to her number');
   const r = await s.post('/admin/day/2026-10-24/email', {});
@@ -277,7 +279,7 @@ let invA;
   let st = await s.one('SELECT status, prev_status FROM request_status WHERE request_key = ?1', reqB.key);
   must(st && st.status === 'scheduled', 'scheduling does not mark the request Scheduled');
   const dash = (await s.get('/admin/')).text;
-  must(dash.includes('Scheduled for Sat 31 Oct'), 'card does not show "Scheduled for Sat 31 Oct"');
+  must(/Scheduled <span data-scheduled>Sat 31 Oct<\/span>/.test(dash) && !/Scheduled for Sat 31 Oct/.test(dash), 'the progress line does not carry "Scheduled Sat 31 Oct" (or a duplicate Scheduled pill is back)');
   const invB = await s.invoiceFor(reqB, { go: 'send' });
   const rows = await s.all('SELECT kind, date, edited_by_hand FROM bookings WHERE request_key = ?1 ORDER BY kind', reqB.key);
   must(rows.length === 2 && rows.find((r) => r.kind === 'rental_pickup').date === '2026-10-31', `invoice send changed her scheduled date or duplicated: ${JSON.stringify(rows)}`);

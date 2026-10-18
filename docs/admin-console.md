@@ -69,13 +69,16 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   stacked on a phone.
 - **Cards** (`requestCard` in `views.mjs`): large service badge(s) with words in the four service
   colours (`kinds.mjs`) and a coloured left border; name large; ONE key-facts line (event or pickup
-  day, where, Call); the compact 1-6 line; ONE big primary button (the next step); a secondary row;
-  the Payment box; everything to read (answers, ID, checklist state, notes, history) behind "Show
+  day, where, Call); the compact 1-6 line (it carries "Scheduled Sat 17 Oct" and Paid in full, so no
+  status pills repeat it beside the name; a paid card has no Payment box, its undo is one small link
+  on the progress line and on the Edit page); the inline Takedown line; ONE big primary button (the
+  next step; a "Next: …" wait shows in that same slot); a compact row of small secondary buttons;
+  the Payment box; the thank-you as ONE small line at the bottom; everything to read (answers, ID, checklist state, notes, history) behind "Show
   details". The buttons come from ONE rules table, `cardButtons` in `functions/_lib/cards.mjs`
   (service x stage): rentals never show porch, takedown or walk-through buttons; porch and party
-  show the walk-through checklist and, once the install/setup is booked, Schedule takedown; grazing
-  shows guest count + a rough food estimate (`foodPerHead` in `data/offers/services.json`) and an
-  optional pickup; void shows only Bring back + Put away, finished only Put away, put away only
+  show the walk-through checklist and the inline Takedown line; grazing shows guest count + a rough
+  food estimate (`foodPerHead` in `data/offers/services.json`) and the same line for its optional
+  pickup; void shows only Bring back + Put away, finished only Put away, put away only
   Bring back. Scheduling buttons pass the booking kind (`/admin/calendar/new?r=…&kind=…`).
 - **Filter chips**: All · Porch · Party & decor · Grazing · Rentals · Not paid yet (`?f=`), applied
   to the Put away section too. Weekly counts stay on top.
@@ -91,8 +94,18 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   install, then takedown; Party & decor → Schedule setup, then takedown; Grazing → Schedule setup,
   then pickup (optional); Rentals → Schedule pickup + return as a pair (the return day defaults from
   the length, editable; the return is always required, its time may be left empty = not sure yet).
-  The takedown is never required: once the install/setup is booked, the card asks "Takedown
-  afterwards?" with Schedule it · Not sure yet (amber "Takedown: not decided yet" + note, listed in
+  The takedown is never required. **Inline takedown row** (owner, 18 Oct 2026, "too many steps";
+  `takedownRow` in `views.mjs`, `cards.mjs inlineRowKind`, `POST /admin/requests/takedown-inline`):
+  every porch and party & decor card has ONE line "Takedown:" with a date box (the booked day, else
+  the form's / owner's takedown date, else the day after the install/setup), an optional time and
+  Save · Not sure yet · Customer will handle it. Save books / moves the `<kind>_takedown` booking in
+  place (edited_by_hand = 1, takedown_plan = scheduled, one history line) and comes back to the same
+  card with "Takedown on the calendar for Tue 20 Oct ✓". Booked: "Booked for Tue 20 Oct" + a one-tap
+  **Mark takedown done** (any day; it is the card's one big button after Job done) + Change / Remove
+  (Remove also clears the asked-for day, so nothing re-books it). Grazing has the same line for its
+  optional pickup (Save / Change / Remove). Rentals never. Only a FIRST booking (install, setup,
+  pickup) marks a request Scheduled (`calendar.mjs SECOND_KINDS`, `markScheduled` never moves
+  job_done / paid / void back). The older choices: Not sure yet (amber "Takedown: not decided yet" + note, listed in
   "Still to decide" on Calendar & Bookings, and Mark job done asks once) · Customer will handle it
   (no booking, no nagging), each with a note, stored as `requests.takedown_plan` +
   `takedown_note` (`POST /admin/requests/takedown`). Booking a takedown sets the plan to
@@ -103,20 +116,42 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   every screen asks). A porch/party request whose customer asked for a takedown (takedown_plan
   scheduled / not_sure, the takedown add-on on the invoice, or a takedown booking) is not Finished,
   gets no "Put it away?", until the takedown booking is marked done ("Mark takedown done" on the
-  card and the Day sheet, from the takedown day; `POST /admin/calendar/bookings/:id/takedown-done`,
-  `undo=1` takes it back) or takedown_plan = customer_handles. After Job done the one big button is
-  Schedule takedown (not booked) or Mark takedown done (its day reached); the progress line reads
+  card's Takedown line and the Day sheet, one tap, any day; `POST /admin/calendar/bookings/:id/takedown-done`,
+  `undo=1` takes it back) or takedown_plan = customer_handles. After Job done the next step is the
+  Takedown line's Save (not booked) or its Mark takedown done (booked); the progress line reads
   "Job done ✓ · Takedown: Sun 18 Oct" / "Takedown done ✓". The old Google Form's "Need us to take it
   down afterwards?" + "Takedown date" map at source (the import) into takedown_plan +
-  takedown_date; the date only PREFILLS Schedule takedown, nothing is booked until she saves it.
-  Asked-for, not booked: amber "Takedown requested for Sun 18 Oct — tap to schedule" on the card,
+  takedown_date. **A takedown date on the form is booked by itself** (`takedown.mjs
+  autoTakedownRow` / `autoBookTakedown`: porch/party, plan scheduled, a real date, live, and no
+  takedown booking of either kind yet; ON CONFLICT DO NOTHING), on arrival (`/request`, the import,
+  the local fixture) and again when the install/setup is booked; never over a booking she made or
+  edited; Not sure yet / Customer will handle it / no date book nothing. Asked-for, not booked (a
+  yes with no day): the amber "Asked for, not booked yet" Takedown line on the card,
   "Takedowns to schedule" at the top of Calendar & Bookings, on that day's Day sheet and in the
-  Monday summary's Needs you. Existing rows: `npm run admin:backfill-takedown` (idempotent; a row
-  with any "Takedown…" event is never touched again; `--invoice PNP-… --owner-date YYYY-MM-DD`
+  Monday summary's Needs you. Existing rows: `npm run admin:backfill-takedown` (idempotent; maps
+  the answers, then books every dated takedown nobody booked yet (`autoBookPlan`); a row
+  with any "Takedown…" event is never re-mapped; `--invoice PNP-… --owner-date YYYY-MM-DD`
   records the owner's day). The thank-you email still follows Job done. "IDs ready to delete" is
-  the last box on Requests, after Put away. Proof: `npm run validate:admin-takedown`.
+  the last box on Requests, after Put away. Proof: `npm run validate:admin-takedown` and
+  `npm run validate:admin-takedown-inline`.
+- **Requested chips** (`functions/_lib/requested.mjs`): every live request (not void, put away or
+  test) whose asked-for day (event date; rentals the pickup date) has no booking of that kind shows
+  on the month, the day page and Today's list as an OUTLINED chip (border only) in its service
+  colour: "Requested · Porch: Ada E."; tap opens the card. Legend: "Filled = booked · Outlined =
+  asked for, not booked yet". Requested rentals never count as games out ("N games asked for"
+  apart); a held rental is filled and says "Held", an expired hold reverts to Requested. They are
+  not bookings: never in the ICS feed or the Sheet's Bookings tab.
+- **Projector** (`data/rentals/games.json adminItems`, `admin_only: true`; `prices.mjs TRACK_TABLE`):
+  tracked In/Out on the Day sheet, counted for availability and the double-booking warning,
+  pickable on the booking form; never priced and never on a public page (the public generators read
+  `games` and `extras` only).
 - **Day sheet**: when a customer with a balance is booked that day, a line gives the Not paid yet
-  count and total, linking to Money.
+  count and total, linking to Money. One block per job (owner, 18 Oct 2026: "too busy"): checkbox +
+  "Anytime · Game pickup · Ada", items, place, "Still owed $X" only when > 0, notes in italics;
+  timed jobs first, Anytime last; no "$0.00" total; "Load these items" only with 2+ pickups; the
+  games grid "3 of 8 games out" with OUT tiles light red with a light diagonal X ("Out · back Tue
+  20 Oct · Ada") and IN tiles light green ("In"), words always there for a black-and-white print.
+  Print hides the banner, nav and buttons; Letter, one page for a normal day.
 - **Monday summary email** (`functions/_lib/weekly.mjs`): automatic every Monday 7:00 AM
   America/Chicago from the pnp-mailer hourly cron `0 * * * *` (the run whose Memphis weekday is
   Monday and hour is 7: 12:00 UTC in daylight time, 13:00 UTC in standard time, so daylight saving

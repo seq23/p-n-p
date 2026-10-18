@@ -8,14 +8,14 @@
  *  1. a request whose customer asked for a takedown (plan scheduled / not_sure, the takedown
  *     add-on on the invoice, or a takedown booking) is Finished, shows "Put it away?" or the
  *     Finished chip before the takedown booking is marked done, or "customer will handle it";
- *     or a request that never asked is held back; or the primary after Job done is not
- *     "Schedule takedown" (not booked) / "Mark takedown done" (booked, on/after its day);
+ *     or a request that never asked is held back; or after Job done the inline row's Save is
+ *     not the next step (not booked) / its one-tap "Mark takedown done" not the primary (booked, any day);
  *     or the progress line lacks the takedown sub-step;
  *  2. the old form's "Need us to take it down afterwards?" + "Takedown date" or the /request
- *     form's answer does not map at source into takedown_plan (+ date), or a yes creates a booking;
+ *     form's answer does not map at source into takedown_plan (+ date), or a yes with NO date books anything;
  *  3. the backfill plan is not idempotent, or overrides the owner's later choice;
  *  4. Calendar & Bookings, the Day sheet, the Monday summary or the booking screen prefill miss
- *     a requested takedown; "Mark takedown done" works before the takedown day;
+ *     a requested takedown; "Mark takedown done" is refused before the takedown day;
  *  5. "IDs ready to delete" is not the very last box of Requests (after Put away).
  * Rule 0: fewer than 60 checks is a failure.
  */
@@ -32,6 +32,7 @@ const fixture = (await mod('data/admin/fixture-request.json')).default;
 const errors = [];
 let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
+const bigBtns = (h) => (String(h).replace(/<div class="confirmbox">[\s\S]*?<\/details>/g, '').match(/class="btn primary"/g) || []).length;
 
 // ---- 1. Finished gating, every takedown state, porch and party ------------------------------
 const paid = { status: 'paid', balance: { total: 50000, paid: 50000, remaining: 0, owed: 0, refundable: 0, void: false } };
@@ -63,11 +64,13 @@ for (const svc of ['porch', 'party']) {
     const stage = K.cardStage({ pr, inv: paid });
     must(stage === (finished ? 'finished' : 'job_done'), `${tag}: stage ${stage}`);
     const rules = K.cardButtons({ services: [svc], stage, inv: paid, sched: true, kinds: bookings.map((b) => b.kind), jobDoneAt: true, takedownPlan: plan, takedown: td, paidFull: true });
-    const wantPrimary = finished ? 'card.archive' : ({ to_schedule: `card.schedTakedown|${tdKind(svc)}`, not_sure: `card.schedTakedown|${tdKind(svc)}`, due: 'td.markDone', booked: '' })[status];
+    // The inline row (owner, 18 Oct 2026): not booked -> its Save is the next step (no separate
+    // primary); booked -> its one-tap Mark takedown done IS the primary, before the day too.
+    const wantPrimary = finished ? 'card.archive' : ({ to_schedule: '', not_sure: '', due: 'td.markDone', booked: 'td.markDone' })[status];
     must(rules.primary === wantPrimary, `${tag}: primary "${rules.primary}", expected "${wantPrimary}"`);
     if (status === 'booked') {
       const w = K.cardWaiting({ services: [svc], stage, primary: rules.primary, jobDoneAt: true, dates: { eventReached: true }, takedown: td });
-      must(w && w.key === 'td.markDone' && w.date === '2026-10-20', `${tag}: no "Next: Mark takedown done" line before the takedown day`);
+      must(!w, `${tag}: a "Next:" line waits for the takedown day instead of the one-tap button`);
     }
     // The real card.
     const r = { key: `k|${svc}|${label}`, name: 'Ann Example', services: [svc], need: svc, wantsDecor: true, wantsRentals: false, gamesAnswer: '', rentals: [], decor: [{ label: 'Event date', value: '10/17/2026' }], other: [],
@@ -76,7 +79,8 @@ for (const svc of ['porch', 'party']) {
     must(/data-put-away-prompt/.test(html) === finished, `${tag}: "Put it away?" ${finished ? 'missing' : 'shown before the takedown is resolved'}`);
     must(/Finished: job done and paid/.test(html) === finished, `${tag}: Finished chip ${finished ? 'missing' : 'shown'}`);
     if (status !== 'none') must(new RegExp(`Job done[^<]*<span class="tdsub[^"]*" data-takedown-step="${status}"> · ${status === 'done' ? 'Takedown done ✓' : 'Takedown: '}`).test(html), `${tag}: the progress line has no takedown sub-step after Job done`);
-    if (status === 'to_schedule' && plan === 'scheduled') must(/data-takedown="requested"[\s\S]*Takedown requested for Sun 18 Oct — tap to schedule/.test(html) && /kind=\w+_takedown&amp;date=2026-10-18/.test(html), `${tag}: no amber "Takedown requested for Sun 18 Oct — tap to schedule" with the date prefilled`);
+    if (status === 'to_schedule' && plan === 'scheduled') must(/data-takedown-row="open"[\s\S]*Asked for, not booked yet[\s\S]*name="date" value="2026-10-18"[\s\S]*class="btn primary" type="submit" name="go" value="save"/.test(html) && !/calendar\/new\?r=[^"]*_takedown/.test(html), `${tag}: no inline Takedown row with the asked-for day (Sun 18 Oct) and Save as the big button`);
+    if (status === 'booked' || status === 'due') must(/data-takedown-row="booked"[\s\S]*data-takedown-booked="2026-10-(20|18|16)"/.test(html) && /Booked for (Tue 20|Sun 18|Fri 16) Oct/.test(html) && (html.match(/data-takedown-done-tap/g) || []).length === 1 && bigBtns(html) === 1, `${tag}: the booked row lacks "Booked for …" + exactly one one-tap Mark takedown done (and one big button)`);
     if (status === 'due') must(/action="\/admin\/calendar\/bookings\/2\/takedown-done"/.test(html) && /class="btn primary"[^>]*>Mark takedown done/.test(html), `${tag}: "Mark takedown done" is not the big button`);
   }
 }
@@ -116,7 +120,7 @@ for (const [answer, plan] of [['Yes', 'scheduled'], ['yes please', 'scheduled'],
   const r = RQ.fromRow({ ...yes, takedown_note: '' });
   must(r.takedownPlan === 'scheduled' && r.takedownDate === '2026-10-18', 'fromRow lost the takedown plan/date');
   const html = V.requestCard(r, { st: { status: 'paid', job_done_at: '2026-10-17 18:00:00' }, sched: { date: '2026-10-17' }, kinds: ['party_setup'], bookings: [{ id: 1, kind: 'party_setup', date: '2026-10-17' }], today: '2026-10-18' });
-  must(/Takedown requested for Sun 18 Oct — tap to schedule/.test(html) && !/data-put-away-prompt/.test(html) && /data-stage="job_done"/.test(html), 'an imported old-form request with takedown 18 Oct does not show the prompt, or reads as Finished');
+  must(/data-takedown-row="open"[\s\S]*name="date" value="2026-10-18"/.test(html) && !/data-put-away-prompt/.test(html) && /data-stage="job_done"/.test(html), 'an imported old-form request with takedown 18 Oct does not show the inline row on 18 Oct, or reads as Finished');
 }
 
 // ---- 3. Backfill: idempotent, never over the owner's choice --------------------------------
@@ -165,8 +169,11 @@ await s.post('/admin/calendar/bookings', { r: rk, kind: 'porch_takedown', date: 
 const tb = await s.one("SELECT id, done_at FROM bookings WHERE request_key = ?1 AND kind = 'porch_takedown'", req.row.request_key);
 must(tb && !tb.done_at, 'booking the takedown did not make one booking');
 must(!/Dee Takedown/.test(boxOf((await s.get('/admin/calendar')).text)), 'a booked takedown is still in "Takedowns to schedule"');
+// One tap, ANY day (owner, 18 Oct 2026): before the takedown day it works too, and comes back to the card.
 const early = await s.post(`/admin/calendar/bookings/${tb.id}/takedown-done`, {});
-must(/e=/.test(early.location) && !(await s.one('SELECT done_at FROM bookings WHERE id = ?1', tb.id)).done_at, 'Mark takedown done worked before the takedown day');
+must(!/e=/.test(early.location) && new RegExp(`#c-${rk}$`).test(early.location) && Boolean((await s.one('SELECT done_at FROM bookings WHERE id = ?1', tb.id)).done_at), 'Mark takedown done before the takedown day was refused, or did not come back to the card');
+await s.post(`/admin/calendar/bookings/${tb.id}/takedown-done`, { undo: '1' });
+must(!(await s.one('SELECT done_at FROM bookings WHERE id = ?1', tb.id)).done_at, 'Undo takedown done (before the day) did not undo');
 await s.db.prepare('UPDATE bookings SET date = ?2 WHERE id = ?1').bind(tb.id, today).run();
 must(/Mark takedown done/.test((await s.get(`/admin/day/${today}`)).text), 'the Day sheet has no "Mark takedown done" on the takedown day');
 await s.post(`/admin/calendar/bookings/${tb.id}/takedown-done`, {});
@@ -187,4 +194,4 @@ must(!(await s.one('SELECT done_at FROM bookings WHERE id = ?1', tb.id)).done_at
 
 if (checks < 60) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) { console.error(`VALIDATION FAIL: admin takedown (${errors.length})\n${errors.map((e) => `- ${e}`).join('\n')}`); process.exit(1); }
-console.log(`validate_admin_takedown: OK (${checks} checks: Finished gated by every takedown state, porch + party; old + new form mapping; backfill idempotent; Takedowns to schedule on Calendar, Day sheet, Monday summary; prefill; Mark takedown done from its day; IDs box last)`);
+console.log(`validate_admin_takedown: OK (${checks} checks: Finished gated by every takedown state, porch + party; old + new form mapping; backfill idempotent; Takedowns to schedule on Calendar, Day sheet, Monday summary; prefill; one-tap Mark takedown done any day; IDs box last)`);

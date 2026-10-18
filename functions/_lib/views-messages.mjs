@@ -88,10 +88,12 @@ export function confirmedPage({ rk, name, sms, emailed, texted, canEmail, flash,
 // The thank-you box on a request whose job is done / games are back (on the card: small links,
 // never a second big button).
 export function thankYouBox(r, { rk, sms, canEmail, now = Date.now() }) {
-  const sentWords = r.thankyouEmailedAt ? 'Thank-you email sent ✓' : r.thankyouSkip ? 'No thank-you email (you chose not to send one).' : canEmail ? 'Thank-you email goes out tomorrow morning.' : 'No email on file, so no thank-you email.';
-  const toggle = `<form method="post" action="/admin/requests/thankyou-skip">${hiddenInputs({ r: rk, skip: r.thankyouSkip ? '0' : '1' })}${act(`<button class="btn ghost" type="submit"${tip(r.thankyouSkip ? 'ty.unskip' : 'ty.skip')}>${r.thankyouSkip ? 'Send the thank-you after all' : "Don't send a thank-you"}</button>`, r.thankyouSkip ? 'ty.unskip' : 'ty.skip')}</form>`;
-  return `<section class="paybox" data-thankyou><h3>Send a thank-you</h3><p class="words" data-thankyou-state>${esc(sentWords)}</p>
-    <div class="msgline" data-messages>${msgPair({ sms, rk, template: 'thankyou', textKey: 'ty.text', emailKey: 'ty.email', textLabel: 'Text a thank-you', emailLabel: 'Email it now', canEmail: canEmail && !r.thankyouEmailedAt })}</div>
-    ${r.thankyouTextedAt ? '<p class="money ok" style="margin:4px 0 0">Thank-you text sent ✓</p>' : ''}
-    ${r.thankyouEmailedAt ? '' : toggle}</section>`;
+  void now;
+  // ONE small muted line at the bottom of the card (owner, 18 Oct 2026: "less bulky"):
+  // "Thank-you email goes out tomorrow morning · Text a thank-you · Email it now · Don't send".
+  const sentWords = r.thankyouEmailedAt ? 'Thank-you email sent ✓' : r.thankyouSkip ? 'No thank-you email (you chose not to send one)' : canEmail ? 'Thank-you email goes out tomorrow morning' : 'No email on file, so no thank-you email';
+  const pair = msgPair({ sms, rk, template: 'thankyou', textKey: 'ty.text', emailKey: 'ty.email', textLabel: 'Text a thank-you', emailLabel: 'Email it now', canEmail: canEmail && !r.thankyouEmailedAt });
+  const toggle = r.thankyouEmailedAt ? '' : `<form method="post" action="/admin/requests/thankyou-skip">${hiddenInputs({ r: rk, skip: r.thankyouSkip ? '0' : '1' })}<button class="linkbtn" type="submit"${tip(r.thankyouSkip ? 'ty.unskip' : 'ty.skip')}>${r.thankyouSkip ? 'Send it after all' : "Don't send"}</button></form>`;
+  const sep = '<span aria-hidden="true">·</span>';
+  return `<div class="tyline" data-thankyou><span data-thankyou-state>${esc(sentWords)}</span>${sep}${pair}${r.thankyouTextedAt ? `${sep}<span>Thank-you text sent ✓</span>` : ''}${toggle ? `${sep}${toggle}` : ''}</div>`;
 }

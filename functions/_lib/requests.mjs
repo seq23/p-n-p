@@ -9,7 +9,7 @@
 // the source except the ID (private R2 photo vs Drive link).
 import { rowsToRequests } from './sheet.mjs';
 import { normName, digitsOf } from './calendar.mjs';
-import { takedownFromAnswers } from './takedown.mjs';
+import { takedownFromAnswers, autoBookTakedown } from './takedown.mjs';
 import fixture from '../../data/admin/fixture-request.json';
 import porchPackages from '../../data/offers/porch_packages.json';
 import PP from '../../scripts/lib/porch_packages.js';
@@ -154,6 +154,12 @@ export async function seedFixture(db) {
   const [headers, ...rows] = fixture.values;
   const recs = rows.map((row) => importRowFor(headers, row)).filter(Boolean);
   if (recs.length) await db.batch(recs.map((rec) => importStatement(db, rec)));
+  // As the import does: a takedown date on the form books the takedown (idempotent).
+  for (const rec of recs) {
+    const row = await db.prepare('SELECT * FROM requests WHERE request_key = ?1').bind(rec.request_key).first();
+    const r = row ? fromRow(row) : null;
+    if (r) await autoBookTakedown(db, r, { who: 'import' });
+  }
 }
 
 export async function loadRequests(env) {

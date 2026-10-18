@@ -1,6 +1,7 @@
-// Games left for a rental window, by item slug, from the Calendar & Bookings data (every
+// Games left for a rental window, by item slug (every tracked item, the admin-only Projector
+// included: TRACK_TABLE), from the Calendar & Bookings data (every
 // rental booking, held or confirmed, counts as games out; checked-in returns free them).
-import { PRICE_TABLE } from './prices.mjs';
+import { TRACK_TABLE as PRICE_TABLE } from './prices.mjs';
 import * as C from './calendar.mjs';
 
 export async function availabilityFor(db, start, end, today, ignoreKey = '') {

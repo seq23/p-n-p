@@ -140,6 +140,10 @@ pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/req
     pages.push([`/admin/day/${today} (takedown due)`, {}, await s.get(`/admin/day/${today}`)]);
     await s.post(`/admin/calendar/bookings/${tb.id}/takedown-done`, {});
     pages.push([`/admin/day/${today} (takedown done)`, {}, await s.get(`/admin/day/${today}`)]);
+    // A takedown asked for with no day yet (the /request form has no date box): "Takedowns to
+    // schedule" on Calendar & Bookings, plus the outlined Requested chips and the legend.
+    await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', porch_takedown: 'yes', event_date: '2030-11-07', location: 'Germantown', name: 'Una Undated', phone: '901-555-0904', email: 'una.undated@example.com' });
+    pages.push(['/admin/calendar (takedown to schedule)', {}, await s.get('/admin/calendar?month=2030-11')]);
   }
   {
     // Render the calendar with one undecided takedown through the real route.

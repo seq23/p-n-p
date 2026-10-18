@@ -3,11 +3,11 @@
  * Idempotent backfill of requests.takedown_plan / takedown_date from each request's own form
  * answers (owner, 18 Oct 2026; functions/_lib/takedown.mjs backfillPlan): the old Google Form's
  * "Need us to take it down afterwards?" + "Takedown date", the /request form's "Want us to take
- * it down afterwards?". yes -> scheduled (+ the date, which only PREFILLS Schedule takedown; no
- * booking is ever created here), not sure -> not_sure, no -> customer_handles. Each mapped row
+ * it down afterwards?". yes -> scheduled (+ the date, which the booking step below books), not sure -> not_sure, no -> customer_handles. Each mapped row
  * gets the request event "Takedown mapped from the request form", and a row carrying any
  * "Takedown..." event (this one, or the owner's own choice on the card) is never touched again, so running it twice changes nothing and the owner's later choices stand.
- * Payments, status and bookings are never touched.
+ * Payments and status are never touched. Then (owner, 18 Oct 2026) every takedown the form dated
+ * and nobody booked yet is booked (takedown.mjs autoBookPlan; never a duplicate, never over hers).
  *
  * Owner's word overrides the form's date (e.g. a takedown moved by phone):
  *   --invoice PNP-YYYY-NNNN --owner-date YYYY-MM-DD   sets that request's takedown_date (plan
@@ -64,6 +64,21 @@ if (invoice || ownerDate) {
     override = 'applied';
   }
 }
+// Then book every takedown the form dated (takedown.mjs autoBookPlan, owner 18 Oct 2026), read
+// AFTER the mapping above: porch/party, plan scheduled, a real date, live, and no takedown booking
+// of either kind yet. A booking she made or edited is never touched; ON CONFLICT DO NOTHING.
+const C = await mod('functions/_lib/calendar.mjs');
+const mapped = reqs.map((r) => { const p = plan.find((x) => x.key === r.key); return p ? { ...r, takedownPlan: p.plan || '', takedownDate: p.date } : r; });
+const bookingsBy = {};
+for (const b of d1('SELECT request_key, kind FROM bookings WHERE request_key IS NOT NULL')) (bookingsBy[b.request_key] = bookingsBy[b.request_key] || []).push(b);
+const statuses = Object.fromEntries(d1('SELECT request_key, status, archived_at FROM request_status').map((x) => [x.request_key, x]));
+const book = TD.autoBookPlan(mapped, bookingsBy, statuses);
+for (const b of book) {
+  sql.push(`INSERT INTO bookings (request_key, kind, date, time, customer_name, phone, email, place, items, edited_by_hand, name_norm, phone_digits) VALUES (${[b.request_key, b.kind, b.date].map(q).join(', ')}, NULL, ${[b.customer_name, b.phone, b.email, b.place, b.items].map(q).join(', ')}, 0, ${q(C.normName(b.customer_name))}, ${q(C.digitsOf(b.phone))}) ON CONFLICT(request_key, kind) DO NOTHING;`);
+  sql.push(`INSERT INTO request_events (request_key, who, what) VALUES (${q(b.request_key)}, 'backfill', ${q(`${TD.AUTO_EVENT} (${b.date})`)});`);
+}
+const withDate = mapped.filter((r) => TD.takedownKindFor(r.services || []) && r.takedownPlan === 'scheduled' && /^\d{4}-\d{2}-\d{2}$/.test(r.takedownDate || '')).length;
+console.log(`backfill bookings: ${withDate} requests with a takedown date, ${withDate - book.length} already booked or not live, ${book.length} to book`);
 const counts = plan.reduce((m, p) => { m[p.plan || 'none'] = (m[p.plan || 'none'] || 0) + 1; return m; }, {});
 console.log(`backfill${dry ? ' (dry run)' : ''}: ${reqs.length} requests read, ${marked.size} already mapped, ${plan.length} to map ${JSON.stringify(counts)}; owner date: ${override}`);
 if (dry || !sql.length) process.exit(0);
@@ -72,4 +87,4 @@ fs.writeFileSync(file, sql.join('\n'), { mode: 0o600 });
 try {
   execFileSync('npx', ['wrangler', 'd1', 'execute', 'pnp-admin', '--remote', '--file', file, '--yes'], { cwd: ROOT, stdio: ['ignore', 'pipe', 'pipe'] });
 } finally { fs.rmSync(path.dirname(file), { recursive: true, force: true }); }
-console.log(`backfill: wrote ${plan.length} mapped rows${override === 'applied' ? ' + the owner date' : ''}`);
+console.log(`backfill: wrote ${plan.length} mapped rows, ${book.length} takedown bookings${override === 'applied' ? ' + the owner date' : ''}`);
