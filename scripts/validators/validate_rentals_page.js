@@ -34,6 +34,7 @@ const { finalHtml, data, OUT, ITEMS, BUNDLES, bundleValue } = require(path.join(
 
 const errors = [];
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 if (!ITEMS.length) errors.push('data/rentals/games.json shows 0 items');
 if (!BUNDLES.length) errors.push('data/rentals/games.json lists 0 bundles');
 const onDisk = fs.existsSync(OUT) ? fs.readFileSync(OUT, 'utf8') : null;
@@ -42,9 +43,11 @@ else if (onDisk !== finalHtml(onDisk)) errors.push('rentals/index.html differs f
 
 // ---- Owner-approved v3 (2026-10-15) ------------------------------------------
 const V3 = {
-  day: 40, weekend: 60, damageDeposit: 50, holdPercent: 50, items: 8, games: 6,
-  shownGames: ['giant-connect-four', 'cornhole', 'giant-checkers', 'giant-color-stack', 'giant-uno', 'grab-the-mic'],
-  hiddenGames: ['giant-tumble-tower', 'giant-yard-pong', 'ladder-toss'],
+  // 18 Oct 2026 (owner): Giant Checkers is not available right now; "the 6 games" are both
+  // Giant Color Stack sets + Connect Four, Cornhole, Uno and Grab the Mic (5 kinds, 6 games).
+  day: 40, weekend: 60, damageDeposit: 50, holdPercent: 50, items: 7, games: 5, gameUnits: 6,
+  shownGames: ['giant-connect-four', 'cornhole', 'giant-color-stack', 'giant-uno', 'grab-the-mic'],
+  hiddenGames: ['giant-tumble-tower', 'giant-yard-pong', 'ladder-toss', 'giant-checkers'],
   extras: { 'inflatable-movie-screen': [50, 75], 'card-table': [15, 25] },
   bundles: { 'Pick 3': [110, null], 'Pick 5': [175, null], 'Whole Yard': [195, null], 'Movie Night': [110, null], 'Game Night': [85, null], 'The Whole Party': [235, 350] },
   place: 'Mt. Moriah Station, Memphis Police Department', address: '2602 Mt. Moriah Rd, Memphis, TN 38115', phone: '901-355-1518'
@@ -69,8 +72,18 @@ for (const [name, [day, wk]] of Object.entries(V3.bundles)) {
 }
 const games = ITEMS.filter((i) => data.games.some((g) => g.slug === i.slug));
 if (games.length !== V3.games) errors.push(`v3 has ${V3.games} games on offer, games.json shows ${games.length}`);
+const colorStack = data.games.find((g) => g.slug === 'giant-color-stack') || {};
+if (colorStack.quantity !== 2 || colorStack.bundleSets !== 2) errors.push('games.json Giant Color Stack is not quantity 2 with bundleSets 2 (owner, 18 Oct 2026: both sets count in "the 6 games")');
+const units = games.reduce((n, g) => n + ((data.games.find((x) => x.slug === g.slug) || {}).bundleSets || 1), 0);
+if (units !== V3.gameUnits) errors.push(`the games on offer count ${units} bundle games, the owner's count is ${V3.gameUnits}`);
+for (const b of BUNDLES.filter((x) => /^all /i.test(x.includes))) {
+  if (b.games !== units) errors.push(`bundle ${b.name} is "all games" but counts ${b.games}, the games on offer count ${units}`);
+  if (!new RegExp(`^All ${units} games \\(both Giant Color Stack sets\\)`).test(b.includes)) errors.push(`bundle ${b.name} includes "${b.includes}", want "All ${units} games (both Giant Color Stack sets)..."`);
+}
+if (BUNDLES.filter((x) => /^all /i.test(x.includes)).length !== 2) errors.push('want exactly 2 all-games bundles (Whole Yard, The Whole Party)');
+for (const b of BUNDLES) if (/checkers/i.test(`${b.includes} ${b.alt} ${b.formChoice}`)) errors.push(`bundle ${b.name} copy or alt text names Giant Checkers, which is not available`);
 for (const b of BUNDLES) {
-  if (b.games > games.length) errors.push(`bundle ${b.name} needs ${b.games} games, only ${games.length} are on offer`);
+  if (b.games > units) errors.push(`bundle ${b.name} needs ${b.games} games, only ${games.length} are on offer`);
   for (const s of b.items) if (!ITEMS.some((i) => i.slug === s)) errors.push(`bundle ${b.name} includes ${s}, which is hidden or missing`);
   if (bundleValue(b, 'day').save <= 0) errors.push(`bundle ${b.name} saves nothing on day prices`);
 }
@@ -254,5 +267,24 @@ for (const f of ['llms.txt', 'llms-full.txt', 'llms-services.txt']) {
     if (!sec.includes(n)) errors.push(`${f} rentals section does not quote ${n}`);
 }
 if (onDisk && (/forms\.gle/.test(onDisk) || (onDisk.match(/>Book your games<\/a>/g) || []).length < 4 || /Check My Date/.test(onDisk))) errors.push('rentals/index.html still links the Google Form, or its buttons do not read "Book your games"');
+// ---- The projector, on request (owner, 18 Oct 2026) ------------------------------------
+const PROJ_LINE = 'Need a projector? We can include one, just ask when you book. Bring your own speaker; it needs a plug within 50 ft.';
+const PROJ_Q = 'Do you have a projector?';
+const PROJ_A = "Yes, we can include one with the movie screen. Just ask when you book; it's one projector, so ask early.";
+const screen = (data.extras || []).find((x) => x.slug === 'inflatable-movie-screen') || {};
+if (!String(screen.blurb || '').endsWith(PROJ_LINE)) errors.push('the movie screen blurb does not offer the projector on request');
+const { FAQ: RFAQ } = require(path.join(ROOT, 'scripts/generators/build_rentals_page.js'));
+if (!RFAQ.some(([q, a]) => q === PROJ_Q && a === PROJ_A)) errors.push('the rentals FAQ lacks "Do you have a projector?" with the owner answer');
+if (ITEMS.some((i) => /projector/i.test(i.name)) || BUNDLES.some((b) => (b.items || []).includes('projector'))) errors.push('the admin-only Projector is a public rental item or in a bundle');
+const PUBLIC = ['rentals/index.html', 'faq/index.html', 'request.html', 'index.html', 'services/index.html', 'llms.txt', 'llms-full.txt', 'llms-services.txt', 'docs/listings/facebook-marketplace.md', 'docs/listings/facebook-page.md', 'data/rentals/games.json'];
+for (const rel of PUBLIC) {
+  const t = read(rel);
+  if (/own projector/i.test(t)) errors.push(`${rel} still says to bring your own projector`);
+  if (/projector[^.<\n]{0,60}\$\d|\$\d[^.<\n]{0,30}projector/i.test(t)) errors.push(`${rel} quotes a projector price`);
+}
+for (const rel of ['rentals/index.html', 'faq/index.html']) if (!read(rel).includes(esc(PROJ_A)) || !read(rel).includes(PROJ_Q)) errors.push(`${rel} does not carry the projector question and answer`);
+for (const rel of ['rentals/index.html', 'llms.txt', 'llms-full.txt', 'llms-services.txt', 'docs/listings/facebook-marketplace.md']) if (!read(rel).includes(esc(PROJ_LINE)) && !read(rel).includes(PROJ_LINE)) errors.push(`${rel} lacks the projector-on-request line`);
+const checkersOut = (data.games.find((g) => g.slug === 'giant-checkers') || {}).availableNow === false;
+for (const rel of PUBLIC.filter((r) => r !== 'data/rentals/games.json')) if (checkersOut && /checkers/i.test(read(rel))) errors.push(`${rel} names Giant Checkers, which is not available`);
 if (errors.length) { for (const e of errors) console.error(`rentals: ${e}`); process.exit(1); }
 console.log(`rentals: OK - page matches a fresh render; v3 prices pinned; ${ITEMS.length} items + ${BUNDLES.length} bundles on the page and in ${blocks.length} Marketplace listings; every price from games.json; no delivery and no hidden item in the rentals copy; renter-safety line on the page and in the llms files; Facebook copy email only`);

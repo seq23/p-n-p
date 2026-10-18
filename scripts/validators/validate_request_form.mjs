@@ -42,6 +42,7 @@ const AM = await mod('functions/_lib/admin-money.mjs');
 const { PRICE_TABLE } = await mod('functions/_lib/prices.mjs');
 const offers = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8'));
 const games = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8'));
+const games_ = games;
 // brand.js is CommonJS reading JSON; read it in a plain child process (this one hooks JSON).
 const { execFileSync } = await import('node:child_process');
 const brand = JSON.parse(execFileSync(process.execPath, ['-e', `const b=require(${JSON.stringify(path.join(ROOT, 'scripts/lib/brand.js'))});console.log(JSON.stringify({SERVICES:b.SERVICES,PRICES:b.PRICES}))`], { encoding: 'utf8' }));
@@ -104,7 +105,7 @@ const PATHS = {
   party: { service: 'party', party_event: 'Birthday', party_where: 'Hotel room', party_takedown: 'yes', event_date: plus(15), location: 'The Peabody' },
   grazing: { service: 'grazing', grazing_event: 'Graduation', grazing_guests: '15–40', grazing_food: 'Yes, include food in my quote', event_date: plus(16), location: 'Cordova' },
   rentals: { service: 'rentals', games: ['giant-connect-four', 'giant-uno'], duration: 'day', pickup_date: plus(9) },
-  multi: { service: 'multi', multi: ['party', 'rentals'], party_event: 'Anniversary', party_where: 'Home', event_date: plus(17), location: 'Bartlett', games: ['giant-checkers'], duration: 'day', pickup_date: plus(17) },
+  multi: { service: 'multi', multi: ['party', 'rentals'], party_event: 'Anniversary', party_where: 'Home', event_date: plus(17), location: 'Bartlett', games: ['cornhole'], duration: 'day', pickup_date: plus(17) },
 };
 
 // ---- 2/3. Every path: ID required, rules required, complete path accepted ---------------
@@ -180,6 +181,46 @@ must(a.ok && a.left['giant-connect-four'] === 0 && a.left['giant-uno'] === 0 && 
 const q = F.rentalQuote(['giant-connect-four', 'giant-uno'], 'day', PRICE_TABLE, games.holdPercent);
 must(q.rental === 2 * games.rates.day * 100 && q.damage === games.damageDeposit * 100 && q.dueNow === q.damage + q.rental / 2 && q.atPickup === q.rental / 2, `rental money is wrong: ${JSON.stringify({ rental: q.rental, damage: q.damage, dueNow: q.dueNow })}`);
 must(a.html.includes(F.money(q.total)) && a.html.includes(F.money(q.dueNow)) && a.html.includes('Due now'), 'the live total does not show the exact total and due-now amount');
+
+// ---- The inventory (owner, 18 Oct 2026): Giant Checkers unavailable, both Color Stack sets count --
+must(a.left['giant-color-stack'] === 2 && !('giant-checkers' in a.left) && !F.rentalItems(PRICE_TABLE).some((i) => i.slug === 'giant-checkers'), `availability does not count 2 Color Stack sets, or still offers Giant Checkers: ${JSON.stringify(a.left)}`);
+must(!/giant-checkers|Giant Checkers/.test(blank), 'the /request form still offers Giant Checkers');
+
+// ---- The projector, on request (owner, 18 Oct 2026) ------------------------------------------
+// One checkbox, only beside the movie screen (hidden until it is ticked), saved as an answer that
+// shows on the admin card; it never adds the admin-only Projector, a price or an availability count.
+{
+  const box = /<label class="rq-choice rq-projector( rq-hide)?" data-projector><input type="checkbox" name="projector" value="yes"( checked)?> <span>([^<]*)<\/span><\/label>/g;
+  const inBlank = [...blank.matchAll(box)];
+  must(F.PROJECTOR_ASK === 'Please include a projector (just ask, one available)' && F.PROJECTOR_ANSWER === 'Asked for a projector' && F.SCREEN_SLUG === 'inflatable-movie-screen', 'the projector wording or the screen slug drifted');
+  must(inBlank.length === 1 && inBlank[0][1] === ' rq-hide' && inBlank[0][3] === F.PROJECTOR_ASK, 'the blank form does not carry exactly one hidden projector checkbox with the owner wording');
+  const games = blank.split('id="q-games"')[1].split('</fieldset>')[0];
+  must(games.includes('name="projector"') && games.indexOf('value="inflatable-movie-screen"') < games.indexOf('name="projector"'), 'the projector checkbox is not with the games, after the movie screen');
+  const withScreen = F.renderForm({ offers, table: PRICE_TABLE, values: { games: ['inflatable-movie-screen'], projector: 'yes' } });
+  const ws = [...withScreen.matchAll(box)];
+  must(ws.length === 1 && ws[0][1] === undefined && ws[0][2] === ' checked', 'with the movie screen ticked the projector checkbox is not shown (or loses its tick)');
+  const noScreenTable = { ...PRICE_TABLE, items: PRICE_TABLE.items.filter((i) => i.slug !== 'inflatable-movie-screen') };
+  must(!F.renderForm({ offers, table: noScreenTable }).includes('name="projector"'), 'the projector checkbox shows when the movie screen is not offered');
+  must(/function proj\(\)\{[^}]*inflatable-movie-screen/.test(blank) && /e\.target\.name==='games'\)proj\(\)/.test(blank), 'the page script does not show the projector checkbox only while the movie screen is ticked');
+  must(!/value="projector"/.test(blank) && !/>\s*Projector\s*</.test(blank) && !/projector[^<]{0,40}\$\d/i.test(blank), 'the form offers the Projector as an item or quotes it a price');
+  const pq = F.rentalQuote(['inflatable-movie-screen'], 'day', PRICE_TABLE, games_.holdPercent);
+  const asked = await send({ service: 'rentals', games: ['inflatable-movie-screen'], projector: 'yes', duration: 'day', pickup_date: plus(31), ...contact(60) });
+  must(asked.status === 303, `a movie-screen request asking for the projector was refused (${asked.status})`);
+  const ar = await s.one('SELECT * FROM requests WHERE email = ?1', 'path60@example.com');
+  const aa = ar ? JSON.parse(ar.answers) : [];
+  must(aa.filter((x) => x.label === 'Asked for a projector').length === 1 && aa.some((x) => x.group === 'rentals' && x.label === 'Asked for a projector' && x.value === 'Yes'), `the projector ask is not saved as a rentals answer: ${JSON.stringify(aa)}`);
+  const abk = ar ? await s.all('SELECT items FROM bookings WHERE request_key = ?1', ar.request_key) : [];
+  must(abk.length === 2 && abk.every((b) => /Inflatable Movie Screen/.test(b.items) && !/projector/i.test(b.items)), `the projector ask added the Projector to the booking: ${JSON.stringify(abk)}`);
+  const pa = await avail(plus(31), 'inflatable-movie-screen');
+  must(!('projector' in pa.left) && pa.left['inflatable-movie-screen'] === 0, `the projector ask touched public availability: ${JSON.stringify(pa.left)}`);
+  must(pq.rental === games_.extras.find((x) => x.slug === 'inflatable-movie-screen').dayPrice * 100 && !pq.lines.some((l) => /projector/i.test(l.description)), 'the projector ask changed the price');
+  const card = (await s.get('/admin/')).text;
+  must(card.includes('<dt>Asked for a projector</dt><dd>Yes</dd>'), 'the admin request card does not show "Asked for a projector: Yes"');
+  // Ticked without the movie screen (no JavaScript): never saved.
+  const stray = await send({ service: 'rentals', games: ['giant-uno'], projector: 'yes', duration: 'day', pickup_date: plus(33), ...contact(61) });
+  const sr = await s.one('SELECT answers FROM requests WHERE email = ?1', 'path61@example.com');
+  must(stray.status === 303 && sr && !/projector/i.test(sr.answers), 'a projector ask without the movie screen was saved');
+}
 must(!/@|555-01|Casey/.test(JSON.stringify(a)), 'the availability API leaks customer details');
 const clash = await send({ ...PATHS.rentals, ...contact(20) });
 must(clash.status === 400 && clash.text.includes('already booked for those dates'), 'an overlapping rental of a held game was accepted');

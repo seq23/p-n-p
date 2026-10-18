@@ -102,6 +102,13 @@ export function questions(offers, table) {
   };
 }
 
+// The projector ask (owner, 18 Oct 2026: "we can include a projector but they must ask for
+// that"). Offered only beside the movie screen; it is a request, never a line item: it does
+// not add the admin-only Projector, change the price or touch availability. Valerie decides.
+export const SCREEN_SLUG = 'inflatable-movie-screen';
+export const PROJECTOR_ASK = 'Please include a projector (just ask, one available)';
+export const PROJECTOR_ANSWER = 'Asked for a projector';
+
 // The rental items a customer can pick (available now), with their bundle-friendly names.
 export const rentalItems = (table) => table.items.map((i) => ({ slug: i.slug, name: i.name, choice: i.choice, quantity: i.quantity }));
 
@@ -186,6 +193,10 @@ export function validateSubmission(fields, { offers, table, today, file = null }
     for (const q of Q.rentals.filter((x) => x.type !== 'games')) clean[q.name] = ask(q);
     clean.duration = String(fields.duration || '');
     if (clean.pickup_date && clean.duration === 'weekend' && weekday(clean.pickup_date) !== 5 && !errors.pickup_date) errors.pickup_date = 'A weekend rental is picked up on a Friday. Please pick a Friday, or choose One day.';
+    if (games.includes(SCREEN_SLUG) && String(fields.projector || '') === 'yes') {
+      clean.projector = true;
+      answers.push({ group: 'rentals', label: PROJECTOR_ANSWER, value: 'Yes' });
+    }
     if (games.length) answers.unshift({ group: 'rentals', label: 'Which games?', value: items.filter((i) => games.includes(i.slug)).map((i) => i.choice).join(', ') });
     if (clean.pickup_date && clean.duration) clean.return_date = returnDateFor(clean.pickup_date, clean.duration === 'weekend' ? 'weekend' : 'day');
   }
@@ -243,8 +254,10 @@ function renderQuestion(q, values, errors) {
 function renderGames(table, values, errors) {
   const picked = Array.isArray(values.games) ? values.games : [];
   const boxes = rentalItems(table).map((i) => `<label class="rq-choice rq-game" data-game="${esc(i.slug)}"><input type="checkbox" name="games" value="${esc(i.slug)}"${picked.includes(i.slug) ? ' checked' : ''}> <span>${esc(i.name)}</span> <span class="rq-left" data-left="${esc(i.slug)}"></span></label>`).join('');
+  const screen = rentalItems(table).some((i) => i.slug === SCREEN_SLUG);
+  const projector = screen ? `<label class="rq-choice rq-projector${picked.includes(SCREEN_SLUG) ? '' : ' rq-hide'}" data-projector><input type="checkbox" name="projector" value="yes"${values.projector === 'yes' ? ' checked' : ''}> <span>${esc(PROJECTOR_ASK)}</span></label>` : '';
   return `<fieldset class="rq-q${errors.games ? ' rq-bad' : ''}" id="q-games" data-q="games"${errors.games ? ' aria-describedby="err-games"' : ''}><legend>Which games?${req}</legend>
-    <p class="rq-help">$${table.dayCents / 100} a game for a day, $${table.weekendCents / 100} for a weekend. We apply the best bundle price for you. Greyed out = already booked for your dates.</p>${fieldError('games', errors)}${boxes}</fieldset>`;
+    <p class="rq-help">$${table.dayCents / 100} a game for a day, $${table.weekendCents / 100} for a weekend. We apply the best bundle price for you. Greyed out = already booked for your dates.</p>${fieldError('games', errors)}${boxes}${projector}</fieldset>`;
 }
 
 function section(key, title, body, { hidden = false } = {}) {
@@ -302,7 +315,7 @@ const FORM_CSS = `.rq-range{font-weight:600;color:#3b302a}.rq-wrap{max-width:680
 .rq-summary{border:2px solid #a8442b;border-radius:14px;padding:14px 16px;background:#fff6f3;margin:12px 0}.rq-summary h2{font-size:1.3rem;margin:0 0 6px}.rq-summary a{color:#a8442b}
 .rq-idnote{background:#faf7f2;border-left:4px solid #b85f40;padding:10px 12px;border-radius:8px;font-weight:600}.rq-hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
 .rq-game.rq-off{opacity:.45}.rq-left{margin-left:auto;font-size:.9rem;color:#6b5c52}.rq-total{background:#faf7f2;border-radius:12px;padding:4px 14px}.rq-total table{width:100%;border-collapse:collapse}.rq-total td{padding:4px 0}.rq-total td+td{text-align:right}
-.rq-submit{width:100%;min-height:52px;font-size:1.1rem;margin-top:8px;border:0;cursor:pointer}.rq-multi{margin:6px 0 0 18px}.rq-js .rq-section[hidden]{display:none}`;
+.rq-submit{width:100%;min-height:52px;font-size:1.1rem;margin-top:8px;border:0;cursor:pointer}.rq-multi{margin:6px 0 0 18px}.rq-js .rq-section[hidden]{display:none}.rq-projector{margin-left:30px}.rq-js .rq-projector.rq-hide{display:none}`;
 
 // Progressive enhancement only: the form works without any of this.
 const FORM_JS = `(function(){var f=document.querySelector('.rq-form');if(!f)return;document.documentElement.classList.add('rq-js');
@@ -310,8 +323,9 @@ var show={porch:['porch','event'],party:['party','event'],grazing:['grazing','ev
 function picked(){var s=f.querySelector('input[name=service]:checked');if(!s)return[];if(s.value!=='multi')return[s.value];return[].slice.call(f.querySelectorAll('input[name=multi]:checked')).map(function(x){return x.value;});}
 function sync(){var p=picked(),on={};p.forEach(function(k){(show[k]||[]).forEach(function(s){on[s]=1;});});var m=f.querySelector('input[name=service][value=multi]');var box=f.querySelector('[data-multi]');if(box)box.hidden=!(m&&m.checked);
 ['porch','party','grazing','event','rentals'].forEach(function(k){var s=f.querySelector('[data-section='+k+']');if(!s)return;s.hidden=!on[k];[].slice.call(s.querySelectorAll('input,textarea')).forEach(function(i){if(i.hasAttribute('required')||i.dataset.req){i.dataset.req=1;i.required=!!on[k];}});});
-['contact','id','agree'].forEach(function(k){var s=f.querySelector('[data-section='+k+']');if(s)s.hidden=!p.length;});quote();}
-f.addEventListener('change',function(e){if(e.target.name==='service'||e.target.name==='multi')sync();if(/^(games|duration|pickup_date)$/.test(e.target.name))quote();});
+['contact','id','agree'].forEach(function(k){var s=f.querySelector('[data-section='+k+']');if(s)s.hidden=!p.length;});proj();quote();}
+function proj(){var l=f.querySelector('[data-projector]');if(!l)return;var s=f.querySelector('input[name=games][value=inflatable-movie-screen]'),on=!!(s&&s.checked);l.classList.toggle('rq-hide',!on);if(!on){var i=l.querySelector('input');if(i)i.checked=false;}}
+f.addEventListener('change',function(e){if(e.target.name==='service'||e.target.name==='multi')sync();if(e.target.name==='games')proj();if(/^(games|duration|pickup_date)$/.test(e.target.name))quote();});
 var t;function quote(){clearTimeout(t);t=setTimeout(function(){var box=f.querySelector('[data-total]');if(!box||picked().indexOf('rentals')<0)return;var d=f.querySelector('input[name=duration]:checked'),pd=f.querySelector('input[name=pickup_date]');
 var g=[].slice.call(f.querySelectorAll('input[name=games]:checked')).map(function(x){return x.value;});var q='/api/request/availability?pickup='+encodeURIComponent(pd&&pd.value||'')+'&duration='+encodeURIComponent(d&&d.value||'day')+'&games='+encodeURIComponent(g.join(','));
 fetch(q).then(function(r){return r.json();}).then(function(j){if(!j||!j.ok)return;[].slice.call(f.querySelectorAll('[data-game]')).forEach(function(l){var s=l.getAttribute('data-game'),left=j.left?j.left[s]:null,inp=l.querySelector('input'),tag=l.querySelector('[data-left]');var off=left!==null&&left!==undefined&&left<=0&&!inp.checked;l.classList.toggle('rq-off',off);inp.disabled=off;if(tag)tag.textContent=off?'Booked those dates':'';});

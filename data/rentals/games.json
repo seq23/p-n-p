@@ -78,10 +78,10 @@
       "size": "4 x 4 ft mat",
       "use": "both",
       "quantity": 1,
-      "availableNow": true,
+      "availableNow": false,
       "blurb": "A four-by-four-foot mat with oversized pieces. Works on a lawn, a porch or indoors.",
       "alt": "Black mother and her young son kneeling on a giant checkers mat on a backyard lawn, moving oversized black checker pieces",
-      "formChoice": "Giant Checkers"
+            "_why": "Hidden (owner, 2026-10-18): not available right now. Data kept so it can come back by flipping availableNow."
     },
     {
       "slug": "grab-the-mic",
@@ -103,7 +103,9 @@
       "availableNow": true,
       "blurb": "A two-foot color-sorting stacking puzzle: slide the sky blue, lime green, yellow and pink rings onto five poles until every pole is one color. Two sets for head-to-head races.",
       "alt": "Black mother and young children sliding sky blue, lime green, yellow and pink rings onto the light-blue poles of two giant color stack sets side by side on a backyard party table",
-      "formChoice": "Giant Color Stack"
+      "formChoice": "Giant Color Stack",
+      "bundleSets": 2,
+      "_bundleSetsWhy": "Owner, 2026-10-18: the six games are both Color Stack sets + Connect Four, Cornhole, Uno and Grab the Mic, so an all-games bundle (Whole Yard, The Whole Party) carries both sets."
     }
   ],
   "extras": [
@@ -117,7 +119,7 @@
       "use": "outdoor",
       "quantity": 1,
       "availableNow": true,
-      "blurb": "An inflatable outdoor movie screen with its blower, stakes and an extension cord. Bring your own projector and speaker; it needs a plug within 50 ft.",
+      "blurb": "An inflatable outdoor movie screen with its blower, stakes and an extension cord. Need a projector? We can include one, just ask when you book. Bring your own speaker; it needs a plug within 50 ft.",
       "alt": "Black inflatable outdoor movie screen standing on a backyard lawn at dusk under string lights, lawn chairs set out in front"
     },
     {
@@ -155,7 +157,7 @@
       "dayPrice": 175,
       "includes": "Any 5 games",
       "image": "/assets/rentals/bundles/bundle-pick-5.jpg",
-      "alt": "Giant connect four, giant color stack, cornhole, a giant checkers mat and giant Uno cards on a backyard lawn"
+      "alt": "Giant connect four, giant color stack, cornhole and giant Uno cards on a backyard lawn"
     },
     {
       "slug": "whole-yard",
@@ -164,9 +166,9 @@
       "games": 6,
       "items": [],
       "dayPrice": 195,
-      "includes": "All 6 games",
+      "includes": "All 6 games (both Giant Color Stack sets)",
       "image": "/assets/rentals/bundles/bundle-whole-yard.jpg",
-      "alt": "All six party games on a backyard lawn: giant connect four, giant color stack, cornhole, giant checkers, giant Uno and Grab the Mic"
+      "alt": "Party games on a backyard lawn: giant connect four, giant color stack, cornhole, giant Uno and Grab the Mic"
     },
     {
       "slug": "movie-night",
@@ -205,9 +207,9 @@
       ],
       "dayPrice": 235,
       "weekendPrice": 350,
-      "includes": "All 6 games, the movie screen and the card table",
+      "includes": "All 6 games (both Giant Color Stack sets), the movie screen and the card table",
       "image": "/assets/rentals/bundles/bundle-whole-party.jpg",
-      "alt": "Every rental on one lawn: inflatable movie screen, card table, giant connect four, giant color stack, cornhole, giant checkers, giant Uno and Grab the Mic"
+      "alt": "Every rental on one lawn: inflatable movie screen, card table, giant connect four, giant color stack, cornhole, giant Uno and Grab the Mic"
     }
   ],
   "pickup": {

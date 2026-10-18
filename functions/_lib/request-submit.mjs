@@ -292,7 +292,9 @@ export async function handleAvailability({ request, env }) {
     await expireHolds(env.DB);
     const ret = C.returnDateFor(pickup, duration);
     out.returnDate = ret;
-    out.left = await availabilityFor(env.DB, pickup, ret, today);
+    // Public items only: an admin-only item (the Projector) never reaches this public answer.
+    const left = await availabilityFor(env.DB, pickup, ret, today);
+    out.left = Object.fromEntries(Object.entries(left).filter(([slug]) => PRICE_TABLE.items.some((i) => i.slug === slug)));
   }
   const q = F.rentalQuote(slugs, duration, PRICE_TABLE, games.holdPercent);
   if (q) out.html = `<h3>Your total</h3>${quoteTable(q)}${out.returnDate ? `<p class="rq-help">Pickup ${esc(shortDay(pickup))}, return ${esc(shortDay(out.returnDate))}, at ${esc(PRICE_TABLE.pickupPlace)}.</p>` : ''}`;

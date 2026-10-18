@@ -210,7 +210,7 @@ const cal2 = (await s.get(`/admin/calendar?month=${askDay.slice(0, 7)}`)).text;
 const cell2 = (() => { const i = cal2.indexOf(`data-day="${askDay}"`); return cal2.slice(i, cal2.indexOf('</a>', i)); })();
 must(!/data-requested="porch"/.test(cell2) && /<span class="k porch_install"[^>]*>Porch install: Rhea Porchask</.test(cell2), 'a booked porch is still outlined, or not filled');
 // Held rental: filled + "Held"; expired: back to outlined Requested, not games out.
-const held = await s.siteRequest({ service: 'rentals', games: ['giant-checkers'], duration: 'day', pickup_date: plus(22), name: 'Hope Heldask', phone: '901-555-0975', email: 'hope.held@example.com' });
+const held = await s.siteRequest({ service: 'rentals', games: ['cornhole'], duration: 'day', pickup_date: plus(22), name: 'Hope Heldask', phone: '901-555-0975', email: 'hope.held@example.com' });
 let cal3 = (await s.get(`/admin/calendar?month=${plus(22).slice(0, 7)}`)).text;
 must(/data-held-chip[^>]*>Held · Rental pickup: Hope Heldask</.test(cal3), 'a held rental is not a filled chip that says Held');
 await s.db.prepare("UPDATE holds SET until = '2000-01-01 00:00:00' WHERE request_key = ?1").bind(held.row.request_key).run();

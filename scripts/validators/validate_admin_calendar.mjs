@@ -66,7 +66,8 @@ must(C.parseFormDate('10/24/2026') === '2026-10-24' && C.parseFormDate('2/30/202
 // Bundle expansion and games out.
 const exp = (t) => C.expandItems(t, PRICE_TABLE);
 must(exp('Pick 3 bundle ($110)').unnamed === 3, 'Pick 3 does not count as 3 games');
-must(exp('The Whole Party, all 8 items ($235 day / $350 weekend)').names.length === 8, 'The Whole Party does not count as all 8 items');
+// Every available item by kind (7 since Giant Checkers went unavailable, 18 Oct 2026; its 8 is both Color Stack sets).
+must(JSON.stringify(exp('The Whole Party, all 8 items ($235 day / $350 weekend)').names) === JSON.stringify(PRICE_TABLE.items.map((i) => i.name)) && PRICE_TABLE.items.length === 7 && !PRICE_TABLE.items.some((i) => /checkers/i.test(i.name)), 'The Whole Party does not count every available item');
 must(exp('Movie Night bundle, weekend: Inflatable Movie Screen, Giant Uno, Grab the Mic').names.length === 3, 'Movie Night bundle lines miscounted');
 {
   const bk = [
@@ -274,7 +275,7 @@ let invA;
 {
   const form = (await s.get(`/admin/calendar/new?r=${s.rk(reqB.key)}`)).text;
   must(form.includes('value="2026-10-30"') && form.includes('Weekend Renter') && form.includes('On these dates:'), 'scheduling screen is not pre-filled from the request');
-  const res = await s.post('/admin/calendar/bookings', { r: s.rk(reqB.key), kind: 'rental_pickup', date: '2026-10-31', return_date: '2026-11-02', customer_name: 'Weekend Renter', phone: '901-555-0101', email: '', place: 'Mt. Moriah Station', items: '', item: ['Giant Checkers', 'Grab the Mic', 'Inflatable Movie Screen'], note: 'Bring the pump' });
+  const res = await s.post('/admin/calendar/bookings', { r: s.rk(reqB.key), kind: 'rental_pickup', date: '2026-10-31', return_date: '2026-11-02', customer_name: 'Weekend Renter', phone: '901-555-0101', email: '', place: 'Mt. Moriah Station', items: '', item: ['Cornhole Set', 'Grab the Mic', 'Inflatable Movie Screen'], note: 'Bring the pump' });
   must(/\/admin\/day\/2026-10-31/.test(res.location), 'saving a booking does not open its day');
   let st = await s.one('SELECT status, prev_status FROM request_status WHERE request_key = ?1', reqB.key);
   must(st && st.status === 'scheduled', 'scheduling does not mark the request Scheduled');
@@ -316,7 +317,7 @@ let invA;
   st = await s.one('SELECT status FROM request_status WHERE request_key = ?1', reqB.key);
   must(st.status !== 'scheduled', `unscheduling left the request Scheduled (${st.status})`);
   must((await s.one('SELECT COUNT(*) AS n FROM booking_notes WHERE request_key = ?1', reqB.key)).n === 1, 'unscheduling lost the request notes');
-  await s.post('/admin/calendar/bookings', { r: s.rk(reqB.key), kind: 'rental_pickup', date: '2026-10-30', return_date: '2026-11-02', customer_name: 'Weekend Renter', phone: '', email: '', place: '', items: 'Giant Checkers' });
+  await s.post('/admin/calendar/bookings', { r: s.rk(reqB.key), kind: 'rental_pickup', date: '2026-10-30', return_date: '2026-11-02', customer_name: 'Weekend Renter', phone: '', email: '', place: '', items: 'Cornhole Set' });
   must((await s.get('/admin/day/2026-10-30')).text.includes('SECRETNOTE'), 'rescheduling did not bring the notes back');
   await s.post(`/admin/notes/${note.id}/delete`, { back: '/admin/day/2026-10-30' });
   must(!(await s.one('SELECT id FROM booking_notes WHERE id = ?1', note.id)), 'deleting a note did not persist');
