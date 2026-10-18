@@ -78,15 +78,24 @@ export const SERVICE_ONLY = {
   'card.undoJobDone': ['porch', 'party', 'grazing'],
 };
 
+// Calm cards (owner, 18 Oct 2026): at most this many secondary buttons show on a card; the rest
+// wait under "Show details", most relevant first (the order below).
+export const MAX_SECONDARY = 3;
+const SECONDARY_ORDER = ['card.openInvoice', 'card.createInvoice', 'card.schedInstall', 'card.schedSetup', 'card.schedPickup', 'ret.mark', 'card.seeCal',
+  'card.schedTakedown', 'card.schedGrazingPickup', 'ret.see', 'card.checklist', 'card.undoJobDone', 'card.printChecklist'];
+const rank = (k) => { const i = SECONDARY_ORDER.indexOf(k.split('|')[0]); return i < 0 ? SECONDARY_ORDER.length : i; };
+
 // The rules table. facts: { services, stage, inv, plan, sched, kinds (booked kinds),
-// returned, jobDoneAt }. Returns { primary: key|'', secondary: [key, ...] } where a key
-// may carry a booking kind as "key|kind".
+// returned, jobDoneAt }. Returns { primary: key|'', secondary: [key, ...] (at most
+// MAX_SECONDARY, shown on the card), more: [key, ...] (under Show details) } where a key
+// may carry a booking kind as "key|kind". "Done — put away" is only ever on a Finished or
+// Void card; money buttons live in the Payment box (cardPayment), never in the secondary row.
 export function cardButtons({ services, stage, inv = null, plan = 'half', sched = false, kinds = [], returned = false, jobDoneAt = false, takedownPlan = '' }) {
   const has = (k) => services.includes(k);
   const decorish = services.filter((k) => k !== 'rentals');
-  if (stage === 'archived') return { primary: 'pa.bringBack', secondary: [] };
-  if (stage === 'void') return { primary: 'pay.unvoid', secondary: ['card.archive'] };
-  if (stage === 'finished') return { primary: 'card.archive', secondary: [] };
+  if (stage === 'archived') return { primary: 'pa.bringBack', secondary: [], more: [] };
+  if (stage === 'void') return { primary: 'pay.unvoid', secondary: ['card.archive'], more: [] };
+  if (stage === 'finished') return { primary: 'card.archive', secondary: [], more: [] };
   const firstSched = services.filter((k) => SCHEDULE_FIRST[k] && !kinds.includes(SCHEDULE_FIRST[k][1])).map((k) => `${SCHEDULE_FIRST[k][0]}|${SCHEDULE_FIRST[k][1]}`);
   let primary = '';
   if (stage === 'new') primary = 'card.createInvoice';
@@ -114,10 +123,34 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
   if (has('rentals') && !returned && sched && primary !== 'ret.mark') sec.push('ret.mark');
   if (decorish.length && jobDoneAt && !returned) sec.push('card.undoJobDone');
   if (decorish.length) sec.push('card.checklist', 'card.printChecklist');
-  sec.push('card.archive');
   // The never-rules, applied last so no branch above can break them.
   const allowed = (key) => { const only = SERVICE_ONLY[key.split('|')[0]]; return !only || only.some((k) => has(k)); };
-  return { primary: allowed(primary) ? primary : '', secondary: [...new Set(sec)].filter(allowed).filter((k) => k !== primary) };
+  const all = [...new Set(sec)].filter(allowed).filter((k) => k !== primary && k !== 'card.archive' && !k.startsWith('pay.'))
+    .map((k, i) => [k, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(([k]) => k);
+  return { primary: allowed(primary) ? primary : '', secondary: all.slice(0, MAX_SECONDARY), more: all.slice(MAX_SECONDARY) };
+}
+
+// The Payment box on a card, by where the money stands (owner, 18 Oct 2026):
+//   none   no invoice yet           -> one quiet line, no buttons (Create invoice covers it)
+//   draft  invoice made, not sent   -> one quiet line, no buttons (Open and send covers it)
+//   sent   sent, nothing paid       -> "Invoice sent · owes $X" + Mark deposit received
+//                                      (Mark paid in full on a full pay plan)
+//   deposit deposit in              -> "Deposit in · still owes $X" + Mark paid in full + undo link
+//   paid   paid in full             -> "Paid in full ✓" + undo link
+// ONE money button at most, and never the same one as the primary (it would show twice).
+// Void is never here: it is a small link under Show details.
+export const PAY_STATES = ['none', 'draft', 'sent', 'deposit', 'paid'];
+export function payState({ inv = null, status = 'new' }) {
+  if (inv) return ({ draft: 'draft', deposit_paid: 'deposit', paid: 'paid', done: 'paid', void: 'void' })[inv.status] || 'sent';
+  return ({ deposit_paid: 'deposit', paid: 'paid', done: 'paid', void: 'void' })[status] || 'none';
+}
+export function cardPayment({ inv = null, status = 'new', plan = 'half', primary = '' }) {
+  const state = payState({ inv, status });
+  let button = '';
+  if (state === 'sent') button = plan === 'full' ? 'pay.paid' : 'pay.deposit';
+  else if (state === 'deposit') button = 'pay.paid';
+  if (button && button === String(primary).split('|')[0]) button = '';
+  return { state, button, undo: state === 'deposit' || state === 'paid' };
 }
 
 // The takedown box: which porch/party takedown still needs a decision on this card.

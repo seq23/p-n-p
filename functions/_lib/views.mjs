@@ -5,7 +5,7 @@
 // screen opens with a numbered 1-2-3 and (except Requests itself) a Back link.
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
-import { servicesOf, cardStage, cardButtons, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, takedownChoice } from './cards.mjs';
+import { servicesOf, cardStage, cardButtons, cardPayment, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, takedownChoice } from './cards.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
@@ -221,11 +221,14 @@ function methodPicker() {
   return `<label>How did they pay?</label><select name="method">${METHODS.map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>`;
 }
 
-function confirmStep({ key, yesKey, label, question, action, hidden, danger = false, extra = '', cls = '' }) {
-  return `<div class="act"><details class="confirm"><summary class="btn ${danger ? 'danger' : (cls || 'ghost')}"${tip(key)}>${esc(label)}</summary>
+// link: a small text link instead of a big button (calm cards: undo and Void); helper: false
+// keeps the helper line as the tooltip only.
+function confirmStep({ key, yesKey, label, question, action, hidden, danger = false, extra = '', cls = '', link = false, helper = true }) {
+  const summary = link ? `linkbtn${danger ? ' danger' : ''}` : `btn ${danger ? 'danger' : (cls || 'ghost')}`;
+  return `<div class="act${link ? ' small' : ''}"><details class="confirm"><summary class="${summary}"${tip(key)}>${esc(label)}</summary>
     <div class="confirmbox"><p><strong>${esc(question)}</strong></p><div class="actions">
       <form method="post" action="${esc(action)}">${hidden}${extra}<button class="btn${danger ? ' danger' : ''}" type="submit"${tip(yesKey)}>${esc(LABEL[yesKey])}</button></form>
-      <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('pay.no')}>No, go back</button></div></div></details>${hint(key)}</div>`;
+      <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('pay.no')}>No, go back</button></div></div></details>${helper && !link ? hint(key) : ''}</div>`;
 }
 const LABEL = { 'dep.refundYes': 'Yes, record the refund', 'dep.keepYes': 'Yes, keep it for damage', 'exp.deleteYes': 'Yes, delete the expense', 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
   'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'hold.releaseYes': 'Yes, release the games', 'hold.depositYes': 'Yes, mark deposit received', 'set.newTokenYes': 'Yes, make a new link', 'td.jobDoneYes': 'Yes, mark job done', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
@@ -354,16 +357,34 @@ export function idsReadyBox(rows) {
     ${rows.map((r) => `<div class="booking" data-id-ready><strong>${esc(r.name || 'No name given')}</strong>${deleteIdStep(r, b64urlText(r.key))}</div>`).join('')}</section>`;
 }
 
-function requestPayment(r, st, inv, omit = '') {
-  const who = r.name || 'this customer';
-  if (inv) {
-    const total = inv.total_cents || 0;
-    const bal = inv.balance;
-    return paymentBox({ who, status: inv.status, plan: payPlanOf(inv, total), rest: bal ? bal.remaining : total - (inv.deposit_due_cents || 0), number: inv.number,
-      balanceLine: bal && !bal.void ? esc([bal.owed > 0 ? `Owes ${money(bal.owed)}` : 'Paid in full ✓', bal.refundable ? `Damage deposit ${money(bal.refundable)}, refundable` : ''].filter(Boolean).join(' · ')) : '',
-      target: { action: `/admin/invoices/${inv.id}/status`, field: 'action', extra: { back: '/admin/' } }, omit });
-  }
-  return paymentBox({ who, status: st.status, hasInvoice: false, target: { action: '/admin/requests/status', field: 'status', extra: { r: b64urlText(r.key) } }, omit });
+// The Payment box on a request card: stage-aware, from the rules table (cards.mjs cardPayment).
+// One line of words, at most ONE money button, a small undo link; Void lives under Show details.
+function cardPaymentBox(r, st, inv, primary, ctx) {
+  const who = ctx.who;
+  const t = ctx.payTarget;
+  const p = cardPayment({ inv, status: st.status, plan: inv ? payPlanOf(inv, inv.total_cents || 0) : 'half', primary });
+  const bal = inv && inv.balance;
+  const owed = bal ? bal.owed : (inv ? Math.max(0, (inv.total_cents || 0)) : 0);
+  const dmg = bal && bal.refundable ? ` · damage deposit ${money(bal.refundable)}, refundable` : '';
+  const words = {
+    none: 'No invoice yet.', draft: 'Invoice made, not sent yet.',
+    sent: `Invoice sent · owes ${money(owed)}`,
+    deposit: inv ? `Deposit in · still owes ${money(owed)}` : 'Deposit in.',
+    paid: 'Paid in full ✓',
+  }[p.state] || '';
+  if (p.state === 'none' || p.state === 'draft') return `<p class="payline muted" data-payment data-pay-state="${p.state}" data-pay-words>${esc(words)}</p>`;
+  const out = [];
+  if (p.button) out.push(cardButton(p.button, ctx, false, { helper: false }));
+  if (p.undo) out.push(confirmStep({ key: 'pay.unpaid', yesKey: 'pay.unpaidYes', label: 'That was a mistake: mark as not paid', question: `Mark ${who} as not paid? Only do this to fix a mistake.`, action: t.action, hidden: hiddenInputs({ ...t.extra, [t.field]: 'unpaid' }), link: true }));
+  return `<section class="paybox calm" data-payment data-pay-state="${p.state}"><p class="words" data-pay-words>${esc(words + dmg)}</p>${out.length ? `<div class="payacts">${out.join('')}</div>` : ''}</section>`;
+}
+
+// Void, as a small danger link under Show details (never a big button on a card).
+function voidLink(r, inv, ctx) {
+  const t = ctx.payTarget;
+  const q = inv && inv.number ? `Void invoice ${inv.number} for ${ctx.who}? The customer is not told. Use this when the job is cancelled or the invoice was a mistake.`
+    : `Void the request from ${ctx.who}? The customer is not told. Use this when the job is cancelled or the request was a mistake.`;
+  return `<div class="voidlink" data-void-link>${confirmStep({ key: 'pay.void', yesKey: 'pay.voidYes', label: 'Void this request…', question: q, action: t.action, hidden: hiddenInputs({ ...t.extra, [t.field]: 'void' }), danger: true, link: true })}</div>`;
 }
 
 // ---- Request cards (JOB B, owner-approved 18 Oct 2026) -----------------------------------
@@ -392,6 +413,11 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .stepspanel .sps{margin:8px 0 0;font-size:.95rem}.stepspanel .sps a{display:inline-flex;min-height:32px;align-items:center;margin-right:12px}
 @media(min-width:900px){.wrap.panelwide{max-width:1080px}.stepspanel{grid-template-columns:repeat(3,1fr)}}
 .putaway{margin-top:24px}
+.payline{margin:12px 2px 0;font-size:1rem}
+.paybox.calm{padding:10px 14px}.paybox.calm .words{margin:0 0 6px}
+.payacts{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}.payacts .act{margin:0}
+.act.small{margin:0}.linkbtn.danger{color:#8f3427}
+.voidlink{margin-top:12px;border-top:1px solid var(--line);padding-top:4px}
 .tdbox{margin:10px 0}.tdbox .secrow{margin-top:8px}.linkbtn{background:none;border:0;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}
 `;
 
@@ -415,7 +441,7 @@ const CARD_LABEL = {
 };
 
 // One button from the rules table. ctx: { rk, inv, st, sched, payTarget, who, plan }.
-function cardButton(keyKind, ctx, primary) {
+function cardButton(keyKind, ctx, primary, { helper = true } = {}) {
   const [key, kind] = keyKind.split('|');
   const cls = primary ? 'btn primary' : 'btn ghost';
   const wrap = (html) => (primary ? act(html, key) : `<div class="act">${html}</div>`);
@@ -432,7 +458,7 @@ function cardButton(keyKind, ctx, primary) {
       return a(`/admin/calendar/new?r=${rk}&kind=${kind}`, CARD_LABEL[key]);
     case 'card.jobDone':
       // Takedown not decided yet: ask once, at the moment of Job done; never blocks it.
-      if (ctx.tdNotSure) return confirmStep({ key, yesKey: 'td.jobDoneYes', label: 'Mark job done', cls: primary ? 'primary' : 'ghost', question: `The takedown is not decided yet for ${ctx.who}. Mark the job done anyway? You can still schedule the takedown later.`, action: '/admin/requests/jobdone', hidden: hiddenInputs({ r: rk }) });
+      if (ctx.tdNotSure) return confirmStep({ key, yesKey: 'td.jobDoneYes', label: 'Mark job done', cls: primary ? 'primary' : 'ghost', question: `The takedown is not decided yet for ${ctx.who}. Mark the job done anyway? You can still schedule the takedown later.`, action: '/admin/requests/jobdone', hidden: hiddenInputs({ r: rk }), helper: primary });
       return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Mark job done</button>`)}</form>`;
     case 'card.undoJobDone': return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk, undo: '1' })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Undo job done</button>`)}</form>`;
     case 'card.archive': return `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}${wrap(`<button class="${primary ? 'btn primary' : 'btn ghost'}" type="submit"${tip(key)}>Done — put away</button>`)}</form>`;
@@ -442,7 +468,7 @@ function cardButton(keyKind, ctx, primary) {
       const t = ctx.payTarget;
       const isInvoice = t.field === 'action';
       const dep = key === 'pay.deposit';
-      return confirmStep({ key, yesKey: dep ? 'pay.depositYes' : 'pay.paidYes', label: dep ? 'Mark deposit received' : 'Mark paid in full', cls: primary ? 'primary' : 'ghost',
+      return confirmStep({ key, yesKey: dep ? 'pay.depositYes' : 'pay.paidYes', label: dep ? 'Mark deposit received' : 'Mark paid in full', cls: primary ? 'primary' : 'ghost', helper: primary && helper,
         question: dep ? `Mark ${ctx.who}'s deposit as received? Only do this after the money is in your account.` : `Mark ${ctx.who} as paid in full? Only do this after the money is in your account.`,
         action: t.action, hidden: hiddenInputs({ ...t.extra, [t.field]: dep ? 'deposit_paid' : 'paid' }), extra: isInvoice ? methodPicker() : '' });
     }
@@ -505,7 +531,7 @@ export function requestCard(r, o) {
   const quiet = ['void', 'finished', 'archived'].includes(stage);
   const finishedNote = stage === 'finished' ? '<div class="notice ok" data-put-away-prompt><strong>Finished: the job is done and it is paid in full.</strong> Put it away?</div>' : '';
   const damage = returned && ret.damaged && stage !== 'archived' && stage !== 'void' ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : '';
-  const payment = quiet ? '' : requestPayment(r, st, inv, rules.primary);
+  const payment = quiet ? '' : cardPaymentBox(r, st, inv, rules.primary, ctx);
   return `<article class="card" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
       ${badges(services)}
       <div class="spread"><h3 class="who">${esc(r.name || 'No name given')}</h3><div class="row">${chips}</div></div>
@@ -523,6 +549,8 @@ export function requestCard(r, o) {
         ${cl && cl !== 'none' ? `<div class="muted" style="margin-top:4px">Checklist ${cl === 'done' ? 'done ✓' : 'started'}</div>` : ''}
         ${requestDetailsBody(r, { referrers })}
         ${historyHtml(events, notes)}
+        ${rules.more.length ? `<div class="secrow" data-more-buttons>${rules.more.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
+        ${quiet ? '' : voidLink(r, inv, ctx)}
       </details>
     </article>`;
 }

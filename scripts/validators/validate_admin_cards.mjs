@@ -34,7 +34,7 @@ for (const services of SINGLE) {
       const kinds = booked ? services.map((k) => firstKind[k]) : [];
       const inv = ['new'].includes(stage) ? null : { id: 1, status: stage === 'draft' ? 'draft' : 'sent' };
       const out = K.cardButtons({ services, stage, inv, kinds, sched: booked, returned: false, jobDoneAt: stage === 'job_done' });
-      const all = [out.primary, ...out.secondary].filter(Boolean).map((x) => x.split('|')[0]);
+      const all = [out.primary, ...out.secondary, ...(out.more || [])].filter(Boolean).map((x) => x.split('|')[0]);
       const tag = `${services.join('+')} @ ${stage}${booked ? ' (booked)' : ''}`;
       if (services.length === 1 && services[0] === 'rentals') for (const k of NEVER_RENTAL) must(!all.includes(k), `${tag}: a rental shows ${k}`);
       if (!services.includes('porch') && !services.includes('party')) must(!all.includes('card.schedTakedown'), `${tag}: takedown shown without porch or party`);
@@ -44,21 +44,26 @@ for (const services of SINGLE) {
       else if (stage === 'archived') must(out.primary === 'pa.bringBack' && !out.secondary.length, `${tag}: put away must show only Bring back (got ${all})`);
       else {
         must(Boolean(out.primary), `${tag}: no primary button`);
-        must(out.secondary.includes('card.archive'), `${tag}: no Put away in the secondary row`);
+        // Calm cards (owner, 18 Oct 2026): Put away only on Finished/Void, at most 3 secondary
+        // buttons visible (the rest under Show details), never a money button in the row.
+        must(!all.includes('card.archive'), `${tag}: Done — put away shows on a card that is not Finished or Void`);
+        must(out.secondary.length <= K.MAX_SECONDARY && K.MAX_SECONDARY === 3, `${tag}: ${out.secondary.length} secondary buttons visible (max 3)`);
+        must(!out.secondary.length || !out.more.length || out.secondary.length === 3, `${tag}: buttons moved under Show details while the row has room`);
+        must(![...out.secondary, ...out.more].some((k) => k.startsWith('pay.')), `${tag}: a money button in the secondary row`);
         const decor = services.some((k) => k !== 'rentals');
         must(!decor || (all.includes('card.checklist') && all.includes('card.printChecklist')), `${tag}: porch/party/grazing lacks the walk-through checklist`);
         if (booked) {
           for (const k of services.filter((x) => x === 'porch' || x === 'party')) {
             for (const plan of ['', 'not_sure', 'customer_handles', 'scheduled']) {
               const o2 = K.cardButtons({ services, stage, inv, kinds, sched: true, takedownPlan: plan });
-              const has = o2.secondary.includes(`card.schedTakedown|${k}_takedown`);
+              const has = [...o2.secondary, ...o2.more].includes(`card.schedTakedown|${k}_takedown`);
               must(plan === 'scheduled' ? has : !has, `${tag}: takedown plan "${plan}" ${plan === 'scheduled' ? 'lacks' : 'shows'} the Schedule takedown button`);
               const box = K.takedownChoice({ services, kinds, takedownPlan: plan, stage });
               must(box === ({ '': 'ask', not_sure: 'not_sure', customer_handles: 'customer_handles', scheduled: '' })[plan], `${tag}: takedown box for plan "${plan}" is "${box}"`);
             }
           }
         }
-        if (booked && services.includes('grazing')) must(out.secondary.includes('card.schedGrazingPickup|grazing_pickup'), `${tag}: no optional grazing pickup once the setup is booked`);
+        if (booked && services.includes('grazing')) must([...out.secondary, ...out.more].includes('card.schedGrazingPickup|grazing_pickup'), `${tag}: no optional grazing pickup once the setup is booked`);
         if (!booked) must(!all.includes('card.schedTakedown') && !all.includes('card.schedGrazingPickup'), `${tag}: the second booking is offered before the first`);
       }
     }
@@ -74,6 +79,16 @@ must(P(['party'], 'deposit_paid') === 'card.schedSetup|party_setup' && P(['grazi
 must(P(['rentals'], 'deposit_paid') === 'card.schedPickup|rental_pickup', 'rentals deposit paid: primary is not Schedule pickup + return');
 must(P(['porch'], 'scheduled', { sched: true, kinds: ['porch_install'] }) === 'card.jobDone' && P(['rentals'], 'scheduled', { sched: true }) === 'ret.mark', 'scheduled: primary is not Mark job done / Mark returned');
 must(P(['porch'], 'job_done', { jobDoneAt: true }) === 'pay.paid', 'job done: primary is not Mark paid in full');
+// The Payment box by money state: no invoice = no money buttons; ONE button at most; never
+// the same button as the primary; undo only once something is paid; Void never in the box.
+const CP = (inv, extra = {}) => K.cardPayment({ inv, ...extra });
+must(K.payState({ inv: null }) === 'none' && CP(null).button === '' && !CP(null).undo, 'no invoice: the Payment box offers a money button');
+must(CP(null, { status: 'scheduled' }).button === '' && CP({ status: 'draft' }).button === '' && CP({ status: 'draft' }).state === 'draft', 'no invoice sent: the Payment box offers a money button');
+must(CP({ status: 'sent' }).button === 'pay.deposit' && CP({ status: 'sent' }, { plan: 'full' }).button === 'pay.paid' && !CP({ status: 'sent' }).undo, 'invoice sent: not ONE Mark deposit received (Mark paid in full on a full plan)');
+must(CP({ status: 'deposit_paid' }).button === 'pay.paid' && CP({ status: 'deposit_paid' }).undo, 'deposit paid: not ONE Mark paid in full + the undo link');
+must(CP({ status: 'paid' }).button === '' && CP({ status: 'paid' }).undo, 'paid in full: a money button still shows, or no undo link');
+must(CP({ status: 'sent' }, { primary: 'pay.deposit' }).button === '' && CP({ status: 'deposit_paid' }, { primary: 'pay.paid' }).button === '', 'the Payment box repeats the primary button');
+for (const st of ['draft', 'sent', 'deposit_paid', 'paid']) for (const plan of ['half', 'full']) must(!['pay.void', 'pay.unvoid'].includes(CP({ status: st }, { plan }).button), `Void in the Payment box (${st})`);
 // Stage: the next step, and a hand-run job without an invoice is not stuck on money.
 const PG = await mod('functions/_lib/progress.mjs');
 const stageOf = (st, inv, scheduled) => K.cardStage({ pr: PG.deriveProgress({ st, inv, scheduled }), inv });
@@ -105,12 +120,38 @@ must(/data-facts>[\s\S]*Event Sat 24 Oct[\s\S]*Germantown[\s\S]*href="tel:901555
 must((pc.match(/class="btn primary"/g) || []).length === 1, 'porch card does not have exactly ONE big primary button');
 must(/<details class="disclose" data-details><summary[^>]*>Show details<\/summary>[\s\S]*Location/.test(pc), 'answers are not behind Show details');
 must(!/Show details[\s\S]*class="btn primary"/.test(pc), 'an action is hidden behind Show details');
+// Calm card render: no invoice -> one quiet line and no money buttons; Void a small link under
+// Show details, never a big button; at most 3 secondary buttons; at most one helper line.
+const beforeDetails = (c) => c.slice(0, c.indexOf('data-details'));
+must(/<p class="payline muted" data-payment data-pay-state="none" data-pay-words>No invoice yet\.<\/p>/.test(pc), 'no-invoice card lacks the single quiet "No invoice yet." line');
+must(!/data-help="pay\.(deposit|paid|unpaid|void)"/.test(beforeDetails(pc)), 'no-invoice card shows a payment button');
+must(/data-void-link>[\s\S]*<summary class="linkbtn danger" data-help="pay\.void"[^>]*>Void this request…<\/summary>[\s\S]*Yes, void it/.test(pc.slice(pc.indexOf('data-details'))), 'Void is not a small danger link (with its confirm) under Show details');
+must(!/Done — put away/.test(pc), 'Done — put away shows on a New card');
 const gc = card(html, 'Gia Graze');
 must(/data-grazing-facts>Guests: 15–40 · Food estimate: \$180–\$720</.test(gc), `grazing card lacks guest count + food estimate (${(gc.match(/data-grazing-facts>[^<]*/) || [''])[0]})`);
 const rc = card(html, 'Rae Rent');
 must(/Pickup Fri 23 Oct/.test(rc) && /Pickup at Mt\. Moriah Station/.test(rc), 'rental key facts do not read the pickup day and place');
 for (const word of ['checklist', 'Schedule takedown', 'Schedule install', 'Mark job done']) must(!new RegExp(word, 'i').test(rc.replace(/<[^>]+>/g, ' ')) && !new RegExp(`data-help="(card\\.checklist|card\\.printChecklist|card\\.sched(Install|Takedown)|card\\.jobDone)"`).test(rc), `rental card shows "${word}"`);
 must(/data-owes>Owes \$500\.00/.test(rc), 'rental card with a sent unpaid invoice does not say what is owed');
+must(/data-pay-state="sent"><p class="words" data-pay-words>Invoice sent · owes \$500\.00</.test(rc), 'sent card does not say "Invoice sent · owes $X"');
+must((rc.match(/<summary[^>]*data-help="pay\.deposit"/g) || []).length === 1 && !/data-help="pay\.paid"/.test(rc), 'sent card does not show exactly ONE Mark deposit received');
+// Deposit in / paid in full renders.
+const depInv = { ...owing, id: 10, status: 'deposit_paid', balance: { ...owing.balance, paid: 25000, owed: 25000, remaining: 25000 } };
+const paidInv = { ...owing, id: 11, status: 'paid', balance: { ...owing.balance, paid: 50000, owed: 0, remaining: 0 } };
+const html2 = V.dashboardPage({ requests: reqs, statuses: { y: { status: 'deposit_paid', invoice_id: 10 }, g: { status: 'paid', invoice_id: 11 }, r: { status: 'invoiced', invoice_id: 9 } }, invoices: { 9: owing, 10: depInv, 11: paidInv }, folderUrl: 'x', sheetError: '', flash: '', missingPayment: [], foodPerHead: { low: 12, high: 18 } });
+const yc = card(html2, 'Pia Party');
+must(/data-pay-state="deposit"><p class="words" data-pay-words>Deposit in · still owes \$250\.00</.test(yc), 'deposit card does not say "Deposit in · still owes $X"');
+must((yc.match(/data-help="pay\.paid"/g) || []).length === 1 && !/data-help="pay\.deposit"/.test(yc) && /<summary class="linkbtn" data-help="pay\.unpaid"[^>]*>That was a mistake: mark as not paid</.test(yc), 'deposit card lacks ONE Mark paid in full + the small undo link');
+const gc2 = card(html2, 'Gia Graze');
+must(/data-pay-words>Paid in full ✓</.test(gc2) && !/data-help="pay\.(deposit|paid)"/.test(beforeDetails(gc2)) && /class="linkbtn" data-help="pay\.unpaid"/.test(gc2), 'paid card is not "Paid in full ✓" + the undo link only');
+for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].map((n) => [n, card(html, n)]), ['Pia Party (deposit)', yc], ['Gia Graze (paid)', gc2]]) {
+  must(!/<summary class="btn danger"/.test(c) && !/<summary class="btn[^"]*"[^>]*data-help="pay\.void"/.test(c), `${nm}: a big danger button on the card (Void must be a small link)`);
+  must(!/data-help="pay\.void"/.test(beforeDetails(c)), `${nm}: Void outside Show details`);
+  const row = c.match(/data-secondary>([\s\S]*?)<\/div>\s*(?:<section|<p class="payline|<details)/);
+  must(!row || (row[1].match(/class="btn /g) || []).length <= 3, `${nm}: more than 3 secondary buttons visible`);
+  must((beforeDetails(c).match(/class="hint"/g) || []).length <= 1, `${nm}: more than one helper line on the card`);
+  must(!/Done — put away/.test(c), `${nm}: Done — put away on a live card`);
+}
 must(/data-week-counts|data-filters/.test(html) && (html.match(/data-filter="/g) || []).length === 6, 'the six filter chips are missing');
 for (const [k, label] of K.FILTERS) must(html.includes(`data-filter="${k}"`) && html.includes(`>${label.replace('&', '&amp;')}</a>`), `filter chip ${label} missing`);
 
