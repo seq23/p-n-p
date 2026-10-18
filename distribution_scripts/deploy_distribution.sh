@@ -51,15 +51,25 @@ if [[ -n "$GSC_CREDS" && -n "$GSC_SITE_URL" && -f "$GSC_CREDS" ]]; then
     2) gsc_inspection_status="$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1]))["status"])' "$ARTIFACT_DIR/inspection-hold.json" 2>/dev/null || echo HELD_UNNAMED)"
        # A hold with no readable name is not a named stop; treat it as the failure it is.
        [[ "$gsc_inspection_status" == HELD_QUOTA || "$gsc_inspection_status" == HELD_CREDENTIAL ]] || gsc_inspection_status="FAILED" ;;
+    # 3: provider 5xx on a minority of URLs; carried into the next run and
+    # named ("GSC inspection deferred for N URL(s): provider 5xx"). Green.
+    3) gsc_inspection_status="DEFERRED" ;;
     *) gsc_inspection_status="FAILED" ;;
   esac
 fi
-python3 - "$RECEIPT" "$HOST" "$indexnow_status" "$gsc_sitemap_status" "$gsc_inspection_status" "$ARTIFACT_DIR/inspection-hold.json" <<'PY'
-import json,sys,datetime,pathlib
-out,host,indexnow,gsc_sitemap,gsc_inspection,hold_path=sys.argv[1:]
+python3 - "$RECEIPT" "$HOST" "$indexnow_status" "$gsc_sitemap_status" "$gsc_inspection_status" "$ARTIFACT_DIR/inspection-hold.json" "$ARTIFACT_DIR/inspection-deferred.json" <<'PY'
+import json,sys,datetime,pathlib,os
+out,host,indexnow,gsc_sitemap,gsc_inspection,hold_path,deferred_path=sys.argv[1:]
 receipt={"schema_version":"1.0","recorded_at":datetime.datetime.now(datetime.timezone.utc).isoformat(),"host":host,"indexnow":indexnow,"gsc_sitemap":gsc_sitemap,"gsc_inspection":gsc_inspection,"truth_boundary":"SUBMITTED means the provider request completed without local error. It does not prove indexing, ranking, LLM surfacing, or citation."}
 if gsc_inspection.startswith("HELD_") and pathlib.Path(hold_path).exists():
     receipt["gsc_inspection_hold"]=json.loads(pathlib.Path(hold_path).read_text(encoding="utf-8"))
+if pathlib.Path(deferred_path).exists():
+    receipt["gsc_inspection_deferred"]=json.loads(pathlib.Path(deferred_path).read_text(encoding="utf-8"))
+    summary=os.environ.get("GITHUB_STEP_SUMMARY")
+    if summary:
+        with open(summary,"a",encoding="utf-8") as f:
+            d=receipt["gsc_inspection_deferred"]
+            f.write(f"### {d['named_line']}\n\n"+"".join(f"- {u} (deferred {n} run(s) in a row)\n" for u,n in d["deferred_urls"].items()))
 pathlib.Path(out).write_text(json.dumps(receipt,indent=2)+"\n",encoding="utf-8")
 print(json.dumps(receipt,indent=2))
 PY
