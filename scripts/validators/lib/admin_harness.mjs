@@ -79,6 +79,7 @@ export function makeEnv(db) {
   const sent = [];
   const objects = new Map();
   const aiCalls = [];
+  const idObjects = new Map();
   return {
     DB: db, PNP_SHEET_FIXTURE: '1', PNP_ADMIN_PASSWORD: 'local-test-pass', PNP_ADMIN_SESSION_KEY: 'test-session-key',
     MAILER: { fetch: async (_u, init) => { sent.push(JSON.parse(init.body)); return Response.json({ ok: true, messageId: 'x' }); } },
@@ -88,12 +89,20 @@ export function makeEnv(db) {
       get: async (key) => { const o = objects.get(key); return o ? { body: o.bytes, arrayBuffer: async () => o.bytes.buffer.slice(o.bytes.byteOffset, o.bytes.byteOffset + o.bytes.byteLength) } : null; },
       delete: async (key) => { objects.delete(key); },
     },
+    // The private ID-photo bucket (binding IDS), in memory.
+    IDS: {
+      put: async (key, bytes, opts) => { idObjects.set(key, { bytes: new Uint8Array(bytes), type: opts && opts.httpMetadata ? opts.httpMetadata.contentType : '' }); },
+      get: async (key) => { const o = idObjects.get(key); return o ? { body: o.bytes, arrayBuffer: async () => o.bytes.buffer.slice(o.bytes.byteOffset, o.bytes.byteOffset + o.bytes.byteLength) } : null; },
+      delete: async (key) => { idObjects.delete(key); },
+    },
+    // Static assets (the Pages ASSETS binding): request.html and friends from the repo.
+    ASSETS: { fetch: async (req) => { const p = new URL(req.url || req).pathname.replace(/^\//, ''); const f = path.join(ROOT, `${p || 'index'}.html`); return fs.existsSync(f) ? new Response(fs.readFileSync(f, 'utf8'), { headers: { 'Content-Type': 'text/html' } }) : new Response('not found', { status: 404 }); } },
     // Workers AI stand-in: answers whatever aiReply holds (a string, or a function of the input).
     AI: {
       run: async (model, input) => { aiCalls.push({ model, input }); const r = typeof aiReply.value === 'function' ? aiReply.value(input) : aiReply.value; if (r instanceof Error) throw r; return { response: r }; },
       toMarkdown: async () => [{ data: 'HOME DEPOT 10/12/2026 TOTAL 42.17 TAX 3.17' }],
     },
-    sent, objects, aiCalls, aiReply,
+    sent, objects, idObjects, aiCalls, aiReply,
   };
 }
 

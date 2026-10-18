@@ -27,6 +27,8 @@ const allowedRootFiles = new Set([
   'site.webmanifest',
   'accessibility.html',
   'contact.html',
+  'request.html',
+  'rules.html',
   'how-it-works.html',
   'index.html',
   'llms-answers.txt',

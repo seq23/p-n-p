@@ -191,18 +191,22 @@ must((await s.get('/admin/calendar', { auth: false })).status === 303, 'Calendar
 must((await s.get('/admin/search?q=test', { auth: false })).location === '/admin', 'search is reachable signed out');
 must((await s.post('/admin/day/2026-10-24/email', {}, { headers: { Origin: 'https://evil.example' } })).status === 403, 'Email it to me accepts a cross-site POST');
 
+// Only the request cards of a Requests page (the weekly count box lists the week's names too).
+const cardsOf = (html) => html.split('<article class="card" data-card=').slice(1).map((c) => c.slice(0, c.indexOf('</article>'))).join('\n');
 // Archive round trip.
 {
   const r = await s.post('/admin/requests/archive', { r: s.rk(reqB.key) }, { headers: { 'X-Pnp-Fetch': '1' } });
   must(r.status === 200, 'archive POST (fetch) failed');
   const dash = (await s.get('/admin/')).text;
-  must(!dash.includes('Weekend Renter') && dash.includes('Test Renter'), 'an archived request is still on the main list');
+  // The request cards (the weekly count box above them lists every request of the week, put away or not).
+  const cards = cardsOf(dash);
+  must(!cards.includes('Weekend Renter') && cards.includes('Test Renter'), 'an archived request is still on the main list');
   const put = (await s.get('/admin/archive')).text;
   must(put.includes('Weekend Renter') && put.includes('Bring back'), 'Put away tab does not list the archived request');
   const undo = (await s.get(`/admin/?put=${s.rk(reqB.key)}`)).text;
   must(/Put away\.<\/strong><form method="post" action="\/admin\/requests\/unarchive">/.test(undo) && undo.includes('data-autohide'), 'no "Put away. Undo" banner after archiving');
   await s.post('/admin/requests/unarchive', { r: s.rk(reqB.key) });
-  must((await s.get('/admin/')).text.includes('Weekend Renter'), 'Bring back does not return the request to the list');
+  must(cardsOf((await s.get('/admin/')).text).includes('Weekend Renter'), 'Bring back does not return the request to the list');
   const row = await s.one('SELECT archived_at FROM request_status WHERE request_key = ?1', reqB.key);
   must(row && row.archived_at === null, 'unarchive did not clear archived_at (row must stay, never deleted)');
 }

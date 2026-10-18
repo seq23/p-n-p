@@ -91,6 +91,9 @@ export const HELP = {
   'card.phone': H('card', 'Phone number', 'Calls this customer from your phone.', '', 'Tap the number to ring them.'),
   'card.email': H('card', 'Email address', 'Starts an email to this customer.', '', 'Tap it to write to them from your email app.'),
   'card.social': H('card', 'Social media link', 'Opens the social media page they gave on the form.', '', 'A quick way to check who they are.'),
+  'card.idDelete': H('card', 'Delete this ID', "Deletes this customer's ID photo for good, after asking you first.", '', 'Use it once they have paid in full (and, for a game rental, brought the games back). The list "IDs ready to delete" on Requests shows who is ready. Nothing ever deletes an ID by itself. Every delete is logged with the time.', 'It cannot be undone.'),
+  'card.idDeleteYes': H('card', 'Yes, delete the ID for good', 'Deletes the ID photo now. This cannot be undone.', '', 'For a request from the old Google Form, the photo also sits in the ID folder in Google Drive: delete it there by hand too.', 'It cannot be undone.'),
+  'req.weekList': H('requests', "See this week's requests", 'Lists the requests that came in this week, Monday to Sunday.', '', 'The line above it counts every request sent this week by service, with last week next to it for comparison.'),
   'card.idPhoto': H('card', 'Open ID photo', 'Opens the photo ID this customer uploaded.', '', 'Their photo ID from the form, in Google Drive.'),
 
   // Payment

@@ -205,7 +205,9 @@ function fakeSheets({ failWith = 0 } = {}) {
   const r2 = await AM.syncSafely(s.env, { client });
   must(r2.ok && sheet.tabs.get('Bookings').length === n + 1 && r2.bookings.appended === 0, 'a second sync duplicated rows (upsert by ID broken / not idempotent)');
   must(sheet.tabs.get('Form Responses 1').length === 2 && !sheet.touched.includes('Form Responses 1'), 'the sync touched Form Responses 1');
-  must(sheet.touched.every((t) => ['Bookings', 'Monthly totals', 'Expenses'].includes(t)), `the sync wrote other tabs: ${[...new Set(sheet.touched)].join(', ')}`);
+  must(sheet.touched.every((t) => ['Bookings', 'Monthly totals', 'Expenses', 'Site requests'].includes(t)), `the sync wrote other tabs: ${[...new Set(sheet.touched)].join(', ')}`);
+  const site = sheet.tabs.get('Site requests');
+  must(site && site[0].join('|') === S.SITE_REQUEST_HEADER.join('|'), 'Site requests tab header wrong or missing');
   must((sheet.tabs.get('Monthly totals') || []).some((r) => r[0] === '2026-10') && (sheet.tabs.get('Expenses') || []).length >= 2, 'Monthly totals or Expenses tab missing rows');
   let refused = false;
   try { S.rangeFor('Form Responses 1', 'A1'); } catch { refused = true; }

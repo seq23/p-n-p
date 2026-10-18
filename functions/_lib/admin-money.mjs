@@ -1,5 +1,6 @@
 // Money tab, year-end summary for taxes, expenses with receipts, damage-deposit outcomes and
 // the Google Sheet sync (docs/admin-console.md). Auth is enforced before this runs.
+import { loadRequests, monthCount } from './requests.mjs';
 import { redirect, htmlResponse, getSettings, putSetting, toCents, FROM_EMAIL, bytesToB64 } from './util.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 import { isRentalInvoice } from './pricing.mjs';
@@ -26,7 +27,8 @@ export async function moneyPage(env, url) {
   const data = await moneyData(env.DB);
   const { results: needs } = await env.DB.prepare("SELECT * FROM expenses WHERE status = 'needs_check' ORDER BY id DESC").all();
   const { results: recent } = await env.DB.prepare("SELECT * FROM expenses WHERE status = 'saved' ORDER BY date DESC, id DESC LIMIT 30").all();
-  return htmlResponse(VM.moneyPage({ month, year, t: M.periodTotals(data, month), months: M.yearSummary(data, year).months, needs: needs || [], recent: recent || [], depositsHeld: M.depositsHeldAt(data, `${month}-31`), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  const requests = await loadRequests(env).catch(() => []);
+  return htmlResponse(VM.moneyPage({ month, year, requestsThisMonth: monthCount(requests, month), t: M.periodTotals(data, month), months: M.yearSummary(data, year).months, needs: needs || [], recent: recent || [], depositsHeld: M.depositsHeldAt(data, `${month}-31`), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
 }
 
 export async function moneyDetail(env, url) {
@@ -201,7 +203,11 @@ export async function sheetRows(env) {
   for (const p of data.payments) years.add(String(p.received_on).slice(0, 4));
   for (const b of all) years.add(String(b.date).slice(0, 4));
   const monthly = [...years].filter((y) => /^\d{4}$/.test(y)).sort().flatMap((y) => S.monthlyRows(data, y));
-  return { bookings, expenses: (ex || []).map(S.expenseRow), monthly, data };
+  const { results: site } = await env.DB.prepare("SELECT * FROM requests WHERE source = 'site' ORDER BY submitted_at").all();
+  const names = {};
+  for (const r of site || []) if (r.referral_code) names[r.referral_code] = r.name;
+  const siteRequests = (site || []).map((r) => S.siteRequestRow(r, { status: statuses[r.request_key] ? statuses[r.request_key].status : 'new', referrer: r.referred_by ? (names[r.referred_by] || r.referred_by) : '' }));
+  return { bookings, expenses: (ex || []).map(S.expenseRow), monthly, data, siteRequests };
 }
 
 export async function syncSheet(env, { client = null, year = null } = {}) {
@@ -210,8 +216,9 @@ export async function syncSheet(env, { client = null, year = null } = {}) {
   const b = await S.upsertById(c, S.TABS.bookings, S.BOOKING_HEADER, rows.bookings);
   await S.rewriteTab(c, S.TABS.monthly, S.MONTHLY_HEADER, rows.monthly);
   const e = await S.upsertById(c, S.TABS.expenses, S.EXPENSE_HEADER, rows.expenses);
+  const sr = await S.upsertById(c, S.TABS.siteRequests, S.SITE_REQUEST_HEADER, rows.siteRequests);
   if (year) await S.rewriteTab(c, `Year ${year}`, null, S.yearRows(rows.data, year));
-  return { bookings: b, expenses: e, months: rows.monthly.length };
+  return { bookings: b, expenses: e, siteRequests: sr, months: rows.monthly.length };
 }
 
 // Never throws; a failure is queued and the next page shows "Google Sheet will catch up shortly".

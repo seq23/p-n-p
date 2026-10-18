@@ -3,10 +3,18 @@
 Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026.
 
 ## What it does
-- **Requests**: read live from the request form's Google Sheet (`Form Responses 1`), newest first,
-  as the `gsc-bot@gsc-automation-493801` service account (Sheets API, JWT signed in the Worker,
-  cached 60 s). Each card shows contact, DOB, the ID file, the rentals/decor answers and
-  a status chip (New / Invoiced / Deposit paid / Paid / Done, table `request_status`).
+- **Requests**: read from D1 (`requests`, migration 0006; `functions/_lib/requests.mjs`), newest
+  first. The site form at porchandparty901.com/request writes there; the one real Google Form
+  request was imported once (`npm run admin:import-form-request -- --invoice PNP-2026-0002`,
+  source `google_form`, raw row kept, request_key unchanged so its status, invoice, payments,
+  booking, notes and checklist stay linked, ID still the Drive link). The other Form Responses
+  rows were tests: they stay in the sheet only. The Google Sheet is the archive and sync target
+  (new tab `Site requests`); `Form Responses 1` is never written. Each card shows contact, DOB,
+  the ID (site: a private photo, signed-in view; old form: the Drive link), "Agreed to rules on
+  ...", "Referred by ...", every answer and the progress line. "Delete this ID" (asked first,
+  permanent, logged) is the only way an ID is ever deleted; "IDs ready to delete" lists requests
+  paid in full (rentals: returned). The top shows "This week: N new requests (by service)" for
+  Mon-Sun America/Chicago with last week beside it; Money shows "Requests this month".
 - **Walk-through checklist**: `/admin/checklist` prints the four-page checklist (blank, or
   `?r=` pre-filled from a request). `/admin/checklist/online?r=` is the same checklist as a form,
   autosaved to `request_checklist`, with up to 10 photos (`checklist_photos`, ≤ 1.5 MB each after
@@ -148,6 +156,33 @@ Proof: `npm run validate:admin-money` (Memphis month/year boundaries, deposits a
 void excluded, categories reconcile with the year, CSV/PDF, receipts never auto-saved, AI fallback
 and cap, receipts private, zip holds only the year's receipts, sheet sync upsert/idempotent/never
 another tab/retry queue, the cron hook).
+
+## Site request form (owner-approved 18 Oct 2026)
+- **Page**: `request.html` (built by `scripts/generators/build_request_pages.js`, public and
+  indexable) rendered and answered by the Pages Function `functions/request/index.js`
+  (`functions/_lib/request-submit.mjs`); markup and validation in `functions/_lib/request-form.mjs`.
+  Page 1 asks what they are planning in the canonical service order with prices; each service has
+  its own questions; every path needs the government photo ID (owner note above the upload) and
+  the rules checkbox (`/rules`, `rules.html`, version `RULES_VERSION`; agreed time, version, name
+  and IP are stored and logged). Works without JavaScript (server validation, errors listed at the
+  top with links); with JavaScript the other sections hide and the phone shrinks the ID photo.
+- **ID photos**: private R2 bucket `pnp-ids` (binding `IDS`), JPEG/PNG only, 10 MB max, EXIF and
+  other metadata stripped (`functions/_lib/image-clean.mjs`), random object names. Read only by
+  the signed-in `/admin/requests/id` route; nothing deletes one except "Delete this ID".
+- **Spam ($0)**: honeypot, a server-signed render time (under 3 s is refused), Cloudflare Turnstile
+  when `TURNSTILE_SITEKEY` / `TURNSTILE_SECRET` are set, 5 requests per IP per hour (3 without the
+  robot check). A request sent with JavaScript off is taken and marked on its card.
+- **Rentals are a booking**: live availability (`/api/request/availability`, counts only) greys
+  booked games; the exact total, due-now (damage deposit + 50%) and at-pickup amounts are shown;
+  submitting holds the games 24 hours (`holds`, Settings `hold_hours`, `hold_auto_expire`), puts
+  pickup and return on the calendar and drafts the invoice for Valerie to send. An unpaid hold
+  expires by itself at its end time (games free again, request stays New, "Hold expired" logged);
+  "Mark deposit received" confirms it.
+- **After sending**: `/request/received?k=` (noindex) shows the next steps; a confirmation email
+  goes from hello@ (`functions/_lib/messages.mjs`, the one templates map and `sendMessage` seam).
+- **Referrals**: each request gets a random 8-letter code; `/r/<code>` sets a cookie the form reads
+  and the card says "Referred by <name>". No reward, no discount, no review ask.
+- **Guard**: `npm run validate:request-form` (in `validate:admin`).
 
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 The Google Form is rebuilt by hand; the admin prefill maps these exact strings

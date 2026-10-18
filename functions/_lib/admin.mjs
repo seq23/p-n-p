@@ -5,7 +5,10 @@ import {
   halfDeposit, PAY_PLANS, payPlanOf, amountDueNow, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice,
 } from './util.mjs';
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
-import { loadRequests, driveFileId, idFolderId } from './sheet.mjs';
+import { driveFileId, idFolderId } from './sheet.mjs';
+import { loadRequests, weekCounts, monthCount, idOnFile, logEvent } from './requests.mjs';
+import { chicagoDate } from './reminders.mjs';
+import { expireHolds } from './holds.mjs';
 import { PRICE_TABLE, CONTACT } from './prices.mjs';
 import { renderInvoicePdf, textMessage } from './pdf.mjs';
 import { prefillLines, pickupNote, isRentalInvoice } from './pricing.mjs';
@@ -138,7 +141,16 @@ async function folderUrl(env, settings, requests) {
   return 'https://drive.google.com/drive/search?q=%22File%20responses%22%20type%3Afolder';
 }
 
+// "IDs ready to delete": paid in full and, for a rental, the games back. A list, never automatic.
+export function readyToDeleteId(r, st, inv, ret) {
+  const bal = inv && inv.balance;
+  const paidFull = bal ? (!bal.void && bal.total > 0 && bal.remaining === 0) : Boolean(st && st.status === 'paid');
+  if (!paidFull) return false;
+  return r.wantsRentals ? Boolean(ret && ret.returned_at) : true;
+}
+
 async function dashboard(env, url) {
+  await expireHolds(env.DB);
   const settings = await getSettings(env.DB);
   let requests = []; let sheetError = '';
   try { requests = await loadRequests(env, { fresh: url.searchParams.get('fresh') === '1' }); } catch (e) { sheetError = e.message || String(e); }
@@ -155,7 +167,12 @@ async function dashboard(env, url) {
   const returns = await C.loadReturns(env.DB);
   const open = requests.filter((r) => !(statuses[r.key] && statuses[r.key].archived_at));
   const { reminders, tomorrowLabel, overdue } = await AC.remindersAndOverdue(env.DB);
-  return htmlResponse(V.dashboardPage({ requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError,
+  const referrers = {};
+  for (const r of requests) if (r.referralCode) referrers[r.referralCode] = r.name;
+  const idsReady = requests.filter((r) => idOnFile(r) && readyToDeleteId(r, statuses[r.key], statuses[r.key] && statuses[r.key].invoice_id ? invoices[statuses[r.key].invoice_id] : null, returns[r.key]));
+  const week = weekCounts(requests, chicagoDate());
+  return htmlResponse(V.dashboardPage({ requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
+    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady),
     flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
     extraTop: `${VC.overdueBox(overdue)}${VC.remindersBox(reminders, tomorrowLabel)}` }));
 }
@@ -217,6 +234,27 @@ async function createInvoice(env, request) {
   await syncInvoiceBookings(env, id);
   if (form.get('go') === 'send') return afterSend(id, await deliver(env, id, false));
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(afterSaveMessage(form.get('go')))}`);
+}
+
+// A draft invoice made for her by the site form (a rental booking): pay plan "custom" with the
+// deposit asked for now. Never sent by itself: Valerie taps Send.
+export async function createDraftInvoice(env, { key, name, email, phone, lines, depositCents, dueDate, notes = '' }) {
+  const issue = todayISO();
+  let number = await nextInvoiceNumber(env.DB, issue);
+  let id = null;
+  for (let attempt = 0; attempt < 3 && id === null; attempt += 1) {
+    try {
+      const row = await env.DB.prepare(`INSERT INTO invoices (number, request_key, customer_name, customer_email, customer_phone, issue_date, due_date, deposit_due_cents, notes, status, pay_plan, name_norm)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'draft', 'custom', ?10) RETURNING id`).bind(number, key, name, email, phone, issue, dueDate || issue, depositCents, notes, C.normName(name)).first();
+      id = row.id;
+    } catch (e) {
+      if (!/UNIQUE/i.test(String(e))) throw e;
+      number = await nextInvoiceNumber(env.DB, issue);
+    }
+  }
+  await saveLines(env.DB, id, lines);
+  await setRequestStatus(env.DB, key, 'new', id);
+  return id;
 }
 
 // 'preview' = she tapped "See it before sending": the invoice page shows the email itself.
@@ -361,6 +399,34 @@ async function changePassword(env, request) {
   return redirect('/admin/settings?m=Password changed. Other devices are signed out.', { 'Set-Cookie': await issueCookie(env) });
 }
 
+// The site form's ID photo, from the private R2 bucket (binding IDS). Signed-in only (guard),
+// never cached, never public: the bucket has no public URL and this is its only reader.
+async function idPhoto(env, url) {
+  const key = decodeKey(url.searchParams.get('r') || '');
+  const row = key ? await env.DB.prepare('SELECT id_object, id_type, id_deleted_at FROM requests WHERE request_key = ?1').bind(key).first() : null;
+  if (!row || !row.id_object || row.id_deleted_at || !env.IDS) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
+  const obj = await env.IDS.get(row.id_object);
+  if (!obj) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
+  return new Response(obj.body, { headers: { 'Content-Type': row.id_type || 'image/jpeg', 'Cache-Control': 'private, no-store', 'Content-Disposition': 'inline; filename="photo-id"' } });
+}
+
+// "Delete this ID": permanent, asked first, logged (who and when). Site photos are removed from
+// private storage; for the old Google Form request the Drive file is hers to delete (the site
+// cannot reach her personal Drive), so the card says where it is.
+async function deleteId(env, request) {
+  const form = await request.formData();
+  const key = decodeKey(form.get('r'));
+  const row = key ? await env.DB.prepare('SELECT source, id_object, id_file, id_deleted_at, name FROM requests WHERE request_key = ?1').bind(key).first() : null;
+  if (!row) return redirect(`/admin/?e=${encodeURIComponent('That request was not found.')}`);
+  if (row.id_deleted_at) return redirect(`/admin/?m=${encodeURIComponent('That ID was already deleted.')}`);
+  if (row.id_object && env.IDS) await env.IDS.delete(row.id_object);
+  await env.DB.prepare("UPDATE requests SET id_deleted_at = datetime('now'), id_object = NULL WHERE request_key = ?1").bind(key).run();
+  const ip = request.headers.get('CF-Connecting-IP') || 'local';
+  await logEvent(env.DB, key, row.source === 'site' ? 'ID photo deleted for good from private storage' : 'ID marked deleted (the Drive copy is deleted by hand from the ID folder)', `signed-in admin (${ip})`);
+  const msg = row.source === 'site' ? 'ID deleted for good ✓' : 'ID removed from the card ✓ Also delete the photo from the ID folder in Google Drive (Open ID folder at the top).';
+  return redirect(`/admin/?m=${encodeURIComponent(msg)}`);
+}
+
 export async function login(env, request) {
   if (!loginConfigured(env)) return htmlResponse(V.loginPage({ disabled: true }), 503);
   const ip = clientIp(request);
@@ -432,6 +498,8 @@ async function routeAdmin(context) {
     }
     return redirect(`/admin/?m=${encodeURIComponent(undo ? 'Job done undone.' : 'Job done ✓')}`);
   }
+  if (segs[0] === 'requests' && segs[1] === 'id' && segs.length === 2 && method === 'GET') return idPhoto(env, url);
+  if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
   if (segs[0] === 'requests' && segs[1] === 'archive' && method === 'POST') return AC.archiveRequest(env, request, true);
   if (segs[0] === 'requests' && segs[1] === 'unarchive' && method === 'POST') return AC.archiveRequest(env, request, false);
   if (segs[0] === 'archive' && segs.length === 1 && method === 'GET') return AC.archivePage(env, url);

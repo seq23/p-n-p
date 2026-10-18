@@ -8,7 +8,7 @@ export async function session({ db = makeDb() } = {}) {
   const { issueCookie } = await mod('functions/_lib/auth.mjs');
   const { PRICE_TABLE } = await mod('functions/_lib/prices.mjs');
   const { prefillLines } = await mod('functions/_lib/pricing.mjs');
-  const { loadRequests } = await mod('functions/_lib/sheet.mjs');
+  const { loadRequests } = await mod('functions/_lib/requests.mjs');
   const util = await mod('functions/_lib/util.mjs');
   const env = makeEnv(db);
   const cookie = (await issueCookie(env)).split(';')[0];

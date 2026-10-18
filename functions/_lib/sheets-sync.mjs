@@ -10,7 +10,7 @@ import { KIND_LABELS } from './kinds.mjs';
 import { CATEGORY_KEYS, CATEGORY_LABELS, periodTotals, yearSummary } from './money.mjs';
 import { chicagoDayOf } from './calendar.mjs';
 
-export const TABS = { bookings: 'Bookings', monthly: 'Monthly totals', expenses: 'Expenses' };
+export const TABS = { bookings: 'Bookings', monthly: 'Monthly totals', expenses: 'Expenses', siteRequests: 'Site requests' };
 const YEAR_TAB = /^Year \d{4}$/;
 const API = 'https://sheets.googleapis.com/v4/spreadsheets';
 
@@ -33,6 +33,25 @@ export function bookingRow(b, { bal = null, notes = [], ret = null, st = null, i
     invoice ? invoice.number : '', bal ? d(bal.total) : '', bal ? d(bal.paid) : '', bal && !bal.void ? d(bal.owed) : '', bal && bal.refundable ? d(bal.refundable) : '',
     status, ret && ret.returned_at ? chicagoDayOf(ret.returned_at) : '', notes[0] ? String(notes[0].body).split('\n')[0].slice(0, 200) : '', b.request_key || '', b.updated_at || '',
   ];
+}
+
+// "Site requests": one row per request sent on porchandparty901.com/request, upserted by
+// Request key. The ID photo itself never goes to the sheet (it stays in private storage).
+export const SITE_REQUEST_HEADER = ['Request key', 'Sent (Memphis time)', 'Services', 'Name', 'Phone', 'Email', 'Date of birth', 'Social media', 'Found us through', 'Answers', 'Photo ID', 'Agreed to rules', 'Rules version', 'Referred by', 'Status', 'Test?'];
+export function siteRequestRow(row, { status = '', referrer = '' } = {}) {
+  let answers = [];
+  try { answers = JSON.parse(row.answers || '[]'); } catch { answers = []; }
+  let services = [];
+  try { services = JSON.parse(row.services || '[]'); } catch { services = []; }
+  return [
+    row.request_key, chicagoDayOf(row.submitted_at) + ' ' + chicagoTimeOf(row.submitted_at), services.join(', '), row.name || '', row.phone || '', row.email || '', row.dob || '', row.social || '', row.heard || '',
+    answers.map((a) => `${a.label}: ${a.value}`).join(' | ').slice(0, 45000), row.id_deleted_at ? `Deleted ${chicagoDayOf(row.id_deleted_at)}` : (row.id_object ? 'In private storage (open it in the admin console)' : ''),
+    row.agreed_at ? `${chicagoDayOf(row.agreed_at)} ${chicagoTimeOf(row.agreed_at)}` : '', row.rules_version || '', referrer, status, row.is_test ? 'yes' : '',
+  ];
+}
+function chicagoTimeOf(utc) {
+  const d = new Date(`${String(utc || '').replace(' ', 'T')}Z`);
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' });
 }
 
 export function expenseRow(e) {
