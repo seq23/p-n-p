@@ -6,7 +6,7 @@
 import { esc, money, shortDate, prettyDate, b64urlText, STATUS_LABELS } from './util.mjs';
 import { tip, hint, stepsPanel } from './helptext.mjs';
 import { layout, act, chip, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS } from './views.mjs';
-import { KINDS, KIND_LABELS, prettyTime, addDays, returnKeyOf, firstLine, usageOn } from './calendar.mjs';
+import { KINDS, KIND_LABELS, prettyTime, addDays, returnKeyOf, firstLine, usageOn, namesText } from './calendar.mjs';
 import { serviceInfo, serviceKey, SERVICE_KINDS } from './kinds.mjs';
 import { gamesAskedOn } from './requested.mjs';
 import { PHONE_SERVICES, PHONE_SERVICE_WORDS, NOTE_CHOICE, FIRST_KIND } from './phone-requests.mjs';
@@ -350,7 +350,7 @@ const firstOf = (name) => String(name || '').trim().split(/\s+/)[0] || 'No name'
 export function gamesGrid(u, table) {
   const tiles = table.items.map((it) => {
     const v = u.byItem[it.name];
-    const n = v ? v.who.length : 0;
+    const n = v ? v.used : 0;
     const stock = v ? v.stock : (it.quantity || 1);
     if (!n) return `<div class="tile in" data-tile="in"><strong>${esc(it.name)}</strong><span>In</span></div>`;
     const who = v.who.map((w) => `Out · back ${shortDate(w.end)} · ${firstOf(w.name)}`).join('; ');
@@ -382,7 +382,7 @@ export function dayPage({ tdToday = [], requested = [], gamesAsked = 0, date, to
   const loading = rows.filter((r) => r.b.kind === 'rental_pickup');
   const load = loading.length >= 2 ? `<section class="card" data-load><h2>Load these items</h2>${loading.map((r) => {
     const w = windows.find((x) => x.key === (r.b.request_key || `m:${String(r.b.customer_name).toLowerCase()}|${String(r.b.items).toLowerCase()}`));
-    const names = w ? w.names : [];
+    const names = w ? namesText(w) : [];
     return `<div><strong>${esc(firstOf(r.b.customer_name))}:</strong> ${esc(names.join(', ') || r.b.items || '')}${w && w.unnamed ? `, plus ${w.unnamed} game${w.unnamed === 1 ? '' : 's'} they still need to pick` : ''}</div>`;
   }).join('')}</section>` : '';
   // One block per job: checkbox + "Anytime · Game pickup · Ada"; items; place; Still owed only
@@ -463,7 +463,7 @@ export function bookingFormPage({ booking, action, title, rk = '', isNew = true,
     function add(s,n){var x=new Date(s+'T12:00:00Z');x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10);}
     function out(w,day){if(day<w.start)return false;if(w.returnedDay)return day<w.returnedDay;return day<=w.last;}
     function upd(){var rent=/^rental_/.test(kind.value);document.getElementById('rent-items').hidden=!rent;var rw=document.getElementById('ret-wrap');if(rw)rw.hidden=kind.value!=='rental_pickup';if(!rent||!d.value)return;
-      var end=(r&&r.value&&r.value>=d.value)?r.value:d.value,n=0;S.forEach(function(p){var left=p[1];for(var day=d.value;day<=end;day=add(day,1)){var c=W.filter(function(w){return w.key!==IGN&&out(w,day)&&w.names.indexOf(p[0])>=0;}).length;left=Math.min(left,p[1]-c);}
+      var end=(r&&r.value&&r.value>=d.value)?r.value:d.value,n=0;S.forEach(function(p){var left=p[1];for(var day=d.value;day<=end;day=add(day,1)){var c=W.filter(function(w){return w.key!==IGN&&out(w,day)&&w.names.indexOf(p[0])>=0;}).reduce(function(k,w){return k+((w.counts&&w.counts[p[0]])||1);},0);left=Math.min(left,p[1]-c);}
         var lab=f.querySelector('[data-item="'+p[0].replace(/"/g,'\\\\"')+'"]'),box=lab.querySelector('input'),na=left<=0;if(na)n++;lab.classList.toggle('na',na);if(!box.checked)box.disabled=na;lab.querySelector('[data-na]').textContent=na?'(out on these dates)':'';});
       document.getElementById('out-n').textContent=n;}
     var KS=${JSON.stringify(Object.fromEntries(PHONE_SERVICES.map((k) => [k, SERVICE_KINDS[k].kinds])))},FK=${JSON.stringify(FIRST_KIND)};

@@ -353,25 +353,52 @@ export function prettyTime(hhmm) {
 // The physical items a booking's words name, with bundles expanded into their parts from
 // data/rentals/games.json (through the price table): "Pick 3" is 3 games, "The Whole Party"
 // is all 8 items. Games a bundle leaves "of your choice" count as unnamed games.
+// counts = how many of each named item it takes out (owner, 18 Oct 2026): an all-games bundle
+// (Whole Yard, The Whole Party) carries every set of a multi-set game (both Giant Color Stack
+// sets), and typed words like "Giant Color Stack (2 sets)" or "2 Giant Color Stack" say so too.
+const reEsc = (s) => String(s).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function typedCount(t, it) {
+  let n = 0;
+  for (const label of [it.name, it.choice].filter(Boolean)) {
+    const l = reEsc(label);
+    const after = t.match(new RegExp(`${l}s?\\s*(?:\\(\\s*(\\d{1,2})\\s*sets?\\s*\\)|[x\u00d7]\\s*(\\d{1,2})(?![0-9])|(\\d{1,2})\\s+sets?\\b)`));
+    if (after) n = Math.max(n, Number(after[1] || after[2] || after[3]));
+    const before = t.match(new RegExp(`(?:^|[^$\\d.])(\\d{1,2})\\s*[x\u00d7]?\\s+${l}`));
+    if (before) n = Math.max(n, Number(before[1]));
+  }
+  return n;
+}
 export function expandItems(text, table) {
   const t = ` ${String(text || '').toLowerCase()} `;
-  const names = new Set(table.items.filter((i) => t.includes(i.name.toLowerCase()) || (i.choice && t.includes(String(i.choice).toLowerCase()))).map((i) => i.name));
+  const counts = {};
+  const need = (name, n = 1) => { counts[name] = Math.max(counts[name] || 0, n); };
+  for (const i of table.items) if (t.includes(i.name.toLowerCase()) || (i.choice && t.includes(String(i.choice).toLowerCase()))) need(i.name, typedCount(t, i) || 1);
+  const slots = table.gameSlots || table.gameNames.length;
   let wantedGames = 0;
   for (const b of table.bundles) {
-    const hit = (b.choice && t.includes(String(b.choice).toLowerCase())) || t.includes(`${b.name.toLowerCase()} bundle`) || new RegExp(`(^|[^a-z])${b.name.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}([^a-z]|$)`).test(t.replace(/[(),]/g, ' '));
+    const hit = (b.choice && t.includes(String(b.choice).toLowerCase())) || t.includes(`${b.name.toLowerCase()} bundle`) || new RegExp(`(^|[^a-z])${reEsc(b.name)}([^a-z]|$)`).test(t.replace(/[(),]/g, ' '));
     if (!hit) continue;
-    for (const slug of b.items) { const it = table.items.find((x) => x.slug === slug); if (it) names.add(it.name); }
-    if (b.games >= table.gameNames.length) table.gameNames.forEach((n) => names.add(n));
-    else wantedGames += b.games;
+    for (const slug of b.items) { const it = table.items.find((x) => x.slug === slug); if (it) need(it.name); }
+    if (b.games >= table.gameNames.length) {
+      for (const it of table.items.filter((x) => x.kind === 'game')) need(it.name, b.games >= slots ? (it.sets || 1) : 1);
+    } else wantedGames += b.games;
   }
-  const namedGames = [...names].filter((n) => table.gameNames.includes(n)).length;
+  const namedGames = table.items.filter((i) => i.kind === 'game' && counts[i.name]).reduce((n, i) => n + counts[i.name], 0);
   const m = t.match(/(\d+) games? of your choice/);
   const unnamed = Math.max(wantedGames - namedGames, m ? Number(m[1]) : 0, 0);
-  return { names: table.items.map((i) => i.name).filter((n) => names.has(n)), unnamed };
+  const names = table.items.map((i) => i.name).filter((n) => counts[n]);
+  return { names, unnamed, counts: Object.fromEntries(names.map((n) => [n, counts[n]])) };
 }
 
-export function itemsText({ names, unnamed }) {
-  return [...names, ...(unnamed ? [`${unnamed} ${unnamed === 1 ? 'game' : 'games'} of your choice`] : [])].join(', ');
+// How many of `name` a window (or expandItems result) takes out: 1 unless its counts say more.
+export const countOf = (w, name) => (w && w.counts && w.counts[name]) || 1;
+// Its named items in words, a multi-set item as "Giant Color Stack (2 sets)" (the same words
+// the invoice lines use, so the count survives being saved as booking text and read back).
+export const namesText = (w) => (w.names || []).map((n) => (countOf(w, n) > 1 ? `${n} (${countOf(w, n)} sets)` : n));
+
+export function itemsText(exp) {
+  const { unnamed } = exp;
+  return [...namesText(exp), ...(unnamed ? [`${unnamed} ${unnamed === 1 ? 'game' : 'games'} of your choice`] : [])].join(', ');
 }
 
 // Memphis calendar date of a D1 datetime('now') value ("2026-10-26 15:04:05", UTC).
@@ -402,8 +429,8 @@ export function rentalWindows(bookings, returns, table) {
     const start = g.start || g.end;
     const end = g.end && g.end >= start ? g.end : addDays(start, 1);
     const ret = [...g.returnKeys].map((k) => returns[k]).find((r) => r && r.returned_at);
-    const { names, unnamed } = expandItems(g.items, table);
-    return { key: g.key, name: g.name, phone: g.phone, start, end, returnedDay: ret ? chicagoDayOf(ret.returned_at) : '', names, unnamed };
+    const { names, unnamed, counts } = expandItems(g.items, table);
+    return { key: g.key, name: g.name, phone: g.phone, start, end, returnedDay: ret ? chicagoDayOf(ret.returned_at) : '', names, unnamed, counts };
   });
 }
 
@@ -419,9 +446,13 @@ export function isOut(w, day, today) {
 export function usageOn(windows, day, today, table) {
   const out = windows.filter((w) => isOut(w, day, today));
   const byItem = {};
-  for (const it of table.items) byItem[it.name] = { stock: it.quantity || 1, who: out.filter((w) => w.names.includes(it.name)) };
-  const count = out.reduce((n, w) => n + w.names.length + w.unnamed, 0);
-  const over = Object.entries(byItem).filter(([, v]) => v.who.length > v.stock).map(([item, v]) => ({ item, stock: v.stock, who: v.who }));
+  // used = how many of the item are out (a Whole Yard takes both Giant Color Stack sets).
+  for (const it of table.items) {
+    const who = out.filter((w) => w.names.includes(it.name));
+    byItem[it.name] = { stock: it.quantity || 1, who, used: who.reduce((n, w) => n + countOf(w, it.name), 0) };
+  }
+  const count = out.reduce((n, w) => n + w.names.reduce((k, name) => k + countOf(w, name), 0) + w.unnamed, 0);
+  const over = Object.entries(byItem).filter(([, v]) => v.used > v.stock).map(([item, v]) => ({ item, stock: v.stock, used: v.used, who: v.who }));
   return { count, out, byItem, over };
 }
 
@@ -446,7 +477,7 @@ export function availability(windows, start, end, today, table, ignoreKey = '') 
   const stop = isISODate(end) && end >= start ? end : start;
   for (let d = start; d <= stop; d = addDays(d, 1)) {
     const u = usageOn(windows.filter((w) => w.key !== ignoreKey), d, today, table);
-    for (const [name, v] of Object.entries(u.byItem)) left[name] = Math.min(left[name], v.stock - v.who.length);
+    for (const [name, v] of Object.entries(u.byItem)) left[name] = Math.min(left[name], v.stock - v.used);
   }
   return left;
 }

@@ -177,7 +177,7 @@ const bk = await s.all('SELECT kind, date, items FROM bookings WHERE request_key
 must(bk.length === 2 && bk[0].kind === 'rental_pickup' && bk[0].date === plus(9) && bk[1].kind === 'rental_return' && bk[1].date === plus(10) && /Giant Connect Four/.test(bk[0].items), 'the hold did not put the pickup and return on the calendar');
 const avail = async (pickup, g = '') => (await (await RS.handleAvailability({ request: new Request(`https://porchandparty901.com/api/request/availability?pickup=${pickup}&duration=day&games=${g}`), env })).json());
 let a = await avail(plus(9), 'giant-connect-four,giant-uno');
-must(a.ok && a.left['giant-connect-four'] === 0 && a.left['giant-uno'] === 0 && a.left.cornhole === 2, `availability does not grey held games: ${JSON.stringify(a.left)}`);
+must(a.ok && a.left['giant-connect-four'] === 0 && a.left['giant-uno'] === 0 && a.left.cornhole === 1 && a.left['giant-color-stack'] === 2, `availability does not grey held games (Cornhole stock 1, Color Stack 2; owner 18 Oct 2026): ${JSON.stringify(a.left)}`);
 const q = F.rentalQuote(['giant-connect-four', 'giant-uno'], 'day', PRICE_TABLE, games.holdPercent);
 must(q.rental === 2 * games.rates.day * 100 && q.damage === games.damageDeposit * 100 && q.dueNow === q.damage + q.rental / 2 && q.atPickup === q.rental / 2, `rental money is wrong: ${JSON.stringify({ rental: q.rental, damage: q.damage, dueNow: q.dueNow })}`);
 must(a.html.includes(F.money(q.total)) && a.html.includes(F.money(q.dueNow)) && a.html.includes('Due now'), 'the live total does not show the exact total and due-now amount');
