@@ -55,6 +55,42 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   linked from Requests and the invoice screen. No migration: answers live in `requests.answers`.
 - **Guard**: `npm run validate:porch-packages` (in validate:admin).
 
+## Request cards + admin homepage (JOB B, owner-approved 18 Oct 2026, migration 0008)
+- **Main nav**: Requests · Calendar & Bookings · Money · Settings · Help. Put away and Invoices
+  left the nav: Put away is the collapsed "Put away (N)" section at the bottom of Requests ("Show
+  put-away requests", `#put-away`, the only whitelisted disclosure in `validate:admin-tooltips`);
+  `/admin/archive` redirects to `/admin/?pa=1#put-away` with it open. All invoices are linked from
+  Money's steps panel.
+- **Steps panel** (`stepsPanel` in `functions/_lib/helptext.mjs`) replaces the sub-nav button row
+  and the separate steps box: Requests 1 "See who's asking." (Check for new requests · Find a
+  customer; Open responses sheet · Open ID folder), 2 "Send a quote or invoice." (Start a blank
+  invoice · Print a blank checklist; Porch packages), 3 "Plan your day and get paid." (Today's list
+  · Calendar & Bookings). Same pattern on Calendar & Bookings and Money; 3 columns on a computer,
+  stacked on a phone.
+- **Cards** (`requestCard` in `views.mjs`): large service badge(s) with words in the four service
+  colours (`kinds.mjs`) and a coloured left border; name large; ONE key-facts line (event or pickup
+  day, where, Call); the compact 1-6 line; ONE big primary button (the next step); a secondary row;
+  the Payment box; everything to read (answers, ID, checklist state, notes, history) behind "Show
+  details". The buttons come from ONE rules table, `cardButtons` in `functions/_lib/cards.mjs`
+  (service x stage): rentals never show porch, takedown or walk-through buttons; porch and party
+  show the walk-through checklist and, once the install/setup is booked, Schedule takedown; grazing
+  shows guest count + a rough food estimate (`foodPerHead` in `data/offers/services.json`) and an
+  optional pickup; void shows only Bring back + Put away, finished only Put away, put away only
+  Bring back. Scheduling buttons pass the booking kind (`/admin/calendar/new?r=…&kind=…`).
+- **Filter chips**: All · Porch · Party & decor · Grazing · Rentals · Not paid yet (`?f=`), applied
+  to the Put away section too. Weekly counts stay on top.
+- **Not paid yet** (`functions/_lib/notpaid.mjs`, top of Money): every SENT, non-void invoice with
+  charges still owed, most overdue first (red "N days late", amber within 3 days), with service
+  badge, what for, invoice #, total, paid, STILL OWED, Call · Text a reminder (sms: with the amount,
+  due date and invoice number; there is no public invoice page, so it names the invoice they were
+  sent) · Email a reminder (`POST /admin/money/remind`, one tap, logs `invoices.reminded_at`) · Open
+  invoice · Mark paid, and a total line. Drafts are listed apart as "Invoice not sent yet"; the
+  refundable damage deposit is never owed. The Requests chip uses the same rule (`notPaidYet`).
+
+Proof: `npm run validate:admin-cards` (rules table over every service x stage, colours, key facts,
+filters, Put away section, Not paid yet math and the Money list end to end, reminders, contextual
+scheduling links).
+
 ## Calendar & Bookings, Put away, Void (migration 0004, owner-approved 18 Oct 2026)
 Built for Valerie on a phone: plain words, 48 px+ buttons, a Back link and a numbered 1-2-3 at
 the top of every screen, and a printable guide at `/admin/help`.
@@ -64,7 +100,7 @@ the top of every screen, and a printable guide at `/admin/help`.
   and delete actions) plus "What each status means". `npm run validate:admin-tooltips` renders
   every screen in many states and fails on a control without its map entry, a map entry missing
   from the help page or never rendered, a screen without its steps or Back link, or a "More"
-  toggle on Requests (its three actions are a visible sub-nav, with Today's list and Find a customer).
+  toggle on Requests (its actions are in the steps panel).
 - **Request steps** (`functions/_lib/progress.mjs`), derived from facts, never one stored chip:
   1 New, 2 Invoice sent, 3 Deposit paid, 4 Scheduled, 5 Job done ("Returned" for rentals, set by
   Mark returned), 6 Paid in full; Void off the line. Money (table `payments`) and the job
@@ -79,7 +115,8 @@ the top of every screen, and a printable guide at `/admin/help`.
   on an invoice holds only non-money actions. Balances: charges minus payments; the refundable
   damage deposit is shown on its own line and never counted as owed (`functions/_lib/ledger.mjs`).
 - **Put away**: "Done — put away" sets `request_status.archived_at` (nothing deleted, the sheet
-  untouched); a 6-second "Put away. Undo" banner; the Put away tab has "Bring back".
+  untouched); a 6-second "Put away. Undo" banner; the Put away section at the bottom of Requests
+  has "Bring back" on each.
 - **Bookings** (table `bookings`, kinds per service in `functions/_lib/kinds.mjs`, one colour per
   service: porch orange, party purple, grazing green, rentals blue, always with words). An invoice
   created, sent or marked texted from a request upserts its bookings by (request_key, kind):

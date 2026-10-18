@@ -63,15 +63,7 @@ export async function archiveRequest(env, request, on) {
   }
   if (wantsJson(request)) return okJson();
   if (on) return redirect(`/admin/?put=${encodeURIComponent(form.get('r') || '')}`);
-  return redirect(form.get('from') === 'archive' ? '/admin/archive?m=Brought back ✓' : '/admin/?m=Brought back ✓');
-}
-
-export async function archivePage(env, url) {
-  const statuses = await statusMap(env.DB);
-  const { requests } = await requestsSafe(env);
-  const archived = requests.filter((r) => statuses[r.key] && statuses[r.key].archived_at)
-    .sort((a, b) => String(statuses[b.key].archived_at).localeCompare(String(statuses[a.key].archived_at)));
-  return htmlResponse(V.archivePage({ requests: archived, statuses, flash: url.searchParams.get('m') || '' }));
+  return redirect(form.get('from') === 'archive' ? '/admin/?pa=1&m=Brought back ✓#put-away' : '/admin/?m=Brought back ✓');
 }
 
 // ---- Calendar --------------------------------------------------------------------------
@@ -171,6 +163,18 @@ export async function newBookingPage(env, url) {
   }
   if (C.isISODate(url.searchParams.get('date'))) booking.date = url.searchParams.get('date');
   const req = key ? (await requestsSafe(env)).requests.find((r) => r.key === key) : null;
+  // "Schedule takedown" / "Schedule pickup (optional)" / "Schedule install" on a card pass the kind.
+  const wantKind = url.searchParams.get('kind') || '';
+  if (C.KINDS.includes(wantKind) && wantKind !== booking.kind) {
+    booking.kind = wantKind;
+    if (req && /_takedown$|^grazing_pickup$/.test(wantKind) && !url.searchParams.get('date')) {
+      const { results } = await env.DB.prepare('SELECT kind, date FROM bookings WHERE request_key = ?1').bind(key).all();
+      const first = (results || []).find((b) => /_install$|_setup$/.test(b.kind));
+      booking.date = C.secondDateFor(req, first ? first.date : booking.date);
+    }
+    if (/_takedown$/.test(wantKind)) title = `Schedule the takedown for ${V.firstName(req ? req.name : booking.customer_name)}`;
+    if (wantKind === 'grazing_pickup') title = `Schedule the pickup for ${V.firstName(req ? req.name : booking.customer_name)}`;
+  }
   const returnDate = booking.date ? C.returnDateFor(booking.date, req ? req.durationAnswer : '') : '';
   const extras = await formExtras(env, booking.date, returnDate, key);
   return htmlResponse(VC.bookingFormPage({ booking, action: '/admin/calendar/bookings', title, rk, isNew: true, returnDate, table: PRICE_TABLE, ignoreKey: key, ...extras }));

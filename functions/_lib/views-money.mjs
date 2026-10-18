@@ -1,8 +1,11 @@
 // Money tab screens: the month in big plain numbers, a 12-month list, details behind each
 // total, expenses with receipts, and the year-end summary for taxes. Same rules as views.mjs.
 import { esc, money, shortDate, prettyDate } from './util.mjs';
-import { tip } from './helptext.mjs';
-import { layout, act, confirmStep, hiddenInputs, BACK_REQUESTS } from './views.mjs';
+import { tip, stepsPanel } from './helptext.mjs';
+import { serviceBadge } from './cards.mjs';
+import { smsLink } from './reminders.mjs';
+import { render } from './messages.mjs';
+import { layout, act, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS } from './views.mjs';
 import { CATEGORY_KEYS, CATEGORY_LABELS, METHOD_LABELS, FOOTER } from './money.mjs';
 import { KIND_LABELS } from './kinds.mjs';
 import { LOW_CONFIDENCE } from './expenses.mjs';
@@ -12,6 +15,11 @@ const MONEY_CSS = `
 .tot{display:block;text-decoration:none;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;background:#fff}
 .mbar{height:12px;background:#dbeafe;border-radius:6px;margin-top:4px}.mbar span{display:block;height:12px;background:#1d4ed8;border-radius:6px}
 .amber{border:2px solid #d97706 !important;background:#fff8ea}.amber-note{color:#7a4a0c;font-weight:700;font-size:.95rem}
+.np{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 10px;background:#fff}
+.np .owed{font-size:1.6rem;font-weight:800}.np .late{color:#8f3427;font-weight:700}.np .soon{color:#7a4a0c;font-weight:700}
+.np .nums{display:flex;flex-wrap:wrap;gap:4px 14px;color:var(--muted)}
+.np .secrow{grid-template-columns:1fr 1fr}
+.nptotal{font-size:1.25rem;font-weight:700;margin:6px 0 0}
 .exp{display:block;padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
 @media print{.noprint{display:none!important}}
 `;
@@ -31,11 +39,48 @@ const UPLOAD_JS = `
       .then(function(r){return r.json().then(function(j){if(!r.ok)throw new Error(j.error||r.status);if(!first)first=j.id;});}).then(next).catch(function(e){st.textContent='Receipt not added: '+e.message;});})();});
 })();`;
 
-export function moneyPage({ month, year, requestsThisMonth = 0, t, months, needs, recent, depositsHeld, flash = '', error = '' }) {
+// "Not paid yet" (top of Money): every customer still owing on a sent invoice, most overdue first.
+export function notPaidBox(np, { prettyDue = (d) => shortDate(d) } = {}) {
+  const row = (r) => {
+    const badges = r.services.map((k) => { const b = serviceBadge(k); return b ? `<span class="svc" style="border-color:${b.bar};background:${b.tint}">${esc(b.label)}</span>` : ''; }).join('');
+    const sms = smsLink(r.phone, render('paymentReminder', { name: r.name, amount: money(r.owed), due: r.due ? prettyDue(r.due) : '', late: r.tone === 'late', number: r.number }).text);
+    const tel = String(r.phone || '').replace(/[^\d+]/g, '');
+    return `<article class="np" data-not-paid="${r.id}"><div class="svcs">${badges}</div>
+      <div class="spread"><strong style="font-size:1.25rem">${esc(r.name)}</strong><span class="${esc(r.tone)}" data-due-words>${esc(r.words)}</span></div>
+      <div class="muted">${esc(r.whatFor)} · ${esc(r.number)}</div>
+      <div class="nums"><span>Total ${esc(money(r.total))}</span><span>Paid ${esc(money(r.paid))}</span></div>
+      <div>Still owed <span class="owed" data-owed>${esc(money(r.owed))}</span></div>
+      ${r.remindedAt ? `<div class="muted" data-reminded>Reminder emailed ${esc(String(r.remindedAt).slice(0, 10))}</div>` : ''}
+      <div class="secrow">
+        ${tel ? `<div class="act"><a class="btn ghost" href="tel:${esc(tel)}"${tip('np.call')}>Call</a></div>` : ''}
+        ${sms ? `<div class="act"><a class="btn ghost" href="${esc(sms)}"${tip('np.text')}>Text a reminder</a></div>` : ''}
+        ${r.email ? `<form method="post" action="/admin/money/remind">${hiddenInputs({ invoice: r.id })}<div class="act"><button class="btn ghost" type="submit"${tip('np.email')}>Email a reminder</button></div></form>` : ''}
+        <div class="act"><a class="btn ghost" href="/admin/invoices/${r.id}"${tip('np.open')}>Open invoice</a></div>
+      </div>
+      ${confirmStep({ key: 'np.paid', yesKey: 'pay.paidYes', label: 'Mark paid', question: `Mark ${r.name} as paid in full (${money(r.owed)})? Only do this after the money is in your account.`, action: `/admin/invoices/${r.id}/status`, hidden: hiddenInputs({ action: 'paid', back: '/admin/money' }), extra: `<label>How did they pay?</label><select name="method">${[['zelle', 'Zelle'], ['cashapp', 'Cash App'], ['cash', 'Cash'], ['card', 'Card'], ['other', 'Other']].map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>` })}
+    </article>`;
+  };
+  return `<section class="card" id="not-paid" data-not-paid-box><h2>Not paid yet</h2>
+    ${np.owed.length ? `${np.owed.map(row).join('')}<p class="nptotal" data-not-paid-total>${np.count} ${np.count === 1 ? 'customer owes' : 'customers owe'} ${esc(money(np.total))} in all.</p>` : '<p class="muted" style="margin:0">Everyone has paid. Nothing is owed on a sent invoice.</p>'}
+    ${np.drafts.length ? `<h3>Invoice not sent yet</h3>${np.drafts.map((r) => `<div class="exp" data-draft><a href="/admin/invoices/${r.id}"${tip('np.open')}><strong>${esc(r.name)}</strong></a> · ${esc(r.number)} · ${esc(money(r.total))}</div>`).join('')}<p class="muted">Not counted as owed until you send them.</p>` : ''}
+  </section>`;
+}
+
+export function moneyPanel() {
+  return stepsPanel('money', [
+    [`<a class="btn ghost" href="/admin/?f=unpaid"${tip('np.filter')}>Not paid yet on Requests</a>`],
+    [`<a class="btn ghost" href="/admin/invoices"${tip('money.invoices')}>All invoices</a>`],
+    [`<a class="btn ghost" href="/admin/money/expenses/new"${tip('exp.manual')}>Type in a receipt</a>`, `<a class="btn ghost" href="/admin/money/year"${tip('mon.taxes')}>Year-end summary for taxes</a>`],
+  ]);
+}
+
+export function moneyPage({ month, year, requestsThisMonth = 0, t, months, needs, recent, depositsHeld, flash = '', error = '', notPaid = null }) {
   const tot = (what, label, value, sub = '') => `<a class="tot" href="/admin/money/detail?month=${month}&amp;what=${what}"${tip('mon.total')}><div class="muted">${esc(label)}</div><div class="big" data-total="${what}">${esc(value)}${sub ? `<small>${esc(sub)}</small>` : ''}</div></a>`;
   const max = Math.max(1, ...months.map((m) => m.received));
-  return layout('Money', `<style>${MONEY_CSS}</style>
+  return layout('Money', `<style>${MONEY_CSS}${CARD_CSS}</style>
     ${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+    ${moneyPanel()}
+    ${notPaid ? notPaidBox(notPaid) : ''}
     <h1>Money: ${esc(monthName(month))}</h1>
     <div class="monthbar">
       <a class="btn ghost" href="/admin/money?month=${shift(month, -1)}"${tip('mon.prev')}>&lsaquo; Previous</a>
@@ -72,7 +117,7 @@ export function moneyPage({ month, year, requestsThisMonth = 0, t, months, needs
       <table class="sumlines" data-year-list>${months.map((m) => `<tr><td><a href="/admin/money?month=${m.month}"${tip('mon.month')}>${esc(monthName(m.month))}</a><div class="mbar" role="presentation"><span style="width:${Math.round((m.received / max) * 100)}%"></span></div></td>
         <td class="amt">${esc(money(m.received))}<div class="muted">${m.jobs} ${m.jobs === 1 ? 'job' : 'jobs'}</div></td></tr>`).join('')}</table>
     </section>
-    <script>${UPLOAD_JS}</script>`, { screen: 'money', back: BACK_REQUESTS });
+    <script>${UPLOAD_JS}</script>`, { screen: '', back: BACK_REQUESTS, panelWide: true });
 }
 
 export function detailPage({ month, what, t, byInv }) {

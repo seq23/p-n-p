@@ -4,8 +4,8 @@
 // Calendar link page. Same rules as views.mjs: words + colour, 48 px targets, every button
 // and link carries a title from helptext.mjs.
 import { esc, money, shortDate, prettyDate, b64urlText, STATUS_LABELS } from './util.mjs';
-import { tip, hint } from './helptext.mjs';
-import { layout, act, chip, confirmStep, hiddenInputs, BACK_REQUESTS } from './views.mjs';
+import { tip, hint, stepsPanel } from './helptext.mjs';
+import { layout, act, chip, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS } from './views.mjs';
 import { KINDS, KIND_LABELS, prettyTime, addDays, returnKeyOf, firstLine, usageOn } from './calendar.mjs';
 import { serviceInfo, serviceKey } from './kinds.mjs';
 import { balanceWords, depositWords } from './ledger.mjs';
@@ -160,16 +160,21 @@ export function calendarPage({ month, today, bookings, all = bookings, ctx, wind
   const uns = `<aside class="card unsched" data-unscheduled><h2>Unscheduled requests</h2><p class="muted">On a computer, drag a request onto a day. Or tap Schedule.</p>
     ${unscheduled.length ? unscheduled.map((r) => `<div class="u" draggable="true" data-drag data-rk="${esc(b64urlText(r.key))}"${tip('cal.unscheduled')}><strong>${esc(r.name || 'No name')}</strong><div class="muted">${esc(r.summary || '')}</div>
       ${act(`<a class="btn ghost" href="/admin/calendar/new?r=${esc(b64urlText(r.key))}"${tip('cal.schedule')}>Schedule</a>`, 'cal.schedule')}</div>`).join('') : '<p class="muted">Every request is on the calendar.</p>'}</aside>`;
-  return layout('Calendar', `<style>${CAL_CSS}</style>
+  const panel = stepsPanel('calendar', [
+    [`<a class="btn ghost" href="/admin/search"${tip('sub.find')}>Find a customer</a>`],
+    [`<a class="btn" href="/admin/calendar/new"${tip('cal.add')}>Add a booking</a>`],
+    [`<a class="btn ghost" href="/admin/day/today"${tip('sub.today')}>Today's list</a>`],
+  ]);
+  return layout('Calendar', `<style>${CAL_CSS}${CARD_CSS}</style>
     ${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+    ${panel}
     <h1>Calendar</h1>
     ${searchBox()}
     ${holdsBox}
     ${overdueBox(overdue)}
     ${remindersBox(reminders, tomorrowLabel)}
     ${warn}
-    <div class="actions" style="grid-template-columns:1fr 1fr">
-      ${act(`<a class="btn" href="/admin/calendar/new"${tip('cal.add')}>Add a booking</a>`, 'cal.add')}
+    <div class="actions">
       ${act(`<a class="btn ghost" href="/admin/calendar/link"${tip('cal.link')}>Link my Google Calendar</a>`, 'cal.link')}
     </div>
     <div class="actions" style="grid-template-columns:1fr 1fr 1fr" role="group" aria-label="How to show bookings">
@@ -192,7 +197,7 @@ export function calendarPage({ month, today, bookings, all = bookings, ctx, wind
       <div class="month">${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => `<div class="dow">${d}</div>`).join('')}${cells.join('')}</div>
     </section>${uns}</div></div>
     <form id="move-form" method="post" action="" hidden><input type="hidden" name="date" value=""></form>
-    <script>${CAL_JS}${VIEW_JS}</script>`, { screen: 'calendar', back: BACK_REQUESTS, wide: true });
+    <script>${CAL_JS}${VIEW_JS}</script>`, { screen: '', back: BACK_REQUESTS, wide: true });
 }
 
 const VIEW_JS = `

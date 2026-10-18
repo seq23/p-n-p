@@ -262,6 +262,12 @@ export async function moveBooking(db, id, date) {
   return Boolean(r && r.meta ? r.meta.changes : true);
 }
 
+// The second booking's day (porch/party takedown, grazing pickup): the form's takedown date
+// when there is one, else the day after the install/setup.
+export function secondDateFor(request, firstDate) {
+  return parseFormDate(answer(request, /takedown date|take (it )?down.*(date|when)/i)) || (isISODate(firstDate) ? addDays(firstDate, 1) : '');
+}
+
 // What "Put on the calendar" pre-fills from one request.
 export function bookingFromRequest(request, table) {
   const rental = Boolean(request.gamesAnswer) || (request.wantsRentals && !request.wantsDecor);

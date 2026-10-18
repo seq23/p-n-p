@@ -19,6 +19,7 @@ import { renderInvoicePdf, textMessage } from './pdf.mjs';
 import { prefillLines, porchPrefill, pickupNote, isRentalInvoice } from './pricing.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
+import SERVICES_DATA from '../../data/offers/services.json';
 import * as VC from './views-calendar.mjs';
 import * as C from './calendar.mjs';
 import * as AC from './admin-calendar.mjs';
@@ -222,6 +223,17 @@ async function dashboard(env, url) {
   for (const r of booked || []) schedule[r.request_key] = { date: r.date };
   const returns = await C.loadReturns(env.DB);
   const open = requests.filter((r) => !(statuses[r.key] && statuses[r.key].archived_at));
+  const archived = requests.filter((r) => statuses[r.key] && statuses[r.key].archived_at)
+    .sort((a, b) => String(statuses[b.key].archived_at).localeCompare(String(statuses[a.key].archived_at)));
+  const kinds = {};
+  const { results: kindRows } = await env.DB.prepare('SELECT request_key, kind FROM bookings WHERE request_key IS NOT NULL').all();
+  for (const k of kindRows || []) (kinds[k.request_key] = kinds[k.request_key] || []).push(k.kind);
+  const events = {};
+  const { results: evRows } = await env.DB.prepare('SELECT request_key, at, what FROM request_events ORDER BY id').all();
+  for (const e of evRows || []) (events[e.request_key] = events[e.request_key] || []).push(e);
+  const notes = {};
+  const { results: noteRows } = await env.DB.prepare('SELECT request_key, body FROM booking_notes WHERE request_key IS NOT NULL ORDER BY id').all();
+  for (const n of noteRows || []) (notes[n.request_key] = notes[n.request_key] || []).push(n);
   const { reminders, tomorrowLabel, overdue } = await AC.remindersAndOverdue(env.DB);
   const referrers = {};
   for (const r of requests) if (r.referralCode) referrers[r.referralCode] = r.name;
@@ -232,6 +244,8 @@ async function dashboard(env, url) {
   const soon = endingSoon(holds, Date.now(), settings);
   return htmlResponse(V.dashboardPage({ requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
     weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady), cardExtras: extras,
+    archived, filter: url.searchParams.get('f') || 'all', openPutAway: url.searchParams.get('pa') === '1', kinds, events, notes,
+    foodPerHead: SERVICES_DATA.services.grazing.foodPerHead || null, pickupPlace: PRICE_TABLE.pickupPlace,
     holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length ? VM2.TAP_JS : ''}`,
     flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
     extraTop: `${VC.overdueBox(overdue)}${VC.remindersBox(reminders, tomorrowLabel)}` }));
@@ -671,7 +685,8 @@ async function routeAdmin(context) {
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
   if (segs[0] === 'requests' && segs[1] === 'archive' && method === 'POST') return AC.archiveRequest(env, request, true);
   if (segs[0] === 'requests' && segs[1] === 'unarchive' && method === 'POST') return AC.archiveRequest(env, request, false);
-  if (segs[0] === 'archive' && segs.length === 1 && method === 'GET') return AC.archivePage(env, url);
+  // Put away left the main nav (JOB B): it is the collapsed section at the bottom of Requests.
+  if (segs[0] === 'archive' && segs.length === 1 && method === 'GET') return redirect(`/admin/?pa=1${url.searchParams.get('m') ? `&m=${encodeURIComponent(url.searchParams.get('m'))}` : ''}#put-away`);
   if (segs[0] === 'search' && method === 'GET') return AC.searchRoute(env, url);
   if (segs[0] === 'day' && segs[1]) {
     if (segs.length === 2 && method === 'GET') return AC.dayPage(env, url, segs[1]);
@@ -686,6 +701,7 @@ async function routeAdmin(context) {
   if (segs[0] === 'money') {
     if (segs.length === 1 && method === 'GET') return AM.moneyPage(env, url);
     if (segs[1] === 'detail' && method === 'GET') return AM.moneyDetail(env, url);
+    if (segs[1] === 'remind' && segs.length === 2 && method === 'POST') return AM.remindRoute(env, request);
     if (segs[1] === 'year' && segs.length === 2 && method === 'GET') return AM.yearPage(env, url);
     if (segs[1] === 'year.pdf' && method === 'GET') return AM.yearPdf(env, url);
     if (segs[1] === 'year.csv' && method === 'GET') return AM.yearCsv(env, url);
