@@ -112,6 +112,25 @@
       "accepted_urls": [
         "https://porchandparty901.com/rentals/"
       ]
+    },
+    {
+      "accepted_at": "2026-10-18",
+      "reason": "Daily governed authority cycle for 2026-10-18, run 39139399716. The cadence gate cleared before this step, so these pages are inside the weekly publication cap.",
+      "urls_total_after": 119,
+      "accepted_count": 2,
+      "accepted_publications": 1,
+      "accepted_section_indexes": 1,
+      "weekly_cap": 1,
+      "publication_allowance": 1,
+      "ledger_baseline_date": "2026-10-14",
+      "accrual_weeks": 1,
+      "over_cap_by": 0,
+      "maintainable_ceiling": 104,
+      "library_over_ceiling_by": 15,
+      "accepted_urls": [
+        "https://porchandparty901.com/accessibility",
+        "https://porchandparty901.com/sitemap"
+      ]
     }
   ]
 }
