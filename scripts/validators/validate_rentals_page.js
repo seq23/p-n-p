@@ -121,7 +121,7 @@ if (onDisk) {
     if (!main.includes(`id="${i.slug}"`)) errors.push(`rentals/index.html items grid lacks ${i.name}`);
     const card = (main.split(`id="${i.slug}"`)[1] || '').split('</article>')[0];
     if (!card.includes(`${money(i.dayPrice)} a day &middot; ${money(i.weekendPrice)} a weekend`)) errors.push(`rentals/index.html ${i.name} card lacks its day and weekend price`);
-    if (!/href="https:\/\/forms\.gle\/[^"]+"/.test(card)) errors.push(`rentals/index.html ${i.name} card does not link to the quote form`);
+    if (!card.includes(`href="/request?service=rentals" data-quote-cta="rentals-item-${i.slug}">Book the ${i.name}</a>`)) errors.push(`rentals/index.html ${i.name} card does not link to the booking form (/request?service=rentals, "Book the ${i.name}")`);
   }
   const bundleSec = (main.split('id="bundles"')[1] || '').split('</section>')[0];
   const cards = bundleSec.match(/class="pricing-card"/g) || [];
@@ -216,7 +216,7 @@ for (const rel of ['pricing.html', 'terms-and-conditions.html']) if (/rental pic
 // ---- llms files and renter safety ----------------------------------------------
 const SAFE = require(path.join(ROOT, 'data/offers/services.json')).renterSafety || {};
 const SAFE_TEXT = `${SAFE.line} ${SAFE.rentalFormNote}`;
-if (!/government photo ID/.test(SAFE.line || '') || !/three minutes/.test(SAFE.rentalFormNote || '') || !/Google sign-in/.test(SAFE.rentalFormNote || '')) errors.push('services.json renterSafety is not the owner-approved ID / three-minute Google sign-in copy');
+if (!/government photo ID/.test(SAFE.line || '') || !/three minutes/.test(SAFE.rentalFormNote || '') || !/no account or sign-in/.test(SAFE.rentalFormNote || '') || /Google sign-in/.test(SAFE.rentalFormNote || '')) errors.push('services.json renterSafety is not the owner-approved ID / three-minute, no-sign-in copy (the site form needs no Google sign-in)');
 if (onDisk) {
   const booking = (onDisk.split('id="how-booking-works"')[1] || '').split('</section>')[0];
   if (!booking.includes(SAFE_TEXT)) errors.push('rentals/index.html How Booking Works lacks the renter-safety line and form note');
@@ -234,5 +234,6 @@ for (const f of ['llms.txt', 'llms-full.txt', 'llms-services.txt']) {
   for (const n of [`${money(V3.day)} per game per day`, `${money(V3.weekend)} per game for a weekend`, ...BUNDLES.map((b) => money(b.dayPrice)), `${money(V3.damageDeposit)} damage deposit`, V3.address])
     if (!sec.includes(n)) errors.push(`${f} rentals section does not quote ${n}`);
 }
+if (onDisk && (/forms\.gle/.test(onDisk) || (onDisk.match(/>Book your games<\/a>/g) || []).length < 4 || /Check My Date/.test(onDisk))) errors.push('rentals/index.html still links the Google Form, or its buttons do not read "Book your games"');
 if (errors.length) { for (const e of errors) console.error(`rentals: ${e}`); process.exit(1); }
 console.log(`rentals: OK - page matches a fresh render; v3 prices pinned; ${ITEMS.length} items + ${BUNDLES.length} bundles on the page and in ${blocks.length} Marketplace listings; every price from games.json; no delivery and no hidden item in the rentals copy; renter-safety line on the page and in the llms files; Facebook copy email only`);

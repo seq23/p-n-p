@@ -227,7 +227,7 @@ const labels = {
 
 function relatedLinks(rels) {
   // /contact.html in a related list is the quote CTA (owner ruling 2026-10-15): it opens the form.
-  const link = (r) => (r === '/contact.html' ? `<a href="${siteChrome.QUOTE.href}" ${siteChrome.QUOTE.attrs}>` : `<a href="${r}">`);
+  const link = (r) => (r === '/contact.html' ? `<a href="${siteChrome.QUOTE.href}"${siteChrome.QUOTE_ATTRS}>` : `<a href="${r}">`);
   return `<div class="info-panel"><h2>Related pages</h2><ul>${rels.map(r => `<li>${link(r)}${labels[r] || r}</a></li>`).join('')}</ul></div>`;
 }
 
@@ -293,7 +293,7 @@ function trustBlock(t) {
 /**
  * Make the quote click countable, at zero cost, with what is already installed.
  *
- * The conversion path is page -> forms.gle in a new tab (owner ruling 2026-10-15: no /contact hop). The
+ * The conversion path is page -> the site's own /request form (owner rulings 2026-10-15 / 2026-10-18: no /contact hop). The
  * CTAs work; the buttons are not the defect. The defect is that the submission
  * lands in Google, so there is no lead count on this side of the fence and
  * Microsoft Clarity records the click as an anonymous rage-free click on an
@@ -330,9 +330,9 @@ function renderPage(entry) {
   // indented line an empty `${...}` on its own line would leave behind. That
   // whitespace would be drift on 98 frozen routes.
   const opt = (block, indent = '          ') => (block ? `\n${indent}${block}` : '');
-  const topCta = `<div class="btn-row"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('top')} ${siteChrome.QUOTE.attrs}>Request a Quote</a><a href="${service.slug}" class="btn-secondary">View ${service.name}</a></div>`;
-  const midCta = `<div class="btn-row"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('mid')} ${siteChrome.QUOTE.attrs}>Request a Quote</a></div>`;
-  const bottomCta = `<section class="section cta-band"><div class="container"><span class="eyebrow">Request a Quote</span><h2>Need a clearer next step for this setup?</h2><p>Use the Porch &amp; Party quote form to share your date, city, budget range, and setup notes. That makes it easier to respond with scope, pricing direction, and availability.</p><div class="btn-row hero-centered-cta"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('band')} ${siteChrome.QUOTE.attrs}>Request a Quote</a></div><p class="muted" style="margin-top: 14px;"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p></div></section>`;
+  const topCta = `<div class="btn-row"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('top')}${siteChrome.QUOTE_ATTRS}>Request a Quote</a><a href="${service.slug}" class="btn-secondary">View ${service.name}</a></div>`;
+  const midCta = `<div class="btn-row"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('mid')}${siteChrome.QUOTE_ATTRS}>Request a Quote</a></div>`;
+  const bottomCta = `<section class="section cta-band"><div class="container"><span class="eyebrow">Request a Quote</span><h2>Need a clearer next step for this setup?</h2><p>Use the Porch &amp; Party quote form to share your date, city, budget range, and setup notes. That makes it easier to respond with scope, pricing direction, and availability.</p><div class="btn-row hero-centered-cta"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('band')}${siteChrome.QUOTE_ATTRS}>Request a Quote</a></div><p class="muted" style="margin-top: 14px;"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p></div></section>`;
 
   return `<!doctype html>
 <html lang="en">
@@ -395,7 +395,7 @@ function renderPage(entry) {
             <ul class="recommendation-summary__points">
               <li><strong>Best for:</strong> ${entry.forWho}</li>
               <li><strong>Service area:</strong> ${cityList} and the greater Memphis metro area.</li>
-              <li><strong>Next step:</strong> <a href="${siteChrome.QUOTE.href}" ${siteChrome.QUOTE.attrs}>Request a Quote</a></li>
+              <li><strong>Next step:</strong> <a href="${siteChrome.QUOTE.href}"${siteChrome.QUOTE_ATTRS}>Request a Quote</a></li>
             </ul>
           </div>
           <div class="info-panel">
@@ -427,7 +427,7 @@ function renderPage(entry) {
           <div class="info-card">
             <h3>What to do next</h3>
             <p>${entry.nextStep}</p>
-            <div class="btn-row"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('aside')} ${siteChrome.QUOTE.attrs}>Request a Quote</a></div>
+            <div class="btn-row"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('aside')}${siteChrome.QUOTE_ATTRS}>Request a Quote</a></div>
           </div>
         </div>
       </div>

@@ -75,11 +75,11 @@ const leadLength = (html) => {
 // /contact.html 308s to /contact on this origin, so matching only the `.html`
 // form meant this contract required the redirecting link. Both forms count as
 // the same one conversion destination.
-const CONVERSION = /href="\/contact(\.html)?"|forms\.gle\/|mailto:hello@porchandparty901\.com/i;
+const CONVERSION = /href="\/contact(\.html)?"|href="\/request(\?service=[a-z]+)?"|mailto:hello@porchandparty901\.com/i;
 
-// forms.gle is the conversion destination and fonts are assets - neither is a
+// /request is the conversion destination (on-site) and fonts are assets - neither is a
 // cited source, so neither may satisfy the named-source check.
-const EXTERNAL_SOURCE = /<a[^>]+href="https?:\/\/(?!(?:www\.)?porchandparty901\.com)(?!forms\.gle)(?!fonts\.(?:googleapis|gstatic)\.com)/i;
+const EXTERNAL_SOURCE = /<a[^>]+href="https?:\/\/(?!(?:www\.)?porchandparty901\.com)(?!fonts\.(?:googleapis|gstatic)\.com)/i;
 
 
 // The spec was named in this validator's output as its provenance while nothing

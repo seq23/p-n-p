@@ -7,8 +7,8 @@
  * Rentals · Pricing · How It Works · FAQ (FAQ added by owner ruling 2026-10-17), then "Request a Quote" and
  * "Call or text 901-355-1518", identical on EVERY page, frozen ones included.
  *
- * Owner ruling 2026-10-15: every quote call-to-action opens the quote form
- * (services.json quoteUrl, a Google Form) directly, in a new tab - the header
+ * Owner ruling 2026-10-15, retargeted 2026-10-18: every quote call-to-action opens the quote form
+ * (services.json quoteUrl, the site's own /request page, same tab) directly - the header
  * button and every in-body "Request a Quote" / "Start Your Request" / "Check
  * My Date" link. /contact stays (email, phone, the form button) and is linked
  * only as "Contact". retargetQuoteCtas() moves any quote CTA still pointing at
@@ -47,7 +47,12 @@ const NAV_ITEMS = Object.freeze([
   { href: '/how-it-works', label: 'How It Works' },
   { href: '/faq/', label: 'FAQ' }
 ]);
-const QUOTE = Object.freeze({ href: offers.quoteUrl, label: 'Request a Quote', attrs: 'target="_blank" rel="noopener"' });
+// /request is the site's own page, so it opens in the same tab (no target/rel).
+const QUOTE = Object.freeze({ href: offers.quoteUrl, label: 'Request a Quote', attrs: '' });
+/** QUOTE.attrs with its leading space ('' when none), for `<a href="..." class="x"${QUOTE_ATTRS}>`. */
+const QUOTE_ATTRS = QUOTE.attrs ? ` ${QUOTE.attrs}` : '';
+// The retired Google Form (owner, 2026-10-18): kept as the owner's fallback, linked nowhere.
+const RETIRED_FORM_RE = /^https:\/\/(?:forms\.gle\/vHjfKtRRAnGV3HxFA|docs\.google\.com\/forms\/d\/e\/1FAIpQLSfI4EWhRQaR1xYs0QLBIilqyfqn9mvvMkDLybczfFVvhu5gjA\/viewform[^"]*)$/;
 const CONTACT_HREF_RE = /^\/contact(?:\.html)?\/?(?:[?#].*)?$/;
 // A link whose words ask for a quote, a request or a date check is a quote CTA.
 const QUOTE_CTA_LABEL_RE = /\b(?:quote|request|check my date|book)\b/i;
@@ -86,6 +91,7 @@ const LEGAL_LINKS = Object.freeze([
   { href: '/privacy-policy', label: 'Privacy Policy' },
   { href: '/terms-and-conditions', label: 'Terms &amp; Conditions' },
   { href: '/terms-and-conditions#rental-cancellation', label: 'Rental &amp; Cancellation Policy' },
+  { href: '/rules', label: 'Rules &amp; Responsibilities' },
   { href: '/accessibility', label: 'Accessibility' },
   { href: '/sitemap', label: 'Sitemap' },
   { href: '/privacy-policy#privacy-choices', label: 'Privacy Choices' }
@@ -125,7 +131,7 @@ const cur = (href, currentPath) => (isCurrent(href, currentPath) ? ' aria-curren
 
 function header(currentPath) {
   const items = NAV_ITEMS.map((i) => `<a href="${i.href}"${cur(i.href, currentPath)}>${i.label}</a>`).join('');
-  const quote = (cls) => `<a href="${QUOTE.href}" class="${cls}" ${QUOTE.attrs}>${QUOTE.label}</a>`;
+  const quote = (cls) => `<a href="${QUOTE.href}" class="${cls}"${QUOTE_ATTRS}>${QUOTE.label}</a>`;
   return `<header class="site-header pnp-header" ${MARK.header}><div class="pnp-header-inner">`
     + `<a class="pnp-logo" href="/" aria-label="Porch and Party home"><span class="brand-script">Porch &amp; Party</span></a>`
     + `<nav class="site-nav pnp-nav" aria-label="Primary navigation">${items}</nav>`
@@ -162,7 +168,8 @@ const FAQ_ANY_RE = /<a\b[^>]*href="\/faq\/?(?:index\.html)?"[^>]*>[^<]*<\/a>/g;
 /** True when an anchor (its attribute string and inner HTML) is a quote call-to-action. */
 function isQuoteCta(attrs, inner) {
   const href = hrefOf(attrs);
-  if (href !== QUOTE.href && !CONTACT_HREF_RE.test(href || '')) return false;
+  const formHref = href === QUOTE.href || /^\/request\?service=[a-z]+$/.test(href || '') || RETIRED_FORM_RE.test(href || '');
+  if (!formHref && !CONTACT_HREF_RE.test(href || '')) return false;
   return QUOTE_CTA_LABEL_RE.test(anchorText(inner));
 }
 
@@ -173,9 +180,14 @@ function isQuoteCta(attrs, inner) {
  */
 function retargetQuoteCtas(html) {
   return html.replace(ANCHOR_RE, (whole, attrs, inner) => {
-    if (!CONTACT_HREF_RE.test(hrefOf(attrs) || '') || !isQuoteCta(attrs, inner)) return whole;
-    const rest = attrs.replace(/\s+(?:target|rel)="[^"]*"/g, '').replace(/\bhref="[^"]*"/, `href="${QUOTE.href}"`);
-    return `<a${rest} ${QUOTE.attrs}>${inner}</a>`;
+    const href = hrefOf(attrs) || '';
+    // Every link to the retired Google Form, whatever its words, goes to /request (rental
+    // CTAs to its rentals path); a quote CTA still pointing at /contact too.
+    const retired = RETIRED_FORM_RE.test(href);
+    if (!retired && !(CONTACT_HREF_RE.test(href) && isQuoteCta(attrs, inner))) return whole;
+    const rentals = retired && /data-quote-cta="rentals-/.test(attrs);
+    const rest = attrs.replace(/\s+(?:target|rel)="[^"]*"/g, '').replace(/\bhref="[^"]*"/, `href="${rentals ? `${QUOTE.href}?service=rentals` : QUOTE.href}"`);
+    return `<a${rest}${QUOTE.attrs ? ` ${QUOTE.attrs}` : ''}>${inner}</a>`;
   });
 }
 
@@ -245,7 +257,7 @@ function withoutChrome(html) {
 }
 
 module.exports = {
-  NAV_ITEMS, QUOTE, CALL_LABEL, MARK, LEGAL_LINKS, LEGAL_YEAR, footerAbout, legal, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, HEADER_RE, EXPLORE_RE,
+  NAV_ITEMS, QUOTE, QUOTE_ATTRS, RETIRED_FORM_RE, CALL_LABEL, MARK, LEGAL_LINKS, LEGAL_YEAR, footerAbout, legal, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, HEADER_RE, EXPLORE_RE,
   header, cssLink, fontsLink, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
   isQuoteCta, retargetQuoteCtas
 };

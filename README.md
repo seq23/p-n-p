@@ -4,7 +4,7 @@ Static site repo for Porch & Party at porchandparty901.com.
 
 ## Public contact path
 - Quote page: `/contact.html`
-- Form destination: https://forms.gle/vHjfKtRRAnGV3HxFA
+- Form destination: /request (the site's own request form, 18 Oct 2026; the old Google Form https://forms.gle/vHjfKtRRAnGV3HxFA stays as an unlinked fallback)
 - Public email: hello@porchandparty901.com
 - Phone (call or text): 901-355-1518, `tel:+19013551518` / `sms:+19013551518`
 - Google Business Profile: https://www.google.com/maps?cid=1437103205402862394 ("Porch and Party", Maps feature 0x13f19dc04f9ce33a)

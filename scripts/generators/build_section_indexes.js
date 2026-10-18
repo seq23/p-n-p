@@ -41,8 +41,8 @@ const faqContent = require(path.join(ROOT, 'scripts/lib/faq_content.js'));
 const rentalRates = require(path.join(ROOT, 'data/rentals/games.json')).rates;
 const { nav, footer } = require(path.join(ROOT, 'templates/page-shell.js'));
 // Owner ruling 2026-10-15: every quote CTA opens the quote form directly, in a new tab.
-const { QUOTE } = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
-const QUOTE_LINK = `href="${QUOTE.href}" ${QUOTE.attrs}`;
+const { QUOTE, QUOTE_ATTRS } = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
+const QUOTE_LINK = `href="${QUOTE.href}"${QUOTE_ATTRS}`;
 
 const DOMAIN = offers.domain;
 const CHECK = process.argv.includes('--check');
@@ -453,13 +453,13 @@ ${section.groups ? `        <div class="page-intro" id="top">
           <h1>${section.heroH1}</h1>
           <p>${section.lead}</p>
           <p class="faq-hero-note">${esc(section.heroNote)}</p>
-          <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary" ${QUOTE.attrs}>Request a Quote</a></div>
+          <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary"${QUOTE_ATTRS}>Request a Quote</a></div>
         </div>${faqMapHtml(section.groups)}
 ` : `        <div class="page-intro">
           <span class="eyebrow">${section.eyebrow}</span>
           <h1>${section.h1}</h1>
           <p>${section.lead}</p>
-          <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary" ${QUOTE.attrs}>Request a Quote</a><a href="/pricing.html" class="btn-secondary">See Pricing</a></div>
+          <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary"${QUOTE_ATTRS}>Request a Quote</a><a href="/pricing.html" class="btn-secondary">See Pricing</a></div>
         </div>
         <div class="info-panel recommendation-summary" data-content-block="recommendation_summary" id="recommendation-summary">
           <h2>What this page recommends</h2>
@@ -498,7 +498,7 @@ ${section.groups ? '' : `
         <span class="eyebrow">Request a Quote</span>
         <h2>Ready to plan your setup?</h2>
         <p>Share the occasion, city, date, location type, budget range, and any inspiration notes so Porch &amp; Party can confirm fit and quote direction.</p>
-        <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary" ${QUOTE.attrs}>Start Your Request</a></div>
+        <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary"${QUOTE_ATTRS}>Start Your Request</a></div>
         <p class="muted" style="margin-top: 14px;"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p>
       </div>
     </section>`}

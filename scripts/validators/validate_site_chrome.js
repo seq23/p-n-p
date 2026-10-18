@@ -11,11 +11,12 @@
  *     list exactly the ruled items in the ruled order (spelled out below, so
  *     editing the module cannot quietly change the nav), followed by the
  *     Request a Quote button and the Call or text tel: link;
- *   - owner ruling 2026-10-15: the header Request a Quote (desktop row AND
- *     mobile panel) opens the quote form (services.json quoteUrl) with
- *     target="_blank" rel="noopener"; on every page no quote CTA links
- *     /contact - the only link to /contact anywhere is one labelled "Contact" -
- *     and every link to the form opens in a new tab with rel="noopener";
+ *   - owner rulings 2026-10-15 / 2026-10-18: the header Request a Quote (desktop
+ *     row AND mobile panel) opens the site's own request form, /request, in the
+ *     same tab; on every page no quote CTA links /contact - the only link to
+ *     /contact anywhere is one labelled "Contact" - no link to /request opens a
+ *     new tab, and nothing links the retired Google Form (forms.gle or its
+ *     docs.google.com/forms address) any more;
  *   - no header links the party-planner page ("Party Planning" was removed);
  *   - the hamburger is a <button> with aria-expanded + aria-controls="site-menu",
  *     the panel #site-menu exists, and the no-JS :target fallback link exists;
@@ -47,9 +48,11 @@ const RULED = [
 ];
 const TEL = 'tel:+19013551518';
 // Written out on purpose (not read from services.json or the chrome module).
-const FORM = 'https://forms.gle/vHjfKtRRAnGV3HxFA';
+const FORM = '/request';
+const RETIRED = /forms\.gle\/|docs\.google\.com\/forms\//;
 const CONTACT_RE = /^\/contact(?:\.html)?\/?(?:[?#].*)?$/;
-const newTab = (attrs) => / target="_blank"/.test(` ${attrs}`) && /\brel="[^"]*\bnoopener\b[^"]*"/.test(attrs);
+const newTab = (attrs) => / target="_blank"/.test(` ${attrs}`);
+const isForm = (href) => href === FORM || /^\/request\?service=[a-z]+$/.test(href || '');
 const PLANNER = '/services/birthday-party-planner-memphis';
 
 const text = (s) => s.replace(/<[^>]+>/g, '').replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
@@ -80,12 +83,12 @@ function checkPage(html, rel) {
   }
   const actions = (h.match(/<div class="pnp-actions">([\s\S]*?)<\/div>/) || [])[1] || '';
   const act = links(actions);
-  if (!(act.length === 2 && act[0].href === FORM && newTab(act[0].attrs) && act[0].label === 'Request a Quote' && act[1].href === TEL && act[1].label === 'Call or text 901-355-1518')) errs.push(`${rel}: header actions are not [Request a Quote (${FORM}, target=_blank rel=noopener), Call or text 901-355-1518 (tel:)]`);
+  if (!(act.length === 2 && act[0].href === FORM && !newTab(act[0].attrs) && act[0].label === 'Request a Quote' && act[1].href === TEL && act[1].label === 'Call or text 901-355-1518')) errs.push(`${rel}: header actions are not [Request a Quote (${FORM}, same tab), Call or text 901-355-1518 (tel:)]`);
   const panel = (h.match(/<div class="pnp-panel" id="site-menu">([\s\S]*?)<\/div>/) || [])[1];
   if (!panel) errs.push(`${rel}: no mobile panel #site-menu`);
   else {
     const after = links(panel.replace(/<nav[\s\S]*?<\/nav>/, ''));
-    if (!after.some((l) => l.href === FORM && newTab(l.attrs) && l.label === 'Request a Quote')) errs.push(`${rel}: mobile panel lacks Request a Quote opening ${FORM} in a new tab`);
+    if (!after.some((l) => l.href === FORM && !newTab(l.attrs) && l.label === 'Request a Quote')) errs.push(`${rel}: mobile panel lacks Request a Quote opening ${FORM}`);
     if (!after.some((l) => l.href === TEL && l.label === 'Call or text 901-355-1518')) errs.push(`${rel}: mobile panel lacks the phone line`);
   }
   if (!/<button type="button" class="pnp-toggle" aria-expanded="false" aria-controls="site-menu"/.test(h)) errs.push(`${rel}: hamburger <button> lacks aria-expanded/aria-controls`);
@@ -95,8 +98,10 @@ function checkPage(html, rel) {
   // "Contact"; any other label there is a quote CTA that must open the form.
   for (const l of links(html)) {
     if (CONTACT_RE.test(l.href || '') && l.label !== 'Contact') errs.push(`${rel}: "${l.label}" links ${l.href} - quote CTAs open ${FORM} directly (owner ruling 2026-10-15)`);
-    if (l.href === FORM && !newTab(l.attrs)) errs.push(`${rel}: "${l.label}" links the quote form without target="_blank" rel="noopener"`);
+    if (isForm(l.href) && newTab(l.attrs)) errs.push(`${rel}: "${l.label}" opens the request form in a new tab (it is the site's own page)`);
+    if (RETIRED.test(l.href || '')) errs.push(`${rel}: "${l.label}" links the retired Google Form (${l.href}); every quote link goes to ${FORM}`);
   }
+  if (RETIRED.test(html)) errs.push(`${rel}: the retired Google Form address appears on the page`);
   const head = html.slice(0, html.indexOf('</head>'));
   if (!head.includes(`href="${chrome.CSS_HREF}"`)) errs.push(`${rel}: <head> does not link ${chrome.CSS_HREF}`);
   if (!/fonts\.googleapis\.com\/css2\?family=Cormorant/.test(head)) errs.push(`${rel}: <head> does not load the site fonts (Inter, Cormorant Garamond, Great Vibes)`);
@@ -120,9 +125,10 @@ const broken = {
   'footer without Rentals': sample.replace(chrome.RENTALS_FOOTER, ''),
   'footer without FAQ': sample.replace(chrome.FAQ_FOOTER, ''),
   'nav without FAQ': sample.replace(/(<nav class="site-nav[^>]*>[\s\S]*?)<a href="\/faq\/">FAQ<\/a>/, '$1'),
-  'header quote back on /contact': sample.replace(`<a href="${FORM}" class="btn-primary pnp-quote" target="_blank" rel="noopener">`, '<a href="/contact" class="btn-primary pnp-quote">'),
+  'header quote back on /contact': sample.replace(`<a href="${FORM}" class="btn-primary pnp-quote">`, '<a href="/contact" class="btn-primary pnp-quote">'),
   'an in-body quote CTA on /contact': sample.replace('</main>', '<a href="/contact.html" class="btn-primary">Request a Quote</a></main>'),
-  'a form link without a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary">Check My Date</a></main>`)
+  'a link to the retired Google Form': sample.replace('</main>', '<a href="https://forms.gle/vHjfKtRRAnGV3HxFA" class="btn-primary">Check My Date</a></main>'),
+  'the request form opening a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary" target="_blank" rel="noopener">Request a Quote</a></main>`)
 };
 for (const [what, html] of Object.entries(broken)) {
   if (html === sample) errors.push(`self-test: could not build the "${what}" fixture (pricing.html shape changed)`);
