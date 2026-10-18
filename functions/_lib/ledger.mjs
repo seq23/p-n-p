@@ -1,7 +1,7 @@
 // Money per invoice from recorded payments (table `payments`, migration 0004), never from a
 // status chip. The refundable damage deposit is kept apart from what is owed: a payment
 // covers the charges first, then the damage deposit.
-import { invoiceTotal, lineTotal, money } from './util.mjs';
+import { invoiceTotal, lineTotal, money, toCents } from './util.mjs';
 import { chicagoDate } from './reminders.mjs';
 
 export function splitTotals(lines) {
@@ -95,4 +95,45 @@ export async function recordDepositOutcome(db, invoice, lines, kind, amountCents
       .bind(invoice.id, amount, chicagoDate(), method, kind === 'refund' ? 'damage deposit refunded' : 'damage deposit kept for damage', kind).run();
   }
   return { amount, held: held - amount };
+}
+
+// The invoice lines as the editor posts them (line_desc / line_qty / line_price / line_note /
+// line_refundable, one of each per line). Used by the invoice editor and by "Change anything".
+export function linesFromForm(form) {
+  const desc = form.getAll('line_desc'); const qty = form.getAll('line_qty');
+  const price = form.getAll('line_price'); const note = form.getAll('line_note'); const ref = form.getAll('line_refundable');
+  const lines = [];
+  desc.forEach((d, i) => {
+    const description = String(d || '').trim();
+    if (!description) return;
+    const q = Number(qty[i]);
+    lines.push({ description, qty: Number.isFinite(q) ? q : 1, unit_cents: toCents(price[i]), note: String(note[i] || '').trim(), refundable: ref[i] === '1' ? 1 : 0 });
+  });
+  return lines;
+}
+
+export async function saveLines(db, invoiceId, lines) {
+  const stmts = [db.prepare('DELETE FROM invoice_lines WHERE invoice_id = ?1').bind(invoiceId)];
+  lines.forEach((l, i) => stmts.push(db.prepare('INSERT INTO invoice_lines (invoice_id, position, description, qty, unit_cents, note, refundable) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)')
+    .bind(invoiceId, i, l.description, l.qty, l.unit_cents, l.note, l.refundable)));
+  await db.batch(stmts);
+}
+
+// After a payment or an invoice line is changed by hand: the invoice's money status (and the
+// request's, while it sits on a money step) follows the recorded payments, so a removed
+// payment or a raised total reads "owes" again. Draft, void and done invoices are left alone.
+export const MONEY_STATUS = { sent: 'invoiced', deposit_paid: 'deposit_paid', paid: 'paid' };
+export async function syncMoneyStatus(db, invoiceId) {
+  const inv = await db.prepare('SELECT * FROM invoices WHERE id = ?1').bind(invoiceId).first();
+  if (!inv || !(inv.status in MONEY_STATUS)) return inv ? inv.status : '';
+  const { results: lines } = await db.prepare('SELECT * FROM invoice_lines WHERE invoice_id = ?1').bind(invoiceId).all();
+  const paid = (await paidByInvoice(db, [invoiceId]))[invoiceId] || 0;
+  const bal = balanceOf(inv, lines || [], paid);
+  const next = bal.total > 0 && bal.remaining === 0 ? 'paid' : (bal.paid > 0 ? 'deposit_paid' : 'sent');
+  if (next !== inv.status) await db.prepare("UPDATE invoices SET status = ?2, updated_at = datetime('now') WHERE id = ?1").bind(invoiceId, next).run();
+  if (inv.request_key) {
+    await db.prepare("UPDATE request_status SET status = ?2, updated_at = datetime('now') WHERE request_key = ?1 AND status IN ('invoiced','deposit_paid','paid')")
+      .bind(inv.request_key, MONEY_STATUS[next]).run();
+  }
+  return next;
 }

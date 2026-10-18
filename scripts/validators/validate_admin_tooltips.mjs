@@ -98,6 +98,11 @@ await s.post('/admin/requests/archive', { r: s.rk(reqB.key) });
   pages.push(['/admin/?f=unpaid', { home: true }, await s.get('/admin/?f=unpaid')]);
 }
 pages.push(['/admin/search?partial=1&q=renter', { partial: true }, await s.get('/admin/search?partial=1&q=renter')]);
+// "Change anything on this request" (the Edit link): with bookings, payments and a return, and
+// with nothing booked yet (Put it on the calendar).
+await s.post('/admin/requests/edit/payment-add', { r: s.rk(reqA.key), amount: '10.00', method: 'cash' });
+pages.push([`/admin/requests/edit (${reqA.email})`, {}, await s.get(`/admin/requests/edit?r=${s.rk(reqA.key)}`)]);
+pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/requests/edit?r=${s.rk(tyReq.row.request_key)}`)]);
 // A porch job (no rental) on the calendar, then done: Mark job done / Undo job done.
 {
   const views = await mod('functions/_lib/views.mjs');

@@ -33,6 +33,29 @@ export function wallClockMs(utc) {
 
 const parse = (s, fallback) => { try { return JSON.parse(s); } catch { return fallback; } };
 
+// Customer details Valerie corrected on "Change anything on this request" (migration 0011,
+// requests.details_edits). Laid over what the form sent, for both sources, so every screen,
+// invoice prefill and booking reads the corrected value; raw_row is never rewritten.
+export const DETAIL_FIELDS = ['name', 'phone', 'email', 'address', 'notes'];
+export const ADDRESS_RE = /^location|address/i;
+export const NOTES_RE = /^anything else|^notes/i;
+export function detailAnswer(r, re) {
+  for (const g of ['rentals', 'decor', 'other']) { const hit = (r[g] || []).find((x) => re.test(x.label)); if (hit) return { group: g, item: hit }; }
+  return null;
+}
+function applyEdits(out, row) {
+  const edits = parse(row.details_edits || '{}', {}) || {};
+  out.detailsEdits = edits;
+  for (const f of ['name', 'phone', 'email']) if (typeof edits[f] === 'string') out[f] = edits[f];
+  for (const [f, re, label] of [['address', ADDRESS_RE, 'Location'], ['notes', NOTES_RE, 'Notes']]) {
+    if (typeof edits[f] !== 'string') continue;
+    const hit = detailAnswer(out, re);
+    if (hit) out[hit.group] = out[hit.group].map((x) => (x === hit.item ? { ...x, value: edits[f] } : x));
+    else if (edits[f]) out.other = [...(out.other || []), { label, value: edits[f] }];
+  }
+  return out;
+}
+
 // Which services an old Google Form request asks for (rentals only with a real game).
 function servicesOf(r) {
   const need = String(r.need || '').toLowerCase();
@@ -61,7 +84,7 @@ export function fromRow(row) {
     const out = { ...r, ...common, key: row.request_key };
     if (!common.services.length) out.services = servicesOf(out);
     if (row.id_deleted_at) out.idFile = '';
-    return out;
+    return applyEdits(out, row);
   }
   const answers = parse(row.answers, []);
   const get = (re) => { const a = answers.find((x) => re.test(x.label)); return a ? a.value : ''; };
@@ -92,7 +115,7 @@ export function fromRow(row) {
   };
   // "Fall · picturing a full porch (Classic, from $N)" for the card.
   out.porchLine = out.porchSeason ? PP.cardLine(porchPackages, { season: out.porchSeason, decor: out.porchDecor, both: out.porchBoth }) : '';
-  return out;
+  return applyEdits(out, row);
 }
 
 export async function loadRequestsFromDb(db) {

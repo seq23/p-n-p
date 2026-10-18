@@ -232,7 +232,8 @@ function confirmStep({ key, yesKey, label, question, action, hidden, danger = fa
       <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('pay.no')}>No, go back</button></div></div></details>${helper && !link ? hint(key) : ''}</div>`;
 }
 const LABEL = { 'dep.refundYes': 'Yes, record the refund', 'dep.keepYes': 'Yes, keep it for damage', 'exp.deleteYes': 'Yes, delete the expense', 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
-  'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'hold.releaseYes': 'Yes, release the games', 'hold.depositYes': 'Yes, mark deposit received', 'set.newTokenYes': 'Yes, make a new link', 'td.jobDoneYes': 'Yes, mark job done', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned' };
+  'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'hold.releaseYes': 'Yes, release the games', 'hold.depositYes': 'Yes, mark deposit received', 'set.newTokenYes': 'Yes, make a new link', 'td.jobDoneYes': 'Yes, mark job done', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned',
+  'edit.removeBookingYes': 'Yes, remove the booking', 'edit.removePaymentYes': 'Yes, remove this payment' };
 
 const hiddenInputs = (obj) => Object.entries(obj).map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(v)}">`).join('');
 
@@ -398,6 +399,7 @@ export const CARD_CSS = `
 .svc{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;font:700 1rem Inter,Arial,sans-serif;border:2px solid;color:#2b2420}
 article[data-reqcard]{border-left-width:8px}
 article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
+.editlink{display:inline-flex;align-items:center;min-height:48px;padding:0 18px;border:2px solid var(--accent);border-radius:999px;background:#fff;color:var(--accent);font:700 1.05rem Inter,Arial,sans-serif;text-decoration:none}
 .facts{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;margin:6px 0 2px;font-size:1.05rem}
 .facts .call{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:999px;background:var(--ok);color:#fff;font-weight:700;text-decoration:none}
 .progress.mini{gap:4px;margin:8px 0}.progress.mini li{padding:1px 8px;font-size:.82rem}
@@ -582,7 +584,7 @@ export function requestCard(r, o) {
   const payment = quiet ? '' : cardPaymentBox(r, st, inv, rules.primary, ctx);
   return `<article class="card" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
       ${badges(services)}
-      <div class="spread"><h3 class="who">${esc(r.name || 'No name given')}</h3><div class="row">${chips}</div></div>
+      <div class="spread"><h3 class="who">${esc(r.name || 'No name given')}</h3><div class="row">${chips}<a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a></div></div>
       ${factsLine(keyFacts(r, services, { pickupPlace }))}
       ${wantSummary(r).map((w) => `<div class="want">${esc(w)}</div>`).join('')}${gLine}
       ${progress}
@@ -663,7 +665,7 @@ export function invoicesPage({ invoices }) {
     ${act(`<a class="btn ghost" href="/admin/invoices/new"${tip('sub.blankInvoice')}>Start a blank invoice</a>`, 'sub.blankInvoice')}`, { screen: 'invoices', back: BACK_REQUESTS });
 }
 
-function lineEditor(line) {
+export function lineEditor(line) {
   return `<div class="line" data-line>
     <div class="grid">
       <div class="full"><label>What it is</label><input name="line_desc" value="${esc(line.description)}"></div>

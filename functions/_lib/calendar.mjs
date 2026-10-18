@@ -169,8 +169,12 @@ export async function createBooking(db, b) {
   return row.id;
 }
 
+// A booking that moves to another day gets its day-before reminder again (the text button and
+// the 10 AM email), so the reminder follows the booking; the same day keeps "reminded".
+const REMIND_AGAIN = (p) => `reminded_at = CASE WHEN bookings.date <> ${p} THEN NULL ELSE bookings.reminded_at END, email_reminded_at = CASE WHEN bookings.date <> ${p} THEN NULL ELSE bookings.email_reminded_at END`;
+
 export async function updateBooking(db, id, b) {
-  await db.prepare(`UPDATE bookings SET kind = ?1, date = ?2, time = ?3, customer_name = ?4, phone = ?5, email = ?6, place = ?7, items = ?8,
+  await db.prepare(`UPDATE bookings SET ${REMIND_AGAIN('?2')}, kind = ?1, date = ?2, time = ?3, customer_name = ?4, phone = ?5, email = ?6, place = ?7, items = ?8,
     name_norm = ?9, phone_digits = ?10, edited_by_hand = 1, updated_at = datetime('now') WHERE id = ?11`)
     .bind(b.kind, b.date, b.time, b.customer_name, b.phone, b.email || '', b.place, b.items, normName(b.customer_name), digitsOf(b.phone), id).run();
 }
@@ -258,8 +262,16 @@ export async function unscheduleIfEmpty(db, key) {
 
 export async function moveBooking(db, id, date) {
   if (!isISODate(date)) return false;
-  const r = await db.prepare("UPDATE bookings SET date = ?1, edited_by_hand = 1, updated_at = datetime('now') WHERE id = ?2").bind(date, id).run();
+  const r = await db.prepare(`UPDATE bookings SET ${REMIND_AGAIN('?1')}, date = ?1, edited_by_hand = 1, updated_at = datetime('now') WHERE id = ?2`).bind(date, id).run();
   return Boolean(r && r.meta ? r.meta.changes : true);
+}
+
+// "Change anything on this request": the day and time of one booking (her change, so a later
+// invoice send keeps it), with the reminder following the new day.
+export async function editBookingWhen(db, id, { date, time }) {
+  if (!isISODate(date)) return false;
+  await db.prepare(`UPDATE bookings SET ${REMIND_AGAIN('?1')}, date = ?1, time = ?2, edited_by_hand = 1, updated_at = datetime('now') WHERE id = ?3`).bind(date, time || null, id).run();
+  return true;
 }
 
 // The second booking's day (porch/party takedown, grazing pickup): the form's takedown date

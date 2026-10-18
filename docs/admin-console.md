@@ -135,6 +135,32 @@ now, no PII, sections and links) and `npm run validate:admin-cards` (rules table
 filters, Put away section, Not paid yet math and the Money list end to end, reminders, contextual
 scheduling links).
 
+## Change anything on this request (owner-approved 18 Oct 2026, migration 0011)
+- **Edit link** on every request card at every stage (New to Finished, Void and Put away
+  included), next to the status chips, never under Show details (`card.edit`). It opens ONE page,
+  `/admin/requests/edit?r=…` (`functions/_lib/admin-edit.mjs`), sections in order, one Save each:
+  1 **Bookings** (each booking's day, time, done tick, notes; Remove booking asks first),
+  2 **Done dates** (Job done, Returned, Takedown done; empty = take it back through the same undo
+  paths, so Finished recomputes; never after today), 3 **Invoice** (lines and amounts even after
+  sent or paid; a paid invoice says "Changing this changes what they owe"; nothing is re-sent),
+  4 **Payments** (amount, day, how paid; Add a payment; Remove this payment asks first and only
+  sets `payments.voided_at`, the row stays and shows as removed), 5 **Status** (any of the six
+  steps or Void, plus takedown plan / date / note; the steps follow the facts, so a chosen step
+  writes them: an earlier step clears Job done and soft-removes payments, Paid in full records
+  the rest, a booking keeps it at Scheduled and the page says so), 6 **Customer details** (name,
+  phone, email, address, their notes; stored in `requests.details_edits` and laid over the form
+  by `fromRow`, so the old Google Form raw row is never rewritten; bookings and live invoices
+  follow, nothing is sent).
+- **History**: every change is a `logEvent` line "old → new (by Valerie)", who = Valerie.
+- **Everything follows**: the sheet sync runs after every admin POST (Bookings / Site requests
+  tabs); the ICS feed reads the bookings live; a booking that changes day gets its day-before
+  reminder again (`REMIND_AGAIN` in `calendar.mjs`, also for Move and Change this booking; the
+  same day keeps "reminded", so nothing sends twice); the thank-you follows `job_done_at`
+  (cleared before it went out = it never goes; `thankyou_emailed_at` is never cleared, so it is
+  never sent twice); `syncMoneyStatus` (`ledger.mjs`) puts the invoice back to owing when a
+  payment is removed or the total goes up.
+- Proof: `npm run validate:admin-edit` (in validate:admin).
+
 ## Calendar & Bookings, Put away, Void (migration 0004, owner-approved 18 Oct 2026)
 Built for Valerie on a phone: plain words, 48 px+ buttons, a Back link and a numbered 1-2-3 at
 the top of every screen, and a printable guide at `/admin/help`.
