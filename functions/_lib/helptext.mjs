@@ -52,6 +52,7 @@ export const STEPS = {
   year: ['Pick the year.', 'Download the PDF and the spreadsheet, or email them to yourself.', 'Give them to your tax preparer.'],
   confirmed: ['Their deposit is in: the booking is confirmed.', 'Tap Text them it\'s confirmed (or Email them).', 'Tap Done.'],
   help: ['Find the screen you are on.', 'Read what each button does.', 'Tap Print this page to keep a paper copy.'],
+  packages: ['Find the season (fall or Christmas).', 'Read what each package includes and where its price starts.', 'Use it as the starting price on the invoice, then adjust after the walk-through.'],
 };
 
 const H = (screen, label, title, helper, more, warn = '') => ({ screen, label, title, helper, more, warn });
@@ -75,6 +76,7 @@ export const HELP = {
   'sub.blankChecklist': H('requests', 'Print a blank checklist', 'Opens an empty walk-through checklist you can print on paper.', 'A paper copy to take to a visit.', 'Opens the four-page checklist with nothing filled in, ready to print.'),
   'sub.refresh': H('requests', 'Check for new requests now', 'Reloads the list straight from the Google Sheet, so a brand-new request shows up.', 'Use it if you are waiting for someone.', 'The list already updates every minute. This button asks the Google Sheet right now.'),
   'sub.today': H('requests', "Today's list", "Opens today's Day sheet: every booking today, what to load and what to collect.", 'Print it or text it to yourself.', 'The same page as tapping today on the calendar.'),
+  'sub.packages': H('requests', 'Porch packages', 'Opens the porch package prices for fall and Christmas: Stoop, Classic, Grand and Showstopper.', 'The same prices customers see on the website.', 'A reference grid with what each package includes and its starting price per season, plus the add-ons and the fall + Christmas bundle. It changes nothing.'),
   'sub.find': H('requests', 'Find a customer', 'Opens the search to find any customer by name, phone or email.', 'Past, upcoming and put-away customers.', 'Searches every booking and every request.'),
   'req.sheet': H('requests', 'Open responses sheet', 'Opens the Google Sheet where every website request is saved.', '', 'The Google Sheet behind the list. You never need to change it.'),
   'req.idFolder': H('requests', 'Open ID folder', 'Opens the Google Drive folder with the photo IDs every customer uploaded.', '', 'The folder in Google Drive that holds every photo ID from the form.'),
@@ -141,6 +143,7 @@ export const HELP = {
   'ed.preview': H('invoice', 'See it before sending', 'Saves the invoice and shows you the exact email the customer will get. Nothing is sent.', 'Nothing is sent yet.', 'The safe button. You see the email first, then send it.'),
   'ed.sendNow': H('invoice', 'Send to (name) now', 'Saves the invoice and emails it to the customer straight away.', 'Sends the email right now.', 'Skips the preview and sends at once.', 'The customer gets the email immediately.'),
   'ed.change': H('invoice', 'Change what goes into the total', 'Opens the lines, prices and customer details so you can change them.', '', 'Change a price, add or remove a line, or fix the name, email or phone.'),
+  'ed.packages': H('invoice', 'See the porch packages', 'Opens the porch package prices in a new tab, so you can check a starting price while you write the invoice.', '', 'The same grid as Porch packages on Requests. A porch invoice already starts at the package the customer picked.'),
   'ed.addLine': H('invoice', 'Add a line', 'Adds one more thing to charge for.', '', 'Adds an empty line. Type what it is and the price.'),
   'ed.removeLine': H('invoice', 'Remove this line', 'Takes this line off the invoice.', '', 'Removes one line. Nothing is saved until you tap a Save or Send button.'),
   'ed.saveOnly': H('invoice', 'Save without sending', 'Saves your changes and does not send anything.', '', 'Keeps the invoice as a draft.'),

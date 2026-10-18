@@ -194,7 +194,7 @@ const SECTIONS = [
     heroH1: 'Frequently asked questions',
     title: 'Porch &amp; Party FAQ | Pricing, Setup Time &amp; Booking Questions',
     description: 'Questions asked most before booking Porch & Party: what setups cost, how long they take, how far ahead to book, and what grazing-table pricing covers.',
-    lead: 'Every question we get, in one place, sectioned by service: booking and payment, porch decor, party and room decor, grazing tables and party game rentals. The grazing estimator and the porch-size pictures give you a starting price before you ask.',
+    lead: 'Every question we get, in one place, sectioned by service: booking and payment, porch decor, party and room decor, grazing tables and party game rentals. The grazing estimator and the Price my porch calculator give you a starting price before you ask.',
     heroNote: 'Use the estimator below for a starting price before you ask.',
     summary: 'Jump to your service below. Setup and styling prices are firm starting points from our price list; food for grazing tables is always a separate rough estimate until the menu is confirmed.',
     group: (pages) => [{ heading: 'Longer answers', blurb: 'Each of these is a full page with the pricing detail behind one question.', pages }],
@@ -276,13 +276,14 @@ const ld = (obj) => `<script type="application/ld+json">${JSON.stringify(obj)}</
 // porch-size picker read their numbers from the same data the answers quote.
 const money = faqContent.money;
 
+// The Price my porch calculator (owner, 18 Oct 2026): season toggle, the four packages
+// with from-prices, the size hint, add-ons, bundle and rough-estimate lines and
+// "Request this package", all from data/offers/porch_packages.json via
+// scripts/lib/porch_packages.js (the same module the porch pages and admin render).
+const PP = require('../lib/porch_packages');
 function porchPickerHtml() {
-  const tiers = faqContent.porchTiers;
   return `
-        <div class="faq-tool" id="porch-picker"><div class="porch-tiers" data-estimator="porch">${tiers.map((t) => `
-          <article class="card porch-tier"><img src="${t.image}" alt="${esc(t.name)}: ${esc(t.describe)}" loading="lazy" width="1200" height="900" /><div class="card-body"><h3>${esc(t.name)}</h3><p>${esc(t.describe)}</p><p class="price">From ${money(t.from)}</p><p class="muted">Looks like yours? Attach a photo of your porch to your quote request.</p></div></article>`).join('')}
-        </div>
-        <p class="muted estimator-note" style="text-align:center;margin-top:14px;">${esc(offers.services.porch.notes[1])} ${esc(offers.addOns.takedown.line)}</p></div>`;
+        ${PP.calculatorHtml(faqContent.porchPackages)}`;
 }
 
 function grazingEstimatorHtml() {
@@ -319,7 +320,7 @@ function faqMapHtml(groups) {
     + `<span class="faq-map__title">${esc(title)}</span><span class="faq-map__lead">${esc(lead)}</span>`
     + `<span class="faq-map__meta">${meta}</span><span class="faq-map__go">${go} &rarr;</span></a>`;
   return `
-        <nav class="faq-map" aria-label="What is on this page">${groups.map((g) => card(`#${g.id}`, g.title, g.lead, `${g.qa.length} questions`, 'See answers', false)).join('')}${card('#porch-picker', 'Price my porch', 'Pick the porch picture that looks like yours for a starting price.', 'Porch picker', 'Open the picker', true)}${card('#grazing-estimator', 'Estimate my grazing table', 'Enter your guest count for a table size and a starting price.', 'Grazing estimator', 'Open the estimator', true)}</nav>`;
+        <nav class="faq-map" aria-label="What is on this page">${groups.map((g) => card(`#${g.id}`, g.title, g.lead, `${g.qa.length} questions`, 'See answers', false)).join('')}${card('#porch-picker', 'Price my porch', 'Pick a season and a package for a starting price.', 'Porch calculator', 'Open the calculator', true)}${card('#grazing-estimator', 'Estimate my grazing table', 'Enter your guest count for a table size and a starting price.', 'Grazing estimator', 'Open the estimator', true)}</nav>`;
 }
 
 const FAQ_NAV_SCRIPT = `<script>(function(){var nav=document.querySelector('.faq-jump');if(!nav||!('IntersectionObserver' in window))return;var links={};Array.prototype.forEach.call(nav.querySelectorAll('a[href^="#"]'),function(a){links[a.getAttribute('href').slice(1)]=a;});var set=function(id){Object.keys(links).forEach(function(k){var a=links[k];if(k===id){a.classList.add('is-active');a.setAttribute('aria-current','true');if(nav.scrollWidth>nav.clientWidth)nav.scrollLeft=Math.max(0,a.offsetLeft-nav.firstElementChild.offsetWidth-24);}else{a.classList.remove('is-active');a.removeAttribute('aria-current');}});};var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)set(e.target.id);});},{rootMargin:'-170px 0px -55% 0px'});Object.keys(links).forEach(function(id){var el=document.getElementById(id);if(el)io.observe(el);});})();</script>`;
@@ -388,6 +389,8 @@ function render(section, groups) {
       }))
     }
   ];
+  // The porch packages as priced offers (SEO/AEO/GEO) next to the calculator.
+  if (section.groups && section.groups.some((g) => g.picker === 'porch')) jsonld.push(PP.schemaNode(faqContent.porchPackages, { domain: DOMAIN, url: `${DOMAIN}/faq/` }));
   if (section.faq && section.faq.length) {
     jsonld.push({
       '@context': 'https://schema.org', '@type': 'FAQPage',

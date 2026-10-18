@@ -27,6 +27,7 @@ const ROOT = path.resolve(__dirname, '../..');
 const CHAIN = [
   'scripts/retrofit_root_pages.js',
   'scripts/install_brand_surfaces.js',
+  'scripts/install_porch_packages.js',
   'scripts/install_clarity.js',
   'scripts/install_site_icons.js',
   'scripts/install_contact_surface.js',

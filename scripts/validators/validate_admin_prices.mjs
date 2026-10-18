@@ -36,7 +36,7 @@ const errors = [];
 const pricesSrc = fs.readFileSync(path.join(ROOT, 'functions/_lib/prices.mjs'), 'utf8');
 if (!/import games from '\.\.\/\.\.\/data\/rentals\/games\.json';/.test(pricesSrc)) errors.push('functions/_lib/prices.mjs does not import data/rentals/games.json');
 if (!/import services from '\.\.\/\.\.\/data\/offers\/services\.json';/.test(pricesSrc)) errors.push('functions/_lib/prices.mjs does not import data/offers/services.json');
-if (!/buildPriceTable\(games, services\)/.test(pricesSrc)) errors.push('functions/_lib/prices.mjs does not build the table from the two data files');
+if (!/buildPriceTable\(games, services, porchPackages\)/.test(pricesSrc) || !/import porchPackages from '\.\.\/\.\.\/data\/offers\/porch_packages\.json'/.test(pricesSrc)) errors.push('functions/_lib/prices.mjs does not build the table from the three data files (games, services, porch packages)');
 
 // ---- 2. The quote form contract ---------------------------------------------
 const CONTRACT_GAMES = ['Giant Connect Four', 'Cornhole set', 'Giant Checkers', 'Giant Color Stack', 'Giant Uno', 'Grab the Mic',

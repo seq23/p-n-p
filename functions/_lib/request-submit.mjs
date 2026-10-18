@@ -81,7 +81,7 @@ function fieldsOf(form) {
   const out = {};
   for (const [k, v] of form.entries()) {
     if (typeof v !== 'string') continue;
-    if (k === 'multi' || k === 'games') (out[k] = out[k] || []).push(v);
+    if (k === 'multi' || k === 'games' || k === 'porch_addons') (out[k] = out[k] || []).push(v);
     else out[k] = v;
   }
   return out;
@@ -121,6 +121,13 @@ export async function handleRequestPage(context) {
     const values = {};
     const want = url.searchParams.get('service');
     if (F.SERVICE_KEYS.includes(want)) values.service = want;
+    // "Request this package" on the price grid and the FAQ calculator preselects the season
+    // and the decor answer: /request?service=porch&season=fall&decor=classic.
+    const pk = PRICE_TABLE.porchPackages;
+    const season = pk && pk.seasons.find((x) => x.key === url.searchParams.get('season'));
+    if (season) { values.service = values.service || 'porch'; values.porch_season = season.formChoice; }
+    const decor = url.searchParams.get('decor');
+    if (pk && (pk.tierOrder.includes(decor) || decor === 'not_sure')) { values.service = values.service || 'porch'; values.porch_decor = decor; }
     return formPage(env, url, { values, referral: ref });
   }
   if (method !== 'POST') return new Response('method not allowed', { status: 405, headers: { Allow: 'GET, POST' } });

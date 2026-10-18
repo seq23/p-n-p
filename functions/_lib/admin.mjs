@@ -16,7 +16,7 @@ import * as VM2 from './views-messages.mjs';
 import { hasEmail } from './reminders.mjs';
 import { PRICE_TABLE, CONTACT } from './prices.mjs';
 import { renderInvoicePdf, textMessage } from './pdf.mjs';
-import { prefillLines, pickupNote, isRentalInvoice } from './pricing.mjs';
+import { prefillLines, porchPrefill, pickupNote, isRentalInvoice } from './pricing.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
 import * as VC from './views-calendar.mjs';
@@ -248,6 +248,7 @@ async function newInvoice(env, url) {
   let depositCents = null; let dueDate = todayISO(7);
   const fromChecklist = key ? invoiceFromChecklist(CHECKLIST_SOURCE, await savedChecklist(env, key)) : null;
   if (request && request.gamesAnswer && lines.some((l) => /^Game rental \(/.test(l.description))) warnings.push(`We could not match the games they picked ("${request.gamesAnswer}"). Check the first line under Change what goes into the total.`);
+  if (request) warnings.push(...porchPrefill(request, PRICE_TABLE).warnings);
   if (request && lines.some((l) => /of your choice/i.test(l.description))) warnings.push('They picked a bundle without naming every game. Ask which games, then change the line under Change what goes into the total.');
   if (fromChecklist) {
     if (fromChecklist.lines.length) {
@@ -770,6 +771,7 @@ async function routeAdmin(context) {
     }
   }
   if (segs[0] === 'help' && method === 'GET') return htmlResponse(V.helpPage());
+  if (segs[0] === 'packages' && segs.length === 1 && method === 'GET') return htmlResponse(V.porchPackagesPage(PRICE_TABLE.porchPackages));
   if (segs[0] === 'checklist' && method === 'GET') {
     if (segs.length === 1) return checklistPrint(env, url);
     if (segs[1] === 'online') return checklistOnline(env, url);

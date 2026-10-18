@@ -1,0 +1,239 @@
+#!/usr/bin/env node
+/**
+ * Porch packages (owner-approved 18 Oct 2026; spec ~/porch-and-party/porch-packages.md).
+ * data/offers/porch_packages.json is the one source; scripts/lib/porch_packages.js renders
+ * every surface from it. This fails when:
+ *
+ *  1. a tier price is typed anywhere but the data file: the source tree (functions/,
+ *     scripts/, templates/) carries a tier price literal, or a surface rendered from a
+ *     perturbed copy of the data still shows an original price (calculator, page grid,
+ *     schema, form ranges, admin grid, card line, invoice prefill);
+ *  2. the /request form carries a tier price: the porch path may show only the from-price
+ *     and range line per season (read from the data), the final-quote line and the "See
+ *     examples and prices" link; the question and its five answers are the owner's
+ *     wording verbatim, and "Book both seasons" and the unpriced add-ons are on it;
+ *  3. a page in porch_packages.json `pages` lacks the current grid block or its Offer /
+ *     PriceSpecification schema, or the admin Porch packages screen does not render the
+ *     same grid (gridHtml) the public pages show;
+ *  4. the bundle wording is missing from the package grid, the calculator, the form, the
+ *     pages, the card line or the invoice prefill (10% off the Christmas package);
+ *  5. end to end through the real handlers: a porch request with a package and both seasons
+ *     does not show "<Season> · picturing ... (<Tier>, from $N)" on its card, its invoice
+ *     does not start at the tier minimum with the bundle line, "Request this package"
+ *     (/request?season=&decor=) does not preselect both answers, or /admin/packages is
+ *     not linked from Requests and the invoice screen;
+ *  6. the retired small stoop / standard porch / large porch tiers ($350/$600/$800) are
+ *     still published anywhere.
+ * Self-test: each check is run against a broken input and must fail. Rule 0: fewer than
+ * 8 priced offers or 5 pages checked is a failure.
+ */
+import fs from 'node:fs';
+import path from 'node:path';
+import { createRequire } from 'node:module';
+import { mod, ROOT } from './lib/admin_harness.mjs';
+import { session } from './lib/admin_scenario.mjs';
+
+const require = createRequire(import.meta.url);
+const PP = require(path.join(ROOT, 'scripts/lib/porch_packages.js'));
+const pk = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/porch_packages.json'), 'utf8'));
+const services = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8'));
+const games = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8'));
+const { applyPorchPackages } = require(path.join(ROOT, 'scripts/install_porch_packages.js'));
+const F = await mod('functions/_lib/request-form.mjs');
+const P = await mod('functions/_lib/pricing.mjs');
+const V = await mod('functions/_lib/views.mjs');
+
+const errors = [];
+const fail = (m) => errors.push(m);
+const text = (h) => String(h).replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/\s+/g, ' ');
+const offers = pk.seasons.flatMap((s) => pk.tierOrder.map((t) => ({ s, t, from: s.tiers[t].from })));
+const perturb = (d) => { const c = JSON.parse(JSON.stringify(d)); c.seasons.forEach((s, i) => Object.values(s.tiers).forEach((t, j) => { t.from += 13 + i * 100 + j; })); return c; };
+const pk2 = perturb(pk);
+const money = PP.money;
+
+// ---- 0. the data -------------------------------------------------------------------
+if (offers.length < 8) fail(`Rule 0: only ${offers.length} priced offers in porch_packages.json, want 2 seasons x 4 packages`);
+if (JSON.stringify(pk.tierOrder) !== JSON.stringify(['stoop', 'classic', 'grand', 'showstopper'])) fail('tier order is not Stoop, Classic, Grand, Showstopper');
+for (const s of pk.seasons) {
+  const p = pk.tierOrder.map((t) => s.tiers[t] && s.tiers[t].from);
+  if (p.some((x) => !(x > 0)) || p.some((x, i) => i && x <= p[i - 1])) fail(`${s.name}: package prices are missing or not rising (${p})`);
+}
+if (!(pk.bundle.percentOff > 0) || pk.bundle.appliesTo !== 'christmas') fail('the bundle is not a percentage off the Christmas package');
+if (pk.addOns.priced !== false || /\$\d/.test(pk.addOns.line + pk.addOns.formItems.join(' '))) fail('add-ons carry a price');
+if (services.services.porch.tiers) fail('data/offers/services.json still carries the retired porch tiers');
+
+// ---- 1. single source --------------------------------------------------------------
+const SRC_DIRS = ['functions', 'scripts', 'templates'];
+// $350 is also the overall porch floor in services.json (its own source), so it is not a package-only literal.
+const priceLits = [...new Set(offers.map((o) => o.from))].filter((n) => n !== Number(String(services.services.porch.price).replace(/[^0-9]/g, "")));
+const litRe = new RegExp(`\\$(${priceLits.map((n) => money(n).slice(1).replace(',', ',?')).join('|')})(?![\\d,])`);
+const scan = (dir) => fs.readdirSync(path.join(ROOT, dir), { withFileTypes: true }).flatMap((e) => {
+  const rel = `${dir}/${e.name}`;
+  if (e.isDirectory()) return /node_modules|validators|\.wrangler/.test(e.name) ? [] : scan(rel);
+  return /\.(m?js|txt)$/.test(e.name) ? [rel] : [];
+});
+let scanned = 0;
+for (const rel of SRC_DIRS.flatMap(scan)) {
+  scanned += 1;
+  const src = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+  for (const line of src.split('\n')) if (/porch|stoop|classic|grand|showstopper|christmas|fall/i.test(line) && litRe.test(line)) fail(`${rel}: a porch package price is typed in the code: ${line.trim().slice(0, 120)}`);
+}
+if (scanned < 50) fail(`Rule 0: only ${scanned} source files scanned`);
+// Every surface follows the data: rendered from the perturbed copy, no original price survives.
+const origOnly = offers.map((o) => money(o.from)).filter((m) => !pk2.seasons.some((s) => Object.values(s.tiers).some((t) => money(t.from) === m)));
+const surfaces = (d) => ({
+  calculator: PP.calculatorHtml(d),
+  'page grid': PP.pageBlockHtml(d),
+  schema: JSON.stringify(PP.schemaNode(d, { domain: services.domain, url: `${services.domain}/pricing` })).replace(/"minPrice":(\d+)/g, (m, n) => `${m} ${money(Number(n))}`),
+  'form ranges': F.porchQuestions(d, 75).map((q) => q.helpHtml || '').join(' '),
+  'admin grid': V.porchPackagesPage(d),
+  'card line': offers.map((o) => PP.cardLine(d, { season: o.s.formChoice, decor: pk.tiers[o.t].formAnswer })).join(' | '),
+  'invoice prefill': offers.map((o) => P.prefillLines({ services: ['porch'], wantsDecor: true, porchSeason: o.s.formChoice, porchDecor: pk.tiers[o.t].formAnswer }, { ...P.buildPriceTable(games, services, d) }).map((l) => money(l.unit_cents / 100)).join(' ')).join(' | '),
+});
+function checkFollows(d, label) {
+  const before = errors.length;
+  for (const [name, out] of Object.entries(surfaces(d))) {
+    for (const s of d.seasons) for (const t of d.tierOrder) {
+      const want = money(s.tiers[t].from);
+      if (name === 'form ranges') continue; // checked by range below
+      if (!out.includes(want)) fail(`${label}: ${name} does not show ${s.name} ${d.tiers[t].name} at ${want}`);
+    }
+    if (d !== pk) for (const m of origOnly) if (out.includes(m)) fail(`${label}: ${name} still shows ${m} after the data changed (a typed-in price)`);
+  }
+  const ranges = surfaces(d)['form ranges'];
+  for (const line of PP.formRangeLines(d)) if (!ranges.includes(PP.esc(line))) fail(`${label}: the form range line "${line}" is not rendered from the data`);
+  return errors.length > before;
+}
+checkFollows(pk, 'data');
+checkFollows(pk2, 'perturbed data');
+
+// ---- 2. the /request form ----------------------------------------------------------
+const VERBATIM = {
+  question: 'How much decor are you picturing?',
+  answers: [
+    'A simple touch: a few pumpkins or holiday greenery + a door accent (our Stoop package)',
+    'A full porch (our Classic package)',
+    'Porch and steps (our Grand package)',
+    'The works: porch, steps and walkway (our Showstopper package)',
+    'Not sure yet, help me decide',
+  ],
+  final: "Your final quote depends on the design you want, your porch size and how much decor. We'll confirm it after a quick look.",
+  bundle: 'Book fall and Christmas together and save 10% on your Christmas package.',
+};
+function checkForm(html, label) {
+  const before = errors.length;
+  const s = (html.match(/<section class="rq-section" data-section="porch">[\s\S]*?<\/section>/) || [''])[0];
+  if (!s) { fail(`${label}: no porch section`); return true; }
+  const t = text(s);
+  const noRange = text(s.replace(/<span class="rq-range">[\s\S]*?<\/span>/, ' '));
+  for (const m of PP.tierPriceStrings(pk)) if (noRange.includes(m)) fail(`${label}: the porch path shows the tier price ${m} outside the from-price / range lines`);
+  for (const line of PP.formRangeLines(pk)) if (!t.includes(line)) fail(`${label}: lacks "${line}"`);
+  if (!t.includes(`${VERBATIM.question}`)) fail(`${label}: lacks the question "${VERBATIM.question}"`);
+  const radios = [...s.matchAll(/<input type="radio" name="porch_decor" value="([^"]+)"[^>]*> <span>([^<]*)<\/span>/g)].map((m) => m[2].replace(/&amp;/g, '&'));
+  if (JSON.stringify(radios) !== JSON.stringify(VERBATIM.answers)) fail(`${label}: the decor answers are not the owner's five, verbatim: ${JSON.stringify(radios)}`);
+  if (!t.includes(VERBATIM.final)) fail(`${label}: lacks the final-quote line`);
+  if (!/<a href="\/faq\/#porch-picker" target="_blank" rel="noopener"[^>]*>See examples and prices<\/a>/.test(s)) fail(`${label}: lacks "See examples and prices" opening the calculator in a new tab`);
+  if (!/<input type="checkbox" name="porch_both" value="yes"/.test(s) || !t.includes('Book both seasons') || !t.includes(VERBATIM.bundle)) fail(`${label}: lacks the "Book both seasons" box with the bundle line`);
+  for (const a of pk.addOns.formItems) if (!s.includes(`name="porch_addons" value="${PP.esc(a)}"`)) fail(`${label}: lacks the add-on "${a}"`);
+  if (/porch_budget/.test(s)) fail(`${label}: the retired porch budget question is back`);
+  if (!/name="porch_notes"/.test(s)) fail(`${label}: lacks the porch notes box`);
+  return errors.length > before;
+}
+const table = P.buildPriceTable(games, services, pk);
+const formHtml = F.renderForm({ offers: services, table });
+checkForm(formHtml, 'renderForm');
+checkForm(fs.readFileSync(path.join(ROOT, 'request.html'), 'utf8'), 'request.html');
+if (pk.form.bothSeasonsHelp !== pk.bundle.line) fail('the form bundle line differs from the bundle line');
+
+// ---- 3. the pages and the admin grid ------------------------------------------------
+let pagesChecked = 0;
+const publicSeasons = pk.seasons.map((s) => PP.seasonHtml(pk, s.key, { links: true }).replace(/<a class="pkg-request"[^>]*>[^<]*<\/a>/g, ''));
+const adminSeasons = pk.seasons.map((s) => PP.seasonHtml(pk, s.key));
+if (JSON.stringify(publicSeasons) !== JSON.stringify(adminSeasons)) fail('the public and admin package grids differ beyond the request links');
+for (const rel of pk.pages) {
+  const abs = path.join(ROOT, rel);
+  if (!fs.existsSync(abs)) { fail(`${rel}: listed in porch_packages.json pages but missing`); continue; }
+  const html = fs.readFileSync(abs, 'utf8');
+  pagesChecked += 1;
+  if (!html.includes(PP.pageBlockHtml(pk))) fail(`${rel}: the porch package grid is missing or stale (run node scripts/install_porch_packages.js)`);
+  if (applyPorchPackages(html, rel, pk, services.domain) !== html) fail(`${rel}: the porch packages block or schema is stale`);
+  const ld = (html.match(/<script type="application\/ld\+json" data-porch-packages>([\s\S]*?)<\/script>/) || [])[1];
+  if (!ld) { fail(`${rel}: no porch packages Offer schema`); continue; }
+  const node = JSON.parse(ld);
+  const prices = node.hasOfferCatalog.itemListElement.flatMap((c) => c.itemListElement.map((o) => o.priceSpecification.minPrice));
+  if (JSON.stringify(prices) !== JSON.stringify(offers.map((o) => o.from))) fail(`${rel}: schema minPrices ${prices} differ from the data`);
+  if (node.provider['@id'] !== `${services.domain}/#business`) fail(`${rel}: schema provider is not the business node`);
+  if (!text(html).includes(pk.bundle.line)) fail(`${rel}: lacks the bundle line`);
+}
+if (pagesChecked < 5) fail(`Rule 0: only ${pagesChecked} porch package pages checked`);
+const faqHtml = fs.readFileSync(path.join(ROOT, 'faq/index.html'), 'utf8');
+if (!faqHtml.includes(PP.calculatorHtml(pk))) fail('faq/index.html: the calculator is not rendered from the data');
+if (!faqHtml.includes('"@id":"https://porchandparty901.com/#porch-packages"')) fail('faq/index.html: no porch packages Offer schema');
+const adminPage = V.porchPackagesPage(pk);
+if (!adminPage.includes(PP.gridHtml(pk))) fail('the admin Porch packages screen does not render the public grid');
+
+// ---- 4. bundle everywhere -----------------------------------------------------------
+const bundleCard = PP.cardLine(pk, { season: 'Fall / Halloween', decor: pk.tiers.classic.formAnswer, both: true });
+if (!bundleCard.includes(`${pk.bundle.percentOff}% off the Christmas package`)) fail(`card line with both seasons lacks the bundle: "${bundleCard}"`);
+if (!PP.calculatorHtml(pk).includes(PP.esc(pk.bundle.line))) fail('the calculator lacks the bundle line');
+if (!PP.gridHtml(pk).includes(PP.esc(pk.bundle.line))) fail('the package grid lacks the bundle line');
+for (const sAns of ['Fall / Halloween', 'Christmas & holidays']) {
+  const lines = P.prefillLines({ services: ['porch'], wantsDecor: true, porchSeason: sAns, porchDecor: pk.tiers.grand.formAnswer, porchBoth: true }, table);
+  const xmas = PP.priceOf(pk, 'christmas', 'grand');
+  const disc = lines.find((l) => l.description === pk.bundle.invoiceLine);
+  if (!disc || disc.unit_cents !== -Math.round(xmas * pk.bundle.percentOff)) fail(`${sAns} + both seasons: no "${pk.bundle.invoiceLine}" line of -${pk.bundle.percentOff}% of ${money(xmas)}`);
+  if (lines.filter((l) => /porch: Grand package$/.test(l.description)).length !== 2) fail(`${sAns} + both seasons: the invoice does not carry both seasons' Grand package`);
+}
+
+// ---- 5. end to end ------------------------------------------------------------------
+const s = await session();
+const plus = (n) => { const d = new Date(`${F.chicagoToday()}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const sent = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', porch_both: 'yes', porch_addons: ['Lighting', 'A lamp post'], porch_notes: 'Two columns', event_date: plus(10), location: 'Germantown', name: 'Paula Package', phone: '901-555-0410', email: 'paula@example.com' });
+if (sent.status !== 303) fail(`a porch package request did not go through (${sent.status}) ${text(sent.text).slice(0, 200)}`);
+else {
+  const home = text((await s.get('/admin/')).text);
+  const want = `Porch: ${PP.cardLine(pk, { season: 'Fall / Halloween', decor: pk.tiers.classic.formAnswer, both: true })}`;
+  if (!home.includes(want)) fail(`the card does not read "${want}"`);
+  if (!home.includes(`Fall · picturing a full porch (Classic, from ${money(PP.priceOf(pk, 'fall', 'classic'))})`)) fail('the card does not read "Fall · picturing a full porch (Classic, from $…)"');
+  if (!home.includes('Add-ons: Lighting, A lamp post')) fail('the card does not list the add-ons');
+  const inv = (await s.get(`/admin/invoices/new?r=${s.rk(sent.row.request_key)}`)).text;
+  const descs = [...inv.matchAll(/name="line_desc" value="([^"]*)"/g)].map((m) => m[1]);
+  const prices = [...inv.matchAll(/name="line_price" type="number" step="0.01" inputmode="decimal" value="([^"]*)"/g)].map((m) => m[1]);
+  const at = (d) => prices[descs.indexOf(d)];
+  if (at('Fall porch: Classic package') !== (PP.priceOf(pk, 'fall', 'classic')).toFixed(2)) fail(`the invoice does not start at the Classic fall minimum (${descs} / ${prices})`);
+  if (at('Christmas porch: Classic package') !== (PP.priceOf(pk, 'christmas', 'classic')).toFixed(2)) fail('the invoice does not add the Christmas Classic package for both seasons');
+  if (at(PP.esc(pk.bundle.invoiceLine)) !== (-PP.priceOf(pk, 'christmas', 'classic') * pk.bundle.percentOff / 100).toFixed(2)) fail('the invoice lacks the editable bundle line');
+  if (descs.some((d) => /^Decor/.test(d))) fail('a porch-only package invoice still carries a $0 "Decor" line');
+  if (!/href="\/admin\/packages"[^>]*data-help="ed\.packages"|data-help="ed\.packages"[^>]*href|href="\/admin\/packages" target="_blank"/.test(inv)) fail('the invoice screen does not link Porch packages');
+  if (!/href="\/admin\/packages"/.test((await s.get('/admin/')).text)) fail('Requests does not link Porch packages');
+  const pkg = await s.get('/admin/packages');
+  if (pkg.status !== 200 || !pkg.text.includes(PP.gridHtml(pk))) fail('/admin/packages does not render the package grid');
+  const unsure = await s.siteRequest({ service: 'porch', porch_season: 'Christmas & holidays', porch_decor: 'not_sure', event_date: plus(40), location: 'Bartlett', name: 'Nell Unsure', phone: '901-555-0411', email: 'nell@example.com' });
+  if (unsure.status !== 303) fail('a "not sure" porch request did not go through');
+  else {
+    const inv2 = (await s.get(`/admin/invoices/new?r=${s.rk(unsure.row.request_key)}`)).text;
+    if (!inv2.includes('Christmas porch package') || !/not sure how much decor/i.test(inv2)) fail('a "not sure" porch invoice does not start with a Christmas package line to price and a warning');
+  }
+}
+const pre = await s.RS.handleRequestPage({ request: new Request('https://porchandparty901.com/request?service=porch&season=christmas&decor=grand'), env: s.env, params: {} });
+const preHtml = await pre.text();
+if (!/name="porch_season" value="Christmas &amp; holidays" checked/.test(preHtml) || !/name="porch_decor" value="grand" checked/.test(preHtml) || !/name="service" value="porch" checked/.test(preHtml)) fail('"Request this package" (/request?season=christmas&decor=grand) does not preselect porch, the season and the answer');
+
+// ---- 6. retired wording ------------------------------------------------------------
+const RETIRED = [/Small stoop/, /Standard porch/, /Large or wraparound porch/, /porch-size (pictures|prices)/i, /\$350 \/ \$600 \/ \$800/, /From \$600/, /\$500–\$800/];
+const SKIP = new Set(['node_modules', '.git', '.pages-output', '.wrangler', '.claude', 'reports', 'data', 'scripts', 'docs', 'functions', 'templates']);
+const published = (dir = ROOT, acc = []) => { for (const e of fs.readdirSync(dir, { withFileTypes: true })) { if (SKIP.has(e.name) || e.name.startsWith('.')) continue; const abs = path.join(dir, e.name); if (e.isDirectory()) published(abs, acc); else if (/\.(html|txt)$/.test(e.name)) acc.push(abs); } return acc; };
+const pub = published();
+if (pub.length < 100) fail(`Rule 0: only ${pub.length} published files scanned for retired wording`);
+for (const abs of pub) { const h = fs.readFileSync(abs, 'utf8'); for (const re of RETIRED) if (re.test(h)) fail(`${path.relative(ROOT, abs)}: still says "${h.match(re)[0]}" (retired porch tiers)`); }
+
+// ---- self-test ---------------------------------------------------------------------
+const probe = (label, broken) => { const before = errors.length; const caught = broken(); errors.length = before; if (!caught) errors.push(`self-test: ${label} passed when it should fail`); };
+probe('a form with a tier price', () => checkForm(formHtml.replace('Not sure yet, help me decide', `Not sure yet, help me decide (${money(PP.priceOf(pk, 'fall', 'classic'))})`), 'probe'));
+probe('a form without the bundle box', () => checkForm(formHtml.replace(/<input type="checkbox" name="porch_both"[^>]*>/, ''), 'probe'));
+probe('a form with reworded answers', () => checkForm(formHtml.replace('A full porch (our Classic package)', 'A full porch (Classic)'), 'probe'));
+probe('a calculator with a typed price', () => { const real = PP.calculatorHtml; const fake = (d) => real(d).replace(money(d.seasons[0].tiers.classic.from), '$550'); const before = errors.length; const out = fake(pk2); for (const m of origOnly) if (out.includes(m)) errors.push('x'); return errors.length > before; });
+probe('a page without the grid', () => { const h = fs.readFileSync(path.join(ROOT, pk.pages[0]), 'utf8').replace(/<!--porch-packages-->[\s\S]*?<!--\/porch-packages-->/, ''); return !h.includes(PP.pageBlockHtml(pk)); });
+
+if (errors.length) { console.error(`VALIDATION FAIL: porch packages\n - ${[...new Set(errors)].join('\n - ')}`); process.exit(1); }
+console.log(`validate_porch_packages: OK - ${offers.length} priced offers from data/offers/porch_packages.json; ${Object.keys(surfaces(pk)).length} surfaces follow a perturbed copy; ${scanned} source files free of typed tier prices; /request shows only the from/range lines with the owner's five answers; ${pagesChecked} pages + /faq/ carry the grid and Offer schema; admin grid = public grid; bundle on grid, calculator, form, card and invoice; card, invoice, preselect and /admin/packages proven end to end; ${pub.length} published files free of the retired tiers`);

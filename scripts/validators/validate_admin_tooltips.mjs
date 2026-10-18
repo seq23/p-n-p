@@ -74,7 +74,7 @@ const screens = [
   [`/admin/returns?k=${s.rk(reqA.key)}`], [`/admin/returns?k=${s.rk(`booking:${late.id}`)}`],
   ['/admin/invoices'], ['/admin/invoices/new'], [`/admin/invoices/new?r=${s.rk(reqA.key)}`],
   [`/admin/invoices/${invA.id}`], [`/admin/invoices/${invB.id}`], [`/admin/invoices/${draftWithEmail.id}`], [`/admin/invoices/${v.id}`], [`/admin/invoices/${paidInv.id}`], [`/admin/invoices/${invA.id}/edit`],
-  ['/admin/settings'], ['/admin/help', { help: true }],
+  ['/admin/settings'], ['/admin/help', { help: true }], ['/admin/packages'],
   [`/admin/confirmed?r=${s.rk(heldReq.row.request_key)}&m=Deposit%20received&back=/admin/`],
   [`/admin/checklist/online?r=${s.rk(reqA.key)}`], ['/admin/checklist', { print: true }], [`/admin/checklist?r=${s.rk(reqA.key)}`, { print: true }],
   ['/admin/search'], ['/admin/search?q=renter'], ['/admin/search?q=zzzz'],

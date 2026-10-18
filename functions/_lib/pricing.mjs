@@ -7,8 +7,14 @@
 // Rentals v3 (owner-approved 2026-10-15): no delivery line, ever. Pickup and
 // return at Mt. Moriah Station; items with availableNow:false are not in the
 // table, so the prefill cannot price a hidden item.
+//
+// Porch packages (owner-approved 18 Oct 2026): the table carries
+// data/offers/porch_packages.json, and a porch request starts at its tier's minimum
+// for the season (scripts/lib/porch_packages.js invoiceLines, the same module the
+// public grid renders from), with the fall + Christmas bundle line when both are booked.
+import PP from '../../scripts/lib/porch_packages.js';
 
-export function buildPriceTable(games, services) {
+export function buildPriceTable(games, services, porchPackages = null) {
   const takedown = services && services.addOns && services.addOns.takedown;
   const cents = (d) => Math.round(d * 100);
   const items = [
@@ -33,6 +39,7 @@ export function buildPriceTable(games, services) {
     pickupLine: `Pay the rest at pickup. Text or call ${pickup.phone} to set your pickup time at ${String(pickup.place || '').split(',')[0]}.`,
     pickupPlace: String(pickup.place || '').split(',')[0],
     gameNames: items.filter((i) => i.kind === 'game').map((i) => i.name),
+    porchPackages,
   };
 }
 
@@ -170,14 +177,25 @@ export function prefillLines(request, table) {
     }
     lines.push({ description: 'Damage deposit (refundable)', qty: 1, unit_cents: table.damageDepositCents, note: 'Refunded at return if everything comes back undamaged', refundable: 1 });
   }
-  if (request.wantsDecor) {
-    const what = request.eventType ? `Decor: ${request.eventType}` : 'Decor setup';
+  const porch = porchPrefill(request, table);
+  lines.push(...porch.lines);
+  // The decor line for party / grazing (and old form rows); a site porch-only request is
+  // fully covered by its package lines.
+  const otherDecor = (request.services || []).some((k) => k === 'party' || k === 'grazing');
+  if (request.wantsDecor && (!porch.lines.length || otherDecor)) {
+    const what = request.eventType && !porch.lines.length ? `Decor: ${request.eventType}` : 'Decor setup';
     lines.push({ description: what, qty: 1, unit_cents: 0, note: '', refundable: 0 }); // $0 = price needed; the send screen asks for it
     if (saidYes(request.takedownAnswer)) {
       lines.push({ description: 'Takedown', qty: 1, unit_cents: table.takedownCents, note: '', refundable: 0 });
     }
   }
   return lines;
+}
+
+// The porch package lines (and any warnings) for a request; empty without a package season.
+export function porchPrefill(request, table) {
+  if (!table.porchPackages || !request || !request.porchSeason) return { lines: [], warnings: [] };
+  return PP.invoiceLines(table.porchPackages, { season: request.porchSeason, decor: request.porchDecor, both: request.porchBoth });
 }
 
 // A rental invoice is one with any line from the rentals price table: an item,

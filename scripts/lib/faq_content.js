@@ -1,8 +1,8 @@
 'use strict';
 /**
  * The consolidated FAQ (owner-approved 2026-10-17): one page, /faq/, sectioned
- * by service, with a grazing estimator and a porch-size picker. Every number
- * comes from data/offers/services.json, data/service_areas/areas.json and
+ * by service, with a grazing estimator and the Price my porch calculator. Every number
+ * comes from data/offers/services.json, data/offers/porch_packages.json, data/service_areas/areas.json and
  * data/rentals/games.json, so the FAQ cannot contradict the pages or invoices
  * (scripts/validators/validate_faq_page.js holds it to that).
  *
@@ -14,6 +14,8 @@ const ROOT = path.resolve(__dirname, '../..');
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const areas = require(path.join(ROOT, 'data/service_areas/areas.json'));
 const games = require(path.join(ROOT, 'data/rentals/games.json'));
+const porchPackages = require(path.join(ROOT, 'data/offers/porch_packages.json'));
+const PP = require(path.join(ROOT, 'scripts/lib/porch_packages.js'));
 const { FAQ: RENTALS_FAQ } = require(path.join(ROOT, 'scripts/generators/build_rentals_page.js'));
 
 const money = (n) => `$${Number(n).toLocaleString('en-US')}`;
@@ -24,7 +26,6 @@ const TRAVEL = offers.travel;
 const PICK = games.pickup;
 const cities = areas.areas.map((a) => a.split(',')[0]);
 const cityList = `${cities.slice(0, -1).join(', ')} and ${cities[cities.length - 1]}`;
-const porchTiers = S.porch.tiers;
 const grazingTiers = S.grazing.tiers;
 const food = S.grazing.foodPerHead;
 const feeds = (t) => `${t.feedsSnack[0]} to ${t.feedsSnack[1]}`;
@@ -58,13 +59,17 @@ const SECTIONS = [
   {
     id: 'porch', title: 'Porch decor', eyebrow: S.porch.name,
     lead: `Seasonal front-porch styling from ${S.porch.price}.`,
-    intro: `Seasonal front-porch styling from ${S.porch.price}. Pick the picture that looks most like your porch for a starting price, then send a photo with your request for the exact quote.`,
+    intro: `Seasonal front-porch styling from ${S.porch.price}, priced by package: ${PP.tierKeys(porchPackages).map((t) => porchPackages.tiers[t].name).join(', ')}, for fall and for Christmas. Pick the season and the look closest to what you want for a starting price. ${porchPackages.bundle.line}`,
     picker: 'porch',
     qa: [
       ['What does a porch setup include?',
         'We design it, bring everything and set it up: wreath, door swag, planters, pumpkins or greenery, lanterns, signs and lights to suit the season. You come home to a finished porch.'],
       ['How much does a porch cost?',
-        `From ${money(porchTiers[0].from)} for a ${porchTiers[0].name.toLowerCase()} (${porchTiers[0].describe.replace(/\.$/, '').toLowerCase()}), from ${money(porchTiers[1].from)} for a ${porchTiers[1].name.toLowerCase()} and from ${money(porchTiers[2].from)} for a ${porchTiers[2].name.toLowerCase()}. Wider porches take more pieces. Send a photo of your porch with your request and we quote it exactly.`],
+        `${porchPackages.seasons.map((x) => `${x.name}: ${PP.tierKeys(porchPackages).map((t) => `${porchPackages.tiers[t].name} from ${money(x.tiers[t].from)}`).join(', ')}.`).join(' ')} ${porchPackages.bundle.line} ${porchPackages.estimateLine}`],
+      ['Which porch package do I need?',
+        `${porchPackages.sizeHint} ${porchPackages.seasons[0].customLine}`],
+      ['What add-ons can I ask for?',
+        `${porchPackages.addOns.line} We price add-ons with your quote.`],
       ['Which seasons do you decorate?',
         'Fall, Halloween, Thanksgiving and Christmas now; spring and special-occasion porches on request.'],
       ['Do I need to be home?',
@@ -136,4 +141,4 @@ const SECTIONS = [
 
 const flat = () => SECTIONS.flatMap((s) => s.qa);
 
-module.exports = { SECTIONS, flat, porchTiers, grazingTiers, food, cityList, money };
+module.exports = { SECTIONS, flat, porchPackages, grazingTiers, food, cityList, money };

@@ -181,7 +181,7 @@ function finalHtml(html, rel, before) {
 async function build() {
   const F = await import(pathToFileURL(path.join(ROOT, 'functions/_lib/request-form.mjs')).href);
   const { buildPriceTable } = await import(pathToFileURL(path.join(ROOT, 'functions/_lib/pricing.mjs')).href);
-  const table = buildPriceTable(games, offers);
+  const table = buildPriceTable(games, offers, require(path.join(ROOT, 'data/offers/porch_packages.json')));
   return { 'request.html': await renderRequest(F, table), 'rules.html': renderRules(F, table) };
 }
 
