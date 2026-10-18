@@ -4,7 +4,9 @@ import { SHEET_ID, SHEET_TAB, b64url, b64urlText } from './util.mjs';
 import fixture from '../../data/admin/fixture-request.json';
 
 const SCOPES = 'https://www.googleapis.com/auth/spreadsheets.readonly https://www.googleapis.com/auth/drive.metadata.readonly';
-let tokenCache = { token: null, exp: 0 };
+const tokenCache = {};
+// Read/write scope for the Bookings / Monthly totals / Expenses / Year tabs (sheets-sync.mjs).
+export const WRITE_SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
 
 function pemToBytes(pem) {
   const body = pem.replace(/-----[^-]+-----/g, '').replace(/\s+/g, '');
@@ -14,13 +16,14 @@ function pemToBytes(pem) {
   return out.buffer;
 }
 
-async function accessToken(env) {
+export async function accessToken(env, scopes = SCOPES) {
   const now = Math.floor(Date.now() / 1000);
-  if (tokenCache.token && tokenCache.exp - 60 > now) return tokenCache.token;
+  const hit = tokenCache[scopes];
+  if (hit && hit.exp - 60 > now) return hit.token;
   if (!env.GOOGLE_SA_JSON) throw new SheetError('no-key', 'The site holds no Google key (GOOGLE_SA_JSON is not set).');
   const sa = JSON.parse(env.GOOGLE_SA_JSON);
   const unsigned = `${b64urlText(JSON.stringify({ alg: 'RS256', typ: 'JWT' }))}.${b64urlText(JSON.stringify({
-    iss: sa.client_email, scope: SCOPES, aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600,
+    iss: sa.client_email, scope: scopes, aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600,
   }))}`;
   const key = await crypto.subtle.importKey('pkcs8', pemToBytes(sa.private_key), { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' }, false, ['sign']);
   const sig = await crypto.subtle.sign('RSASSA-PKCS1-v1_5', key, new TextEncoder().encode(unsigned));
@@ -31,8 +34,8 @@ async function accessToken(env) {
   });
   const json = await res.json();
   if (!res.ok || !json.access_token) throw new SheetError('token', `Google refused the service-account sign-in (${res.status}).`);
-  tokenCache = { token: json.access_token, exp: now + (json.expires_in || 3600) };
-  return tokenCache.token;
+  tokenCache[scopes] = { token: json.access_token, exp: now + (json.expires_in || 3600) };
+  return json.access_token;
 }
 
 export class SheetError extends Error {

@@ -105,6 +105,16 @@ for (const file of announced) if (/\/api\/calendar/.test(read(file))) errors.pus
   if (right.status !== 200 || right.headers.get('X-Robots-Tag') !== 'noindex, nofollow' || !/text\/calendar/.test(right.headers.get('Content-Type') || '')) errors.push(`the right ICS token answered ${right.status} without noindex text/calendar`);
 }
 
+// 6. The daily sheet-resync hook (/api/sync/<token>) is the only other route outside the
+//    guard: POST only, a 64-hex token from settings, 404 otherwise, noindex, never announced.
+const syncFiles = routeFiles.filter((f) => f.startsWith(path.join('functions', 'api', 'sync') + path.sep));
+if (syncFiles.length !== 1 || path.basename(syncFiles[0]) !== '[token].js' || !/export const onRequest = \(context\) => handleSync\(context\);/.test(read(syncFiles[0]))) errors.push('functions/api/sync must hold exactly one [token].js that runs the shared handleSync');
+const syncSrc = read('functions/_lib/sync-route.mjs');
+for (const [re, why] of [[/'X-Robots-Tag': 'noindex, nofollow'/, 'the sync hook does not answer noindex'], [/safeEqual\(tok, token\)/, 'the sync token is not compared in constant time'], [/!== 'POST'/, 'the sync hook accepts methods other than POST'], [/token\.length !== 64/, 'the sync hook runs when no token is set']]) if (!re.test(syncSrc)) errors.push(why);
+for (const file of announced) if (/\/api\/sync/.test(read(file))) errors.push(`${file} announces the sheet-resync hook`);
+const outside = routeFiles.filter((f) => !guardedDirs.some((d) => f.startsWith(d + path.sep)));
+for (const f of outside) if (![...icsFiles, ...syncFiles].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed nor the sync hook`);
+
 if (errors.length) {
   console.error('VALIDATION FAIL: admin console noindex / guard');
   for (const e of errors) console.error(`- ${e}`);

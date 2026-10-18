@@ -14,7 +14,9 @@ import * as V from './views.mjs';
 import * as VC from './views-calendar.mjs';
 import * as C from './calendar.mjs';
 import * as AC from './admin-calendar.mjs';
-import { balances, recordPayment, voidPayments, balanceWords, depositWords } from './ledger.mjs';
+import * as AM from './admin-money.mjs';
+import { balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld } from './ledger.mjs';
+import { categoriesFrom } from './expenses.mjs';
 import { CHECKLIST_SOURCE } from './checklist-source.mjs';
 import { renderPrintPage, prefillFromRequest, renderOnlineSections, checklistState, invoiceFromChecklist, fieldIndex } from './checklist.mjs';
 
@@ -369,7 +371,29 @@ export async function login(env, request) {
   return redirect('/admin/', { 'Set-Cookie': await issueCookie(env) });
 }
 
+// Every admin request: route it, then (1) after a change, update the Google Sheet in the
+// background; (2) on a page, retry a queued sheet update and say "Google Sheet will catch up
+// shortly" while one is waiting. Neither ever blocks or breaks the page.
+const NO_SYNC = /^\/admin\/(login|logout|settings\/password|settings\/sheet-sync)$/;
 export async function handleAdmin(context) {
+  const res = await routeAdmin(context);
+  const { request, env } = context;
+  const url = new URL(request.url);
+  const method = request.method.toUpperCase();
+  const later = (p) => { if (typeof context.waitUntil === 'function') context.waitUntil(p.catch(() => {})); };
+  if (method === 'POST' && res.status < 400 && !NO_SYNC.test(url.pathname.replace(/\/+$/, ''))) later(AM.syncSafely(env));
+  if (method === 'GET' && res.status === 200 && /text\/html/.test(res.headers.get('Content-Type') || '') && env.DB) {
+    const pending = await AM.pendingSync(env.DB);
+    if (pending) {
+      later(AM.syncSafely(env));
+      const html = (await res.text()).replace('<main class="wrap', '<div class="wrap" style="padding-bottom:0"><div class="notice warn" data-sheet-pending>Google Sheet will catch up shortly.</div></div><main class="wrap');
+      return new Response(html, { status: res.status, headers: res.headers });
+    }
+  }
+  return res;
+}
+
+async function routeAdmin(context) {
   const { request, env } = context;
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
@@ -422,6 +446,26 @@ export async function handleAdmin(context) {
     if (segs[1] === 'undo' && method === 'POST') return AC.undoReturnRoute(env, url);
   }
   if (segs[0] === 'notes' && /^\d+$/.test(segs[1] || '') && method === 'POST') return AC.editNoteRoute(env, request, Number(segs[1]), segs[2] === 'delete');
+  if (segs[0] === 'money') {
+    if (segs.length === 1 && method === 'GET') return AM.moneyPage(env, url);
+    if (segs[1] === 'detail' && method === 'GET') return AM.moneyDetail(env, url);
+    if (segs[1] === 'year' && segs.length === 2 && method === 'GET') return AM.yearPage(env, url);
+    if (segs[1] === 'year.pdf' && method === 'GET') return AM.yearPdf(env, url);
+    if (segs[1] === 'year.csv' && method === 'GET') return AM.yearCsv(env, url);
+    if (segs[1] === 'year' && segs[2] === 'email' && method === 'POST') return AM.yearEmail(env, url);
+    if (segs[1] === 'receipts.zip' && method === 'GET') return AM.receiptsZip(env, url);
+    if (segs[1] === 'expenses') {
+      if (segs.length === 2 && method === 'POST') return AM.saveExpense(env, request, null);
+      if (segs[2] === 'new' && method === 'GET') return AM.expensePage(env, 'new');
+      const eid = Number(segs[2]);
+      if (Number.isInteger(eid) && eid > 0) {
+        if (segs.length === 3 && method === 'GET') return AM.expensePage(env, eid);
+        if (segs.length === 3 && method === 'POST') return AM.saveExpense(env, request, eid);
+        if (segs[3] === 'delete' && method === 'POST') return AM.deleteExpense(env, eid);
+        if (segs[3] === 'receipt' && method === 'GET') return AM.receiptFile(env, eid);
+      }
+    }
+  }
   if (segs[0] === 'calendar') {
     if (segs.length === 1 && method === 'GET') return AC.calendarPage(env, url);
     if (segs[1] === 'day' && segs[2]) return redirect(`/admin/day/${segs[2]}`);
@@ -459,6 +503,7 @@ export async function handleAdmin(context) {
         const pickup = pickupNote(loaded.lines, PRICE_TABLE);
         const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings, pickup });
         const balance = (await balances(env.DB))[id];
+        if (balance) Object.assign(balance, await depositHeld(env.DB, id));
         return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pickup, balance, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
       }
       if (segs[2] === 'edit' && method === 'GET') {
@@ -471,6 +516,7 @@ export async function handleAdmin(context) {
       if (segs.length === 2 && method === 'POST') return updateInvoice(env, request, id);
       if (segs[2] === 'send' && method === 'POST') return sendInvoice(env, request, id);
       if (segs[2] === 'status' && method === 'POST') return changeStatus(env, request, id);
+      if (segs[2] === 'deposit' && method === 'POST') return AM.depositOutcome(env, request, id);
       if (segs[2] === 'invoice.pdf' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse('Not found', 404);
@@ -494,11 +540,13 @@ export async function handleAdmin(context) {
   if (segs[0] === 'settings') {
     if (segs.length === 1 && method === 'GET') {
       const settings = await getSettings(env.DB);
-      return htmlResponse(V.settingsPage({ settings, hasQr: Boolean(settings.qr_png), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+      return htmlResponse(V.settingsPage({ settings, hasQr: Boolean(settings.qr_png), categories: categoriesFrom(settings), pendingSync: await AM.pendingSync(env.DB), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
     }
     if (segs.length === 1 && method === 'POST') return saveSettings(env, request);
     if (segs[1] === 'password' && method === 'POST') return changePassword(env, request);
     if (segs[1] === 'calendar-token' && method === 'POST') return AC.regenerateToken(env);
+    if (segs[1] === 'sheet-sync' && method === 'POST') return AM.syncNowRoute(env, url);
+    if (segs[1] === 'categories' && method === 'POST') return AM.saveCategories(env, request);
   }
   return htmlResponse(V.layout('Not found', '<p>Nothing here.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
 }
@@ -511,6 +559,7 @@ export async function handleApi(context) {
     if (!settings.qr_png) return new Response('no QR code yet', { status: 404, headers: { 'Cache-Control': 'no-cache' } });
     return new Response(b64ToBytes(settings.qr_png), { headers: { 'Content-Type': settings.qr_type || 'image/png', 'Cache-Control': 'no-cache' } });
   }
+  if (url.pathname === '/api/admin/receipts' && request.method === 'POST') return AM.uploadReceipt(env, request);
   if (url.pathname === '/api/admin/checklist' && request.method === 'PUT') {
     const key = decodeKey(url.searchParams.get('r'));
     if (!key) return Response.json({ error: 'which request?' }, { status: 400 });

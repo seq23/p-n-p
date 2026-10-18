@@ -72,20 +72,35 @@ export function applyMigration(d1, number) {
   d1.raw.exec(fs.readFileSync(path.join(dir, f), 'utf8'));
 }
 
+export const aiReply = { value: '{"vendor":"Party City","date":"2026-10-12","total":42.17,"tax":3.17,"suggested_category":"Supplies & decor","line_items":[],"confidence":{"vendor":0.95,"date":0.9,"total":0.95,"tax":0.4}}' };
+
 // An env like production's, with a fake mailer that records what it was asked to send.
 export function makeEnv(db) {
   const sent = [];
+  const objects = new Map();
+  const aiCalls = [];
   return {
     DB: db, PNP_SHEET_FIXTURE: '1', PNP_ADMIN_PASSWORD: 'local-test-pass', PNP_ADMIN_SESSION_KEY: 'test-session-key',
     MAILER: { fetch: async (_u, init) => { sent.push(JSON.parse(init.body)); return Response.json({ ok: true, messageId: 'x' }); } },
-    sent,
+    // A private R2 bucket in memory (binding RECEIPTS).
+    RECEIPTS: {
+      put: async (key, bytes, opts) => { objects.set(key, { bytes: new Uint8Array(bytes), type: opts && opts.httpMetadata ? opts.httpMetadata.contentType : '' }); },
+      get: async (key) => { const o = objects.get(key); return o ? { body: o.bytes, arrayBuffer: async () => o.bytes.buffer.slice(o.bytes.byteOffset, o.bytes.byteOffset + o.bytes.byteLength) } : null; },
+      delete: async (key) => { objects.delete(key); },
+    },
+    // Workers AI stand-in: answers whatever aiReply holds (a string, or a function of the input).
+    AI: {
+      run: async (model, input) => { aiCalls.push({ model, input }); const r = typeof aiReply.value === 'function' ? aiReply.value(input) : aiReply.value; if (r instanceof Error) throw r; return { response: r }; },
+      toMarkdown: async () => [{ data: 'HOME DEPOT 10/12/2026 TOTAL 42.17 TAX 3.17' }],
+    },
+    sent, objects, aiCalls, aiReply,
   };
 }
 
 // Drive the real router: { method, path, form, headers } -> Response.
-export async function call(handler, env, method, p, { form = null, headers = {} } = {}) {
+export async function call(handler, env, method, p, { form = null, headers = {}, raw = undefined } = {}) {
   const url = `https://porchandparty901.com${p}`;
-  let body;
+  let body = raw;
   if (form) { body = new FormData(); for (const [k, v] of Object.entries(form)) (Array.isArray(v) ? v : [v]).forEach((x) => body.append(k, x)); }
   const request = new Request(url, { method, body, headers: { Origin: 'https://porchandparty901.com', ...headers } });
   const params = {};

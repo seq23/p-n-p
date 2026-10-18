@@ -17,6 +17,7 @@ export const SCREENS = [
   ['calendar', 'Calendar & Bookings'],
   ['day', 'A day (the Day sheet)'],
   ['returns', 'Mark returned (rental check-in)'],
+  ['money', 'Money'],
   ['archive', 'Put away'],
   ['settings', 'Settings'],
   ['gcal', 'Link my Google Calendar'],
@@ -43,6 +44,10 @@ export const STEPS = {
   search: ['Type part of a name, a phone number or an email.', 'Read their bookings and what they paid.', 'Tap Open to go to one.'],
   checklistPrint: ['Tap Print.', 'Take the paper to the visit and fill it in by hand.', 'Or tap Open online checklist to fill it in on your phone.'],
   notfound: ['This page does not exist.', 'Tap Back to requests.', 'Or tap How to use this at the top.'],
+  money: ['Pick a month.', 'See what came in and what is still owed.', 'Tap a line to see the booking.'],
+  moneyDetail: ['Read the payments or jobs behind the total.', 'Tap a name to open it.', 'Tap Back to Money when done.'],
+  expense: ['Take a photo of the receipt (or pick one).', 'Check what the computer read — fix anything wrong.', 'Tap Save.'],
+  year: ['Pick the year.', 'Download the PDF and the spreadsheet, or email them to yourself.', 'Give them to your tax preparer.'],
   help: ['Find the screen you are on.', 'Read what each button does.', 'Tap Print this page to keep a paper copy.'],
 };
 
@@ -53,6 +58,7 @@ export const HELP = {
   'nav.brand': H('every', 'Porch & Party', 'Goes back to the list of requests.', '', 'The name at the very top. Tap it any time to get back to Requests.'),
   'nav.requests': H('every', 'Requests', 'Shows the new requests people sent from the website form.', '', 'The main list. New requests from the website form show up here within a minute.'),
   'nav.calendar': H('every', 'Calendar & Bookings', 'Shows every booking for all four services, as a month or as a list.', '', 'Porch decorating, party decor, grazing tables and game rentals, all in one place.'),
+  'nav.money': H('every', 'Money', 'Shows money received, what is still owed, expenses and the year-end summary for taxes.', '', 'Month by month, in plain numbers.'),
   'nav.archive': H('every', 'Put away', 'Shows the finished requests you put away.', '', 'Finished requests live here. You can bring any of them back.'),
   'nav.invoices': H('every', 'Invoices', 'Shows every invoice you have made, newest first.', '', 'A list of all invoices with their status and total.'),
   'nav.settings': H('every', 'Settings', 'Opens your payment details, password and calendar link.', '', 'Your Zelle, Cash App, QR code, password and the Google Calendar link.'),
@@ -169,6 +175,32 @@ export const HELP = {
   'ret.undoYes': H('returns', 'Yes, undo returned', 'Undoes the check-in now.', '', ''),
   'bk.save': H('calendar', 'Save booking', 'Saves this booking on the calendar.', '', 'It shows on the admin Calendar at once, and in Google Calendar after Google refreshes.'),
 
+  // Money
+  'mon.total': H('money', 'A total (Money received, Still owed, Jobs, a service...)', 'Shows the payments, jobs or expenses behind this number.', '', 'Every total on the Money tab can be tapped.'),
+  'mon.prev': H('money', '‹ Previous', 'Shows the month before.', '', ''),
+  'mon.this': H('money', 'This month', 'Jumps back to the current month.', '', ''),
+  'mon.next': H('money', 'Next ›', 'Shows the month after.', '', ''),
+  'mon.month': H('money', 'A month (in the 12-month list)', 'Opens that month.', '', 'The bar shows money received; the number is always written next to it.'),
+  'mon.yearPrev': H('money', '‹ Last year', 'Shows the year before.', '', ''),
+  'mon.yearNext': H('money', 'Next year ›', 'Shows the year after.', '', ''),
+  'mon.taxes': H('money', 'Year-end summary for taxes', 'Opens the summary of the year for your tax preparer.', 'PDF, spreadsheet and receipts.', 'Money in by month, service and payment method, refunds, damage deposits, jobs, expenses and every invoice number. It is a summary, not tax advice.'),
+  'exp.add': H('money', 'Add a receipt', 'Takes a photo of a receipt (or picks photos or PDFs) and reads it for you.', 'The computer reads it; you check it.', 'Nothing is saved until you tap Save. Low-confidence fields are outlined in amber.'),
+  'exp.manual': H('money', 'Type it in instead', 'Opens an empty expense form to type in yourself.', '', 'For a receipt you do not have, or when the reader is busy.'),
+  'exp.open': H('money', 'An expense (in the list)', 'Opens this expense so you can check, change or delete it.', '', ''),
+  'exp.receipt': H('money', 'See the receipt', 'Opens the receipt picture or PDF.', '', 'Only you can see it, after signing in.'),
+  'exp.save': H('money', 'Save (an expense)', 'Saves the expense so it counts in the Money totals.', '', 'An expense counts only after you save it.'),
+  'exp.delete': H('money', 'Delete this expense', 'Deletes the expense and its receipt. It asks "Are you sure?" first.', '', '', 'Delete cannot be undone.'),
+  'exp.deleteYes': H('money', 'Yes, delete the expense', 'Deletes it now.', '', '', 'Delete cannot be undone.'),
+  'yr.pdf': H('money', 'Download PDF', 'Saves the year-end summary as a PDF to print or send.', '', ''),
+  'yr.csv': H('money', 'Download spreadsheet (CSV)', 'Saves the summary and every invoice and expense as a spreadsheet file.', '', 'Opens in Excel or Google Sheets.'),
+  'yr.email': H('money', 'Email it to me (year-end)', 'Emails the PDF and the spreadsheet to your own email address.', '', 'The address is set in Settings, under My day list.'),
+  'yr.sheet': H('money', 'Write the Year tab in the Google Sheet', 'Writes this year\'s summary into a "Year" tab of your request sheet.', '', 'It never changes the form responses tab.'),
+  'yr.zip': H('money', 'Download all receipts (zip)', 'Downloads every saved receipt for the year in one zip file.', '', 'Handy for your tax preparer.'),
+  'dep.refund': H('payment', 'Refund the damage deposit', 'Records that you gave the damage deposit back. It asks you to be sure first.', 'Send the money yourself first.', 'It only records the refund; no money moves by itself.', 'Money: record it only after you sent it back.'),
+  'dep.refundYes': H('payment', 'Yes, record the refund', 'Saves the refund.', '', '', 'Money: only after you sent it back.'),
+  'dep.keep': H('payment', 'Keep some for damage', 'Records keeping part of the damage deposit because something was damaged.', '', 'It counts as income on the Money tab.', 'Money: tell the customer yourself.'),
+  'dep.keepYes': H('payment', 'Yes, keep it for damage', 'Saves the amount kept.', '', '', 'Money: tell the customer yourself.'),
+
   // Put away
   'pa.bringBack': H('archive', 'Bring back', 'Puts this request back on the Requests list.', '', 'Use it if a finished customer needs something again.'),
 
@@ -178,6 +210,8 @@ export const HELP = {
   'set.password': H('settings', 'Change password (open)', 'Opens the boxes to change the console password.', '', 'You need the current password.'),
   'set.passwordSave': H('settings', 'Change password', 'Saves the new password and signs out every other phone or computer.', '', 'Write the new password down somewhere safe.', 'Every other device is signed out.'),
   'set.saveDayList': H('settings', 'Save my day list details', 'Saves the phone number and email your day list is sent to.', '', 'Used by Text it to me and Email it to me on the Day sheet.'),
+  'set.sheetSync': H('settings', 'Update the Google Sheet now', 'Rewrites your Bookings, Monthly totals and Expenses tabs in the request sheet right now.', 'They also update by themselves.', 'It never touches the form responses tab.'),
+  'set.categories': H('settings', 'Save categories', 'Saves your list of expense categories.', '', 'One per line. Other is always kept.'),
   'set.newToken': H('settings', 'Make a new private calendar link', 'Replaces your Google Calendar link with a new one. It asks you to be sure first.', '', 'Only if the link was shared by mistake.', 'Google Calendar stops updating until you link the new one.'),
   'set.newTokenYes': H('settings', 'Yes, make a new link', 'Makes the new link now. The old one stops working.', '', 'The second tap for a new calendar link.', 'You must add the new link to Google Calendar again.'),
 
