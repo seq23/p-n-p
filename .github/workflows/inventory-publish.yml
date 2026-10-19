@@ -25,6 +25,9 @@ on:
 
 permissions:
   contents: write
+  # Starts Deploy Distribution for the pushed commit: a push made with GITHUB_TOKEN raises no push
+  # event, and a run this workflow's poll started raises no workflow_run either (seen 19 Oct 2026).
+  actions: write
 
 # A newer save carries the whole inventory too, so it replaces a run still going.
 concurrency:
@@ -76,6 +79,8 @@ jobs:
           npm run validate:release
 
       - name: Commit and push
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "pnp-inventory-bot"
           git config user.email "actions@users.noreply.github.com"
@@ -91,7 +96,11 @@ jobs:
           fi
           git commit -m "Inventory: website update #${PUBLISH_ID} from Settings -> Inventory"
           for i in 1 2 3; do
-            if git push origin "HEAD:$GITHUB_REF_NAME"; then bash scripts/inventory/report.sh pushed; exit 0; fi
+            if git push origin "HEAD:$GITHUB_REF_NAME"; then
+              bash scripts/inventory/report.sh pushed
+              gh workflow run deploy-distribution.yml -R "$GITHUB_REPOSITORY" --ref "$GITHUB_REF_NAME" || echo "::warning::could not start Deploy Distribution for the inventory commit"
+              exit 0
+            fi
             git pull --rebase origin "$GITHUB_REF_NAME"
           done
           echo "::error::could not push the inventory update after 3 tries"

@@ -193,6 +193,15 @@ must(P.GAMES.bundles.find((b) => b.slug === 'whole-yard').includes === 'All game
 const back = await post('/admin/settings/inventory/giant-uno/restore', {});
 must(back.status === 303 && P.PRICE_TABLE.items.some((i) => i.slug === 'giant-uno') && /Giant Uno is back/.test(decodeURIComponent(back.location)), 'Bring back did not put the item back');
 
+// A save of the admin-only Projector with nothing changed changes nothing (19 Oct 2026: the first
+// production round trip added "use" and "kind" to it).
+{
+  const pj = JSON.parse((await one("SELECT data FROM inventory_items WHERE slug = 'projector'")).data);
+  const v0 = (await I.loadInventory(db)).version;
+  const r = await post('/admin/settings/inventory/projector', { kind: 'extra', name: pj.name, quantity: String(pj.quantity), deposit: '', blurb: pj.blurb || '', size: pj.size || '', use: pj.use || 'both', alt: pj.alt || '', on_website: '0' });
+  must(r.status === 303 && (await I.loadInventory(db)).version === v0, 'a no-change save of an admin-only item changed the inventory');
+}
+
 // ---- 5. Admin only ---------------------------------------------------------------------------
 must(P.TRACK_TABLE.items.some((i) => i.slug === 'projector' && i.adminOnly) && !P.PRICE_TABLE.items.some((i) => i.slug === 'projector'), 'the admin-only Projector is priced or not tracked');
 const toAdmin = await post('/admin/settings/inventory/giant-jenga', { ...jenga, on_website: '0' });
