@@ -902,7 +902,7 @@ async function inventoryHtml(env) {
   try {
     const state = await INVD.loadInventory(env.DB);
     const words = INVD.publishWords(await INVD.publishStatus(env));
-    return VI.inventorySection({ state: await INVD.loadInventory(env.DB), words, future: await futureCounts(env, state) });
+    return VI.inventorySection({ state: await INVD.loadInventory(env.DB), words, future: await futureCounts(env, state), keyMissing: !env.PNP_GITHUB_TOKEN });
   } catch (e) {
     return `<section class="card" id="inventory"><h2>Inventory: your rental items</h2><div class="notice err">The inventory could not load: ${esc(String(e && e.message ? e.message : e))}</div></section>`;
   }

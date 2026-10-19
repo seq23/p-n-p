@@ -262,6 +262,7 @@ must(INV.validate((() => { const d = INV.resolve(JSON.parse(FIX_TEXT)); d.adminI
 // ---- 7. Publishing ----------------------------------------------------------------------------
 // No GitHub key in Cloudflare (today): the save waits for the Inventory Poll round.
 const stNoKey = await get('/admin/settings');
+must(stNoKey.text.includes('Website auto-update needs a GitHub key (PNP_GITHUB_TOKEN) to start at once.'), 'with no GitHub key, Settings does not show the named stop');
 must(/data-state="queued"/.test(stNoKey.text) && stNoKey.text.includes('Website updating… (it starts within 5 minutes)'), 'with no GitHub key, Settings does not say the update starts within 5 minutes');
 const pend = await (await I.handlePending({ env: s.env })).json();
 const stNow0 = await I.loadInventory(db);
