@@ -3,7 +3,7 @@
 // pnp-mailer Worker. Every customer message is built here and sent through ONE seam,
 // sendMessage(channel, template, ctx), so a paid SMS provider could be switched on later
 // without changing a single button. No template ever asks for a review or offers a discount.
-import { esc, FROM_EMAIL } from './util.mjs';
+import { esc, FROM_EMAIL, ownerCopy } from './util.mjs';
 import { smsLink, hasEmail, BUSINESS_PHONE } from './reminders.mjs';
 
 const first = (name) => String(name || '').trim().split(/\s+/)[0] || 'there';
@@ -149,7 +149,7 @@ export async function sendMessage(env, channel, template, ctx, { to = ctx.email,
     const full = msg.images && msg.images.length ? await attachImages(msg, env.SITE_ORIGIN || 'https://porchandparty901.com', env.FETCH || fetch) : { ...msg, attachments: [] };
     const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to, bcc: FROM_EMAIL, replyTo: FROM_EMAIL, subject: full.subject, html: full.html, text: full.emailText || full.text, attachments: full.attachments }),
+      body: JSON.stringify({ to, ...ownerCopy(template), replyTo: FROM_EMAIL, subject: full.subject, html: full.html, text: full.emailText || full.text, attachments: full.attachments }),
     });
     const out = await res.json().catch(() => ({ ok: false }));
     return res.ok && out.ok ? { ok: true } : { ok: false, error: out.error || `mailer answered ${res.status}` };

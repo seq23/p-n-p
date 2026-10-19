@@ -20,6 +20,7 @@ import { createHold, expireHolds, sqlTime } from './holds.mjs';
 import { logEvent, fromRow } from './requests.mjs';
 import { autoBookTakedown } from './takedown.mjs';
 import { sendMessage } from './messages.mjs';
+import { sendNewRequestEmail } from './owner-new-request.mjs';
 import { createDraftInvoice } from './admin.mjs';
 import { syncSafely } from './admin-money.mjs';
 
@@ -231,6 +232,9 @@ async function submit(context) {
     pay: { zelle: settings.zelle || '', cashapp: settings.cashapp || '' },
   };
   later(sendMessage(env, 'email', 'requestReceived', ctx).then((r) => (r.ok ? logEvent(env.DB, key, 'Confirmation email sent', 'website form') : logEvent(env.DB, key, `Confirmation email did not go out (${r.error})`, 'website form'))));
+  // Valerie's own "New request" email with every answer (owner, 19 Oct 2026). Once per request,
+  // website requests only; a failure is logged on the card and never blocks the submission.
+  later(sendNewRequestEmail(env, key, { log: (what) => logEvent(env.DB, key, what, 'website form') }));
   later(syncSafely(env));
   await Promise.all(pending);
   return new Response(null, { status: 303, headers: { Location: `/request/received?k=${receipt}`, 'Cache-Control': 'no-store' } });

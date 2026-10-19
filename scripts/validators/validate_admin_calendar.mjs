@@ -420,7 +420,7 @@ let invA;
   const sent = [];
   const r1 = await R.sendEmailReminders(s.db, async (m) => { sent.push(m); return true; });
   const r2 = await R.sendEmailReminders(s.db, async (m) => { sent.push(m); return true; });
-  must(r1.sent === 2 && r2.sent === 0 && sent.length === 2 && sent.every((m) => m.bcc === 'hello@porchandparty901.com'), `email reminders double-sent or missed: ${JSON.stringify([r1, r2])}`);
+  must(r1.sent === 2 && r2.sent === 0 && sent.length === 2 && sent.every((m) => !('bcc' in m) && !('cc' in m) && m.to !== 'hello@porchandparty901.com'), `email reminders double-sent or missed: ${JSON.stringify([r1, r2])}`);
   const before = (await R.tomorrowsBookings(s.db)).length;
   const gia = await s.one("SELECT id FROM bookings WHERE customer_name = 'Gia Graze'");
   await s.db.prepare("UPDATE bookings SET request_key = 'zz' WHERE id = ?1").bind(gia.id).run();

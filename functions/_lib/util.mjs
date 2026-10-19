@@ -3,6 +3,12 @@ export const SHEET_ID = '1I2YgweURdLHhg9dKrgWu0Zsyo3eXpF6bj1KEOS2RMDo';
 export const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
 export const SHEET_TAB = 'Form Responses 1';
 export const FROM_EMAIL = 'hello@porchandparty901.com';
+// Which emails to customers send Valerie a copy (Bcc to hello@) - owner, 19 Oct 2026: invoices
+// and receipts ONLY. Thank-yous, request confirmations, reminders, hold reminders and every other
+// customer message go without a copy (they stay logged on the card). Every send asks this one
+// place; scripts/validators/validate_owner_email.mjs pins it.
+export const OWNER_COPY_KINDS = Object.freeze(['invoice', 'receipt']);
+export const ownerCopy = (kind) => (OWNER_COPY_KINDS.includes(kind) ? { bcc: FROM_EMAIL } : {});
 export const SA_EMAIL = 'gsc-bot@gsc-automation-493801.iam.gserviceaccount.com';
 
 export function esc(value) {

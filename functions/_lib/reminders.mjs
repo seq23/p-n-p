@@ -4,6 +4,8 @@
 // Every reminder is transactional, about one booking, as the Text messages clause in
 // terms-and-conditions.html allows: no offers, no marketing. The wording lives ONLY here.
 
+import { ownerCopy } from './util.mjs';
+
 export const BUSINESS_PHONE = '901-355-1518';
 export const TZ = 'America/Chicago';
 
@@ -109,7 +111,7 @@ export async function sendEmailReminders(db, send, now = new Date(), from = 'hel
     if (claim && claim.meta && claim.meta.changes === 0) { out.skipped += 1; continue; }
     const mail = reminderEmail(b);
     let ok = false;
-    try { ok = Boolean(await send({ to: b.reminder_email, bcc: from, replyTo: from, ...mail })); } catch { ok = false; }
+    try { ok = Boolean(await send({ to: b.reminder_email, ...ownerCopy('reminder'), replyTo: from, ...mail })); } catch { ok = false; }
     if (ok) out.sent += 1;
     else { out.failed += 1; await db.prepare('UPDATE bookings SET email_reminded_at = NULL WHERE id = ?1').bind(b.id).run(); }
   }

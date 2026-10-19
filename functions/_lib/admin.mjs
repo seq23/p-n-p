@@ -3,6 +3,7 @@
 import {
   SHEET_URL, FROM_EMAIL, esc, redirect, htmlResponse, getSettings, putSetting, toCents, invoiceTotal,
   halfDeposit, PAY_PLANS, payPlanOf, amountDueNow, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice, b64urlText,
+  ownerCopy,
 } from './util.mjs';
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
 import { driveFileId, idFolderId } from './sheet.mjs';
@@ -386,7 +387,7 @@ async function deliver(env, id, test) {
   const parts = await emailParts(env, invoice, lines, settings, false);
   const payload = {
     to: test ? FROM_EMAIL : invoice.customer_email,
-    ...(test ? {} : { bcc: FROM_EMAIL }),
+    ...(test ? {} : ownerCopy('invoice')),
     replyTo: FROM_EMAIL,
     subject: test ? `TEST ${parts.subject}` : parts.subject,
     html: parts.html, text: parts.text, attachments: parts.attachments,
