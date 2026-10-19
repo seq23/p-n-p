@@ -36,6 +36,15 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
 - **Send**: HTML email from hello@porchandparty901.com with a copy (Bcc) to hello@; payment block
   from Settings (Zelle, Cash App, QR as an inline CID image, which Gmail renders; Gmail strips
   data: URIs). A test send goes to hello@ only with a `TEST` subject and changes nothing.
+- **Valerie's copies** (owner, 19 Oct 2026): only invoices and receipts are copied (Bcc) to hello@.
+  Thank-yous, request confirmations, reminders, hold reminders and every other customer email go
+  without a copy; each is still logged on the card. One rule decides it: `ownerCopy(kind)` in
+  `functions/_lib/util.mjs` (`npm run validate:owner-email`).
+- **New-request email**: each website request emails Valerie once, at Settings "My email for my day
+  list" (`day_list_email`), subject `New request: <First L.> · <services> · <date>`, every form
+  answer labelled, "ID photo uploaded" (never attached) and an "Open this request" button to the
+  card. Never for phone-call requests. Claimed by `requests.owner_emailed_at` (migration 0014);
+  the card logs "New-request email sent to Valerie" or the failure. `functions/_lib/owner-new-request.mjs`.
 
 ## Porch packages (owner-approved 18 Oct 2026)
 - **One source**: `data/offers/porch_packages.json` (Stoop / Classic / Grand / Showstopper per
