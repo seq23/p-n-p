@@ -157,7 +157,9 @@ function applyFields(item, f, to, data) {
   const renamed = item.name !== undefined && item.name !== f.name;
   out.name = f.name;
   out.quantity = f.quantity;
-  for (const k of ['size', 'use', 'blurb', 'alt']) if (to !== 'adminItems' || f[k]) out[k] = f[k];
+  // An admin-only item keeps only the public fields it already has or that were typed in, so a
+  // save that changes nothing changes nothing (the form's default "Indoor or outdoor" included).
+  for (const k of ['size', 'use', 'blurb', 'alt']) if (to !== 'adminItems' || item[k] !== undefined || (f[k] && !(k === 'use' && f[k] === 'both'))) out[k] = f[k];
   // The hand-written llms line and running-copy words follow the old name or size; drop them so
   // the derived ones (scripts/lib/inventory.js) take over.
   if (renamed || (item.size !== undefined && item.size !== f.size)) delete out.llms;
@@ -167,7 +169,7 @@ function applyFields(item, f, to, data) {
   if (to === 'games') { delete out.dayPrice; delete out.weekendPrice; }
   if (to !== 'adminItems') { if (f.deposit == null || f.deposit === data.damageDeposit) delete out.deposit; else out.deposit = f.deposit; }
   if (out.bundleSets) out.bundleSets = f.quantity;
-  if (to === 'adminItems') { out.admin_only = true; out.kind = f.kind; } else { delete out.admin_only; delete out.kind; }
+  if (to === 'adminItems') { out.admin_only = true; if (item.kind !== undefined || f.kind !== 'extra') out.kind = f.kind; } else { delete out.admin_only; delete out.kind; }
   if (out.availableNow === undefined) out.availableNow = true;
   return out;
 }
