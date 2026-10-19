@@ -9,9 +9,9 @@
   "max_targets": 500,
   "measurement_rule": "Every target carries a source (gsc_export | measured_demand) and a positive measured number. Anything unmeasured is dropped, not kept with a null.",
   "gsc_window": {
-    "start_date": "2026-09-18",
-    "end_date": "2026-10-15",
-    "collected_at": "2026-10-18T15:12:28.553185+00:00"
+    "start_date": "2026-09-19",
+    "end_date": "2026-10-16",
+    "collected_at": "2026-10-19T20:26:23.071610+00:00"
   },
   "target_count": 23,
   "targets_by_source": {
@@ -132,8 +132,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 5,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -152,8 +152,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 5,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -172,8 +172,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 5,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -192,8 +192,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 5,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -212,8 +212,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 4,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -232,8 +232,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -252,8 +252,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -272,8 +272,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -292,8 +292,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -312,8 +312,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -332,8 +332,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -352,8 +352,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -372,8 +372,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -392,8 +392,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -412,8 +412,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -432,8 +432,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -452,8 +452,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -472,8 +472,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -492,8 +492,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -512,8 +512,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -532,8 +532,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-18..2026-10-15",
-        "collected_at": "2026-10-18T15:12:28.553185+00:00"
+        "window": "2026-09-19..2026-10-16",
+        "collected_at": "2026-10-19T20:26:23.071610+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",

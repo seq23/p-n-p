@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-09-18..2026-10-15",
-  "coverage_collected_at": "2026-10-18T15:14:02.229581+00:00",
-  "url_count": 119,
+  "gsc_window": "2026-09-19..2026-10-16",
+  "coverage_collected_at": "2026-10-19T20:28:05.772002+00:00",
+  "url_count": 121,
   "roles": {
-    "candidate": 89,
+    "candidate": 91,
     "section_index": 7,
     "root": 6,
     "hub": 17
   },
   "candidates_with_impressions": 0,
   "candidates_by_hub": {
-    "/services/celebration-setups-memphis": 23,
+    "/services/celebration-setups-memphis": 25,
     "/services/hotel-room-decor-memphis": 14,
     "/services/grazing-tables-memphis": 12,
     "/services/porch-decorating": 10,
@@ -352,7 +352,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 352,
+      "word_count": 657,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
@@ -726,7 +726,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 340,
+      "word_count": 335,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -913,7 +913,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 975,
+      "word_count": 1289,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/christmas-porch-decorating",
       "fold_rule": "/christmas|holiday/"
@@ -924,7 +924,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 2134,
+      "word_count": 2481,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -999,9 +999,9 @@
       "url": "https://porchandparty901.com/",
       "file": "index.html",
       "role": "root",
-      "impressions_28d": 50,
+      "impressions_28d": 49,
       "clicks_28d": 0,
-      "word_count": 1458,
+      "word_count": 1461,
       "coverage_state": "Submitted and indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1067,7 +1067,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 434,
+      "word_count": 811,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1078,7 +1078,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 279,
+      "word_count": 501,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1089,10 +1089,32 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1708,
+      "word_count": 1705,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
+    },
+    {
+      "url": "https://porchandparty901.com/request",
+      "file": "request.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 833,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/rules",
+      "file": "rules.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 643,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
     },
     {
       "url": "https://porchandparty901.com/seasonal/christmas-porch-decorating-memphis",
@@ -1199,7 +1221,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 318,
+      "word_count": 632,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1210,7 +1232,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 324,
+      "word_count": 638,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1221,7 +1243,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 324,
+      "word_count": 638,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1298,7 +1320,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 445,
+      "word_count": 759,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1309,7 +1331,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 325,
+      "word_count": 639,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1320,7 +1342,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 90,
+      "word_count": 93,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
