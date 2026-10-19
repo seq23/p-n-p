@@ -7,7 +7,7 @@
 // Customers appear as first name + last initial only; every line links into /admin.
 import { fromRow, weekCounts, SERVICE_KEYS, SERVICE_WORDS, idOnFile } from './requests.mjs';
 import { notPaidYet } from './notpaid.mjs';
-import { listBookings, loadReturns, rentalWindows, usageOn, overdueReturns, addDays } from './calendar.mjs';
+import { listBookings, loadReturns, rentalWindows, usageOn, overdueReturns, addDays, outBetween } from './calendar.mjs';
 import { KIND_LABELS } from './kinds.mjs';
 import { currentHolds, endingSoon } from './holds.mjs';
 import { chicagoDate, chicagoHour } from './reminders.mjs';
@@ -72,7 +72,9 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
     const d = addDays(thisMon, i);
     const list = week.filter((b) => b.date === d);
     const games = usageOn(windows, d, today, PRICE_TABLE).count;
-    if (list.length || games) days.push({ date: d, bookings: list.map((b) => ({ kind: KIND_LABELS[b.kind] || b.kind, who: shortName(b.customer_name), time: b.time || '' })), games });
+    // Between a rental's pickup and its return the games are out: "Rental out" each day (19 Oct 2026).
+    const outs = outBetween(windows, d, today).map((w) => ({ kind: 'Rental out', who: shortName(w.name), time: '' }));
+    if (list.length || games || outs.length) days.push({ date: d, bookings: [...list.map((b) => ({ kind: KIND_LABELS[b.kind] || b.kind, who: shortName(b.customer_name), time: b.time || '' })), ...outs], games });
   }
   const np = await notPaidYet(db, requests, today);
   const weekKeys = new Set(week.map((b) => b.request_key).filter(Boolean));

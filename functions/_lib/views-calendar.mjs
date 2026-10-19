@@ -6,7 +6,7 @@
 import { esc, money, shortDate, prettyDate, b64urlText, STATUS_LABELS } from './util.mjs';
 import { tip, hint, stepsPanel } from './helptext.mjs';
 import { layout, act, chip, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS } from './views.mjs';
-import { KINDS, KIND_LABELS, prettyTime, addDays, returnKeyOf, firstLine, usageOn, namesText } from './calendar.mjs';
+import { KINDS, KIND_LABELS, prettyTime, addDays, returnKeyOf, firstLine, usageOn, namesText, outBetween } from './calendar.mjs';
 import { serviceInfo, serviceKey, SERVICE_KINDS } from './kinds.mjs';
 import { gamesAskedOn } from './requested.mjs';
 import { PHONE_SERVICES, PHONE_SERVICE_WORDS, NOTE_CHOICE, FIRST_KIND } from './phone-requests.mjs';
@@ -60,6 +60,7 @@ const CAL_CSS = `
 a.k.req{text-decoration:none;color:var(--ink)}
 .k.req[role=link]{cursor:pointer}
 .badge.asked{color:#4b3f8f}
+.k.rental_out{border-color:#1d4ed8;background:repeating-linear-gradient(135deg,#dbeafe 0 8px,#eef4ff 8px 16px);color:#2b2420}a.k.rental_out{text-decoration:none}
 .fill-legend{margin:0 0 10px;font-size:.98rem}.fill-legend .k{margin-right:4px}
 .reqlist{display:flex;flex-wrap:wrap;gap:8px}.reqlist a.k{display:inline-flex;align-items:center;min-height:44px;padding:4px 12px;font-size:1rem}
 /* The Day sheet (owner, 18 Oct 2026: one simple block per job, one printed page). */
@@ -179,9 +180,22 @@ export function toScheduleBox(rows = []) {
 // span with role=link (CAL_JS opens it); elsewhere a real link.
 export function requestedChip(c, tag = 'a') {
   const href = `/admin/#c-${c.rk}`;
-  const words = `Requested · ${SERVICE_KINDS[c.service].short}: ${c.name}`;
+  const words = `Requested · ${c.part === 'out' ? OUT_WORDS : c.part === 'return' ? 'Rental return' : SERVICE_KINDS[c.service].short}: ${c.name}`;
   const attrs = `class="k req ${esc(c.kind)}" style="border-color:${esc(c.color)}" data-requested="${esc(c.service)}"${tip('cal.requested')}`;
   return tag === 'a' ? `<a ${attrs} href="${esc(href)}">${esc(words)}</a>` : `<span ${attrs} role="link" tabindex="0" data-open="${esc(href)}">${esc(words)}</span>`;
+}
+
+// "Rental out" on every day between a rental's pickup and its return (owner, 19 Oct 2026): the
+// games are with the customer, so the span reads pickup chip, Rental out, ..., return chip.
+export const OUT_WORDS = 'Rental out';
+export function outChips(windows, day, today, tag = 'span') {
+  return outBetween(windows, day, today).map((w) => {
+    const words = `${OUT_WORDS}: ${tag === 'a' ? (w.name || 'No name') : firstLine(w.name, 18)}`;
+    const back = ` <span class="ki">· back ${esc(shortDate(w.end))}</span>`;
+    return tag === 'a'
+      ? `<a class="k rental_out" href="/admin/day/${esc(day)}" data-rental-out="${esc(w.key)}"${tip('cal.rentalOut')}>${esc(words)}${back}</a>`
+      : `<span class="k rental_out" data-rental-out="${esc(w.key)}"${tip('cal.rentalOut')}>${esc(words)}</span>`;
+  }).join('');
 }
 
 export function fillLegend() {
@@ -216,6 +230,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
         const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
         return `<span class="k ${esc(b.kind)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(held ? 'cal.heldChip' : 'cal.booking')}>${held ? 'Held · ' : ''}${esc(KIND_LABELS[b.kind])}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
       }).join('')}
+      ${outChips(windows, day, today, 'span')}
       ${(reqByDay[day] || []).map((c) => requestedChip(c, 'span')).join('')}
       ${games ? `<span class="badge" data-games-out>${games} ${games === 1 ? 'game' : 'games'} out</span>` : ''}
       ${gamesAskedOn(requested, day) ? `<span class="badge asked" data-games-asked${tip('cal.gamesAsked')}>${gamesAskedOn(requested, day)} ${gamesAskedOn(requested, day) === 1 ? 'game' : 'games'} asked for</span>` : ''}
@@ -228,7 +243,8 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
   const listDays = [];
   for (let day = first; day.slice(0, 7) === month; day = addDays(day, 1)) {
     const list = byDay[day] || []; const asked = reqByDay[day] || [];
-    if (!list.length && !asked.length && day !== today) continue;
+    const outs = outChips(windows, day, today, 'a');
+    if (!list.length && !asked.length && !outs && day !== today) continue;
     const games = usageOn(windows, day, today, table).count;
     listDays.push(`<div class="mday${day === today ? ' today' : ''}" data-month-day="${day}"><a class="mdh" href="/admin/day/${day}"${tip('cal.day')}><strong>${esc(shortDate(day))}</strong>${day === today ? ' <span class="muted">today</span>' : ''}${games ? ` <span class="badge" data-games-out>${games} ${games === 1 ? 'game' : 'games'} out</span>` : ''}</a>
       ${list.map((b) => {
@@ -236,8 +252,8 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
         const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
         return `<a class="k ${esc(b.kind)}" href="/admin/day/${day}" data-list-booking="${b.id}"${tip(held ? 'cal.heldChip' : 'cal.booking')}>${held ? 'Held · ' : ''}${esc(KIND_LABELS[b.kind])}${b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : ''}${b.time ? ` ${esc(prettyTime(b.time))}` : ''}: ${esc(b.customer_name || 'No name')}${b.items ? ` <span class="ki">· ${esc(firstLine(b.items, 80))}</span>` : ''}</a>`;
       }).join('')}
-      ${asked.map((c) => requestedChip(c, 'a')).join('')}
-      ${!list.length && !asked.length ? '<p class="muted" style="margin:0">Nothing booked today.</p>' : ''}</div>`);
+      ${outs}${asked.map((c) => requestedChip(c, 'a')).join('')}
+      ${!list.length && !asked.length && !outs ? '<p class="muted" style="margin:0">Nothing booked today.</p>' : ''}</div>`);
   }
   const monthList = `<div class="monthlist" data-month-list>${listDays.length ? listDays.join('') : '<p class="muted">Nothing booked this month.</p>'}</div>`;
   const upcoming = bookings.filter((b) => b.date >= today && b.date <= addDays(today, 14));
@@ -362,7 +378,7 @@ export function gamesGrid(u, table) {
   return { html: `<div class="grid" data-strip>${tiles.join('')}</div>`, outTiles, total: shown.length };
 }
 
-export function dayPage({ tdToday = [], requested = [], gamesAsked = 0, date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [], notPaid = null }) {
+export function dayPage({ outRows = [], tdToday = [], requested = [], gamesAsked = 0, date, today, bookings, ctx, windows, table, sheetText, settings, flash = '', error = '', holds = [], notPaid = null }) {
   const u = usageOn(windows, date, today, table);
   let owedTotal = 0; let depositTotal = 0;
   const rows = bookings.map((b) => {
@@ -395,8 +411,9 @@ export function dayPage({ tdToday = [], requested = [], gamesAsked = 0, date, to
       <div class="jl">${esc([b.time ? prettyTime(b.time) : 'Anytime', SHEET_WORDS[b.kind] || KIND_LABELS[b.kind] || 'Booking', firstOf(b.customer_name)].join(' · '))}</div>
       ${b.items ? `<div class="ji">${esc(b.items)}</div>` : ''}${b.place ? `<div class="muted">${esc(b.place)}</div>` : ''}
       ${owe > 0 ? `<div class="jo" data-still-owed>Still owed ${esc(money(owe))}</div>` : ''}
-      ${(c.notes || []).map((n) => `<div class="jn">${esc(n.body)}</div>`).join('')}</div></div>`).join('') || '<p>Nothing booked this day.</p>'}
+      ${(c.notes || []).map((n) => `<div class="jn">${esc(n.body)}</div>`).join('')}</div></div>`).join('') || (outRows.length ? '' : '<p>Nothing booked this day.</p>')}
     </div>
+    ${outRows.length ? `<div class="jobs" data-day-out>${outRows.map((w) => `<div class="job" data-rental-out="${esc(w.key)}"><span class="box" aria-hidden="true"></span><div><div class="jl">${esc([OUT_WORDS, firstOf(w.name)].join(' · '))}</div><div class="ji">${esc(namesText(w).join(', ') || '')}</div><div class="muted">Picked up ${esc(shortDate(w.start))}, back ${esc(shortDate(w.end))}</div></div></div>`).join('')}</div>` : ''}
     ${owedTotal > 0 ? `<p style="font-size:1.15rem" data-day-total><strong>Still to collect today: ${esc(money(owedTotal))}</strong>${depositTotal ? ` plus ${esc(money(depositTotal))} in refundable damage deposits` : ''}</p>` : ''}</section>`;
   const smsTo = normalizePhone(settings.day_list_phone || '901-355-1518');
   const tools = `<div class="actions three daytools">

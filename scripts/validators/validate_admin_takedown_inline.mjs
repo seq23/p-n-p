@@ -114,7 +114,7 @@ await s.post('/admin/requests/takedown-inline', { r: rkP, kind: 'porch_takedown'
 must(!(await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind = 'porch_takedown'", keyP)) && (await s.one('SELECT takedown_date FROM requests WHERE request_key = ?1', keyP)).takedown_date === '', 'Remove left the takedown booked (or kept its date)');
 must(/data-takedown-row="open"/.test(cardOf((await s.get('/admin/')).text, 'Ida Inline')), 'after Remove the line does not ask again');
 // A rental never books one through the route.
-const reqR = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', pickup_date: plus(9), name: 'Rio Rental', phone: '901-555-0961', email: 'rio.rental@example.com' });
+const reqR = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', rental_date: plus(9), pickup_when: 'morning', return_when: 'after', name: 'Rio Rental', phone: '901-555-0961', email: 'rio.rental@example.com' });
 const rr = await s.post('/admin/requests/takedown-inline', { r: s.rk(reqR.row.request_key), kind: 'porch_takedown', date: plus(10) });
 must(/e=/.test(rr.location) && !(await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind LIKE '%takedown'", reqR.row.request_key)), 'the inline route booked a takedown for a rental');
 
@@ -210,7 +210,7 @@ const cal2 = (await s.get(`/admin/calendar?month=${askDay.slice(0, 7)}`)).text;
 const cell2 = (() => { const i = cal2.indexOf(`data-day="${askDay}"`); return cal2.slice(i, cal2.indexOf('</a>', i)); })();
 must(!/data-requested="porch"/.test(cell2) && /<span class="k porch_install"[^>]*>Porch install: Rhea Porchask</.test(cell2), 'a booked porch is still outlined, or not filled');
 // Held rental: filled + "Held"; expired: back to outlined Requested, not games out.
-const held = await s.siteRequest({ service: 'rentals', games: ['cornhole'], duration: 'day', pickup_date: plus(22), name: 'Hope Heldask', phone: '901-555-0975', email: 'hope.held@example.com' });
+const held = await s.siteRequest({ service: 'rentals', games: ['cornhole'], duration: 'day', rental_date: plus(22), pickup_when: 'morning', return_when: 'after', name: 'Hope Heldask', phone: '901-555-0975', email: 'hope.held@example.com' });
 let cal3 = (await s.get(`/admin/calendar?month=${plus(22).slice(0, 7)}`)).text;
 must(/data-held-chip[^>]*>Held · Rental pickup: Hope Heldask</.test(cal3), 'a held rental is not a filled chip that says Held');
 await s.db.prepare("UPDATE holds SET until = '2000-01-01 00:00:00' WHERE request_key = ?1").bind(held.row.request_key).run();

@@ -119,7 +119,7 @@ function renderRules(F, table) {
     ['rentals', 'Party game rentals', [
       `Pickup and return are at ${PLACE}, a safe exchange zone. We do not bring rentals to you. The pickup time is set by text or call to ${C.telephoneDisplay} after payment.`,
       'A rental booked on our request form is held for 24 hours while you pay the deposit. If the deposit has not come in by then, the hold ends and the games are offered to others.',
-      'A day rental comes back within 24 hours of pickup. A weekend rental is picked up Friday and returned Monday. A late return is charged as quoted with your booking.',
+      'One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday. A late return is charged as quoted with your booking.',
       'An adult watches over children playing with the giant games. Set them up on flat ground and use them for what they are made for.',
       `Everything is checked at return. A missing bag, ring, card or piece is $5 each; a broken board, frame or screen is charged at replacement cost. The ${d(games.damageDeposit)} damage deposit is refunded when everything comes back complete.`,
       'We check the photo ID on your request against the name on the invoice at hand-off. Party game rentals have no takedown: you return them yourself.',

@@ -119,15 +119,17 @@ export async function daySheetData(env, date) {
   });
   const holds = (await currentHolds(env.DB)).filter((h) => !h.by_hand && h.until && C.chicagoDayOf(h.until) === date)
     .map((h) => ({ ...h, timeLabel: new Date(h.untilMs).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) }));
-  return { all, ctx, windows, bookings, rows, holds };
+  // Rentals out with a customer this day, between their pickup and return (owner, 19 Oct 2026).
+  const outRows = C.outBetween(windows, date, chicagoDate());
+  return { all, ctx, windows, bookings, rows, holds, outRows };
 }
 
 export async function dayPage(env, url, date) {
   if (date === 'today') return redirect(`/admin/day/${chicagoDate()}`);
   if (!C.isISODate(date)) return redirect('/admin/calendar');
   const settings = await getSettings(env.DB);
-  const { ctx, windows, bookings, rows, holds } = await daySheetData(env, date);
-  const sheetText = C.daySheetText(date, rows, { host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date), holds });
+  const { ctx, windows, bookings, rows, holds, outRows } = await daySheetData(env, date);
+  const sheetText = C.daySheetText(date, rows, { host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date), holds, outRows });
   // A customer with a balance is booked today: say how much is not paid yet in all.
   const { requests } = await requestsSafe(env);
   const np = await notPaidYet(env.DB, requests, chicagoDate());
@@ -137,7 +139,7 @@ export async function dayPage(env, url, date) {
   const requested = reqChips.filter((c) => c.date === date);
   const gamesAsked = gamesAskedOn(reqChips, date);
   const owingToday = np.owed.filter((r) => bookings.some((b) => (b.request_key && b.request_key === r.requestKey) || (b.invoice_id && b.invoice_id === r.id)));
-  return htmlResponse(VC.dayPage({ tdToday, requested, gamesAsked, notPaid: owingToday.length ? { today: owingToday.length, count: np.count, total: np.total } : null, holds, date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  return htmlResponse(VC.dayPage({ outRows, tdToday, requested, gamesAsked, notPaid: owingToday.length ? { today: owingToday.length, count: np.count, total: np.total } : null, holds, date, today: chicagoDate(), bookings, ctx, windows, table: PRICE_TABLE, sheetText, settings, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
 }
 
 // "Email it to me": the full day list to the Settings address, through the mailer.
@@ -145,10 +147,10 @@ export async function emailDay(env, url, date) {
   if (!C.isISODate(date)) return redirect('/admin/calendar');
   const settings = await getSettings(env.DB);
   const to = settings.day_list_email || FROM_EMAIL;
-  const { rows, holds } = await daySheetData(env, date);
-  const text = C.daySheetText(date, rows, { max: 100000, host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date), holds });
+  const { rows, holds, outRows } = await daySheetData(env, date);
+  const text = C.daySheetText(date, rows, { max: 100000, host: url.host.replace(/^www\./, ''), dayLabel: shortDate(date), holds, outRows });
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const html = `<div style="font:16px/1.5 Arial,sans-serif;color:#3b302a"><h2>Day list for ${esc(shortDate(date))}</h2>${holds.map((h) => `<p><strong>Hold ends ${esc(h.timeLabel)} · ${esc(h.name || 'No name')}</strong><br>${esc(h.items || '')} · deposit not in yet</p>`).join('')}${rows.map((r) => `<p><strong>${esc(r.timeLabel || 'Any time')} · ${esc(C.KIND_LABELS[r.kind])} · ${esc(r.customer_name || 'No name')}</strong><br>${esc([r.phone, r.items, r.place].filter(Boolean).join(' · '))}${r.owed ? `<br>Still owed: $${(r.owed / 100).toFixed(2)}` : ''}${r.note ? `<br>Note: ${esc(r.note)}` : ''}</p>`).join('') || '<p>Nothing booked.</p>'}</div>`;
+  const html = `<div style="font:16px/1.5 Arial,sans-serif;color:#3b302a"><h2>Day list for ${esc(shortDate(date))}</h2>${holds.map((h) => `<p><strong>Hold ends ${esc(h.timeLabel)} · ${esc(h.name || 'No name')}</strong><br>${esc(h.items || '')} · deposit not in yet</p>`).join('')}${outRows.map((w) => `<p><strong>Rental out · ${esc(w.name || 'No name')}</strong><br>${esc(C.namesText(w).join(', '))} · back ${esc(shortDate(w.end))}</p>`).join('')}${rows.map((r) => `<p><strong>${esc(r.timeLabel || 'Any time')} · ${esc(C.KIND_LABELS[r.kind])} · ${esc(r.customer_name || 'No name')}</strong><br>${esc([r.phone, r.items, r.place].filter(Boolean).join(' · '))}${r.owed ? `<br>Still owed: $${(r.owed / 100).toFixed(2)}` : ''}${r.note ? `<br>Note: ${esc(r.note)}` : ''}</p>`).join('') || '<p>Nothing booked.</p>'}</div>`;
   if (!env.MAILER) return redirect(`/admin/day/${date}?e=${encodeURIComponent('Email is not connected on this copy of the site, so nothing was sent.')}`);
   let ok = false; let err = '';
   try {
@@ -200,7 +202,7 @@ export async function newBookingPage(env, url) {
     if (/_takedown$/.test(wantKind)) title = `Schedule the takedown for ${V.firstName(req ? req.name : booking.customer_name)}`;
     if (wantKind === 'grazing_pickup') title = `Schedule the pickup for ${V.firstName(req ? req.name : booking.customer_name)}`;
   }
-  const returnDate = booking.date ? C.returnDateFor(booking.date, req ? req.durationAnswer : '') : '';
+  const returnDate = booking.date ? (req ? C.requestReturnDate(req, booking.date) : C.returnDateFor(booking.date, '')) : '';
   const extras = await formExtras(env, booking.date, returnDate, key);
   // No request: ask which service (a phone request on Save) or Just a calendar note.
   const askService = !req;

@@ -3,7 +3,7 @@
   "rates": {
     "day": 40,
     "weekend": 60,
-    "_note": "Flat per game: $40 for a day (return within 24 hours), $60 for a weekend (pick up Friday, return Monday)."
+    "_note": "Flat per game: $40 for one day, $60 for the entire weekend (Fri, Sat and Sun). Pickup/return days (owner, 19 Oct 2026; functions/_lib/calendar.mjs rentalSpan): one day = pick up the day before or the morning of the event, return the day after or 2 days after; weekend = pick up Thursday or Friday, return Monday or Tuesday. The price never depends on the days picked."
   },
   "games": [
     {

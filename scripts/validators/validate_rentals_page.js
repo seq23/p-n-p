@@ -192,7 +192,7 @@ if (onDisk) {
     if (b.weekendPrice && !card.includes(`${money(b.weekendPrice)} for a weekend`)) errors.push(`rentals/index.html bundle ${b.name} card lacks its weekend price`);
   }
   const pickupSec = (main.split('id="pickup"')[1] || '').split('</section>')[0];
-  for (const need of [V3.place, '2602 Mt. Moriah Rd', V3.phone, 'within 24 hours', 'Friday', 'Monday', `${money(data.damageDeposit)} refundable damage deposit + ${V3.holdPercent}%`, 'never cash', 'refunded at return', 'photo ID'])
+  for (const need of [V3.place, '2602 Mt. Moriah Rd', V3.phone, 'pick up the day before your event or that morning', 'the day after or 2 days after', 'pick up Thursday or Friday', 'Monday or Tuesday', `${money(data.damageDeposit)} refundable damage deposit + ${V3.holdPercent}%`, 'never cash', 'refunded at return', 'photo ID'])
     if (!pickupSec.includes(need)) errors.push(`rentals/index.html "How pickup works" lacks "${need}"`);
   const ld = [...onDisk.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((m) => JSON.parse(m[1]));
   const service = ld.find((o) => o['@type'] === 'Service');
@@ -214,7 +214,7 @@ if (onDisk) {
 const CONTACT = 'Porch & Party, Memphis\nWebsite: https://porchandparty901.com/rentals/\nEmail: hello@porchandparty901.com\nFacebook Page: https://www.facebook.com/porchandparty901\n';
 const PHONE = /\(?\b\d{3}\)?[-.\s]\d{3}[-.\s]\d{4}\b|call or text|\btext us\b/i;
 const RETIRED = /\bzone\s*\d|\bZIP\b|38103|1\.5\s*(x|times)|free over|free on orders/i;
-const RULES = [`${V3.place}, ${V3.address}`, 'within 24 hours', 'picked up Friday and returned Monday', `${money(V3.damageDeposit)} refundable damage deposit + ${V3.holdPercent}% of the rental`, 'Zelle or Cash App', 'paid at pickup', 'government photo ID', 'check it at hand-off'];
+const RULES = [`${V3.place}, ${V3.address}`, 'pick up the day before your event or that morning, and bring everything back the day after or 2 days after', 'The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday', `${money(V3.damageDeposit)} refundable damage deposit + ${V3.holdPercent}% of the rental`, 'Zelle or Cash App', 'paid at pickup', 'government photo ID', 'check it at hand-off'];
 const listing = read('docs/listings/facebook-marketplace.md');
 const blocks = listing.split(/^## /m).slice(1);
 if (blocks.length !== ITEMS.length + BUNDLES.length) listingErrors.push(`facebook-marketplace.md has ${blocks.length} listings, games.json has ${ITEMS.length} items + ${BUNDLES.length} bundles`);
