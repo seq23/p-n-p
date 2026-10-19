@@ -86,7 +86,7 @@ if(!busy(j.state)){setTimeout(function(){location.reload()},800);return}setTimeo
 setTimeout(tick,4000)})();</script>`;
 
 // The Inventory section inside Settings.
-export function inventorySection({ state, words, future = {} }) {
+export function inventorySection({ state, words, future = {}, keyMissing = false }) {
   const data = state.data;
   const bySlug = Object.fromEntries(state.rows.map((r) => [r.slug, r]));
   const list = (section, removed) => INV.SECTIONS.includes(section)
@@ -98,6 +98,7 @@ export function inventorySection({ state, words, future = {} }) {
   return `<style>${INV_CSS}</style><section class="card" id="inventory" data-inventory><h2>Inventory: your rental items</h2>
     <p>Everything you rent out. A change here counts in the admin and on the booking form straight away, and goes on the website by itself.</p>
     ${statusBox(words)}
+    ${keyMissing ? '<p class="inv-note" data-inv-key-stop><strong>Website auto-update needs a GitHub key (PNP_GITHUB_TOKEN) to start at once.</strong> Until it is added, each change waits for GitHub\'s 5-minute round, which can run late. Your changes always count in the admin and on the booking form straight away.</p>' : ''}
     ${act(`<a class="btn primary" href="/admin/settings/inventory/new"${tip('inv.add')}>Add an item</a>`, 'inv.add')}
     ${allGames ? `<p class="inv-note" data-inv-bundles>Whole Yard and The Whole Party include every game on the website: <strong>${esc(allGames.includes.split(',')[0])}</strong>.</p>` : ''}
     ${off.length ? `<div class="notice warn" data-inv-bundles-off>${off.map((b) => `<div><strong>${esc(b.name)}</strong> is off the website: ${esc(b.offBecause)}.</div>`).join('')}</div>` : ''}
