@@ -105,8 +105,8 @@ const PATHS = {
   porch: { service: 'porch', porch_season: 'Fall / Halloween', porch_takedown: 'not_sure', event_date: plus(14), location: 'Germantown' },
   party: { service: 'party', party_event: 'Birthday', party_where: 'Hotel room', party_takedown: 'yes', event_date: plus(15), location: 'The Peabody' },
   grazing: { service: 'grazing', grazing_event: 'Graduation', grazing_guests: '15–40', grazing_food: 'Yes, include food in my quote', event_date: plus(16), location: 'Cordova' },
-  rentals: { service: 'rentals', games: ['giant-connect-four', 'giant-uno'], duration: 'day', pickup_date: plus(9) },
-  multi: { service: 'multi', multi: ['party', 'rentals'], party_event: 'Anniversary', party_where: 'Home', event_date: plus(17), location: 'Bartlett', games: ['cornhole'], duration: 'day', pickup_date: plus(17) },
+  rentals: { service: 'rentals', games: ['giant-connect-four', 'giant-uno'], duration: 'day', rental_date: plus(9), pickup_when: 'morning', return_when: 'after'},
+  multi: { service: 'multi', multi: ['party', 'rentals'], party_event: 'Anniversary', party_where: 'Home', event_date: plus(17), location: 'Bartlett', games: ['cornhole'], duration: 'day', rental_date: plus(17) , pickup_when: 'morning', return_when: 'after'},
 };
 
 // ---- 2/3. Every path: ID required, rules required, complete path accepted ---------------
@@ -131,8 +131,12 @@ must(made.porch && made.party && made.porch.takedown_plan === 'not_sure' && made
 must(made.multi && JSON.stringify(JSON.parse(made.multi.services)) === JSON.stringify(['party', 'rentals']), 'the "more than one" path did not store both services');
 const bad = await send({ ...PATHS.porch, ...contact(9), porch_season: '' });
  must(bad.status === 400 && bad.text.includes('rq-summary') && bad.text.includes('value="path9@example.com"') && bad.text.includes('id="err-porch_season"') && bad.text.includes('href="#q-porch_season"'), 'a missing answer does not re-show the form with the answers kept and the error named');
-const weekendNotFriday = await send({ ...PATHS.rentals, ...contact(10), duration: 'weekend', pickup_date: plus(new Date(`${plus(9)}T12:00:00Z`).getUTCDay() === 5 ? 10 : 9) });
-must(weekendNotFriday.status === 400 && weekendNotFriday.text.includes('picked up on a Friday'), 'a weekend rental on a non-Friday was accepted');
+// The entire weekend is Fri-Sun: a Monday-Thursday event date with "The entire weekend" is refused.
+const wedOffset = (() => { for (let k = 9; k < 16; k += 1) if (new Date(`${plus(k)}T12:00:00Z`).getUTCDay() === 3) return k; return 9; })();
+const weekendNotFriday = await send({ ...PATHS.rentals, ...contact(10), duration: 'weekend', rental_date: plus(wedOffset), pickup_when: 'friday', return_when: 'monday' });
+must(weekendNotFriday.status === 400 && weekendNotFriday.text.includes('Pick a Friday, Saturday or Sunday event date'), 'a weekend rental on a Wednesday event was accepted');
+const mixed = await send({ ...PATHS.rentals, ...contact(10), duration: 'weekend', rental_date: plus(wedOffset + 3), pickup_when: 'morning', return_when: 'monday' });
+must(mixed.status === 400 && mixed.text.includes('Please pick &quot;Thursday&quot; or &quot;Friday&quot;'), 'a one-day pickup choice was accepted on a weekend rental');
 const past = await send({ ...PATHS.party, ...contact(11), event_date: plus(-2) });
 must(past.status === 400 && past.text.includes('That date has passed'), 'a past event date was accepted');
 
@@ -176,7 +180,7 @@ const holdMs = H.fromSql(hold && hold.until) - H.fromSql(rent.submitted_at);
 must(hold && hold.state === 'held' && hold.by_hand === 0 && Math.abs(holdMs - 24 * 3600000) < 5000, `the rental hold is not 24 hours (${hold && hold.until})`);
 const bk = await s.all('SELECT kind, date, items FROM bookings WHERE request_key = ?1 ORDER BY kind', rent.request_key);
 must(bk.length === 2 && bk[0].kind === 'rental_pickup' && bk[0].date === plus(9) && bk[1].kind === 'rental_return' && bk[1].date === plus(10) && /Giant Connect Four/.test(bk[0].items), 'the hold did not put the pickup and return on the calendar');
-const avail = async (pickup, g = '') => (await (await RS.handleAvailability({ request: new Request(`https://porchandparty901.com/api/request/availability?pickup=${pickup}&duration=day&games=${g}`), env })).json());
+const avail = async (pickup, g = '') => (await (await RS.handleAvailability({ request: new Request(`https://porchandparty901.com/api/request/availability?event=${pickup}&pickup_when=morning&return_when=after&duration=day&games=${g}`), env })).json());
 let a = await avail(plus(9), 'giant-connect-four,giant-uno');
 must(a.ok && a.left['giant-connect-four'] === 0 && a.left['giant-uno'] === 0 && a.left.cornhole === 1 && a.left['giant-color-stack'] === 2, `availability does not grey held games (Cornhole stock 1, Color Stack 2; owner 18 Oct 2026): ${JSON.stringify(a.left)}`);
 const q = F.rentalQuote(['giant-connect-four', 'giant-uno'], 'day', PRICE_TABLE, games.holdPercent);
@@ -205,7 +209,7 @@ must(!/giant-checkers|Giant Checkers/.test(blank), 'the /request form still offe
   must(/function proj\(\)\{[^}]*inflatable-movie-screen/.test(blank) && /e\.target\.name==='games'\)proj\(\)/.test(blank), 'the page script does not show the projector checkbox only while the movie screen is ticked');
   must(!/value="projector"/.test(blank) && !/>\s*Projector\s*</.test(blank) && !/projector[^<]{0,40}\$\d/i.test(blank), 'the form offers the Projector as an item or quotes it a price');
   const pq = F.rentalQuote(['inflatable-movie-screen'], 'day', PRICE_TABLE, games_.holdPercent);
-  const asked = await send({ service: 'rentals', games: ['inflatable-movie-screen'], projector: 'yes', duration: 'day', pickup_date: plus(31), ...contact(60) });
+  const asked = await send({ service: 'rentals', games: ['inflatable-movie-screen'], projector: 'yes', duration: 'day', rental_date: plus(31), pickup_when: 'morning', return_when: 'after', ...contact(60) });
   must(asked.status === 303, `a movie-screen request asking for the projector was refused (${asked.status})`);
   const ar = await s.one('SELECT * FROM requests WHERE email = ?1', 'path60@example.com');
   const aa = ar ? JSON.parse(ar.answers) : [];
@@ -218,7 +222,7 @@ must(!/giant-checkers|Giant Checkers/.test(blank), 'the /request form still offe
   const card = (await s.get('/admin/')).text;
   must(card.includes('<dt>Asked for a projector</dt><dd>Yes</dd>'), 'the admin request card does not show "Asked for a projector: Yes"');
   // Ticked without the movie screen (no JavaScript): never saved.
-  const stray = await send({ service: 'rentals', games: ['giant-uno'], projector: 'yes', duration: 'day', pickup_date: plus(33), ...contact(61) });
+  const stray = await send({ service: 'rentals', games: ['giant-uno'], projector: 'yes', duration: 'day', rental_date: plus(33), pickup_when: 'morning', return_when: 'after', ...contact(61) });
   const sr = await s.one('SELECT answers FROM requests WHERE email = ?1', 'path61@example.com');
   must(stray.status === 303 && sr && !/projector/i.test(sr.answers), 'a projector ask without the movie screen was saved');
 }
@@ -244,7 +248,7 @@ must(rentSt && rentSt.status === 'new', 'an expired hold did not leave the reque
 must((await H.expireHolds(s.db, Date.now() + 30 * 86400000)) === 0 && (await s.all('SELECT id FROM bookings WHERE request_key = ?1', multiKey)).length >= 2, 'a confirmed booking expired');
 // Settings: automatic expiry off -> held by hand, no end time.
 await s.db.prepare("INSERT INTO settings (key, value) VALUES ('hold_auto_expire', '0')").run();
-const byHand = await send({ service: 'rentals', games: ['cornhole'], duration: 'day', pickup_date: plus(25), ...contact(21) });
+const byHand = await send({ service: 'rentals', games: ['cornhole'], duration: 'day', rental_date: plus(25), pickup_when: 'morning', return_when: 'after', ...contact(21) });
 must(byHand.status === 303, 'a rental with automatic expiry off was refused');
 const bh = await s.one("SELECT h.* FROM holds h JOIN requests r ON r.request_key = h.request_key WHERE r.email = 'path21@example.com'");
 must(bh && bh.by_hand === 1 && bh.until === null && (await H.expireHolds(s.db, Date.now() + 90 * 86400000)) === 0, 'with automatic expiry off a hold still has an end time or expires');

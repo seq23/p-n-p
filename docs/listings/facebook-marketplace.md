@@ -55,9 +55,9 @@ Both decor listings end with the email-only contact lines (website https://porch
 
 AVAILABLE NOW. Giant Connect Four for your party. Four-in-a-row at yard scale. Big enough for kids and adults to play standing up. Size: 4 ft tall.
 
-$40 a day (back within 24 hours), or $60 for a weekend (pick up Friday, return Monday). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
+$40 a day for one day, or $60 for a weekend (the entire weekend: Fri, Sat and Sun). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -79,9 +79,9 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 AVAILABLE NOW. Cornhole Set for your party. Two regulation boards and eight bags. Size: Regulation, 2 boards + 8 bags. 1 available.
 
-$40 a day (back within 24 hours), or $60 for a weekend (pick up Friday, return Monday). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
+$40 a day for one day, or $60 for a weekend (the entire weekend: Fri, Sat and Sun). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -103,9 +103,9 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 AVAILABLE NOW. Giant Uno for your party. Oversized Uno cards, same rules as the original. Play on a table or spread out on the lawn. Size: Oversized Uno cards, ages 7+.
 
-$40 a day (back within 24 hours), or $60 for a weekend (pick up Friday, return Monday). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
+$40 a day for one day, or $60 for a weekend (the entire weekend: Fri, Sat and Sun). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -127,9 +127,9 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 AVAILABLE NOW. Grab the Mic for your party. The Lucky Egg tabletop singing party game. Flip a word card, and the first player to grab the foam mic and sing a lyric with that word scores. Our rain-plan game. Size: Tabletop, 2 to 10 players, ages 8+.
 
-$40 a day (back within 24 hours), or $60 for a weekend (pick up Friday, return Monday). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
+$40 a day for one day, or $60 for a weekend (the entire weekend: Fri, Sat and Sun). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -151,9 +151,9 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 AVAILABLE NOW. Giant Color Stack for your party. A two-foot color-sorting stacking puzzle: slide the sky blue, lime green, yellow and pink rings onto five poles until every pole is one color. Two sets for head-to-head races. Size: 2 ft tall, 5 poles and rings in 4 colors, ages 6+. 2 available.
 
-$40 a day (back within 24 hours), or $60 for a weekend (pick up Friday, return Monday). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
+$40 a day for one day, or $60 for a weekend (the entire weekend: Fri, Sat and Sun). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -175,9 +175,9 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 AVAILABLE NOW. Inflatable Movie Screen for your party. An inflatable outdoor movie screen with its blower, stakes and an extension cord. Need a projector? We can include one, just ask when you book. Bring your own speaker; it needs a plug within 50 ft. Size: Outdoor screen with blower, stakes and extension cord.
 
-$50 a day (back within 24 hours), or $75 for a weekend (pick up Friday, return Monday). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
+$50 a day for one day, or $75 for a weekend (the entire weekend: Fri, Sat and Sun). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -199,9 +199,9 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 AVAILABLE NOW. Card Table with Cup Holders for your party. A folding card table with a green felt top, four cup holders and chip trays. No chairs. Size: Folding card table, seats 4.
 
-$15 a day (back within 24 hours), or $25 for a weekend (pick up Friday, return Monday). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
+$15 a day for one day, or $25 for a weekend (the entire weekend: Fri, Sat and Sun). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -228,7 +228,7 @@ Pick 3 bundle: any 3 games, $110 a day. You save $10 on day prices ($120 separat
 
 Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -255,7 +255,7 @@ Pick 5 bundle: any 5 games, $175 a day. You save $25 on day prices ($200 separat
 
 Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -282,7 +282,7 @@ Whole Yard bundle: all 6 games (both Giant Color Stack sets), $195 a day. You sa
 
 Games included: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -309,7 +309,7 @@ Movie Night bundle: the inflatable movie screen + any 2 games, $110 a day. You s
 
 Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack. Included: Inflatable Movie Screen.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -336,7 +336,7 @@ Game Night bundle: the card table + any 2 games, $85 a day. You save $10 on day 
 
 Games to choose from: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack. Included: Card Table with Cup Holders.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 
@@ -363,7 +363,7 @@ The Whole Party bundle: all 6 games (both Giant Color Stack sets), the movie scr
 
 Games included: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets. Included: Inflatable Movie Screen and Card Table with Cup Holders.
 
-Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.
+Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
 To hold your date: $50 refundable damage deposit + 50% of the rental, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App (no cash). The deposit is refunded at return.
 

@@ -175,7 +175,7 @@ async function submit(context) {
   }
   const services = clean.services;
   let quote = null;
-  if (services.includes('rentals') && clean.games && clean.games.length && clean.pickup_date && clean.duration && !errors.pickup_date) {
+  if (services.includes('rentals') && clean.games && clean.games.length && clean.pickup_date && clean.return_date && clean.duration && !errors.rental_date && !errors.pickup_when && !errors.return_when) {
     await expireHolds(env.DB);
     const left = await availabilityFor(env.DB, clean.pickup_date, clean.return_date, today);
     quote = F.rentalQuote(clean.games, clean.duration, PRICE_TABLE, games.holdPercent);
@@ -201,7 +201,7 @@ async function submit(context) {
   const receipt = randomId();
   const code = randomCode();
   const extra = [];
-  if (services.includes('rentals')) extra.push({ group: 'rentals', label: 'Return date', value: clean.return_date });
+  // The pickup and return days are answers of their own (request-form.mjs, from the event date).
   await env.DB.prepare(`INSERT INTO requests (request_key, source, submitted_at, services, name, email, phone, dob, social, heard, answers, id_object, id_type, id_size,
       agreed_at, rules_version, agreed_name, agreed_ip, takedown_plan, referral_code, referred_by, receipt_id, robot_check, name_norm, phone_digits)
     VALUES (?1, 'site', ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?2, ?14, ?4, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22)`)
@@ -293,14 +293,16 @@ export async function handleReceived({ request, env }) {
 export async function handleAvailability({ request, env }) {
   const url = new URL(request.url);
   await useInventory(env);
-  const pickup = url.searchParams.get('pickup') || '';
   const duration = url.searchParams.get('duration') === 'weekend' ? 'weekend' : 'day';
+  // The event date and the two choices (owner, 19 Oct 2026) give the pickup and return days.
+  const span = C.rentalSpan({ event: url.searchParams.get('event') || '', length: duration, pickup: url.searchParams.get('pickup_when') || '', ret: url.searchParams.get('return_when') || '' });
+  const pickup = span.error ? '' : span.pickup;
   const slugs = String(url.searchParams.get('games') || '').split(',').filter((s) => /^[a-z0-9-]{1,60}$/.test(s));
   const today = F.chicagoToday();
   const out = { ok: true, left: {}, html: '' };
   if (C.isISODate(pickup) && pickup >= today && env.DB) {
     await expireHolds(env.DB);
-    const ret = C.returnDateFor(pickup, duration);
+    const ret = span.ret;
     out.returnDate = ret;
     // Public items only: an admin-only item (the Projector) never reaches this public answer.
     const left = await availabilityFor(env.DB, pickup, ret, today);

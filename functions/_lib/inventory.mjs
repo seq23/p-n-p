@@ -130,7 +130,10 @@ export function photoUrl(row) {
 // Future rental pickups that take an item out (its name, or a bundle that carries it), for
 // "Remove": say so plainly with the count, and still allow it.
 export async function futureBookingsFor(db, name, today, table) {
-  const { results } = await db.prepare("SELECT id, date, items FROM bookings WHERE date >= ?1 AND kind = 'rental_pickup'").bind(today).all();
+  // A rental counts until its return day, not only from its pickup day (owner, 19 Oct 2026): one
+  // picked up yesterday and back next week still has the item out.
+  const { results } = await db.prepare(`SELECT p.id, p.date, p.items FROM bookings p WHERE p.kind = 'rental_pickup' AND (p.date >= ?1
+      OR EXISTS (SELECT 1 FROM bookings r WHERE r.kind = 'rental_return' AND r.request_key IS NOT NULL AND r.request_key = p.request_key AND r.date >= ?1))`).bind(today).all();
   const n = String(name).toLowerCase();
   return (results || []).filter((b) => String(b.items || '').toLowerCase().includes(n) || expandItems(b.items, table).names.includes(name));
 }

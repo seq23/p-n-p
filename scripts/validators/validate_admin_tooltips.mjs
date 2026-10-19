@@ -35,6 +35,10 @@ const tmr = R.tomorrowChicago();
 await s.post('/admin/calendar/bookings', { kind: 'grazing_setup', date: tmr, time: '14:00', customer_name: 'Gia Graze', phone: '901-555-0123', email: 'gia@example.com', place: '12 Oak St', items: 'Grazing table', note: 'Side gate' });
 await s.post('/admin/calendar/bookings', { kind: 'porch_install', date: tmr, customer_name: 'No Phone', phone: '', email: 'np@example.com', place: '', items: '' });
 await s.post('/admin/calendar/bookings', { kind: 'rental_pickup', date: '2026-01-05', return_date: '2026-01-06', customer_name: 'Late Larry', phone: '901-555-0999', email: '', place: '', items: 'Giant Uno' });
+// A weekend-long rental (pickup tomorrow, back 4 days later): "Rental out" chips on the days between.
+const outMid = (() => { const d = new Date(`${tmr}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 2); return d.toISOString().slice(0, 10); })();
+const outEnd = (() => { const d = new Date(`${tmr}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 4); return d.toISOString().slice(0, 10); })();
+await s.post('/admin/calendar/bookings', { kind: 'rental_pickup', date: tmr, return_date: outEnd, customer_name: 'Wendy Weekend', phone: '901-555-0998', email: '', place: '', items: 'Giant Connect Four' });
 const late = await s.one("SELECT id FROM bookings WHERE customer_name = 'Late Larry' AND kind = 'rental_return'");
 const pick = await s.one("SELECT id, date FROM bookings WHERE request_key = ?1 AND kind = 'rental_pickup'", reqA.key);
 const note = await s.one('SELECT id FROM booking_notes LIMIT 1');
@@ -54,10 +58,10 @@ await s.post(`/admin/money/expenses/${up2.json.id}`, { vendor: 'Party City', dat
 // the thank-you turned off; the deposit-received screen.
 const F = await mod('functions/_lib/request-form.mjs');
 const dplus = (n) => { const d = new Date(`${F.chicagoToday()}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
-const heldReq = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', pickup_date: dplus(12), name: 'Hana Held', phone: '901-555-0177', email: 'hana@example.com' });
+const heldReq = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', rental_date: dplus(12), pickup_when: 'morning', return_when: 'after', name: 'Hana Held', phone: '901-555-0177', email: 'hana@example.com' });
 await s.db.prepare("UPDATE holds SET until = datetime('now', '+2 hours') WHERE request_key = ?1").bind(heldReq.row.request_key).run();
 await s.db.prepare("INSERT INTO settings (key, value) VALUES ('hold_auto_expire', '0')").run();
-const handReq = await s.siteRequest({ service: 'rentals', games: ['cornhole'], duration: 'day', pickup_date: dplus(13), name: 'Hal Hand', phone: '901-555-0178', email: 'hal@example.com' });
+const handReq = await s.siteRequest({ service: 'rentals', games: ['cornhole'], duration: 'day', rental_date: dplus(13), pickup_when: 'morning', return_when: 'after', name: 'Hal Hand', phone: '901-555-0178', email: 'hal@example.com' });
 await s.db.prepare("DELETE FROM settings WHERE key = 'hold_auto_expire'").run();
 const tyReq = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', event_date: dplus(3), location: 'Germantown', name: 'Tia Thanks', phone: '901-555-0179', email: 'tia@example.com' });
 await s.post('/admin/requests/jobdone', { r: s.rk(tyReq.row.request_key) });
@@ -91,6 +95,8 @@ const screens = [
 // Archive one so Put away has rows (after the dashboard renders above are collected below).
 const pages = [...early];
 for (const [p, o = {}] of screens) pages.push([p, o, await s.get(p, { auth: o.auth !== false })]);
+pages.push(['/admin/calendar (rental out)', {}, await s.get(`/admin/calendar?month=${outMid.slice(0, 7)}`)]);
+pages.push([`/admin/day/${outMid} (rental out)`, {}, await s.get(`/admin/day/${outMid}`)]);
 // An inventory save whose website update failed: the box says so and offers Try again.
 await s.post('/admin/settings/inventory/rates', { rate_day: '40', rate_weekend: '60' });
 await s.db.prepare("UPDATE inventory_publishes SET status = 'failed', detail = 'The website did not update.' WHERE id = (SELECT MAX(id) FROM inventory_publishes)").run();

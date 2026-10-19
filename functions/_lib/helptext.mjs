@@ -95,6 +95,7 @@ export const HELP = {
   'card.idUpload': H('card', 'Add ID photo', 'Adds a photo of their ID to this request, if you get one later.', '', 'Optional on a phone booking. The photo is kept in private storage like the ones from the website form, and Delete this ID removes it.'),
   'card.edit': H('card', 'Edit', 'Opens one page where you can change anything on this request: bookings, done dates, invoice, payments, status and customer details.', '', 'Always on the card, at every step, also on Finished, Void and Put away requests. Nothing is sent to the customer.'),
   // Change anything on this request (/admin/requests/edit)
+  'edit.saveRentalDates': H('edit', 'Save rental dates', 'Moves the rental pickup and return to the two days you picked.', 'The calendar, Google Calendar and the reminders move with them.', 'If a game is already out with someone else on those days, it says so plainly. It still saves.'),
   'edit.saveBooking': H('edit', 'Save this booking', 'Saves the day, time, done tick and notes of this booking.', 'The calendar, Google Calendar and the reminder move with it.', 'A new day gets the day-before reminder again. The Bookings tab of the Google Sheet updates by itself.'),
   'edit.removeBooking': H('edit', 'Remove booking', 'Takes this booking off the calendar, after asking you first.', '', 'Its notes stay with the request, and the history says what was removed.', 'It leaves the calendar and Google Calendar.'),
   'edit.removeBookingYes': H('edit', 'Yes, remove the booking', 'Removes the booking now.', '', 'Put it back any time with Put it on the calendar.', 'It leaves the calendar and Google Calendar.'),
@@ -218,6 +219,7 @@ export const HELP = {
   'cal.prev': H('calendar', 'Previous month', 'Shows the month before.', '', 'Moves the calendar back one month.'),
   'cal.next': H('calendar', 'Next month', 'Shows the month after.', '', 'Moves the calendar forward one month.'),
   'cal.today': H('calendar', 'This month', 'Jumps back to the current month.', '', 'Brings you back to today.'),
+  'cal.rentalOut': H('calendar', 'Rental out', 'The games are with this customer: picked up earlier, coming back on the day shown.', '', 'Every day between the pickup and the return shows it, so you can see the games are not in the shed.'),
   'cal.day': H('calendar', 'A day (on the calendar or the Upcoming list)', 'Opens this day with every booking, the customer, what and where.', '', 'Tap any day to see its bookings and call the customer.'),
   'cal.schedule': H('calendar', 'Schedule', 'Opens the scheduling screen for this request so you can pick its day.', '', 'On each request in the Unscheduled requests list. On a computer you can also drag the request onto a day.'),
   'cal.unscheduled': H('calendar', 'Unscheduled request (drag onto a day)', 'Drag this request onto a day to schedule it there, or tap Schedule.', '', 'On a computer, hold the mouse button on a request and drop it on a day. The scheduling screen opens for that day.'),

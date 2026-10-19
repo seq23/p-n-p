@@ -6,7 +6,7 @@
 // counted apart ("N games asked for"). A held rental already has its bookings (filled, "Held");
 // when the hold expires its bookings come off and the request shows here again, outlined.
 import { servicesOf, SCHEDULE_FIRST } from './cards.mjs';
-import { parseFormDate, returnDateFor, expandItems, addDays } from './calendar.mjs';
+import { parseFormDate, requestReturnDate, expandItems, addDays, spanDays } from './calendar.mjs';
 import { serviceInfo } from './kinds.mjs';
 
 const answerOf = (r, re) => {
@@ -45,7 +45,13 @@ export function requestedChips(requests, statuses = {}, bookings = [], table = n
       if (service === 'rentals') {
         const ex = table ? expandItems(r.gamesAnswer || answerOf(r, /which games/i), table) : { names: [], unnamed: 0 };
         chip.games = ex.names.reduce((n, name) => n + ((ex.counts && ex.counts[name]) || 1), 0) + ex.unnamed;
-        chip.returnDate = returnDateFor(date, r.durationAnswer) || addDays(date, 1);
+        chip.returnDate = requestReturnDate(r, date) || addDays(date, 1);
+        // The whole span, outlined like the pickup (owner, 19 Oct 2026): Rental out on each day
+        // between, then the return. These parts never count games (gamesAskedOn reads the pickup).
+        out.push({ ...chip, part: 'pickup' });
+        for (const day of spanDays(date, chip.returnDate).slice(1, -1)) out.push({ ...chip, part: 'out', kind: 'rental_out', date: day });
+        if (chip.returnDate > date) out.push({ ...chip, part: 'return', kind: 'rental_return', date: chip.returnDate });
+        continue;
       }
       out.push(chip);
     }
@@ -56,5 +62,5 @@ export function requestedChips(requests, statuses = {}, bookings = [], table = n
 // Games asked for (not booked) on one day: every requested rental whose asked window covers it.
 // Never added to "games out".
 export function gamesAskedOn(chips, day) {
-  return (chips || []).filter((c) => c.service === 'rentals' && c.date <= day && day <= (c.returnDate || c.date)).reduce((n, c) => n + c.games, 0);
+  return (chips || []).filter((c) => c.service === 'rentals' && (!c.part || c.part === 'pickup') && c.date <= day && day <= (c.returnDate || c.date)).reduce((n, c) => n + c.games, 0);
 }

@@ -23,7 +23,7 @@ const data = INV.resolve(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rental
 const money = INV.money;
 
 function priceBlock() {
-  const lines = [`Prices (every game, flat): ${money(data.rates.day)} per game per day; ${money(data.rates.weekend)} per game for a weekend (pick up Friday, return Monday). No minimum order.`];
+  const lines = [`Prices (every game, flat): ${money(data.rates.day)} per game per day; ${money(data.rates.weekend)} per game for a weekend (the entire weekend: Friday, Saturday and Sunday). One day: pick up the day before the event or that morning, return the day after or 2 days after. Weekend: pick up Thursday or Friday, return Monday or Tuesday. Same price whichever days. No minimum order.`];
   for (const g of INV.publicGames(data)) lines.push(INV.llmsLine(data, g, 'games'));
   for (const x of INV.publicExtras(data)) lines.push(INV.llmsLine(data, x, 'extras'));
   lines.push('');

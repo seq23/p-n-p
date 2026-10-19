@@ -283,7 +283,7 @@ must(/>Eve Edited</.test((await s.get('/admin/?pa=1')).text), 'the card does not
 
 // 3h. A rental: Returned date set and cleared (the Undo returned path).
 {
-  const rr = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', pickup_date: plus(5), name: 'Rex Return', phone: '901-555-0952', email: 'rex.return@example.com' });
+  const rr = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', rental_date: plus(5), pickup_when: 'morning', return_when: 'after', name: 'Rex Return', phone: '901-555-0952', email: 'rex.return@example.com' });
   const k2 = rr.row.request_key; const rk2 = s.rk(k2);
   await s.post('/admin/calendar/bookings', { r: rk2, kind: 'rental_pickup', date: plus(-2), return_date: plus(-1), customer_name: 'Rex Return', phone: '', email: '', place: '', items: 'Giant Uno' });
   const p0 = (await s.get(`/admin/requests/edit?r=${rk2}`)).text;

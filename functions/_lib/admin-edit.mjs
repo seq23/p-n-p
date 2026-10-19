@@ -22,6 +22,7 @@ import { deriveProgress, STEP_KEYS } from './progress.mjs';
 import { takedownState, loadTakedownFacts, TAKEDOWN_KINDS } from './takedown.mjs';
 import { tip } from './helptext.mjs';
 import * as V from './views.mjs';
+import { TRACK_TABLE } from './prices.mjs';
 
 export const WHO = 'Valerie';
 export const SECTIONS = ['bookings', 'dates', 'invoice', 'payments', 'status', 'customer'];
@@ -95,8 +96,31 @@ const save = (key, label) => `<div class="save">${V.act(`<button class="btn prim
 const form = (what, rk, body, extra = '') => `<form method="post" action="/admin/requests/edit/${what}"${extra}>${V.hiddenInputs({ r: rk })}${body}</form>`;
 const field = (id, label, input) => `<label for="${id}">${esc(label)}</label>${input}`;
 
+// Rental dates (owner, 19 Oct 2026): pickup and return in one place, phone-sized. Saving moves
+// both bookings (calendar, ICS, reminders follow), logs old -> new, and warns in plain words when
+// the new span needs a game that is already out with someone else. It still saves.
+export async function rentalClashWords(db, key, { start, end, items }) {
+  const all = await C.listBookings(db);
+  const windows = C.rentalWindows(all, await C.loadReturns(db), TRACK_TABLE);
+  const hit = C.spanClashes(windows, { start, end, items }, chicagoDate(), TRACK_TABLE, key);
+  if (!hit.length) return '';
+  return `Heads up: ${hit.map((c) => `${c.item} is already out with ${c.who.join(' and ')} on ${c.dates.map((x) => shortDate(x)).join(', ')}`).join('; ')}. The dates are saved anyway; change them if that is a mistake.`;
+}
+
+function rentalDatesBlock(d, rk) {
+  const p = d.bookings.find((b) => b.kind === 'rental_pickup');
+  const r = d.bookings.find((b) => b.kind === 'rental_return');
+  if (!p || !r) return '';
+  return `<div class="bk" data-rental-dates><h3>Rental dates · out ${esc(shortDate(p.date))} to ${esc(shortDate(r.date))}</h3>
+    ${form('rental-dates', rk, `<div class="two">
+      ${field('rdp', 'Pickup day', `<input id="rdp" name="pickup" type="date" required value="${esc(p.date)}">`)}
+      ${field('rdr', 'Return day', `<input id="rdr" name="return" type="date" required value="${esc(r.date)}">`)}</div>
+      <p class="muted" style="margin:4px 0 8px">The games count as out every day from pickup through return. Prices do not change.</p>
+      ${save('edit.saveRentalDates', 'Save rental dates')}`)}</div>`;
+}
+
 function bookingsSection(d, rk) {
-  const rows = d.bookings.map((b) => {
+  const rows = rentalDatesBlock(d, rk) + d.bookings.map((b) => {
     const ns = d.notes[b.id] || [];
     const isTd = TAKEDOWN_KINDS.includes(b.kind);
     return `<div class="bk" data-edit-booking="${b.id}"><h3>${esc(C.KIND_LABELS[b.kind] || b.kind)} · ${esc(shortDate(b.date))}${b.time ? ` · ${esc(C.prettyTime(b.time))}` : ''}</h3>
@@ -205,11 +229,11 @@ function customerSection(d, rk) {
       ${save('edit.saveCustomer', 'Save customer details')}`)}</section>`;
 }
 
-export function editPageHtml(d, { flash = '', error = '' } = {}) {
+export function editPageHtml(d, { flash = '', error = '', warn = '' } = {}) {
   const rk = b64urlText(d.r.key);
   const ev = d.events.slice(-30).reverse().map((e) => `<li>${esc(e.what)}</li>`).join('');
   const body = `<style>${EDIT_CSS}</style><div class="editpage" data-edit-page="${esc(rk)}">
-    ${flash ? `<div class="notice ok" data-flash>${esc(flash)}</div>` : ''}${error ? `<div class="notice err" data-error>${esc(error)}</div>` : ''}
+    ${flash ? `<div class="notice ok" data-flash>${esc(flash)}</div>` : ''}${error ? `<div class="notice err" data-error>${esc(error)}</div>` : ''}${warn ? `<div class="notice warn" data-clash>${esc(warn)}</div>` : ''}
     <h1>Change anything on this request</h1>
     <p style="font-size:1.15rem"><strong>${esc(d.r.name || 'No name given')}</strong> · now: ${esc(STEP_WORDS[currentStep(d)])}${d.pr.finished ? ' · Finished' : ''}${d.st.archived_at ? ' · Put away' : ''}</p>
     ${bookingsSection(d, rk)}${datesSection(d, rk)}${invoiceSection(d, rk)}${paymentsSection(d, rk)}${statusSection(d, rk)}${customerSection(d, rk)}
@@ -221,12 +245,12 @@ export async function editPage(env, url) {
   const key = decodeKey(url.searchParams.get('r'));
   const d = key ? await loadEdit(env, key) : null;
   if (!d) return htmlResponse(V.layout('Not found', '<p>That request was not found.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
-  return htmlResponse(editPageHtml(d, { flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  return htmlResponse(editPageHtml(d, { flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', warn: url.searchParams.get('w') || '' }));
 }
 
 // ---- Saves -----------------------------------------------------------------------------
 
-const back = (rk, section, m, e = false) => redirect(`/admin/requests/edit?r=${encodeURIComponent(rk)}&${e ? 'e' : 'm'}=${encodeURIComponent(m)}#${section}`);
+const back = (rk, section, m, e = false, w = '') => redirect(`/admin/requests/edit?r=${encodeURIComponent(rk)}&${e ? 'e' : 'm'}=${encodeURIComponent(m)}${w ? `&w=${encodeURIComponent(w)}` : ''}#${section}`);
 
 export async function editRoute(env, request, what) {
   const f = await request.formData();
@@ -235,9 +259,25 @@ export async function editRoute(env, request, what) {
   const d = key ? await loadEdit(env, key) : null;
   if (!d) return redirect('/admin/?e=That request was not found.');
   const db = env.DB;
-  const H = { booking: saveBooking, 'booking-remove': removeBooking, dates: saveDates, invoice: saveInvoice, payment: savePayment, 'payment-remove': removePayment, 'payment-add': addPayment, status: saveStatus, customer: saveCustomer }[what];
+  const H = { 'rental-dates': saveRentalDates, booking: saveBooking, 'booking-remove': removeBooking, dates: saveDates, invoice: saveInvoice, payment: savePayment, 'payment-remove': removePayment, 'payment-add': addPayment, status: saveStatus, customer: saveCustomer }[what];
   if (!H) return back(rk, 'bookings', 'Nothing to save there.', true);
   return H({ db, f, d, key, rk });
+}
+
+async function saveRentalDates({ db, f, d, key, rk }) {
+  const p = d.bookings.find((b) => b.kind === 'rental_pickup');
+  const r = d.bookings.find((b) => b.kind === 'rental_return');
+  if (!p || !r) return back(rk, 'bookings', 'This request has no rental pickup and return to change.', true);
+  const pickup = dateIn(f.get('pickup')); const ret = dateIn(f.get('return'));
+  if (!pickup || !ret) return back(rk, 'bookings', 'Pick both days: the pickup day and the return day.', true);
+  if (ret < pickup) return back(rk, 'bookings', 'The return day is before the pickup day. Please check the two days.', true);
+  const out = [];
+  if (pickup !== p.date) { await C.editBookingWhen(db, p.id, { date: pickup, time: p.time || null }); out.push(changed('Rental pickup day', shortDate(p.date), shortDate(pickup))); }
+  if (ret !== r.date) { await C.editBookingWhen(db, r.id, { date: ret, time: r.time || null }); out.push(changed('Rental return day', shortDate(r.date), shortDate(ret))); }
+  for (const line of out) await log(db, key, line);
+  if (!out.length) return back(rk, 'bookings', 'Nothing changed.');
+  const warn = await rentalClashWords(db, key, { start: pickup, end: ret, items: p.items || r.items });
+  return back(rk, 'bookings', 'Rental dates saved ✓ The calendar shows the new days.', false, warn);
 }
 
 async function saveBooking({ db, f, d, key, rk }) {
@@ -269,7 +309,14 @@ async function saveBooking({ db, f, d, key, rk }) {
   const add = String(f.get('new_note') || '').trim();
   if (add) { await C.addNote(db, b, add); out.push(changed(`${label} note added`, '', add)); }
   for (const line of out) await log(db, key, line);
-  return back(rk, 'bookings', out.length ? 'Booking saved ✓' : 'Nothing changed.');
+  // A rental day moved by itself: the same plain clash warning over the new span.
+  let warn = '';
+  if (C.RENTAL_KINDS.includes(b.kind) && date !== b.date) {
+    const p = b.kind === 'rental_pickup' ? date : (d.bookings.find((x) => x.kind === 'rental_pickup') || {}).date;
+    const r = b.kind === 'rental_return' ? date : (d.bookings.find((x) => x.kind === 'rental_return') || {}).date;
+    if (p && r) warn = await rentalClashWords(db, key, { start: p, end: r, items: b.items });
+  }
+  return back(rk, 'bookings', out.length ? 'Booking saved ✓' : 'Nothing changed.', false, warn);
 }
 
 async function removeBooking({ db, f, d, key, rk }) {

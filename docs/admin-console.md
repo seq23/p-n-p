@@ -262,8 +262,8 @@ the top of every screen, and a printable guide at `/admin/help`.
 - **Bookings** (table `bookings`, kinds per service in `functions/_lib/kinds.mjs`, one colour per
   service: porch orange, party purple, grazing green, rentals blue, always with words). An invoice
   created, sent or marked texted from a request upserts its bookings by (request_key, kind):
-  rental pickup on the form's "Pickup date" and return (One day = next day; Weekend = the next
-  Monday), porch / party / grazing on "Event date", takedown on "Takedown date". A booking she
+  rental pickup on the form's "Pickup date" and return on its "Return date" (older requests:
+  One day = next day; Weekend = the next Monday), porch / party / grazing on "Event date", takedown on "Takedown date". A booking she
   made or changed by hand (`edited_by_hand`) keeps her date on every re-send. "Put on the
   calendar" on a card (or drag a request from "Unscheduled requests" onto a day on a computer)
   opens the pre-filled scheduling screen and marks the request Scheduled; deleting its last
@@ -428,6 +428,23 @@ fails if a string is missing from the data, maps to the wrong price, or names a 
 
 "Pickup date" replaces "Delivery date". The delivery address, city and pickup-time questions are
 gone: pickup and return are at Mt. Moriah Station, time set by text or call after payment.
+
+## Rental dates (owner, 19 Oct 2026)
+The website form (`/request`, rentals path) asks "What date is your event?", then "How long?":
+`One day` or `The entire weekend (Fri, Sat and Sun)`, then the pickup and return days:
+- One day: pickup "The day before" or "The morning of"; return "The day after" or "2 days after".
+- The entire weekend (the Fri-Sat-Sun holding the event date; a Monday-Thursday event is refused):
+  pickup "Thursday" or "Friday"; return "Monday" or "Tuesday".
+
+Prices never change with the days: one day is the day price, the weekend the weekend price
+(`data/rentals/games.json`). The days are computed in ONE place, `rentalSpan` in
+`functions/_lib/calendar.mjs`, and stored as the "Pickup date" and "Return date" answers. The
+games count as out every day from pickup through return (availability, clash checks, holds).
+The calendar shows the pickup chip, a striped "Rental out" chip on each day between, and the
+return chip (outlined "Requested" chips for an unpaid request); the Day sheet and the Monday
+summary list "Rental out" too. Edit (Bookings) has "Rental dates": both days in one Save, history
+old → new, and a plain warning naming the game and dates when the span clashes (it still saves).
+`npm run validate:rental-dates`. The Google Form strings above are the one imported old request.
 
 ## Inventory (Settings, owner-approved 18 Oct 2026)
 Valerie adds, edits, removes and brings back rental items in **Settings -> Inventory** (also linked

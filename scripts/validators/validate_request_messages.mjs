@@ -43,7 +43,7 @@ const today = F.chicagoToday();
 const plus = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const ev = async (key) => (await s.all('SELECT what FROM request_events WHERE request_key = ?1', key)).map((e) => e.what);
 const rental = async (n, games, extra = {}) => {
-  const r = await s.siteRequest({ service: 'rentals', games, duration: 'day', pickup_date: plus(10 + n), name: `Rita Rent${n}`, phone: `901-555-02${String(n).padStart(2, '0')}`, email: `rent${n}@example.com`, ...extra });
+  const r = await s.siteRequest({ service: 'rentals', games, duration: 'day', rental_date: plus(10 + n), pickup_when: 'morning', return_when: 'after', name: `Rita Rent${n}`, phone: `901-555-02${String(n).padStart(2, '0')}`, email: `rent${n}@example.com`, ...extra });
   if (r.status !== 303) errors.push(`rental ${n} was refused: ${r.text.slice(r.text.indexOf('rq-summary'), r.text.indexOf('rq-summary') + 300)}`);
   return r.row;
 };

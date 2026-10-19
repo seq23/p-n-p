@@ -92,7 +92,7 @@ const foot = footer();
 
 const PICKUP_RULES = [
   ['Where', `Pick up and return at ${PICK.place}, ${PICK.address}, a safe exchange zone. We do not bring rentals to you.`],
-  ['When', `After payment, text or call ${PICK.phone} to set your pickup time. A day rental comes back within 24 hours; a weekend rental is picked up Friday and returned Monday.`],
+  ['When', `After payment, text or call ${PICK.phone} to set your pickup time. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.`],
   ['Pay', `${money(data.damageDeposit)} refundable damage deposit + ${data.holdPercent}% of the rental holds your date, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App on the spot (never cash). The deposit is refunded at return.`],
   ['Bring', `Your government photo ID (the name must match the invoice) and a car. Every game fits an SUV or a sedan with the seats down${has('inflatable-movie-screen') ? '; the movie screen fits a trunk' : ''}.`]
 ];
@@ -107,7 +107,7 @@ const FAQ = [
   ['How much do the games cost?',
     `Every game is ${money(RATE.day)} a day or ${money(RATE.weekend)} for a weekend. ${EXTRAS.map((x) => `The ${x.name.toLowerCase()} is ${money(x.dayPrice)} a day or ${money(x.weekendPrice)} for a weekend.`).join(' ')} Bundles: ${BUNDLES.map((b) => `${b.name} ${money(b.dayPrice)}${b.weekendPrice ? ` (${money(b.weekendPrice)} for a weekend)` : ''}`).join(', ')}. There is no minimum order.`],
   ['How long is a rental?',
-    'A day rental is returned within 24 hours of pickup. A weekend rental is picked up Friday and returned Monday.'],
+    'One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday. The price is the same whichever days you pick.'],
   ['What happens if it rains?',
     `If rain or a storm is forecast for your date, we reschedule the rental free within 30 days. Every game also works indoors, so many hosts simply move the games inside${INDOOR_GAME ? `, and ${INDOOR_GAME.name} is a tabletop game made for an indoor party` : ''}.`],
   ['Can we use the games indoors?',
@@ -123,14 +123,14 @@ const FAQ = [
 ];
 
 const STEPS = [
-  ['Book your games', 'Pick your games and pickup date on our booking form: it shows what is free and your exact total. Add your photo ID.'],
+  ['Book your games', 'Pick your games, your event date and your pickup and return days on our booking form: it shows what is free and your exact total. Add your photo ID.'],
   ['Hold your date', `Your games are held for 24 hours. ${money(data.damageDeposit)} damage deposit + ${data.holdPercent}% by Zelle or Cash App from your invoice confirms them.`],
   ['Pick up', `Text or call ${PICK.phone} to set a time, then meet us at ${PLACE}. We check your ID and you pay the rest on the spot.`],
-  ['Return', 'Bring everything back within 24 hours, or Monday for a weekend. We check every piece and refund the deposit.']
+  ['Return', 'Bring everything back on the day you picked: the day after or 2 days after your event, or Monday or Tuesday after a weekend. We check every piece and refund the deposit.']
 ];
 
 const TERMS = [
-  `<strong>Rental period:</strong> a day is returned within 24 hours of pickup; a weekend is picked up Friday and returned Monday.`,
+  `<strong>Rental period:</strong> One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday. The price is the same whichever days you pick.`,
   `<strong>Price:</strong> ${money(RATE.day)} per game per day, ${money(RATE.weekend)} per game for a weekend; no minimum order.`,
   `<strong>Pickup and return:</strong> ${esc(PICK.place)}, ${esc(PICK.address)}. Pickup time is set by text or call to ${PICK.phone} after payment.`,
   `<strong>Holding the date:</strong> ${money(data.damageDeposit)} refundable damage deposit + ${data.holdPercent}% of the rental, by Zelle or Cash App from the invoice.`,
@@ -238,7 +238,7 @@ function render() {
 
     <section class="section section-soft" id="games">
       <div class="container">
-        <div class="answer-block"><span class="eyebrow">The Rentals</span><h2>${ITEMS.length} party rentals: ${GAMES.length} ${GAMES.length === 1 ? 'game' : 'games'} at ${money(RATE.day)} a day${EXTRAS.length ? `, plus ${INV.joinAnd(EXTRAS.map(INV.extraShort))}` : ''}</h2><p>A weekend (pick up Friday, return Monday) is ${money(RATE.weekend)} a game. Tap any item to book it.</p></div>
+        <div class="answer-block"><span class="eyebrow">The Rentals</span><h2>${ITEMS.length} party rentals: ${GAMES.length} ${GAMES.length === 1 ? 'game' : 'games'} at ${money(RATE.day)} a day${EXTRAS.length ? `, plus ${INV.joinAnd(EXTRAS.map(INV.extraShort))}` : ''}</h2><p>The entire weekend (Friday, Saturday and Sunday) is ${money(RATE.weekend)} a game. Tap any item to book it.</p></div>
         <div class="cards-grid">${ITEMS.map(itemCard).join('')}</div>
       </div>
     </section>

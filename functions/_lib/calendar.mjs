@@ -6,7 +6,8 @@
 import { KINDS, KIND_LABELS, serviceInfo } from './kinds.mjs';
 
 export { KINDS, KIND_LABELS };
-const RENTAL = new Set(['rental_pickup', 'rental_return']);
+export const RENTAL_KINDS = ['rental_pickup', 'rental_return'];
+const RENTAL = new Set(RENTAL_KINDS);
 
 const pad = (n) => String(n).padStart(2, '0');
 const iso = (d) => `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
@@ -50,6 +51,85 @@ export function returnDateFor(pickupISO, durationAnswer) {
     return addDays(pickupISO, toMonday);
   }
   return addDays(pickupISO, 1);
+}
+
+// ---- Rental dates (owner, 19 Oct 2026) -----------------------------------------------------
+// The form asks the EVENT date, then the length, then when they pick up and when they bring
+// the games back. Prices never depend on these: one day is the day price, the entire weekend
+// the weekend price (games.json), whatever pickup/return is picked.
+//   One day:            pickup "The day before" (event - 1) or "The morning of" (event);
+//                       return "The day after" (event + 1) or "2 days after" (event + 2).
+//   The entire weekend: the Fri-Sat-Sun holding the event date; pickup Thursday or Friday,
+//                       return Monday or Tuesday after it.
+export const RENTAL_LENGTHS = [['day', 'One day'], ['weekend', 'The entire weekend (Fri, Sat and Sun)']];
+export const PICKUP_CHOICES = { day: [['before', 'The day before'], ['morning', 'The morning of']], weekend: [['thursday', 'Thursday'], ['friday', 'Friday']] };
+export const RETURN_CHOICES = { day: [['after', 'The day after'], ['two_after', '2 days after']], weekend: [['monday', 'Monday'], ['tuesday', 'Tuesday']] };
+const PICKUP_OFFSET = { before: -1, morning: 0, thursday: -1, friday: 0 };
+const RETURN_OFFSET = { after: 1, two_after: 2, monday: 3, tuesday: 4 };
+
+// The Friday of the Fri-Sat-Sun weekend holding a date; '' for Monday to Thursday.
+export function weekendFriday(eventISO) {
+  if (!isISODate(eventISO)) return '';
+  const wd = weekday(eventISO);
+  return wd === 5 ? eventISO : wd === 6 ? addDays(eventISO, -1) : wd === 0 ? addDays(eventISO, -2) : '';
+}
+
+// { pickup, ret } dates for an event date, a length and the two choices; error words when the
+// combination cannot be booked.
+export function rentalSpan({ event, length, pickup, ret }) {
+  const len = length === 'weekend' ? 'weekend' : length === 'day' ? 'day' : '';
+  if (!isISODate(event)) return { error: 'Please pick the date of your event.' };
+  if (!len) return { error: 'Please pick how long.' };
+  if (!PICKUP_CHOICES[len].some(([k]) => k === pickup)) return { error: 'Please pick when you will pick the games up.' };
+  if (!RETURN_CHOICES[len].some(([k]) => k === ret)) return { error: 'Please pick when you will bring the games back.' };
+  const base = len === 'weekend' ? weekendFriday(event) : event;
+  if (!base) return { error: 'The entire weekend is Friday, Saturday and Sunday. Pick a Friday, Saturday or Sunday event date, or choose One day.' };
+  return { length: len, event, pickup: addDays(base, PICKUP_OFFSET[pickup]), ret: addDays(base, RETURN_OFFSET[ret]) };
+}
+
+// Every day from pickup through return, both counted.
+export function spanDays(start, end) {
+  const out = [];
+  if (!isISODate(start)) return out;
+  const stop = isISODate(end) && end >= start ? end : start;
+  for (let d = start; d <= stop; d = addDays(d, 1)) out.push(d);
+  return out;
+}
+
+// Rentals whose games are out on `day` between their pickup and return days (not those days).
+export function outBetween(windows, day, today) {
+  return (windows || []).filter((w) => w.start < day && day < w.end && isOut(w, day, today));
+}
+
+// Games already out somewhere in [start, end] that this rental (items text) would need more of
+// than the shed holds. -> [{ item, dates: [...], who: [names] }]. ignoreKey = this rental itself.
+export function spanClashes(windows, { start, end, items }, today, table, ignoreKey = '') {
+  const want = expandItems(items || '', table);
+  const others = (windows || []).filter((w) => w.key !== ignoreKey);
+  const by = new Map();
+  for (const day of spanDays(start, end)) {
+    const u = usageOn(others, day, today, table);
+    for (const name of want.names) {
+      const v = u.byItem[name];
+      if (!v) continue;
+      const need = (want.counts && want.counts[name]) || 1;
+      if (v.used + need > v.stock) {
+        const c = by.get(name) || { item: name, dates: [], who: new Set() };
+        c.dates.push(day);
+        v.who.forEach((w) => c.who.add(w.name || 'someone'));
+        by.set(name, c);
+      }
+    }
+  }
+  return [...by.values()].map((c) => ({ ...c, who: [...c.who] }));
+}
+
+// The return day a request asked for: its stored "Return date" answer when there is one
+// (requests from the site form since 19 Oct 2026), else the old rule from the pickup date.
+export function requestReturnDate(request, pickupISO) {
+  const stored = parseFormDate(answer(request, /^return date$/i));
+  if (stored && (!pickupISO || stored > pickupISO)) return stored;
+  return returnDateFor(pickupISO, request && request.durationAnswer);
 }
 
 function answer(request, re) {
@@ -96,7 +176,7 @@ export function bookingsFromInvoice({ invoice, lines, request, table, isRental }
       const items = itemsText(expandItems(lineText || request.gamesAnswer, table)) || request.gamesAnswer || '';
       const place = table.pickupPlace || '';
       out.push({ ...base, kind: 'rental_pickup', date: pickup, place, items });
-      out.push({ ...base, kind: 'rental_return', date: returnDateFor(pickup, request.durationAnswer), place, items });
+      out.push({ ...base, kind: 'rental_return', date: requestReturnDate(request, pickup), place, items });
     }
   }
   // Porch decorating, party planning & decor and grazing tables: each one the request or the
@@ -636,10 +716,11 @@ const usd = (c) => `$${(Math.round(c) / 100).toFixed(2).replace(/\.00$/, '')}`;
 
 // Short plain text of one day for an SMS to herself. Cut on a whole line, politely, with a
 // link to the full list when it would run long.
-export function daySheetText(date, rows, { max = 480, host = 'porchandparty901.com', dayLabel = date, holds = [] } = {}) {
+export function daySheetText(date, rows, { max = 480, host = 'porchandparty901.com', dayLabel = date, holds = [], outRows = [] } = {}) {
   const head = `${dayLabel} day list (${rows.length} ${rows.length === 1 ? 'booking' : 'bookings'}${holds.length ? `, ${holds.length} ${holds.length === 1 ? 'hold' : 'holds'} ending` : ''}):`;
   const holdLines = holds.map((h) => `Hold ends ${h.timeLabel} - ${h.name || 'No name'}${h.items ? ` (${h.items})` : ''}: deposit not in yet${h.phone ? `, ${h.phone}` : ''}`);
-  const lines = [...holdLines, ...rows.map((r) => {
+  const outLines = outRows.map((w) => `Rental out - ${w.name || 'No name'}${namesText(w).length ? ` (${namesText(w).join(', ')})` : ''}, back ${new Date(`${w.end}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })}`);
+  const lines = [...holdLines, ...outLines, ...rows.map((r) => {
     const bits = [`${r.timeLabel ? `${r.timeLabel} ` : ''}${KIND_LABELS[r.kind] || 'Booking'} - ${r.customer_name || 'No name'}`];
     if (r.phone) bits.push(r.phone);
     if (r.items) bits.push(r.items);
