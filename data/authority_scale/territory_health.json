@@ -3,7 +3,7 @@
   "generated_at": "2026-07-24T00:00:00.000Z",
   "territories": {
     "seasonal_porch_decorating": {
-      "public_surface_count": 23,
+      "public_surface_count": 24,
       "sample_routes": [
         "/answers/christmas-porch-decorating-memphis.html",
         "/answers/fall-porch-decorating-ideas-southern-homes.html",
@@ -20,11 +20,11 @@
         "/areas/index.html",
         "/areas/lakeland-tn-porch-decorating.html",
         "/areas/memphis-tn-porch-decorating.html",
+        "/guides/porch-decorating-packages-memphis.html",
         "/seasonal/christmas-porch-decorating-memphis.html",
         "/seasonal/halloween-porch-decorating-memphis.html",
         "/services/christmas-porch-decorating.html",
-        "/services/fall-porch-decorating.html",
-        "/services/front-door-styling.html"
+        "/services/fall-porch-decorating.html"
       ],
       "status": "STRONG_BASELINE"
     },

@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-07-24T00:00:00.000Z",
-  "count": 110,
+  "count": 111,
   "pages": [
     {
       "route": "/answers/anniversary-room-decorations-memphis",
@@ -79,9 +79,9 @@
       "route": "/answers/christmas-porch-decorating-memphis",
       "rendered_file": "answers/christmas-porch-decorating-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "fa514717e639c09cb06ffa6f3001c5a6453e9c92dccc4aa043d3faf199abbc93",
-      "cache_file": "data/release/frozen_accepted_outputs/fa514717e639c09cb06ffa6f3001c5a6453e9c92dccc4aa043d3faf199abbc93.html.gz",
-      "cache_sha256": "d3814a7dd12b1a1e9d928fe0aba06adbf2a216e8af06bf2c0260ae50c406fd34",
+      "accepted_sha256": "15f7103e8d37cddd1d14e3794999077523bee20ffc7c3b751de2ab5ef9478357",
+      "cache_file": "data/release/frozen_accepted_outputs/15f7103e8d37cddd1d14e3794999077523bee20ffc7c3b751de2ab5ef9478357.html.gz",
+      "cache_sha256": "1162a8487d1b445858baecaed4ea0e303b4ba489cb3ebafb845ad1afa19202c8",
       "accepted_at": "2026-07-24"
     },
     {
@@ -142,18 +142,18 @@
       "route": "/answers/fall-porch-decorating-ideas-southern-homes",
       "rendered_file": "answers/fall-porch-decorating-ideas-southern-homes.html",
       "state": "FROZEN",
-      "accepted_sha256": "a6657b5c50237f7d2ce670120a82979c3e4f6f9d87d64512297e6078f111382c",
-      "cache_file": "data/release/frozen_accepted_outputs/a6657b5c50237f7d2ce670120a82979c3e4f6f9d87d64512297e6078f111382c.html.gz",
-      "cache_sha256": "aed3df44c8b2f66a4c0585005c841aae92881e03d232388aa0fedbc24d25faf5",
+      "accepted_sha256": "f4a8b2342049c95a4e92804958b271ba5608e91d1f218cada95095b9712f297d",
+      "cache_file": "data/release/frozen_accepted_outputs/f4a8b2342049c95a4e92804958b271ba5608e91d1f218cada95095b9712f297d.html.gz",
+      "cache_sha256": "4450b99bad245ae90c1f5d936ec711fd007f6829a80d58e43573723c428b985b",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/front-porch-styling-memphis",
       "rendered_file": "answers/front-porch-styling-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "bca5c1f396002a57599d1dcdadb4f90b192e47fbf4e5af03191ce06d2d245c8e",
-      "cache_file": "data/release/frozen_accepted_outputs/bca5c1f396002a57599d1dcdadb4f90b192e47fbf4e5af03191ce06d2d245c8e.html.gz",
-      "cache_sha256": "daf2caa3fb9756e770deec92391fbcecf07c1ad586f2c4bbe2ea146a1797d3f8",
+      "accepted_sha256": "8b6fcd824cbf25615a481fe3e427356aa6c6f7ad69fa62e2448520e04ae0fa37",
+      "cache_file": "data/release/frozen_accepted_outputs/8b6fcd824cbf25615a481fe3e427356aa6c6f7ad69fa62e2448520e04ae0fa37.html.gz",
+      "cache_sha256": "5fd69f69b37c5b52545b5cf5c5049bef5d735d4a2c5603f24dcfec88bb90f18b",
       "accepted_at": "2026-07-24"
     },
     {
@@ -178,9 +178,9 @@
       "route": "/answers/halloween-porch-decorating-memphis",
       "rendered_file": "answers/halloween-porch-decorating-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "b5b7e8d5aecfdfd6bfcbd332b49bfd21d119208d05a49d56d9ab94b20f7e2d11",
-      "cache_file": "data/release/frozen_accepted_outputs/b5b7e8d5aecfdfd6bfcbd332b49bfd21d119208d05a49d56d9ab94b20f7e2d11.html.gz",
-      "cache_sha256": "e48d450d075baff9aceb8ecc621aec96ed932d4551770337b20d990bf1e9a098",
+      "accepted_sha256": "9fc7972c779afd21b43f9472f6d0f052a92b7a47837dc4be8b5652bbc929ed2a",
+      "cache_file": "data/release/frozen_accepted_outputs/9fc7972c779afd21b43f9472f6d0f052a92b7a47837dc4be8b5652bbc929ed2a.html.gz",
+      "cache_sha256": "50d9029bce5f133374370e06e41f058d39c79891f3ab8d94d0bf289351d5d179",
       "accepted_at": "2026-07-24"
     },
     {
@@ -259,9 +259,9 @@
       "route": "/answers/how-much-does-porch-decorating-cost-in-memphis",
       "rendered_file": "answers/how-much-does-porch-decorating-cost-in-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "faafb6d07488499f1c13b2c5a3f8d9686862e1aacdc65e6f3461e1fb126c9aec",
-      "cache_file": "data/release/frozen_accepted_outputs/faafb6d07488499f1c13b2c5a3f8d9686862e1aacdc65e6f3461e1fb126c9aec.html.gz",
-      "cache_sha256": "a55e198bdf4982b8be408bb6ef11e6e5da3e0f6d70cc87f6d0447b9a51796b75",
+      "accepted_sha256": "04c9b9e5d1a2f1485a3505bc3d223d28e5ea24be7d85aecda0f59fe9811a80d0",
+      "cache_file": "data/release/frozen_accepted_outputs/04c9b9e5d1a2f1485a3505bc3d223d28e5ea24be7d85aecda0f59fe9811a80d0.html.gz",
+      "cache_sha256": "1a1b6d6fb3ffbcf170cf5c38fae54a42a8d2d96c5213a5704581831235463983",
       "accepted_at": "2026-07-24"
     },
     {
@@ -322,9 +322,9 @@
       "route": "/answers/porch-decorating-under-500-memphis",
       "rendered_file": "answers/porch-decorating-under-500-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "1bd81a66577e482c42de853f688d19d4cbfa9b3ca521c6d23d7f0a2b456e77e8",
-      "cache_file": "data/release/frozen_accepted_outputs/1bd81a66577e482c42de853f688d19d4cbfa9b3ca521c6d23d7f0a2b456e77e8.html.gz",
-      "cache_sha256": "27f20eda65083d3564fb93f570e64cfeaba4721ba188f45917c36e39e3ddbd7b",
+      "accepted_sha256": "9e338115350243ab3c428c126ba03e024b36e9c19be483d1dd58484ccd59563f",
+      "cache_file": "data/release/frozen_accepted_outputs/9e338115350243ab3c428c126ba03e024b36e9c19be483d1dd58484ccd59563f.html.gz",
+      "cache_sha256": "20dc33c34b87954dde286fe04ea30d6f1aa1471f7bf6480d0f4e6de4c5b84926",
       "accepted_at": "2026-07-24"
     },
     {
@@ -358,9 +358,9 @@
       "route": "/answers/small-porch-styling-ideas-memphis",
       "rendered_file": "answers/small-porch-styling-ideas-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "76ec5f657cb393b3941b3e8a49c84f70bbb81f1f11c84f69a36a2ee691d74929",
-      "cache_file": "data/release/frozen_accepted_outputs/76ec5f657cb393b3941b3e8a49c84f70bbb81f1f11c84f69a36a2ee691d74929.html.gz",
-      "cache_sha256": "eb6e43b409eeb13cf0875995500e88b80fc3dffd3da07e674f600b10c7a62d27",
+      "accepted_sha256": "0ad4e4714690977ec008a20928495863b7246c4e1656b17ac0e4b121ea31722f",
+      "cache_file": "data/release/frozen_accepted_outputs/0ad4e4714690977ec008a20928495863b7246c4e1656b17ac0e4b121ea31722f.html.gz",
+      "cache_sha256": "a4dc126bf38ee69ec52de0dece20439eae877970b67ac2c1daf226b3d4d15464",
       "accepted_at": "2026-07-24"
     },
     {
@@ -709,18 +709,18 @@
       "route": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis",
       "rendered_file": "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "3c02f066f5c457e31f677c3510c4238c380c99131de5fbf177d764f21179cca4",
-      "cache_file": "data/release/frozen_accepted_outputs/3c02f066f5c457e31f677c3510c4238c380c99131de5fbf177d764f21179cca4.html.gz",
-      "cache_sha256": "f4cd9b7b928e778308b25741f4c537e59db94f99c9dd93b6451b09576723760b",
+      "accepted_sha256": "29161fb5bd4dda7dc7c171939744da7d2e1eb1ba7d58e2edfce0a47225e71eff",
+      "cache_file": "data/release/frozen_accepted_outputs/29161fb5bd4dda7dc7c171939744da7d2e1eb1ba7d58e2edfce0a47225e71eff.html.gz",
+      "cache_sha256": "880974292fd916705dd8a14d3444b16d8120dce23e950a92a916b57a9f0e4bf0",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/faq/index",
       "rendered_file": "faq/index.html",
       "state": "FROZEN",
-      "accepted_sha256": "bd28370ab691e7bfea9735727ea80d341e269addcb9117e5566e933eaa501929",
-      "cache_file": "data/release/frozen_accepted_outputs/bd28370ab691e7bfea9735727ea80d341e269addcb9117e5566e933eaa501929.html.gz",
-      "cache_sha256": "adc6b15c4b395862b525a0c63e64c7fbdbda248e7bef3b74be79dc6cf727f060",
+      "accepted_sha256": "f9312b3daa2a723ad3530411158cd7d6d3c8616a3c93b6466321ac6f8ff9a4f2",
+      "cache_file": "data/release/frozen_accepted_outputs/f9312b3daa2a723ad3530411158cd7d6d3c8616a3c93b6466321ac6f8ff9a4f2.html.gz",
+      "cache_sha256": "7b6834cb8d0abe1b68820e78d9ad6ece12ad2b6a336daa5d6c2fa9d22909fad0",
       "accepted_at": "2026-07-24"
     },
     {
@@ -757,6 +757,15 @@
       "accepted_sha256": "684f4d7a423c3e71c48cb2abbd46753f818bc2727f8411672dfc680344658668",
       "cache_file": "data/release/frozen_accepted_outputs/684f4d7a423c3e71c48cb2abbd46753f818bc2727f8411672dfc680344658668.html.gz",
       "cache_sha256": "51ccd6e50611deeef8b3b8494ede9cfd5bcd7fb7d8c407ebe27d8f70b9421f2b",
+      "accepted_at": "2026-07-24"
+    },
+    {
+      "route": "/guides/porch-decorating-packages-memphis",
+      "rendered_file": "guides/porch-decorating-packages-memphis.html",
+      "state": "FROZEN",
+      "accepted_sha256": "213d55125853b92266c2027febb4f23e0ad83d8e7e5498fb895750771f0fe368",
+      "cache_file": "data/release/frozen_accepted_outputs/213d55125853b92266c2027febb4f23e0ad83d8e7e5498fb895750771f0fe368.html.gz",
+      "cache_sha256": "2ff602b8fd0dafc294408f067119bd8516202f35dc420bb9a0848619451848c9",
       "accepted_at": "2026-07-24"
     },
     {
@@ -898,27 +907,27 @@
       "route": "/services/christmas-porch-decorating",
       "rendered_file": "services/christmas-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "efe5b761126558093b39656b12a78de344d447a0caa317792f4c458c1ddf166c",
-      "cache_file": "data/release/frozen_accepted_outputs/efe5b761126558093b39656b12a78de344d447a0caa317792f4c458c1ddf166c.html.gz",
-      "cache_sha256": "f0ec06b7cae612c888be430224d305d28952ac435bd76af965a8846163e3199c",
+      "accepted_sha256": "a8ba710a74c9e4fc63588161ce3ca7912712f402bde0eeba80cfe608b6ff3553",
+      "cache_file": "data/release/frozen_accepted_outputs/a8ba710a74c9e4fc63588161ce3ca7912712f402bde0eeba80cfe608b6ff3553.html.gz",
+      "cache_sha256": "5bc8a30ff075390d797a62a59c3b5901446eb0eafc418ca711b529f02182c7bb",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/fall-porch-decorating",
       "rendered_file": "services/fall-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "e4c09744a3aab8fdb2f150f42817fd91f13e74b552a9fda730faadbeb2866067",
-      "cache_file": "data/release/frozen_accepted_outputs/e4c09744a3aab8fdb2f150f42817fd91f13e74b552a9fda730faadbeb2866067.html.gz",
-      "cache_sha256": "eaa26270f89cdfbcfcfb2fdaa1fd120fcf940469ddca437568c0527565d2702b",
+      "accepted_sha256": "390dba1e47087c467b91255365091bb6b051f5e4bc2c14a7b02186b3d36b0448",
+      "cache_file": "data/release/frozen_accepted_outputs/390dba1e47087c467b91255365091bb6b051f5e4bc2c14a7b02186b3d36b0448.html.gz",
+      "cache_sha256": "751bbf8cfbe47fe9410a59ac999d2a8f13cda96b27da64590915f85205268fcd",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/front-door-styling",
       "rendered_file": "services/front-door-styling.html",
       "state": "FROZEN",
-      "accepted_sha256": "ec74cb933317e1c4a7cf2fa8b6daca425ed159dd744dbe83120470df84ec9c90",
-      "cache_file": "data/release/frozen_accepted_outputs/ec74cb933317e1c4a7cf2fa8b6daca425ed159dd744dbe83120470df84ec9c90.html.gz",
-      "cache_sha256": "0c1a5fdadd3e3b731995e8a130556afcf01b772bb5bb599640b755c32fc3221e",
+      "accepted_sha256": "83be340cb9f8aaa68fd8f7ce7e05e9e38cbd019e4aea9f5d2377edaa8ec49daa",
+      "cache_file": "data/release/frozen_accepted_outputs/83be340cb9f8aaa68fd8f7ce7e05e9e38cbd019e4aea9f5d2377edaa8ec49daa.html.gz",
+      "cache_sha256": "d04896e4aaee90ae48cdf4b62ecef1e10b4c6d7cf2ea7430026f85d83c2f3e1a",
       "accepted_at": "2026-07-24"
     },
     {
@@ -979,18 +988,18 @@
       "route": "/services/porch-decorating",
       "rendered_file": "services/porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "fa0b505f318e3942b23682ee15f7a929b3893539738664fc31141b34c9d9f7b0",
-      "cache_file": "data/release/frozen_accepted_outputs/fa0b505f318e3942b23682ee15f7a929b3893539738664fc31141b34c9d9f7b0.html.gz",
-      "cache_sha256": "f727fb02b11404282aa57a8f13a6b905e705cd502750f7be0fd8f151b422c8c9",
+      "accepted_sha256": "3d5bb5420611570fd06f836dca81152162182a06455dd4c20aae3708688069ae",
+      "cache_file": "data/release/frozen_accepted_outputs/3d5bb5420611570fd06f836dca81152162182a06455dd4c20aae3708688069ae.html.gz",
+      "cache_sha256": "db49c0c868ed57645e504dc351322d8a123825913df794692718c7a1edb08b02",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/small-porch-decorating",
       "rendered_file": "services/small-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "ff9589ad71898eb4e3474cd684fef5db516a0d78469a33950a73ef95be3073ab",
-      "cache_file": "data/release/frozen_accepted_outputs/ff9589ad71898eb4e3474cd684fef5db516a0d78469a33950a73ef95be3073ab.html.gz",
-      "cache_sha256": "d05a70238a7dbec9b6810974810b994d34d2e4abf2002bff3219c27a8628c21d",
+      "accepted_sha256": "ff5976e17b7d1ed63db7a5a0b561b71b619d853f1875f322a7a56eddec389cc2",
+      "cache_file": "data/release/frozen_accepted_outputs/ff5976e17b7d1ed63db7a5a0b561b71b619d853f1875f322a7a56eddec389cc2.html.gz",
+      "cache_sha256": "5b10b46b3a9f1b87cedda84523e99b4c413fb23e937c95cda7402f6d86f4232b",
       "accepted_at": "2026-07-24"
     }
   ]

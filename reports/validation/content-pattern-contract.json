@@ -2,9 +2,9 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-10-18T15:14:15.024Z",
+  "generated_at": "2026-10-19T20:28:38.677Z",
   "enforcement": "block",
-  "pages_checked": 114,
+  "pages_checked": 115,
   "status": "PASS",
   "blocking_failures": 0,
   "summary": [
@@ -47,7 +47,7 @@
       "id": "comparison_table",
       "blocking": false,
       "pages_missing": 110,
-      "coverage_pct": 3.5,
+      "coverage_pct": 4.3,
       "why": "no comparison or cost table (agent request #2, 529 occurrences)"
     },
     {
@@ -82,21 +82,21 @@
       "id": "recommendation_summary",
       "blocking": false,
       "pages_missing": 5,
-      "coverage_pct": 95.6,
+      "coverage_pct": 95.7,
       "why": "no recommendation summary - asked for on 913 of 913 agent recommendations, the single most requested block"
     },
     {
       "id": "definition_callout",
       "blocking": false,
       "pages_missing": 108,
-      "coverage_pct": 5.3,
+      "coverage_pct": 6.1,
       "why": "no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\""
     },
     {
       "id": "trust_block",
       "blocking": false,
       "pages_missing": 108,
-      "coverage_pct": 5.3,
+      "coverage_pct": 6.1,
       "why": "no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor"
     },
     {
@@ -110,7 +110,7 @@
       "id": "protocol",
       "blocking": false,
       "pages_missing": 109,
-      "coverage_pct": 4.4,
+      "coverage_pct": 5.2,
       "why": "no ordered protocol - ordered steps are what gets lifted for \"how do I\""
     },
     {
@@ -123,13 +123,13 @@
     {
       "id": "prompt_template",
       "blocking": false,
-      "pages_missing": 114,
+      "pages_missing": 115,
       "coverage_pct": 0,
       "why": "no copy-ready prompt - the artifact this audience actually reuses"
     }
   ],
   "spec_producer_parity": {
-    "generator_sources_scanned": 81,
+    "generator_sources_scanned": 91,
     "blocks_in_spec": 10,
     "blocks_required_of_this_repo": 9,
     "orphan_blocks": [],
@@ -142,9 +142,9 @@
     ]
   },
   "recommendation_summary_distinctness": {
-    "total_blocks": 109,
-    "distinct_texts": 106,
-    "ratio": 0.9725,
+    "total_blocks": 110,
+    "distinct_texts": 107,
+    "ratio": 0.9727,
     "texts_on_more_than_one_page": 3,
     "pages_carrying_a_repeated_text": 6,
     "worst": [
@@ -880,6 +880,7 @@
       "guides/bridal-shower-planning-checklist-memphis.html",
       "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
       "guides/last-minute-birthday-setup-ideas-memphis.html",
+      "guides/porch-decorating-packages-memphis.html",
       "how-it-works.html",
       "hubs/memphis-celebration-setups.html",
       "index.html",

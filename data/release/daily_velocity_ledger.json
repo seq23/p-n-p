@@ -15,6 +15,15 @@
       "new_pages": 1,
       "ceiling": 3,
       "updated_at": "2026-10-10T15:14:35.308Z"
+    },
+    "2026-10-19": {
+      "new_pages": 1,
+      "ceiling": 3,
+      "routes": [
+        "/guides/porch-decorating-packages-memphis"
+      ],
+      "publication_frozen": true,
+      "updated_at": "2026-10-19T20:28:16.844Z"
     }
   }
 }

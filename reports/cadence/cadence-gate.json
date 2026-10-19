@@ -1,21 +1,19 @@
 {
-  "generated_at": "2026-10-18",
+  "generated_at": "2026-10-19",
   "policy_source": "data/cadence/policy.json",
-  "urls": 119,
-  "dated": 119,
+  "urls": 122,
+  "dated": 122,
   "undated": 0,
   "stale_over_window": 0,
   "stale_pct": 0,
-  "fresh_within_30d": 29,
-  "lastmod_within_7d": 29,
-  "new_since_last_run": 2,
+  "fresh_within_30d": 33,
+  "lastmod_within_7d": 30,
+  "new_since_last_run": 1,
   "new_publications_since_last_run": 1,
-  "new_section_indexes_since_last_run": [
-    "https://porchandparty901.com/sitemap"
-  ],
+  "new_section_indexes_since_last_run": [],
   "ledger_initialised": true,
-  "ledger_baseline_date": "2026-10-14",
-  "ledger_age_days": 4,
+  "ledger_baseline_date": "2026-10-18",
+  "ledger_age_days": 1,
   "accrual_weeks": 1,
   "accrual_weeks_max": 13,
   "publication_allowance": 1,
@@ -39,8 +37,7 @@
   },
   "blocking": [],
   "warnings": [
-    "new_section_indexes: 1 navigation index route(s) are new since the last run and sit outside the publication cap (https://porchandparty901.com/sitemap)",
-    "library_over_ceiling: 119 pages against a ceiling of 104 (8 substantive refreshes per week held inside 91 days). 15 pages cannot be kept current at this capacity."
+    "library_over_ceiling: 122 pages against a ceiling of 104 (8 substantive refreshes per week held inside 91 days). 18 pages cannot be kept current at this capacity."
   ],
   "status": "CLEAR"
 }

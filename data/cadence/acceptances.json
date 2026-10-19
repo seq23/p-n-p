@@ -150,6 +150,24 @@
         "https://porchandparty901.com/request",
         "https://porchandparty901.com/rules"
       ]
+    },
+    {
+      "accepted_at": "2026-10-19",
+      "reason": "Daily governed authority cycle for 2026-10-19, run 39319265188. The cadence gate cleared before this step, so these pages are inside the weekly publication cap.",
+      "urls_total_after": 122,
+      "accepted_count": 1,
+      "accepted_publications": 1,
+      "accepted_section_indexes": 0,
+      "weekly_cap": 1,
+      "publication_allowance": 1,
+      "ledger_baseline_date": "2026-10-18",
+      "accrual_weeks": 1,
+      "over_cap_by": 0,
+      "maintainable_ceiling": 104,
+      "library_over_ceiling_by": 18,
+      "accepted_urls": [
+        "https://porchandparty901.com/guides/porch-decorating-packages-memphis"
+      ]
     }
   ]
 }
