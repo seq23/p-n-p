@@ -95,7 +95,9 @@ a.k.req{text-decoration:none;color:var(--ink)}
 
 // ---- Tomorrow's reminders / Overdue returns (Requests and Calendar) -------------------------
 
-export function remindersBox(rows, tomorrowLabel) {
+// line: true (Requests, owner 19 Oct 2026) folds the box into ONE tappable line at the bottom of
+// the page, "3 reminders ▸", that opens to the same box. The Calendar keeps the open box.
+export function remindersBox(rows, tomorrowLabel, { line = false } = {}) {
   if (!rows.length) return '';
   const items = rows.map((b) => {
     const body = reminderText(b);
@@ -113,8 +115,13 @@ export function remindersBox(rows, tomorrowLabel) {
         ${done ? '' : `<form method="post" action="/admin/calendar/bookings/${b.id}/reminded">${act(`<button class="btn ghost" type="submit"${tip('rem.mark')}>Mark reminded</button>`, 'rem.mark')}</form>`}
       </div></div>`;
   }).join('');
-  return `<section class="card" data-reminders><h2>Tomorrow's reminders <small class="muted">${esc(tomorrowLabel)}</small></h2>${items}
-    <p class="muted" style="margin:8px 0 0">Customers with an email on file also get an email reminder by themselves at about 10 AM.</p></section>
+  const left = rows.filter((b) => !b.reminded_at).length;
+  const inner = `<h2>Tomorrow's reminders <small class="muted">${esc(tomorrowLabel)}</small></h2>${items}
+    <p class="muted" style="margin:8px 0 0">Customers with an email on file also get an email reminder by themselves at about 10 AM.</p>`;
+  const box = line
+    ? `<details class="card remline" data-reminders data-reminders-line><summary${tip('req.reminders')}><span class="remcount">${rows.length} reminder${rows.length === 1 ? '' : 's'}</span> <span class="muted">for tomorrow, ${esc(tomorrowLabel)}${left && left < rows.length ? ` · ${left} still to send` : (!left ? ' · all sent ✓' : '')}</span><span class="remchev" aria-hidden="true">▸</span></summary><div class="remin">${inner}</div></details>`
+    : `<section class="card" data-reminders>${inner}</section>`;
+  return `${box}
   <script>(function(){document.addEventListener('click',function(e){var a=e.target.closest('[data-remind-tap]');if(!a)return;try{fetch(a.getAttribute('data-remind-tap'),{method:'POST',headers:{'X-Pnp-Fetch':'1'},credentials:'same-origin',keepalive:true});}catch(err){}});})();</script>`;
 }
 

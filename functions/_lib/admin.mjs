@@ -5,6 +5,7 @@ import {
   halfDeposit, PAY_PLANS, payPlanOf, amountDueNow, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice, b64urlText,
   ownerCopy,
 } from './util.mjs';
+import * as RN from './request-new.mjs';
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
 import { driveFileId, idFolderId } from './sheet.mjs';
 import { loadRequests, weekCounts, monthCount, idOnFile, logEvent } from './requests.mjs';
@@ -236,7 +237,7 @@ async function dashboard(env, url) {
     bookingsBy[key] = rows.map((k) => ({ id: k.id, kind: k.kind, date: k.date, time: k.time, done_at: k.done_at }));
   }
   const events = {};
-  const { results: evRows } = await env.DB.prepare('SELECT request_key, at, what FROM request_events ORDER BY id').all();
+  const { results: evRows } = await env.DB.prepare('SELECT request_key, at, what, who FROM request_events ORDER BY id').all();
   for (const e of evRows || []) (events[e.request_key] = events[e.request_key] || []).push(e);
   const notes = {};
   const { results: noteRows } = await env.DB.prepare('SELECT request_key, body FROM booking_notes WHERE request_key IS NOT NULL ORDER BY id').all();
@@ -250,13 +251,16 @@ async function dashboard(env, url) {
   const { extras, msgs, bottom } = await cardExtras(env, open, statuses, holds);
   const tdKey = url.searchParams.get('tdok') ? decodeKey(url.searchParams.get('tdok')) : '';
   const soon = endingSoon(holds, Date.now(), settings);
-  return htmlResponse(V.dashboardPage({ requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
-    weekBox: V.weekBox(week), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, cardBottom: bottom, tdSaved: tdKey ? { key: tdKey, words: url.searchParams.get('tdm') || 'Saved ✓' } : null, bookings: bookingsBy, takedownInvoices: tdFacts.invoiceIds, today: chicagoDate(),
+  // NEW until opened or acted on (request-new.mjs, migration 0016).
+  const opened = await RN.openedSet(env.DB);
+  const newKeys = new Set(open.filter((r) => RN.isNewRequest(r, { st: statuses[r.key], opened: opened.has(r.key), events: events[r.key] || [] })).map((r) => r.key));
+  return htmlResponse(V.dashboardPage({ newKeys, requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
+    weekBox: V.weekBox(week, newKeys), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, cardBottom: bottom, tdSaved: tdKey ? { key: tdKey, words: url.searchParams.get('tdm') || 'Saved ✓' } : null, bookings: bookingsBy, takedownInvoices: tdFacts.invoiceIds, today: chicagoDate(),
     archived, filter: url.searchParams.get('f') || 'all', openPutAway: url.searchParams.get('pa') === '1', kinds, events, notes,
     foodPerHead: SERVICES_DATA.services.grazing.foodPerHead || null, pickupPlace: PRICE_TABLE.pickupPlace,
     holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length || Object.keys(msgs).length || Object.keys(bottom).length ? VM2.TAP_JS : ''}`,
     flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
-    extraTop: `${VC.overdueBox(overdue)}${VC.remindersBox(reminders, tomorrowLabel)}` }));
+    extraTop: VC.overdueBox(overdue), remindersLine: VC.remindersBox(reminders, tomorrowLabel, { line: true }) }));
 }
 
 async function newInvoice(env, url) {
@@ -712,6 +716,12 @@ async function routeAdmin(context) {
   if (segs[0] === 'holds' && method === 'POST' && ['extend', 'keep', 'release'].includes(segs[1])) return holdAction(env, request, segs[1]);
   if (segs[0] === 'msg' && segs[1] === 'email' && method === 'POST') return emailMessage(env, request);
   if (segs[0] === 'msg' && segs[1] === 'tapped' && method === 'POST') return tappedMessage(env, request);
+  if (segs[0] === 'requests' && segs[1] === 'opened' && method === 'POST') {
+    const form = await request.formData();
+    const key = decodeKey(String(form.get('r') || ''));
+    const done = key ? await RN.markOpened(env.DB, key, String(form.get('how') || 'card')) : false;
+    return Response.json({ ok: Boolean(key), recorded: done });
+  }
   if (segs[0] === 'confirmed' && method === 'GET') return confirmedScreen(env, url);
   if (segs[0] === 'requests' && segs[1] === 'thankyou-skip' && method === 'POST') {
     const form = await request.formData();
@@ -736,7 +746,7 @@ async function routeAdmin(context) {
   if (segs[0] === 'requests' && segs[1] === 'takedown-inline' && method === 'POST') return AC.takedownInlineRoute(env, request);
   // "Change anything on this request" (owner, 18 Oct 2026): one page, one Save per section, at any stage.
   if (segs[0] === 'requests' && segs[1] === 'edit') {
-    if (segs.length === 2 && method === 'GET') return AE.editPage(env, url);
+    if (segs.length === 2 && method === 'GET') { await RN.markOpened(env.DB, decodeKey(url.searchParams.get('r') || ''), 'edit'); return AE.editPage(env, url); }
     if (segs.length === 3 && method === 'POST') return AE.editRoute(env, request, segs[2]);
   }
   if (segs[0] === 'requests' && segs[1] === 'id' && segs.length === 2 && method === 'GET') return idPhoto(env, url);

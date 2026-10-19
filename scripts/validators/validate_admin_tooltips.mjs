@@ -162,6 +162,10 @@ pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/req
     const sr = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', porch_takedown: 'not_sure', event_date: '2030-10-24', location: 'Germantown', name: 'Una Decided', phone: '901-555-0901', email: 'una@example.com' });
     if (sr.status !== 303) errors.push('the not-sure takedown request did not go through');
     pages.push(['/admin/calendar (still to decide)', {}, await s.get('/admin/calendar')]);
+    // Requests with NEW website requests not yet opened (owner, 19 Oct 2026): the NEW badge.
+    const withNew = await s.get('/admin/');
+    if (!withNew.text.includes('data-new-badge')) errors.push('no NEW request on Requests, so the NEW badge goes untested');
+    pages.push(['/admin/ (NEW requests)', { home: true }, withNew]);
   }
   pages.push(['dashboardPage(grazing+party scheduled, one put away)', { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [graze, party, { ...reqA, key: 'rent|x', name: 'Rae Rent', services: ['rentals'] }], archived: [{ ...porch, key: 'old|x' }],
     statuses: { 'graze|x': { status: 'scheduled' }, 'party|x': { status: 'scheduled' }, 'rent|x': { status: 'deposit_paid' }, 'old|x': { status: 'paid', archived_at: '2026-10-01 10:00:00' } },

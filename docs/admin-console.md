@@ -400,6 +400,15 @@ another tab/retry queue, the cron hook).
   Monday 7 AM Memphis: Valerie's weekly summary.
 - **Guard**: `npm run validate:request-form` and `npm run validate:request-messages` (in `validate:admin`).
 
+## Requests on a phone (owner, 19 Oct 2026)
+The request list comes right after the heading and a one-line week card ("Latest: <name>" with
+"N NEW"). Tomorrow's reminders are one tappable line at the bottom ("3 reminders ▸"). The
+three-step panel sits under the list on a phone, on top from 900 px. Each new website request
+wears **NEW** until Valerie taps it, opens Show details / Edit / any button on the card, arrives
+from the New-request email link, or acts on it (status, invoice, put away). Opened is stored in
+`request_opened` (migration 0016, every older request backfilled as opened); the rule is
+`functions/_lib/request-new.mjs` (`npm run validate:admin-requests-phone`).
+
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 Legacy intake: the site's /request form replaced it and takes its choices from the live inventory.
 Old answers keep these strings forever, so each must still name an item (available or removed)
