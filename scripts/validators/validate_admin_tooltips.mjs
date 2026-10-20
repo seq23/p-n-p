@@ -268,13 +268,14 @@ for (const [p, o, res] of pages) {
   if (o.home && o.auth !== false) {
     // The only "More" toggle on Requests is each step card's own one (owner-approved 19 Oct 2026).
     const MORE_CARD = '<summary data-help="card.details" title="';
-    const mores = [...html.matchAll(/<summary([^>]*)>([^<]*\bMore\b[^<]*)</g)];
-    // "More about <first name>" (owner-approved mock-up, 20 Oct 2026).
-    for (const m of mores) if (!m[0].startsWith(MORE_CARD) || !/^More about (\S+|this request)$/.test(m[2])) errors.push(`${p}: a "More" toggle that is not a card's "More about <first name>": ${m[0].slice(0, 80)}`);
+    // A summary's own text, or the text of its first span (the card toggle wraps Show/Hide in spans).
+    const mores = [...html.matchAll(/<summary([^>]*)>(?:<span[^>]*>)?([^<]*\b[Mm]ore\b[^<]*)</g)];
+    // "Show more about <first name>" (owner-approved mock-up 20 Oct 2026; Show/Hide wording 20 Oct 2026).
+    for (const m of mores) if (!m[0].startsWith(MORE_CARD) || !/^Show more about (\S+|this request)$/.test(m[2])) errors.push(`${p}: a "More" toggle that is not a card's "Show more about <first name>": ${m[0].slice(0, 80)}`);
     for (const a of html.split('<article').slice(1)) {
       const card = a.slice(0, a.indexOf('</article>'));
       if (!/data-reqcard/.test(card)) continue;
-      const n = (card.match(/<summary data-help="card\.details"[^>]*>More about /g) || []).length;
+      const n = (card.match(/<summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>Show more about ([^<]+)<\/span><span class="mhide" data-more-hide>Hide more about \1<\/span>/g) || []).length;
       if (n !== 1) errors.push(`${p}: a request card has ${n} "More" toggles (must be exactly one)`);
       if (card.indexOf('data-next-step') < 0 || card.indexOf('data-next-step') > card.indexOf('data-details')) errors.push(`${p}: a request card's "More" comes before (or without) its next-step box`);
     }

@@ -89,12 +89,25 @@ const c1 = V.requestCard(den, cardOpts);
 // ---- B. More about <first name> ------------------------------------------------------------
 {
   const m = more(c1);
-  must(/<details class="disclose more" data-details><summary data-help="card\.details"[^>]*>More about Denise<\/summary>/.test(c1) && !/More: answers, history, other buttons/.test(c1), 'B: the toggle is not "More about Denise"');
+  // The toggle reads as an action (20 Oct 2026, Valerie could not tell it opens): "Show more about
+  // Denise ▾" closed, "Hide more about Denise ▴" open (CSS-only via details[open]), a button-like row.
+  must(/<details class="disclose more" data-details><summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>Show more about Denise<\/span><span class="mhide" data-more-hide>Hide more about Denise<\/span><span class="mchev" aria-hidden="true">▾<\/span><\/summary>\s*<p class="mhint" data-more-hint>Tap any line below to see more\.<\/p>\s*<details class="grp" data-more-group="booked"/.test(c1) && !/More: answers, history, other buttons/.test(c1), 'B: the toggle is not "Show more about Denise" / "Hide more about Denise" with its chevron, then the "Tap any line below to see more." hint right above the groups');
+  must(count(c1, /Tap any line below to see more\./g) === 1, 'B: the hint line is not there exactly once');
+  // Every group row: title, "Tap to open" (hidden when open), big › on the right.
+  must(count(m, /<details class="grp"[^>]*><summary[^>]*><span class="gt">[^]*?<span class="tapopen" data-tap-open>Tap to open<\/span><\/span><span class="gchev" aria-hidden="true">›<\/span><\/summary>/g) === 4, 'B: not all four group rows carry "Tap to open" and a › chevron');
+  const css = V.STEP_CSS;
+  const rule = (sel, decl) => new RegExp(`(^|[},\\n])${sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[^}]*${decl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(css);
+  must(rule('details.disclose.more .mhide', 'display:none') && rule('details.disclose.more[open]>summary .mshow', 'display:none') && rule('details.disclose.more[open]>summary .mhide', 'display:inline') && rule('details.disclose.more[open]>summary .mchev', 'transform:rotate(180deg)'), 'B: Show/Hide does not swap on details[open] (CSS only)');
+  must(rule('details.disclose.more>summary', 'border:1px solid') && rule('details.disclose.more>summary', 'background:') && /min-height:(4[4-9]|[5-9]\d)px/.test((css.match(/details\.disclose\.more>summary\{[^}]*\}/) || [''])[0] + (css.match(/details\.disclose>summary\{[^}]*\}/) || [''])[0]), 'B: the toggle does not look like a button (fill, border, >=44px)');
+  must(rule('details.disclose.more>summary::before', 'content:none'), 'B: the old small ▸ still shows next to the new chevron');
+  must(rule('details.grp>summary', 'list-style:none') && rule('details.grp>summary::-webkit-details-marker', 'display:none') && rule('details.grp>summary::marker', 'content:""') && rule('details.disclose.more>summary::marker', 'content:""'), 'B: the default disclosure markers are not hidden (double arrows)');
+  must(rule('details.grp>summary', 'background:') && /min-height:(4[4-9]|[5-9]\d)px/.test((css.match(/details\.grp>summary\{[^}]*\}/) || [''])[0]) && rule('details.grp[open]>summary .tapopen', 'display:none') && rule('details.grp[open]>summary .gchev', 'transform:rotate(90deg)'), 'B: group rows are not filled >=44px rows whose › turns down and whose "Tap to open" hides when open');
+  must(/details\.grp>summary:focus-visible[^{]*\{[^}]*outline:3px/.test(css) && /details\.disclose>summary:focus-visible/.test(css), 'B: no visible keyboard focus on the toggle and group rows');
   const groups = [['booked', 'What they booked'], ['money', 'Money'], ['details', 'Their details and ID'], ['history', 'Notes and history']];
   let last = -1;
   for (const [k, title] of groups) {
     const i = at(m, `data-more-group="${k}"`);
-    must(i > last && new RegExp(`data-more-group="${k}"( open)?><summary data-help="card\\.grp${k[0].toUpperCase()}${k.slice(1)}"[^>]*>${title}`).test(m), `B: group ${title} missing or out of order`);
+    must(i > last && new RegExp(`data-more-group="${k}"( open)?><summary data-help="card\\.grp${k[0].toUpperCase()}${k.slice(1)}"[^>]*><span class="gt">${title}`).test(m), `B: group ${title} missing or out of order`);
     last = i;
   }
   must(at(m, 'data-more-row') > last, 'B: the quiet row is not after the four groups');
@@ -266,7 +279,7 @@ const c1 = V.requestCard(den, cardOpts);
 {
   must(/data-pay-words>Invoice sent · \$180 due \(\$130 \+ \$50 refundable deposit\)</.test(c1), `D: the card's Money line is not "Invoice sent · $180 due ($130 + $50 refundable deposit)" (${(c1.match(/data-pay-words>[^<]*/) || [''])[0]})`);
   must(/data-next-money>Invoice sent · \$180 due \(\$130 \+ \$50 refundable deposit\)</.test(top(c1)), 'D: the next step does not say the amount due in the one form');
-  must(/data-more-group="money"><summary[^>]*>Money <small>\$180 due \(\$130 \+ \$50 refundable deposit\)<\/small>/.test(c1), 'D: the Money group summary does not say the amount due');
+  must(/data-more-group="money"><summary[^>]*><span class="gt">Money <small>\$180 due \(\$130 \+ \$50 refundable deposit\)<\/small>/.test(c1), 'D: the Money group summary does not say the amount due');
   must(!/\bowes\b|still owed/i.test(text(c1)), 'D: the card still says "owes" / "still owed"');
   const noDep = [lines[0], lines[1]];
   const c5 = V.requestCard(den, { ...cardOpts, inv: { ...sentInv, lines: noDep, total_cents: 13000, balance: L.balanceOf({ status: 'sent' }, noDep, 0) } });
