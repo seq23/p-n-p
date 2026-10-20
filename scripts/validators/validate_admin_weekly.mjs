@@ -73,8 +73,9 @@ for (const p of people) {
 // ---- 3. once per Monday, off switch -------------------------------------------------------------
 const sent = [];
 const env = { ...s.env, EMAIL: { send: async (m) => { sent.push(m); return { messageId: 'x' }; } } };
-// A Monday with a missed job starts "⚠ N missed job(s) · " (missed.mjs); the rest is unchanged.
-const mondays = () => sent.filter((m) => /^(⚠ [1-9]\d* missed jobs? · )?Your to-do list for Mon /.test(m.subject));
+// A Monday with a red item starts "⚠ N not back yet · " / "⚠ N to check · " (missed.mjs
+// subjectWarning); a yellow step never touches the subject; the rest is unchanged.
+const mondays = () => sent.filter((m) => /^(⚠ [1-9]\d* (not back yet|to check) · )?Your to-do list for Mon /.test(m.subject));
 const r1 = await mailer.runReminders(env, new Date('2026-10-19T12:00:00Z'));
 must(r1.todo && r1.todo.ok && sent.length === 1 && mondays().length === 1 && /data-week/.test(sent[0].html), `the Monday 7 AM cron did not send ONE email with Your week (${JSON.stringify(r1.todo)})`);
 must(!sent.some((m) => /Your week at Porch & Party/.test(m.subject)), 'the separate weekly summary email was sent');

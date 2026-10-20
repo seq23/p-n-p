@@ -153,10 +153,11 @@ must(!m5.some((x) => /Dee D|Sam R/.test(x.t)), 'Money lists a damage deposit as 
 const owedRow = m5.find((x) => /Alex S/.test(x.t));
 must(owedRow && owedRow.btns.some((b) => b.label === 'Text a reminder' && /^sms:/.test(b.href)) && owedRow.btns.some((b) => b.label === 'Mark paid' && b.href === `/admin/invoices/${inv['PNP-T-1']}`), 'the owed line lacks Text a reminder / Mark paid');
 must(m5.some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && x.d === 'Invoice not sent yet' && x.btns.map((b) => b.label).join() === 'Reserve their games longer,Open card' && x.btns[0].solid && x.btns.every((b) => b.href === card(reqB.key))), `Money lacks the hold ending today: ${JSON.stringify(titles(m5))}`);
-// A late return is a MISSED job (owner, 20 Oct 2026, panel 7): in the red box above section 1,
-// never also in Money.
+// A late return is RED (missed.mjs tiers, owner-approved 20 Oct 2026): a question in the red box
+// above section 1, never also in Money. Pat P.'s pickup not ticked is YELLOW: only on Tidy up.
 must(!m5.some((x) => x.type === 'overdue' || /Ollie O/.test(x.t)) && d.missed.filter((m) => /Ollie O/.test(m.t)).length === 1
-  && d.missed.some((m) => m.t === 'Ollie O. · games not returned' && m.d === 'Was due Sun 18 Oct · 2 days late · not marked done'), `the overdue return is not in Missed exactly once (and out of Money): ${JSON.stringify(d.missed.map((m) => m.t))}`);
+  && d.missed.some((m) => m.t === "Are Ollie O.'s games back?" && m.d === 'Due back Sun 18 Oct · not marked back yet'), `the overdue return is not in the red box exactly once (and out of Money): ${JSON.stringify(d.missed.map((m) => m.t))}`);
+must(d.missed.length === 1 && !d.missed.some((m) => /Pat P/.test(m.t)) && JSON.stringify(d.tidy.map((x) => x.t)) === JSON.stringify(["Pat P.'s pickup"]), `Pat P.'s unticked pickup is not ONLY on the Tidy up line: red ${JSON.stringify(d.missed.map((m) => m.t))}, tidy ${JSON.stringify(d.tidy)}`);
 {
   // The rendered email with that hold in it: the new words, the new link text, nothing old.
   const hm = T.renderTodo(await T.todoData(db, TODAY, NOW));
@@ -256,8 +257,12 @@ await run("UPDATE request_status SET archived_at = NULL WHERE request_key = ?1",
 // ---- the rendered email -------------------------------------------------------------------------
 d = await T.todoData(db, TODAY, NOW);
 let msg = T.renderTodo(d);
-// Pat P.'s pickup (Mon 19 Oct, not marked) and Ollie O.'s return (Sun 18 Oct, not back) are missed.
-must(msg.subject === '⚠ 2 missed jobs · Your to-do list for Tue 20 Oct · Porch & Party', `subject is "${msg.subject}"`);
+// Ollie O.'s return (Sun 18 Oct, not back) is red: the subject; Pat P.'s pickup (Mon 19 Oct, not
+// ticked) is yellow: one quiet line at the very bottom, never in the subject.
+must(msg.subject === '⚠ 1 not back yet · Your to-do list for Tue 20 Oct · Porch & Party', `subject is "${msg.subject}"`);
+must(/data-tidy[^>]*>Tidy up: 1 step to tick off \(Pat P\.&#39;s pickup\)\. <a href="https:\/\/porchandparty901\.com\/admin\/"[^>]*>Open admin<\/a>/.test(msg.html.replace(/&#x27;/g, '&#39;').replace(/'/g, '&#39;'))
+  && msg.html.indexOf('data-tidy') > msg.html.indexOf('data-tomorrow') && msg.html.indexOf('data-tidy') < msg.html.indexOf('This email comes every day'), 'the Tidy up line is not at the very bottom, above the footer');
+must(msg.text.includes("\nTidy up: 1 step to tick off (Pat P.'s pickup). Open admin: https://porchandparty901.com/admin/"), 'the plain text lacks the Tidy up line');
 const order = [...msg.html.matchAll(/data-section="(\d)"/g)].map((x) => x[1]);
 must(order.join() === [1, 2, 3, 4, 5].filter((n) => d.sections[n].length).map(String).join() && order.length === 5, `sections in the email: ${order} (all five in order 1-5)`);
 for (const n of [2, 3, 4]) must(msg.html.includes(T.SECTION_WHY[n]) && msg.text.includes(T.SECTION_WHY[n]), `section ${n} lacks its why sentence`);
@@ -312,10 +317,10 @@ for (const p of people) {
 const sent = [];
 let failNext = false;
 const env = { ...s.env, EMAIL: { send: async (m) => { if (failNext) { failNext = false; throw new Error('mailer down'); } sent.push(m); return { messageId: 'x' }; } } };
-const todos = () => sent.filter((m) => /^(⚠ [1-9]\d* missed jobs? · )?Your to-do list for /.test(m.subject));
-const subjectFor = async (day, words) => { const n = (await T.todoData(db, day, Date.parse(`${day}T12:00:00Z`))).missed.length; return `${n ? `⚠ ${n} missed job${n === 1 ? '' : 's'} · ` : ''}Your to-do list for ${words} · Porch & Party`; };
+const todos = () => sent.filter((m) => /^(⚠ [1-9]\d* (not back yet|to check) · )?Your to-do list for /.test(m.subject));
+const subjectFor = async (day, words) => { const n = (await T.todoData(db, day, Date.parse(`${day}T12:00:00Z`))).missed.length; return `${n ? `⚠ ${n} not back yet · ` : ''}Your to-do list for ${words} · Porch & Party`; };
 const r1 = await mailer.runReminders(env, new Date('2026-10-20T12:00:00Z'));
-must(r1.todo && r1.todo.ok && todos().length === 1 && todos()[0].subject === '⚠ 2 missed jobs · Your to-do list for Tue 20 Oct · Porch & Party' && todos()[0].text && todos()[0].html, `the 7 AM cron did not send the to-do email (${JSON.stringify(r1.todo)})`);
+must(r1.todo && r1.todo.ok && todos().length === 1 && todos()[0].subject === '⚠ 1 not back yet · Your to-do list for Tue 20 Oct · Porch & Party' && todos()[0].text && todos()[0].html, `the 7 AM cron did not send the to-do email (${JSON.stringify(r1.todo)})`);
 must(todos()[0].to === 'hello@porchandparty901.com', 'the to-do email did not go to the day-list email (default hello@)');
 const r2 = await mailer.runReminders(env, new Date('2026-10-20T12:00:00Z'));
 must(todos().length === 1 && /already sent/.test(r2.todo && r2.todo.skipped), 'a retried 7 AM run sent the to-do email twice');
@@ -353,7 +358,7 @@ must(/data-todo-settings[\s\S]*Daily to-do email[\s\S]*It is <strong>off<\/stron
 must(/data-weekly-settings[\s\S]*Your week, on Mondays/.test(settingsPage) && !/weekly-now/.test(settingsPage), 'Settings still offers the separate weekly email');
 const before = s.env.sent.length;
 const now = await s.post('/admin/settings/todo-now', {});
-must(now.status === 303 && /on%20its%20way/.test(now.location) && s.env.sent.length === before + 1 && s.env.sent.at(-1).to === 'val@example.com' && /^(⚠ [1-9]\d* missed jobs? · )?Your to-do list for /.test(s.env.sent.at(-1).subject) && s.env.sent.at(-1).text, 'Send me today\'s list now did not send to the day-list email');
+must(now.status === 303 && /on%20its%20way/.test(now.location) && s.env.sent.length === before + 1 && s.env.sent.at(-1).to === 'val@example.com' && /^(⚠ [1-9]\d* (not back yet|to check) · )?Your to-do list for /.test(s.env.sent.at(-1).subject) && s.env.sent.at(-1).text, 'Send me today\'s list now did not send to the day-list email');
 await s.post('/admin/settings/todo', { todo_email: '1' });
 must((await s.one("SELECT value FROM settings WHERE key = 'todo_email'")).value === '1', 'the switch did not turn the to-do email back on');
 must(!(await (await session()).one("SELECT value FROM settings WHERE key = 'todo_email'")), 'the to-do setting is not absent (= on) on a fresh database');

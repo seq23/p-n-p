@@ -21,7 +21,8 @@ import * as VM2 from './views-messages.mjs';
 import { expireHolds, endingSoon, holdSettings, currentHolds } from './holds.mjs';
 import { choiceFrom, createPhoneRequest, NOTE_CHOICE } from './phone-requests.mjs';
 import { serviceOfKind, serviceInfo } from './kinds.mjs';
-import { loadMissed } from './missed.mjs';
+import * as MS from './missed.mjs';
+import { shortName } from './requested.mjs';
 
 const decodeKey = (v) => { try { return fromB64urlText(v); } catch { return ''; } };
 const wantsJson = (request) => request.headers.get('X-Pnp-Fetch') === '1';
@@ -89,9 +90,11 @@ export async function calendarPage(env, url) {
   const month = /^\d{4}-\d{2}$/.test(url.searchParams.get('month') || '') ? url.searchParams.get('month') : today.slice(0, 7);
   const all = await C.listBookings(env.DB);
   const { ctx: ctx0, returns, unconfirmed: unconfKeys } = await contextFor(env.DB, all);
-  // A missed job's chip is red on its day (missed.mjs).
-  const missedIds = new Set((await loadMissed(env.DB, today)).map((m) => m.id));
-  const ctx = (b) => (missedIds.has(b.id) ? { ...ctx0(b), missed: true } : ctx0(b));
+  // A past step not ticked (missed.mjs tiers): red chip for a red item, yellow for "Did this happen?".
+  const T = MS.tiers(await MS.loadMissed(env.DB, today));
+  const redIds = new Set(T.red.map((m) => m.id));
+  const tidyIds = new Set(T.yellow.map((m) => m.id));
+  const ctx = (b) => (redIds.has(b.id) ? { ...ctx0(b), missed: true } : (tidyIds.has(b.id) ? { ...ctx0(b), tidy: true } : ctx0(b)));
   const windows = C.rentalWindows(all, returns, PRICE_TABLE);
   const statuses = await statusMap(env.DB);
   const { requests } = await requestsSafe(env);
@@ -342,13 +345,36 @@ export async function remindedRoute(env, request, id) {
 // rental pickup ("Mark picked up", optionally recording the rest as paid: "They paid the rest
 // now") and the grazing pickup ("Mark pickup done"). Undo takes back only the done mark; a
 // payment recorded with it stays (money is changed on the invoice).
-// A booking of kind other (typed on the calendar) is marked done the same way (Mark done (it
-// happened) on a missed job, missed.mjs).
-const DONE_KINDS = /_takedown$|^rental_pickup$|^grazing_pickup$|^other$/;
+// A booking of kind other (typed on the calendar) is marked done the same way, and so is a setup /
+// install from the "Did this happen?" ✓ Yes (missed.mjs): its booking done AND the request's job
+// done (the same SQL as the card's "Mark setup done"). A later step marked done ticks the earlier
+// open steps of the same job (missed.mjs autoTickEarlier).
+const SETUP_DONE = /^(porch_install|party_setup|grazing_setup)$/;
+const DONE_KINDS = /_takedown$|^rental_pickup$|^grazing_pickup$|^other$|^porch_install$|^party_setup$|^grazing_setup$/;
 const DONE_WORDS = (kind, undo) => {
-  const w = kind === 'rental_pickup' ? 'Picked up' : (kind === 'grazing_pickup' ? 'Pickup done' : (kind === 'other' ? 'Job done' : 'Takedown done'));
+  const w = kind === 'rental_pickup' ? 'Picked up' : (kind === 'grazing_pickup' ? 'Pickup done' : (kind === 'other' ? 'Job done'
+    : (kind === 'porch_install' ? 'Install done' : (SETUP_DONE.test(kind) ? 'Setup done' : 'Takedown done'))));
   return undo ? `${w} undone` : `${w} ✓`;
 };
+async function deliveredFor(env, key) {
+  if (!key) return false;
+  const { requests } = await requestsSafe(env);
+  const r = requests.find((x) => x.key === key);
+  return Boolean(r && C.deliveryAddress(r));
+}
+// Mark one booking done (the done route, the confirm screen): done_at, the setup's job done, the
+// auto-tick of earlier steps. Returns the history words of the ticked steps.
+async function markBookingDone(env, b) {
+  await env.DB.prepare("UPDATE bookings SET done_at = COALESCE(done_at, datetime('now')) WHERE id = ?1").bind(b.id).run();
+  if (SETUP_DONE.test(b.kind) && b.request_key) {
+    await env.DB.prepare(`INSERT INTO request_status (request_key, status, job_done_at, prev_status, updated_at) VALUES (?1, 'job_done', datetime('now'), 'new', datetime('now'))
+      ON CONFLICT(request_key) DO UPDATE SET prev_status = CASE WHEN request_status.status = 'job_done' THEN request_status.prev_status ELSE request_status.status END,
+        status = 'job_done', job_done_at = COALESCE(request_status.job_done_at, datetime('now')), updated_at = datetime('now')`).bind(b.request_key).run();
+  }
+  const ticked = await MS.autoTickEarlier(env.DB, b);
+  return ticked.map((t) => MS.autoTickWords(t.kind, b.kind));
+}
+const tickedWords = (w) => (w.length ? ` ${w.map((x) => x.replace(/ ticked off automatically.*$/, '')).join(' and ')} ticked off too.` : '');
 export async function takedownDoneRoute(env, request, id) {
   const form = await request.formData();
   const undo = form.get('undo') === '1';
@@ -360,8 +386,11 @@ export async function takedownDoneRoute(env, request, id) {
     return redirect(`${to}?${e ? 'e' : 'm'}=${encodeURIComponent(m)}${anchor}`);
   };
   if (!b || !DONE_KINDS.test(b.kind)) return back('That booking cannot be marked done here.', true);
-  if (undo) await env.DB.prepare('UPDATE bookings SET done_at = NULL WHERE id = ?1').bind(id).run();
-  else await env.DB.prepare("UPDATE bookings SET done_at = COALESCE(done_at, datetime('now')) WHERE id = ?1").bind(id).run();
+  let ticked = [];
+  if (undo) {
+    await env.DB.prepare('UPDATE bookings SET done_at = NULL WHERE id = ?1').bind(id).run();
+    if (SETUP_DONE.test(b.kind) && b.request_key) await env.DB.prepare("UPDATE request_status SET job_done_at = NULL, status = COALESCE(prev_status, status), prev_status = NULL, updated_at = datetime('now') WHERE request_key = ?1 AND status = 'job_done'").bind(b.request_key).run();
+  } else ticked = await markBookingDone(env, b);
   let paidWords = '';
   if (!undo && b.kind === 'rental_pickup' && form.get('paid_rest') === '1' && b.request_key) {
     const st = await env.DB.prepare('SELECT invoice_id FROM request_status WHERE request_key = ?1').bind(b.request_key).first();
@@ -372,7 +401,81 @@ export async function takedownDoneRoute(env, request, id) {
     }
   }
   if (b.request_key) await logEvent(env.DB, b.request_key, `${DONE_WORDS(b.kind, undo)}${paidWords}`, 'admin');
-  return back(`${DONE_WORDS(b.kind, undo).replace(' undone', ' undone.')}${paidWords}`);
+  return back(`${DONE_WORDS(b.kind, undo).replace(' undone', ' undone.')}${paidWords}${tickedWords(ticked)}`);
+}
+
+// ✗ No on a "Did this happen?" item (missed.mjs): one history line the detector reads; the item
+// turns red ("<Name> did not pick up on <day>") on the strip, the card, the calendar and the email.
+export async function notHappenedRoute(env, request) {
+  const form = await request.formData();
+  const id = Number(form.get('b'));
+  const today = chicagoDate();
+  const b = Number.isInteger(id) && id > 0 ? await bookingById(env, id) : null;
+  const m = b ? MS.tiers(await MS.loadMissed(env.DB, today)).yellow.find((x) => x.id === id) : null;
+  const anchor = b && b.request_key ? `#c-${b64urlText(b.request_key)}` : '';
+  if (!b || !m) return redirect(`/admin/?e=${encodeURIComponent('That step is not waiting to be ticked off.')}${anchor}`);
+  const red = MS.classify({ ...m, dl: await deliveredFor(env, b.request_key), nh: true });
+  await MS.recordNotHappened(env.DB, b, red);
+  return redirect(`/admin/?m=${encodeURIComponent(`Moved to red: ${red.question}. Call them.`)}${anchor}`);
+}
+
+// ---- "✓ Yes" from the 7 AM email: the confirm screen ---------------------------------------------
+// GET /admin/confirm-done?b=<booking id>&r=<card key> never changes anything (email scanners
+// prefetch links): it asks "Mark <Name>'s games back?" (a return / collect, with "Anything damaged
+// or missing?", default "No, all fine": the check-in's back / damaged fields, so the card goes on to
+// "Give back the deposit" or "Returned — check damage") or "Mark <Name>'s takedown done?". The POST
+// marks it (+ the auto-tick), then back to the card with "✓ Marked: <Name>'s games are back."
+// Already done: "Already marked back ✓", nothing changes.
+async function confirmTarget(env, id) {
+  const b = Number.isInteger(id) && id > 0 ? await bookingById(env, id) : null;
+  if (!b) return null;
+  const req = b.request_key ? await env.DB.prepare('SELECT name FROM requests WHERE request_key = ?1').bind(b.request_key).first() : null;
+  const who = shortName(b.customer_name || (req && req.name)) || 'this customer';
+  const isReturn = b.kind === 'rental_return';
+  const card = b.request_key ? `/admin/#c-${b64urlText(b.request_key)}` : `/admin/day/${b.date}`;
+  if (isReturn) {
+    const k = b64urlText(C.returnKeyOf(b));
+    const t = await returnTarget(env, k);
+    const saved = (await C.loadReturns(env.DB))[C.returnKeyOf(b)] || null;
+    const exp = C.expandItems(t ? t.itemsText : b.items, PRICE_TABLE);
+    const items = [...C.namesText(exp), ...Array.from({ length: exp.unnamed }, (_, i) => `Game of their choice ${i + 1}`)];
+    return { b, t, who, isReturn, card, items, done: Boolean(saved && saved.returned_at), damagedBefore: Boolean(saved && saved.damaged) };
+  }
+  if (!DONE_KINDS.test(b.kind)) return { b, who, isReturn, card, items: [], done: false, cannot: true };
+  const st = b.request_key ? await env.DB.prepare('SELECT job_done_at FROM request_status WHERE request_key = ?1').bind(b.request_key).first() : null;
+  const done = Boolean(b.done_at) || (SETUP_DONE.test(b.kind) && Boolean(st && st.job_done_at));
+  return { b, who, isReturn, card, items: String(b.items || '').split(/\s*[,;\n]\s*/).map((x) => x.trim()).filter(Boolean), done };
+}
+const JOB_NOUN = (kind) => ({ porch_takedown: 'takedown', party_takedown: 'takedown', grazing_pickup: 'grazing pickup', rental_pickup: 'pickup', porch_install: 'install', party_setup: 'setup', grazing_setup: 'grazing setup' }[kind] || 'job');
+export async function confirmDonePage(env, url) {
+  const x = await confirmTarget(env, Number(url.searchParams.get('b')));
+  if (!x || x.cannot) return redirect(`/admin/?e=${encodeURIComponent('That job could not be found.')}`);
+  return htmlResponse(VC.confirmDonePage({ id: x.b.id, r: url.searchParams.get('r') || '', who: x.who, isReturn: x.isReturn, noun: JOB_NOUN(x.b.kind), items: x.items, due: x.b.date, done: x.done, damaged: x.damagedBefore, card: x.card }));
+}
+export async function confirmDoneRoute(env, request) {
+  const form = await request.formData();
+  const x = await confirmTarget(env, Number(form.get('b')));
+  if (!x || x.cannot) return redirect(`/admin/?e=${encodeURIComponent('That job could not be found.')}`);
+  const [path, hash] = x.card.split('#');
+  const go = (m) => redirect(`${path}?m=${encodeURIComponent(m)}${hash ? `#${hash}` : ''}`);
+  if (x.done) return go(x.isReturn ? 'Already marked back ✓' : 'Already marked done ✓');
+  if (x.isReturn) {
+    // The check-in's fields: every item back; "Yes, something is damaged or missing" + the items
+    // ticked (none ticked: the whole rental is flagged) -> Returned — check damage.
+    const hurt = form.get('damage') === 'yes';
+    const ticked = new Set(form.getAll('damaged').map(String));
+    const items = x.items.map((name) => ({ name, back: true, damaged: hurt && (ticked.has(name) || !ticked.size), note: '' }));
+    const notes = hurt ? String(form.get('notes') || '').trim().slice(0, 4000) : '';
+    const key = x.t ? x.t.requestKey : x.b.request_key;
+    await C.saveReturn(env.DB, { returnKey: C.returnKeyOf(x.b), requestKey: key || null, bookingId: x.t ? x.t.bookingId : x.b.id, items, notes });
+    const delivered = await deliveredFor(env, x.b.request_key);
+    const ticks = await MS.autoTickEarlier(env.DB, { kind: 'rental_return', request_key: x.b.request_key }, { delivered });
+    if (x.b.request_key) await logEvent(env.DB, x.b.request_key, hurt ? 'Games back (from the 7 AM email): something damaged or missing' : 'Games back (from the 7 AM email): all fine', 'Valerie');
+    return go(`✓ Marked: ${x.who}'s games are back.${hurt ? ' Something is damaged or missing: check the deposit on the card.' : ''}${tickedWords(ticks.map((t) => MS.autoTickWords(t.kind, 'rental_return', delivered)))}`);
+  }
+  const ticks = await markBookingDone(env, x.b);
+  if (x.b.request_key) await logEvent(env.DB, x.b.request_key, `${DONE_WORDS(x.b.kind, false)} (from the 7 AM email)`, 'Valerie');
+  return go(`✓ Marked: ${x.who}'s ${JOB_NOUN(x.b.kind)} is done.${tickedWords(ticks)}`);
 }
 
 // The inline takedown row on a card (owner, 18 Oct 2026): Save books / moves the porch or party
@@ -497,6 +600,8 @@ export async function saveReturnRoute(env, request, url) {
   const names = [...C.namesText(exp), ...Array.from({ length: exp.unnamed }, (_, i) => `Game of their choice ${i + 1}`)];
   const items = names.map((name) => ({ name, back: back.has(name), damaged: damaged.has(name), note: String(form.get(`note_${name}`) || '').trim().slice(0, 1000) }));
   const res = await C.saveReturn(env.DB, { returnKey: t.returnKey, requestKey: t.requestKey, bookingId: t.bookingId, items, notes: String(form.get('notes') || '').trim().slice(0, 4000) });
+  // Games back => the pickup / delivery is ticked too (missed.mjs autoTickEarlier).
+  if (t.requestKey) await MS.autoTickEarlier(env.DB, { kind: 'rental_return', request_key: t.requestKey }, { delivered: await deliveredFor(env, t.requestKey) });
   return redirect(`/admin/returns?k=${encodeURIComponent(k)}&m=${encodeURIComponent(res.damaged ? 'Saved. Returned — check damage.' : 'Returned ✓')}`);
 }
 
