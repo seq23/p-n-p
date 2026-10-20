@@ -795,6 +795,11 @@ Proof: `npm run validate:admin-missed-jobs`.
   panel stays at the bottom on a phone (owner, 20 Oct 2026).
 Proof: `npm run validate:admin-customer-nav`.
 
+Screenshots of the live page, 20 Oct 2026 (customer names and notes blurred; the repo is public),
+in `docs/admin-screenshots/2026-10-20/`: `phone-requests-top.jpg` (menu button, filter pull-down,
+customer bar, Customer 4 card), `phone-menu-open.jpg`, `phone-scrolled-customer-bar.jpg`,
+`laptop-requests-top-spine.jpg`, `laptop-scrolled-spine.jpg`.
+
 ## Where things live
 | Piece | Place |
 |---|---|
