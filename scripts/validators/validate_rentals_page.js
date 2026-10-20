@@ -61,6 +61,7 @@ for (const e of INV.validate(RAW, { hasImage: (slug) => fs.existsSync(path.join(
 // Remove is soft: no item the seed had may vanish from the file (old bookings and invoices name it).
 const allSlugs = new Set(INV.allItems(RAW).map(({ item }) => item.slug));
 for (const { item } of INV.allItems(FIXTURE)) if (!allSlugs.has(item.slug)) errors.push(`${item.slug} was deleted from games.json; Remove keeps an item's data (availableNow false)`);
+const cornholeSeedPer = (d) => ((d.games || []).find((g) => g.slug === 'cornhole') || {}).perSet;
 const V3 = {
   // 18 Oct 2026 (owner): Giant Checkers is not available right now; "the 6 games" are both
   // Giant Color Stack sets + Connect Four, Cornhole, Uno and Grab the Mic (5 kinds, 6 games).
@@ -90,7 +91,8 @@ if (SEED) {
   }
   if (games.length !== V3.games) errors.push(`v3 has ${V3.games} games on offer, games.json shows ${games.length}`);
   const colorStack = data.games.find((g) => g.slug === 'giant-color-stack') || {};
-  if (colorStack.quantity !== 2 || colorStack.bundleSets !== 2) errors.push('games.json Giant Color Stack is not quantity 2 with bundleSets 2 (owner, 18 Oct 2026: both sets count in "the 6 games")');
+  if (colorStack.quantity !== 2 || colorStack.bundleSets !== 2 || colorStack.perSet !== 2) errors.push('games.json Giant Color Stack is not quantity 2 (games) with bundleSets 2 and perSet 2 (owner, 20 Oct 2026: ONE set of 2 games, both count in "the 6 games")');
+  if (cornholeSeedPer(data) != null) errors.push('games.json Cornhole has a perSet; it is 1 set, 1 game (owner, 20 Oct 2026)');
   const cornholeSeed = data.games.find((g) => g.slug === 'cornhole') || {};
   if (cornholeSeed.quantity !== 1) errors.push(`games.json Cornhole quantity is ${cornholeSeed.quantity}, the owner has 1 set (18 Oct 2026)`);
   if (units !== V3.gameUnits) errors.push(`the games on offer count ${units} bundle games, the owner's count is ${V3.gameUnits}`);
@@ -241,13 +243,16 @@ if (PHONE.test(listing)) errors.push('facebook-marketplace.md carries a phone nu
 if (RETIRED.test(listing)) errors.push('facebook-marketplace.md still quotes retired zones, the 1.5x weekend rate or free delivery');
 if (DELIVERY.test(listing)) errors.push('facebook-marketplace.md mentions delivery; rentals v3 is pickup and return only');
 hiddenIn(listing, 'facebook-marketplace.md', listingErrors);
-// Live Marketplace wording (owner, 18 Oct 2026): all-games bundles list "2 Giant Color Stack sets",
+// Marketplace wording (owner, 20 Oct 2026: ONE Color Stack set of 2 games): all-games bundles list
+// "Giant Color Stack (1 set of 2)", never "2 Giant Color Stack sets" / "both ... sets",
 // and every quote link goes to the site request page, never a Google Form.
 for (const bn of ['Whole Yard', 'The Whole Party']) {
   const b = blocks.find((x) => x.startsWith(`${bn} bundle\n`)) || '';
-  if (!/Games included: [^\n]*, 2 Giant Color Stack sets\./.test(b)) listingErrors.push(`${bn} bundle: "Games included" does not say "2 Giant Color Stack sets" (live Marketplace wording)`);
+  if (!/Games included: [^\n]*, Giant Color Stack \(1 set of 2\)\./.test(b)) listingErrors.push(`${bn} bundle: "Games included" does not say "Giant Color Stack (1 set of 2)" (owner, 20 Oct 2026: one set of 2 games)`);
 }
-if (/Color Stack \(both sets\)/.test(listing)) listingErrors.push('facebook-marketplace.md says "Giant Color Stack (both sets)"; live listings say "2 Giant Color Stack sets"');
+// Owner, 20 Oct 2026: there is ONE Giant Color Stack set (2 games). No copy may say two sets.
+const TWO_STACK_SETS = /Color Stack \(both sets\)|Color Stack \(2 sets\)|2 Giant Color Stack sets|both (Giant )?Color Stack sets|two (Giant )?Color Stack sets|Two sets for head-to-head/i;
+for (const rel of ['docs/listings/facebook-marketplace.md', 'docs/listings/facebook-page.md', 'rentals/index.html', 'llms.txt', 'llms-full.txt', 'llms-services.txt', 'faq/index.html', 'request.html', 'data/rentals/games.json', 'functions/_lib/assets/walkthrough-checklist.html.txt']) if (TWO_STACK_SETS.test(read(rel))) errors.push(`${rel} still says there are two Giant Color Stack sets; the owner has 1 set of 2 games (20 Oct 2026)`);
 for (const f of ['facebook-marketplace.md', 'facebook-page.md', 'bark.md', 'thumbtack.md']) if (/forms\.gle|docs\.google\.com\/forms/.test(read(`docs/listings/${f}`))) errors.push(`docs/listings/${f} links a Google Form; quote links go to https://porchandparty901.com/request (owner, 18 Oct 2026)`);
 pricesOnlyFromData(blocks.join('## '), 'facebook-marketplace.md', listingErrors);
 // ---- Request-page lines (owner-approved wording, 2026-10-18) -------------------

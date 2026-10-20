@@ -4,6 +4,7 @@
 // D1 statements that touch the table. No JSON imports here, so the validators can load it.
 
 import { KINDS, KIND_LABELS, serviceInfo } from './kinds.mjs';
+import INV from '../../scripts/lib/inventory.js';
 
 export { KINDS, KIND_LABELS };
 export const RENTAL_KINDS = ['rental_pickup', 'rental_return'];
@@ -471,14 +472,15 @@ export function prettyTime(hhmm) {
 // is all 8 items. Games a bundle leaves "of your choice" count as unnamed games.
 // counts = how many of each named item it takes out (owner, 18 Oct 2026): an all-games bundle
 // (Whole Yard, The Whole Party) carries every set of a multi-set game (both Giant Color Stack
-// sets), and typed words like "Giant Color Stack (2 sets)" or "2 Giant Color Stack" say so too.
+// sets), and typed words like "Giant Color Stack (1 set of 2)", the older "(2 sets)" on invoices
+// already saved, or "2 Giant Color Stack" say so too.
 const reEsc = (s) => String(s).toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 function typedCount(t, it) {
   let n = 0;
   for (const label of [it.name, it.choice].filter(Boolean)) {
     const l = reEsc(label);
-    const after = t.match(new RegExp(`${l}s?\\s*(?:\\(\\s*(\\d{1,2})\\s*sets?\\s*\\)|[x\u00d7]\\s*(\\d{1,2})(?![0-9])|(\\d{1,2})\\s+sets?\\b)`));
-    if (after) n = Math.max(n, Number(after[1] || after[2] || after[3]));
+    const after = t.match(new RegExp(`${l}s?\\s*(?:\\(\\s*1\\s*set\\s+of\\s+(\\d{1,2})\\s*\\)|\\(\\s*(\\d{1,2})\\s*(?:sets?|games?)\\s*\\)|[x\u00d7]\\s*(\\d{1,2})(?![0-9])|(\\d{1,2})\\s+sets?\\b)`));
+    if (after) n = Math.max(n, Number(after[1] || after[2] || after[3] || after[4]));
     const before = t.match(new RegExp(`(?:^|[^$\\d.])(\\d{1,2})\\s*[x\u00d7]?\\s+${l}`));
     if (before) n = Math.max(n, Number(before[1]));
   }
@@ -515,14 +517,15 @@ export function expandItems(text, table) {
   const m = t.match(/(\d+) games? of your choice/);
   const unnamed = Math.max(wantedGames - namedGames, m ? Number(m[1]) : 0, 0);
   const names = table.items.map((i) => i.name).filter((n) => counts[n]);
-  return { names, unnamed, counts: Object.fromEntries(names.map((n) => [n, counts[n]])) };
+  const per = Object.fromEntries(table.items.filter((i) => counts[i.name] && i.perSet > 1).map((i) => [i.name, i.perSet]));
+  return { names, unnamed, counts: Object.fromEntries(names.map((n) => [n, counts[n]])), per };
 }
 
 // How many of `name` a window (or expandItems result) takes out: 1 unless its counts say more.
 export const countOf = (w, name) => (w && w.counts && w.counts[name]) || 1;
-// Its named items in words, a multi-set item as "Giant Color Stack (2 sets)" (the same words
+// Its named items in words, a multi-game item as "Giant Color Stack (1 set of 2)" (the same words
 // the invoice lines use, so the count survives being saved as booking text and read back).
-export const namesText = (w) => (w.names || []).map((n) => (countOf(w, n) > 1 ? `${n} (${countOf(w, n)} sets)` : n));
+export const namesText = (w) => (w.names || []).map((n) => (countOf(w, n) > 1 ? `${n} (${INV.countWords(countOf(w, n), w.per && w.per[n])})` : n));
 
 export function itemsText(exp) {
   const { unnamed } = exp;
@@ -557,8 +560,8 @@ export function rentalWindows(bookings, returns, table) {
     const start = g.start || g.end;
     const end = g.end && g.end >= start ? g.end : addDays(start, 1);
     const ret = [...g.returnKeys].map((k) => returns[k]).find((r) => r && r.returned_at);
-    const { names, unnamed, counts } = expandItems(g.items, table);
-    return { key: g.key, name: g.name, phone: g.phone, start, end, returnedDay: ret ? chicagoDayOf(ret.returned_at) : '', names, unnamed, counts };
+    const { names, unnamed, counts, per } = expandItems(g.items, table);
+    return { key: g.key, name: g.name, phone: g.phone, start, end, returnedDay: ret ? chicagoDayOf(ret.returned_at) : '', names, unnamed, counts, per };
   });
 }
 

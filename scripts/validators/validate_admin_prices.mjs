@@ -207,11 +207,11 @@ for (const step of ['Payment confirmed before leaving', 'Photo ID matches the in
   if (T.gameSlots !== 6 || T.gameNames.length !== 5 || T.gameNames.includes('Giant Checkers')) errors.push(`price table counts ${T.gameSlots} bundle games over ${T.gameNames.length} kinds; want 6 over 5, no Giant Checkers`);
   const allChoices = T.items.filter((i) => i.kind === 'game').map((i) => i.choice).join(', ');
   const wy = prefillLines({ wantsRentals: true, gamesAnswer: 'Whole Yard, all 6 games ($195)', durationAnswer: DAY }, T);
-  if (!/^Whole Yard bundle, 1 day: .*Giant Color Stack \(2 sets\)/.test(wy[0].description) || wy[0].unit_cents !== 19500) errors.push(`a Whole Yard ask does not invoice both Color Stack sets at $195: "${wy[0].description}"`);
+  if (!/^Whole Yard bundle, 1 day: .*Giant Color Stack \(1 set of 2\)/.test(wy[0].description) || /2 sets/.test(wy[0].description) || wy[0].unit_cents !== 19500) errors.push(`a Whole Yard ask does not invoice both Color Stack sets at $195: "${wy[0].description}"`);
   const five = prefillLines({ wantsRentals: true, gamesAnswer: allChoices, durationAnswer: DAY }, T);
-  if (!five[0].description.startsWith('Pick 5 bundle') || five[0].unit_cents !== 17500 || /2 sets/.test(five[0].description)) errors.push(`all five games ticked (one each) is not the cheaper Pick 5: "${five[0].description}"`);
+  if (!five[0].description.startsWith('Pick 5 bundle') || five[0].unit_cents !== 17500 || /2 sets|set of/.test(five[0].description)) errors.push(`all five games ticked (one each) is not the cheaper Pick 5: "${five[0].description}"`);
   const party = prefillLines({ wantsRentals: true, gamesAnswer: `${allChoices}, Inflatable movie screen, Card table with cup holders`, durationAnswer: DAY }, T);
-  if (!/^The Whole Party bundle, 1 day: .*Giant Color Stack \(2 sets\)/.test(party[0].description) || party[0].unit_cents !== 23500) errors.push(`every item ticked is not The Whole Party with both Color Stack sets: "${party[0].description}"`);
+  if (!/^The Whole Party bundle, 1 day: .*Giant Color Stack \(1 set of 2\)/.test(party[0].description) || /2 sets/.test(party[0].description) || party[0].unit_cents !== 23500) errors.push(`every item ticked is not The Whole Party with both Color Stack sets: "${party[0].description}"`);
 }
 
 if (errors.length) {

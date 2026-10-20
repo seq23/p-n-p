@@ -94,7 +94,7 @@ must(exp('Movie Night bundle, weekend: Inflatable Movie Screen, Giant Uno, Grab 
   must(C.overdueReturns(bk, { a: { returned_at: 'x' } }, '2026-11-10').length === 1, 'a returned rental is reported overdue');
 }
 // An all-games bundle takes BOTH Giant Color Stack sets out (owner, 18 Oct 2026); typed words
-// "Giant Color Stack (2 sets)" count 2; Cornhole is 1 set, so two overlapping cornhole bookings
+// "Giant Color Stack (1 set of 2)" (and the older "(2 sets)" on saved invoices) count 2; Cornhole is 1 set, so two overlapping cornhole bookings
 // double-book it and the second finds none left.
 {
   const CS = 'Giant Color Stack';
@@ -102,12 +102,17 @@ must(exp('Movie Night bundle, weekend: Inflatable Movie Screen, Giant Uno, Grab 
   two('Whole Yard, all 6 games ($195)', 'Whole Yard form choice');
   two('Whole Yard', 'typed "Whole Yard"');
   two('The Whole Party, all 8 items ($235 day / $350 weekend)', 'The Whole Party form choice');
-  two('Giant Color Stack (2 sets)', 'typed "Giant Color Stack (2 sets)"');
+  two('Giant Color Stack (2 sets)', 'typed "Giant Color Stack (2 sets)" (older saved invoices)');
+  two('Giant Color Stack (1 set of 2)', 'typed "Giant Color Stack (1 set of 2)"');
+  two('Giant Color Stack (2 games)', 'typed "Giant Color Stack (2 games)"');
   two('2 Giant Color Stack', 'typed "2 Giant Color Stack"');
-  two('Whole Yard bundle, 1 day: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack (2 sets)', 'Whole Yard invoice line');
+  two('Whole Yard bundle, 1 day: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack (2 sets)', 'Whole Yard invoice line (older wording)');
+  two('Whole Yard bundle, 1 day: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack (1 set of 2)', 'Whole Yard invoice line');
+  must(exp('Cornhole Set (1 set)').counts['Cornhole Set'] === 1, 'Cornhole "(1 set)" counts more than 1 game');
   must(exp('Giant Color Stack').counts[CS] === 1 && exp('Pick 3 bundle ($110): Giant Color Stack, 2 games of your choice').counts[CS] === 1, 'one Giant Color Stack named counts more than 1 set');
   must(exp('Pick 5 bundle ($175)').counts[CS] === 1, 'Pick 5 (5 games, one of each) takes more than one Giant Color Stack set');
-  must(C.itemsText(exp('Whole Yard')).includes('Giant Color Stack (2 sets)'), 'the saved booking words for a Whole Yard lose the second Color Stack set');
+  must(C.itemsText(exp('Whole Yard')).includes('Giant Color Stack (1 set of 2)') && !/2 sets/.test(C.itemsText(exp('Whole Yard'))), `the saved booking words for a Whole Yard do not say "Giant Color Stack (1 set of 2)": ${C.itemsText(exp('Whole Yard'))}`);
+  must(C.expandItems(C.itemsText(exp('Whole Yard')), PRICE_TABLE).counts[CS] === 2, 'the saved Whole Yard words read back as fewer than 2 Color Stack games');
   const bk = (id, key, who, from, to, items) => [
     { id, request_key: key, kind: 'rental_pickup', date: from, customer_name: who, items },
     { id: id + 1, request_key: key, kind: 'rental_return', date: to, customer_name: who, items },

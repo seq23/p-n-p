@@ -57,6 +57,6 @@ Reserve your night: https://porchandparty901.com/rentals/ · hello@porchandparty
 (Photo: `assets/rentals/inflatable-movie-screen.webp`)
 
 ### Post 3 — The Whole Party
-Planning a family reunion or a church picnic? Rent The Whole Party: all 6 games (both Giant Color Stack sets), the movie screen and the card table for $235 a day or $350 for a weekend (the entire weekend: Fri, Sat and Sun; pick up Thursday or Friday, return Monday or Tuesday). 50% holds the date and rain reschedules free.
+Planning a family reunion or a church picnic? Rent The Whole Party: all 6 games (the Giant Color Stack set counts as 2), the movie screen and the card table for $235 a day or $350 for a weekend (the entire weekend: Fri, Sat and Sun; pick up Thursday or Friday, return Monday or Tuesday). 50% holds the date and rain reschedules free.
 Reserve your date: https://porchandparty901.com/rentals/ · hello@porchandparty901.com
 (Photo: `assets/rentals/hero.webp` or a carousel of all eight)

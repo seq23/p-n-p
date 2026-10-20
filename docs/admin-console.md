@@ -675,9 +675,11 @@ Guarded by `validate:admin-phone-fixes` (scripts/validators/validate_admin_phone
   "1 of 2 IN"), then grey **NOT OFFERED** (`nowRow` in `views-inventory.mjs`). The editing tools (add,
   photo, description, Offered / Not offered, game price) sit below in "Edit games", folded shut unless
   a save message is showing.
-- **Games per set** (`perSet`, optional, default 1, 2-10): Giant Color Stack is a set of 2 games.
-  Quantity still counts sets (what a booking takes out); perSet only changes the words: "IN 2 sets
-  (4 games)", "1 of 2 sets IN". Editor field "Games in one set"; the public site's wording is unchanged.
+- **Games per set** (`perSet`, optional, default 1, 2-10): the owner has ONE Giant Color Stack set of
+  2 games (20 Oct 2026). Quantity counts games (2: what a booking, a bundle and the OUT / IN tiles
+  count); perSet is the games in one set (2), so the row reads "IN 1 set (2 games)", "1 of 2 games IN",
+  "OUT", and invoices say "Giant Color Stack (1 set of 2)" (the older "(2 sets)" still reads as 2).
+  Editor field "Games in one set". Cornhole has no perSet: 1 set, 1 game.
 - **The top bar** (`layout()` in `views.mjs`): every signed-in screen opens with "← Back" (history
   back when she came from an admin screen, else the screen's parent) and where she is on the right.
   A Home Screen icon has no browser Back button.

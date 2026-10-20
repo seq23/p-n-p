@@ -5,12 +5,13 @@
  * Fails unless:
  *  1. Inventory In / Out: a game out today has a solid RED "OUT" pill (class out), a game in has a
  *     solid GREEN "IN" pill ("IN 2", "1 of 2 IN"), a Not offered item a grey "NOT OFFERED" (class
- *     off); Giant Color Stack (a set of 2 games, perSet) reads "IN 2 sets (4 games)" / "1 of 2 sets
- *     IN"; the rows come from itemStatuses (the one bookings matcher), never a second list;
+ *     off); Giant Color Stack (ONE set of 2 games, owner 20 Oct 2026: quantity 2 games, perSet 2)
+ *     reads "IN 1 set (2 games)" / "1 of 2 games IN" (with "1 game out: <who>") / "OUT" (with who);
+ *     Cornhole (1 set, no perSet) reads plain "IN", never "set" or "games"; the rows come from itemStatuses (the one bookings matcher), never a second list;
  *  2. the OUT now / IN tiles are the FIRST thing on the Inventory page, before the list, and the
  *     list (Out games with who + back day, then In, then Not offered) comes before the folded
  *     editing tools (<details>, shut unless a save message is showing);
- *  3. the tiles count units (sets), live from the inventory + bookings: adding an item, bumping a
+ *  3. the tiles count units (games: the unit bookings and bundles count; Color Stack's 1 set is 2), live from the inventory + bookings: adding an item, bumping a
  *     quantity and switching an item to Not offered all move the totals; Not offered counts in neither;
  *  4. every request card with a phone number has 📞 Call (tel:) and 💬 Text (sms:, blank body) in
  *     its header, and a card without one has neither;
@@ -59,7 +60,7 @@ if (tableOk) {
   const none = I.inventoryTotals(statusesFor(DATA, [], day));
   must(none.out === 0 && none.in === units(DATA), `totals with nothing booked are ${JSON.stringify(none)}, not 0 out / ${units(DATA)} in (every offered unit, quantities counted)`);
   const stackQty = DATA.games.find((g) => g.slug === 'giant-color-stack').quantity;
-  must(stackQty === 2, 'the fixture Giant Color Stack is not 2 sets');
+  must(stackQty === 2, 'the fixture Giant Color Stack is not 2 games (1 set of 2)');
   const oneOut = I.inventoryTotals(statusesFor(DATA, bk('k1', 'Ana Bee', day, '2026-11-06', 'Giant Color Stack, Giant Uno'), day));
   must(oneOut.out === 2 && oneOut.in === units(DATA) - 2, `one Color Stack set + Giant Uno out reads ${JSON.stringify(oneOut)}`);
   const bothOut = I.inventoryTotals(statusesFor(DATA, [...bk('k1', 'Ana Bee', day, '2026-11-06', 'Giant Color Stack'), ...bk('k2', 'Cy Dee', day, '2026-11-06', 'giant color stack')], day));
@@ -75,7 +76,7 @@ if (tableOk) {
   const offT = I.inventoryTotals(statusesFor(offData, bk('k3', 'Eve Fox', day, '2026-11-06', 'Giant Uno'), day));
   must(offT.out === 0 && offT.in === none.in - 1, `a Not offered Giant Uno (out today) still counts: ${JSON.stringify(offT)}`);
   const offStack = clone(DATA); offStack.games.find((g) => g.slug === 'giant-color-stack').availableNow = false;
-  must(I.inventoryTotals(statusesFor(offStack, [], day)).in === none.in - 2, 'a Not offered Color Stack does not take both sets out of IN');
+  must(I.inventoryTotals(statusesFor(offStack, [], day)).in === none.in - 2, 'a Not offered Color Stack does not take both its games out of IN');
   // perSet: words only, never the units.
   const per = clone(DATA); delete per.games.find((g) => g.slug === 'giant-color-stack').perSet;
   must(I.inventoryTotals(statusesFor(per, [], day)).in === none.in, 'perSet changes the unit totals (it must only change the words)');
@@ -109,8 +110,8 @@ for (const slug of ['giant-uno', 'grab-the-mic', 'projector']) {
 }
 must((row('projector') || {}).who && /not on website/.test(row('projector').who), 'the admin-only Projector row does not say "not on website"');
 const cs = row('giant-color-stack');
-must(cs && cs.now === 'in' && cs.pill[0] === 'in' && cs.pill[1] === '1 of 2 sets IN', `Giant Color Stack with one set out is not a green "1 of 2 sets IN" (${JSON.stringify(cs && cs.pill)})`);
-must(cs && /^1 set out: Ana B\. · back /.test(cs.who), `Giant Color Stack does not say who has the set out ("${cs && cs.who}")`);
+must(cs && cs.now === 'in' && cs.pill[0] === 'in' && cs.pill[1] === '1 of 2 games IN', `Giant Color Stack with one of its 2 games out is not a green "1 of 2 games IN" (${JSON.stringify(cs && cs.pill)})`);
+must(cs && /^1 game out: Ana B\. · back /.test(cs.who), `Giant Color Stack does not say who has the game out ("${cs && cs.who}")`);
 const cf = row('giant-connect-four');
 must(cf && cf.now === 'in' && cf.pill[0] === 'in' && cf.pill[1] === 'IN', `Giant Connect Four is not a green IN (${JSON.stringify(cf && cf.pill)})`);
 const offSlugs = T.items.filter((i) => i.removed).map((i) => i.slug);
@@ -149,9 +150,21 @@ must(tin === before - 1, `Remove (Not offered) on Giant Connect Four moved IN fr
 await post('/admin/inventory/giant-connect-four/restore', {});
 // Phone width: one column list, nothing wider than the screen.
 must(/a\.inv-nrow\{display:grid;grid-template-columns:minmax\(0,1fr\) auto/.test(html) && /\.inv-sum\{display:grid;grid-template-columns:1fr 1fr/.test(html), 'the list / tiles are not a single column that fits 375 px');
-// Color Stack all in: "IN 2 sets (4 games)".
-const csIn = VI.nowRow({ slug: 'giant-color-stack', section: 'games' }, DATA.games.find((g) => g.slug === 'giant-color-stack'), { offered: true, stock: 2, used: 0, upcoming: [] });
-must(/>IN 2 sets \(4 games\)</.test(csIn.html), `Giant Color Stack all in does not read "IN 2 sets (4 games)": ${csIn.html}`);
+// Color Stack (owner, 20 Oct 2026: ONE set of 2 games): all in "IN 1 set (2 games)"; one game out
+// "1 of 2 games IN" + "1 game out: <who>"; both out "OUT" + who "(2 games)". Never "2 sets" / "4 games".
+const CSI = DATA.games.find((g) => g.slug === 'giant-color-stack');
+must(CSI.quantity === 2 && CSI.perSet === 2, `the fixture Color Stack is quantity ${CSI.quantity} / perSet ${CSI.perSet}, not 2 games in 1 set`);
+const csIn = VI.nowRow({ slug: 'giant-color-stack', section: 'games' }, CSI, { offered: true, stock: 2, used: 0, upcoming: [] });
+must(/>IN 1 set \(2 games\)</.test(csIn.html) && csIn.kind === 'in', `Giant Color Stack all in does not read "IN 1 set (2 games)": ${csIn.html}`);
+must(!/2 sets|4 games/.test(csIn.html), `Giant Color Stack all in still says 2 sets / 4 games: ${csIn.html}`);
+const csUp = (n, count) => ({ name: n, start: '2026-11-05', end: '2026-11-06', count, outNow: true, late: false, hold: '' });
+const csHalf = VI.nowRow({ slug: 'giant-color-stack', section: 'games' }, CSI, { offered: true, stock: 2, used: 1, upcoming: [csUp('Ana B.', 1)] });
+must(/>1 of 2 games IN</.test(csHalf.html) && csHalf.kind === 'in' && /data-inv-who>1 game out: Ana B\. · back /.test(csHalf.html), `one Color Stack game out does not read "1 of 2 games IN" / "1 game out: Ana B.": ${csHalf.html}`);
+const csOut = VI.nowRow({ slug: 'giant-color-stack', section: 'games' }, CSI, { offered: true, stock: 2, used: 2, upcoming: [csUp('Wy Z.', 2)] });
+must(/>OUT</.test(csOut.html) && csOut.kind === 'out' && /data-inv-who>Wy Z\. \(2 games\) · back /.test(csOut.html) && !/sets/.test(csOut.html), `the whole Color Stack set out does not read "OUT" with "Wy Z. (2 games)": ${csOut.html}`);
+const ch = VI.nowRow({ slug: 'cornhole', section: 'games' }, DATA.games.find((g) => g.slug === 'cornhole'), { offered: true, stock: 1, used: 0, upcoming: [] });
+must(/>IN</.test(ch.html) && !/set|games/.test(ch.html.replace(/data-inv-[a-z-]+/g, '')), `Cornhole (1 set, 1 game) does not read plain "IN": ${ch.html}`);
+must(VI.perSetOf(DATA.games.find((g) => g.slug === 'cornhole')) === 1, 'Cornhole counts as more than 1 game per set');
 const two = VI.nowRow({ slug: 'cornhole', section: 'games' }, { name: 'Cornhole', quantity: 2 }, { offered: true, stock: 2, used: 0, upcoming: [] });
 must(/>IN 2</.test(two.html) && two.kind === 'in', 'a 2-quantity game all in does not read "IN 2"');
 

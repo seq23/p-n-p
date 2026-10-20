@@ -24,7 +24,7 @@ export function liveChecklistSource(data = GAMES, src = source) {
   p = p.replace(/(<h2>Game rentals[\s\S]*?<ul class="ck" style="columns:4">)([\s\S]*?)(\n  <\/ul>)/, (m, a, list, z) => {
     const label = (i, section) => {
       const base = String(i.formChoice || i.name).replace(/ set$/i, '');
-      return section === 'games' && i.quantity > 1 ? `${base} (${i.quantity} sets)` : base;
+      return section === 'games' && i.quantity > 1 ? `${base} (${INV.countWords(i.quantity, INV.perSetOf(i))})` : base;
     };
     const want = [...INV.publicGames(g).map((i) => label(i, 'games')), ...INV.publicExtras(g).map((i) => label(i, 'extras'))];
     const esc = (s) => s.replace(/&/g, '&amp;');

@@ -149,7 +149,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 **Description:**
 
-AVAILABLE NOW. Giant Color Stack for your party. A two-foot color-sorting stacking puzzle: slide the sky blue, lime green, yellow and pink rings onto five poles until every pole is one color. Two sets for head-to-head races. Size: 2 ft tall, 5 poles and rings in 4 colors, ages 6+. 2 available.
+AVAILABLE NOW. Giant Color Stack for your party. A two-foot color-sorting stacking puzzle: slide the sky blue, lime green, yellow and pink rings onto five poles until every pole is one color. Comes as a pair for head-to-head races. Size: 2 ft tall, 5 poles and rings in 4 colors, ages 6+. 2 available.
 
 $40 a day for one day, or $60 for a weekend (the entire weekend: Fri, Sat and Sun). No minimum order. Save with a bundle: Pick 3 $110, Pick 5 $175, Whole Yard $195, Movie Night $110, Game Night $85, The Whole Party $235.
 
@@ -278,9 +278,9 @@ Facebook Page: https://www.facebook.com/porchandparty901
 RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
 Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
 
-Whole Yard bundle: all 6 games (both Giant Color Stack sets), $195 a day. You save $45 on day prices ($240 separately).
+Whole Yard bundle: all 6 games (the Giant Color Stack set counts as 2), $195 a day. You save $45 on day prices ($240 separately).
 
-Games included: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets.
+Games included: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack (1 set of 2).
 
 Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
@@ -359,9 +359,9 @@ Facebook Page: https://www.facebook.com/porchandparty901
 RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
 Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
 
-The Whole Party bundle: all 6 games (both Giant Color Stack sets), the movie screen and the card table, $235 a day or $350 for a weekend. You save $70 on day prices ($305 separately); a weekend saves $110 ($460 separately).
+The Whole Party bundle: all 6 games (the Giant Color Stack set counts as 2), the movie screen and the card table, $235 a day or $350 for a weekend. You save $70 on day prices ($305 separately); a weekend saves $110 ($460 separately).
 
-Games included: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, 2 Giant Color Stack sets. Included: Inflatable Movie Screen and Card Table with Cup Holders.
+Games included: Giant Connect Four, Cornhole Set, Giant Uno, Grab the Mic, Giant Color Stack (1 set of 2). Included: Inflatable Movie Screen and Card Table with Cup Holders.
 
 Pickup and return only, at Mt. Moriah Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115 (a safe exchange zone). After payment we set your pickup time by email or message. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.
 
