@@ -472,11 +472,23 @@ function typedCount(t, it) {
   }
   return n;
 }
+// Hand-typed booking words (owner, 19 Oct 2026: "Giant Uno, Grab the Mic, Inflatable Movie
+// Screen, Projector, movie night bundle for $110 + $50 deposit refunded on tuesday"): an item
+// counts when its inventory name (or form choice) appears anywhere in the words, any case, with
+// any punctuation or spacing ("grab-the-mic", "GIANT  UNO"); the other words are ignored. This is
+// the ONE matcher: availability (the /request form), the clash checks, the calendar, the Day sheet
+// and Inventory's In / Out all read rentalWindows -> expandItems.
+export const matchText = (s) => ` ${String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]+/g, ' ').trim()} `;
+export function namesItem(text, it) {
+  const t = ` ${String(text || '').toLowerCase()} `;
+  const m = matchText(text);
+  return [it.name, it.choice].filter(Boolean).some((label) => t.includes(String(label).toLowerCase()) || (matchText(label).trim() && m.includes(matchText(label))));
+}
 export function expandItems(text, table) {
   const t = ` ${String(text || '').toLowerCase()} `;
   const counts = {};
   const need = (name, n = 1) => { counts[name] = Math.max(counts[name] || 0, n); };
-  for (const i of table.items) if (t.includes(i.name.toLowerCase()) || (i.choice && t.includes(String(i.choice).toLowerCase()))) need(i.name, typedCount(t, i) || 1);
+  for (const i of table.items) if (namesItem(text, i)) need(i.name, typedCount(t, i) || 1);
   const slots = table.gameSlots || table.gameNames.length;
   let wantedGames = 0;
   for (const b of table.bundles) {

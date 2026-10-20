@@ -77,19 +77,25 @@ const { db, get, post } = s;
 const all = (sql, ...a) => db.prepare(sql).bind(...a).all().then((r) => r.results);
 const one = (sql, ...a) => db.prepare(sql).bind(...a).first();
 
-const settings0 = await get('/admin/settings');
-must(settings0.status === 200 && /id="inventory"/.test(settings0.text), 'Settings has no Inventory section');
-must(/href="#inventory"/.test(settings0.text), 'Settings top has no link to Inventory');
+// Inventory has its own page (19 Oct 2026); Settings keeps an Inventory section that links to it,
+// and an old /admin/settings#inventory link lands there.
+const settingsPage0 = await get('/admin/settings');
+must(settingsPage0.status === 200 && /<details class="set-sec" id="inventory"[\s\S]*?href="\/admin\/inventory"[^>]*data-help="set.inventoryLink"/.test(settingsPage0.text), 'Settings has no Inventory section linking to /admin/inventory');
+must(settingsPage0.text.includes("if(location.hash==='#inventory')location.replace('/admin/inventory')"), 'an old /admin/settings#inventory link does not land on the Inventory page');
+must(/data-inv-status/.test(settingsPage0.text), 'Settings lost the website-update box');
+must(/<nav aria-label="Main">[\s\S]*?>Money<\/a><a href="\/admin\/inventory"[^>]*>Inventory<\/a><a href="\/admin\/settings"/.test(settingsPage0.text), 'the main nav lacks Inventory between Money and Settings');
+const settings0 = await get('/admin/inventory');
+must(settings0.status === 200 && /id="inventory"/.test(settings0.text), 'the Inventory page does not answer');
 const seedRows = await all('SELECT slug, section, position, data FROM inventory_items ORDER BY section, position');
 for (const sec of INV.SECTIONS) must(seedRows.filter((r) => r.section === sec).map((r) => r.slug).join() === (FIX[sec] || []).map((i) => i.slug).join(), `seed: D1 ${sec} rows are not the games.json ${sec}, in order`);
 must(seedRows.every((r) => JSON.stringify(JSON.parse(r.data)) === JSON.stringify(INV.allItems(FIX).find((x) => x.item.slug === r.slug).item)), 'seed: a D1 row is not its games.json object');
 const st0 = await I.loadInventory(db);
 must(INV.stringify(st0.data) === FIX_TEXT, 'seed: D1 merged over the bundled file does not export the bundled file exactly');
-must((settings0.text.match(/data-inv-item=/g) || []).length === INV.allItems(FIX).length, 'Settings does not list every inventory item');
-must(/data-inv-section="adminItems"[^>]*>[\s\S]*?Admin only/.test(settings0.text) && /On the website/.test(settings0.text), 'Settings does not say "On the website" / "Admin only"');
-must(/Bring back/.test(settings0.text) && /data-inv-state="removed"/.test(settings0.text), 'removed items do not show with Bring back');
-must(/Add an item/.test(settings0.text) && /data-inv-status/.test(settings0.text), 'Settings lacks Add an item or the website-update box');
-must(/Whole Yard and The Whole Party include every game on the website: <strong>All games \(available now: 6\)<\/strong>/.test(settings0.text), 'Settings does not say what the all-games bundles hold');
+must((settings0.text.match(/data-inv-item=/g) || []).length === INV.allItems(FIX).length, 'the Inventory page does not list every inventory item');
+must(/data-inv-section="adminItems"[^>]*>[\s\S]*?Admin only/.test(settings0.text) && /On the website/.test(settings0.text), 'the Inventory page does not say "On the website" / "Admin only"');
+must(/<h2 class="inv-group">Not offered<\/h2>[\s\S]*data-inv-state="removed"[\s\S]*Bring back/.test(settings0.text) && !/data-inv-state="removed"[^>]*data-inv-now="(in|out|some|hold)"/.test(settings0.text), 'Not offered items are not in their own group with Bring back (or show In / Out)');
+must(/href="\/admin\/inventory\/new"[^>]*>\+ Add a game or item</.test(settings0.text) && settings0.text.indexOf('+ Add a game or item') < settings0.text.indexOf('data-inv-live') && /data-inv-status/.test(settings0.text), 'the Inventory page lacks the big + Add a game or item button at the top, or the website-update box');
+must(/Whole Yard and The Whole Party include every game on the website: <strong>All games \(available now: 6\)<\/strong>/.test(settings0.text), 'the Inventory page does not say what the all-games bundles hold');
 const day0 = await get(`/admin/day/${s.util.todayISO(3)}`);
 must(/href="\/admin\/settings#inventory"[^>]*data-help="inv.fromGrid"/.test(day0.text), 'the games-out grid has no link to Inventory');
 
@@ -97,16 +103,17 @@ must(/href="\/admin\/settings#inventory"[^>]*data-help="inv.fromGrid"/.test(day0
 const exifJpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe1, 0x00, 0x0c, 0x45, 0x78, 0x69, 0x66, 0x00, 0x00, 0x47, 0x50, 0x53, 0x21, 0xff, 0xda, 0x00, 0x02, 0x11, 0x22, 0xff, 0xd9]);
 const photo = new File([exifJpeg], 'IMG_0001.jpg', { type: 'image/jpeg' });
 const jenga = { kind: 'game', name: 'Giant Jenga', quantity: '1', deposit: '50', blurb: 'The giant wooden block tower. Pull a block, stack it on top, and keep it standing.', size: '60 blocks, stacks to 4 ft', use: 'both', alt: 'Black teenagers pulling a block from a giant wooden block tower on a backyard lawn', on_website: ['0', '1'] };
-const newForm = await get('/admin/settings/inventory/new');
+const newForm = await get('/admin/inventory/new');
 must(newForm.status === 200 && /name="photo"/.test(newForm.text) && /name="alt"/.test(newForm.text) && /data-suggest="Black family and friends playing/.test(newForm.text) && /name="on_website" value="1" checked/.test(newForm.text), 'the Add form lacks the photo upload, the suggested alt text or the Show on website switch (on by default)');
 for (const f of ['name', 'quantity', 'day_price', 'weekend_price', 'deposit', 'blurb', 'size', 'use', 'kind']) must(new RegExp(`name="${f}"`).test(newForm.text), `the Add form lacks ${f}`);
 const rev0 = (await one("SELECT value FROM inventory_meta WHERE key = 'rev'")).value;
 // Refused first: no photo.
-const noPhoto = await post('/admin/settings/inventory/new', jenga);
+const noPhoto = await post('/admin/inventory/new', jenga);
 must(noPhoto.status === 422 && /add a photo before it goes on the website/.test(noPhoto.text), 'a public item without a photo was not refused with a plain message');
 must((await one("SELECT value FROM inventory_meta WHERE key = 'rev'")).value === rev0 && !(await one("SELECT slug FROM inventory_items WHERE slug = 'giant-jenga'")), 'a refused save changed the database');
-const added = await post('/admin/settings/inventory/new', { ...jenga, photo });
-must(added.status === 303 && /#inventory$/.test(added.location) && /Saved/.test(decodeURIComponent(added.location)), `Add did not save and go back to Settings (${added.status} ${added.location})`);
+const added = await post('/admin/inventory/new', { ...jenga, photo });
+must(added.status === 303 && /^\/admin\/inventory\?m=/.test(added.location) && /Saved/.test(decodeURIComponent(added.location)), `Add did not save and go back to the Inventory page (${added.status} ${added.location})`);
+must(/data-inv-item="giant-jenga"/.test((await get('/admin/inventory')).text), 'the added item is not on the Inventory page');
 const jrow = await one("SELECT section, data, photo_sha, photo_live FROM inventory_items WHERE slug = 'giant-jenga'");
 must(jrow && jrow.section === 'games' && jrow.photo_sha && jrow.photo_live === 0, 'the new game is not a games row with a pending photo');
 const ph = jrow ? await one('SELECT bytes FROM inventory_photos WHERE sha = ?1', jrow.photo_sha) : null;
@@ -144,21 +151,24 @@ const dayJ = await get(`/admin/day/${s.util.todayISO(5)}`);
 must(/<strong>Giant Jenga<\/strong><span>Out/.test(dayJ.text), 'the Day sheet grid does not show the new game Out');
 
 // ---- Edit -------------------------------------------------------------------------------
-const editPage = await get('/admin/settings/inventory/giant-uno');
+const editPage = await get('/admin/inventory/giant-uno/edit');
 must(editPage.status === 200 && /value="Giant Uno"/.test(editPage.text) && /Every game is \$40 a day/.test(editPage.text), 'the Edit form does not open with the item and the shared game price');
 const uno = JSON.parse((await one("SELECT data FROM inventory_items WHERE slug = 'giant-uno'")).data);
 const unoForm = { kind: 'game', name: uno.name, quantity: String(uno.quantity), deposit: '50', blurb: uno.blurb, size: uno.size, use: uno.use, alt: uno.alt, on_website: ['0', '1'] };
 const ver0 = (await I.loadInventory(db)).version;
-const noop = await post('/admin/settings/inventory/giant-uno', unoForm);
+const noop = await post('/admin/inventory/giant-uno/edit', unoForm);
 must(noop.status === 303 && (await I.loadInventory(db)).version === ver0, 'a no-change save changed the inventory version');
 must(JSON.parse((await one("SELECT data FROM inventory_items WHERE slug = 'giant-uno'")).data).formChoice === uno.formChoice, 'a save lost the item\'s form string');
-const edited = await post('/admin/settings/inventory/giant-uno', { ...unoForm, quantity: '2', deposit: '75' });
+const edited = await post('/admin/inventory/giant-uno/edit', { ...unoForm, quantity: '2', deposit: '75' });
+must(/How many: <strong>2<\/strong>/.test((await get('/admin/inventory/giant-uno')).text), 'an edit is not shown on the item page');
 const uno2 = JSON.parse((await one("SELECT data FROM inventory_items WHERE slug = 'giant-uno'")).data);
 must(edited.status === 303 && uno2.quantity === 2 && uno2.deposit === 75, 'Edit did not save how many and the deposit');
 must(P.PRICE_TABLE.items.find((i) => i.slug === 'giant-uno').depositCents === 7500, 'the price table does not carry the item deposit');
 const unoInv = prefillLines({ wantsRentals: true, gamesAnswer: 'Giant Uno, Card table with cup holders', durationAnswer: 'One day (24 hours)' }, P.PRICE_TABLE);
 must(unoInv.filter((l) => l.refundable).length === 1 && unoInv.find((l) => l.refundable).unit_cents === 7500, 'an order does not pay one deposit, the biggest among its items');
-await post('/admin/settings/inventory/giant-uno', unoForm); // back to 1 / $50
+// An old Settings address still saves (a form left open on a phone) and lands on Inventory.
+const legacy = await post('/admin/settings/inventory/giant-uno', unoForm); // back to 1 / $50
+must(legacy.status === 303 && /^\/admin\/inventory\?m=/.test(legacy.location) && JSON.parse((await one("SELECT data FROM inventory_items WHERE slug = 'giant-uno'")).data).quantity === 1, 'a save to the old Settings address did not save and land on Inventory');
 
 // ---- 4. Remove (with a future booking) and Bring back ----------------------------------------
 const inv1 = await s.invoiceFor(s.requests.find((r) => r.email === 'test.renter@example.com'));
@@ -167,10 +177,10 @@ await post('/admin/calendar/bookings', { kind: 'rental_pickup', date: s.util.tod
 const unoBooking = await one("SELECT id FROM bookings WHERE customer_name = 'Una Uno' AND kind = 'rental_pickup'");
 const nUno = (await I.futureBookingsFor(db, 'Giant Uno', s.util.todayISO(0), P.TRACK_TABLE)).length;
 must(nUno >= 1, 'the future booking with Giant Uno is not found');
-const st1 = await get('/admin/settings');
+const st1 = await get('/admin/inventory/giant-uno');
 must(st1.text.includes(`Remove Giant Uno? ${nUno} future ${nUno === 1 ? 'booking has' : 'bookings have'} it. ${nUno === 1 ? 'It keeps' : 'They keep'} it.`), 'Remove does not say plainly how many future bookings have the item');
-const removed = await post('/admin/settings/inventory/giant-uno/remove', {});
-must(removed.status === 303 && decodeURIComponent(removed.location).includes(`Giant Uno is removed ✓ ${nUno} future ${nUno === 1 ? 'booking keeps' : 'bookings keep'} it.`), `Remove did not confirm with the booking count (${decodeURIComponent(removed.location)})`);
+const removed = await post('/admin/inventory/giant-uno/remove', {});
+must(removed.status === 303 && decodeURIComponent(removed.location).includes(`Giant Uno is not offered now ✓ ${nUno} future ${nUno === 1 ? 'booking keeps' : 'bookings keep'} it.`), `Remove did not confirm with the booking count (${decodeURIComponent(removed.location)})`);
 must(JSON.parse((await one("SELECT data FROM inventory_items WHERE slug = 'giant-uno'")).data).availableNow === false, 'Remove did not set availableNow false (soft remove)');
 must(!P.PRICE_TABLE.items.some((i) => i.slug === 'giant-uno'), 'a removed item is still in the price table');
 fresh();
@@ -190,21 +200,22 @@ must(!/<strong>Giant Uno<\/strong>/.test(dayEmpty.text), 'a removed item shows o
 must(JSON.stringify(await all('SELECT description FROM invoice_lines WHERE invoice_id = ?1 ORDER BY id', inv1.id)) === JSON.stringify(linesBefore), 'removing an item changed an existing invoice');
 must(!prefillLines({ wantsRentals: true, gamesAnswer: 'Giant Uno', durationAnswer: 'One day (24 hours)' }, P.PRICE_TABLE).some((l) => l.description.startsWith('Giant Uno')), 'a removed item is still priced by the invoice prefill');
 must(P.GAMES.bundles.find((b) => b.slug === 'whole-yard').includes === 'All games (available now: 6)', 'Whole Yard does not drop a removed game');
-const back = await post('/admin/settings/inventory/giant-uno/restore', {});
-must(back.status === 303 && P.PRICE_TABLE.items.some((i) => i.slug === 'giant-uno') && /Giant Uno is back/.test(decodeURIComponent(back.location)), 'Bring back did not put the item back');
+must(/data-inv-item="giant-uno"[^>]*data-inv-state="removed"[^>]*data-inv-now="off"/.test((await get('/admin/inventory')).text) && /data-state="off">Not offered</.test((await get('/admin/inventory/giant-uno')).text), 'a removed item does not show as Not offered');
+const back = await post('/admin/inventory/giant-uno/restore', {});
+must(back.status === 303 && P.PRICE_TABLE.items.some((i) => i.slug === 'giant-uno') && /Giant Uno is offered again ✓/.test(decodeURIComponent(back.location)), 'Bring back did not put the item back');
 
 // A save of the admin-only Projector with nothing changed changes nothing (19 Oct 2026: the first
 // production round trip added "use" and "kind" to it).
 {
   const pj = JSON.parse((await one("SELECT data FROM inventory_items WHERE slug = 'projector'")).data);
   const v0 = (await I.loadInventory(db)).version;
-  const r = await post('/admin/settings/inventory/projector', { kind: 'extra', name: pj.name, quantity: String(pj.quantity), deposit: '', blurb: pj.blurb || '', size: pj.size || '', use: pj.use || 'both', alt: pj.alt || '', on_website: '0' });
+  const r = await post('/admin/inventory/projector/edit', { kind: 'extra', name: pj.name, quantity: String(pj.quantity), deposit: '', blurb: pj.blurb || '', size: pj.size || '', use: pj.use || 'both', alt: pj.alt || '', on_website: '0' });
   must(r.status === 303 && (await I.loadInventory(db)).version === v0, 'a no-change save of an admin-only item changed the inventory');
 }
 
 // ---- 5. Admin only ---------------------------------------------------------------------------
 must(P.TRACK_TABLE.items.some((i) => i.slug === 'projector' && i.adminOnly) && !P.PRICE_TABLE.items.some((i) => i.slug === 'projector'), 'the admin-only Projector is priced or not tracked');
-const toAdmin = await post('/admin/settings/inventory/giant-jenga', { ...jenga, on_website: '0' });
+const toAdmin = await post('/admin/inventory/giant-jenga/edit', { ...jenga, on_website: '0' });
 must(toAdmin.status === 303 && (await one("SELECT section FROM inventory_items WHERE slug = 'giant-jenga'")).section === 'adminItems', 'switching Show on website off did not make the item admin only');
 must(!P.PRICE_TABLE.items.some((i) => i.slug === 'giant-jenga') && P.TRACK_TABLE.items.some((i) => i.slug === 'giant-jenga' && i.adminOnly), 'an admin-only item is public or untracked');
 fresh();
@@ -213,7 +224,7 @@ fresh();
 const avail3 = await (await s.RS.handleAvailability({ request: new Request(`https://porchandparty901.com/api/request/availability?event=${s.util.todayISO(20)}&pickup_when=morning&return_when=after&duration=day`), env: s.env })).json();
 must(!reqPage3.includes('Giant Jenga') && !('giant-jenga' in (avail3.left || {})) && !('projector' in (avail3.left || {})), 'an admin-only item reaches the /request form or the availability answer');
 must(P.GAMES.bundles.find((b) => b.slug === 'whole-yard').includes === 'All games (available now: 6)', 'an admin-only game is counted in the all-games bundles');
-await post('/admin/settings/inventory/giant-jenga', { ...jenga, on_website: ['0', '1'] });
+await post('/admin/inventory/giant-jenga/edit', { ...jenga, on_website: ['0', '1'] });
 must((await one("SELECT section FROM inventory_items WHERE slug = 'giant-jenga'")).section === 'games', 'switching Show on website back on did not make the item public');
 // The generators read games and extras only; the live pages name no admin-only item.
 for (const rel of ['scripts/generators/build_rentals_page.js', 'scripts/generators/build_llms_rentals.js', 'scripts/lib/faq_content.js', 'scripts/install_brand_surfaces.js']) must(!/adminItems/.test(fs.readFileSync(path.join(ROOT, rel), 'utf8').replace(/\(data\.adminItems \|\| \[\]\)\.some\(\(x\) => x\.slug === 'projector'[^)]*\)/, '')), `${rel} reads adminItems`);
@@ -231,7 +242,7 @@ const bad = [
   ['duplicate', { ...jenga, photo }, /There is already an item called "Giant Jenga"/],
 ];
 for (const [label, form, re] of bad) {
-  const r = await post('/admin/settings/inventory/new', form);
+  const r = await post('/admin/inventory/new', form);
   const t = r.text.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
   must(r.status === 422 && re.test(t) && /Not saved yet/.test(t), `save-time rule "${label}" did not refuse with its plain sentence (${r.status})`);
 }
@@ -241,7 +252,7 @@ must((await one("SELECT value FROM inventory_meta WHERE key = 'rev'")).value ===
   const cand = INV.resolve(JSON.parse(JSON.stringify(P.GAMES)));
   cand.games.push(INV.newItem('games', { slug: 'giant-uno-deluxe', name: 'Giant Uno Deluxe', size: 'x', use: 'both', quantity: 1, blurb: 'A long enough description.', alt: 'A long enough photo description.' }));
   const ci = INV.validate(INV.resolve(cand), { hasImage: () => true });
-  const r = await post('/admin/settings/inventory/new', { ...jenga, name: 'Giant Uno Deluxe', size: 'x', blurb: 'A long enough description.', alt: 'A long enough photo description.', photo });
+  const r = await post('/admin/inventory/new', { ...jenga, name: 'Giant Uno Deluxe', size: 'x', blurb: 'A long enough description.', alt: 'A long enough photo description.', photo });
   must(ci.length > 0 && ci.every((e) => r.text.includes(e.replace(/&/g, '&amp;').replace(/"/g, '&quot;'))), 'the admin refusal is not word for word the CI rule');
 }
 for (const [rel, re] of [['scripts/validators/validate_rentals_page.js', /INV\.validate\(RAW/], ['functions/_lib/inventory.mjs', /INV\.validate\(candidate/], ['scripts/inventory/apply_publish.mjs', /INV\.validate\(next/]]) must(re.test(fs.readFileSync(path.join(ROOT, rel), 'utf8')), `${rel} does not run scripts/lib/inventory.js validate()`);
@@ -301,13 +312,13 @@ must(status.state === 'live' && status.text === 'Live ✓', `the live /rentals/ 
 must((await one("SELECT value FROM inventory_meta WHERE key = 'dirty'")).value === '0' && (await one("SELECT photo_live FROM inventory_items WHERE slug = 'giant-jenga'")).photo_live === 1, 'Live ✓ did not clear the waiting change or mark the photo live');
 must(/data-state="live"/.test((await get('/admin/settings')).text) && (await (await I.handlePending({ env: s.env })).json()).pending === false, 'Settings does not show Live ✓, or the change is still pending');
 // A failed run: plain words and Try again (a new update the poll picks up).
-await post('/admin/settings/inventory/rates', { rate_day: '40', rate_weekend: '60' });
+await post('/admin/inventory/rates', { rate_day: '40', rate_weekend: '60' });
 const failedId = (await one('SELECT id FROM inventory_publishes ORDER BY id DESC LIMIT 1')).id;
 await report('failed', { id: failedId });
 status = JSON.parse((await get('/api/admin/inventory/status')).text);
 must(status.state === 'failed' && /did not update/.test(status.text) && /Your change is saved/.test(status.text), 'a failed run is not reported in plain words');
-must(/Try again/.test((await get('/admin/settings')).text), 'a failed update offers no Try again');
-const again = await post('/admin/settings/inventory/publish', {});
+must(/Try again/.test((await get('/admin/settings')).text) && /Try again/.test((await get('/admin/inventory')).text), 'a failed update offers no Try again (Settings and Inventory)');
+const again = await post('/admin/inventory/publish', {});
 const againRow = await one('SELECT id, status FROM inventory_publishes ORDER BY id DESC LIMIT 1');
 must(again.status === 303 && againRow.id > failedId && againRow.status === 'queued' && (await (await I.handlePending({ env: s.env })).json()).publish_id === againRow.id, 'Try again does not queue a new update for the poll');
 // With the optional key: the save starts the workflow at once, carrying the whole inventory.
@@ -324,8 +335,8 @@ s.env.PNP_FETCH = async (url) => (/\/dispatches$/.test(url) ? new Response('bad'
 await post('/admin/settings/inventory/publish', {});
 must((await one('SELECT status FROM inventory_publishes ORDER BY id DESC LIMIT 1')).status === 'queued' && (await (await I.handlePending({ env: s.env })).json()).pending === true, 'a dead GitHub key blocks the website update instead of leaving it to the poll');
 delete s.env.PNP_GITHUB_TOKEN;
-must(/Game price \(every game is the same price\)/.test((await get('/admin/settings')).text), 'Settings lacks the game price form');
-const rates = await post('/admin/settings/inventory/rates', { rate_day: '45', rate_weekend: '30' });
+must(/Game price \(every game is the same price\)/.test((await get('/admin/inventory')).text), 'the Inventory page lacks the game price form');
+const rates = await post('/admin/inventory/rates', { rate_day: '45', rate_weekend: '30' });
 must(/weekend price must be a whole number/.test(decodeURIComponent(rates.location)), 'a bad game price was not refused');
 
 // ---- 8. The public photo route ---------------------------------------------------------------

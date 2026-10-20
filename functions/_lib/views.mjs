@@ -128,7 +128,7 @@ ${kindCss()}
 
 export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false, panelWide = false } = {}) {
   const nav = authed ? `<nav aria-label="Main">
-    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${tip('nav.money')}>Money</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>Help</a>
+    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${tip('nav.money')}>Money</a><a href="/admin/inventory"${tip('nav.inventory')}>Inventory</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>Help</a>
     <form method="post" action="/admin/logout" style="display:inline"><button type="submit"${tip('nav.signout')}>Sign out</button></form></nav>` : '';
   const backLink = back ? `<a class="back" href="${esc(back.href)}"${tip('nav.back')}>&larr; ${esc(back.label || 'Back')}</a>` : '';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
@@ -1274,18 +1274,41 @@ export function helpPage() {
   ${helpGlossary()}`, { screen: 'help', back: BACK_REQUESTS });
 }
 
-export function settingsPage({ settings, flash, error, hasQr, categories = [], pendingSync = 0, inventory = '' }) {
-  return layout('Settings', `<h1>Settings</h1>
-  ${flash ? `<div class="notice ok"><strong>${esc(flash)}</strong></div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
-  ${inventory ? `<p data-inv-top>${act(`<a class="btn ghost" href="#inventory"${tip('set.inventoryLink')}>Inventory: your rental items &darr;</a>`, 'set.inventoryLink')}</p>` : ''}
-  <form class="card" method="post" action="/admin/settings" enctype="multipart/form-data">
-    <h2>How customers pay you</h2>
+// Settings, calm layout (owner, 19 Oct 2026): short plainly named sections, each opening with one
+// sentence saying what it is for; folded on a phone (open on a computer); every form, field and
+// button that was here is still here, saving the same way.
+const SET_CSS = `
+details.set-sec{background:var(--card);border:1px solid var(--line);border-radius:14px;margin:0 0 12px;padding:0 16px}
+details.set-sec>summary{list-style:none;cursor:pointer;min-height:60px;display:flex;align-items:center;justify-content:space-between;gap:10px;font:600 1.35rem "Cormorant Garamond",Georgia,serif;color:var(--ink)}
+details.set-sec>summary::-webkit-details-marker{display:none}
+details.set-sec>summary::after{content:"+";font:600 1.5rem Inter,Arial,sans-serif;color:var(--accent)}details.set-sec[open]>summary::after{content:"\\2013"}
+details.set-sec[open]{padding-bottom:16px}
+.set-head{display:flex;flex-direction:column;gap:2px;padding:10px 0}.set-why{font:400 .98rem/1.4 Inter,Arial,sans-serif;color:var(--muted)}
+details.set-sec[open] .set-why{margin-bottom:4px}
+.set-sec h3{font-size:1.2rem;margin:16px 0 4px}
+.set-sec form+form,.set-sec form+h3{margin-top:12px}
+.set-row{display:flex;align-items:center;gap:10px;min-height:48px;color:var(--ink)}.set-row input{width:24px;height:24px;min-height:24px;flex:none}
+`;
+const SET_JS = `<script>(function(){var phone=window.matchMedia&&window.matchMedia('(max-width:700px)').matches;var h=location.hash.slice(1);
+document.querySelectorAll('details.set-sec').forEach(function(d){if(phone&&d.id!==h&&!d.querySelector('#'+(h||'x')))d.open=false;});})();</script>`;
+function setSec(id, title, why, body, open = true) {
+  return `<details class="set-sec" id="${id}" data-set-sec="${id}"${open ? ' open' : ''}><summary${tip(id === 'password' ? 'set.password' : `set.sec.${id}`)}><span class="set-head"><span class="set-title">${esc(title)}</span><span class="set-why">${esc(why)}</span></span></summary>${body}</details>`;
+}
+// The Settings sections, in order (validate:admin-settings reads this list).
+export const SETTINGS_SECTIONS = [
+  ['pay', 'Your payment details'], ['emails', 'Emails & reminders'], ['inventory', 'Inventory'], ['gcal', 'Google Calendar link'],
+  ['website', 'Website auto-update status'], ['sheet', 'Google Sheet'], ['categories', 'Expense categories'], ['password', 'Password'],
+];
+
+export function settingsPage({ settings, flash, error, hasQr, categories = [], pendingSync = 0, inventory = '', websiteStatus = '' }) {
+  const T = Object.fromEntries(SETTINGS_SECTIONS);
+  const pay = `<form method="post" action="/admin/settings" enctype="multipart/form-data">
     <label for="z">Zelle (the email or phone number people send Zelle to)</label><input id="z" name="zelle" value="${esc(settings.zelle || '')}" autocomplete="off">
     <label for="c">Cash App name (starts with $)</label><input id="c" name="cashapp" placeholder="$yourname" value="${esc(settings.cashapp || '')}" autocomplete="off" autocapitalize="off">
     <label for="q">Payment QR code (a photo or screenshot of it)</label>
     ${hasQr ? '<div style="margin:6px 0"><img src="/api/admin/qr.png" alt="Your QR code" width="160" height="160" style="border:1px solid var(--line);border-radius:10px"></div>' : '<div class="muted">No QR code yet.</div>'}
     <input id="q" name="qr" type="file" accept="image/png,image/jpeg">
-    ${hasQr ? '<label class="row" style="color:var(--ink);gap:10px;min-height:48px"><input type="checkbox" name="remove_qr" value="1" style="width:24px;min-height:24px"> Remove the QR code</label>' : ''}
+    ${hasQr ? '<label class="set-row"><input type="checkbox" name="remove_qr" value="1"> Remove the QR code</label>' : ''}
     <details class="disclose"><summary${tip('set.business')}>Business name and address</summary>
       <label for="bn">Business name on invoices</label><input id="bn" name="business_name" value="${esc(settings.business_name || 'Porch & Party')}">
       <label for="ba">Address line on invoices</label><input id="ba" name="business_address" placeholder="Memphis, Tennessee" value="${esc(settings.business_address || '')}">
@@ -1293,49 +1316,54 @@ export function settingsPage({ settings, flash, error, hasQr, categories = [], p
     </details>
     <input type="hidden" name="day_list_phone" value="${esc(settings.day_list_phone || '901-355-1518')}"><input type="hidden" name="day_list_email" value="${esc(settings.day_list_email || 'hello@porchandparty901.com')}">
     <div style="margin-top:16px">${act(`<button class="btn primary" type="submit"${tip('set.save')}>Save</button>`, 'set.save')}</div>
-  </form>
-  <section class="card"><h2>Google Calendar</h2>
-    ${act(`<a class="btn" href="/admin/calendar/link"${tip('cal.link')}>Link my Google Calendar</a>`, 'cal.link')}
-    <div style="margin-top:12px">${confirmStep({ key: 'set.newToken', yesKey: 'set.newTokenYes', label: 'Make a new private calendar link', question: 'Make a new calendar link? The old link stops working, so Google Calendar stops updating until you add the new link there again.', action: '/admin/settings/calendar-token', hidden: '', danger: true })}</div>
-  </section>
-  <form class="card" method="post" action="/admin/settings" enctype="multipart/form-data">
-    <h2>My day list</h2>
+  </form>`;
+  const emails = `<form method="post" action="/admin/settings" enctype="multipart/form-data" data-day-list>
+    <h3>My day list and new-request emails</h3>
     ${['zelle', 'cashapp', 'business_name', 'business_address', 'id_folder_url'].map((k) => `<input type="hidden" name="${k}" value="${esc(settings[k] || (k === 'business_name' ? 'Porch & Party' : ''))}">`).join('')}
     <label for="dlp">My phone number for my day list</label><input id="dlp" name="day_list_phone" type="tel" value="${esc(settings.day_list_phone || '901-355-1518')}">
     <label for="dle">My email for my day list</label><input id="dle" name="day_list_email" type="email" value="${esc(settings.day_list_email || 'hello@porchandparty901.com')}">
     <div style="margin-top:12px">${act(`<button class="btn" type="submit"${tip('set.saveDayList')}>Save my day list details</button>`, 'set.saveDayList')}</div>
   </form>
-  <section class="card" data-weekly-settings><h2>Monday summary email</h2>
+  <div data-weekly-settings><h3>Monday summary email</h3>
     <p>Every Monday at 7 AM: last week, this week and what needs you, to ${esc(settings.day_list_email || 'hello@porchandparty901.com')}. It is ${settings.weekly_summary === '0' ? '<strong>off</strong>' : '<strong>on</strong>'}.</p>
     <form method="post" action="/admin/settings/weekly">${hiddenInputs({ weekly_summary: settings.weekly_summary === '0' ? '1' : '0' })}${act(`<button class="btn ghost" type="submit"${tip('set.weeklyToggle')}>${settings.weekly_summary === '0' ? 'Turn the Monday summary on' : 'Turn the Monday summary off'}</button>`, 'set.weeklyToggle')}</form>
-    <form method="post" action="/admin/settings/weekly-now" style="margin-top:10px">${act(`<button class="btn" type="submit"${tip('set.weeklyNow')}>Send me this week's summary now</button>`, 'set.weeklyNow')}</form>
-  </section>
-  <section class="card"><h2>Google Sheet</h2>
-    <p>Your Bookings, Monthly totals and Expenses tabs in the request sheet update by themselves.${settings.sheet_synced_at ? ` Last updated ${esc(prettyDate(settings.sheet_synced_at.slice(0, 10)))}.` : ''}${pendingSync ? ' <strong>An update is waiting and will be tried again.</strong>' : ''}</p>
-    <form method="post" action="/admin/settings/sheet-sync">${act(`<button class="btn ghost" type="submit"${tip('set.sheetSync')}>Update the Google Sheet now</button>`, 'set.sheetSync')}</form>
-  </section>
-  <form class="card" method="post" action="/admin/settings/holds" data-hold-settings><h2>Game rental holds</h2>
+    <form method="post" action="/admin/settings/weekly-now" style="margin-top:10px">${act(`<button class="btn ghost" type="submit"${tip('set.weeklyNow')}>Send me this week's summary now</button>`, 'set.weeklyNow')}</form>
+  </div>
+  <form method="post" action="/admin/settings/holds" data-hold-settings><h3>Game rental holds and their reminder</h3>
     <p class="muted">A rental booked on the website holds its games while the customer pays the deposit.</p>
     <label for="hh">How long a hold lasts (hours)</label><input id="hh" name="hold_hours" type="number" min="1" max="336" inputmode="numeric" value="${esc(settings.hold_hours || '24')}">
-    <label class="row" style="color:var(--ink);gap:10px;min-height:48px"><input type="checkbox" name="hold_auto_expire" value="1"${settings.hold_auto_expire === '0' ? '' : ' checked'} style="width:24px;min-height:24px"> Expire unpaid holds automatically (off: every new hold is held by hand until you release it)</label>
-    <label class="row" style="color:var(--ink);gap:10px;min-height:48px"><input type="checkbox" name="hold_reminder" value="1"${settings.hold_reminder === '0' ? '' : ' checked'} style="width:24px;min-height:24px"> Email the customer a reminder before the hold ends</label>
+    <label class="set-row"><input type="checkbox" name="hold_auto_expire" value="1"${settings.hold_auto_expire === '0' ? '' : ' checked'}> Expire unpaid holds automatically (off: every new hold is held by hand until you release it)</label>
+    <label class="set-row"><input type="checkbox" name="hold_reminder" value="1"${settings.hold_reminder === '0' ? '' : ' checked'}> Email the customer a reminder before the hold ends</label>
     <label for="hrh">Send that reminder this many hours before the end</label><input id="hrh" name="hold_reminder_hours" type="number" min="1" max="48" inputmode="numeric" value="${esc(settings.hold_reminder_hours || '4')}">
     <label for="hsh">Show "Holds ending soon" for holds ending within (hours)</label><input id="hsh" name="hold_soon_hours" type="number" min="1" max="72" inputmode="numeric" value="${esc(settings.hold_soon_hours || '12')}">
     <div style="margin-top:12px">${act(`<button class="btn primary" type="submit"${tip('set.holds')}>Save hold settings</button>`, 'set.holds')}</div>
-  </form>
-  <form class="card" method="post" action="/admin/settings/categories"><h2>Expense categories</h2>
+  </form>`;
+  const gcal = `${act(`<a class="btn" href="/admin/calendar/link"${tip('cal.link')}>Link my Google Calendar</a>`, 'cal.link')}
+    <div style="margin-top:12px">${confirmStep({ key: 'set.newToken', yesKey: 'set.newTokenYes', label: 'Make a new private calendar link', question: 'Make a new calendar link? The old link stops working, so Google Calendar stops updating until you add the new link there again.', action: '/admin/settings/calendar-token', hidden: '', danger: true })}</div>`;
+  const sheet = `<p>Your Bookings, Monthly totals and Expenses tabs in the request sheet update by themselves.${settings.sheet_synced_at ? ` Last updated ${esc(prettyDate(settings.sheet_synced_at.slice(0, 10)))}.` : ''}${pendingSync ? ' <strong>An update is waiting and will be tried again.</strong>' : ''}</p>
+    <form method="post" action="/admin/settings/sheet-sync">${act(`<button class="btn ghost" type="submit"${tip('set.sheetSync')}>Update the Google Sheet now</button>`, 'set.sheetSync')}</form>`;
+  const cats = `<form method="post" action="/admin/settings/categories">
     <label for="cats">One per line</label><textarea id="cats" name="categories" rows="8">${esc(categories.join('\n'))}</textarea>
     <div style="margin-top:12px">${act(`<button class="btn ghost" type="submit"${tip('set.categories')}>Save categories</button>`, 'set.categories')}</div>
-  </form>
-  ${inventory}
-  <details class="disclose card" style="padding-top:0"><summary${tip('set.password')}>Change password</summary>
-  <form method="post" action="/admin/settings/password">
+  </form>`;
+  const pw = `<form method="post" action="/admin/settings/password">
     <label for="cur">Current password</label><input id="cur" name="current" type="password" autocomplete="current-password" required>
     <label for="np">New password (at least 10 letters or numbers)</label><input id="np" name="next" type="password" autocomplete="new-password" minlength="10" required>
     <label for="np2">New password again</label><input id="np2" name="confirm" type="password" autocomplete="new-password" minlength="10" required>
     <p class="muted">Changing it signs out every other phone or computer.</p>
     <button class="btn" type="submit"${tip('set.passwordSave')}>Change password</button>
-  </form></details>`, { screen: 'settings', back: BACK_REQUESTS });
+  </form>`;
+  return layout('Settings', `<style>${SET_CSS}</style><h1>Settings</h1>
+  ${flash ? `<div class="notice ok"><strong>${esc(flash)}</strong></div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+  ${setSec('pay', T.pay, 'How customers pay you: this goes on every invoice.', pay)}
+  ${setSec('emails', T.emails, 'Where your day list and emails go, the Monday summary, and how long website rentals are held.', emails)}
+  ${setSec('inventory', T.inventory, 'Your rental games and items, In or Out today, have their own page.', inventory)}
+  ${setSec('gcal', T.gcal, 'Shows all your bookings in your own Google Calendar.', gcal)}
+  ${setSec('website', T.website, 'After an inventory change the website updates by itself, and this box says when it is done.', websiteStatus || '<p class="muted">Nothing to show.</p>')}
+  ${setSec('sheet', T.sheet, 'A copy of your bookings, monthly totals and expenses in the Google Sheet.', sheet)}
+  ${setSec('categories', T.categories, 'The categories you pick from when you add an expense on Money.', cats, false)}
+  ${setSec('password', T.password, 'The password for this console (rarely needed).', pw, false)}
+  ${SET_JS}`, { screen: 'settings', back: BACK_REQUESTS });
 }
 
 const CHECKLIST_CSS = `

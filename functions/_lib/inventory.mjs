@@ -17,7 +17,10 @@ import INV from '../../scripts/lib/inventory.js';
 import { BUNDLED_GAMES, applyInventory } from './prices.mjs';
 import { cleanImage } from './image-clean.mjs';
 import { bytesToB64 } from './util.mjs';
-import { expandItems } from './calendar.mjs';
+import { expandItems, rentalWindows, isOut, countOf, listBookings, loadReturns } from './calendar.mjs';
+import { shortName } from './requested.mjs';
+import { shortDate } from './util.mjs';
+import { currentHolds, fromSql } from './holds.mjs';
 
 export const REPO = 'seq23/p-n-p';
 export const WORKFLOW = 'inventory-publish.yml';
@@ -463,4 +466,61 @@ export async function handlePending({ env }) {
 export async function handleReportRoute({ request, env }) {
   const res = await handleReport(env, request);
   return new Response(res.body, { status: res.status, headers: { ...PUBLIC_HEADERS, 'Content-Type': 'application/json' } });
+}
+
+// ---- In / Out (owner, 19 Oct 2026) ------------------------------------------------------------
+// Two separate ideas, never both called "available":
+//  - Offered / Not offered is set by hand (Remove / Bring back: availableNow).
+//  - In / Out is computed from the bookings: every rental from its pickup day through its return
+//    day (calendar.mjs rentalWindows, the same windows and the same item matcher the /request form's
+//    availability and the clash checks use), held (unpaid) or confirmed; a checked-in return frees it.
+// A customer can book an item only when it is offered AND not out on their dates.
+
+// "Tue 20 Oct, 3:40 PM" in Memphis, from a D1 UTC time.
+export function holdUntilWords(until) {
+  const ms = fromSql(until);
+  if (!Number.isFinite(ms)) return '';
+  const d = new Date(ms);
+  const day = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'America/Chicago' }).replace(',', '');
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' });
+  return `${day}, ${time}`;
+}
+
+// table: TRACK_TABLE; data: the games.json-shaped inventory (for Offered); holds: currentHolds rows.
+// Returns slug -> { state: 'in' | 'out' | 'some' | 'hold' | 'off', label, next, upcoming: [...] }.
+export function itemStatuses({ table, data, windows, holds = [], today }) {
+  const held = new Map((holds || []).filter((h) => h.state === 'held').map((h) => [h.request_key, h]));
+  const holdWords = (w) => { const h = held.get(w.key); if (!h) return ''; return h.until ? `On hold until ${holdUntilWords(h.until)}` : 'On hold until you decide'; };
+  const offered = new Map(INV.allItems(data).map(({ item }) => [item.slug, item.availableNow !== false]));
+  const out = {};
+  for (const it of table.items) {
+    const mine = windows.filter((w) => w.names.includes(it.name));
+    const upcoming = mine.filter((w) => isOut(w, today, today) || w.start > today).sort((a, b) => (a.start < b.start ? -1 : a.start > b.start ? 1 : 0))
+      .map((w) => ({ key: w.key, name: shortName(w.name), start: w.start, end: w.end, count: countOf(w, it.name), outNow: isOut(w, today, today), late: isOut(w, today, today) && w.end < today, hold: holdWords(w) }));
+    const now = upcoming.filter((u) => u.outNow);
+    const nextW = upcoming.find((u) => !u.outNow);
+    const next = nextW ? { ...nextW, words: `Next booked: ${shortDate(nextW.start)}${nextW.end !== nextW.start ? ` – ${shortDate(nextW.end)}` : ''}${nextW.hold ? ' (on hold)' : ''}` } : null;
+    const stock = it.quantity || 1;
+    const used = now.reduce((n, u) => n + u.count, 0);
+    const isOffered = offered.has(it.slug) ? offered.get(it.slug) : !it.removed;
+    const back = (u) => (u.late ? `was due back ${shortDate(u.end)}` : `back ${shortDate(u.end)}`);
+    let state; let label;
+    if (!isOffered) { state = 'off'; label = 'Not offered'; }
+    else if (!used) { state = 'in'; label = 'In'; }
+    else if (stock > 1 && used < stock) { state = 'some'; label = `${used} of ${stock} out`; }
+    else if (now.every((u) => u.hold)) { state = 'hold'; label = now[0].hold; }
+    else {
+      const first = now.filter((u) => !u.hold).sort((a, b) => (a.end < b.end ? -1 : 1))[0];
+      state = 'out';
+      label = stock > 1 ? `${used} of ${stock} out, ${back(first)}` : `Out: ${first.name}, ${back(first)}`;
+    }
+    out[it.slug] = { state, label, used, stock, next, upcoming, offered: isOffered };
+  }
+  return out;
+}
+
+// The same, from the database (Inventory page and its item pages).
+export async function loadStatuses(db, { table, data, today }) {
+  const [bookings, returns, holds] = await Promise.all([listBookings(db), loadReturns(db), currentHolds(db)]);
+  return itemStatuses({ table, data, windows: rentalWindows(bookings, returns, table), holds, today });
 }
