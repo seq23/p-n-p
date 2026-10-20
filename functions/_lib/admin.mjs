@@ -795,6 +795,9 @@ async function routeAdmin(context) {
       await logEvent(env.DB, key, plan === 'not_sure' ? `Takedown: not decided yet${note ? ` (${note})` : ''}` : (plan ? `Takedown: the customer will handle it${note ? ` (${note})` : ''}` : 'Takedown question asked again'), 'admin');
     }
     const words = plan === 'not_sure' ? 'Saved: takedown not decided yet.' : (plan ? 'Saved: the customer will handle the takedown.' : 'Saved ✓');
+    // "Not needed" in Step 2 of Calendar & Bookings stays on the calendar.
+    const calBack = AS.calendarBack(form.get('back'));
+    if (calBack) return redirect(`${calBack.split('#')[0]}${calBack.includes('?') ? '&' : '?'}m=${encodeURIComponent(`✓ ${words}`)}#takedowns-to-schedule`);
     return redirect(key ? `/admin/?tdok=${encodeURIComponent(form.get('r'))}&tdm=${encodeURIComponent(words)}#c-${form.get('r')}` : `/admin/?m=${encodeURIComponent(words)}`);
   }
   if (segs[0] === 'requests' && segs[1] === 'takedown-inline' && method === 'POST') return AC.takedownInlineRoute(env, request);

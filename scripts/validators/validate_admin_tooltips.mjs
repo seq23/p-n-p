@@ -21,6 +21,8 @@ import { mod } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
 
 const { HELP } = await mod('functions/_lib/helptext.mjs');
+// The owner's words for the five Calendar & Bookings steps (calm calendar, 19 Oct 2026), pinned here, not read from the code.
+const CAL_STEPS = ["See what's coming up.", 'Put a request on the calendar.', 'Plan your day.', "Check tomorrow's reminders.", 'Look over the next 14 days.'];
 const { esc } = await mod('functions/_lib/util.mjs');
 const R = await mod('functions/_lib/reminders.mjs');
 const errors = [];
@@ -232,9 +234,18 @@ for (const [p, o, res] of pages) {
   }
   if (o.partial) continue;
   const steps = (html.match(/<ol class="topsteps[^"]*" data-steps="[^"]+"[^>]*>([\s\S]*?)<\/ol>/) || [])[1];
-  if (!steps || (steps.match(/<li>/g) || []).length !== 3) errors.push(`${p}: no numbered 1-2-3 steps at the top`);
+  // Calendar & Bookings (owner-approved calm calendar, 19 Oct 2026): five numbered steps, the
+  // month first; 1-4 in the margin column, 5 under the month (validate:admin-calm-calendar has the rest).
+  if (/^\/admin\/calendar(\?| \(|$)/.test(p)) {
+    const calm = [...html.matchAll(/data-calstep="(\d)"[^>]*>(?:<summary[^>]*>|<h2[^>]*>)<span class="n">(\d)<\/span><span class="spt">([^<]+)<\/span>/g)].map((m) => [m[1], m[2], m[3]]);
+    const want = CAL_STEPS.map((t, i) => [String(i + 1), String(i + 1), esc(t)]);
+    const order = (x) => html.indexOf(x);
+    if (JSON.stringify([...calm].sort()) !== JSON.stringify(want)) errors.push(`${p}: the five calendar steps are not 1-5 with the owner's words: ${JSON.stringify(calm)}`);
+    else if (!(order('<section class="calcal" data-calendar>') > 0 && order('<section class="calcal" data-calendar>') < order('id="calstep-5"') && order('<aside class="calside">') > order('id="calstep-5"') && order('<aside class="calside">') < order('id="calstep-1"'))) errors.push(`${p}: the calendar does not come before the steps`);
+  } else if (!steps || (steps.match(/<li>/g) || []).length !== 3) errors.push(`${p}: no numbered 1-2-3 steps at the top`);
   if (/class="subnav"/.test(html)) errors.push(`${p}: the old sub-nav button row is back (the steps panel replaced it)`);
-  if (/^\/admin\/(calendar|money)(\?|$)/.test(p) && !/data-steps-panel/.test(html)) errors.push(`${p}: no steps panel (3 steps, each with its buttons)`);
+  if (/^\/admin\/money(\?|$)/.test(p) && !/data-steps-panel/.test(html)) errors.push(`${p}: no steps panel (3 steps, each with its buttons)`);
+  if (/^\/admin\/calendar(\?| \(|$)/.test(p) && !/data-steps="calendar" data-steps-panel data-calm/.test(html)) errors.push(`${p}: no calm steps panel (5 steps beside the month)`);
   if (!o.home && !/class="back"|&larr; Back to requests/.test(html)) errors.push(`${p}: no Back link`);
   if (o.auth !== false && !o.print && !/href="\/admin\/help"/.test(html)) errors.push(`${p}: no link to How to use this`);
   if (o.print && !/href="\/admin\/help"/.test(html)) errors.push(`${p}: print page has no link to How to use this`);

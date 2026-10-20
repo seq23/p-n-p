@@ -4,8 +4,8 @@
 // Calendar link page. Same rules as views.mjs: words + colour, 48 px targets, every button
 // and link carries a title from helptext.mjs.
 import { esc, money, shortDate, prettyDate, b64urlText, STATUS_LABELS } from './util.mjs';
-import { tip, hint, stepsPanel } from './helptext.mjs';
-import { layout, act, chip, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS } from './views.mjs';
+import { tip, hint, STEPS, PANELS } from './helptext.mjs';
+import { layout, act, chip, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS, bookYesForm } from './views.mjs';
 import { KINDS, KIND_LABELS, prettyTime, addDays, returnKeyOf, firstLine, usageOn, namesText, outBetween } from './calendar.mjs';
 import { serviceInfo, serviceKey, SERVICE_KINDS } from './kinds.mjs';
 import { gamesAskedOn } from './requested.mjs';
@@ -56,8 +56,8 @@ const CAL_CSS = `
 .notes .n{padding:10px 0;border-bottom:1px solid var(--line)}
 .found h3{margin-bottom:2px}
 /* Requested (asked for, not booked): outlined, never filled. Words always shown. */
-.k.req{background:transparent!important;border-style:solid;border-width:2px 2px 2px 6px;font-weight:600}
-.k.req.tent{border-style:dashed solid dashed solid;color:var(--ink)}
+.k.req{background:transparent!important;border-style:dashed;border-width:2px;font-weight:600}
+.k.req.tent{border-style:dashed;color:var(--ink)}
 .tentpill{display:inline-block;padding:1px 8px;border:2px dashed #8a7d73;border-radius:999px;color:#5f5148;font-size:.85rem;font-weight:700;background:#fff;margin:2px 0}
 .askedline{margin:6px 0}.askedline a.k{display:inline-flex;align-items:center;min-height:40px;padding:2px 10px;text-decoration:none;color:var(--ink)}
 a.k.req{text-decoration:none;color:var(--ink)}
@@ -80,7 +80,7 @@ a.k.req{text-decoration:none;color:var(--ink)}
 .grid .tile.over{border-width:3px;border-color:#8f3427}
 /* Month on a phone: a day-by-day list, full chips (the grid stays from 700 px up). */
 .monthlist{display:none}
-@media(max-width:699px){.month{display:none}.monthlist{display:grid;gap:8px}}
+@media(max-width:899px){.month{display:none}.monthlist{display:grid;gap:8px}}
 .mday{border:1px solid var(--line);border-radius:10px;background:#fff;padding:8px 10px;display:grid;gap:6px;min-width:0}
 .mday.today{border:2px solid var(--accent)}
 .mday .mdh{display:flex;flex-wrap:wrap;gap:4px 10px;align-items:center;min-height:44px;color:var(--ink);text-decoration:none;font-size:1.1rem}
@@ -100,8 +100,8 @@ a.k.req{text-decoration:none;color:var(--ink)}
 
 // line: true (Requests, owner 19 Oct 2026) folds the box into ONE tappable line at the bottom of
 // the page, "3 reminders ▸", that opens to the same box. The Calendar keeps the open box.
-export function remindersBox(rows, tomorrowLabel, { line = false } = {}) {
-  if (!rows.length) return '';
+export function remindersBox(rows, tomorrowLabel, { line = false, bare = false } = {}) {
+  if (!rows.length) return bare ? `<section data-reminders><p class="muted" style="margin:0">No reminders for tomorrow, ${esc(tomorrowLabel)}.</p></section>` : '';
   const items = rows.map((b) => {
     const body = reminderText(b);
     const sms = smsLink(b.phone, body);
@@ -121,7 +121,9 @@ export function remindersBox(rows, tomorrowLabel, { line = false } = {}) {
   const left = rows.filter((b) => !b.reminded_at).length;
   const inner = `<h2>Tomorrow's reminders <small class="muted">${esc(tomorrowLabel)}</small></h2>${items}
     <p class="muted" style="margin:8px 0 0">Customers with an email on file also get an email reminder by themselves at about 10 AM.</p>`;
-  const box = line
+  const box = bare
+    ? `<section data-reminders><p class="muted" style="margin:0 0 4px">For ${esc(tomorrowLabel)}${left && left < rows.length ? ` · ${left} still to send` : (!left ? ' · all sent ✓' : '')}</p>${items}<p class="muted" style="margin:8px 0 0">Customers with an email on file also get an email reminder by themselves at about 10 AM.</p></section>`
+    : line
     ? `<details class="card remline" data-reminders data-reminders-line><summary${tip('req.reminders')}><span class="remcount">${rows.length} reminder${rows.length === 1 ? '' : 's'}</span> <span class="muted">for tomorrow, ${esc(tomorrowLabel)}${left && left < rows.length ? ` · ${left} still to send` : (!left ? ' · all sent ✓' : '')}</span><span class="remchev" aria-hidden="true">▸</span></summary><div class="remin">${inner}</div></details>`
     : `<section class="card" data-reminders>${inner}</section>`;
   return `${box}
@@ -165,11 +167,11 @@ const CAL_JS = `
   });
 })();`;
 
-export function searchBox(q = '') {
-  return `<form class="card" method="get" action="/admin/search" role="search" data-search>
-    <label for="find" style="margin-top:0;font-size:1.1rem;color:var(--ink)"><strong>Find a customer — type a name</strong></label>
-    <input id="find" name="q" value="${esc(q)}" autocomplete="off" placeholder="For example: Jane, or 901 555" data-find${tip('find.box')}>
-    <div style="margin-top:8px">${act(`<button class="btn ghost" type="submit"${tip('find.go')}>Find</button>`, 'find.go')}</div>
+export function searchBox(q = '', { bare = false } = {}) {
+  return `<form class="${bare ? 'findbar' : 'card'}" method="get" action="/admin/search" role="search" data-search>
+    <label for="find" ${bare ? 'class="vh"' : 'style="margin-top:0;font-size:1.1rem;color:var(--ink)"'}><strong>Find a customer — type a name</strong></label>
+    ${bare ? '<span class="findrow">' : ''}<input id="find" name="q" type="search" value="${esc(q)}" autocomplete="off" placeholder="${bare ? 'Find a customer: name, phone or email' : 'For example: Jane, or 901 555'}" data-find${tip('find.box')}>
+    ${bare ? `<button class="btn ghost" type="submit"${tip('find.go')}>Find</button></span>` : `<div style="margin-top:8px">${act(`<button class="btn ghost" type="submit"${tip('find.go')}>Find</button>`, 'find.go')}</div>`}
     <div id="find-results" aria-live="polite"></div></form>
   <script>(function(){var i=document.querySelector('[data-find]'),out=document.getElementById('find-results'),t=null,last='';if(!i||!out)return;
     i.addEventListener('input',function(){clearTimeout(t);t=setTimeout(function(){var q=i.value.trim();if(q===last)return;last=q;if(q.length<2){out.innerHTML='';return;}
@@ -178,7 +180,15 @@ export function searchBox(q = '') {
 
 // "Takedowns to schedule" (owner, 18 Oct 2026): the customer asked for a takedown that is not
 // on the calendar yet. Their day prefills the booking screen; nothing is booked until she saves.
-export function toScheduleBox(rows = []) {
+export function toScheduleBox(rows = [], { inline = false, back = '/admin/calendar' } = {}) {
+  if (inline) {
+    return `<section class="sub" id="takedowns-to-schedule" data-takedowns-to-schedule><h3>Takedowns to schedule (${rows.length})</h3>
+      ${rows.length ? rows.map((d) => `<div class="u" data-td-to-schedule><strong>${esc(d.name || 'No name')}</strong> <span class="muted">${esc(KIND_LABELS[d.kind])}${d.date ? ` · asked for ${esc(shortDate(d.date))}` : ' · no day given yet'}${d.note ? ` · ${esc(d.note)}` : ''}</span>
+        ${d.inline ? `<details class="yes" data-td-inline><summary class="btn primary"${tip('cal.tdOpen')}>Schedule takedown</summary>
+          <form method="post" action="/admin/requests/takedown-inline" data-td-book>${hiddenInputs({ r: d.rk, kind: d.kind, go: 'save', back })}<label for="td-${esc(d.rk)}">Takedown day</label><input type="date" id="td-${esc(d.rk)}" name="date" value="${esc(d.date || '')}" required${tip('step.date')}><button class="btn primary" type="submit"${tip('cal.tdBook')}>Book takedown</button></form></details>` : ''}
+        <p class="rowlinks"><a href="/admin/calendar/new?r=${esc(d.rk)}&amp;kind=${esc(d.kind)}${d.date ? `&amp;date=${esc(d.date)}` : ''}"${tip('cal.tdToSchedule')}>More choices</a> · <a href="/admin/#c-${esc(d.rk)}"${tip('cal.decideOpen')}>Open the request</a></p>
+        ${d.inline ? `<form method="post" action="/admin/requests/takedown" data-td-not-needed>${hiddenInputs({ r: d.rk, plan: 'customer_handles', back })}<button class="btn ghost" type="submit"${tip('cal.tdNotNeeded')}>Not needed</button></form>` : ''}</div>`).join('') : '<p class="muted" style="margin:0">Nothing waiting.</p>'}</section>`;
+  }
   if (!rows.length) return '';
   return `<section class="card notice warn" id="takedowns-to-schedule" data-takedowns-to-schedule><h2>Takedowns to schedule</h2><p class="muted">The customer asked for a takedown. The job is not Finished until it is done. Tap to book it on the day they asked for.</p>
       ${rows.map((d) => `<div class="u" data-td-to-schedule><strong>${esc(d.name || 'No name')}</strong> <span class="muted">${esc(KIND_LABELS[d.kind])}${d.date ? ` · asked for ${esc(shortDate(d.date))}` : ' · no day given yet'}${d.note ? ` · ${esc(d.note)}` : ''}</span>
@@ -190,7 +200,10 @@ export function toScheduleBox(rows = []) {
 // span with role=link (CAL_JS opens it); elsewhere a real link.
 export function requestedChip(c, tag = 'a') {
   const href = `/admin/#c-${c.rk}`;
-  const words = `${TENT_WORDS} · ${c.part === 'out' ? OUT_WORDS : c.part === 'return' ? 'Rental return' : SERVICE_KINDS[c.service].short}: ${c.name}`;
+  const what = `${c.part === 'out' ? OUT_WORDS : c.part === 'return' ? 'Rental return' : SERVICE_KINDS[c.service].short}: ${c.name}`;
+  // The month grid (owner-approved calm calendar, 19 Oct 2026): "? Party: Rene P." in a dashed
+  // outline; the legend says what ? means. Lists, the Day sheet and a phone's day keep the words.
+  const words = tag === 'a' ? `${TENT_WORDS} · ${what}` : `? ${what}`;
   const attrs = `class="k req ${esc(c.kind)}" style="border-color:${esc(c.color)}" data-requested="${esc(c.service)}"${tip('cal.requested')}`;
   return tag === 'a' ? `<a ${attrs} href="${esc(href)}">${esc(words)}</a>` : `<span ${attrs} role="link" tabindex="0" data-open="${esc(href)}">${esc(words)}</span>`;
 }
@@ -221,6 +234,126 @@ export function fillLegend() {
   return `<div class="fill-legend" data-fill-legend${tip('cal.legend')}><span class="k porch_install">Booked</span><span class="k req" style="border-color:${s.bar}">Requested</span> Filled = booked (you said yes) · Outlined = requested, not confirmed yet</div>`;
 }
 
+// The calm Calendar & Bookings (owner-approved mock-up, 19 Oct 2026). On a computer (>= 900 px)
+// the month comes first and largest, numbered steps 1-4 sit in the right margin and Step 5 (the
+// next 14 days) under the month. On a phone: Step 1's search at the top, a small month with a
+// coloured dot per job (hollow = not confirmed), the tapped day's jobs right under it (each opens
+// to its details), then Steps 2-5 as numbered rows that fold. Every booking (the old List) is a
+// section at the bottom. "Yes, book it" here is the Requests card's own form (bookYesForm ->
+// POST /admin/requests/talked), one code path. Nothing that was on the page is gone, only moved.
+const CALM_CSS = `
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.calm{display:grid;gap:16px;margin:0 0 16px}
+.calmain,.calside{display:grid;gap:16px;align-content:start;min-width:0}
+.cstep{background:var(--card);border-radius:14px;padding:14px 16px;min-width:0;box-shadow:0 1px 0 var(--line)}
+.cstep>.csh{display:flex;gap:10px;align-items:center;margin:0;font:600 1.2rem/1.2 "Cormorant Garamond",Georgia,serif;color:var(--ink);list-style:none}
+.cstep>summary.csh{cursor:pointer;min-height:48px}.cstep>summary.csh::-webkit-details-marker{display:none}
+.cstep .n{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font:700 .95rem Inter,Arial,sans-serif;display:inline-flex;align-items:center;justify-content:center}
+.cstep .spt{flex:1;min-width:0}.cstep .cnt{font:600 .95rem Inter,Arial,sans-serif;color:var(--muted)}
+.cstep .chev{display:inline-block;color:var(--accent);font-size:1rem;transition:transform .2s}.cstep[open] .chev{transform:rotate(90deg)}
+.cstep .spl{margin:4px 0 10px;color:var(--muted);font-size:.98rem}
+.cstep .csb{display:grid;gap:10px;min-width:0}
+.cstep .sub h3{font:700 .95rem Inter,Arial,sans-serif;margin:6px 0 6px}
+.cstep .u{background:var(--cream);border:0;border-radius:10px;padding:10px;margin:0 0 8px;display:grid;gap:6px;min-width:0}
+.cstep .u[draggable=true]{cursor:grab}
+.cstep .rowlinks{margin:0;font-size:.95rem}.cstep .s1links{display:flex;flex-wrap:wrap;gap:0 18px}.cstep .rowlinks a{display:inline-flex;min-height:36px;align-items:center}
+.cstep .btn{min-height:46px;padding:8px 14px;font-size:1rem}
+.cstep details.yes>summary{list-style:none}.cstep details.yes>summary::-webkit-details-marker{display:none}
+details.yes[open]>summary{display:none}
+details.yes form{display:grid;gap:6px;margin:0}details.yes label{margin:0;font-size:.95rem;color:var(--muted)}
+.findbar{margin:0}.findrow{display:flex;gap:8px}.findrow input{flex:1;min-width:0}.findrow .btn{width:auto;flex:none}
+.calcal{min-width:0}
+.mhead{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;margin:0 0 8px}
+.mhead h2{flex:1;margin:0;font-size:1.6rem;min-width:10ch}
+.mnav{display:flex;gap:6px}.mnav .btn{width:auto;min-height:44px;padding:6px 12px;font-size:.95rem}
+.views{display:flex;gap:6px}.views .btn{width:auto;min-height:44px;padding:6px 14px;font-size:.95rem}
+.calcal .legend{margin:0 0 6px;font-size:.85rem}.calcal .legend .k{font-size:.8rem}
+.calcal .fill-legend{font-size:.92rem;color:var(--muted)}
+.month .day .k.req,.month .day .k.tent{border-style:dashed}
+.cstep .upcoming .item{padding:10px 0}
+.evb{margin:8px 0 0}.evb>summary{list-style:none}.evb>summary::-webkit-details-marker{display:none}
+.evb>summary{cursor:pointer;min-height:48px;display:flex;align-items:center;font-weight:600;color:var(--accent)}
+.evb .links{margin:8px 0}
+/* Phone month: dots, a tapped day, a job that opens */
+.pmonth{display:none}
+.pmonth .pdw{font-size:.75rem;color:var(--muted);text-align:center}
+.pmonth .pd{display:grid;justify-items:center;gap:3px;padding:6px 0 4px;border-radius:10px;text-decoration:none;color:var(--ink);min-height:48px;min-width:0}
+.pmonth .pd.out{opacity:.4}.pmonth .pd.today{background:#fbf0ea}.pmonth .pd.sel{outline:2px solid var(--accent);outline-offset:-2px}
+.pmonth .pd b{font-size:.95rem;font-weight:600}
+.pmonth .dots{display:flex;gap:2px;height:8px;flex-wrap:nowrap}.pmonth .dots i{width:7px;height:7px;border-radius:50%;border:1.5px solid;box-sizing:border-box}
+.pmonth .dots i.tent{background:transparent!important}
+.pmonth .dots i.more{border:0;width:auto;height:auto;font:700 .6rem/1 Inter,Arial,sans-serif;font-style:normal;color:var(--muted)}
+.monthlist .mday{background:var(--card);border:0;box-shadow:0 1px 0 var(--line)}
+.mday .pj{border-left:5px solid;border-radius:8px;background:var(--cream);padding:0;min-width:0}
+.mday .pj.tent{border-left-style:dashed}
+.mday .pj>summary{list-style:none;cursor:pointer;padding:8px 10px;min-height:44px;display:grid;gap:2px}.mday .pj>summary::-webkit-details-marker{display:none}
+.mday .pj .pjw{font-size:.88rem;color:var(--muted)}
+.mday .pj .pjb{padding:0 10px 10px;display:grid;gap:8px}
+.mday dl.jd{margin:0;display:grid;grid-template-columns:auto 1fr;gap:3px 10px;font-size:.95rem}.mday dl.jd dt{color:var(--muted)}.mday dl.jd dd{margin:0;overflow-wrap:anywhere}
+.mday .jb{display:flex;flex-wrap:wrap;gap:6px;margin:0}.mday .jb .btn{width:auto;min-height:44px;padding:6px 12px;font-size:.95rem}
+.mday .jb details.yes{flex-basis:100%}
+@media(min-width:900px){.calm{grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start}
+  .cstep>summary.csh{cursor:default}.cstep>summary.csh .chev{display:none}}
+@media(max-width:899px){.calm{display:flex;flex-direction:column}.calmain,.calside{display:contents}
+  [data-calstep="1"]{order:1}.calcal{order:2}[data-calstep="2"]{order:3}[data-calstep="3"]{order:4}[data-calstep="4"]{order:5}[data-calstep="5"]{order:6}
+  .pmonth{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;margin:0 0 8px}
+  .monthlist .mday{display:none}.monthlist .mday.sel{display:grid}
+  .mhead h2{font-size:1.35rem}.calcal .legend{display:none}
+  .cstep{padding:4px 14px}.cstep[open]{padding-bottom:14px}.cstep[data-calstep="1"]{padding:12px 14px}
+  .cstep>.csh{font-size:1.1rem}}
+@media print{.calside,.pmonth,.mhead .views,.evb{display:none!important}}
+`;
+
+const calmStep = (n, inner, { fold = true, count = '' } = {}) => {
+  const title = `<span class="n">${n}</span><span class="spt">${esc(STEPS.calendar[n - 1])}</span>${count !== '' ? `<span class="cnt">(${esc(String(count))})</span>` : ''}`;
+  const body = `<p class="spl">${esc(PANELS.calendar[n - 1])}</p><div class="csb">${inner}</div>`;
+  return fold
+    ? `<details class="cstep" id="calstep-${n}" data-calstep="${n}" open><summary class="csh"${tip('cal.stepRow')}>${title}<span class="chev" aria-hidden="true">▸</span></summary>${body}</details>`
+    : `<section class="cstep" id="calstep-${n}" data-calstep="${n}"><h2 class="csh">${title}</h2>${body}</section>`;
+};
+
+// One job on a phone's tapped day: a row that opens to time, where, what to bring, what is left
+// to collect (or Paid in full ✓), the deposit, then Call · Text · Open their card (· Yes, book it).
+function phoneJob(b, c, day, yesFor) {
+  const s = serviceInfo(b.kind);
+  const held = RENTAL.has(b.kind) && c.hold && c.hold.state === 'held';
+  const ret = c.ret;
+  const words = `${KIND_LABELS[b.kind]}${b.kind === 'rental_return' && ret && ret.returned_at ? ' ✓' : ''}: ${b.customer_name || 'No name'}`;
+  const bal = c.bal && !c.bal.void ? c.bal : null;
+  const rows = [['Time', b.time ? prettyTime(b.time) : 'Any time this day']];
+  if (b.place) rows.push(['Where', b.place]);
+  if (b.items) rows.push([RENTAL.has(b.kind) ? 'Games' : 'Bring', b.items]);
+  rows.push(['Collect', bal ? (bal.owed > 0 ? `${money(bal.owed)} still to collect` : 'Paid in full ✓') : 'No invoice yet']);
+  if (bal && bal.refundable) rows.push(['Deposit', depositWords(bal)]);
+  if (held) rows.push(['Hold', 'Games held, waiting for the deposit']);
+  if (c.notes && c.notes.length) rows.push(['Note', firstLine(c.notes[0].body)]);
+  const phone = normalizePhone(b.phone);
+  const rk = b.request_key ? b64urlText(b.request_key) : '';
+  const yes = c.tentative && b.request_key && yesFor[b.request_key] ? yesBox(yesFor[b.request_key], `p${day.replace(/-/g, '')}${b.id}`) : '';
+  return `<details class="pj${c.tentative ? ' tent' : ''}" style="border-color:${esc(s.bar)}" data-pjob="${b.id}"${c.tentative ? ' data-tentative' : ''}><summary${tip('cal.pjob')}><span class="k ${esc(b.kind)}${tentClass(c)}" data-list-booking="${b.id}"${tentAttrs(b, c)}>${esc(tentWords(c, held))}${esc(words)}</span><span class="pjw">${c.tentative ? 'Not confirmed yet · call them back' : 'Booked'} · tap for more</span></summary>
+    <span class="pjb"><dl class="jd">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    <span class="jb">${phone ? `<a class="btn ghost" href="tel:${phone}"${tip('day.call')}>Call</a><a class="btn ghost" href="sms:${phone}"${tip('cal.jobText')}>Text</a>` : ''}${rk ? `<a class="btn ghost" href="/admin/#c-${esc(rk)}"${tip('cal.openCard')}>Open their card</a>` : `<a class="btn ghost" href="/admin/day/${esc(day)}"${tip('cal.daySheet')}>Open the day sheet</a>`}${yes}</span></span></details>`;
+}
+
+// A request asked for this day with no booking yet (outlined): the same row, from the request.
+function phoneAsked(c, day, yesFor) {
+  const s = SERVICE_KINDS[c.service];
+  const words = `${TENT_WORDS} · ${c.part === 'out' ? OUT_WORDS : c.part === 'return' ? 'Rental return' : s.short}: ${c.name}`;
+  const y = yesFor[c.key];
+  const r = y ? y.r : null;
+  const phone = r ? normalizePhone(r.phone) : '';
+  const rows = [['Asked for', shortDate(day)]];
+  if (y && y.summary) rows.push(['What', y.summary]);
+  return `<details class="pj tent" style="border-color:${esc(c.color)}" data-pjob-asked="${esc(c.rk)}" data-tentative><summary${tip('cal.pjob')}><span class="k req ${esc(c.kind)}" style="border-color:${esc(c.color)}" data-requested="${esc(c.service)}">${esc(words)}</span><span class="pjw">Not confirmed yet · call them back · tap for more</span></summary>
+    <span class="pjb"><dl class="jd">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
+    <span class="jb">${phone ? `<a class="btn ghost" href="tel:${phone}"${tip('day.call')}>Call</a><a class="btn ghost" href="sms:${phone}"${tip('cal.jobText')}>Text</a>` : ''}<a class="btn ghost" href="/admin/#c-${esc(c.rk)}"${tip('cal.openCard')}>Open their card</a>${y ? yesBox(y, `q${day.replace(/-/g, '')}${c.rk.slice(0, 6)}${c.part || ''}`) : ''}</span></span></details>`;
+}
+
+// "Yes, book it" -> the day(s) prefilled -> "Book it": the Requests card's form, back here.
+function yesBox(y, idp) {
+  return `<details class="yes" data-yes-book><summary class="btn primary"${tip('cal.yesOpen')}>Yes, book it</summary>${bookYesForm(y.r, y, { label: 'Book it', idp, back: y.back, key: 'cal.bookYes' })}</details>`;
+}
+
 export function calendarPage({ stillToDecide = [], toSchedule = [], requested = [], month, today, bookings, all = bookings, ctx, windows, table, warnings, unconfirmed = [], reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
   const [y, m] = month.split('-').map(Number);
   const first = `${month}-01`;
@@ -228,11 +361,14 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
   const gridStart = addDays(first, -startPad);
   const prev = new Date(Date.UTC(y, m - 2, 1)).toISOString().slice(0, 7);
   const next = new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 7);
+  const back = `/admin/calendar?month=${month}`;
+  const yesFor = Object.fromEntries(unconfirmed.filter((r) => r.yes).map((r) => [r.key, { ...r.yes, r, summary: r.summary, back }]));
   const byDay = {};
   for (const b of bookings) (byDay[b.date] = byDay[b.date] || []).push(b);
   const reqByDay = {};
   for (const c of requested) (reqByDay[c.date] = reqByDay[c.date] || []).push(c);
   const cells = [];
+  const pcells = [];
   for (let i = 0; i < 42; i += 1) {
     const day = addDays(gridStart, i);
     if (i >= 35 && day.slice(0, 7) !== month) break;
@@ -247,7 +383,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
         const mark = b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : '';
         const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
         const c = ctx(b);
-        return `<span class="k ${esc(b.kind)}${tentClass(c)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''}${tentAttrs(b, c)} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(tentWords(c, held))}${esc(KIND_LABELS[b.kind])}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
+        return `<span class="k ${esc(b.kind)}${tentClass(c)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''}${tentAttrs(b, c)} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(gridTent(c, held))}${esc(KIND_LABELS[b.kind])}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
       }).join('')}
       ${outChips(windows, day, today, 'span')}
       ${(reqByDay[day] || []).map((c) => requestedChip(c, 'span')).join('')}
@@ -255,27 +391,28 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
       ${gamesAskedOn(requested, day) ? `<span class="badge asked" data-games-asked${tip('cal.gamesAsked')}>${gamesAskedOn(requested, day)} ${gamesAskedOn(requested, day) === 1 ? 'game' : 'games'} asked for</span>` : ''}
       ${owes ? '<span class="due" data-due>$ due</span>' : ''}${late ? '<span class="late-dot">Not returned yet</span>' : ''}
     </a>`);
+    // The phone month: one dot per job in its service colour, hollow = not confirmed yet.
+    const dots = [...list.map((b) => ({ bar: serviceInfo(b.kind).bar, tent: ctx(b).tentative })),
+      ...(reqByDay[day] || []).filter((c) => c.part !== 'out').map((c) => ({ bar: c.color, tent: true }))];
+    pcells.push(`<a class="pd${day.slice(0, 7) !== month ? ' out' : ''}${day === today ? ' today' : ''}" href="${day.slice(0, 7) === month ? `#d-${day}` : `/admin/calendar?month=${day.slice(0, 7)}#d-${day}`}" data-pday="${day}"${tip('cal.pday')}><b>${Number(day.slice(8))}</b><span class="dots" aria-hidden="true">${dots.slice(0, 4).map((d) => `<i class="${d.tent ? 'tent' : ''}" style="border-color:${esc(d.bar)};background:${esc(d.bar)}"></i>`).join('')}${dots.length > 4 ? `<i class="more">+${dots.length - 4}</i>` : ''}</span><span class="vh">${dots.length ? `${dots.length} ${dots.length === 1 ? 'job' : 'jobs'}` : 'nothing booked'}</span></a>`);
   }
-  // Phones (< 700 px): the month as a simple day-by-day list with full, readable chips (owner,
-  // 18 Oct 2026: the 7-column grid was cramped at 390 px, worse with the outlined Requested
-  // chips). The grid stays as it was on a computer; CSS shows one or the other.
-  const listDays = [];
-  for (let day = first; day.slice(0, 7) === month; day = addDays(day, 1)) {
+  // The phone's tapped day: every day of the month has its panel (one shows at a time); the
+  // default is today in this month, else the first day with something on it, else the 1st.
+  const days = [];
+  for (let day = first; day.slice(0, 7) === month; day = addDays(day, 1)) days.push(day);
+  const busy = (d) => (byDay[d] || []).length || (reqByDay[d] || []).length;
+  const selDay = days.includes(today) ? today : (days.find(busy) || first);
+  const listDays = days.map((day) => {
     const list = byDay[day] || []; const asked = reqByDay[day] || [];
     const outs = outChips(windows, day, today, 'a');
-    if (!list.length && !asked.length && !outs && day !== today) continue;
     const games = usageOn(windows, day, today, table).count;
-    listDays.push(`<div class="mday${day === today ? ' today' : ''}" id="d-${day}" data-month-day="${day}"><a class="mdh" href="/admin/day/${day}"${tip('cal.day')}><strong>${esc(shortDate(day))}</strong>${day === today ? ' <span class="muted">today</span>' : ''}${games ? ` <span class="badge" data-games-out>${games} ${games === 1 ? 'game' : 'games'} out</span>` : ''}</a>
-      ${list.map((b) => {
-        const r = ctx(b).ret;
-        const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
-        const c = ctx(b);
-        return `<a class="k ${esc(b.kind)}${tentClass(c)}" href="/admin/day/${day}" data-list-booking="${b.id}"${tentAttrs(b, c)}${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(tentWords(c, held))}${esc(KIND_LABELS[b.kind])}${b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : ''}${b.time ? ` ${esc(prettyTime(b.time))}` : ''}: ${esc(b.customer_name || 'No name')}${b.items ? ` <span class="ki">· ${esc(firstLine(b.items, 80))}</span>` : ''}</a>`;
-      }).join('')}
-      ${outs}${asked.map((c) => requestedChip(c, 'a')).join('')}
-      ${!list.length && !asked.length && !outs ? '<p class="muted" style="margin:0">Nothing booked today.</p>' : ''}</div>`);
-  }
-  const monthList = `<div class="monthlist" data-month-list>${listDays.length ? listDays.join('') : '<p class="muted">Nothing booked this month.</p>'}</div>`;
+    const wd = new Date(`${day}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' });
+    return `<section class="mday${day === today ? ' today' : ''}${day === selDay ? ' sel' : ''}" id="d-${day}" data-month-day="${day}"><a class="mdh" href="/admin/day/${day}"${tip('cal.day')}><strong>${esc(wd)}</strong>${day === today ? ' <span class="muted">today</span>' : ''}${games ? ` <span class="badge" data-games-out>${games} ${games === 1 ? 'game' : 'games'} out</span>` : ''}</a>
+      ${list.map((b) => phoneJob(b, ctx(b), day, yesFor)).join('')}
+      ${outs}${asked.map((c) => phoneAsked(c, day, yesFor)).join('')}
+      ${!list.length && !asked.length && !outs ? '<p class="muted" style="margin:0">Nothing booked. Tap another day.</p>' : `<p class="rowlinks" style="margin:0"><a href="/admin/day/${day}"${tip('cal.daySheet')}>Open the day sheet</a></p>`}</section>`;
+  });
+  const monthList = `<div class="monthlist" data-month-list data-phone-day>${listDays.join('')}</div>`;
   const upcoming = bookings.filter((b) => b.date >= today && b.date <= addDays(today, 14));
   // Requested dates (outlined, not confirmed) are in Upcoming too, so a request a few days out
   // is seen without paging the month (owner, 19 Oct 2026: a 3 Nov request looked "unscheduled").
@@ -283,71 +420,84 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
   const upRows = [...upcoming.map((b) => ({ date: b.date, time: b.time || '', html: `<a class="item" href="/admin/day/${esc(b.date)}"${tip('cal.day')}>
       <strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind)}${ctx(b).tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''} ${esc(b.customer_name || 'No name')}<br><span class="muted">${esc(b.items || '')}</span> ${statusBits(b, ctx(b))}</a>` })),
     ...upReq.map((c) => ({ date: c.date, time: '', html: `<div class="item" data-upcoming-requested><strong>${esc(shortDate(c.date))}</strong> ${requestedChip(c, 'a')}</div>` }))]
-    .sort((x, y) => (x.date + x.time).localeCompare(y.date + y.time));
-  const upcomingHtml = `<section class="card upcoming" data-upcoming><h2>Upcoming (next 14 days)</h2>${upRows.length ? upRows.map((x) => x.html).join('') : '<p class="muted" style="margin:0">Nothing in the next 14 days.</p>'}</section>`;
+    .sort((x, y2) => (x.date + x.time).localeCompare(y2.date + y2.time));
+  const upcomingHtml = `<section class="upcoming" data-upcoming><h3 class="vh">Upcoming (next 14 days)</h3>${upRows.length ? upRows.map((x) => x.html).join('') : '<p class="muted" style="margin:0">Nothing in the next 14 days.</p>'}</section>`;
   const warn = warnings.length ? `<div class="notice err" data-overlap><strong>Double-booked:</strong>${warnings.map((w) => `<div>${esc(w.item)} (you have ${w.stock}) is out with ${esc(w.who.map((x) => `${x.name} (${shortDate(x.start)} to ${shortDate(x.end)})`).join(' and '))}. Starts ${esc(shortDate(w.first))}.</div>`).join('')}</div>` : '';
   // Unconfirmed requests (owner, 19 Oct 2026; was "Unscheduled requests"): every live request
   // she has not said yes to. Each stays here, outlined on its asked-for day, until "Yes, book it"
-  // on its card (or Book it here); then it leaves the list and its day turns solid.
-  const uns = `<aside class="card unsched" data-unconfirmed><h2>Unconfirmed requests</h2><p class="muted">Not booked for sure yet. Each one is outlined on its day until you tap <strong>Yes, book it</strong> on its card. On a computer you can also drag one onto a day.</p>
-    ${unconfirmed.length ? unconfirmed.map((r) => `<div class="u" draggable="true" data-drag data-rk="${esc(b64urlText(r.key))}" data-unconfirmed-row${tip('cal.unconfirmed')}><strong>${esc(r.name || 'No name')}</strong><div class="muted">${esc(r.summary || '')}</div>
-      ${r.asked ? `<p class="askedline" data-asked="${esc(r.asked)}">Asked for <a class="k req" style="border-color:${esc(r.color || '#999')}" href="/admin/calendar?month=${esc(r.asked.slice(0, 7))}#d-${esc(r.asked)}"${tip('cal.askedDay')}>${esc(shortDate(r.asked))}</a></p>` : '<p class="askedline muted">No date given yet.</p>'}
-      <div class="actions" style="grid-template-columns:1fr 1fr"><a class="btn ghost" href="/admin/#c-${esc(b64urlText(r.key))}"${tip('cal.openCard')}>Open the request</a>${act(`<a class="btn ghost" href="/admin/calendar/new?r=${esc(b64urlText(r.key))}"${tip('cal.schedule')}>Book it</a>`, 'cal.schedule')}</div></div>`).join('') : '<p class="muted">Every request is confirmed.</p>'}</aside>`;
-  const panel = stepsPanel('calendar', [
-    [`<a class="btn ghost" href="/admin/search"${tip('sub.find')}>Find a customer</a>`],
-    [`<a class="btn" href="/admin/calendar/new"${tip('cal.add')}>Add a booking</a>`],
-    [`<a class="btn ghost" href="/admin/day/today"${tip('sub.today')}>Today's list</a>`],
-  ]);
-  return layout('Calendar', `<style>${CAL_CSS}${CARD_CSS}</style>
-    ${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
-    ${panel}
-    <h1>Calendar</h1>
-    ${searchBox()}
-    ${holdsBox}
-    ${toScheduleBox(toSchedule)}
-    ${stillToDecide.length ? `<section class="card" id="still-to-decide" data-still-to-decide><h2>Still to decide</h2><p class="muted">Takedowns marked Not sure yet. Nothing is required: schedule it, or tell the card the customer will handle it.</p>
+  // (here or on its card) or a drag onto a day; then it leaves the list and its day turns solid.
+  const uns = `<section class="sub unsched" data-unconfirmed><h3>Unconfirmed requests (${unconfirmed.length})</h3>
+    ${unconfirmed.length ? unconfirmed.map((r) => `<div class="u" draggable="true" data-drag data-rk="${esc(b64urlText(r.key))}" data-unconfirmed-row${tip('cal.unconfirmed')}><strong>${esc(r.name || 'No name')}</strong><span class="muted">${esc(r.summary || '')}</span>
+      ${r.asked ? `<p class="askedline" data-asked="${esc(r.asked)}">Asked for <a class="k req" style="border-color:${esc(r.color || '#999')}" href="/admin/calendar?month=${esc(r.asked.slice(0, 7))}#d-${esc(r.asked)}"${tip('cal.askedDay')}>${esc(shortDate(r.asked))}</a> · not confirmed yet</p>` : '<p class="askedline muted">No date given yet.</p>'}
+      ${yesFor[r.key] ? yesBox(yesFor[r.key], `s${b64urlText(r.key).slice(0, 8)}`) : ''}
+      <p class="rowlinks">${normalizePhone(r.phone) ? `<a href="tel:${normalizePhone(r.phone)}"${tip('day.call')}>Call</a> · ` : ''}<a href="/admin/#c-${esc(b64urlText(r.key))}"${tip('cal.openCard')}>Open the request</a> · <a href="/admin/calendar/new?r=${esc(b64urlText(r.key))}"${tip('cal.schedule')}>More choices</a></p></div>`).join('') : '<p class="muted" style="margin:0">Every request is confirmed.</p>'}</section>`;
+  const still = `<section class="sub" id="still-to-decide" data-still-to-decide><h3>Still to decide (${stillToDecide.length})</h3>${stillToDecide.length ? `<p class="muted" style="margin:0 0 6px">Takedowns marked Not sure yet. Nothing is required: schedule it, or tell the card the customer will handle it.</p>
       ${stillToDecide.map((d) => `<div class="u"><strong>${esc(d.name || 'No name')}</strong> <span class="muted">${esc(KIND_LABELS[d.kind])}${d.note ? ` · ${esc(d.note)}` : ''}</span>
-        <div class="actions" style="grid-template-columns:1fr 1fr"><a class="btn ghost" href="/admin/calendar/new?r=${esc(d.rk)}&amp;kind=${esc(d.kind)}"${tip('cal.decide')}>Schedule it</a><a class="btn ghost" href="/admin/#c-${esc(d.rk)}"${tip('cal.decideOpen')}>Open the request</a></div></div>`).join('')}</section>` : ''}
+        <p class="rowlinks"><a href="/admin/calendar/new?r=${esc(d.rk)}&amp;kind=${esc(d.kind)}"${tip('cal.decide')}>Schedule it</a> · <a href="/admin/#c-${esc(d.rk)}"${tip('cal.decideOpen')}>Open the request</a></p></div>`).join('')}` : '<p class="muted" style="margin:0">Nothing waiting.</p>'}</section>`;
+  const monthName = new Date(`${first}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const todayList = (byDay[today] || []).length;
+  const step1 = calmStep(1, `${searchBox('', { bare: true })}<p class="rowlinks s1links"><a href="#every-booking" data-show-list${tip('cal.everyBooking')}>Every booking as a list</a> <a href="/admin/calendar/link"${tip('cal.link')}>Link my Google Calendar</a></p>`, { fold: false });
+  const step2 = calmStep(2, `${uns}${toScheduleBox(toSchedule, { inline: true, back: `${back}#takedowns-to-schedule` })}${still}
+    ${act(`<a class="btn" href="/admin/calendar/new"${tip('cal.add')}>Add a booking</a>`, 'cal.add')}`, { count: unconfirmed.length });
+  const step3 = calmStep(3, `<p style="margin:0"><strong>Today, ${esc(shortDate(today))}:</strong> ${todayList ? `${todayList} ${todayList === 1 ? 'job' : 'jobs'}` : 'nothing booked'}.</p>
+    ${act(`<a class="btn ghost" href="/admin/day/today"${tip('sub.today')}>Today's list</a>`, 'sub.today')}`);
+  const step4 = calmStep(4, remindersBox(reminders, tomorrowLabel, { bare: true }), { count: reminders.length });
+  const step5 = calmStep(5, upcomingHtml, { count: upRows.length });
+  const cal = `<section class="calcal" data-calendar>
+      <div class="mhead"><h2>${esc(monthName)}</h2>
+        <span class="mnav"><a class="btn ghost" href="/admin/calendar?month=${prev}"${tip('cal.prev')}>&larr;<span class="vh"> Previous month</span></a><a class="btn ghost" href="/admin/calendar"${tip('cal.today')}>This month</a><a class="btn ghost" href="/admin/calendar?month=${next}"${tip('cal.next')}><span class="vh">Next month </span>&rarr;</a></span>
+        <span class="views" role="group" aria-label="How to show bookings"><button type="button" class="btn" data-view="month" aria-pressed="true"${tip('cal.viewMonth')}>Month</button><button type="button" class="btn ghost" data-view="list" aria-pressed="false"${tip('cal.viewList')}>List</button><button type="button" class="btn ghost" data-view="held" aria-pressed="false"${tip('cal.viewHeld')}>Held</button></span></div>
+      <div class="legend" data-service-key>${serviceKey()}</div>
+      ${fillLegend()}
+      <div data-pane="held" hidden>${heldPane}</div>
+      <div data-pane="month">
+        <div class="month">${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => `<div class="dow">${d}</div>`).join('')}${cells.join('')}</div>
+        <div class="pmonth" data-phone-month>${['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d) => `<span class="pdw">${d}</span>`).join('')}${pcells.join('')}</div>
+        ${monthList}
+      </div></section>`;
+  const every = `<details class="card evb" id="every-booking" data-every-booking><summary${tip('cal.everyBooking')}>Every booking (${all.length}) — the whole list</summary><div data-pane="list">${listView(all, today, ctx)}</div></details>`;
+  return layout('Calendar', `<style>${CAL_CSS}${CARD_CSS}${CALM_CSS}</style>
+    ${flash ? `<div class="notice ok" data-cal-flash>${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+    <h1 class="vh">Calendar &amp; Bookings</h1>
+    ${holdsBox}
     ${overdueBox(overdue)}
-    ${remindersBox(reminders, tomorrowLabel)}
     ${warn}
-    <div class="actions">
-      ${act(`<a class="btn ghost" href="/admin/calendar/link"${tip('cal.link')}>Link my Google Calendar</a>`, 'cal.link')}
+    <div class="calm" data-steps="calendar" data-steps-panel data-calm>
+      <div class="calmain">${cal}${step5}</div>
+      <aside class="calside">${step1}${step2}${step3}${step4}</aside>
     </div>
-    <div class="actions" style="grid-template-columns:1fr 1fr 1fr" role="group" aria-label="How to show bookings">
-      <button type="button" class="btn" data-view="month" aria-pressed="true"${tip('cal.viewMonth')}>Month</button>
-      <button type="button" class="btn ghost" data-view="list" aria-pressed="false"${tip('cal.viewList')}>List</button>
-      <button type="button" class="btn ghost" data-view="held" aria-pressed="false"${tip('cal.viewHeld')}>Held</button>
-    </div>
-    <div data-pane="held" hidden>${heldPane}</div>
-    <div class="legend" data-service-key>${serviceKey()}</div>
-    ${fillLegend()}
-    <div data-pane="list" hidden>${listView(all, today, ctx)}</div>
-    <div data-pane="month">
-    ${upcomingHtml}
-    <div class="calwrap"><section>
-      <div class="monthbar">
-        <a class="btn ghost" href="/admin/calendar?month=${prev}"${tip('cal.prev')}>&larr; Previous month</a>
-        <a class="btn ghost" href="/admin/calendar"${tip('cal.today')}>This month</a>
-        <a class="btn ghost" href="/admin/calendar?month=${next}"${tip('cal.next')}>Next month &rarr;</a>
-      </div>
-      <h2>${esc(new Date(`${first}T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' }))}</h2>
-      <div class="month">${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => `<div class="dow">${d}</div>`).join('')}${cells.join('')}</div>
-      ${monthList}
-    </section>${uns}</div></div>
+    ${every}
     <form id="move-form" method="post" action="" hidden><input type="hidden" name="date" value=""></form>
     <script>${CAL_JS}${VIEW_JS}</script>`, { screen: '', back: BACK_REQUESTS, wide: true });
 }
 
+// "? " = not confirmed yet (the month grid; the legend says so). "Held · " = games held.
+const gridTent = (c, held) => (c && c.tentative ? `? ${held ? '(games held) ' : ''}` : (held ? 'Held · ' : ''));
+
 const VIEW_JS = `
 (function(){
-  var KEY='pnp-cal-view';
-  function show(v){document.querySelectorAll('[data-pane]').forEach(function(p){p.hidden=p.getAttribute('data-pane')!==v;});
-    document.querySelectorAll('[data-view]').forEach(function(b){var on=b.getAttribute('data-view')===v;b.setAttribute('aria-pressed',on?'true':'false');b.classList.toggle('ghost',!on);});
-    try{localStorage.setItem(KEY,v);}catch(e){}}
-  document.querySelectorAll('[data-view]').forEach(function(b){b.addEventListener('click',function(){show(b.getAttribute('data-view'));});});
-  var saved=null;try{saved=localStorage.getItem(KEY);}catch(e){}if(saved==='list'||saved==='month'||saved==='held')show(saved);
+  var KEY='pnp-cal-view',wide=window.matchMedia('(min-width:900px)');
+  var every=document.getElementById('every-booking');
+  function show(v){if(v==='list'){if(every){every.open=true;every.scrollIntoView({block:'start'});}v='month';}
+    document.querySelectorAll('[data-pane]').forEach(function(p){if(p.getAttribute('data-pane')!=='list')p.hidden=p.getAttribute('data-pane')!==v;});
+    document.querySelectorAll('[data-view]').forEach(function(b){var on=b.getAttribute('data-view')===v;b.setAttribute('aria-pressed',on?'true':'false');b.classList.toggle('ghost',!on);});}
+  document.querySelectorAll('[data-view]').forEach(function(b){b.addEventListener('click',function(){var v=b.getAttribute('data-view');try{localStorage.setItem(KEY,v==='list'?'month':v);}catch(e){}show(v);});});
+  var saved=null;try{saved=localStorage.getItem(KEY);}catch(e){}if(saved==='held')show(saved);
+  var sl=document.querySelector('[data-show-list]');if(sl)sl.addEventListener('click',function(){if(every)every.open=true;});
   var past=document.querySelector('[data-show-past]');if(past)past.addEventListener('click',function(){var box=document.getElementById('past-list');box.hidden=!box.hidden;past.setAttribute('aria-pressed',box.hidden?'false':'true');past.textContent=box.hidden?'Show past bookings':'Hide past bookings';});
+  // Steps: all open beside the month on a computer; folded rows on a phone (the one holding the
+  // #target stays open).
+  var steps=document.querySelectorAll('details.cstep');
+  function fold(){var t=location.hash?document.getElementById(location.hash.slice(1)):null;
+    steps.forEach(function(d){d.open=wide.matches||(t&&d.contains(t));});}
+  fold();if(wide.addEventListener)wide.addEventListener('change',fold);
+  steps.forEach(function(d){d.querySelector('summary').addEventListener('click',function(e){if(wide.matches)e.preventDefault();});});
+  // The phone month: tap a day, its jobs show right under the month.
+  function pick(day){var p=document.getElementById('d-'+day);if(!p||!p.hasAttribute('data-month-day'))return false;
+    document.querySelectorAll('[data-month-day].sel').forEach(function(x){x.classList.remove('sel');});p.classList.add('sel');
+    document.querySelectorAll('[data-pday]').forEach(function(a){a.classList.toggle('sel',a.getAttribute('data-pday')===day);a.setAttribute('aria-current',a.getAttribute('data-pday')===day?'date':'false');});return true;}
+  document.querySelectorAll('[data-pday]').forEach(function(a){a.addEventListener('click',function(e){if(pick(a.getAttribute('data-pday')))e.preventDefault();});});
+  var h=/^#d-(\\d{4}-\\d{2}-\\d{2})$/.exec(location.hash);var sel=document.querySelector('[data-month-day].sel');pick(h?h[1]:(sel?sel.getAttribute('data-month-day'):''));
 })();`;
 
 function listEntry(b, ctx) {

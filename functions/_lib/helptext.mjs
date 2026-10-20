@@ -32,7 +32,9 @@ export const SCREENS = [
 // The 1-2-3 at the top of each screen.
 export const STEPS = {
   requests: ['See who\'s asking.', 'Send a quote or invoice.', 'Plan your day and get paid.'],
-  calendar: ['See what\'s coming up.', 'Put a request on the calendar.', 'Plan your day.'],
+  // Calendar & Bookings has five (owner-approved calm calendar, 19 Oct 2026): 1-4 beside the month
+  // on a computer, 5 under it; on a phone 1 is the search at the top and 2-5 fold into rows.
+  calendar: ['See what\'s coming up.', 'Put a request on the calendar.', 'Plan your day.', 'Check tomorrow\'s reminders.', 'Look over the next 14 days.'],
   day: ['Read who is coming and what they need.', 'Tap Call to ring them.', 'Tap Change this booking if something moved.'],
   booking: ['Pick the service (or Just a calendar note).', 'Check the day, name and phone.', 'Tap Save booking: a customer goes on Requests too.'],
   move: ['Pick the new day.', 'Check it is the right booking.', 'Tap Move it.'],
@@ -156,7 +158,7 @@ export const HELP = {
   'td.changeDate': H('card', 'Change (takedown day)', 'Shows the day and time boxes so you can move the takedown.', '', 'Tap Save after changing them. The day-before reminder follows the new day.'),
   'td.remove': H('card', 'Remove (takedown)', 'Takes the takedown off the calendar.', '', 'The Takedown line asks again, so you can pick another day, Not sure yet, or Customer will handle it.'),
   'td.undoDone': H('calendar', 'Undo takedown done', 'Takes back Mark takedown done if you tapped it by mistake.', '', 'The request goes back to waiting for the takedown.'),
-  'cal.tdToSchedule': H('calendar', 'Schedule it (Takedowns to schedule)', 'Opens the scheduling screen for a takedown the customer asked for, with their day filled in.', 'Nothing is booked until you save it.', 'Takedowns to schedule lists every porch or party whose customer asked for a takedown that is not on the calendar yet.'),
+  'cal.tdToSchedule': H('calendar', 'More choices (Takedowns to schedule)', 'Opens the full scheduling screen for a takedown the customer asked for (time, notes), with their day filled in.', 'Nothing is booked until you save it.', 'Takedowns to schedule lists every porch or party whose customer asked for a takedown that is not on the calendar yet.'),
   'td.notSure': H('card', 'Not sure yet (takedown)', 'Saves that the takedown is not decided yet, with your note.', '', 'The card shows "Takedown: not decided yet" in amber, and it is listed under Still to decide on Calendar & Bookings.'),
   'td.customer': H('card', 'Customer will handle it', 'Saves that the customer takes the decor down themselves. No booking, no reminders.', '', 'Your note is kept with it. Tap Change if they change their mind.'),
   'td.change': H('card', 'Change (customer will handle it)', 'Asks the takedown question again on this card.', '', 'Use it if the customer changed their mind.'),
@@ -256,7 +258,7 @@ export const HELP = {
   'cal.today': H('calendar', 'This month', 'Jumps back to the current month.', '', 'Brings you back to today.'),
   'cal.rentalOut': H('calendar', 'Rental out', 'The games are with this customer: picked up earlier, coming back on the day shown.', '', 'Every day between the pickup and the return shows it, so you can see the games are not in the shed.'),
   'cal.day': H('calendar', 'A day (on the calendar or the Upcoming list)', 'Opens this day with every booking, the customer, what and where.', '', 'Tap any day to see its bookings and call the customer.'),
-  'cal.schedule': H('calendar', 'Book it', 'Opens the booking screen for this request so you can pick its day. Saving it confirms the request.', '', 'On each request in the Unconfirmed requests list. On a computer you can also drag the request onto a day.'),
+  'cal.schedule': H('calendar', 'More choices (Unconfirmed requests)', 'Opens the full booking screen for this request (time, place, items). Saving it confirms the request.', '', 'On each request in the Unconfirmed requests list. On a computer you can also drag the request onto a day.'),
   'cal.unconfirmed': H('calendar', 'Unconfirmed request (drag onto a day)', 'A request you have not said yes to yet. Drag it onto a day to book it there, or tap Book it.', '', 'It stays in the Unconfirmed requests list, and outlined on its day, until you tap Yes, book it on its card (or book it here).'),
   'cal.askedDay': H('calendar', 'Asked for (the day they asked for)', 'Opens the month on the day this customer asked for, where it shows outlined.', '', 'Outlined means requested, not confirmed yet.'),
   'cal.openCard': H('calendar', 'Open the request', 'Opens this customer\'s card on Requests, where you tap Yes, book it.', '', 'The card has the steps: call them back, then say whether you are taking the job.'),
@@ -269,7 +271,20 @@ export const HELP = {
   'bk.move': H('calendar', 'Move to another day', 'Opens a date picker to move this booking to a different day.', '', 'For phones and keyboards; on a computer you can also drag it.'),
   'bk.moveYes': H('calendar', 'Move it', 'Moves the booking to the day you picked.', '', 'Shows on the admin Calendar at once and in Google Calendar after Google refreshes.'),
   'cal.viewMonth': H('calendar', 'Month', 'Shows the bookings on a month calendar.', '', 'Your phone remembers whether you last used Month or List.'),
-  'cal.viewList': H('calendar', 'List', 'Shows every booking as one list, soonest first.', '', 'Tap Show past bookings to see the old ones too.'),
+  // The calm calendar (owner-approved 19 Oct 2026): numbered steps beside the month, a phone month
+  // with dots, a tapped day's jobs, and the same "Yes, book it" as the Requests card.
+  'cal.stepRow': H('calendar', 'A numbered step (on a phone)', 'Opens or closes this step. On a computer every step stays open beside the calendar.', '', 'Steps 2 to 5 fold into rows on a phone so the month stays near the top.'),
+  'cal.pday': H('calendar', 'A day on the phone month', 'Shows this day\'s jobs right under the month. A dot is a job; a hollow dot is not confirmed yet.', '', 'Tap a job to see its time, place, what to bring and what is left to collect.'),
+  'cal.pjob': H('calendar', 'A job on the tapped day', 'Opens this job: time, where, what to bring, what is left to collect and the deposit.', '', 'Call, Text and Open their card are inside. A request you have not said yes to has Yes, book it too.'),
+  'cal.jobText': H('calendar', 'Text', 'Opens Messages to this customer (nothing is typed in for you).', '', 'For a reminder with the words typed in, use Text reminder in Step 4.'),
+  'cal.daySheet': H('calendar', 'Open the day sheet', 'Opens this day\'s full list to print, text or email: who is coming, what to load, what to collect.', '', 'The same page as tapping a day on a computer.'),
+  'cal.yesOpen': H('calendar', 'Yes, book it (on the calendar)', 'Shows the day they asked for, ready to change, with a Book it button.', '', 'The same answer as Yes, book it on their card on Requests.'),
+  'cal.bookYes': H('calendar', 'Book it (after Yes, book it)', 'Books the day you see and confirms the request: its chip turns solid and it leaves Unconfirmed requests.', '', 'Exactly the same as Yes, book it on the Requests card (one action, two places).'),
+  'cal.tdOpen': H('calendar', 'Schedule takedown', 'Shows the day they asked for, ready to change, with a Book takedown button.', '', 'Nothing is booked until you tap Book takedown.'),
+  'cal.tdBook': H('calendar', 'Book takedown', 'Puts the takedown on the calendar on the day you see.', '', 'The same as Save on the takedown row of their card on Requests.'),
+  'cal.tdNotNeeded': H('calendar', 'Not needed (Takedowns to schedule)', 'The customer will handle the takedown: it leaves this list.', '', 'Undo is beside the ✓ on their card on Requests.'),
+  'cal.everyBooking': H('calendar', 'Every booking (the whole list)', 'Opens the list of every booking, soonest first, with past bookings one tap away.', '', 'It sits at the bottom of the page; List at the top jumps here.'),
+  'cal.viewList': H('calendar', 'List', 'Jumps to Every booking at the bottom: one list, soonest first.', '', 'Tap Show past bookings to see the old ones too.'),
   'cal.past': H('calendar', 'Show past bookings', 'Shows (or hides) bookings that are already over.', '', 'On the List view.'),
   'find.box': H('calendar', 'Find a customer — type a name', 'Type part of a name, phone number or email; results show as you type.', '', 'Capital letters and accents do not matter. Put-away and void customers are shown and labelled.'),
   'find.go': H('calendar', 'Find', 'Searches for the customer you typed.', '', 'Results also appear by themselves as you type.'),
@@ -401,7 +416,7 @@ export function hint(key) {
 // with a line and its buttons. 3 columns on a computer, stacked on a phone.
 export const PANELS = {
   requests: ['New requests are listed below.', 'Open a request below and tap Create invoice — or, for someone who called or texted you:', 'When money comes in, tap Mark paid on that card.'],
-  calendar: ['Every booking for all four services, by month or as a list.', 'Drag one from Unconfirmed requests onto a day on a computer, or tap Book it — or add one that came by phone:', 'Open a day to see who is coming, what to load and what to collect.'],
+  calendar: ['Every booking for all four services, by month or as a list.', 'Drag one from Unconfirmed requests onto a day on a computer, or tap Book it — or add one that came by phone:', 'Open a day to see who is coming, what to load and what to collect.', 'Who gets a reminder text or email tomorrow, and whether it has gone out.', 'Every job and request from today to two weeks out, soonest first.'],
   money: ['Not paid yet is listed under the big numbers, most overdue first.', 'Pick By month or All jobs; tick the boxes to include unconfirmed jobs or deposits. Record tips here.', 'Add an expense or upload a receipt; the year-end summary is ready for your tax preparer.'],
 };
 export function stepsPanel(screen, buttons = [[], [], []], small = ['', '', '']) {

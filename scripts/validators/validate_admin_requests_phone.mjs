@@ -77,7 +77,10 @@ must(/<details class="card remline" data-reminders data-reminders-line>/.test(da
 must(/<span class="remcount">3 reminders<\/span>/.test(line) && line.includes('▸'), `the reminders line does not read "3 reminders ▸": ${line.slice(0, 300)}`);
 must((dash.match(/data-reminder="/g) || []).length === 3, 'the reminders are not all inside the line');
 const cal = (await s.get('/admin/calendar')).text;
-must(/<section class="card" data-reminders>/.test(cal) && !cal.includes('data-reminders-line'), 'the Calendar lost its open reminders box');
+// Calm calendar (19 Oct 2026): the open reminders box is Step 4, "Check tomorrow's reminders.", every row inside it.
+const step4 = cal.slice(cal.indexOf('id="calstep-4"'), cal.indexOf('</details>', cal.indexOf('id="calstep-4"')));
+must(/Check tomorrow&#39;s reminders\.|Check tomorrow's reminders\./.test(step4) && /<section data-reminders>/.test(step4) && !cal.includes('data-reminders-line'), 'the Calendar lost its open reminders box (Step 4)');
+must((step4.match(/data-reminder="/g) || []).length === 3 && (cal.match(/data-reminder="/g) || []).length === 3, 'the Calendar does not show all 3 reminders inside Step 4');
 // 3. NEW.
 must(/data-reqcard data-new/.test(cardOf(dash, rkA)) && /data-new-badge[^>]*>NEW</.test(cardOf(dash, rkA)), 'a new website request does not wear NEW');
 must(/data-new-badge[^>]*>NEW</.test(cardOf(dash, rkB)), 'the second new request does not wear NEW');
