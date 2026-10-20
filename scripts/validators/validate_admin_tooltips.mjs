@@ -17,7 +17,9 @@
  *     carry the same panel; /admin/archive redirects to the opened Put away section.
  * Rule 0: fewer than 20 screens or 150 controls checked is a failure.
  */
-import { mod } from './lib/admin_harness.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+import { mod, ROOT } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
 
 const { HELP } = await mod('functions/_lib/helptext.mjs');
@@ -328,6 +330,17 @@ if (!/data-status-meanings/.test(helpHtml)) errors.push('help page lacks "What e
 }
 if (pages.length < 20 || controls < 150) errors.push(`Rule 0: only ${pages.length} screens / ${controls} controls checked`);
 
+// A key written twice in HELP silently keeps only the last one, so the first screen shows the
+// other screen's words (inv.row: the Invoices list showed the Inventory wording, 20 Oct 2026).
+{
+  const src = fs.readFileSync(path.join(ROOT, 'functions/_lib/helptext.mjs'), 'utf8');
+  const body = src.slice(src.indexOf('export const HELP = {'));
+  const keys = [...body.matchAll(/^\s*(?:'([^']+)'|"([^"]+)"|([A-Za-z_$][\w$]*))\s*:\s*H\(/gm)].map((m) => m[1] || m[2] || m[3]);
+  const dupes = [...new Set(keys.filter((k, i) => keys.indexOf(k) !== i))];
+  if (keys.length < 100) errors.push(`helptext.mjs: only ${keys.length} HELP keys found (the duplicate check cannot see the map)`);
+  if (dupes.length) errors.push(`helptext.mjs: HELP key(s) defined more than once: ${dupes.join(', ')}`);
+  if (HELP['inv.row'].screen !== 'invoice' || !HELP['invt.row'] || HELP['invt.row'].screen !== 'inventory') errors.push('the Invoices list row and the Inventory game row do not each have their own help key (inv.row / invt.row)');
+}
 if (errors.length) {
   console.error(`VALIDATION FAIL: admin tooltips (${errors.length})`);
   for (const e of [...new Set(errors)].slice(0, 60)) console.error(`- ${e}`);
