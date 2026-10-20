@@ -32,8 +32,19 @@ header.top{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;justify-c
 header.top .brand{font-family:"Cormorant Garamond",Georgia,serif;font-size:1.5rem;font-weight:600;text-decoration:none;color:var(--ink);min-height:48px;display:inline-flex;align-items:center}
 header.top nav{display:flex;flex-wrap:wrap;gap:0 4px;align-items:center}
 header.top nav a,header.top nav button{min-height:48px;display:inline-flex;align-items:center;padding:0 8px;font:600 1rem Inter,Arial,sans-serif;color:var(--accent);text-decoration:none;background:none;border:0;cursor:pointer}
+header.top nav a[aria-current=page]{text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:2px}
+.menubtn{display:none}
+@media(max-width:899px){header.top{flex-wrap:wrap;padding:6px 12px}header.top .brand{font-size:1.4rem}
+.menubtn{align-items:center;min-height:48px;padding:0 14px;border:2px solid var(--accent);border-radius:12px;background:#fff;color:var(--accent);font:700 1.05rem Inter,Arial,sans-serif;text-decoration:none;white-space:nowrap}
+.menubtn.mopen{display:inline-flex}
+header.top .navpanel{display:none;flex-basis:100%;margin:4px -12px -6px;border-top:1px solid var(--line)}
+header.top.open .navpanel,header.top:target .navpanel{display:block}
+header.top.open .mopen,header.top:target .mopen{display:none}header.top.open .mclose,header.top:target .mclose{display:inline-flex}
+header.top nav{display:grid;gap:0}header.top nav form{display:block!important}
+header.top nav a,header.top nav button{width:100%;min-height:56px;padding:0 18px;font-size:1.15rem;color:var(--ink);border-bottom:1px solid var(--line);justify-content:flex-start;text-align:left}
+header.top nav a[aria-current=page]{color:var(--accent);background:#fbf0ea;box-shadow:inset 5px 0 0 var(--accent);text-decoration:none}}
 .big-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 18px}.big-buttons>*,.actions>*{min-width:0}
-html,body{overflow-x:hidden}main,article,.card{min-width:0;overflow-wrap:anywhere}
+html,body{overflow-x:hidden}body{overflow-x:clip}main,article,.card{min-width:0;overflow-wrap:anywhere}
 .btn{display:flex;align-items:center;justify-content:center;gap:6px;min-height:52px;padding:12px 18px;border-radius:12px;border:2px solid var(--accent);background:var(--accent);color:#fff;font:600 1.05rem Inter,Arial,sans-serif;text-decoration:none;cursor:pointer;text-align:center;width:100%;-webkit-appearance:none;appearance:none}
 .btn.ghost{background:#fff;color:var(--accent)}.btn.danger{background:#fff;color:#8f3427;border-color:#8f3427}
 .btn.primary{min-height:60px;font-size:1.15rem}
@@ -143,10 +154,17 @@ ${kindCss()}
 @media print{header.top,.subnav,.noprint,.back,.topsteps{display:none!important}body{background:#fff}.card{border:0;padding:0;margin:0 0 10px}.gloss .g{padding:4px 0}}
 `;
 
-export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false, panelWide = false, where = '' } = {}) {
+export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false, panelWide = false, where = '', spine = false } = {}) {
+  // The screen she is on is marked in the menu (phone menu, owner-approved 20 Oct 2026).
+  const on = NAV_CURRENT[title] || '';
+  const cur = (href) => (href === on ? ' aria-current="page"' : '');
   const nav = authed ? `<nav aria-label="Main">
-    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${tip('nav.money')}>Money</a><a href="/admin/inventory"${tip('nav.inventory')}>Inventory</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>Help</a><a href="/admin/pricing"${tip('nav.pricing')}>Quick Pricing Summary</a>
+    <a href="/admin/"${cur('/admin/')}${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${cur('/admin/calendar')}${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${cur('/admin/money')}${tip('nav.money')}>Money</a><a href="/admin/inventory"${cur('/admin/inventory')}${tip('nav.inventory')}>Inventory</a><a href="/admin/settings"${cur('/admin/settings')}${tip('nav.settings')}>Settings</a><a href="/admin/help"${cur('/admin/help')}${tip('nav.help')}>Help</a><a href="/admin/pricing"${cur('/admin/pricing')}${tip('nav.pricing')}>Quick Pricing Summary</a>
     <form method="post" action="/admin/logout" style="display:inline"><button type="submit"${tip('nav.signout')}>Sign out</button></form></nav>` : '';
+  // Phone (< 900 px): one short line, "Porch & Party" + a labelled "☰ Menu ▾" button; the panel
+  // opens below as big rows and the button reads "✕ Close menu". Without JS the button is a
+  // #admin-menu link and :target opens the same panel; "✕ Close menu" is a link to #.
+  const menu = authed ? `<a class="menubtn mopen" href="#admin-menu" role="button" aria-controls="admin-nav" aria-expanded="false" data-menu-btn${tip('nav.menu')}>&#9776; Menu &#9662;</a><a class="menubtn mclose" href="#" role="button" aria-controls="admin-nav" data-menu-close${tip('nav.menu')}>&#10005; Close menu</a>` : '';
   // The same top bar on every screen (owner, 20 Oct 2026): "← Back" on the left (history.back()
   // when she came from another admin screen, else the screen's parent), where she is on the right.
   // A Home Screen icon has no browser Back button, so this is it.
@@ -159,11 +177,20 @@ export function layout(title, body, { authed = true, screen = '', back = null, s
 <title>${esc(title)} · Porch &amp; Party</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>${CSS}${EXTRA_CSS}</style></head><body>
-<header class="top"><a class="brand" href="/admin/"${tip('nav.brand')}>Porch &amp; Party</a>${nav}</header>${subnav}
-<main class="wrap${wide ? ' wide' : ''}${panelWide ? ' panelwide' : ''}">${backLink}${screen ? stepsBar(screen) : ''}${body}</main>${viewer}${authed ? `<script>${ADMIN_JS}</script>` : ''}</body></html>`;
+<header class="top" id="admin-menu" data-topbar><a class="brand" href="/admin/"${tip('nav.brand')}>Porch &amp; Party</a>${menu}${nav ? `<div class="navpanel" id="admin-nav" data-menu-panel>${nav}</div>` : ''}</header>${subnav}
+<main class="wrap${wide ? ' wide' : ''}${panelWide ? ' panelwide' : ''}${spine ? ' hasspine' : ''}">${backLink}${screen ? stepsBar(screen) : ''}${body}</main>${viewer}${authed ? `<script>${MENU_JS}${ADMIN_JS}</script>` : ''}</body></html>`;
 }
 
 const BACK_REQUESTS = { href: '/admin/', label: 'Back to requests' };
+// Which menu row is "you are here", by the screen's title (the seven top-level screens).
+export const NAV_CURRENT = { Requests: '/admin/', Calendar: '/admin/calendar', Money: '/admin/money', Inventory: '/admin/inventory', Settings: '/admin/settings', 'How to use this': '/admin/help', 'Quick Pricing Summary': '/admin/pricing' };
+// The phone menu: the button opens/closes the panel without touching the address bar; a screen
+// under one of the seven (e.g. /admin/money/...) marks its parent row.
+const MENU_JS = `(function(){var h=document.querySelector('[data-topbar]');if(!h)return;var o=h.querySelector('[data-menu-btn]');if(!o)return;
+function set(on){h.classList.toggle('open',on);o.setAttribute('aria-expanded',String(on));}
+h.addEventListener('click',function(e){var t=e.target.closest('[data-menu-btn],[data-menu-close]');if(!t)return;var open=t.hasAttribute('data-menu-btn');if(open||location.hash!=='#admin-menu')e.preventDefault();set(open);});
+var links=[].slice.call(h.querySelectorAll('nav a[href^="/admin/"]'));if(!links.some(function(a){return a.hasAttribute('aria-current');})){var best=null;
+links.forEach(function(a){var p=a.getAttribute('href');if(p!=='/admin/'&&location.pathname.indexOf(p)===0&&(!best||p.length>best.getAttribute('href').length))best=a;});if(best)best.setAttribute('aria-current','page');}})();`;
 
 // A button/link with its helper line underneath.
 function act(html, key) {
@@ -1076,7 +1103,7 @@ export function missedStrip(missed = [], { hidden = false } = {}) {
 // One request card. o: everything dashboardPage knows about this request.
 export function requestCard(r, o) {
   const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace,
-    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '', isNew = false, stored = null, depositOut = null, hold = null, holdHtml = '', missed = [] } = o;
+    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '', isNew = false, stored = null, depositOut = null, hold = null, holdHtml = '', missed = [], num = null } = o;
   const rk = b64urlText(r.key);
   const services = servicesOf(r);
   const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
@@ -1170,8 +1197,8 @@ export function requestCard(r, o) {
       ${!archived && !quiet ? `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('card.putAway')}>Put away</button></div></form>` : ''}
       ${stage === 'void' && !bottomBtns.some((k) => k.startsWith('card.archive')) ? cardButton('card.archive', ctx, false) : ''}${bottomBtns.map((k) => cardButton(k, ctx, false)).join('')}
       ${quiet ? '' : voidLink(r, inv, ctx)}</div>`;
-  return `<article class="card stepcard${red ? ' miss' : (miss ? ' tidy' : '')}" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''}${red ? ` data-missed="${esc(miss.id)}"` : (miss ? ` data-tidy="${esc(miss.id)}"` : '')} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
-      ${red ? `<span class="mchip" data-missed-tag>⚠ ${esc(miss.tag)}</span>` : (miss ? `<span class="ychip" data-tidy-tag>${esc(miss.tag)}</span>` : '')}<div class="schead">${quickContact(r)}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
+  return `<article class="card stepcard${red ? ' miss' : (miss ? ' tidy' : '')}" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''}${red ? ` data-missed="${esc(miss.id)}"` : (miss ? ` data-tidy="${esc(miss.id)}"` : '')} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${num ? ` data-customer="${num}" data-first="${esc(firstName(r.name) || 'No name')}"` : ''}${first ? ` style="border-left-color:${first.bar}${num ? `;--cc:${first.bar}` : ''}"` : ''}>
+      ${num ? `<span class="cnum" data-customer-num aria-hidden="true">${num}</span>` : ''}${red ? `<span class="mchip" data-missed-tag>⚠ ${esc(miss.tag)}</span>` : (miss ? `<span class="ychip" data-tidy-tag>${esc(miss.tag)}</span>` : '')}<div class="schead">${quickContact(r)}${num ? `<p class="custno" data-customer-label>Customer ${num}</p>` : ''}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
         <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
         ${bizLine}</div>
       ${latest}
@@ -1258,6 +1285,90 @@ function filterChips(filter, base = '/admin/') {
   return `<nav class="filters" aria-label="Show only" data-filters>${FILTERS.map(([k, label]) => `<a href="${base}${k === 'all' ? '' : `?f=${k}`}"${k === filter ? ' aria-current="true"' : ''} data-filter="${k}"${tip('req.filter')}>${esc(label)}</a>`).join('')}</nav>`;
 }
 
+// Customer N: by arrival time over every active request, oldest first (ties by key, so the
+// numbers never shuffle). -> Map(request key -> number).
+export function customerNumbers(requests = []) {
+  const t = (r) => (Number.isFinite(r.sortTime) ? r.sortTime : 0);
+  const order = [...requests].sort((a, b) => t(a) - t(b) || String(a.key).localeCompare(String(b.key)));
+  return new Map(order.map((r, i) => [r.key, i + 1]));
+}
+const svcWords = (services) => services.map((k) => (serviceBadge(k) || {}).label).filter(Boolean).join(' + ') || 'Request';
+const custColor = (services) => (serviceBadge(services[0]) || { bar: '#57534e' }).bar;
+
+// Phone: the filter as one labelled native drop-down (same filters and URLs as the bubbles). It
+// goes on change; without JS the form's Show button submits ?f=<filter>.
+export function filterSelect(filter, active = [], base = '/admin/') {
+  const opts = FILTERS.map(([k, label]) => {
+    const n = active.filter((x) => matchesFilter(k, x)).length;
+    const href = `${base}${k === 'all' ? '' : `?f=${k}`}`;
+    return `<option value="${k}" data-href="${esc(href)}"${k === filter ? ' selected' : ''}>${esc(k === 'all' ? 'All requests' : label)} (${n})</option>`;
+  }).join('');
+  return `<form class="ffl" method="get" action="${esc(base)}" data-filter-select><label for="ffsel">Filter: tap to choose &#9662;</label><select id="ffsel" name="f" data-filter-pick${tip('req.filterPick')}>${opts}</select><noscript><button class="btn ghost" type="submit"${tip('req.filterGo')}>Show</button></noscript></form>`;
+}
+
+// Phone: the dark customer bar under the filter, sticky once scrolled: ‹ Customer N · Name ▾ ›,
+// the name opens the jump list of the cards on screen. Without JS the arrows link to the first
+// and second card and the list is a plain <details>.
+export function customerBar(shown = []) {
+  if (!shown.length) return '';
+  const rk = (x) => b64urlText(x.r.key);
+  const a = shown[0];
+  const next = shown[1] || a;
+  const list = shown.map((x) => `<a href="#c-${esc(rk(x))}" data-cjump="${esc(rk(x))}" style="--c:${custColor(x.services)}"${tip('req.custJumpTo')}><b>${x.num}</b> ${esc(firstName(x.r.name) || 'No name')} · ${esc(svcWords(x.services))}</a>`).join('');
+  return `<div class="cbar" data-customer-bar><a class="cstep" href="#c-${esc(rk(a))}" data-cstep="-1" aria-label="Previous customer"${tip('req.custPrev')}>&#8249;</a><details class="cjump" data-customer-jump><summary data-customer-now${tip('req.custJump')}>Customer ${a.num} · ${esc(firstName(a.r.name) || 'No name')} &#9662;</summary><div class="cjl" data-customer-list>${list}</div></details><a class="cstep" href="#c-${esc(rk(next))}" data-cstep="1" aria-label="Next customer"${tip('req.custNext')}>&#8250;</a></div>`;
+}
+
+// Laptop: the sticky "Customers" spine in the left margin, one entry per card on screen.
+export function customerSpine(shown = []) {
+  const items = shown.map((x) => { const k = esc(b64urlText(x.r.key)); return `<a href="#c-${k}" data-spine-to="${k}" style="--c:${custColor(x.services)}"${tip('req.spine')}><span>Customer ${x.num}</span>${esc(firstName(x.r.name) || 'No name')}<small>${esc(svcWords(x.services))}</small></a>`; }).join('');
+  return `<nav class="spine" aria-label="Customers" data-spine><p class="sph">Customers</p>${items || '<p class="muted">None here.</p>'}</nav>`;
+}
+
+const CUST_CSS = `
+article[data-reqcard]{position:relative;scroll-margin-top:12px}
+.cnum{position:absolute;left:-19px;top:-10px;z-index:1;width:32px;height:32px;border-radius:50%;background:var(--cc,#57534e);color:#fff;display:flex;align-items:center;justify-content:center;font:800 1rem Inter,Arial,sans-serif;box-shadow:0 0 0 3px #fff}
+.card.miss .cnum{left:-17px}
+.stepcard .custno{margin:0;font:800 .85rem Inter,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--cc,var(--muted))}
+.ffl,.cbar,.spine{display:none}
+.ffl label{margin:0 0 4px;font-size:.85rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ffl select{font-weight:700;border:2px solid var(--ink);border-radius:12px;min-height:52px}
+.ffl noscript .btn{margin-top:8px}
+.cbar{position:sticky;top:0;z-index:5;align-items:center;gap:6px;margin:0 -16px 14px;padding:6px 10px;background:var(--ink);color:#fff}
+.cbar .cstep{flex:none;display:inline-flex;align-items:center;justify-content:center;width:48px;min-height:48px;border:2px solid #fff;border-radius:10px;color:#fff;font:800 1.5rem/1 Inter,Arial,sans-serif;text-decoration:none}
+.cbar .cjump{flex:1;min-width:0;position:static}
+.cbar .cjump>summary{list-style:none;display:flex;align-items:center;justify-content:center;min-height:48px;padding:0 6px;font-weight:700;font-size:1.05rem;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbar .cjump>summary::-webkit-details-marker{display:none}
+.cbar .cjl{position:absolute;left:0;right:0;top:100%;display:grid;gap:2px;padding:8px;background:var(--card);border-bottom:2px solid var(--line);box-shadow:0 8px 18px rgba(0,0,0,.15);max-height:60vh;overflow:auto}
+.cbar .cjl a{display:flex;align-items:center;gap:8px;min-height:48px;padding:0 10px;border-left:6px solid var(--c);border-radius:8px;color:var(--ink);text-decoration:none;font-size:1.05rem}
+.cbar .cjl a b{color:var(--c);min-width:1.4em}
+.spine .sph{margin:0 0 2px;font-size:.8rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.spine a{display:grid;padding:6px 10px;border-left:6px solid var(--c);border-radius:8px;background:#fff;color:var(--ink);text-decoration:none;font-weight:600;line-height:1.3}
+.spine a span{font-size:.75rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--c)}
+.spine a small{color:var(--muted);font-weight:400;font-size:.85rem}
+.spine a.on{outline:2px solid var(--c);background:var(--cream)}
+@media(max-width:899px){.filters{display:none}.ffl{display:block;margin:0 0 10px}.cbar{display:flex}article[data-reqcard]{scroll-margin-top:72px}}
+@media(min-width:900px){.wrap.panelwide.hasspine{max-width:1270px}.rqgrid{display:grid;grid-template-columns:170px minmax(0,1fr);gap:22px;align-items:start}.rqcol{min-width:0}
+.spine{display:grid;gap:6px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding:4px 2px}}
+`;
+// The card on screen: the phone bar's name and arrows, the spine's highlight (IntersectionObserver
+// wakes it; the anchors work on their own without JS). Taps scroll in place, no history entries.
+const CUST_JS = `(function(){var cards=[].slice.call(document.querySelectorAll('[data-request-list] article[data-customer]'));if(!cards.length)return;
+var bar=document.querySelector('[data-customer-bar]'),now=bar&&bar.querySelector('[data-customer-now]'),jump=bar&&bar.querySelector('[data-customer-jump]'),spine=[].slice.call(document.querySelectorAll('[data-spine-to]')),cur=-1;
+function barOn(){return bar&&bar.getClientRects().length>0;}
+function off(){return barOn()?bar.getBoundingClientRect().height+8:12;}
+function mark(i){if(i===cur)return;cur=i;var c=cards[i],k=c.getAttribute('data-card');
+ if(now)now.textContent='Customer '+c.getAttribute('data-customer')+' \\u00b7 '+c.getAttribute('data-first')+' \\u25be';
+ if(bar){bar.querySelector('[data-cstep="-1"]').setAttribute('href','#'+cards[Math.max(0,i-1)].id);bar.querySelector('[data-cstep="1"]').setAttribute('href','#'+cards[Math.min(cards.length-1,i+1)].id);}
+ spine.forEach(function(a){var on=a.getAttribute('data-spine-to')===k;a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current');});}
+function pick(){var y=off()+(barOn()?0:60),k=0;cards.forEach(function(c,i){if(c.getBoundingClientRect().top<=y)k=i;});mark(k);}
+function go(i){i=Math.max(0,Math.min(cards.length-1,i));var c=cards[i];window.scrollTo({top:c.getBoundingClientRect().top+window.pageYOffset-off(),behavior:'smooth'});if(jump)jump.open=false;cur=-1;mark(i);}
+document.addEventListener('click',function(e){var t=e.target.closest('[data-cstep],[data-cjump],[data-spine-to]');if(!t)return;e.preventDefault();
+ if(t.hasAttribute('data-cstep'))return go(cur+Number(t.getAttribute('data-cstep')));
+ var k=t.getAttribute('data-cjump')||t.getAttribute('data-spine-to');for(var i=0;i<cards.length;i++)if(cards[i].getAttribute('data-card')===k)return go(i);});
+var sel=document.querySelector('[data-filter-pick]');if(sel)sel.addEventListener('change',function(){var o=sel.options[sel.selectedIndex];if(o&&o.getAttribute('data-href'))location.href=o.getAttribute('data-href');});
+if('IntersectionObserver' in window){var io=new IntersectionObserver(pick,{rootMargin:'0px 0px -55% 0px',threshold:[0,1]});cards.forEach(function(c){io.observe(c);});}
+var raf=0;window.addEventListener('scroll',function(){if(!raf)raf=requestAnimationFrame(function(){raf=0;pick();});},{passive:true});pick();})();`;
+
 export function requestsPanel(folderUrl) {
   const b = (href, label, key, extra = '') => `<a class="btn ghost" href="${esc(href)}"${extra}${tip(key)}>${esc(label)}</a>`;
   return stepsPanel('requests', [
@@ -1282,10 +1393,15 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
   const one = (r, isArchived) => {
     const st = statuses[r.key] || { status: 'new' };
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
-    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '', isNew: !isArchived && newKeys.has(r.key),
+    return { r, inv, services: servicesOf(r), html: (num = null) => requestCard(r, { num, st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '', isNew: !isArchived && newKeys.has(r.key),
       stored: stored[r.key] || null, depositOut: inv ? depositOut[inv.id] || null : null, hold: holds[r.key] || null, holdHtml: holdHtml[r.key] || '', missed: isArchived ? [] : (missedBy[r.key] || []) }) };
   };
-  const shown = requests.map((r) => one(r, false)).filter((x) => matchesFilter(f, x));
+  // Customer numbers (owner-approved mock-up, 20 Oct 2026): over ALL active requests, oldest = 1,
+  // newest = highest, so the list counts down from the top and a filter never renumbers. Put-away
+  // requests carry no number.
+  const nums = customerNumbers(requests);
+  const active = requests.map((r) => one(r, false));
+  const shown = active.filter((x) => matchesFilter(f, x)).map((x) => ({ ...x, num: nums.get(x.r.key), html: () => x.html(nums.get(x.r.key)) }));
   const putRows = archived.map((r) => one(r, true)).filter((x) => matchesFilter(f, x));
   const empty = f === 'all'
     ? '<div class="card"><p style="margin:0">No requests waiting. New ones from the website form show up here within a minute. Finished ones are in Put away at the bottom.</p></div>'
@@ -1297,18 +1413,18 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
   // Phone first (owner, 19 Oct 2026): the request list comes straight after the heading and the
   // one-line week card; tomorrow's reminders are one tappable line at the bottom; the three-step
   // panel sits under the list on a phone and stays on top on a wide screen (CSS order, .rqflow).
-  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}${CUST_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
 ${setupBanner(missingPayment)}
-    <div class="rqflow"><div class="rqpanel">${requestsPanel(folderUrl)}</div>
+    <div class="rqgrid">${customerSpine(shown)}<div class="rqcol"><div class="rqflow"><div class="rqpanel">${requestsPanel(folderUrl)}</div>
     <div class="rqmain"><h1>Requests</h1>${extraTop}${week}${holdsBox}${err}
-    ${filterChips(f)}
+    ${filterChips(f)}${filterSelect(f, active)}${customerBar(shown)}
     <div data-request-list>${shown.length ? shown.map((x) => x.html()).join('') : (sheetError ? '' : empty)}</div>
     ${remindersLine}</div></div>
     ${putSection}
-    ${idsBox}
+    ${idsBox}</div></div>
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
-    <script>${DASH_JS}${NEW_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { screen: '', panelWide: true });
+    <script>${DASH_JS}${NEW_JS}${CUST_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { screen: '', panelWide: true, spine: true });
 }
 
 export function invoicesPage({ invoices }) {
