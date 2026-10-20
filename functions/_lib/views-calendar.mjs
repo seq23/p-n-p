@@ -10,7 +10,7 @@ import { KINDS, KIND_LABELS, prettyTime, addDays, returnKeyOf, firstLine, usageO
 import { serviceInfo, serviceKey, SERVICE_KINDS } from './kinds.mjs';
 import { gamesAskedOn } from './requested.mjs';
 import { PHONE_SERVICES, PHONE_SERVICE_WORDS, NOTE_CHOICE, FIRST_KIND } from './phone-requests.mjs';
-import { balanceWords, depositWords } from './ledger.mjs';
+import { balanceWords, depositWords, dueWords } from './ledger.mjs';
 import { reminderText, smsLink, normalizePhone, hasEmail } from './reminders.mjs';
 import { reservedWords, RESERVED_BY_HAND } from './views-messages.mjs';
 import { fromSql } from './holds.mjs';
@@ -29,12 +29,12 @@ function tel(phone) {
 }
 
 // ctx: { bal, notes, ret, today }
-export function statusBits(b, { bal, notes = [], ret, today, hold = null }) {
+export function statusBits(b, { bal, notes = [], ret, today, hold = null, delivery = false }) {
   const bits = [];
   if (hold && hold.state === 'held' && RENTAL.has(b.kind)) bits.push(`<span class="money owe" data-held-booking>${hold.until ? `Games reserved until ${esc(reservedWords(fromSql(hold.until)))}` : RESERVED_BY_HAND} — waiting for deposit</span>`);
   if (bal && !bal.void) {
     bits.push(bal.owed > 0 ? `<span class="money owe" data-owed>${esc(balanceWords(bal))}</span>` : `<span class="money ok" data-paid>${esc(balanceWords(bal))}</span>`);
-    if (b.kind === 'rental_pickup' && bal.owed > 0) bits.push(`<span class="money owe" data-collect>Collect ${esc(money(bal.owed))} at pickup</span>`);
+    if (b.kind === 'rental_pickup' && bal.owed > 0) bits.push(`<span class="money owe" data-collect>Collect at ${delivery ? 'delivery' : 'pickup'}: ${esc(dueWords(bal).replace(' due', ''))}</span>`);
   }
   if (b.kind === 'rental_return') {
     if (ret && ret.returned_at) bits.push(`<span class="money ${ret.damaged ? 'owe' : 'ok'}" data-returned>${ret.damaged ? 'Returned — check damage' : 'Returned ✓'}</span>`);
@@ -596,7 +596,7 @@ export function dayPage({ outRows = [], tdToday = [], requested = [], gamesAsked
     ${rows.map(({ b, c, owe }) => `<div class="job" data-sheet-row="${b.id}"><span class="box" aria-hidden="true"></span><div>
       <div class="jl">${esc([b.time ? prettyTime(b.time) : 'Anytime', (c.delivery && DELIVERY_WORDS[b.kind]) || SHEET_WORDS[b.kind] || KIND_LABELS[b.kind] || 'Booking', firstOf(b.customer_name)].join(' · '))}${c.tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''}</div>
       ${b.items ? `<div class="ji">${esc(b.items)}</div>` : ''}${b.place ? `<div class="muted">${esc(b.place)}</div>` : ''}
-      ${owe > 0 ? `<div class="jo" data-still-owed>Still owed ${esc(money(owe))}</div>` : ''}
+      ${owe > 0 ? `<div class="jo" data-still-owed>${esc(dueWords(c.bal))}</div>` : ''}
       ${(c.notes || []).map((n) => `<div class="jn">${esc(n.body)}</div>`).join('')}</div></div>`).join('') || (outRows.length ? '' : '<p>Nothing booked this day.</p>')}
     </div>
     ${outRows.length ? `<div class="jobs" data-day-out>${outRows.map((w) => `<div class="job" data-rental-out="${esc(w.key)}"><span class="box" aria-hidden="true"></span><div><div class="jl">${esc([OUT_WORDS, firstOf(w.name)].join(' · '))}</div><div class="ji">${esc(namesText(w).join(', ') || '')}</div><div class="muted">Picked up ${esc(shortDate(w.start))}, back ${esc(shortDate(w.end))}</div></div></div>`).join('')}</div>` : ''}

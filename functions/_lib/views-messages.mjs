@@ -79,7 +79,9 @@ export const RESERVE_JS = `<script>(function(){if(window.__pnpRes)return;window.
 
 // The hold controls for one held rental (request card, holds box, calendar). compact: on a
 // request card, where the card's ONE big button is its primary, so the reminder is a small
-// "Text a reminder · Email it" pair.
+// "Text a reminder · Email it" pair. On the card (under More → Money) it never repeats what
+// the card already shows (owner, 20 Oct 2026): no second Call, no games list, no second
+// "Reserve their games longer" (the card draws its own), and Release reads "Release the games now".
 export function holdControls(h, { rk, sms = null, canEmail = false, now = Date.now(), depositTarget = null, back = '/admin/', compact = false }) {
   const ends = h.by_hand ? { text: RESERVED_BY_HAND, level: 'amber' } : endsWords(h.untilMs, now);
   const hidden = hiddenInputs({ r: rk, back });
@@ -87,14 +89,14 @@ export function holdControls(h, { rk, sms = null, canEmail = false, now = Date.n
   // the number she types is honoured). No 24 / 48 hour menus, no other choices.
   const more = reserveLongerControl(rk, { untilMs: h.by_hand ? NaN : h.untilMs, back, now });
   const keep = '';
-  const release = confirmStep({ key: h.by_hand ? 'hold.releaseHand' : 'hold.release', yesKey: 'hold.releaseYes', label: h.by_hand ? 'Release these games' : 'Release now', question: `Release ${h.name || 'this customer'}'s games now? They come off the calendar and others can book them.`, action: '/admin/holds/release', hidden, danger: true });
+  const release = confirmStep({ key: h.by_hand ? 'hold.releaseHand' : 'hold.release', yesKey: 'hold.releaseYes', label: h.by_hand ? 'Release these games' : (compact ? 'Release the games now' : 'Release now'), question: `Release ${h.name || 'this customer'}'s games now? They come off the calendar and others can book them.`, action: '/admin/holds/release', hidden, danger: true });
   const deposit = depositTarget ? confirmStep({ key: 'hold.deposit', yesKey: 'hold.depositYes', label: 'Mark deposit received', question: `Mark ${h.name || 'this customer'}'s deposit as received? Only do this after the money is in your account. The hold becomes a confirmed booking.`, action: depositTarget.action, hidden: hiddenInputs(depositTarget.fields) }) : '';
   return `<div class="hold" data-hold="${esc(rk)}"><p><span class="chip deposit_paid" data-held>Held — waiting for deposit</span> <strong class="ends ${ends.level}" data-hold-ends>${esc(ends.text)}</strong></p>
-    ${h.items ? `<p class="muted" style="margin:0">${esc(h.items)}</p>` : ''}
-    ${h.phone ? act(`<a class="btn ghost" href="tel:${esc(String(h.phone).replace(/[^\d+]/g, ''))}"${tip('hold.call')}>Call</a>`, 'hold.call') : ''}
+    ${h.items && !compact ? `<p class="muted" style="margin:0">${esc(h.items)}</p>` : ''}
+    ${h.phone && !compact ? act(`<a class="btn ghost" href="tel:${esc(String(h.phone).replace(/[^\d+]/g, ''))}"${tip('hold.call')}>Call</a>`, 'hold.call') : ''}
     ${compact ? `<div class="msgline" data-messages>${msgPair({ sms, rk, template: 'holdEnding', textKey: 'hold.text', emailKey: 'hold.email', textLabel: 'Text a reminder', canEmail })}</div>`
     : twinButtons({ sms, rk, template: 'holdEnding', textKey: 'hold.text', emailKey: 'hold.email', textLabel: 'Text a reminder', canEmail })}
-    <div class="actions">${deposit}${keep}${release}</div>${more}</div>`;
+    <div class="actions">${deposit}${keep}${release}</div>${compact ? '' : more}</div>`;
 }
 
 export const HOLD_CSS = '.reslonger{margin-top:8px}.reslonger>summary.ressum{list-style:none;display:grid;gap:1px;width:100%;min-height:48px;text-align:left;justify-items:start;padding:10px 12px}.reslonger>summary::-webkit-details-marker{display:none}.ressum b{font-size:1rem}.ressum .ressub{font-size:.85rem;color:#6f6359;font-weight:400}.reslonger[open]>summary{display:none}.resext{border:1.5px solid #b65f3e;border-radius:10px;padding:12px;display:grid;gap:8px}.resext p{margin:0}.restitle{font-weight:700}.resnew b{color:#2f7a46}.rescancel{background:none;border:0;color:#6f6359;text-decoration:underline;padding:0;justify-self:start;min-height:32px;cursor:pointer;font:inherit}.hlrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}.hlrow input{width:5.5em;min-height:48px;font-size:1.1rem;margin:0}.hlrow .btn{width:auto;min-height:48px;padding:8px 22px}.hold{border:2px solid #ebcf96;background:#fffaf0;border-radius:12px;padding:10px 12px;margin:10px 0}.ends.amber{color:#7a4a0c}.ends.red{color:#8f3427}.hold .actions{margin-top:6px}';

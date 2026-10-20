@@ -26,10 +26,10 @@
 import { requestFacts, callbackRows, serviceWords } from './callback-list.mjs';
 import { waitingWords, depositOutcomes } from './steps.mjs';
 import { shortName, askedDate } from './requested.mjs';
-import { listBookings, loadReturns, overdueReturns, addDays, daySort } from './calendar.mjs';
+import { listBookings, loadReturns, overdueReturns, addDays, daySort, deliveryAddress } from './calendar.mjs';
 import { serviceOfKind } from './kinds.mjs';
 import { currentHolds } from './holds.mjs';
-import { balances, linesByInvoice } from './ledger.mjs';
+import { balances, linesByInvoice, dueWords } from './ledger.mjs';
 import { notPaidRows } from './notpaid.mjs';
 import { chicagoDate, chicagoHour, dayWords, timeWords, smsLink, normalizePhone } from './reminders.mjs';
 import { render as renderMessage } from './messages.mjs';
@@ -55,6 +55,9 @@ export const JOB_WORDS = {
   rental_pickup: 'games pickup', rental_return: 'games return', porch_install: 'porch install', porch_takedown: 'porch takedown',
   party_setup: 'party setup', party_takedown: 'party takedown', grazing_setup: 'grazing setup', grazing_pickup: 'grazing pickup', other: 'job',
 };
+// A rental going to a business (Valerie set business delivery): Delivery / Collect (owner, 20 Oct 2026),
+// the same words as the calendar chips and the Day sheet (views-calendar.mjs DELIVERY_WORDS).
+export const DELIVERY_JOB_WORDS = { rental_pickup: 'delivery', rental_return: 'collect' };
 const RENTAL_PLACE = 'Mt. Moriah Station';
 const usd = (c) => money(c).replace(/\.00$/, '');
 
@@ -111,12 +114,15 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   };
   // The set-time Call / Text (Text prefilled from the setTime message template).
   const setTimeBtns = (b) => {
-    const job = JOB_WORDS[b.kind] || 'job';
+    const job = delivered(b) ? (b.kind === 'rental_pickup' ? 'games delivery' : 'games collection') : (JOB_WORDS[b.kind] || 'job');
     const body = renderMessage('setTime', { name: b.customer_name || (reqBy[b.request_key] && reqBy[b.request_key].name), job, day: dayWords(b.date) }).text;
     return callText(phoneOf(b), body);
   };
   // A CONFIRMED open job with a day but no time is asked for one: today's in section 1, the rest in 3.
   const needsTime = (b) => !hasTime(b) && confirmedJob(b);
+  // Delivery / Collect for a business-delivery rental, else the usual job words.
+  const delivered = (b) => Boolean(DELIVERY_JOB_WORDS[b.kind] && b.request_key && factsBy[b.request_key] && deliveryAddress(factsBy[b.request_key].r));
+  const jobOf = (b) => (delivered(b) ? DELIVERY_JOB_WORDS[b.kind] : (JOB_WORDS[b.kind] || 'job'));
 
   // 1. Today's jobs.
   const jobs = open.filter((b) => b.date === today).sort(daySort).map((b) => {
@@ -126,14 +132,14 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const items = String(b.items || '').trim().replace(/\s+/g, ' ').slice(0, 160);
     // What to bring to a setup / install, what to load at a takedown / pickup; rentals: the games.
     if (items) bits.push(svc === 'rentals' ? items : `${/takedown|pickup/.test(b.kind) ? 'load' : 'bring'} ${items}`);
-    if (bal && bal.owed > 0 && b.kind !== 'rental_return') bits.push(`collect ${usd(bal.owed)}`);
+    if (bal && bal.owed > 0 && b.kind !== 'rental_return') bits.push(`collect ${dueWords(bal, usd).replace(' due', '')}`);
     if (bal && b.kind === 'rental_return') {
       const out = outcomes[invoiceOf(b)] || { refunded: 0, kept: 0 };
       const held = Math.max(0, bal.refundable - bal.depositOwed - (out.refunded || 0) - (out.kept || 0));
       if (held > 0) bits.push(`give back ${usd(held)} deposit`);
     }
     const ask = needsTime(b);
-    return { svc, t: `${timeOr(b)} · ${who(b)} · ${JOB_WORDS[b.kind] || 'job'}`, d: bits.filter(Boolean).join(' · '), p: ask ? TODAY_SET_TIME_PROMPT : '', btns: [...(ask ? setTimeBtns(b) : []), { label: 'Open card', href: bookingHref(b) }], key: b.request_key || '', id: b.id, invoice: invoiceOf(b), job: JOB_WORDS[b.kind] || 'job' };
+    return { svc, t: `${timeOr(b)} · ${who(b)} · ${jobOf(b)}`, d: bits.filter(Boolean).join(' · '), p: ask ? TODAY_SET_TIME_PROMPT : '', btns: [...(ask ? setTimeBtns(b) : []), { label: 'Open card', href: bookingHref(b) }], key: b.request_key || '', id: b.id, invoice: invoiceOf(b), job: jobOf(b) === 'collect' ? 'collection' : jobOf(b) };
   });
 
   // 2. Call these people back (oldest first).
@@ -150,7 +156,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   const soon = addDays(today, SET_TIME_HIGHLIGHT_DAYS);
   const setTime = open.filter((b) => b.date > today && needsTime(b))
     .sort((a, b) => String(a.date).localeCompare(String(b.date)) || daySort(a, b)).map((b) => {
-      const job = JOB_WORDS[b.kind] || 'job';
+      const job = jobOf(b);
       return { svc: serviceOfKind(b.kind), t: `${who(b)} · ${job} ${dayWords(b.date)}`, d: 'No time yet', hi: b.date <= soon, date: b.date, key: b.request_key || '', id: b.id, btns: setTimeBtns(b) };
     });
 
@@ -189,7 +195,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const job = jobs.find((j) => j.invoice === row.id || (j.key && j.key === row.requestKey));
     const body = renderMessage('paymentReminder', { name: row.name, amount: usd(row.owed), due: row.due ? dayWords(row.due) : '', late: row.tone === 'late', number: row.number }).text;
     const sms = smsLink(row.phone, body);
-    moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, t: `${shortName(row.name)} · ${usd(row.owed)} still owed`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}`,
+    moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, t: `${shortName(row.name)} · ${dueWords(bals[row.id], usd) || `${usd(row.owed)} due`}`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}`,
       btns: [...(sms ? [{ label: 'Text a reminder', href: sms }] : []), { label: 'Mark paid', href: `/admin/invoices/${row.id}` }] });
   }
   // Every unpaid rental hold (owner, 20 Oct 2026): waiting for its deposit, with the invoice's
@@ -203,14 +209,14 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const until = !timed ? 'Reserved by hand (no end date)' : `Games reserved until ${endDay === today ? 'today' : dayWords(endDay)} ${memphisTime(h.untilMs)}`;
     const bal = h.invoice_id ? bals[h.invoice_id] : null;
     const due = bal && !bal.void ? bal.owed + bal.depositOwed : 0;
-    const d = bal && !bal.void ? (due > 0 ? `${usd(due)} due on the invoice` : 'Deposit not paid yet') : 'Invoice not sent yet';
+    const d = bal && !bal.void ? (due > 0 ? `${dueWords(bal, usd)} on the invoice` : 'Deposit not paid yet') : 'Invoice not sent yet';
     moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [{ label: 'Reserve their games longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
   }
   for (const b of overdueReturns(bookings, returns, today)) {
     moneyItems.push({ type: 'overdue', svc: 'rentals', key: b.request_key || '', t: `${who(b)} · games not returned yet`, d: `Due back ${dayWords(b.date)}`, btns: [...callText(phoneOf(b)), { label: 'Open card', href: bookingHref(b) }] });
   }
 
-  const tomorrowJobs = open.filter((b) => b.date === tomorrow).sort(daySort).map((b) => ({ svc: serviceOfKind(b.kind), t: `${timeOr(b)} · ${who(b)} · ${JOB_WORDS[b.kind] || 'job'}` }));
+  const tomorrowJobs = open.filter((b) => b.date === tomorrow).sort(daySort).map((b) => ({ svc: serviceOfKind(b.kind), t: `${timeOr(b)} · ${who(b)} · ${jobOf(b)}` }));
   const monday = isMondayIso(today);
   const withWeek = includeWeek === null ? monday && settings.weekly_summary !== '0' : includeWeek;
   let week = null;

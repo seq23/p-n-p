@@ -170,7 +170,7 @@ if (biz.row && home.row) {
   void hist;
   dash = (await s.get('/admin/')).text;
   const c = cardOf(dash, biz.row.request_key);
-  must(/data-business-delivery><strong>Business delivery<\/strong>: Acme Offices, 100 Main St, Memphis</.test(c), 'the card does not show "Business delivery" with the business and address');
+  must(/data-business-delivery><span class="biztag">🚚 Business delivery<\/span> Acme Offices, 100 Main St, Memphis</.test(c.slice(0, c.indexOf('data-details'))), 'the card does not show the "🚚 Business delivery" tag with the business and address above More');
   must(!/data-business-delivery/.test(cardOf(dash, home.row.request_key)), 'a home rental card says Business delivery');
   const pick = bks.find((b) => b.kind === 'rental_pickup');
   const ret = bks.find((b) => b.kind === 'rental_return');

@@ -100,7 +100,7 @@ export function notPaidBox(np, { prettyDue = (d) => shortDate(d) } = {}) {
       <div class="spread"><strong style="font-size:1.25rem">${esc(r.name)}</strong><span class="${esc(r.tone)}" data-due-words>${esc(r.words)}</span></div>
       <div class="muted">${esc(r.whatFor)} · ${esc(r.number)}</div>
       <div class="nums"><span>Total ${esc(money(r.total))}</span><span>Paid ${esc(money(r.paid))}</span></div>
-      <div>Still owed <span class="owed" data-owed>${esc(money(r.owed))}</span></div>
+      <div><span class="owed" data-owed>${esc(r.dueWords || `${money(r.owed)} due`)}</span></div>
       ${r.remindedAt ? `<div class="muted" data-reminded>Reminder emailed ${esc(String(r.remindedAt).slice(0, 10))}</div>` : ''}
       <div class="secrow">
         ${tel ? `<div class="act"><a class="btn ghost" href="tel:${esc(tel)}"${tip('np.call')}>Call</a></div>` : ''}

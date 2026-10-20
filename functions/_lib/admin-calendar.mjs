@@ -13,7 +13,7 @@ import { calendarBack } from './admin-steps.mjs';
 import { requestedChips, gamesAskedOn, askedDate } from './requested.mjs';
 import * as C from './calendar.mjs';
 import { notPaidYet } from './notpaid.mjs';
-import { balances, balanceWords, depositWords } from './ledger.mjs';
+import { balances, balanceWords, depositWords, dueWords } from './ledger.mjs';
 import { tomorrowsBookings, tomorrowChicago, chicagoDate } from './reminders.mjs';
 import * as V from './views.mjs';
 import * as VC from './views-calendar.mjs';
@@ -132,7 +132,7 @@ export async function daySheetData(env, date) {
   const bookings = all.filter((b) => b.date === date).sort(C.daySort);
   const rows = bookings.map((b) => {
     const c = ctx(b);
-    return { ...b, timeLabel: b.time ? C.prettyTime(b.time) : '', owed: c.bal && !c.bal.void ? c.bal.owed : 0, note: c.notes[0] ? c.notes[0].body : '' };
+    return { ...b, timeLabel: b.time ? C.prettyTime(b.time) : '', owed: c.bal && !c.bal.void ? c.bal.owed : 0, dueWords: c.bal ? dueWords(c.bal) : '', delivery: c.delivery, note: c.notes[0] ? c.notes[0].body : '' };
   });
   const holds = (await currentHolds(env.DB)).filter((h) => !h.by_hand && h.until && C.chicagoDayOf(h.until) === date)
     .map((h) => ({ ...h, timeLabel: new Date(h.untilMs).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) }));

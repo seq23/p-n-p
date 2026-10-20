@@ -8,6 +8,9 @@
 //        go=no    No, put it away: called, games released, put away (Bring back undoes it).
 //   POST /admin/requests/called   undo=1: takes back "Called back" (and the Yes) only; bookings stay.
 //   POST /admin/requests/note     Add a note (internal, only Valerie sees it).
+//   POST /admin/requests/delivery "How do they get the games?" (Step 1, rentals): pickup at the
+//                 safe exchange zone, or business delivery to a business name + address
+//                 (delivery.mjs setDelivery: the same answers Edit -> Customer details writes).
 import { redirect, b64urlText, fromB64urlText, shortDate } from './util.mjs';
 import { loadRequests, logEvent } from './requests.mjs';
 import { TRACK_TABLE as PRICE_TABLE } from './prices.mjs';
@@ -18,6 +21,7 @@ import { getHold, keepHolding, releaseHold } from './holds.mjs';
 import { markCalled, markConfirmed, undoCalled } from './steps.mjs';
 import { markOpened } from './request-new.mjs';
 import { syncExtraGames } from './extra-games.mjs';
+import { setDelivery, deliveryFeeCents } from './delivery.mjs';
 
 const decodeKey = (v) => { try { return fromB64urlText(v); } catch { return ''; } };
 const toCard = (key, m, e = false) => redirect(`/admin/?${e ? 'e' : 'm'}=${encodeURIComponent(m)}#c-${b64urlText(key)}`);
@@ -120,4 +124,23 @@ export async function noteRoute(env, request) {
   if (!key || !body) return key ? toCard(key, 'Type the note first.', true) : redirect('/admin/');
   await env.DB.prepare('INSERT INTO booking_notes (booking_id, request_key, body) VALUES (NULL, ?1, ?2)').bind(key, body).run();
   return toCard(key, 'Note saved ✓ Only you see it.');
+}
+
+export async function deliveryRoute(env, request) {
+  const form = await request.formData();
+  const key = decodeKey(form.get('r'));
+  if (!key) return redirect('/admin/');
+  const how = String(form.get('how') || '');
+  if (!['pickup', 'delivery'].includes(how)) return toCard(key, 'Pick how they get the games first.', true);
+  const req = (await loadRequests(env)).find((r) => r.key === key);
+  if (!req) return redirect(`/admin/?e=${encodeURIComponent('That request was not found.')}`);
+  if (!servicesOf(req).includes('rentals')) return toCard(key, 'Business delivery is for game rentals only.', true);
+  const name = String(form.get('delivery_name') || '').trim();
+  const address = String(form.get('delivery_address') || '').trim();
+  if (how === 'delivery' && !address) return toCard(key, 'Type the delivery address first, then tap Save.', true);
+  await markOpened(env.DB, key, 'card');
+  const out = await setDelivery(env.DB, req, how === 'delivery' ? { name, address } : { name: '', address: '' });
+  if (!out.changed) return toCard(key, 'Nothing changed.');
+  const fee = out.words.some((w) => /^Delivery fee added/.test(w)) ? ` The $${deliveryFeeCents() / 100} delivery fee is on the draft invoice.` : '';
+  return toCard(key, how === 'delivery' ? `Saved ✓ Business delivery to ${[name, address].filter(Boolean).join(', ')}.${fee} Nothing was sent to them.` : `Saved ✓ They pick up at ${PRICE_TABLE.pickupPlace}. Nothing was sent to them.`);
 }

@@ -147,6 +147,14 @@ pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/req
       schedule: { 'rentp|x': { date: '2026-10-30' } }, kinds: { 'rentp|x': ['rental_pickup', 'rental_return'] }, bookings: { 'rentp|x': [{ kind: 'rental_pickup', date: '2026-10-30', time: null }] }, today: '2026-10-18',
       cardMsgs: { 'rentp|x': { confirm: { sms: { href: 'sms:9015550100?&body=ok' }, canEmail: true }, pickup: { sms: { href: 'sms:9015550100?&body=time' }, canEmail: true } } } }) }]);
   }
+  // A rental whose invoice has a Delivery fee line but no business delivery set: the card asks for
+  // the business name and address (owner, 20 Oct 2026), the same Step-1 form.
+  {
+    const rent = { ...reqA, key: 'rentd|x', name: 'Dee Fee', services: ['rentals'], rentals: [], decor: [], other: [] };
+    const inv = { id: 77, number: 'PP-77', status: 'sent', total_cents: 15000, deposit_due_cents: 7500, lines: [{ description: 'Giant Uno', qty: 1, unit_cents: 13000 }, { description: 'Delivery fee', qty: 1, unit_cents: 2000 }],
+      balance: { total: 15000, charges: 15000, refundable: 0, paid: 0, owed: 15000, depositOwed: 0, remaining: 15000, void: false } };
+    pages.push(['dashboardPage(delivery fee, no business address)', { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [rent], statuses: { 'rentd|x': { status: 'invoiced', invoice_id: 77 } }, invoices: { 77: inv }, today: '2026-10-18' }) }]);
+  }
   // Grazing and party once their setup is on the calendar: the optional second booking buttons.
   const graze = { ...porch, key: 'graze|x', name: 'Gia Graze', services: ['grazing'], need: 'grazing', decor: [{ label: 'How many guests?', value: '15–40' }, { label: 'Should we source the food?', value: 'Yes, include food in my quote' }] };
   const party = { ...porch, key: 'party|x', name: 'Pia Party', services: ['party'], need: 'party & decor' };
@@ -261,11 +269,12 @@ for (const [p, o, res] of pages) {
     // The only "More" toggle on Requests is each step card's own one (owner-approved 19 Oct 2026).
     const MORE_CARD = '<summary data-help="card.details" title="';
     const mores = [...html.matchAll(/<summary([^>]*)>([^<]*\bMore\b[^<]*)</g)];
-    for (const m of mores) if (!m[0].startsWith(MORE_CARD) || m[2] !== 'More: answers, history, other buttons') errors.push(`${p}: a "More" toggle that is not a card's "More: answers, history, other buttons": ${m[0].slice(0, 80)}`);
+    // "More about <first name>" (owner-approved mock-up, 20 Oct 2026).
+    for (const m of mores) if (!m[0].startsWith(MORE_CARD) || !/^More about (\S+|this request)$/.test(m[2])) errors.push(`${p}: a "More" toggle that is not a card's "More about <first name>": ${m[0].slice(0, 80)}`);
     for (const a of html.split('<article').slice(1)) {
       const card = a.slice(0, a.indexOf('</article>'));
       if (!/data-reqcard/.test(card)) continue;
-      const n = (card.match(/More: answers, history, other buttons/g) || []).length;
+      const n = (card.match(/<summary data-help="card\.details"[^>]*>More about /g) || []).length;
       if (n !== 1) errors.push(`${p}: a request card has ${n} "More" toggles (must be exactly one)`);
       if (card.indexOf('data-next-step') < 0 || card.indexOf('data-next-step') > card.indexOf('data-details')) errors.push(`${p}: a request card's "More" comes before (or without) its next-step box`);
     }

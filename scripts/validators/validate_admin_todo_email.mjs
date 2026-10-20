@@ -146,8 +146,8 @@ must(sms && decodeURIComponent(sms.href.split('body=')[1] || '') === "Hi Danesha
 
 // 5. Money.
 const m5 = S[5];
-must(m5.some((x) => x.type === 'owed' && x.t === 'Alex S. · $180 still owed' && x.d === 'Due today, at the takedown'), `Money lacks "Alex S. · $180 still owed / Due today, at the takedown": ${JSON.stringify(titles(m5))}`);
-must(m5.some((x) => x.type === 'owed' && x.t === 'Lou L. · $90 still owed' && /3 days late/.test(x.d)), 'Money lacks the late balance');
+must(m5.some((x) => x.type === 'owed' && x.t === 'Alex S. · $180 due' && x.d === 'Due today, at the takedown'), `Money lacks "Alex S. · $180 due / Due today, at the takedown": ${JSON.stringify(titles(m5))}`);
+must(m5.some((x) => x.type === 'owed' && x.t === 'Lou L. · $90 due' && /3 days late/.test(x.d)), 'Money lacks the late balance');
 must(!m5.some((x) => /Fay F/.test(x.t)), 'Money lists a balance due tomorrow');
 must(!m5.some((x) => /Dee D|Sam R/.test(x.t)), 'Money lists a damage deposit as owed (deposits are never owed)');
 const owedRow = m5.find((x) => /Alex S/.test(x.t));
@@ -182,7 +182,7 @@ await markCalled(db, reqB.key, { confirm: true, how: 'test' });
 let h3 = (await T.todoData(db, TODAY, NOW)).sections;
 must(!h3[3].some((x) => x.key === reqB.key), `an invoiced-unpaid HELD rental is in Set a time: ${JSON.stringify(titles(h3[3]))}`);
 const wait = h3[5].filter((x) => x.type === 'hold' && x.key === reqB.key);
-must(wait.length === 1 && wait[0].t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && wait[0].d === '$160 due on the invoice' && wait[0].due === 16000 && wait[0].btns.map((b) => b.label).join() === 'Reserve their games longer,Open card', `an invoiced-unpaid held rental is not in Money as waiting for deposit with its amount due: ${JSON.stringify(wait)}`);
+must(wait.length === 1 && wait[0].t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && wait[0].d === '$160 due ($110 + $50 refundable deposit) on the invoice' && wait[0].due === 16000 && wait[0].btns.map((b) => b.label).join() === 'Reserve their games longer,Open card', `an invoiced-unpaid held rental is not in Money as waiting for deposit with its amount due: ${JSON.stringify(wait)}`);
 // Already in Money (its invoice is due today): listed once, as owed, never twice.
 await run("UPDATE invoices SET due_date = ?2 WHERE id = ?1", inv6, TODAY);
 h3 = (await T.todoData(db, TODAY, NOW)).sections;

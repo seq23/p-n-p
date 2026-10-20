@@ -431,8 +431,19 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   name, one date line; a green bar, "N of M done" and the named steps (done = green ✓, current
   bold, later grey) with ONE "undo" beside the last ✓; then ONE "Next step · step N" box (one
   sentence, one big button, small Call / Text where useful). Everything else (answers, phone and
-  email, ID, notes, history, Edit, Add a note, Print checklist, Put away, the Payment box, the
-  other buttons, Void) is under "More: answers, history, other buttons".
+  email, ID, notes, history, Edit, Print checklist, Put away, the Payment box, the other buttons,
+  Cancel this job) is under "More about <first name>".
+  - **Calm card** (owner-approved mock-up, 20 Oct 2026; `validate:admin-card-calm`): always
+    visible: name, Call / Text, the when-line, the "🚚 Business delivery" tag, the **Latest note**
+    (newest note in full + its day) with "+ Add a note", then the next step. "More about <first
+    name>" holds four groups, only the first open: What they booked · Money · Their details and
+    ID · Notes and history (all notes, then history newest first, 5 shown + "Show all (N)"), then
+    a quiet row Edit · Print checklist · Put away · "Cancel this job…" (the old "Void this
+    request…", same action and confirm). Raw ISO dates and UTC history stamps read as Memphis
+    words on screen only; stored rows never change.
+  - **One money wording** (`ledger.mjs dueWords`): "$180 due ($130 + $50 refundable deposit)"
+    when a refundable deposit is not collected yet, else "$130 due": card, to-do email, invoice
+    page, Money's Not paid yet, Edit page and the day list. `balance.owed` still excludes the deposit.
   - Rentals: Called back -> Invoice sent ("Review & send invoice" opens the website's draft in the
     editor) -> Deposit paid ("Games reserved until <time>" + "Reserve their games longer" holding the hold controls)
     -> Picked up ("Mark picked up", with "They paid the rest now" ticked when money is owed) ->
@@ -557,7 +568,13 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   herself: Change anything on this request → Customer details → Business delivery (name +
   address; empty address = pickup), stored in `requests.details_edits` and laid over the answers
   "Business delivery", "Business name", "Delivery address" (`requests.mjs applyEdits`), and adds
-  "+ Delivery fee" on the invoice. Set: the card shows "Business delivery: <business>, <address>",
+  "+ Delivery fee" on the invoice. Or in Step 1 on the card: "How do they get the games?" (They
+  pick up at Mt. Moriah Station / Business delivery) writes the same answers, logs a request event,
+  and adds ONE "Delivery fee" line at the services.json price to a draft that was never sent (pickup
+  takes it off again); a sent invoice is never touched (`delivery.mjs`). An invoice with a Delivery
+  fee but no address shows "🚚 Business delivery: add the business name and address" on the card.
+  The pickup step reads "Delivery: <date> · Deliver to <business>, <address> · Mark delivered", the
+  return "Collect: <date>", the 7 AM email "delivery" / "collect". Set: the card shows "🚚 Business delivery <business>, <address>",
   the pickup / return bookings move to that address (and back when cleared) and read "Delivery" / "Collect" on the
   calendar, Upcoming, the list and the Day sheet (`calendar.mjs deliveryAddress / rentalPlace`).
   Home rentals stay pickup and return at the safe exchange zone. Facebook listings are hand-written:

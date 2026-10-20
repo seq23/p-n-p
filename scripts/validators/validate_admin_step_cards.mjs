@@ -146,7 +146,7 @@ for (const [txt, want] of [['11/3', '2026-11-03'], ['11-3', '2026-11-03'], ['11.
 const SERVICES = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8'));
 const QA = SERVICES.invoiceQuickAdds || {};
 must(Number(QA.deliveryFee) === 20 && Number(QA.extraGame) === 20, `services.json invoiceQuickAdds is not { deliveryFee: 20, extraGame: 20 } (${JSON.stringify(QA)})`);
-for (const f of ['functions/_lib/views.mjs', 'functions/_lib/admin.mjs', 'functions/_lib/extra-games.mjs', 'functions/_lib/admin-steps.mjs']) {
+for (const f of ['functions/_lib/views.mjs', 'functions/_lib/admin.mjs', 'functions/_lib/extra-games.mjs', 'functions/_lib/admin-steps.mjs', 'functions/_lib/delivery.mjs', 'functions/_lib/helptext.mjs']) {
   const src = fs.readFileSync(path.join(ROOT, f), 'utf8');
   must(!/(Delivery fee|Extra game)[^\n]{0,80}\b(20|2000|20\.00)\b/.test(src) && !/deliveryFee\s*[:=]\s*\d|extraGame\s*[:=]\s*\d/.test(src), `${f} types a quick-add price instead of reading services.json`);
 }
@@ -189,7 +189,7 @@ for (const [svc, row] of Object.entries(made)) {
   const c = await card(row.request_key);
   must(cur(c) === 'called' && /data-confirmed="0"/.test(c) && /<summary class="btn primary" data-help="step\.talked"[^>]*>I've talked to them<\/summary>/.test(c) && /Are you taking this job\?/.test(c), `${svc}: a new card's next step is not "I've talked to them" -> "Are you taking this job?"`);
   must((c.match(/class="btn primary"/g) || []).length === 1 || (svc === 'rentals'), `${svc}: more than one big button on a new card`);
-  must(/data-step-count>0 of \d done</.test(c) && /More: answers, history, other buttons/.test(c), `${svc}: no "0 of M done" / More on a new card`);
+  must(/data-step-count>0 of \d done</.test(c) && new RegExp(`<summary data-help="card\\.details"[^>]*>More about ${svcReq[svc].name.split(' ')[0]}</summary>`).test(c), `${svc}: no "0 of M done" / "More about <first name>" on a new card`);
 }
 // Not yet: called, still tentative and listed.
 {
