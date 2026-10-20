@@ -64,8 +64,28 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   linked from Requests and the invoice screen. No migration: answers live in `requests.answers`.
 - **Guard**: `npm run validate:porch-packages` (in validate:admin).
 
+## Quick Pricing Summary (owner-approved mock-up, 20 Oct 2026)
+- **`/admin/pricing`**, the last menu button: jump chips Rentals · Porch · Party & decor · Grazing,
+  one block per service in its service colour. Every number comes from the files the website
+  renders from (`data/rentals/games.json` through the live inventory, `porch_packages.json`,
+  `services.json`) via `functions/_lib/price-summary.mjs`; nothing types a price.
+- **"Only you see this"** (yellow): business delivery and the extra game (services.json
+  `invoiceQuickAdds`), the projector (games.json `adminItems`), the hold length (Settings, default
+  `rentalHolds`); porch takedown / setup fee and discount are invoice quick-adds. Shown on the page
+  only: never in Text it, Email it or a printout.
+- **Text it**: an `sms:` link (her phone, free) with a short list + the public page, at most 300
+  characters. **Email it / Email all**: a small "Send to" box (type-ahead from request emails);
+  `POST /admin/pricing/email` sends from hello@ through the shared mailer
+  (`messages.mjs sendPriceList`), subject "Porch & Party prices: <service>" / "Porch & Party
+  prices", at most once a minute per address + section (settings row `pricelist_recent`, no
+  migration), and logs "Price list emailed (<service>)" on the newest request with that address.
+  **Print** / **Print all**: just that section (print CSS hides the menu, buttons, other blocks and
+  the private box).
+- **Guard**: `npm run validate:admin-pricing` (in validate:admin): page = data, perturbed data
+  moves every number, private facts never in text / email / print, the send path end to end.
+
 ## Request cards + admin homepage (JOB B, owner-approved 18 Oct 2026, migration 0008)
-- **Main nav**: Requests · Calendar & Bookings · Money · Inventory · Settings · Help (Inventory added 19 Oct 2026). Put away and Invoices
+- **Main nav**: Requests · Calendar & Bookings · Money · Inventory · Settings · Help · Quick Pricing Summary (Inventory added 19 Oct 2026; Quick Pricing Summary, the last button, 20 Oct 2026). Put away and Invoices
   left the nav: Put away is the collapsed "Put away (N)" section at the bottom of Requests ("Show
   put-away requests", `#put-away`, the only whitelisted disclosure in `validate:admin-tooltips`);
   `/admin/archive` redirects to `/admin/?pa=1#put-away` with it open. All invoices are linked from

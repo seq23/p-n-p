@@ -145,7 +145,7 @@ ${kindCss()}
 
 export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false, panelWide = false, where = '' } = {}) {
   const nav = authed ? `<nav aria-label="Main">
-    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${tip('nav.money')}>Money</a><a href="/admin/inventory"${tip('nav.inventory')}>Inventory</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>Help</a>
+    <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${tip('nav.money')}>Money</a><a href="/admin/inventory"${tip('nav.inventory')}>Inventory</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>Help</a><a href="/admin/pricing"${tip('nav.pricing')}>Quick Pricing Summary</a>
     <form method="post" action="/admin/logout" style="display:inline"><button type="submit"${tip('nav.signout')}>Sign out</button></form></nav>` : '';
   // The same top bar on every screen (owner, 20 Oct 2026): "← Back" on the left (history.back()
   // when she came from another admin screen, else the screen's parent), where she is on the right.

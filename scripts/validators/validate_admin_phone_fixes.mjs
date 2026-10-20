@@ -226,7 +226,7 @@ const img = await get(`/admin/requests/id?r=${rkId}`);
 must(img.status === 200 && /no-store/.test(img.headers.get('Cache-Control') || ''), 'the private photo route lost no-store');
 
 // ---- 6. The top bar everywhere, and actions land on the card ----------------------------------
-for (const p of ['/admin/', '/admin/inventory', '/admin/inventory/giant-uno', '/admin/calendar', '/admin/money', '/admin/settings', '/admin/help', '/admin/invoices', `/admin/requests/edit?r=${rkId}`, `/admin/requests/id/view?r=${rkId}`]) {
+for (const p of ['/admin/', '/admin/inventory', '/admin/inventory/giant-uno', '/admin/calendar', '/admin/money', '/admin/settings', '/admin/help', '/admin/pricing', '/admin/invoices', `/admin/requests/edit?r=${rkId}`, `/admin/requests/id/view?r=${rkId}`]) {
   const r = await get(p);
   must(/<nav class="adminbar noprint" aria-label="Back" data-adminbar><a class="back" href="\/admin\/[^"]*" data-back[^>]*>&larr; Back<\/a><span class="where" data-where>[^<]+<\/span><\/nav>/.test(r.text), `${p}: no top bar with ← Back and where you are`);
   must(/history\.back\(\)/.test(r.text) && /r\.origin===location\.origin/.test(r.text), `${p}: Back does not use the history when she came from an admin screen`);

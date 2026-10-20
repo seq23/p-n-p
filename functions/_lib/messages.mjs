@@ -145,15 +145,34 @@ export async function sendMessage(env, channel, template, ctx, { to = ctx.email,
     return href ? { ok: true, href, text: msg.text } : { ok: false, error: 'No mobile number on file.' };
   }
   if (channel !== 'email') return { ok: false, error: `unknown channel ${channel}` };
+  return deliver(env, to, template, msg);
+}
+
+// The mailer call every email shares (from hello@ via the pnp-mailer Worker) -> { ok, error? }.
+async function deliver(env, to, kind, msg) {
   if (!hasEmail(to)) return { ok: false, error: 'No working email on file.' };
   if (!env.MAILER) return { ok: false, error: 'Email is not connected on this copy of the site.' };
   try {
     const full = msg.images && msg.images.length ? await attachImages(msg, env.SITE_ORIGIN || 'https://porchandparty901.com', env.FETCH || fetch) : { ...msg, attachments: [] };
     const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ to, ...ownerCopy(template), replyTo: FROM_EMAIL, subject: full.subject, html: full.html, text: full.emailText || full.text, attachments: full.attachments }),
+      body: JSON.stringify({ to, ...ownerCopy(kind), replyTo: FROM_EMAIL, subject: full.subject, html: full.html, text: full.emailText || full.text, attachments: full.attachments }),
     });
     const out = await res.json().catch(() => ({ ok: false }));
     return res.ok && out.ok ? { ok: true } : { ok: false, error: out.error || `mailer answered ${res.status}` };
   } catch (e) { return { ok: false, error: String(e && e.message ? e.message : e) }; }
+}
+
+// The Quick Pricing Summary price list (owner, 20 Oct 2026; admin-pricing.mjs "Email it" /
+// "Email all"). Not one of TEMPLATES: those are messages about a job and never mention a
+// discount; this is the published price list itself (the porch fall + Christmas bundle
+// included), sent through the same mailer. ctx is price-summary.mjs emailFor(): public rows
+// only, never the "Only you see this" facts. No copy to hello@ (ownerCopy: invoices and receipts).
+export function renderPriceList(ctx) {
+  const emailText = `${ctx.plain}\n\nQuestions? Reply to this email or call or text ${BUSINESS_PHONE}.`;
+  return { subject: ctx.subject, text: ctx.lines.join('\n\n'), emailText, html: wrapEmail({ title: ctx.subject, paragraphs: ctx.lines, extraHtml: ctx.extraHtml }), images: [] };
+}
+
+export async function sendPriceList(env, ctx, { to }) {
+  return deliver(env, to, 'priceList', renderPriceList(ctx));
 }
