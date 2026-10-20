@@ -283,6 +283,29 @@ export function paymentBox({ who, status, plan = 'half', rest = 0, hasInvoice = 
 }
 
 // ---- Requests --------------------------------------------------------------------------
+// The NEW badge and the phone-first order of Requests (owner, 19 Oct 2026).
+const NEW_CSS = `
+.newb{display:inline-flex;align-items:center;padding:2px 10px;border-radius:999px;background:#c2410c;color:#fff;font:800 .85rem Inter,Arial,sans-serif;letter-spacing:.06em;border:0;white-space:nowrap;vertical-align:middle}
+button.newb.big{min-height:44px;padding:0 16px;font-size:1rem;cursor:pointer}
+article[data-new]{box-shadow:0 0 0 3px #f3b493}
+.rqflow{display:flex;flex-direction:column}.rqmain{order:1}.rqpanel{order:2;margin-top:18px}
+@media(min-width:900px){.rqpanel{order:0;margin-top:0}}
+.weekcard{padding-top:12px;padding-bottom:12px}.weekcard .weekline{margin:0}.weekcard details{margin-top:6px}
+.weekcard .wkn{display:none}@media(min-width:600px){.weekcard .wkn{display:inline}}
+.weekcard summary{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}.weekcard li a{color:inherit}
+.remline{padding:0}.remline>summary{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:56px;padding:12px 16px;cursor:pointer;list-style:none;font-size:1.1rem}
+.remline>summary::-webkit-details-marker{display:none}.remline .remcount{font-weight:700}.remline .remchev{margin-left:auto;font-size:1.2rem;color:var(--accent);transition:transform .15s}
+.remline[open] .remchev{transform:rotate(90deg)}.remline .remin{padding:0 16px 14px;border-top:1px solid var(--line)}.remline .remin h2{margin-top:12px}
+`;
+// Opening a card clears its NEW: the badge itself, Show details, Edit, any button or link on it,
+// or arriving at #c-<card> from the New-request email.
+const NEW_JS = `(function(){
+  function seen(card,how){if(!card||!card.hasAttribute('data-new'))return;card.removeAttribute('data-new');var b=card.querySelector('[data-new-badge]');if(b)b.remove();
+    var f=new FormData();f.append('r',card.getAttribute('data-card'));f.append('how',how);try{fetch('/admin/requests/opened',{method:'POST',body:f,headers:{'X-Pnp-Fetch':'1'},credentials:'same-origin',keepalive:true});}catch(e){}}
+  document.addEventListener('click',function(e){var c=e.target.closest('article[data-new]');if(!c)return;var t=e.target.closest('[data-new-badge],summary,a,button');if(t)seen(c,t.matches('[data-new-badge]')?'badge':'card');});
+  if(/^#c-/.test(location.hash)){var c=document.getElementById(location.hash.slice(1));if(c){seen(c,'link');c.scrollIntoView();}}
+})();`;
+
 const DASH_JS = `
 (function(){
   var tpl=document.getElementById('undo-tpl'),slot=document.getElementById('undo-slot');if(!slot)return;
@@ -357,13 +380,17 @@ function requestDetailsBody(r, { referrers = {} } = {}) {
 }
 
 // Top of Requests: this week (Mon–Sun, Memphis) by service, and last week.
-export function weekBox(w) {
+export function weekBox(w, newKeys = new Set()) {
   const n = w.thisWeek.length;
   const parts = [['porch', 'porch'], ['party', 'party & decor'], ['grazing', 'grazing'], ['rentals', 'rentals']].filter(([k]) => w.byService[k]).map(([k, word]) => `${w.byService[k]} ${word}`);
-  const list = w.thisWeek.map((r) => `<li>${esc(r.name || 'No name given')} <span class="muted">${esc(shortDate(new Date(r.sortTime).toISOString().slice(0, 10)))}</span></li>`).join('');
-  return `<section class="card" data-week-counts><p class="weekline"><strong>This week: ${n} new request${n === 1 ? '' : 's'}</strong>${parts.length ? ` (${esc(parts.join(', '))})` : ''}</p>
-    <p class="muted" style="margin:0">Last week: ${w.lastWeek.length}</p>
-    ${n ? `<details class="disclose" data-week-list><summary${tip('req.weekList')}>See this week's requests</summary><ul>${list}</ul></details>` : ''}</section>`;
+  const fresh = w.thisWeek.filter((r) => newKeys.has(r.key));
+  const badge = (txt) => `<span class="newb" data-new-count>${esc(txt)}</span>`;
+  const list = w.thisWeek.map((r) => `<li>${newKeys.has(r.key) ? `${badge('NEW')} ` : ''}<a href="#c-${esc(b64urlText(r.key))}"${tip('req.weekJump')}>${esc(r.name || 'No name given')}</a> <span class="muted">${esc(shortDate(new Date(r.sortTime).toISOString().slice(0, 10)))}</span></li>`).join('');
+  // The collapsed line names the newest request and says how many are NEW (owner, 19 Oct 2026).
+  const newest = w.thisWeek.slice().sort((a, b) => (b.sortTime || 0) - (a.sortTime || 0))[0];
+  const sum = n ? `<span class="wkl">Latest: ${esc(newest.name || 'No name given')}</span>${fresh.length ? ` ${badge(fresh.length === 1 ? 'NEW' : `${fresh.length} NEW`)}` : ''}${n > 1 ? ` <span class="muted wkn">· see all ${n}</span>` : ''}` : '';
+  return `<section class="card weekcard" data-week-counts><p class="weekline"><strong>This week: ${n} new request${n === 1 ? '' : 's'}</strong>${parts.length ? ` (${esc(parts.join(', '))})` : ''} <span class="muted">· Last week: ${w.lastWeek.length}</span></p>
+    ${n ? `<details class="disclose" data-week-list><summary${tip('req.weekList')}>${sum}</summary><ul>${list}</ul></details>` : ''}</section>`;
 }
 
 // A gentle list: requests paid in full (and for rentals, returned) that still hold an ID photo.
@@ -601,7 +628,7 @@ const chicagoToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America
 // One request card. o: everything dashboardPage knows about this request.
 export function requestCard(r, o) {
   const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace,
-    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '' } = o;
+    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '', isNew = false } = o;
   const rk = b64urlText(r.key);
   const services = servicesOf(r);
   const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
@@ -627,6 +654,7 @@ export function requestCard(r, o) {
   // Oct" repeated the progress line). Only what the progress line cannot say: Void (no progress
   // line), Finished, and Returned — check damage.
   const chips = [
+    isNew ? `<button type="button" class="newb big" data-new-badge${tip('req.new')}>NEW</button>` : '',
     isPhone(r) ? `<span class="chip phone" data-phone-chip${tip('card.phoneChip')}>From a phone call</span>` : '',
     pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : '',
     pr.finished && !pr.void ? '<span class="chip paid" data-step="paid">Finished: job done and paid</span>' : '',
@@ -642,7 +670,7 @@ export function requestCard(r, o) {
   const finishedNote = stage === 'finished' ? '<div class="notice ok" data-put-away-prompt><strong>Finished: the job is done and it is paid in full.</strong> Put it away?</div>' : '';
   const damage = returned && ret.damaged && stage !== 'archived' && stage !== 'void' ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : '';
   const payment = quiet ? '' : cardPaymentBox(r, st, inv, rules.primary, ctx);
-  return `<article class="card" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
+  return `<article class="card" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
       ${badges(services)}
       <div class="spread"><h3 class="who">${esc(r.name || 'No name given')}</h3><div class="row">${chips}<a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a></div></div>
       ${factsLine(keyFacts(r, services, { pickupPlace }))}
@@ -686,7 +714,7 @@ export function requestsPanel(folderUrl) {
 }
 
 // schedule: { [request_key]: { date } } earliest booking per request; kinds: { [request_key]: [kind] }.
-export function dashboardPage({ requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '',
+export function dashboardPage({ newKeys = new Set(), remindersLine = '', requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '',
   cardMsgs = {}, cardBottom = {}, tdSaved = null, bookings = {}, takedownInvoices = new Set(), today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station' }) {
   const err = sheetError ? `<div class="notice err"><strong>The requests could not be loaded right now.</strong> ${/not shared/i.test(sheetError)
     ? `The responses sheet needs to be shared with the site. In Google Sheets tap Share and add <code>${esc(SA_EMAIL)}</code> as a Viewer.`
@@ -695,7 +723,7 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
   const one = (r, isArchived) => {
     const st = statuses[r.key] || { status: 'new' };
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
-    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '' }) };
+    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '', isNew: !isArchived && newKeys.has(r.key) }) };
   };
   const shown = requests.map((r) => one(r, false)).filter((x) => matchesFilter(f, x));
   const putRows = archived.map((r) => one(r, true)).filter((x) => matchesFilter(f, x));
@@ -706,16 +734,21 @@ export function dashboardPage({ requests, statuses, checklists = {}, invoices = 
     <details class="disclose" id="put-away"${openPutAway ? ' open' : ''}><summary${tip('pa.show')}>Show put-away requests</summary>
       ${putRows.length ? putRows.map((x) => x.html()).join('') : '<p class="muted">Nothing put away yet. Tap <strong>Done — put away</strong> on a finished request to move it here.</p>'}
     </details></section>`;
-  return layout('Requests', `<style>${CARD_CSS}</style>${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}${setupBanner(missingPayment)}
-    ${requestsPanel(folderUrl)}
-    <h1>Requests</h1>${week}${holdsBox}${extraTop}${err}
+  // Phone first (owner, 19 Oct 2026): the request list comes straight after the heading and the
+  // one-line week card; tomorrow's reminders are one tappable line at the bottom; the three-step
+  // panel sits under the list on a phone and stays on top on a wide screen (CSS order, .rqflow).
+  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}</style>${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+${setupBanner(missingPayment)}
+    <div class="rqflow"><div class="rqpanel">${requestsPanel(folderUrl)}</div>
+    <div class="rqmain"><h1>Requests</h1>${extraTop}${week}${holdsBox}${err}
     ${filterChips(f)}
-    ${shown.length ? shown.map((x) => x.html()).join('') : (sheetError ? '' : empty)}
+    <div data-request-list>${shown.length ? shown.map((x) => x.html()).join('') : (sheetError ? '' : empty)}</div>
+    ${remindersLine}</div></div>
     ${putSection}
     ${idsBox}
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
-    <script>${DASH_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { screen: '', panelWide: true });
+    <script>${DASH_JS}${NEW_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { screen: '', panelWide: true });
 }
 
 export function invoicesPage({ invoices }) {
