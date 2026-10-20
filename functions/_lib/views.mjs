@@ -718,22 +718,30 @@ function undoHtml(u, ctx) {
   return `<details class="undo" data-undo="${esc(u.key)}" data-undo-kind="${esc(u.kind)}"><summary class="undolink"${tip('step.undo')}>undo</summary><div class="undobox">${body}</div></details>`;
 }
 
-// "Are you taking this job?" Yes, book it (the date editable right here) / Not yet / No, put it away.
-function talkBox(r, s, x, { withNo = true } = {}) {
-  const { rk, services, bookings } = x;
+// The ONE "Yes, book it" form (owner-approved 19 Oct 2026): the day(s) she sees, editable, then
+// POST /admin/requests/talked go=yes (admin-steps.mjs talkedRoute). The Requests card uses it as
+// is; Calendar & Bookings uses the same form (Step 2 and a tapped day on a phone) with
+// label "Book it", an id prefix (two copies on one page) and back= so she stays on the calendar.
+export function bookYesForm(r, { rk, services, bookings }, { label = 'Yes, book it', idp = 't', back = '', key = 'step.bookYes' } = {}) {
   const rentalsOnly = services.length === 1 && services[0] === 'rentals';
   let dates;
   if (services.includes('rentals')) {
     const { pickup, ret } = rentalDates(r, bookings);
-    dates = `<label for="tp-${esc(rk)}">Pickup day</label><input type="date" id="tp-${esc(rk)}" name="date" value="${esc(pickup || '')}" required${tip('step.date')}>
-      <label for="tr-${esc(rk)}">Return day</label><input type="date" id="tr-${esc(rk)}" name="return_date" value="${esc(ret || '')}" required${tip('step.date')}>`;
+    dates = `<label for="${idp}p-${esc(rk)}">Pickup day</label><input type="date" id="${idp}p-${esc(rk)}" name="date" value="${esc(pickup || '')}" required${tip('step.date')}>
+      <label for="${idp}r-${esc(rk)}">Return day</label><input type="date" id="${idp}r-${esc(rk)}" name="return_date" value="${esc(ret || '')}" required${tip('step.date')}>`;
   }
   if (!rentalsOnly) {
     const first = services.filter((k) => k !== 'rentals').map((k) => ((bookings || []).find((b) => b.kind === SCHEDULE_FIRST[k][1]) || {}).date).filter(Boolean).sort()[0] || parseFormDate(answerOf(r, /event date/i));
     const word = services.includes('porch') ? 'Install day' : 'Setup day';
-    dates = `${dates || ''}<label for="te-${esc(rk)}">${word}</label><input type="date" id="te-${esc(rk)}" name="${services.includes('rentals') ? 'event_date' : 'date'}" value="${esc(first || '')}" required${tip('step.date')}>`;
+    dates = `${dates || ''}<label for="${idp}e-${esc(rk)}">${word}</label><input type="date" id="${idp}e-${esc(rk)}" name="${services.includes('rentals') ? 'event_date' : 'date'}" value="${esc(first || '')}" required${tip('step.date')}>`;
   }
-  const yes = `<form method="post" action="/admin/requests/talked" data-talk-yes>${hiddenInputs({ r: rk, go: 'yes' })}${dates}<button class="btn yes" type="submit"${tip('step.bookYes')}>Yes, book it</button></form>`;
+  return `<form method="post" action="/admin/requests/talked" data-talk-yes>${hiddenInputs({ r: rk, go: 'yes', ...(back ? { back } : {}) })}${dates}<button class="btn yes" type="submit"${tip(key)}>${esc(label)}</button></form>`;
+}
+
+// "Are you taking this job?" Yes, book it (the date editable right here) / Not yet / No, put it away.
+function talkBox(r, s, x, { withNo = true } = {}) {
+  const { rk } = x;
+  const yes = bookYesForm(r, x);
   const later = `<form method="post" action="/admin/requests/talked">${hiddenInputs({ r: rk, go: 'later' })}<button class="btn ghost" type="submit"${tip('step.notYet')}>Not yet</button></form>`;
   const no = withNo ? `<form method="post" action="/admin/requests/talked">${hiddenInputs({ r: rk, go: 'no' })}<button class="btn danger" type="submit"${tip('step.putAwayNo')}>No, put it away</button></form>` : '';
   return `<div class="talkbox" data-talk-box><p class="q"><strong>Are you taking this job?</strong></p>${yes}${s.called ? '' : later}${no}</div>`;

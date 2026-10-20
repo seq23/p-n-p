@@ -9,6 +9,7 @@ import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
 import { TRACK_TABLE as PRICE_TABLE } from './prices.mjs';
 import { autoBookTakedown, inlineKindFor } from './takedown.mjs';
 import { servicesOf, SCHEDULE_FIRST } from './cards.mjs';
+import { calendarBack } from './admin-steps.mjs';
 import { requestedChips, gamesAskedOn, askedDate } from './requested.mjs';
 import * as C from './calendar.mjs';
 import { notPaidYet } from './notpaid.mjs';
@@ -91,7 +92,11 @@ export async function calendarPage(env, url) {
   const { requests } = await requestsSafe(env);
   const unconfirmed = C.unconfirmedRequests(requests, statuses, unconfKeys).map((r) => {
     const svc = servicesOf(r)[0];
-    return { ...r, summary: V.wantSummary(r).join(' · '), asked: svc ? askedDate(r, svc) : '', color: svc ? serviceInfo(SCHEDULE_FIRST[svc][1]).bar : '' };
+    // yes: what the shared "Yes, book it" form (views.mjs bookYesForm) needs, the same as the card.
+    const mine = all.filter((b) => b.request_key === r.key);
+    const services = servicesOf(r);
+    return { ...r, summary: V.wantSummary(r, mine).join(' · '), asked: svc ? askedDate(r, svc) : '', color: svc ? serviceInfo(SCHEDULE_FIRST[svc][1]).bar : '',
+      yes: services.length ? { rk: b64urlText(r.key), services, bookings: mine } : null };
   });
   const from = C.addDays(`${month}-01`, -7); const to = C.addDays(`${month}-01`, 45);
   const visible = all.filter((b) => (b.date >= from && b.date <= to) || (b.date >= today && b.date <= C.addDays(today, 14)));
@@ -105,7 +110,11 @@ export async function calendarPage(env, url) {
     .map((r) => ({ name: r.name, note: r.takedownNote, rk: b64urlText(r.key), kind: (r.services || []).includes('porch') ? 'porch_takedown' : 'party_takedown' }));
   // "Takedowns to schedule": the customer asked for a takedown that is not booked yet; the day
   // they named prefills the booking screen, nothing is booked until she saves it.
-  const toSchedule = takedownsToSchedule(requests, statuses, await loadTakedownFacts(env.DB), today).map((t) => ({ ...t, rk: b64urlText(t.key) }));
+  // inline: "Schedule takedown -> Book takedown" posts the card's own takedown-inline form.
+  const toSchedule = takedownsToSchedule(requests, statuses, await loadTakedownFacts(env.DB), today).map((t) => {
+    const r = requests.find((x) => x.key === t.key);
+    return { ...t, rk: b64urlText(t.key), inline: Boolean(r && inlineKindFor(servicesOf(r)) === t.kind) };
+  });
   // Asked for, not booked yet: outlined "Requested" chips (requested.mjs), never bookings.
   const requested = requestedChips(requests, statuses, all, PRICE_TABLE).map((c) => ({ ...c, rk: b64urlText(c.key) }));
   return htmlResponse(VC.calendarPage({ stillToDecide, toSchedule, requested,
@@ -370,7 +379,11 @@ export async function takedownInlineRoute(env, request) {
   const rkIn = String(form.get('r') || '');
   const key = decodeKey(rkIn);
   const go = String(form.get('go') || 'save');
-  const backTo = (words, err = false) => redirect(err ? `/admin/?e=${encodeURIComponent(words)}#c-${rkIn}` : `/admin/?tdok=${encodeURIComponent(rkIn)}&tdm=${encodeURIComponent(words)}#c-${rkIn}`);
+  // back=/admin/calendar...: "Book takedown" in Step 2 of Calendar & Bookings stays on the calendar.
+  const calBack = calendarBack(form.get('back'));
+  const backTo = (words, err = false) => (calBack
+    ? redirect(`${calBack.split('#')[0]}${calBack.includes('?') ? '&' : '?'}${err ? 'e' : 'm'}=${encodeURIComponent(err ? words : `✓ ${words.replace(/ ✓$/, '')}`)}#takedowns-to-schedule`)
+    : redirect(err ? `/admin/?e=${encodeURIComponent(words)}#c-${rkIn}` : `/admin/?tdok=${encodeURIComponent(rkIn)}&tdm=${encodeURIComponent(words)}#c-${rkIn}`));
   const { requests } = await requestsSafe(env);
   const req = key ? requests.find((r) => r.key === key) : null;
   if (!req) return redirect(`/admin/?e=${encodeURIComponent('That request could not be found.')}`);

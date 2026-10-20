@@ -186,10 +186,13 @@ const rentRow = RQ.importRowFor(headers, formRow({ Timestamp: '10/3/2026 9:00:00
 await RQ.importStatement(s.db, rentRow).run();
 const cal = (await s.get(`/admin/calendar?month=${askDay.slice(0, 7)}`)).text;
 const cell = (() => { const i = cal.indexOf(`data-day="${askDay}"`); return cal.slice(i, cal.indexOf('</a>', i)); })();
+const phoneDay = (() => { const i = cal.indexOf(`data-month-day="${askDay}"`); return i < 0 ? '' : cal.slice(i, cal.indexOf('</section>', i)); })();
 for (const [svc, name] of [['porch', 'Rhea P.'], ['party', 'Rene P.'], ['grazing', 'Remy G.'], ['rentals', 'Rosa R.']]) {
-  must(new RegExp(`<span class="k req [a-z_]+" style="border-color:#[0-9a-f]{6}" data-requested="${svc}"[^>]*role="link"[^>]*data-open="/admin/#c-[A-Za-z0-9_-]+">Requested · not confirmed · [A-Za-z &]+: ${name.replace('.', '\\.')}</span>`).test(cell), `month: no outlined "Requested · not confirmed" chip for ${svc} (${name}) that opens the card`);
+  // Calm calendar (19 Oct 2026): "? Kind: Name" in the month grid, the words in full on the phone's day.
+  must(new RegExp(`<span class="k req [a-z_]+" style="border-color:#[0-9a-f]{6}" data-requested="${svc}"[^>]*role="link"[^>]*data-open="/admin/#c-[A-Za-z0-9_-]+">\\? [A-Za-z &]+: ${name.replace('.', '\\.')}</span>`).test(cell), `month: no outlined "? ${name}" chip for ${svc} that opens the card`);
+  must(new RegExp(`<span class="k req [a-z_]+" style="border-color:#[0-9a-f]{6}" data-requested="${svc}">Requested · not confirmed · [A-Za-z &]+: ${name.replace('.', '\\.')}</span>`).test(phoneDay), `phone day: no "Requested · not confirmed" row for ${svc} (${name})`);
 }
-must(/\.k\.req\{background:transparent!important;border-style:solid/.test(cal), 'Requested chips are not outlined (border only, no fill)');
+must(/\.k\.req\{background:transparent!important;border-style:dashed;border-width:2px/.test(cal) && !/\.k\.req\{[^}]*background:(?!transparent)/.test(cal), 'Requested chips are not a dashed outline (border only, no fill)');
 must(/data-fill-legend[^>]*>[\s\S]*Filled = booked \(you said yes\) · Outlined = requested, not confirmed yet/.test(cal), 'the legend line is missing');
 must(!/data-games-out/.test(cell) && /data-games-asked[^>]*>2 games asked for</.test(cell), 'a requested rental counts as games out, or "N games asked for" is missing');
 const dayHtml = (await s.get(`/admin/day/${askDay}`)).text;
@@ -214,7 +217,8 @@ const held = await s.siteRequest({ service: 'rentals', games: ['cornhole'], dura
 let cal3 = (await s.get(`/admin/calendar?month=${plus(22).slice(0, 7)}`)).text;
 // Step cards (19 Oct 2026): a held rental nobody said yes to is OUTLINED ("Requested · not
 // confirmed (games held)"), its games still out; it turns solid "Held" on "Yes, book it" (below).
-must(/<span class="k rental_pickup req tent"[^>]*data-held-chip data-tentative style="border-color:#[0-9a-f]{6}"[^>]*>Requested · not confirmed \(games held\) · Rental pickup: Hope Heldask</.test(cal3), 'a held, unconfirmed rental is not an outlined "Requested · not confirmed (games held)" chip');
+must(/<span class="k rental_pickup req tent"[^>]*data-held-chip data-tentative style="border-color:#[0-9a-f]{6}"[^>]*>\? \(games held\) Rental pickup: Hope Heldask</.test(cal3), 'a held, unconfirmed rental is not an outlined "? (games held)" chip in the month');
+must(/<span class="k rental_pickup req tent"[^>]*data-tentative style="border-color:#[0-9a-f]{6}">Requested · not confirmed \(games held\) · Rental pickup: Hope Heldask</.test(cal3), 'a held, unconfirmed rental does not say "Requested · not confirmed (games held)" on the phone\'s day');
 await s.db.prepare("UPDATE holds SET until = '2000-01-01 00:00:00' WHERE request_key = ?1").bind(held.row.request_key).run();
 cal3 = (await s.get(`/admin/calendar?month=${plus(22).slice(0, 7)}`)).text;
 must(!/Rental pickup: Hope/.test(cal3) && /data-requested="rentals"[^>]*>Requested · not confirmed · Rentals: Hope H\.</.test(cal3), 'an expired hold did not revert to an outlined Requested chip');

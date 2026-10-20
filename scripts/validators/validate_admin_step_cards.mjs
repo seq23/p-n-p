@@ -160,6 +160,7 @@ const cur = (c) => (c.match(/data-current-step="([^"]+)"/) || [])[1];
 const doneList = (c) => [...c.matchAll(/data-step="([a-z_]+)" data-step-done/g)].map((m) => m[1]).join(',');
 const moneyRows = async () => (await s.one('SELECT COUNT(*) AS n, COALESCE(SUM(CASE WHEN voided_at IS NULL THEN amount_cents END), 0) AS live FROM payments')).n;
 const cellOf = (html, d) => { const i = html.indexOf(`data-day="${d}"`); return i < 0 ? '' : html.slice(i, html.indexOf('</a>', i)); };
+const phoneDayOf = (html, d) => { const i = html.indexOf(`data-month-day="${d}"`); return i < 0 ? '' : html.slice(i, html.indexOf('</section>', i)); };
 
 // 4. Every service arrives tentative.
 const svcReq = {
@@ -179,7 +180,10 @@ for (const [svc, row] of Object.entries(made)) {
   const cal = (await s.get(`/admin/calendar?month=${day.slice(0, 7)}`)).text;
   const cell = cellOf(cal, day);
   const first = svcReq[svc].name.split(' ')[0];
-  must(new RegExp(`class="k (req [a-z_]+|[a-z_]+ req tent)"[^>]*style="border-color:#[0-9a-f]{6}"[^>]*>Requested · not confirmed[^<]*${first}`).test(cell), `${svc}: the new request's day is not an outlined "Requested · not confirmed" chip (${cell.slice(0, 300)})`);
+  // Calm calendar (19 Oct 2026): the month grid reads "? Kind: Name" in a dashed outline; the
+  // phone's tapped day (data-month-day) keeps the words "Requested · not confirmed" in full.
+  must(new RegExp(`class="k (req [a-z_]+|[a-z_]+ req tent)"[^>]*style="border-color:#[0-9a-f]{6}"[^>]*>\\? [^<]*${first}`).test(cell), `${svc}: the new request's day is not an outlined "? ${first}" chip in the month (${cell.slice(0, 300)})`);
+  must(new RegExp(`class="k (req [a-z_]+|[a-z_]+ req tent)"[^>]*style="border-color:#[0-9a-f]{6}"[^>]*>Requested · not confirmed[^<]*${first}`).test(phoneDayOf(cal, day)), `${svc}: the phone's day ${day} does not say "Requested · not confirmed" for ${first}`);
   must(new RegExp(`data-unconfirmed-row[^>]*><strong>${svcReq[svc].name}</strong>[\\s\\S]*?data-asked="${day}"`).test(cal), `${svc}: not on Unconfirmed requests with its asked-for day`);
   const c = await card(row.request_key);
   must(cur(c) === 'called' && /data-confirmed="0"/.test(c) && /<summary class="btn primary" data-help="step\.talked"[^>]*>I've talked to them<\/summary>/.test(c) && /Are you taking this job\?/.test(c), `${svc}: a new card's next step is not "I've talked to them" -> "Are you taking this job?"`);
@@ -193,7 +197,7 @@ for (const [svc, row] of Object.entries(made)) {
   const c = await card(key);
   must(doneList(c) === 'called' && cur(c) === 'invoiced' && /data-confirmed="0"/.test(c) && /data-book-later/.test(c), 'Not yet: not called-only, still unconfirmed, with Book it now');
   const cal = (await s.get(`/admin/calendar?month=${svcReq.porch.event_date.slice(0, 7)}`)).text;
-  must(/data-unconfirmed-row[^>]*><strong>Poe Stepper/.test(cal) && /Requested · not confirmed[^<]*Poe/.test(cellOf(cal, svcReq.porch.event_date)), 'Not yet took the porch off Unconfirmed requests or made it solid');
+  must(/data-unconfirmed-row[^>]*><strong>Poe Stepper/.test(cal) && />\? [^<]*Poe/.test(cellOf(cal, svcReq.porch.event_date)) && /Requested · not confirmed[^<]*Poe/.test(phoneDayOf(cal, svcReq.porch.event_date)), 'Not yet took the porch off Unconfirmed requests or made it solid');
   must(!(await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind = 'porch_install'", key)), 'Not yet booked something');
 }
 // Yes, book it (party): solid party_setup on the day she typed, off the list, called + confirmed.
@@ -207,7 +211,7 @@ const partyKey = made.party.request_key;
   const cell = cellOf(cal, moved);
   must(/<span class="k party_setup"[^>]*>Party setup: Pia Stepper/.test(cell) && !/data-tentative[^>]*>[^<]*Pia/.test(cell), 'the booked party is not a solid party chip');
   must(!/data-unconfirmed-row[^>]*><strong>Pia Stepper/.test(cal), 'the booked party is still on Unconfirmed requests');
-  must(!/Requested · not confirmed[^<]*Pia/.test(cellOf(cal, svcReq.party.event_date)), 'the old asked-for day still shows a tentative chip after booking another day');
+  must(/>Party setup: Pia/.test(cellOf(cal, moved)) && !/(?:Requested · not confirmed|>\? )[^<]*Pia/.test(cellOf(cal, svcReq.party.event_date) + phoneDayOf(cal, svcReq.party.event_date)), 'the old asked-for day still shows a tentative chip after booking another day');
   const st = await s.one('SELECT called_at, confirmed_at FROM request_steps WHERE request_key = ?1', partyKey);
   must(st && st.called_at && st.confirmed_at, 'Yes, book it did not store called + confirmed');
   const c = await card(partyKey);
@@ -224,7 +228,7 @@ const partyKey = made.party.request_key;
   must(/\/admin\/\?put=/.test(r.location), 'No, put it away did not come back with the Put away / Undo banner');
   const st = await s.one('SELECT archived_at FROM request_status WHERE request_key = ?1', key);
   const cal = (await s.get(`/admin/calendar?month=${svcReq.grazing.event_date.slice(0, 7)}`)).text;
-  must(st && st.archived_at && !/Gil Stepper/.test(cal) && !/Requested · not confirmed[^<]*Gil/.test(cal), 'No, put it away did not put the grazing request away (or it still shows on the calendar)');
+  must(st && st.archived_at && !/Gil Stepper/.test(cal) && !/(?:Requested · not confirmed|>\? )[^<]*Gil/.test(cal), 'No, put it away did not put the grazing request away (or it still shows on the calendar)');
 }
 // The Monday summary lists what is unconfirmed (the rental and the porch).
 {

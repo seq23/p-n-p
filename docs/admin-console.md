@@ -482,6 +482,44 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   and saved by her; "Check N receipts" while any wait). Tip and expense changes are kept in
   `money_history` and shown under History. `npm run validate:admin-money-calm` proves all of it.
 
+## Calm calendar: Calendar & Bookings for laptop and phone (owner-approved mock-up, 19 Oct 2026)
+- **Computer (900 px and up)**: the month grid comes first and largest (service colours + words;
+  not confirmed = a dashed outline reading "? Party: Name", a held one "? (games held) ..."; the
+  colour key and "Filled = booked · Outlined = requested" legend above it). The right margin
+  column holds the numbered steps in the owner's words (`STEPS.calendar` / `PANELS.calendar` in
+  `functions/_lib/helptext.mjs`): 1 See what's coming up (the Find a customer box, submitting to
+  `/admin/search` with live results; Every booking as a list; Link my Google Calendar) · 2 Put a
+  request on the calendar (Unconfirmed requests, Takedowns to schedule, Still to decide, Add a
+  booking; drag a request or a booking onto a day still works) · 3 Plan your day (today's count,
+  Today's list) · 4 Check tomorrow's reminders (who, what, time, Text reminder / Email them / Mark
+  reminded, sent ✓). Step 5 Look over the next 14 days (the old Upcoming list) sits under the
+  month. "Every booking" (the old List view, past bookings one tap away) is a section at the
+  bottom; the List button and Step 1's link jump to it. Alerts (holds ending soon, overdue
+  returns, double-booked) stay above everything.
+- **Phone (under 900 px)**: Step 1's search at the top; a small month with one coloured dot per
+  job (hollow = not confirmed); tapping a day shows that day's jobs right under the month (every
+  day has a panel, `data-month-day`, one shown; default today). Tapping a job opens its details:
+  time, where, games / what to bring, what is left to collect or Paid in full ✓, the deposit, a
+  hold or note, with Call, Text and Open their card (Open the day sheet below). Steps 2-5 are
+  numbered rows with a chevron, holding the same content as the computer. No dragging on a phone.
+- **Yes, book it on the calendar is the Requests card's own action**: `bookYesForm` in
+  `functions/_lib/views.mjs` builds the one form (the card's talk box and the calendar both call
+  it) and `POST /admin/requests/talked go=yes` books + confirms. On the calendar (Step 2 and an
+  unconfirmed job on a phone's day) it opens to the day(s) prefilled with the requested day, then
+  "Book it"; `back=/admin/calendar?month=YYYY-MM` (only that shape is followed,
+  `admin-steps.mjs calendarBack`) brings her back to "✓ Booked Name: ..." with the chip solid and
+  the request off Unconfirmed requests. Takedowns to schedule: "Schedule takedown" -> the day ->
+  "Book takedown" (the card's `/admin/requests/takedown-inline`), "Not needed" (the card's
+  `/admin/requests/takedown plan=customer_handles`); "More choices" opens the full booking screen.
+- Code: `calendarPage` and `CALM_CSS` in `functions/_lib/views-calendar.mjs`; data in
+  `functions/_lib/admin-calendar.mjs calendarPage`. Help text for every new control (`cal.stepRow`,
+  `cal.pday`, `cal.pjob`, `cal.jobText`, `cal.daySheet`, `cal.yesOpen`, `cal.bookYes`, `cal.tdOpen`,
+  `cal.tdBook`, `cal.tdNotNeeded`, `cal.everyBooking`).
+- Proof: `npm run validate:admin-calm-calendar` (in validate:admin): month before the steps,
+  steps 1-5 in the owner's words, the search in Step 1, the phone month + day panel + job details,
+  Yes, book it = the card's form and lands back solid, dashed vs solid, the takedown buttons, and
+  everything the page had before (every-booking list, drag, Add a booking, Day sheet links).
+
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 Legacy intake: the site's /request form replaced it and takes its choices from the live inventory.
 Old answers keep these strings forever, so each must still name an item (available or removed)

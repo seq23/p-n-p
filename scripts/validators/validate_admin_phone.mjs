@@ -236,17 +236,22 @@ must(/pickup Sun 18 Oct, back Tue 20 Oct \(2 days\)/.test(inv.text), 'rental len
 // ---- 7. The month on a 390 px phone ----------------------------------------------------------
 const cal = await get('/admin/calendar?month=2026-10');
 const css = (cal.text.match(/<style>([^]*?)<\/style>/g) || []).join('\n');
-must(/@media\(max-width:699px\)\{\.month\{display:none\}\.monthlist\{display:grid;gap:8px\}\}/.test(css) && /\.monthlist\{display:none\}/.test(css), '390 px: the month grid is not swapped for the day list under 700 px');
+// Calm calendar (owner-approved 19 Oct 2026): under 900 px the big grid gives way to the phone
+// month (7 small columns with dots) and the tapped day's panel (one .mday at a time).
+must(/@media\(max-width:899px\)\{\.month\{display:none\}\.monthlist\{display:grid;gap:8px\}\}/.test(css) && /\.monthlist\{display:none\}/.test(css), '390 px: the month grid is not swapped for the phone day under 900 px');
+must(/@media\(max-width:899px\)\{[^]*?\.pmonth\{display:grid;grid-template-columns:repeat\(7,minmax\(0,1fr\)\)/.test(css) && /\.pmonth\{display:none\}/.test(css) && /\.monthlist \.mday\{display:none\}\.monthlist \.mday\.sel\{display:grid\}/.test(css), '390 px: no 7-column phone month, or more than the tapped day shows');
 must(/\.month\{display:grid;grid-template-columns:repeat\(7,minmax\(0,1fr\)\);gap:3px\}/.test(css), '1280 px: the computer month grid changed');
 const mdayRules = css.match(/\.mday[^{]*\{[^}]*\}/g) || [];
 must(nonEmpty(mdayRules, '.mday rules').every((r) => !/(?:^|[;{])(?:min-)?width:\s*(\d{3,})px/.test(r)), '390 px: a day-list rule has a fixed width');
 must(mdayRules.some((r) => /^\.mday \.k\{/.test(r) && /overflow-wrap:anywhere/.test(r) && /white-space:normal/.test(r) && /max-width:100%/.test(r)), '390 px: day-list chips can overflow (need overflow-wrap:anywhere, white-space:normal, max-width:100%)');
-const list = (cal.text.match(/<div class="monthlist" data-month-list>([^]*?)<\/div>\s*<\/section>/) || [])[1] || '';
+const list = (cal.text.match(/<div class="monthlist" data-month-list data-phone-day>([^]*?)<\/div>\s*<\/div><\/section>/) || [])[1] || '';
+must((list.match(/data-month-day="2026-10-\d\d"/g) || []).length === 31 && (list.match(/class="mday[^"]* sel"/g) || []).length === 1, '390 px: the phone month does not hold a panel for each of the 31 days with exactly one shown');
+must((cal.text.match(/<a class="pd[^"]*" href="[^"]*" data-pday="2026-10-\d\d"/g) || []).length === 31, '390 px: the phone month does not have 31 tappable days');
 must(Boolean(list), '390 px: no day list in the month');
 for (const who of nonEmpty(['Pat Phonecall', 'Pam Porchcall', 'Gus Grazecall', 'Supply run'], 'day-list names')) must(list.includes(`: ${who}`), `390 px: ${who}'s chip is not in the day list in full`);
 must(/data-month-day="2026-10-18"[^]*?Rental pickup: Pat Phonecall/.test(list) && /data-month-day="2026-10-20"[^]*?Rental return: Pat Phonecall/.test(list), '390 px: the day list is not by day');
 must((list.match(/data-month-day="(\d{4}-\d{2}-\d{2})"/g) || []).map((x) => x.slice(16, 26)).every((d, i, a) => !i || a[i - 1] < d), '390 px: the day list is not in day order');
-must(/<a class="k req [^"]*"[^>]*data-requested=/.test(list) || !/data-requested=/.test(cal.text.split('data-month-list')[0]), '390 px: an outlined Requested chip in the grid is missing from the day list');
+must(/<span class="k req [^"]*"[^>]*data-requested=/.test(list) || !/data-requested=/.test(cal.text.split('data-month-list')[0]), '390 px: an outlined Requested chip in the grid is missing from the day list');
 
 // ---- 8. Help ---------------------------------------------------------------------------------
 const help = await get('/admin/help');

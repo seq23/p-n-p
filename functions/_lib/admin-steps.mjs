@@ -21,6 +21,15 @@ import { syncExtraGames } from './extra-games.mjs';
 
 const decodeKey = (v) => { try { return fromB64urlText(v); } catch { return ''; } };
 const toCard = (key, m, e = false) => redirect(`/admin/?${e ? 'e' : 'm'}=${encodeURIComponent(m)}#c-${b64urlText(key)}`);
+// Calendar & Bookings posts the same "Yes, book it" form with back=/admin/calendar?month=...
+// (owner-approved calm calendar, 19 Oct 2026): the answer lands back on the calendar, where the
+// chip has turned solid. Only a /admin/calendar path is ever followed.
+export const calendarBack = (v) => (/^\/admin\/calendar(\?month=\d{4}-\d{2})?(#[A-Za-z0-9_-]+)?$/.test(String(v || '')) ? String(v) : '');
+const backOr = (back, key, m, e = false) => {
+  if (!back) return toCard(key, m, e);
+  const [path, hash] = back.split('#');
+  return redirect(`${path}${path.includes('?') ? '&' : '?'}${e ? 'e' : 'm'}=${encodeURIComponent(m)}${hash ? `#${hash}` : ''}`);
+};
 
 export async function bookIt(env, req, { date, returnDate = '', eventDate = '' }) {
   const key = req.key;
@@ -76,16 +85,18 @@ export async function talkedRoute(env, request) {
     return redirect(`/admin/?put=${encodeURIComponent(rk)}`);
   }
   const services = servicesOf(req);
+  const back = calendarBack(form.get('back'));
   const date = C.parseFormDate(form.get('date'));
   const rentals = services.includes('rentals');
   const returnDate = rentals ? C.parseFormDate(form.get('return_date')) : '';
   const eventDate = rentals && services.some((k) => k !== 'rentals') ? C.parseFormDate(form.get('event_date')) : '';
-  if (!date) return toCard(key, 'Pick the day first, then tap Yes, book it.', true);
-  if (rentals && !(returnDate && returnDate > date)) return toCard(key, 'Pick a return day after the pickup day, then tap Yes, book it.', true);
-  if (rentals && services.some((k) => k !== 'rentals') && !eventDate) return toCard(key, 'Pick the setup day too, then tap Yes, book it.', true);
+  if (!date) return backOr(back, key, 'Pick the day first, then tap Yes, book it.', true);
+  if (rentals && !(returnDate && returnDate > date)) return backOr(back, key, 'Pick a return day after the pickup day, then tap Yes, book it.', true);
+  if (rentals && services.some((k) => k !== 'rentals') && !eventDate) return backOr(back, key, 'Pick the setup day too, then tap Yes, book it.', true);
   await markConfirmed(env.DB, key, 'yes, book it');
   const booked = await bookIt(env, req, { date, returnDate, eventDate });
   await logEvent(env.DB, key, `Called back: taking this job. Booked (${booked.join('; ')})`, 'Valerie');
+  if (back) return backOr(back, key, `✓ Booked ${req.name || 'them'}: ${booked.join(' · ')}. It is solid on the calendar now.`);
   return toCard(key, `Booked ✓ ${booked.join(' · ')} is on the calendar, confirmed.`);
 }
 
