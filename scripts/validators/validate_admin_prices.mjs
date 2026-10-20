@@ -36,7 +36,8 @@ const games = INV.resolve(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/renta
 // The seed inventory the owner's scenario pins were written for (scripts/validators/fixtures).
 const FIXTURE = INV.resolve(JSON.parse(fs.readFileSync(path.join(ROOT, 'scripts/validators/fixtures/games.json'), 'utf8')));
 const services = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8'));
-const { buildPriceTable, prefillLines, isRentalInvoice, pickupNote } = await import(pathToFileURL(path.join(ROOT, 'functions/_lib/pricing.mjs')).href);
+const { buildPriceTable, prefillLines, isRentalInvoice } = await import(pathToFileURL(path.join(ROOT, 'functions/_lib/pricing.mjs')).href);
+const { pickupNote } = await import(pathToFileURL(path.join(ROOT, 'functions/_lib/invoice-note.mjs')).href);
 const errors = [];
 
 const pricesSrc = fs.readFileSync(path.join(ROOT, 'functions/_lib/prices.mjs'), 'utf8');
@@ -104,7 +105,7 @@ function scenarios(table, g, s) {
     const want = expectedDeposit(lines, g);
     if (dep.length !== 1 || dep[0].unit_cents !== want) errors.push(`${label}: prefill lacks the one refundable $${want / 100} damage deposit`);
     if (!isRentalInvoice(lines, table)) errors.push(`${label}: prefill is not recognised as a rental invoice`);
-    if (pickupNote(lines, table) !== table.pickupLine) errors.push(`${label}: rental invoice does not carry the pickup line`);
+    if (!/^(Pay the rest \(\$[\d,]+\.\d\d\) at pickup\.|This covers everything\. Nothing more to pay at pickup\.) Text or call 901-355-1518 to set your pickup time at Mt\. Moriah Station unless otherwise agreed upon\.$/.test(pickupNote(lines, table, { invoice: { deposit_due_cents: 0, pay_plan: 'half', notes: '' } }))) errors.push(`${label}: rental invoice does not carry the pickup note`);
     if (lines.some((l) => /^Game rental \(/.test(l.description))) errors.push(`${label}: "${answer}" was not matched (fell back to "Game rental")`);
     return lines;
   };
@@ -144,8 +145,8 @@ function scenarios(table, g, s) {
 
 const table = buildPriceTable(games, services);
 const P = games.pickup || {};
-const PICKUP_LINE = 'Pay the rest at pickup. Text or call 901-355-1518 to set your pickup time at Mt. Moriah Station.';
-if (table.pickupLine !== PICKUP_LINE) errors.push(`pickup line is "${table.pickupLine}", owner-approved is "${PICKUP_LINE}"`);
+// The note's phone and place come from games.json pickup only (invoice-note.mjs words the note).
+if (table.pickupPhone !== P.phone || table.pickupPlace !== 'Mt. Moriah Station' || 'pickupLine' in table) errors.push(`the rental note's phone / place are not read from games.json pickup (${table.pickupPhone} / ${table.pickupPlace})`);
 if (P.phone !== '901-355-1518' || P.address !== '2602 Mt. Moriah Rd, Memphis, TN 38115') errors.push('games.json pickup is not Mt. Moriah Station, 2602 Mt. Moriah Rd, 901-355-1518');
 if ('delivery' in games) errors.push('games.json still carries a delivery block; rentals v3 has no delivery');
 if (table.items.length !== shown.length) errors.push(`price table has ${table.items.length} items, games.json shows ${shown.length}`);

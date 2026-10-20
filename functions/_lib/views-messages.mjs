@@ -5,6 +5,7 @@
 // 48 px targets, every control carries data-help + its title from helptext.mjs.
 import { esc, b64urlText } from './util.mjs';
 import { tip } from './helptext.mjs';
+import { HOLD_EXTEND_DAYS, HOLD_EXTEND_MAX_DAYS } from './hold-rules.mjs';
 import { act, confirmStep, hiddenInputs, layout, msgPair } from './views.mjs';
 
 const MS_H = 3600000;
@@ -30,20 +31,36 @@ export function twinButtons({ sms, rk, template, textKey, emailKey, textLabel, e
 
 export const TAP_JS = `<script>(function(){document.addEventListener('click',function(e){var a=e.target.closest('[data-msg-tap]');if(!a)return;var f=new FormData();f.append('r',a.getAttribute('data-rk'));f.append('template',a.getAttribute('data-msg-tap'));try{fetch('/admin/msg/tapped',{method:'POST',body:f,headers:{'X-Pnp-Fetch':'1'},credentials:'same-origin',keepalive:true});}catch(err){}});})();</script>`;
 
+// "Games held until Wed 3 PM" (Memphis): weekday + time within the week, else with the date.
+export function heldUntilWords(untilMs, now = Date.now()) {
+  if (!Number.isFinite(untilMs)) return '';
+  const tz = 'America/Chicago';
+  const d = new Date(untilMs);
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }).replace(':00', '');
+  const wd = d.toLocaleDateString('en-US', { weekday: 'short', timeZone: tz });
+  if (untilMs - now < 6 * 24 * MS_H) return `${wd} ${time}`;
+  const day = d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', timeZone: tz }).replace(/^(\w+) (\d+)$/, '$2 $1');
+  return `${wd} ${day}, ${time}`;
+}
+
+// "Hold longer" -> a small row: [3] days + Hold. card: answer back on that request card.
+export function holdLongerRow(rk, { back = '/admin/', card = false } = {}) {
+  return `<details class="holdlonger" data-hold-longer><summary class="btn ghost"${tip('hold.longer')}>Hold longer</summary>
+    <form class="hlrow" method="post" action="/admin/holds/extend">${hiddenInputs({ r: rk, back, ...(card ? { card: '1' } : {}) })}
+      <label for="hd-${esc(rk)}">Days</label><input id="hd-${esc(rk)}" type="number" name="days" value="${HOLD_EXTEND_DAYS}" min="1" max="${HOLD_EXTEND_MAX_DAYS}" step="1" inputmode="numeric" required${tip('hold.days')}>
+      <button class="btn ghost" type="submit"${tip('hold.go')}>Hold</button></form></details>`;
+}
+
 // The hold controls for one held rental (request card, holds box, calendar). compact: on a
 // request card, where the card's ONE big button is its primary, so the reminder is a small
 // "Text a reminder · Email it" pair.
 export function holdControls(h, { rk, sms = null, canEmail = false, now = Date.now(), depositTarget = null, back = '/admin/', compact = false }) {
   const ends = h.by_hand ? { text: 'Held by hand (no end time)', level: 'amber' } : endsWords(h.untilMs, now);
   const hidden = hiddenInputs({ r: rk, back });
-  const more = `<details class="disclose" data-hold-more><summary${tip('hold.more')}>Give them more time</summary>
-    <div class="actions">
-      <form method="post" action="/admin/holds/extend">${hidden}<input type="hidden" name="hours" value="24">${act(`<button class="btn ghost" type="submit"${tip('hold.plus24')}>+24 hours</button>`, 'hold.plus24')}</form>
-      <form method="post" action="/admin/holds/extend">${hidden}<input type="hidden" name="hours" value="48">${act(`<button class="btn ghost" type="submit"${tip('hold.plus48')}>+48 hours</button>`, 'hold.plus48')}</form>
-    </div>
-    <form method="post" action="/admin/holds/extend">${hidden}<label for="until-${esc(rk)}">Or pick a day and time</label><input id="until-${esc(rk)}" type="datetime-local" name="until" required>
-      ${act(`<button class="btn ghost" type="submit"${tip('hold.pick')}>Hold until then</button>`, 'hold.pick')}</form></details>`;
-  const keep = h.by_hand ? '' : `<form method="post" action="/admin/holds/keep">${hidden}${act(`<button class="btn ghost" type="submit"${tip('hold.keep')}>Keep holding — I'll handle it</button>`, 'hold.keep')}</form>`;
+  // "Hold longer" (owner, 19 Oct 2026): two taps: the button, then Hold (3 days prefilled; the
+  // number she types is honoured). No 24 / 48 hour menus, no other choices.
+  const more = holdLongerRow(rk, { back });
+  const keep = '';
   const release = confirmStep({ key: h.by_hand ? 'hold.releaseHand' : 'hold.release', yesKey: 'hold.releaseYes', label: h.by_hand ? 'Release these games' : 'Release now', question: `Release ${h.name || 'this customer'}'s games now? They come off the calendar and others can book them.`, action: '/admin/holds/release', hidden, danger: true });
   const deposit = depositTarget ? confirmStep({ key: 'hold.deposit', yesKey: 'hold.depositYes', label: 'Mark deposit received', question: `Mark ${h.name || 'this customer'}'s deposit as received? Only do this after the money is in your account. The hold becomes a confirmed booking.`, action: depositTarget.action, hidden: hiddenInputs(depositTarget.fields) }) : '';
   return `<div class="hold" data-hold="${esc(rk)}"><p><span class="chip deposit_paid" data-held>Held — waiting for deposit</span> <strong class="ends ${ends.level}" data-hold-ends>${esc(ends.text)}</strong></p>
@@ -54,7 +71,7 @@ export function holdControls(h, { rk, sms = null, canEmail = false, now = Date.n
     <div class="actions">${deposit}${keep}${release}</div>${more}</div>`;
 }
 
-export const HOLD_CSS = '.hold{border:2px solid #ebcf96;background:#fffaf0;border-radius:12px;padding:10px 12px;margin:10px 0}.ends.amber{color:#7a4a0c}.ends.red{color:#8f3427}.hold .actions{margin-top:6px}';
+export const HOLD_CSS = '.holdlonger>summary{list-style:none;display:inline-flex;width:auto;min-height:48px}.holdlonger>summary::-webkit-details-marker{display:none}.hlrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}.hlrow input{width:5.5em;min-height:48px;font-size:1.1rem;margin:0}.hlrow .btn{width:auto;min-height:48px;padding:8px 22px}.hold{border:2px solid #ebcf96;background:#fffaf0;border-radius:12px;padding:10px 12px;margin:10px 0}.ends.amber{color:#7a4a0c}.ends.red{color:#8f3427}.hold .actions{margin-top:6px}';
 
 // "Holds ending soon" (top of Requests and Calendar): every unpaid hold ending within the
 // Settings threshold, soonest first.

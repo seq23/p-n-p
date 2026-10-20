@@ -23,7 +23,7 @@ function cashtag(value) {
   return v ? (v.startsWith('$') ? v : `$${v}`) : '';
 }
 
-// pickup: the rentals pickup line (pricing.mjs pickupNote), '' on a decor-only invoice.
+// pickup: the rentals pickup line (invoice-note.mjs pickupNote, worded per invoice), '' on a decor-only invoice.
 export function payLines({ invoice, lines, pickup = '' }) {
   const total = invoiceTotal(lines);
   const plan = payPlanOf(invoice, total);

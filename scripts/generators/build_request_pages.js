@@ -28,6 +28,8 @@ const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js')
 const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js'));
 const siteIcons = require(path.join(ROOT, 'scripts/lib/site_icons.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
+const BD = require(path.join(ROOT, 'scripts/lib/business_delivery.js'));
+const BDL = BD.businessDeliveryLine(offers); // business delivery, priced from services.json (19 Oct 2026)
 const games = require(path.join(ROOT, 'data/rentals/games.json'));
 const brand = require(path.join(ROOT, 'scripts/lib/brand.js'));
 
@@ -117,8 +119,8 @@ function renderRules(F, table) {
       'Give us correct details for your date, place and what you want. Hotel rooms and venues may need us to coordinate with the property first.',
     ]],
     ['rentals', 'Party game rentals', [
-      `Pickup and return are at ${PLACE}, a safe exchange zone. We do not bring rentals to you. The pickup time is set by text or call to ${C.telephoneDisplay} after payment.`,
-      'A rental booked on our request form is held for 24 hours while you pay the deposit. If the deposit has not come in by then, the hold ends and the games are offered to others.',
+      `Pickup and return are at ${PLACE}, a safe exchange zone. Home and personal rentals are picked up and returned there. ${BDL} The pickup time is set by text or call to ${C.telephoneDisplay} after payment.`,
+      `A rental booked on our request form is held for ${offers.rentalHolds.defaultHours} hours while you pay the deposit. If the deposit has not come in by then, the hold ends and the games are offered to others.`,
       'One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday. A late return is charged as quoted with your booking.',
       'An adult watches over children playing with the giant games. Set them up on flat ground and use them for what they are made for.',
       `Everything is checked at return. A missing bag, ring, card or piece is $5 each; a broken board, frame or screen is charged at replacement cost. The ${d(games.damageDeposit)} damage deposit is refunded when everything comes back complete.`,

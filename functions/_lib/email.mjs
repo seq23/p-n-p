@@ -21,7 +21,7 @@ function cashtag(value) {
   return t ? `$${t}` : '';
 }
 
-// pickup: the rentals pickup line (pricing.mjs pickupNote), '' on a decor-only invoice.
+// pickup: the rentals pickup line (invoice-note.mjs pickupNote, worded per invoice), '' on a decor-only invoice.
 export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, pickup = '' }) {
   const total = invoiceTotal(lines);
   const refundable = lines.filter((l) => l.refundable).reduce((s, l) => s + lineTotal(l), 0);

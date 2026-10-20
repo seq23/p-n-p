@@ -167,13 +167,26 @@ const pricesOnlyFromData = (text, where, out = errors) => {
 const money = (n) => `$${n}`;
 const HIDDEN = [...data.games, ...(data.extras || [])].filter((g) => !g.availableNow);
 const hiddenIn = (text, where, out = errors) => { for (const h of HIDDEN) if (text.toLowerCase().includes(h.name.toLowerCase())) out.push(`${where} names hidden item ${h.name}`); };
-const DELIVERY = /deliver/i;
+// Business delivery (owner, 19 Oct 2026): home rentals stay pickup and return; the ONE delivery
+// mention allowed is the business line from scripts/lib/business_delivery.js, priced from
+// services.json invoiceQuickAdds.deliveryFee. Anything else about delivery still fails.
+const BDOFFERS = require(path.join(ROOT, 'data/offers/services.json'));
+const BDL = require(path.join(ROOT, 'scripts/lib/business_delivery.js')).businessDeliveryLine(BDOFFERS);
+const DELIVERY_ANY = /deliver/i;
+const DELIVERY = { test: (t) => DELIVERY_ANY.test(String(t).split(BDL).join('')) };
+PRICES.add(Number(BDOFFERS.invoiceQuickAdds.deliveryFee));
 
 if (onDisk) {
   const visible = onDisk.replace(/<script[\s\S]*?<\/script>/g, '');
   const main = (visible.split('<main>')[1] || '').split('</main>')[0].replace(/<section[^>]+data-nav="related-pages"[\s\S]*?<\/section>/, '');
   pricesOnlyFromData(main, 'rentals/index.html');
-  if (DELIVERY.test(onDisk)) errors.push('rentals/index.html mentions delivery; rentals v3 is pickup and return only');
+  if (DELIVERY.test(onDisk)) errors.push('rentals/index.html mentions delivery beyond the business delivery line');
+  if ((main.split(BDL).length - 1) < 3) errors.push(`rentals/index.html does not carry the business delivery line ("${BDL}") in Where, the pickup FAQ and How pickup works`);
+  for (const [f, min] of [['faq/index.html', 2], ['rules.html', 1], ['request.html', 1], ['llms.txt', 1]]) {
+    const t = fs.readFileSync(path.join(ROOT, f), 'utf8').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+    if ((t.split(BDL).length - 1) < min) errors.push(`${f} lacks the business delivery line ("${BDL}")`);
+    if (/We do not bring rentals to you/.test(t)) errors.push(`${f} still says "We do not bring rentals to you"`);
+  }
   // A bundle photo's description names what is in the photo (the alt text), not what is on offer.
   hiddenIn(main.replace(/ alt="[^"]*"/g, ''), 'rentals/index.html');
   for (const i of ITEMS) {

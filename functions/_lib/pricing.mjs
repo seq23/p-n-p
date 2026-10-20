@@ -42,7 +42,8 @@ export function buildPriceTable(source, services, porchPackages = null) {
     })),
     damageDepositCents: cents(games.damageDeposit),
     takedownCents: cents(takedown.fromPrice),
-    pickupLine: `Pay the rest at pickup. Text or call ${pickup.phone} to set your pickup time at ${String(pickup.place || '').split(',')[0]}.`,
+    // The rental invoice note's phone (invoice-note.mjs rentalNote words it per invoice).
+    pickupPhone: String(pickup.phone || ''),
     pickupPlace: String(pickup.place || '').split(',')[0],
     gameNames: items.filter((i) => i.kind === 'game').map((i) => i.name),
     // The games an all-games bundle counts (owner, 18 Oct 2026: "the 6 games" are both Giant
@@ -263,7 +264,5 @@ export function isRentalInvoice(lines, table) {
   return (lines || []).some((l) => starts.some((s) => String(l.description || '').toLowerCase().startsWith(s)));
 }
 
-// The line rental invoices carry under the pay box (email, PDF, text, invoice page).
-export function pickupNote(lines, table) {
-  return isRentalInvoice(lines, table) ? table.pickupLine : '';
-}
+// The line rental invoices carry under the pay box (email, PDF, text, invoice page) is worded per
+// invoice in functions/_lib/invoice-note.mjs (rentalNote).

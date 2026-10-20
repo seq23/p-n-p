@@ -187,5 +187,11 @@
     "_why": "The quick-add buttons in the admin invoice editor (owner-approved 19 Oct 2026; functions/_lib/views.mjs invoiceEditorPage, functions/_lib/extra-games.mjs). Prices in whole dollars; a missing price means Valerie types it. Admin only: never on a public page.",
     "deliveryFee": 20,
     "extraGame": 20
+  },
+  "rentalHolds": {
+    "_why": "Website rental holds (owner, 19 Oct 2026): games are held this many hours from the request by default (Settings can change it), and the admin's Hold longer adds extendDays unless Valerie types another number. Read by functions/_lib/hold-rules.mjs, the /request form and the public rentals copy; never typed elsewhere.",
+    "defaultHours": 48,
+    "extendDays": 3,
+    "maxExtendDays": 60
   }
 }

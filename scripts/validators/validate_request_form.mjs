@@ -78,7 +78,9 @@ must(!/forms\.gle/.test(page) && !/forms\.gle/.test(rules), 'request.html or rul
 }
 for (const id of ['everyone', 'rentals', 'porch', 'party', 'grazing', 'photo-id']) must(rules.includes(`<h2 id="${id}">`), `rules.html lacks the ${id} section`);
 must(rules.includes(`data-rules-version="${F.RULES_VERSION}"`) && rules.includes(`Version ${F.RULES_VERSION}`), 'rules.html does not show its version');
-must(!/\$\d+(?!\d)/.test(rules.replace(/\$5 each|\$50|\$75|\$40|\$60/g, '')), 'rules.html quotes a fee the Terms do not state');
+// The business delivery fee (19 Oct 2026) is the invoice quick-add's, read from services.json.
+const DELIV = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8')).invoiceQuickAdds.deliveryFee;
+must(!/\$\d+(?!\d)/.test(rules.replace(/\$5 each|\$50|\$75|\$40|\$60/g, '').replace(new RegExp(`deliver to your business for \\$${DELIV}\\.`), '')), 'rules.html quotes a fee the Terms do not state');
 
 // ---- A session with the real handlers ----------------------------------------------------
 const s = await session();
@@ -177,7 +179,8 @@ must(libSrc.filter(([, t]) => /IDS\.delete\(/.test(t)).map(([f]) => f).join() ==
 const rent = made.rentals;
 const hold = await s.one('SELECT * FROM holds WHERE request_key = ?1', rent.request_key);
 const holdMs = H.fromSql(hold && hold.until) - H.fromSql(rent.submitted_at);
-must(hold && hold.state === 'held' && hold.by_hand === 0 && Math.abs(holdMs - 24 * 3600000) < 5000, `the rental hold is not 24 hours (${hold && hold.until})`);
+// Owner, 19 Oct 2026: 48 hours from the request (services.json rentalHolds.defaultHours).
+must(hold && hold.state === 'held' && hold.by_hand === 0 && Math.abs(holdMs - 48 * 3600000) < 5000, `the rental hold is not 48 hours (${hold && hold.until})`);
 const bk = await s.all('SELECT kind, date, items FROM bookings WHERE request_key = ?1 ORDER BY kind', rent.request_key);
 must(bk.length === 2 && bk[0].kind === 'rental_pickup' && bk[0].date === plus(9) && bk[1].kind === 'rental_return' && bk[1].date === plus(10) && /Giant Connect Four/.test(bk[0].items), 'the hold did not put the pickup and return on the calendar');
 const avail = async (pickup, g = '') => (await (await RS.handleAvailability({ request: new Request(`https://porchandparty901.com/api/request/availability?event=${pickup}&pickup_when=morning&return_when=after&duration=day&games=${g}`), env })).json());
@@ -345,4 +348,4 @@ must(rows.siteRequests.length >= 8 && rows.siteRequests.every((r) => r.length ==
 
 if (checks < 60) errors.push(`only ${checks} checks ran`);
 if (errors.length) { console.error(`VALIDATION FAIL: request form (${errors.length} of ${checks} checks)\n- ${errors.join('\n- ')}`); process.exit(1); }
-console.log(`validate_request_form: OK (${checks} checks: page 1 order + prices, 5 paths, ID + rules required on each, agreement logged, EXIF stripped, private ID + delete, IDs ready, 24 h hold + expiry + by hand, availability greying, exact deposit, referral, honeypot/timing/rate limit, emails, no review/discount, week/month counts, import fidelity, sheet tab)`);
+console.log(`validate_request_form: OK (${checks} checks: page 1 order + prices, 5 paths, ID + rules required on each, agreement logged, EXIF stripped, private ID + delete, IDs ready, 48 h hold + expiry + by hand, availability greying, exact deposit, referral, honeypot/timing/rate limit, emails, no review/discount, week/month counts, import fidelity, sheet tab)`);

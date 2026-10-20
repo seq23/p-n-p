@@ -7,6 +7,8 @@
 import { logEvent } from './requests.mjs';
 
 export const RENTAL_KINDS = ['rental_pickup', 'rental_return'];
+import { HOLD_DEFAULT_HOURS } from './hold-rules.mjs';
+export { HOLD_DEFAULT_HOURS, HOLD_EXTEND_DAYS, HOLD_EXTEND_MAX_DAYS } from './hold-rules.mjs';
 
 export const sqlTime = (ms) => new Date(ms).toISOString().slice(0, 19).replace('T', ' ');
 export const fromSql = (s) => (s ? Date.parse(`${String(s).replace(' ', 'T')}Z`) : NaN);
@@ -14,7 +16,7 @@ export const fromSql = (s) => (s ? Date.parse(`${String(s).replace(' ', 'T')}Z`)
 export function holdSettings(settings = {}) {
   const num = (v, d, lo, hi) => { const n = Number(v); return Number.isFinite(n) && n >= lo && n <= hi ? n : d; };
   return {
-    hours: num(settings.hold_hours, 24, 1, 336),
+    hours: num(settings.hold_hours, HOLD_DEFAULT_HOURS, 1, 336),
     autoExpire: settings.hold_auto_expire !== '0',
     reminderOn: settings.hold_reminder !== '0',
     reminderHours: num(settings.hold_reminder_hours, 4, 1, 48),

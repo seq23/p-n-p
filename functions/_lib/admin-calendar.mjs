@@ -44,8 +44,9 @@ export async function contextFor(db, bookings) {
   const holds = Object.fromEntries(holdRows.map((h) => [h.request_key, h]));
   // Tentative (outlined "Requested · not confirmed") = its request is not confirmed (steps.mjs).
   const unconfirmed = ST.unconfirmedKeys({ requests: reqs, statuses, invoices: bals, returns, stored });
+  const delivery = new Set(reqs.filter((r) => C.deliveryAddress(r)).map((r) => r.key));
   const ctx = (b) => ({ bal: b.invoice_id ? bals[b.invoice_id] : null, notes: notes[b.id] || [], ret: returns[C.returnKeyOf(b)], today: chicagoDate(), hold: b.request_key ? holds[b.request_key] || null : null,
-    tentative: Boolean(b.request_key && unconfirmed.has(b.request_key)) });
+    tentative: Boolean(b.request_key && unconfirmed.has(b.request_key)), delivery: Boolean(b.request_key && delivery.has(b.request_key)) });
   return { ctx, bals, returns, notes, unconfirmed };
 }
 

@@ -41,7 +41,7 @@ export async function bookIt(env, req, { date, returnDate = '', eventDate = '' }
   if (services.includes('rentals')) {
     const p = have('rental_pickup');
     const items = (p && p.items) || base.items;
-    const pick = { ...base, kind: 'rental_pickup', date, time: p ? p.time : null, place: PRICE_TABLE.pickupPlace || base.place, items };
+    const pick = { ...base, kind: 'rental_pickup', date, time: p ? p.time : null, place: C.rentalPlace(req, PRICE_TABLE) || base.place, items };
     await C.saveRequestBooking(env.DB, key, pick);
     const r = have('rental_return');
     await C.saveRequestBooking(env.DB, key, { ...pick, kind: 'rental_return', date: returnDate, time: r ? r.time : null });
