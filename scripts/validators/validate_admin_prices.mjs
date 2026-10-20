@@ -135,6 +135,14 @@ function scenarios(table, g, s) {
   if (pick3) out.push(['three named games, day', sumRental(run(gameChoices.slice(0, 3).join(', '), DAY, 'three games')), c(pick3.dayPrice)]);
   const decor = prefillLines({ wantsDecor: true, eventType: 'Birthday', takedownAnswer: 'Yes' }, table);
   out.push(['takedown add-on', (decor.find((l) => l.description === 'Takedown') || {}).unit_cents, c(s.addOns.takedown.fromPrice)]);
+  // The auto draft's starting lines (owner, 20 Oct 2026): the website's "from" prices, never typed.
+  const from = (k) => Number(String(s.services[k].price).replace(/[^0-9.]/g, ''));
+  const party = prefillLines({ wantsDecor: true, services: ['party'], decor: [{ label: "What's the event type?", value: 'Birthday' }], takedownAnswer: 'Yes' }, table);
+  out.push(['party & decor starting price', (party.find((l) => l.description === 'Party decor: Birthday') || {}).unit_cents, c(from('celebration'))]);
+  out.push(['party & decor takedown', (party.find((l) => l.description === 'Takedown') || {}).unit_cents, c(s.addOns.takedown.fromPrice)]);
+  const graz = prefillLines({ wantsDecor: true, services: ['grazing'], decor: [{ label: "What's the event type?", value: 'Birthday' }, { label: 'Should we source the food?', value: 'Yes, include food in my quote' }] }, table);
+  out.push(['grazing styling starting price', (graz.find((l) => l.description === 'Grazing table styling: Birthday') || {}).unit_cents, c(from('grazing'))]);
+  out.push(['grazing food line (price needed)', (graz.find((l) => l.description === 'Food (at cost)') || {}).unit_cents, 0]);
   if (isRentalInvoice(decor, table) || pickupNote(decor, table)) errors.push('a decor-only invoice is treated as a rental invoice');
   for (const h of hidden) {
     const lines = prefillLines({ wantsRentals: true, gamesAnswer: h.name, durationAnswer: DAY }, table);
@@ -159,6 +167,7 @@ g2.rates.day = bump(g2.rates.day); g2.rates.weekend = bump(g2.rates.weekend);
 g2.bundles.forEach((b) => { b.dayPrice = bump(b.dayPrice); if (b.weekendPrice != null) b.weekendPrice = bump(b.weekendPrice); });
 g2.damageDeposit = bump(g2.damageDeposit);
 const s2 = JSON.parse(JSON.stringify(services)); s2.addOns.takedown.fromPrice = bump(s2.addOns.takedown.fromPrice);
+for (const k of ['celebration', 'grazing']) s2.services[k].price = `$${bump(Number(String(s2.services[k].price).replace(/[^0-9.]/g, '')))}+`;
 const perturbed = scenarios(buildPriceTable(g2, s2), g2, s2);
 for (const [label, got, want] of [...live, ...perturbed.map(([l, g, w]) => [`${l} (perturbed table)`, g, w])]) {
   if (got !== want) errors.push(`${label}: invoice prefill gives ${got} cents, data files say ${want}`);

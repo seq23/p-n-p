@@ -1,7 +1,7 @@
 // Money per invoice from recorded payments (table `payments`, migration 0004), never from a
 // status chip. The refundable damage deposit is kept apart from what is owed: a payment
 // covers the charges first, then the damage deposit.
-import { invoiceTotal, lineTotal, money, toCents } from './util.mjs';
+import { invoiceTotal, lineTotal, money, toCents, lineSig, AUTO_KINDS } from './util.mjs';
 import { chicagoDate } from './reminders.mjs';
 
 export function splitTotals(lines) {
@@ -28,16 +28,17 @@ export function balanceOf(invoice, lines, paidCents) {
 // still never "owed". '' when nothing is due (or the invoice is void).
 export const dollars = (c) => money(c).replace(/\.00$/, '');
 export function dueWords(bal, fmt = dollars) {
-  if (!bal || bal.void) return '';
+  if (!bal || bal.void || bal.draft) return '';
   const owed = Math.max(0, bal.owed || 0);
   const dep = bal.refundable > 0 ? Math.max(0, bal.depositOwed || 0) : 0;
   if (dep > 0) return owed > 0 ? `${fmt(owed + dep)} due (${fmt(owed)} + ${fmt(dep)} refundable deposit)` : `${fmt(dep)} due (refundable deposit)`;
   return owed > 0 ? `${fmt(owed)} due` : '';
 }
-export const dueCents = (bal) => (!bal || bal.void ? 0 : Math.max(0, bal.owed || 0) + (bal.refundable > 0 ? Math.max(0, bal.depositOwed || 0) : 0));
+export const dueCents = (bal) => (!bal || bal.void || bal.draft ? 0 : Math.max(0, bal.owed || 0) + (bal.refundable > 0 ? Math.max(0, bal.depositOwed || 0) : 0));
 
 export function balanceWords(bal) {
   if (!bal || bal.void) return '';
+  if (bal.draft) return 'Invoice not sent yet';
   return bal.owed > 0 ? dueWords(bal) : 'Paid in full ✓';
 }
 
@@ -60,11 +61,27 @@ export async function linesByInvoice(db) {
   return out;
 }
 
-// Balance for every invoice, keyed by id.
+// Balance for every invoice, keyed by id. A draft (never sent) is owed by nobody (owner-approved
+// 20 Oct 2026: "Drafts don't count toward owed anywhere until they're sent"): owed reads 0 and
+// draft: true, and dueWords / dueCents say nothing for it (remaining and depositOwed stay as they
+// are, so nothing reads a draft as "paid in full" or its damage deposit as collected), so the Money tab, Not paid yet, the calendar's "Collect",
+// the card, the missed jobs and the 7 AM email never count an unsent auto draft. The invoice's
+// own page and editor still show its full numbers (payStepsOf in pay-steps.mjs).
 export async function balances(db) {
   const [{ results: invoices }, lines, paid] = await Promise.all([db.prepare('SELECT * FROM invoices').all(), linesByInvoice(db), paidByInvoice(db)]);
   const out = {};
-  for (const inv of invoices || []) out[inv.id] = { invoice: inv, ...balanceOf(inv, lines[inv.id] || [], paid[inv.id] || 0) };
+  for (const inv of invoices || []) {
+    const b = balanceOf(inv, lines[inv.id] || [], paid[inv.id] || 0);
+    out[inv.id] = { invoice: inv, ...b, ...(inv.status === 'draft' ? { draft: true, owed: 0 } : {}) };
+  }
+  return out;
+}
+
+// Every recorded payment per invoice, oldest first: [{ cents, on }] (the "✓ paid Tue 20 Oct" dates).
+export async function paymentsByInvoice(db) {
+  const { results } = await db.prepare("SELECT invoice_id, amount_cents, received_on FROM payments WHERE voided_at IS NULL AND kind = 'payment' ORDER BY received_on, id").all();
+  const out = {};
+  for (const r of results || []) (out[r.invoice_id] = out[r.invoice_id] || []).push({ cents: r.amount_cents || 0, on: r.received_on || '' });
   return out;
 }
 
@@ -113,23 +130,29 @@ export async function recordDepositOutcome(db, invoice, lines, kind, amountCents
 
 // The invoice lines as the editor posts them (line_desc / line_qty / line_price / line_note /
 // line_refundable, one of each per line). Used by the invoice editor and by "Change anything".
+// line_auto ("<kind>:<sig>", util.mjs autoTag) keeps a starting line's kind only while the line is
+// exactly as the auto draft wrote it; anything changed by hand saves with auto NULL.
 export function linesFromForm(form) {
   const desc = form.getAll('line_desc'); const qty = form.getAll('line_qty');
   const price = form.getAll('line_price'); const note = form.getAll('line_note'); const ref = form.getAll('line_refundable');
+  const auto = form.getAll('line_auto');
   const lines = [];
   desc.forEach((d, i) => {
     const description = String(d || '').trim();
     if (!description) return;
     const q = Number(qty[i]);
-    lines.push({ description, qty: Number.isFinite(q) ? q : 1, unit_cents: toCents(price[i]), note: String(note[i] || '').trim(), refundable: ref[i] === '1' ? 1 : 0 });
+    const line = { description, qty: Number.isFinite(q) ? q : 1, unit_cents: toCents(price[i]), note: String(note[i] || '').trim(), refundable: ref[i] === '1' ? 1 : 0 };
+    const [kind, sig] = String(auto[i] || '').split(':');
+    line.auto = AUTO_KINDS.includes(kind) && sig === lineSig(line) ? kind : null;
+    lines.push(line);
   });
   return lines;
 }
 
 export async function saveLines(db, invoiceId, lines) {
   const stmts = [db.prepare('DELETE FROM invoice_lines WHERE invoice_id = ?1').bind(invoiceId)];
-  lines.forEach((l, i) => stmts.push(db.prepare('INSERT INTO invoice_lines (invoice_id, position, description, qty, unit_cents, note, refundable) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)')
-    .bind(invoiceId, i, l.description, l.qty, l.unit_cents, l.note, l.refundable)));
+  lines.forEach((l, i) => stmts.push(db.prepare('INSERT INTO invoice_lines (invoice_id, position, description, qty, unit_cents, note, refundable, auto) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)')
+    .bind(invoiceId, i, l.description, l.qty, l.unit_cents, l.note, l.refundable, AUTO_KINDS.includes(l.auto) ? l.auto : null)));
   await db.batch(stmts);
 }
 

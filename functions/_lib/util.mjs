@@ -44,8 +44,12 @@ export function halfDeposit(totalCents) {
 }
 
 // How the customer pays. 'half': a deposit of half the total now, the rest by the due
-// date. 'full': the whole total by the due date. 'custom': a typed deposit now.
-export const PAY_PLANS = ['half', 'full', 'custom'];
+// date. 'full' ("All now"): the whole total now. 'custom': a typed deposit now, the rest by the
+// due date. 'none' ("No deposit", owner-approved 20 Oct 2026): nothing now, all of it by the due
+// date. Every row saved before 'none' existed keeps the plan it has (pay_plan is always set).
+export const PAY_PLANS = ['half', 'full', 'custom', 'none'];
+// One payment only (no deposit step): "Mark paid in full" is the money button.
+export const singlePayment = (plan) => plan === 'full' || plan === 'none';
 
 export function payPlanOf(invoice, totalCents) {
   if (PAY_PLANS.includes(invoice.pay_plan)) return invoice.pay_plan;
@@ -56,9 +60,22 @@ export function payPlanOf(invoice, totalCents) {
 // What is asked for right now under a plan; the rest is total minus this.
 export function amountDueNow(plan, totalCents, customCents = 0) {
   if (plan === 'full') return totalCents;
+  if (plan === 'none') return 0;
   if (plan === 'custom') return Math.max(0, Math.min(totalCents, Math.round(customCents) || 0));
   return halfDeposit(totalCents);
 }
+
+// A starting line the auto draft wrote keeps its kind (invoice_lines.auto) only while it is
+// exactly as written: the editor posts "<kind>:<sig>" and a line whose fields no longer match
+// its sig was changed by hand (ledger.mjs linesFromForm), so a rebuild keeps it.
+export const AUTO_KINDS = ['start', 'food', 'takedown', 'rental', 'porch', 'deposit'];
+export function lineSig(line) {
+  const t = [line.description, Number(line.qty), Math.round(Number(line.unit_cents) || 0), line.note || '', line.refundable ? 1 : 0].join('\u0001');
+  let h = 5381;
+  for (let i = 0; i < t.length; i += 1) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0;
+  return h.toString(36);
+}
+export const autoTag = (line) => (line && AUTO_KINDS.includes(line.auto) ? `${line.auto}:${lineSig(line)}` : '');
 
 export function b64url(bytes) {
   const arr = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);

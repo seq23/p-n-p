@@ -14,7 +14,7 @@
 // public grid renders from), with the fall + Christmas bundle line when both are booked.
 import PP from '../../scripts/lib/porch_packages.js';
 import INV from '../../scripts/lib/inventory.js';
-import { rentalLength, rentalSpanWords } from './phone-requests.mjs';
+import { rentalLength, rentalSpanWords, isPhone } from './phone-requests.mjs';
 
 export function buildPriceTable(source, services, porchPackages = null) {
   // Resolved first (scripts/lib/inventory.js): the all-games bundles take every available public
@@ -32,7 +32,12 @@ export function buildPriceTable(source, services, porchPackages = null) {
     })),
   ];
   const pickup = games.pickup || {};
+  // The website's "from" prices (services.json "$300+"): the auto draft's starting line for party
+  // & decor and for grazing styling (owner-approved 20 Oct 2026), never typed here.
+  const fromOf = (k) => { const v = services && services.services && services.services[k]; const n = Number(String((v && v.price) || '').replace(/[^0-9.]/g, '')); return Number.isFinite(n) ? cents(n) : 0; };
   return {
+    celebrationFromCents: fromOf('celebration'),
+    grazingFromCents: fromOf('grazing'),
     dayCents: cents(games.rates.day),
     weekendCents: cents(games.rates.weekend),
     items,
@@ -182,7 +187,7 @@ export function prefillLines(request, table) {
     if (slots > named.length) named = gameList(named, slots, table);
     const open = Math.max(0, slots - named.length);
     if (!named.length && !open && !extras.size) {
-      lines.push({ description: `Game rental (${span})`, qty: 1, unit_cents: weekend ? table.weekendCents : table.dayCents, note: '', refundable: 0 });
+      lines.push({ description: `Game rental (${span})`, qty: 1, unit_cents: weekend ? table.weekendCents : table.dayCents, note: '', refundable: 0, auto: 'rental' });
     } else {
       let plan = cheapestPlan(named.length + open, [...extras], table, weekend);
       const queue = [...named, ...Array(open).fill(null)];
@@ -206,31 +211,70 @@ export function prefillLines(request, table) {
       for (const p of plan.picks.filter((x) => x.bundle)) {
         const b = p.bundle;
         const what = [...b.items.map(byName), ...sets(take(b.games))];
-        lines.push({ description: `${b.name} bundle, ${span}: ${what.join(', ')}`, qty: 1, unit_cents: weekend ? b.weekendCents : b.dayCents, note: '', refundable: 0 });
+        lines.push({ description: `${b.name} bundle, ${span}: ${what.join(', ')}`, qty: 1, unit_cents: weekend ? b.weekendCents : b.dayCents, note: '', refundable: 0, auto: 'rental' });
       }
       for (const p of plan.picks.filter((x) => x.game)) {
         const [name] = take(1);
-        lines.push({ description: `${/of your choice/.test(name) ? 'Game of your choice' : name} (${span})`, qty: 1, unit_cents: weekend ? table.weekendCents : table.dayCents, note: '', refundable: 0 });
+        lines.push({ description: `${/of your choice/.test(name) ? 'Game of your choice' : name} (${span})`, qty: 1, unit_cents: weekend ? table.weekendCents : table.dayCents, note: '', refundable: 0, auto: 'rental' });
       }
       for (const p of plan.picks.filter((x) => x.extra)) {
-        lines.push({ description: `${p.extra.name} (${span})`, qty: 1, unit_cents: weekend ? p.extra.weekendCents : p.extra.dayCents, note: '', refundable: 0 });
+        lines.push({ description: `${p.extra.name} (${span})`, qty: 1, unit_cents: weekend ? p.extra.weekendCents : p.extra.dayCents, note: '', refundable: 0, auto: 'rental' });
       }
     }
-    lines.push({ description: 'Damage deposit (refundable)', qty: 1, unit_cents: orderDepositCents(lines, table), note: 'Refunded at return if everything comes back undamaged', refundable: 1 });
+    lines.push({ description: 'Damage deposit (refundable)', qty: 1, unit_cents: orderDepositCents(lines, table), note: 'Refunded at return if everything comes back undamaged', refundable: 1, auto: 'deposit' });
   }
   const porch = porchPrefill(request, table);
-  lines.push(...porch.lines);
-  // The decor line for party / grazing (and old form rows); a site porch-only request is
+  lines.push(...porch.lines.map((l) => ({ ...l, auto: 'porch' })));
+  // Party & decor and grazing (owner-approved mock-up, 20 Oct 2026): a starting line at the
+  // website's "from" price ("Starting price from your price list") with their answers in the note,
+  // and for grazing a "Food (at cost)" line, price needed, when they asked us to source the food.
+  // An old form row with no service ticks keeps the one $0 decor line; a porch-only request is
   // fully covered by its package lines.
-  const otherDecor = (request.services || []).some((k) => k === 'party' || k === 'grazing');
-  if (request.wantsDecor && (!porch.lines.length || otherDecor)) {
-    const what = request.eventType && !porch.lines.length ? `Decor: ${request.eventType}` : 'Decor setup';
-    lines.push({ description: what, qty: 1, unit_cents: 0, note: '', refundable: 0 }); // $0 = price needed; the send screen asks for it
-    if (saidYes(request.takedownAnswer)) {
-      lines.push({ description: 'Takedown', qty: 1, unit_cents: table.takedownCents, note: '', refundable: 0 });
+  const svc = request.services || [];
+  const party = svc.includes('party'); const grazing = svc.includes('grazing');
+  if (request.wantsDecor && (!porch.lines.length || party || grazing)) {
+    if (party || grazing) {
+      const a = serviceAnswers(request);
+      const note = (x) => [x.where, x.guests ? `${x.guests} guests` : '', x.budget ? `budget ${x.budget}` : ''].filter(Boolean).join(' · ');
+      if (party) lines.push({ description: `Party decor${a.party.event ? `: ${a.party.event}` : ''}`, qty: 1, unit_cents: table.celebrationFromCents || 0, note: note(a.party), refundable: 0, auto: 'start' });
+      if (grazing) {
+        lines.push({ description: `Grazing table styling${a.grazing.event ? `: ${a.grazing.event}` : ''}`, qty: 1, unit_cents: table.grazingFromCents || 0, note: note(a.grazing), refundable: 0, auto: 'start' });
+        if (/^yes/i.test(a.grazing.food)) lines.push({ description: 'Food (at cost)', qty: 1, unit_cents: 0, note: '', refundable: 0, auto: 'food' }); // $0 = price needed
+      }
+    } else {
+      const what = request.eventType && !porch.lines.length ? `Decor: ${request.eventType}` : 'Decor setup';
+      lines.push({ description: what, qty: 1, unit_cents: 0, note: '', refundable: 0 }); // $0 = price needed; the send screen asks for it
+    }
+    // Takedown when they said yes (a phone booking with its takedown on the calendar said yes too).
+    if ((party || !grazing) && (saidYes(request.takedownAnswer) || (isPhone(request) && request.takedownPlan === 'scheduled'))) {
+      lines.push({ description: 'Takedown', qty: 1, unit_cents: table.takedownCents, note: '', refundable: 0, auto: 'takedown' });
     }
   }
   return lines;
+}
+
+// The party and grazing answers of one request, apart (both ask "How many guests?" and "Budget",
+// party first, as the form lists them): { party: { event, where, guests, budget }, grazing:
+// { event, guests, food, budget } }. "Not sure yet" says nothing, so it is left out.
+export function serviceAnswers(request) {
+  const out = { party: { event: '', where: '', guests: '', budget: '' }, grazing: { event: '', guests: '', food: '', budget: '' } };
+  const svc = request.services || [];
+  let cur = svc.includes('party') ? 'party' : (svc.includes('grazing') ? 'grazing' : '');
+  let seenEvent = false;
+  for (const x of request.decor || []) {
+    const label = String(x.label || ''); const value = String(x.value || '').trim();
+    if (/event type/i.test(label)) { if (seenEvent && cur === 'party' && svc.includes('grazing')) cur = 'grazing'; seenEvent = true; }
+    if (!cur || !value || /^not sure/i.test(value)) continue;
+    const o = out[cur];
+    if (/event type/i.test(label)) o.event = o.event || value;
+    else if (/^where is it/i.test(label) && cur === 'party') o.where = value;
+    else if (/^how many guests/i.test(label)) o.guests = value;
+    else if (/^budget$/i.test(label)) o.budget = value;
+    else if (/source the food/i.test(label) && cur === 'grazing') o.food = value;
+  }
+  if (!out.party.event && svc.includes('party') && request.eventType) out.party.event = request.eventType;
+  if (!out.grazing.event && svc.includes('grazing') && !svc.includes('party') && request.eventType) out.grazing.event = request.eventType;
+  return out;
 }
 
 // One refundable deposit per order: the biggest deposit among the items its lines name (an item

@@ -33,7 +33,7 @@ export function statusBits(b, { bal, notes = [], ret, today, hold = null, delive
   const bits = [];
   if (hold && hold.state === 'held' && RENTAL.has(b.kind)) bits.push(`<span class="money owe" data-held-booking>${hold.until ? `Games reserved until ${esc(reservedWords(fromSql(hold.until)))}` : RESERVED_BY_HAND} — waiting for deposit</span>`);
   if (bal && !bal.void) {
-    bits.push(bal.owed > 0 ? `<span class="money owe" data-owed>${esc(balanceWords(bal))}</span>` : `<span class="money ok" data-paid>${esc(balanceWords(bal))}</span>`);
+    bits.push(bal.draft ? `<span class="money" data-draft>${esc(balanceWords(bal))}</span>` : (bal.owed > 0 ? `<span class="money owe" data-owed>${esc(balanceWords(bal))}</span>` : `<span class="money ok" data-paid>${esc(balanceWords(bal))}</span>`));
     if (b.kind === 'rental_pickup' && bal.owed > 0) bits.push(`<span class="money owe" data-collect>Collect at ${delivery ? 'delivery' : 'pickup'}: ${esc(dueWords(bal).replace(' due', ''))}</span>`);
   }
   if (b.kind === 'rental_return') {
@@ -329,7 +329,7 @@ function phoneJob(b, c, day, yesFor) {
   const rows = [['Time', b.time ? prettyTime(b.time) : 'Any time this day']];
   if (b.place) rows.push(['Where', b.place]);
   if (b.items) rows.push([RENTAL.has(b.kind) ? 'Games' : 'Bring', b.items]);
-  rows.push(['Collect', bal ? (bal.owed > 0 ? `${money(bal.owed)} still to collect` : 'Paid in full ✓') : 'No invoice yet']);
+  rows.push(['Collect', bal ? (bal.draft ? 'Invoice not sent yet' : (bal.owed > 0 ? `${money(bal.owed)} still to collect` : 'Paid in full ✓')) : 'No invoice yet']);
   if (bal && bal.refundable) rows.push(['Deposit', depositWords(bal)]);
   if (held) rows.push(['Reserved', c.hold.until ? `Games reserved until ${reservedWords(fromSql(c.hold.until))}, waiting for the deposit` : `${RESERVED_BY_HAND}, waiting for the deposit`]);
   if (c.notes && c.notes.length) rows.push(['Note', firstLine(c.notes[0].body)]);
@@ -571,7 +571,7 @@ export function dayPage({ outRows = [], tdToday = [], requested = [], gamesAsked
   const rows = bookings.map((b) => {
     const c = ctx(b);
     const owe = c.bal && !c.bal.void ? c.bal.owed : 0;
-    if (b.kind === 'rental_pickup' || !RENTAL.has(b.kind)) { owedTotal += owe; depositTotal += c.bal && !c.bal.void ? c.bal.depositOwed : 0; }
+    if (b.kind === 'rental_pickup' || !RENTAL.has(b.kind)) { owedTotal += owe; depositTotal += c.bal && !c.bal.void && !c.bal.draft ? c.bal.depositOwed : 0; }
     return { b, c, owe };
   });
   const npLine = notPaid ? `<div class="notice warn" data-day-not-paid><strong>${notPaid.today} ${notPaid.today === 1 ? 'customer' : 'customers'} booked today still ${notPaid.today === 1 ? 'owes' : 'owe'} money.</strong> Not paid yet in all: ${notPaid.count} ${notPaid.count === 1 ? 'customer owes' : 'customers owe'} ${esc(money(notPaid.total))}. <a href="/admin/money#not-paid"${tip('np.filter')}>See Not paid yet</a></div>` : '';

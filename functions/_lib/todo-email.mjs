@@ -44,7 +44,8 @@ import { listBookings, loadReturns, addDays, daySort, deliveryAddress } from './
 import { JOB_WORDS, DELIVERY_JOB_WORDS, missedFrom, isLiveBooking, tiers, subjectWarning, stepWords, notHappenedSet } from './missed.mjs';
 import { serviceOfKind } from './kinds.mjs';
 import { currentHolds } from './holds.mjs';
-import { balances, linesByInvoice, dueWords } from './ledger.mjs';
+import { balances, linesByInvoice, dueWords, paymentsByInvoice } from './ledger.mjs';
+import { payStepsOf, payStepsLine } from './pay-steps.mjs';
 import { notPaidRows } from './notpaid.mjs';
 import { chicagoDate, chicagoHour, dayWords, timeWords, smsLink, normalizePhone } from './reminders.mjs';
 import { render as renderMessage } from './messages.mjs';
@@ -92,8 +93,8 @@ const memphisTime = (ms) => new Intl.DateTimeFormat('en-US', { timeZone: 'Americ
 export async function todoData(db, today, nowMs = Date.now(), { includeWeek = null } = {}) {
   const settings = await getSettings(db);
   const tomorrow = addDays(today, 1);
-  const [facts, all, returns, bals, outcomes, linesBy, holds] = await Promise.all([
-    requestFacts(db, today), listBookings(db), loadReturns(db), balances(db), depositOutcomes(db), linesByInvoice(db), currentHolds(db),
+  const [facts, all, returns, bals, outcomes, linesBy, holds, paysBy] = await Promise.all([
+    requestFacts(db, today), listBookings(db), loadReturns(db), balances(db), depositOutcomes(db), linesByInvoice(db), currentHolds(db), paymentsByInvoice(db),
   ]);
   const { results: stRows } = await db.prepare('SELECT * FROM request_status').all();
   const statuses = Object.fromEntries((stRows || []).map((s) => [s.request_key, s]));
@@ -212,7 +213,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const job = jobs.find((j) => j.invoice === row.id || (j.key && j.key === row.requestKey));
     const body = renderMessage('paymentReminder', { name: row.name, amount: usd(row.owed), due: row.due ? dayWords(row.due) : '', late: row.tone === 'late', number: row.number }).text;
     const sms = smsLink(row.phone, body);
-    moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, t: `${shortName(row.name)} · ${dueWords(bals[row.id], usd) || `${usd(row.owed)} due`}`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}`,
+    moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, t: `${shortName(row.name)} · ${dueWords(bals[row.id], usd) || `${usd(row.owed)} due`}`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}${(() => { const b = bals[row.id]; const w = b ? payStepsLine(payStepsOf(b.invoice, linesBy[row.id] || [], { paid: b.paid, payments: paysBy[row.id] || [] }), usd) : ''; return w ? ` · ${w}` : ''; })()}`,
       btns: [...(sms ? [{ label: 'Text a reminder', href: sms }] : []), { label: 'Mark paid', href: `/admin/invoices/${row.id}` }] });
   }
   // Every unpaid rental hold (owner, 20 Oct 2026): waiting for its deposit, with the invoice's
@@ -225,8 +226,8 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const endDay = timed ? chicagoDate(new Date(h.untilMs)) : '';
     const until = !timed ? 'Reserved by hand (no end date)' : `Games reserved until ${endDay === today ? 'today' : dayWords(endDay)} ${memphisTime(h.untilMs)}`;
     const bal = h.invoice_id ? bals[h.invoice_id] : null;
-    const due = bal && !bal.void ? bal.owed + bal.depositOwed : 0;
-    const d = bal && !bal.void ? (due > 0 ? `${dueWords(bal, usd)} on the invoice` : 'Deposit not paid yet') : 'Invoice not sent yet';
+    const due = bal && !bal.void && !bal.draft ? bal.owed + bal.depositOwed : 0;
+    const d = bal && !bal.void && !bal.draft ? (due > 0 ? `${dueWords(bal, usd)} on the invoice` : 'Deposit not paid yet') : 'Invoice not sent yet';
     moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [{ label: 'Reserve their games longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
   }
   // A late rental return is a missed job (in the alarm box above section 1), never also here.

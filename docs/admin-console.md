@@ -27,8 +27,10 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   price table, `isRentalInvoice` in `functions/_lib/pricing.mjs`) adds the rental note to the
   email, PDF, text message and invoice page, worded from the invoice's own numbers
   (`functions/_lib/invoice-note.mjs`, see "Rental extras" below). Numbers are
-  `PNP-YYYY-NNNN`; pay plan (`pay_plan`: half / full / custom, migration 0003) decides what is asked for now;
-  half is the default, full asks for the whole total by the due date, custom is a typed deposit.
+  `PNP-YYYY-NNNN`; pay plan (`pay_plan`: half / full / custom / none, migration 0003) decides what is asked for now;
+  half is the default, full ("All now") asks for the whole total now, custom is a typed deposit,
+  none ("No deposit", owner-approved 20 Oct 2026) asks nothing now and all of it by the due date.
+  Every invoice saved before "No deposit" keeps the plan it had (`util.mjs payPlanOf`).
   "See it before sending" saves the draft and shows the email inline on the invoice page.
   `GET /admin/invoices/:id/invoice.pdf` renders the same invoice as a PDF (functions/_lib/pdf.mjs,
   pdf-lib) for customers reached by text; "Text the invoice (PDF)" shares it from the phone and
@@ -60,8 +62,9 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   `/request?service=porch&season=fall&decor=classic` preselects both answers.
 - **Admin**: the card reads e.g. "Porch: Fall · picturing a full porch (Classic, from $N)"; the
   invoice starts at that tier's minimum, and with both seasons adds the other season's package
-  and an editable "-10% fall + Christmas bundle" line; `/admin/packages` shows the same grid,
-  linked from Requests and the invoice screen. No migration: answers live in `requests.answers`.
+  and an editable "-10% fall + Christmas bundle" line; `/admin/packages` still shows the same grid
+  for old links, but nothing links to it any more: Requests and the invoice editor link the
+  Quick Pricing Summary (`/admin/pricing`) instead (owner, 20 Oct 2026). No migration: answers live in `requests.answers`.
 - **Guard**: `npm run validate:porch-packages` (in validate:admin).
 
 ## Quick Pricing Summary (owner-approved mock-up, 20 Oct 2026)
@@ -93,7 +96,7 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
 - **Steps panel** (`stepsPanel` in `functions/_lib/helptext.mjs`) replaces the sub-nav button row
   and the separate steps box: Requests 1 "See who's asking." (Check for new requests · Find a
   customer; Open responses sheet · Open ID folder), 2 "Send a quote or invoice." (Start a blank
-  invoice · Print a blank checklist; Porch packages), 3 "Plan your day and get paid." (Today's list
+  invoice · Print a blank checklist; Quick Pricing Summary), 3 "Plan your day and get paid." (Today's list
   · Calendar & Bookings). Same pattern on Calendar & Bookings and Money; 3 columns on a computer,
   stacked on a phone.
 - **Cards** (`requestCard` in `views.mjs`): large service badge(s) with words in the four service
@@ -529,8 +532,9 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   unscheduled, no chip"): the answer was stored right (2026-11-03) and its chip was on November,
   but October's month (grid and phone list) stops at 31 Oct, Upcoming listed only bookings, and the
   old list gave no date; Upcoming and Unconfirmed requests now show it.
-- **Invoice quick-adds** (`invoiceEditorPage`): + Delivery fee, + Discount (she types it, kept
-  negative), + Setup / takedown fee, + Damage deposit (refundable), and on a rental + Extra game:
+- **Invoice quick-adds** (`invoiceEditorPage`, since 20 Oct 2026 the labelled list under ONE
+  "＋ Add something to this invoice", see "Calm invoices" below): Delivery fee, Discount (she types it, kept
+  negative), Setup / takedown fee, Damage deposit (refundable), A porch package, and on a rental Extra game:
   the games free for the whole pickup -> return span (booked or already-in-the-rental ones
   disabled), "Complimentary (no charge)" -> a $0 line (note `free`) + the invoice note
   "Complimentary Nth game: <game>". Prices: `data/offers/services.json invoiceQuickAdds` only.
@@ -640,10 +644,56 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   days", red from 3): Memphis calendar days (`steps.mjs waitingDays / waitingWords`).
   `functions/_lib/callback-list.mjs callbackRows` lists every request still waiting for a call
   (not phone, not put away), oldest first, for a later daily email (not sent yet).
-- **Invoice editor**: compact rows (what · qty × price · total; tap to change in place), the
-  quick-adds as one row of chips (+ Line first), the pay plan, an optional message, ONE summary at
-  the bottom and ONE big "Send invoice" (Save draft and See it before sending small).
+- **Invoice editor**: superseded by "Calm invoices" below (rows with ✏️ Change, the ＋ Add list,
+  the numbered "How <name> pays" summary); still ONE big "Send invoice" (Save draft and See it
+  before sending small).
 - Proof: `npm run validate:admin-rental-extras` (in validate:admin).
+
+## Calm invoices: auto draft, No deposit, the maths in words (owner-approved mock-up, 20 Oct 2026, migration 0020)
+- **Auto draft** (`functions/_lib/auto-draft.mjs makeAutoDraft`): the moment a request arrives (the
+  website form, `request-submit.mjs`, and a phone booking, `admin-calendar.mjs createBookingRoute`)
+  a DRAFT invoice is made from it with the same prefill as Create invoice (`pricing.mjs
+  prefillLines`). It is never sent by itself and never emailed. One per request: a request with any
+  invoice gets nothing. A failure never loses the request: it is logged on the card ("The invoice
+  draft could not be made by itself… Tap Create invoice.") and the card keeps Create invoice. New
+  requests only: nothing is made for a request that came in before this shipped.
+- **Starting lines**: game rentals and porch as before; party & decor = "Party decor: <event>" at
+  the website's "from" price (`services.json` celebration, `PRICE_TABLE.celebrationFromCents`) with
+  where · guests · budget in the line note, shown in the editor as "Starting price from your price
+  list"; grazing = "Grazing table styling: <event>" at the grazing "from" price, plus "Food (at
+  cost)" (price needed) when they asked us to source the food; Takedown when they said yes (or a
+  phone booking with its takedown booked). `invoices.auto_draft = 1` marks the auto draft;
+  `invoice_lines.auto` marks each starting line (start / food / takedown / rental / porch /
+  deposit) while it is exactly as written (the editor posts `line_auto` = kind:signature,
+  `util.mjs autoTag`; a changed line saves with `auto` NULL).
+- **Drafts are owed by nobody**: `ledger.mjs balances` gives a draft `owed` 0 and `draft: true`;
+  `dueWords` / `dueCents` say nothing for it; Money (`money.mjs`), Not paid yet, the calendar
+  ("Invoice not sent yet"), the card and the 7 AM email never count it. Its `remaining` and
+  `depositOwed` are unchanged, so nothing reads it as paid or its damage deposit as collected.
+- **The card**: "📄 Invoice draft ready: $X" + "Made from <name>'s request. Nothing has been sent.
+  Check the price, then send." On the invoice step that is the next-step box with the big "Check and
+  send the invoice"; while another step comes first it sits on the card face with an outlined
+  button (one big button per card). Bookings made for the request carry its invoice.
+- **What they want changed** (Edit page section 1, `admin-edit.mjs saveWant` → `rebuildAutoDraft`):
+  an auto draft that was never sent is rebuilt to match; every line she typed or changed by hand is
+  kept; the flash says so. A sent or void invoice, or a hand-made one, is never touched.
+- **Editor**: each line at rest = name, note, "qty × price", total and a visible ✏️ Change; one
+  line open at a time; ✓ Done with this line; "Remove this line…" apart in red, asking "Remove <line>
+  from this invoice?" in the page (no pop-up); "Total so far" live; ONE "＋ Add something to this
+  invoice" opens Something else / Delivery fee / Setup / takedown fee / Damage deposit (given back) /
+  Discount / A porch package (/ Extra game on a rental); the new line opens with the cursor in its
+  price, marked NEW LINE. "See your prices (Quick Pricing Summary)" opens `/admin/pricing` in a new tab.
+- **How they pay**: Half now · All now · Other deposit · No deposit, each with its live amounts in grey.
+- **The maths in words** (`functions/_lib/pay-steps.mjs payStepsOf`, the same everywhere: invoice
+  page, customer email, PDF and its text message, the card's Payment box, the 7 AM email): Total,
+  then "How <first name> pays": ① Deposit · now · holds the date $X, ② The rest · by Wed 28 Oct $Y,
+  "$X + $Y = $Z total"; All now = ① All of it · now; No deposit = "No deposit. Nothing to pay now."
+  + ① All of it · by <date>. With a damage deposit the total also reads "$80 rental + $50
+  refundable damage deposit" and its line "Given back after the event". A paid step turns green
+  "✓ paid Tue 20 Oct" and "Still owed" shows the rest. The customer's email says "How you pay",
+  "① Deposit now (holds your date)", "② The rest, by Wed 28 Oct". The old one-number "$X due now"
+  band is gone. The numbers are the ones every invoice always had (`deposit_due_cents`).
+- Proof: `npm run validate:admin-invoice-calm` and `validate:admin-pay-plan` (in validate:admin).
 
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 Legacy intake: the site's /request form replaced it and takes its choices from the live inventory.

@@ -20,7 +20,8 @@
  *  5. end to end through the real handlers: a porch request with a package and both seasons
  *     does not show "<Season> · picturing ... (<Tier>, from $N)" on its card, its invoice
  *     does not start at the tier minimum with the bundle line, "Request this package"
- *     (/request?season=&decor=) does not preselect both answers, or /admin/packages is
+ *     (/request?season=&decor=) does not preselect both answers, an admin screen still links
+ *     /admin/packages instead of the Quick Pricing Summary (/admin/pricing), or /admin/packages is
  *     not linked from Requests and the invoice screen;
  *  6. the retired small stoop / standard porch / large porch tiers ($350/$600/$800) are
  *     still published anywhere.
@@ -204,8 +205,13 @@ else {
   if (at('Christmas porch: Classic package') !== (PP.priceOf(pk, 'christmas', 'classic')).toFixed(2)) fail('the invoice does not add the Christmas Classic package for both seasons');
   if (at(PP.esc(pk.bundle.invoiceLine)) !== (-PP.priceOf(pk, 'christmas', 'classic') * pk.bundle.percentOff / 100).toFixed(2)) fail('the invoice lacks the editable bundle line');
   if (descs.some((d) => /^Decor/.test(d))) fail('a porch-only package invoice still carries a $0 "Decor" line');
-  if (!/href="\/admin\/packages"[^>]*data-help="ed\.packages"|data-help="ed\.packages"[^>]*href|href="\/admin\/packages" target="_blank"/.test(inv)) fail('the invoice screen does not link Porch packages');
-  if (!/href="\/admin\/packages"/.test((await s.get('/admin/')).text)) fail('Requests does not link Porch packages');
+  // Every admin link to prices goes to the Quick Pricing Summary (owner, 20 Oct 2026); /admin/packages
+  // still answers for old links and bookmarks, but nothing links to it.
+  if (!/<a href="\/admin\/pricing" target="_blank" rel="noopener" data-see-prices data-help="ed\.packages"[^>]*>See your prices \(Quick Pricing Summary\)<\/a>/.test(inv)) fail('the invoice screen does not link "See your prices (Quick Pricing Summary)" in a new tab');
+  if (!/<option value="Fall porch: Classic package" data-price="[\d.]+"/.test(inv) || !/data-q-porch/.test(inv)) fail('＋ Add something has no "A porch package" picker at the package prices');
+  const reqPage = (await s.get('/admin/')).text;
+  if (!/<a href="\/admin\/pricing" data-help="sub\.packages"[^>]*>Quick Pricing Summary<\/a>/.test(reqPage)) fail('Requests does not link the Quick Pricing Summary');
+  for (const [where, h] of [['Requests', reqPage], ['the invoice editor', inv], ['/admin/help', (await s.get('/admin/help')).text]]) if (/href="\/admin\/packages"/.test(h)) fail(`${where} still links /admin/packages`);
   const pkg = await s.get('/admin/packages');
   if (pkg.status !== 200 || !pkg.text.includes(PP.gridHtml(pk))) fail('/admin/packages does not render the package grid');
   const unsure = await s.siteRequest({ service: 'porch', porch_season: 'Christmas & holidays', porch_decor: 'not_sure', event_date: plus(40), location: 'Bartlett', name: 'Nell Unsure', phone: '901-555-0411', email: 'nell@example.com' });

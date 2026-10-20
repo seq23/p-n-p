@@ -146,7 +146,8 @@ must(sms && decodeURIComponent(sms.href.split('body=')[1] || '') === "Hi Danesha
 
 // 5. Money.
 const m5 = S[5];
-must(m5.some((x) => x.type === 'owed' && x.t === 'Alex S. · $180 due' && x.d === 'Due today, at the takedown'), `Money lacks "Alex S. · $180 due / Due today, at the takedown": ${JSON.stringify(titles(m5))}`);
+// The same numbered payments as the invoice (pay-steps.mjs): Alex's invoice asks nothing now.
+must(m5.some((x) => x.type === 'owed' && x.t === 'Alex S. · $180 due' && x.d === 'Due today, at the takedown · No deposit. ① All of it · by Tue 20 Oct $180'), `Money lacks "Alex S. · $180 due / Due today, at the takedown · No deposit. ① All of it · by Tue 20 Oct $180": ${JSON.stringify(m5.map((x) => [x.t, x.d]))}`);
 must(m5.some((x) => x.type === 'owed' && x.t === 'Lou L. · $90 due' && /3 days late/.test(x.d)), 'Money lacks the late balance');
 must(!m5.some((x) => /Fay F/.test(x.t)), 'Money lists a balance due tomorrow');
 must(!m5.some((x) => /Dee D|Sam R/.test(x.t)), 'Money lists a damage deposit as owed (deposits are never owed)');
