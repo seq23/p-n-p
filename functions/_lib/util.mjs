@@ -126,8 +126,12 @@ export function prettyDate(iso) {
   return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 }
 
+// A header holds bytes only: a typed "Saved ✓" in the address is percent-encoded here (19 Oct 2026:
+// Settings Save, Hold settings and Expense categories answered 500 "Cannot convert argument to a
+// ByteString" after saving).
 export function redirect(location, headers = {}) {
-  return new Response(null, { status: 303, headers: { Location: location, ...headers } });
+  const safe = String(location).replace(/[^\x00-\x7F]+/gu, (run) => encodeURIComponent(run));
+  return new Response(null, { status: 303, headers: { Location: safe, ...headers } });
 }
 
 export function htmlResponse(body, status = 200, headers = {}) {

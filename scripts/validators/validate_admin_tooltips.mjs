@@ -90,7 +90,7 @@ const screens = [
   [`/admin/invoices/${invA.id}`], [`/admin/invoices/${invB.id}`], [`/admin/invoices/${draftWithEmail.id}`], [`/admin/invoices/${v.id}`], [`/admin/invoices/${paidInv.id}`], [`/admin/invoices/${invA.id}/edit`],
   ['/admin/settings'], ['/admin/help', { help: true }], ['/admin/packages'],
   // Settings -> Inventory (18 Oct 2026): the Add and Edit forms.
-  ['/admin/settings/inventory/new'], ['/admin/settings/inventory/giant-uno'],
+  ['/admin/inventory'], ['/admin/inventory/new'], ['/admin/inventory/giant-uno'], ['/admin/inventory/giant-uno/edit'], ['/admin/inventory/giant-tumble-tower'], ['/admin/inventory/projector'],
   [`/admin/confirmed?r=${s.rk(heldReq.row.request_key)}&m=Deposit%20received&back=/admin/`],
   [`/admin/checklist/online?r=${s.rk(reqA.key)}`], ['/admin/checklist', { print: true }], [`/admin/checklist?r=${s.rk(reqA.key)}`, { print: true }],
   ['/admin/search'], ['/admin/search?q=renter'], ['/admin/search?q=zzzz'],
@@ -109,6 +109,12 @@ pages.push([`/admin/day/${outMid} (rental out)`, {}, await s.get(`/admin/day/${o
 await s.post('/admin/settings/inventory/rates', { rate_day: '40', rate_weekend: '60' });
 await s.db.prepare("UPDATE inventory_publishes SET status = 'failed', detail = 'The website did not update.' WHERE id = (SELECT MAX(id) FROM inventory_publishes)").run();
 pages.push(['/admin/settings (website update failed)', {}, await s.get('/admin/settings')]);
+pages.push(['/admin/inventory (website update failed)', {}, await s.get('/admin/inventory')]);
+// The old Settings -> Inventory addresses (before 19 Oct 2026) redirect to the Inventory page.
+for (const [from, to] of [['/admin/settings/inventory', '/admin/inventory'], ['/admin/settings/inventory/new', '/admin/inventory/new'], ['/admin/settings/inventory/giant-uno', '/admin/inventory/giant-uno/edit']]) {
+  const r = await s.get(from);
+  if (r.status !== 303 || r.location !== to) errors.push(`${from} must redirect to ${to} (got ${r.status} ${r.location})`);
+}
 await s.post('/admin/requests/archive', { r: s.rk(reqB.key) });
 {
   const old = await s.get('/admin/archive');

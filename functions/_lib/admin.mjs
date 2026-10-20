@@ -935,11 +935,12 @@ async function routeAdmin(context) {
     if (segs.length === 1) return checklistPrint(env, url);
     if (segs[1] === 'online') return checklistOnline(env, url);
   }
+  if (segs[0] === 'inventory') return inventoryRoute(env, request, url, segs.slice(1), method);
   if (segs[0] === 'settings') {
-    if (segs[1] === 'inventory') return inventoryRoute(env, request, url, segs.slice(2), method);
+    if (segs[1] === 'inventory') return legacyInventoryRoute(env, request, url, segs.slice(2), method);
     if (segs.length === 1 && method === 'GET') {
       const settings = await getSettings(env.DB);
-      return htmlResponse(V.settingsPage({ settings, inventory: await inventoryHtml(env), hasQr: Boolean(settings.qr_png), categories: categoriesFrom(settings), pendingSync: await AM.pendingSync(env.DB), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+      return htmlResponse(V.settingsPage({ settings, inventory: VI.settingsInventoryCard(), websiteStatus: await websiteStatusHtml(env), hasQr: Boolean(settings.qr_png), categories: categoriesFrom(settings), pendingSync: await AM.pendingSync(env.DB), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
     }
     if (segs.length === 1 && method === 'POST') return saveSettings(env, request);
     if (segs[1] === 'password' && method === 'POST') return changePassword(env, request);
@@ -982,18 +983,36 @@ async function futureCounts(env, state) {
   return out;
 }
 
-async function inventoryHtml(env) {
+// Settings -> Website auto-update status: the Inventory page's box.
+async function websiteStatusHtml(env) {
   try {
-    const state = await INVD.loadInventory(env.DB);
-    const words = INVD.publishWords(await INVD.publishStatus(env));
-    return VI.inventorySection({ state: await INVD.loadInventory(env.DB), words, future: await futureCounts(env, state), keyMissing: !env.PNP_GITHUB_TOKEN });
+    return VI.websiteStatusCard({ words: INVD.publishWords(await INVD.publishStatus(env)), keyMissing: !env.PNP_GITHUB_TOKEN });
   } catch (e) {
-    return `<section class="card" id="inventory"><h2>Inventory: your rental items</h2><div class="notice err">The inventory could not load: ${esc(String(e && e.message ? e.message : e))}</div></section>`;
+    return `<div class="notice err">The website update status could not load: ${esc(String(e && e.message ? e.message : e))}</div>`;
   }
 }
 
-const invBack = (m, e = '') => redirect(`/admin/settings?${e ? `e=${encodeURIComponent(e)}` : `m=${encodeURIComponent(m)}`}#inventory`);
+// In / Out for every item today (inventory.mjs itemStatuses: the same windows and matcher as the
+// /request availability and the clash checks).
+async function inventoryStatuses(env, state) {
+  const { TRACK_TABLE } = await import('./prices.mjs');
+  return INVD.loadStatuses(env.DB, { table: TRACK_TABLE, data: state.data, today: chicagoDate() });
+}
+
+const invBack = (m, e = '') => redirect(`${VI.INVENTORY_HOME}?${e ? `e=${encodeURIComponent(e)}` : `m=${encodeURIComponent(m)}`}`);
 const SAVED = 'Saved ✓ It counts in the admin now. The website updates by itself in about 5 minutes.';
+
+// Old addresses (Settings -> Inventory, before 19 Oct 2026): pages redirect to the Inventory page,
+// saves still work (a form left open on a phone) and land on it.
+async function legacyInventoryRoute(env, request, url, rest, method) {
+  const home = VI.INVENTORY_HOME;
+  if (method === 'GET') {
+    const to = !rest.length ? home : rest[0] === 'new' ? `${home}/new` : `${home}/${encodeURIComponent(rest[0])}/edit`;
+    return redirect(to);
+  }
+  const mapped = rest.length === 1 && !['new', 'publish', 'rates'].includes(rest[0]) ? [rest[0], 'edit'] : rest;
+  return inventoryRoute(env, request, url, mapped, method);
+}
 
 async function inventoryRoute(env, request, url, rest, method) {
   const res = await inventoryRouteInner(env, request, url, rest, method);
@@ -1005,6 +1024,11 @@ async function inventoryRoute(env, request, url, rest, method) {
 async function inventoryRouteInner(env, request, url, rest, method) {
   const state = await INVD.loadInventory(env.DB);
   const findRow = (slug) => state.rows.find((r) => r.slug === slug);
+  const notFound = (words) => htmlResponse(V.layout('Not found', `<p>${words}</p>`, { screen: 'notfound', back: { href: VI.INVENTORY_HOME, label: 'Back to Inventory' } }), 404);
+  if (!rest.length && method === 'GET') {
+    return htmlResponse(VI.inventoryPage({ state, words: INVD.publishWords(await INVD.publishStatus(env)), statuses: await inventoryStatuses(env, state), future: await futureCounts(env, state),
+      keyMissing: !env.PNP_GITHUB_TOKEN, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  }
   if (rest[0] === 'publish' && method === 'POST') {
     const r = await INVD.startPublish(env, 'Try again');
     return invBack(r.status === 'running' ? 'The website update started again. About 5 minutes.' : 'Saved. See the box below for the website update.');
@@ -1027,27 +1051,31 @@ async function inventoryRouteInner(env, request, url, rest, method) {
   }
   const slug = rest[0] || '';
   const row = findRow(slug);
-  if (!row) return htmlResponse(V.layout('Not found', '<p>That item is not in the inventory.</p>', { screen: 'notfound', back: { href: '/admin/settings#inventory', label: 'Back to Settings' } }), 404);
+  if (!row) return notFound('That item is not in the inventory.');
   const item = JSON.parse(row.data);
   const { TRACK_TABLE } = await import('./prices.mjs');
   const future = (await INVD.futureBookingsFor(env.DB, item.name, chicagoDate(), TRACK_TABLE)).length;
-  if (rest.length === 1 && method === 'GET') return htmlResponse(VI.itemFormPage({ isNew: false, item, row, section: row.section, data: state.data, futureCount: future }));
-  if (rest.length === 1 && method === 'POST') {
+  if (rest.length === 1 && method === 'GET') {
+    const statuses = await inventoryStatuses(env, state);
+    return htmlResponse(VI.itemDetailPage({ row, item, data: state.data, status: statuses[slug], futureCount: future }));
+  }
+  if (rest[1] === 'edit' && rest.length === 2 && method === 'GET') return htmlResponse(VI.itemFormPage({ isNew: false, item, row, section: row.section, data: state.data, futureCount: future }));
+  if (rest[1] === 'edit' && rest.length === 2 && method === 'POST') {
     const form = await request.formData();
     const r = await INVD.saveItem(env, { slug, form, photo: form.get('photo') });
     if (!r.ok) return htmlResponse(VI.itemFormPage({ isNew: false, item: { ...item, ...formItem(form), slug }, row, section: sectionOfForm(form), data: state.data, errors: r.errors, futureCount: future }), 422);
     await INVD.startPublish(env, `edit ${slug}`);
     return invBack(SAVED);
   }
-  if ((rest[1] === 'remove' || rest[1] === 'restore') && method === 'POST') {
+  if ((rest[1] === 'remove' || rest[1] === 'restore') && rest.length === 2 && method === 'POST') {
     const on = rest[1] === 'restore';
     const r = await INVD.setAvailable(env, slug, on);
     if (!r.ok) return invBack('', r.errors.join(' '));
     await INVD.startPublish(env, `${rest[1]} ${slug}`);
     const kept = !on && future ? ` ${future} future ${future === 1 ? 'booking keeps' : 'bookings keep'} it.` : '';
-    return invBack(`${item.name} ${on ? 'is back' : 'is removed'} ✓${kept} The website updates by itself in about 5 minutes.`);
+    return invBack(`${item.name} ${on ? 'is offered again' : 'is not offered now'} ✓${kept} The website updates by itself in about 5 minutes.`);
   }
-  return htmlResponse(V.layout('Not found', '<p>Nothing here.</p>', { screen: 'notfound', back: { href: '/admin/settings#inventory', label: 'Back to Settings' } }), 404);
+  return notFound('Nothing here.');
 }
 
 // What the form said, to show it again after a refused save.

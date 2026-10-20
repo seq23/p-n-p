@@ -65,7 +65,7 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
 - **Guard**: `npm run validate:porch-packages` (in validate:admin).
 
 ## Request cards + admin homepage (JOB B, owner-approved 18 Oct 2026, migration 0008)
-- **Main nav**: Requests · Calendar & Bookings · Money · Settings · Help. Put away and Invoices
+- **Main nav**: Requests · Calendar & Bookings · Money · Inventory · Settings · Help (Inventory added 19 Oct 2026). Put away and Invoices
   left the nav: Put away is the collapsed "Put away (N)" section at the bottom of Requests ("Show
   put-away requests", `#put-away`, the only whitelisted disclosure in `validate:admin-tooltips`);
   `/admin/archive` redirects to `/admin/?pa=1#put-away` with it open. All invoices are linked from
@@ -566,9 +566,39 @@ summary list "Rental out" too. Edit (Bookings) has "Rental dates": both days in 
 old → new, and a plain warning naming the game and dates when the span clashes (it still saves).
 `npm run validate:rental-dates`. The Google Form strings above are the one imported old request.
 
-## Inventory (Settings, owner-approved 18 Oct 2026)
-Valerie adds, edits, removes and brings back rental items in **Settings -> Inventory** (also linked
-from the Settings top and the Day sheet games grid). Code: `functions/_lib/inventory.mjs`,
+## Inventory (owner-approved 18 Oct 2026; its own page 19 Oct 2026)
+Valerie adds, edits, removes and brings back rental items on **/admin/inventory** (main nav
+"Inventory", the Settings "Inventory" section's Open Inventory button, the Day sheet games grid).
+Old addresses redirect: `/admin/settings/inventory[/new|/<slug>]` -> `/admin/inventory[/new|/<slug>/edit]`
+(their saves still work), `/admin/settings#inventory` lands on the page. The page's address is
+`INVENTORY_HOME` in `views-inventory.mjs` (moving it is that line plus the nav link in `layout()`).
+- **Two separate ideas, never both called "available"** (owner, 19 Oct 2026): **Offered / Not
+  offered** is set by hand (Remove / Bring back); **In / Out** is computed from the bookings. Each item
+  shows one pill: "In" (green) · "Out: <First L.>, back <Tue 20 Oct>" (blue; "was due back" when
+  overdue and not checked in) · "1 of 2 out" (multi-set items) · "On hold until <Memphis time>"
+  (amber; a website hold not paid yet; "until you decide" when held by hand) · a small "Next booked:
+  <range>" line · "Not offered" (grey, its own group at the bottom with Bring back, never In / Out).
+  Tap an item -> `/admin/inventory/<slug>`: its upcoming bookings (each with Open that day), then
+  Edit / Remove / Bring back. Code: `itemStatuses` in `functions/_lib/inventory.mjs`, built on
+  `rentalWindows` / `isOut` (calendar.mjs): the whole pickup -> return span, held or confirmed.
+- **One matcher.** Booking words are matched to items by `expandItems` (`namesItem`/`matchText` in
+  calendar.mjs): the inventory name anywhere in the words, any case, punctuation or spacing, other
+  words ignored (the 19 Oct production booking "Giant Uno, Grab the Mic, Inflatable Movie Screen,
+  Projector, movie night bundle for $110 + $50 deposit refunded on tuesday"). The /request
+  availability answer, the booking picker, the clash checks, the calendar, the Day sheet and
+  Inventory all read it, so a customer can book an item only when it is offered AND not out on their
+  dates. `npm run validate:admin-inventory-status` (in validate:admin) compares Inventory's Out with
+  the availability answer and the clash check for every item over 24 days.
+
+## Settings (calm layout, owner 19 Oct 2026)
+Short sections, each opening with one sentence, folded on a phone and open on a computer
+(`SETTINGS_SECTIONS` in views.mjs): Your payment details · Emails & reminders (day list, Monday
+summary, rental holds) · Inventory (Open Inventory) · Google Calendar link · Website auto-update
+status (the Inventory page's "Website updating… / Live ✓" box) · Google Sheet · Expense categories ·
+Password. Every form, field and button that was there is still there and saves the same way
+(`validate:admin-inventory-status` lists them).
+
+## Inventory: how it is stored and published Code: `functions/_lib/inventory.mjs`,
 `functions/_lib/views-inventory.mjs`; rules: `scripts/lib/inventory.js` (the same `validate()` CI runs).
 - **One source of truth.** D1 (`inventory_items`, migration 0013) is the live copy, seeded from
   `data/rentals/games.json` on first use. Every admin page, the /request form, its availability
@@ -580,10 +610,10 @@ from the Settings top and the Day sheet games grid). Code: `functions/_lib/inven
   `GET /api/inventory/pending` and starts Inventory Publish once per change with GitHub's own token.
   Optional Pages secret `PNP_GITHUB_TOKEN` (Actions: write on seq23/p-n-p) starts it instantly.
   The workflow reports back to `POST /api/inventory/report` (HMAC, `PNP_INVENTORY_REPORT_KEY` on both
-  GitHub and Pages). Settings shows "Website updating…", then "Live ✓" only when
+  GitHub and Pages). Inventory (and Settings) show "Website updating…", then "Live ✓" only when
   porchandparty901.com/rentals/ carries the new `<meta name="pnp-inventory">` version; a failure
   says so in plain words with **Try again**.
-- **Remove is soft** (`availableNow: false`): off the website, /request, availability and the
+- **Remove is soft** (`availableNow: false`, shown as Not offered): off the website, /request, availability and the
   booking picker; old bookings keep it on their Day sheet and edit form; invoices keep their lines.
   Remove says how many future bookings have it. **Show on website** off = admin only (like the
   Projector): tracked, never priced or public.
