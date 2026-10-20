@@ -176,6 +176,7 @@
     "porch:install": "node scripts/install_porch_packages.js",
     "validate:admin-checklist": "node scripts/validators/validate_admin_checklist.mjs",
     "admin:import-form-request": "node scripts/admin/import_form_request.mjs",
+    "admin:one-off-draft": "node --no-warnings scripts/admin/one_off_auto_draft.mjs",
     "admin:backfill-takedown": "node scripts/admin/backfill_takedown.mjs",
     "admin:backfill-phone": "node scripts/admin/backfill_phone_requests.mjs",
     "admin:migrate": "npx wrangler d1 migrations apply pnp-admin --remote",

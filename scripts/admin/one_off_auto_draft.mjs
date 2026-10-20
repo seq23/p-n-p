@@ -5,7 +5,7 @@
  * exact path a new website request takes): auto_draft = 1, lines marked auto, the same prefill,
  * pay plan default, linked in request_status.invoice_id. It stays a DRAFT: nothing is sent.
  *
- *   node scripts/admin/one_off_auto_draft.mjs --key '<request_key>' [--dry-run]
+ *   npm run admin:one-off-draft -- --key '<request_key>' [--dry-run]
  *
  * Refuses when the request is missing, a test, put away, void, or already has ANY invoice
  * (makeAutoDraft's own hasInvoice, checked here first too), so running it twice changes nothing.
