@@ -7,7 +7,7 @@ import { loadRequestsFromDb } from './requests.mjs';
 import { servicesOf } from './cards.mjs';
 import { askedDate, shortName } from './requested.mjs';
 import { deriveProgress } from './progress.mjs';
-import { deriveSteps, loadStored, waitingDays, waitingWords, WAIT_HIGHLIGHT_DAYS } from './steps.mjs';
+import { deriveSteps, loadStored, waitingDays, waitingWords, sentMs, WAIT_HIGHLIGHT_DAYS } from './steps.mjs';
 export { WAIT_HIGHLIGHT_DAYS };
 import { takedownState } from './takedown.mjs';
 import { balances } from './ledger.mjs';
@@ -50,7 +50,7 @@ export async function callbackRows(db, today, facts = null) {
   const out = [];
   for (const { r, services, s } of facts || await requestFacts(db, today)) {
     if (r.source === 'phone' || s.called) continue;
-    const days = waitingDays(r.sortTime, today);
+    const days = waitingDays(sentMs(r), today);
     const asked = services[0] ? askedDate(r, services[0]) : '';
     out.push({ key: r.key, name: shortName(r.name), phone: String(r.phone || '').replace(/[^\d+]/g, ''), service: serviceWords(services), services, asked, days, words: waitingWords(days), sortTime: r.sortTime || 0 });
   }

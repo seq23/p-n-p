@@ -8,7 +8,7 @@ import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext
 import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, inlineRowKind, SCHEDULE_FIRST } from './cards.mjs';
 import { HOLD_DEFAULT_HOURS } from './hold-rules.mjs';
 import { holdLongerRow, heldUntilWords, HOLD_CSS } from './views-messages.mjs';
-import { deriveSteps, undoFor, waitingDays, waitingWords, WAIT_HIGHLIGHT_DAYS } from './steps.mjs';
+import { deriveSteps, undoFor, waitingDays, waitingWords, sentMs, WAIT_HIGHLIGHT_DAYS } from './steps.mjs';
 import { parseFormDate, deliveryAddress } from './calendar.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
@@ -779,7 +779,7 @@ function nextBox(r, s, x) {
       const sms = r.phone ? `<a class="btn ghost" href="sms:${esc(String(r.phone).replace(/[^\d+]/g, ''))}"${tip('step.text')}>Text</a>` : '';
       const why = rentalsOnly ? 'Confirm the games and the date. If you already talked, tap the button.' : 'Talk about what they want and the date. If you already talked, tap the button.';
       // How long they have waited (Memphis days; the daily "Call these people back" email says the same).
-      const wd = waitingDays(r.sortTime, today);
+      const wd = waitingDays(sentMs(r), today);
       const waitLine = `<p class="waitline${wd >= WAIT_HIGHLIGHT_DAYS ? ' late' : ''}" data-waiting="${wd}">${esc(waitingWords(wd))}</p>`;
       return box(`Call or text ${who} back`, why, `${waitLine}${tel || sms ? `<div class="smallrow">${tel}${sms}</div>` : ''}<details class="talk" data-talk><summary class="btn primary"${tip('step.talked')}>I've talked to them</summary>${talkBox(r, s, x)}</details>${hint('step.talked')}`, '', 'step.talked');
     }

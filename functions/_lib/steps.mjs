@@ -231,6 +231,13 @@ export function waitingDays(sentMs, today) {
   const a = Date.parse(`${memphisDay(sentMs)}T12:00:00Z`); const b = Date.parse(`${today}T12:00:00Z`);
   return Math.max(0, Math.round((b - a) / 86400000));
 }
+// The request's real sent instant (UTC ms) for waitingDays. Never r.sortTime: that is Memphis
+// wall-clock time stored as UTC (requests.mjs wallClockMs), so reading it in Chicago again moved a
+// request sent between midnight and 5 AM to the day before (red at 00:20 CDT, 20 Oct 2026).
+export function sentMs(r = {}) {
+  const t = Date.parse(`${String(r.submittedAt || '').replace(' ', 'T')}Z`);
+  return Number.isFinite(t) ? t : NaN;
+}
 export function waitingWords(n) {
   if (n <= 0) return 'Sent today';
   if (n === 1) return 'Waiting since yesterday';

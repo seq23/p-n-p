@@ -6,7 +6,11 @@
  *  2. Each section's inclusion rules, its order inside, the highlight thresholds (call back 2+ days,
  *     no time within 2 days), sections shown only when non-empty and always in the order 1-5, each
  *     with its "why" sentence from the mock.
- *  3. Money: due today or late only; the refundable damage deposit is never owed.
+ *  3. Money: due today or late only; the refundable damage deposit is never owed; every unpaid
+ *     rental hold is "Waiting for deposit · held until <time>" with the invoice's amount due.
+ *  3b. Set a time is CONFIRMED jobs only (owner, 20 Oct 2026): an invoiced-unpaid held rental is
+ *     NOT in it (it is in Money); a deposit-paid rental with no time IS; an unconfirmed party job
+ *     is not, the same job after "Yes, book it" is.
  *  4. All clear: nothing in 1-5 and nothing tomorrow -> only "All clear today", subject unchanged.
  *  5. Monday: ONE email (the to-do list + Your week); the old separate weekly email is never sent;
  *     the weekly_summary switch decides whether Your week is in it.
@@ -22,6 +26,7 @@ const T = await mod('functions/_lib/todo-email.mjs');
 const mailer = await mod('workers/pnp-mailer/src/index.js');
 const { b64urlText } = await mod('functions/_lib/util.mjs');
 const { markCalled, undoCalled } = await mod('functions/_lib/steps.mjs');
+const { confirmHold } = await mod('functions/_lib/holds.mjs');
 const errors = [];
 let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
@@ -94,8 +99,11 @@ for (const [day, words, hi] of [['2026-10-14', 'Waiting 2 days', true], ['2026-1
   must(x && x.d === words && x.hi === hi, `on ${day} the 12 Oct request reads ${x && x.d} / highlight ${x && x.hi} (want ${words} / ${hi})`);
 }
 must(T.CALLBACK_HIGHLIGHT_DAYS === 2 && T.SET_TIME_HIGHLIGHT_DAYS === 2, 'the highlight thresholds are not 2 days');
-// 3. Set a time: every open booking from today on with no time, soonest first, highlight within 2 days.
-must(JSON.stringify(titles(S[3])) === JSON.stringify(['Una U. · porch install Tue 20 Oct', 'Danesha M. · games pickup Thu 22 Oct', 'Kim P. · porch takedown Fri 23 Oct', 'Test R. · party takedown Sun 25 Oct']), `Set a time is ${JSON.stringify(titles(S[3]))}`);
+// 3. Set a time: every CONFIRMED open booking from today on with no time, soonest first, highlight
+// within 2 days. Hand-typed bookings (no request) are Valerie's own, so confirmed. reqA is not
+// confirmed (not called, no "Yes, book it", no money), so its party takedown Sun 25 Oct is NOT here.
+must(JSON.stringify(titles(S[3])) === JSON.stringify(['Una U. · porch install Tue 20 Oct', 'Danesha M. · games pickup Thu 22 Oct', 'Kim P. · porch takedown Fri 23 Oct']), `Set a time is ${JSON.stringify(titles(S[3]))}`);
+must(!S[3].some((x) => x.key === reqA.key), 'Set a time asks an UNCONFIRMED party request for a time');
 must(!titles(S[3]).some((t) => /Pat P|Ollie O|Alex S|Tia T/.test(t)), 'Set a time lists a past day or a booking that has a time');
 const hiOf = (re) => (S[3].find((x) => re.test(x.t)) || {}).hi;
 must(hiOf(/Una U/) === true && hiOf(/Danesha M/) === true && hiOf(/Kim P/) === false, 'Set a time highlight is not "within 2 days"');
@@ -109,12 +117,62 @@ must(!m5.some((x) => /Fay F/.test(x.t)), 'Money lists a balance due tomorrow');
 must(!m5.some((x) => /Dee D|Sam R/.test(x.t)), 'Money lists a damage deposit as owed (deposits are never owed)');
 const owedRow = m5.find((x) => /Alex S/.test(x.t));
 must(owedRow && owedRow.btns.some((b) => b.label === 'Text a reminder' && /^sms:/.test(b.href)) && owedRow.btns.some((b) => b.label === 'Mark paid' && b.href === `/admin/invoices/${inv['PNP-T-1']}`), 'the owed line lacks Text a reminder / Mark paid');
-must(m5.some((x) => x.type === 'hold' && x.t === 'Weekend R. · games held until today 3 PM' && x.d === 'Deposit not paid yet' && x.btns[0].label === 'Hold longer' && x.btns[0].href === card(reqB.key)), `Money lacks the hold ending today: ${JSON.stringify(titles(m5))}`);
+must(m5.some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · held until today 3 PM' && x.d === 'Invoice not sent yet' && x.btns.map((b) => b.label).join() === 'Hold longer,Open card' && x.btns[0].solid && x.btns.every((b) => b.href === card(reqB.key))), `Money lacks the hold ending today: ${JSON.stringify(titles(m5))}`);
 must(m5.some((x) => x.type === 'overdue' && /^Ollie O\. · games not returned yet$/.test(x.t)), 'Money lacks the overdue return');
 must(m5.findIndex((x) => x.type === 'owed') < m5.findIndex((x) => x.type === 'hold') && m5.findIndex((x) => x.type === 'hold') < m5.findIndex((x) => x.type === 'overdue'), 'Money is not balances, then holds, then returns');
+// Every unpaid hold is in Money (owner, 20 Oct 2026), not only one ending today: a later end
+// time says its day; a hold kept by hand says so.
 await run("UPDATE holds SET until = '2026-10-21 20:00:00' WHERE request_key = ?1", reqB.key);
-must(!(await T.todoData(db, TODAY, NOW)).sections[5].some((x) => x.type === 'hold'), 'a hold ending tomorrow is in Money');
-await run("UPDATE holds SET until = '2026-10-20 20:00:00' WHERE request_key = ?1", reqB.key);
+must((await T.todoData(db, TODAY, NOW)).sections[5].filter((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · held until Wed 21 Oct 3 PM').length === 1, 'a hold ending tomorrow is not in Money as waiting for deposit (with its day)');
+await run("UPDATE holds SET by_hand = 1, until = NULL WHERE request_key = ?1", reqB.key);
+must((await T.todoData(db, TODAY, NOW)).sections[5].some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · held by hand'), 'a hold kept by hand is not in Money as waiting for deposit');
+await run("UPDATE holds SET until = '2026-10-20 20:00:00', by_hand = 0 WHERE request_key = ?1", reqB.key);
+
+// ---- 3b. Set a time is CONFIRMED jobs only (owner, 20 Oct 2026; the Denisha C. email) ------------
+// reqB: games held Fri 30 Oct pickup / Sat 31 Oct return, invoiced $160 ($110 + $50 deposit), NOT
+// paid, and even "Yes, book it" ticked: still only a hold, so never asked for a time.
+const stBefore = await db.prepare('SELECT * FROM request_status WHERE request_key = ?1').bind(reqB.key).first();
+await run("INSERT INTO invoices (number, customer_name, customer_phone, issue_date, due_date, status, request_key) VALUES ('PNP-T-6', 'Weekend Renter', '901-555-0101', '2026-10-19', '2026-10-29', 'sent', ?1)", reqB.key);
+const inv6 = (await db.prepare("SELECT id FROM invoices WHERE number = 'PNP-T-6'").first()).id;
+await run("INSERT INTO invoice_lines (invoice_id, description, qty, unit_cents, refundable) VALUES (?1, 'Pick 3 bundle', 1, 11000, 0), (?1, 'Refundable damage deposit', 1, 5000, 1)", inv6);
+await run("INSERT INTO request_status (request_key, status, invoice_id) VALUES (?1, 'invoiced', ?2) ON CONFLICT(request_key) DO UPDATE SET status = 'invoiced', invoice_id = ?2", reqB.key, inv6);
+await run("INSERT INTO bookings (request_key, kind, date, customer_name, phone) VALUES (?1, 'rental_pickup', '2026-10-30', 'Weekend Renter', '901-555-0101'), (?1, 'rental_return', '2026-10-31', 'Weekend Renter', '901-555-0101')", reqB.key);
+await markCalled(db, reqB.key, { confirm: true, how: 'test' });
+let h3 = (await T.todoData(db, TODAY, NOW)).sections;
+must(!h3[3].some((x) => x.key === reqB.key), `an invoiced-unpaid HELD rental is in Set a time: ${JSON.stringify(titles(h3[3]))}`);
+const wait = h3[5].filter((x) => x.type === 'hold' && x.key === reqB.key);
+must(wait.length === 1 && wait[0].t === 'Weekend R. · Waiting for deposit · held until today 3 PM' && wait[0].d === '$160 due on the invoice' && wait[0].due === 16000 && wait[0].btns.map((b) => b.label).join() === 'Hold longer,Open card', `an invoiced-unpaid held rental is not in Money as waiting for deposit with its amount due: ${JSON.stringify(wait)}`);
+// Already in Money (its invoice is due today): listed once, as owed, never twice.
+await run("UPDATE invoices SET due_date = ?2 WHERE id = ?1", inv6, TODAY);
+h3 = (await T.todoData(db, TODAY, NOW)).sections;
+must(h3[5].filter((x) => x.key === reqB.key).length === 1 && h3[5].some((x) => x.key === reqB.key && x.type === 'owed'), `a held rental already listed in Money is listed twice: ${JSON.stringify(titles(h3[5]))}`);
+await run("UPDATE invoices SET due_date = '2026-10-29' WHERE id = ?1", inv6);
+// Deposit paid ("Mark deposit received": the payment, deposit_paid, the hold confirmed): now booked,
+// and with no time it IS in Set a time, and no longer waiting in Money.
+await run("INSERT INTO payments (invoice_id, amount_cents, received_on, method, note, kind) VALUES (?1, 8000, '2026-10-20', 'zelle', 'deposit', 'payment')", inv6);
+await run("UPDATE invoices SET status = 'deposit_paid' WHERE id = ?1", inv6);
+await run("UPDATE request_status SET status = 'deposit_paid' WHERE request_key = ?1", reqB.key);
+must(await confirmHold(db, reqB.key, 'test'), 'confirmHold did not confirm the held rental');
+h3 = (await T.todoData(db, TODAY, NOW)).sections;
+must(JSON.stringify(h3[3].filter((x) => x.key === reqB.key).map((x) => x.t)) === JSON.stringify(['Weekend R. · games pickup Fri 30 Oct', 'Weekend R. · games return Sat 31 Oct']), `a deposit-paid rental with no time is not in Set a time: ${JSON.stringify(titles(h3[3]))}`);
+must(!h3[5].some((x) => x.type === 'hold' && x.key === reqB.key), 'a deposit-paid rental still waits for its deposit in Money');
+// Paid but the hold row still says held (money in, hold not yet confirmed): still a hold, not asked.
+await run("UPDATE holds SET state = 'held' WHERE request_key = ?1", reqB.key);
+must(!(await T.todoData(db, TODAY, NOW)).sections[3].some((x) => x.key === reqB.key), 'a rental whose hold is still current is in Set a time');
+// Party: reqA's takedown (Sun 25 Oct, no time) is out until "Yes, book it", then in.
+await markCalled(db, reqA.key, { confirm: true, how: 'test' });
+must((await T.todoData(db, TODAY, NOW)).sections[3].some((x) => x.key === reqA.key && x.t === 'Test R. · party takedown Sun 25 Oct'), 'a CONFIRMED party job with no time is not in Set a time');
+await undoCalled(db, reqA.key);
+must(!(await T.todoData(db, TODAY, NOW)).sections[3].some((x) => x.key === reqA.key), 'a party job whose "Yes, book it" was taken back is still in Set a time');
+// Restore reqB for the sections below.
+await undoCalled(db, reqB.key);
+await run("DELETE FROM bookings WHERE request_key = ?1", reqB.key);
+await run("DELETE FROM payments WHERE invoice_id = ?1", inv6);
+await run("DELETE FROM invoice_lines WHERE invoice_id = ?1", inv6);
+await run("DELETE FROM invoices WHERE id = ?1", inv6);
+await run("DELETE FROM request_status WHERE request_key = ?1", reqB.key);
+if (stBefore) await run('INSERT INTO request_status (request_key, status, invoice_id, archived_at, prev_status, job_done_at) VALUES (?1, ?2, ?3, ?4, ?5, ?6)', stBefore.request_key, stBefore.status, stBefore.invoice_id, stBefore.archived_at, stBefore.prev_status, stBefore.job_done_at);
+await run("UPDATE holds SET state = 'held', until = '2026-10-20 20:00:00', by_hand = 0 WHERE request_key = ?1", reqB.key);
 // Tomorrow.
 must(JSON.stringify(titles(d.tomorrowJobs)) === JSON.stringify(['3 PM · Tia T. · grazing setup']), `Tomorrow is ${JSON.stringify(titles(d.tomorrowJobs))}`);
 must(d.week === null, 'a Tuesday email carries Your week');
