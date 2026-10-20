@@ -38,10 +38,12 @@ const TE = await mod('functions/_lib/todo-email.mjs');
 const DL = await mod('functions/_lib/delivery.mjs');
 const SERVICES = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8'));
 const FEE = Math.round(Number(SERVICES.invoiceQuickAdds.deliveryFee) * 100);
-const text = (h) => String(h).replace(/<style>[\s\S]*?<\/style>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ');
+// What shows on the card: styles and the folded quick-texts menu (<template>, validate:admin-quick-texts) are not on screen.
+const text = (h) => String(h).replace(/<style>[\s\S]*?<\/style>/g, ' ').replace(/<template[^>]*>[\s\S]*?<\/template>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ');
 const at = (h, x) => h.indexOf(x);
 const top = (c) => c.slice(0, at(c, 'data-details'));
-const more = (c) => c.slice(at(c, 'data-details'));
+// "More" runs from its summary to the quick-texts menu, which sits after it, outside it (or to the end).
+const more = (c) => { const m = c.slice(at(c, 'data-details')); const q = m.indexOf('<template data-qt-menu>'); return q < 0 ? m : m.slice(0, q); };
 const count = (h, re) => (h.match(re) || []).length;
 
 // ---- fixtures: a rental (deposit due, held, sent invoice with a refundable deposit) ----------
@@ -69,6 +71,7 @@ const msgs = { confirm: { sms: { href: 'sms:9015550100?&body=ok' }, canEmail: tr
 const cardOpts = { st: { status: 'invoiced', invoice_id: 4 }, inv: sentInv, kinds: ['rental_pickup', 'rental_return'], bookings: [{ kind: 'rental_pickup', date: '2026-10-29', time: null }, { kind: 'rental_return', date: '2026-10-31', time: null }],
   sched: { date: '2026-10-29' }, today: '2026-10-20', notes, events, hold, holdHtml, msgs, extras: '<p class="money ok" data-confirm-sent>Confirmation email sent ✓</p>', referrers: { REF1: 'Ada A.' } };
 const c1 = V.requestCard(den, cardOpts);
+must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.trimEnd().endsWith('</template>\n    </article>'), 'the quick-texts menu is not the last thing on the card, after More');
 
 // ---- A. always visible -------------------------------------------------------------------
 {

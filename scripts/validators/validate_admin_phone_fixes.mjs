@@ -13,8 +13,8 @@
  *     editing tools (<details>, shut unless a save message is showing);
  *  3. the tiles count units (games: the unit bookings and bundles count; Color Stack's 1 set is 2), live from the inventory + bookings: adding an item, bumping a
  *     quantity and switching an item to Not offered all move the totals; Not offered counts in neither;
- *  4. every request card with a phone number has 📞 Call (tel:) and 💬 Text (sms:, blank body) in
- *     its header, and a card without one has neither;
+ *  4. every request card with a phone number has 📞 Call (tel:) and 💬 Text ▾ (sms:, blank body,
+ *     opening the quick-texts menu the card carries) in its header, and a card without one has neither;
  *  5. Open ID photo never opens a new tab: it opens over the card (the viewer with ✕ Close), and
  *     without JS a same-tab page with the admin bar, the photo from the private no-store route,
  *     and Back to the card;
@@ -182,11 +182,14 @@ for (const c of cards) {
   const head = c.slice(0, c.indexOf('</div>', c.indexOf('class="schead"')) + 6);
   if (digits.length >= 7) {
     withPhone += 1;
-    must(/<div class="qa" data-quick-contact><a href="tel:[\d+]+" data-card-call[^>]*>&#128222; Call<\/a><a href="sms:[\d+]+" data-card-text[^>]*>&#128172; Text<\/a><\/div>/.test(head), `card ${req.name}: no 📞 Call / 💬 Text in the header`);
+    // 💬 Text ▾ opens the quick texts (validate:admin-quick-texts); without the script it stays a blank sms: link.
+    must(/<div class="qa" data-quick-contact><a href="tel:[\d+]+" data-card-call[^>]*>&#128222; Call<\/a><a href="sms:[\d+]+" data-card-text data-qt-open aria-haspopup="dialog" aria-expanded="false"[^>]*>&#128172; Text ▾<\/a><\/div>/.test(head), `card ${req.name}: no 📞 Call / 💬 Text ▾ in the header`);
+    must(/<template data-qt-menu>/.test(c), `card ${req.name}: the 💬 Text ▾ button has no quick-texts menu`);
     must(!/sms:[^"]*body=/.test(head), `card ${req.name}: the Text link carries a ready-made body`);
   } else {
     withoutPhone += 1;
     must(!/data-quick-contact/.test(c), `card ${req.name} (no phone): shows Call / Text`);
+    must(!/data-qt-menu/.test(c), `card ${req.name} (no phone): carries a quick-texts menu`);
   }
 }
 must(withPhone >= 2, `only ${withPhone} cards with a phone number checked`);

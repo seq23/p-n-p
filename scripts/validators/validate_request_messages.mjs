@@ -92,7 +92,11 @@ must((await ev(a.request_key)).filter((e) => /^Hold extended to .* by Valerie$/.
     && /<button class="rescancel" type="button" data-res-cancel data-help="hold\.cancel"[^>]*>Cancel<\/button>/.test(one)
     && card.includes('window.__pnpRes'),
   'the card does not carry the approved Reserve their games longer control (two-line button, Held until <end>, 3 more days + Save, live New date for +3 days, Cancel) after four extensions (it must be repeatable)');
-  must(!/Hold longer|Give them more time|\+24 hours|\+48 hours|Hold until then|Keep holding|>Hold<\/button>|holdlonger|[Gg]ames held until|On hold until/.test(card), 'the Requests page still shows "Hold longer", "Games held until" or an old 24/48 h choice');
+  // The quick-texts menus (validate:admin-quick-texts) carry the approved text "Reminder: games held
+  // until…" as a text to send; outside those menus the page may never say it.
+  const qtMenus = card.match(/<template data-qt-menu>[\s\S]*?<\/template>/g) || [];
+  must(qtMenus.length > 0 && qtMenus.every((m) => !/Hold longer|Give them more time|\+24 hours|\+48 hours|Hold until then|Keep holding|>Hold<\/button>|holdlonger|On hold until/.test(m) && (m.match(/[Gg]ames held until/g) || []).length === (m.match(/Reminder: games held until…/g) || []).length && (m.match(/<b>Reminder: games held until…<\/b>/g) || []).length <= 1), 'a quick-texts menu says an old hold wording, or "games held until" outside the one approved quick text');
+  must(!/Hold longer|Give them more time|\+24 hours|\+48 hours|Hold until then|Keep holding|>Hold<\/button>|holdlonger|[Gg]ames held until|On hold until/.test(card.replace(/<template data-qt-menu>[\s\S]*?<\/template>/g, '')), 'the Requests page still shows "Hold longer", "Games held until" or an old 24/48 h choice');
   // The live "New date" line formats exactly like the server, across a daylight-saving change.
   const js = VM.RESERVE_JS;
   const fsrc = (/function words\(ms\)\{[\s\S]*?return day\+', '\+t;\}/.exec(js) || [''])[0];

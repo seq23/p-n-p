@@ -714,8 +714,30 @@ Guarded by `validate:admin-phone-fixes` (scripts/validators/validate_admin_phone
 - **Open ID photo** opens over the card (full-screen viewer, big ✕ Close, Escape, tap outside or swipe
   down; focus goes back to the link). The image is still the private no-store `/admin/requests/id`.
   Without JS the link is a same-tab page, `/admin/requests/id/view`, with the top bar and Back to the card.
-- **📞 Call / 💬 Text** sit top right of every request card at every step when a phone number exists
-  (`quickContact`): `tel:` and a blank `sms:` from her own phone. No paid SMS.
+- **📞 Call / 💬 Text ▾** sit top right of every request card at every step when a phone number exists
+  (`quickContact`): `tel:`, and Text ▾ opens the quick texts below (without the page script, a blank `sms:`). No paid SMS.
+
+## Quick texts behind 💬 Text ▾ (owner-approved mock-up, 20 Oct 2026)
+Code: `functions/_lib/quick-texts.mjs` (the words, the stage -> best 3 rule, the filled-in values),
+`functions/_lib/views-quick-texts.mjs` (the menu + page script); pinned by `validate:admin-quick-texts`.
+- **💬 Text ▾** (top right of every card with a phone number) opens the quick texts. Phone: a bottom
+  sheet, "Text <first name>" + the number and **✕ Close**. Laptop (900 px and wider): a panel under
+  the button, the list left and the chosen text right.
+- Order: **✏️ Blank text** ("Hi <first>! " + the sign-off), then **Best right now (<where the job is>)**:
+  3 green texts picked by the card's current step (games out: Set return time, Return is today,
+  I'm here; porch up: Set takedown time, We're here, Running late), then **All texts for this job ▾**
+  (folded on a phone): Game rentals (rentals) or Porch, party and grazing (other jobs), Any job,
+  Booking and money (It's confirmed, games-held reminder (rentals only), Payment reminder, Thank you;
+  the old buttons in the steps stay where they are).
+- Tapping a text shows it filled in from the request (first name, day, return day, amount, deposit,
+  items, hold end, invoice number) in a box she can change; anything not on file reads **"__"** and
+  the hint says "Fill in the blank before you send." Every text ends on a new line
+  "— Valerie at Porch & Party".
+- **Open in Messages to send** (phone; laptop: "Open in Messages (Mac linked to iPhone)", with
+  **Copy text** first) opens an sms: link built from the words in the box at that moment. Free: she
+  presses Send in Messages. The card gets a history line **"Texted: <title>"** (`/admin/msg/tapped`,
+  `quick=<id>`; It's confirmed, the hold reminder and Thank you also tick their older "texted" mark)
+  and she stays on the same card. No phone number: no Text button, as before.
 
 ## Settings (calm layout, owner 19 Oct 2026)
 Short sections, each opening with one sentence, folded on a phone and open on a computer

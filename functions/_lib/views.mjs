@@ -20,6 +20,7 @@ import SERVICES_DATA from '../../data/offers/services.json';
 import { isPhone, rentalDates, rentalSpanWords, rentalLength } from './phone-requests.mjs';
 import { lateWords, tiers, stepWords } from './missed.mjs';
 import { dayWords } from './reminders.mjs';
+import { quickMenu, QT_CSS, QT_JS } from './views-quick-texts.mjs';
 
 const CSS = `
 :root{--cream:#faf7f2;--ink:#3b302a;--accent:#b85f40;--line:#e3d8cb;--muted:#5f5148;--card:#fff;--ok:#3f6b3a;--warn:#8a5212}
@@ -610,12 +611,13 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .tdsub{font-weight:600;color:#92400e}.tdsub.done{color:inherit;font-weight:400}.tdbox{margin:10px 0}.tdbox .secrow{margin-top:8px}.linkbtn{background:none;border:0;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}
 `;
 
-// 📞 Call and 💬 Text in the top right of every request card, at every step (owner, 20 Oct 2026),
-// only when a phone number exists. Text is a free sms: link with a blank body (no paid SMS).
+// 📞 Call and 💬 Text ▾ in the top right of every request card, at every step (owner, 20 Oct 2026),
+// only when a phone number exists. Text ▾ opens the quick texts (views-quick-texts.mjs, owner-
+// approved 20 Oct 2026); without the page script it is still a free blank sms: link (no paid SMS).
 export function quickContact(r) {
   const n = String((r && r.phone) || '').replace(/[^\d+]/g, '');
   if (n.replace(/\D/g, '').length < 7) return '';
-  return `<div class="qa" data-quick-contact><a href="tel:${esc(n)}" data-card-call${tip('card.quickCall')}>&#128222; Call</a><a href="sms:${esc(n)}" data-card-text${tip('card.quickText')}>&#128172; Text</a></div>`;
+  return `<div class="qa" data-quick-contact><a href="tel:${esc(n)}" data-card-call${tip('card.quickCall')}>&#128222; Call</a><a href="sms:${esc(n)}" data-card-text data-qt-open aria-haspopup="dialog" aria-expanded="false"${tip('card.quickText')}>&#128172; Text ▾</a></div>`;
 }
 
 const CARD_LABEL = {
@@ -1209,6 +1211,7 @@ export function requestCard(r, o) {
         ${booked}${moneyG}${detailsG}${historyG}
         ${moreRow}
       </details>
+      ${quickMenu({ r, bookings: bk, inv, hold, dates: services.includes('rentals') ? rentalDates(r, bk) : {}, services, current: archived ? 'finished' : s.current, rk })}
     </article>`;
 }
 
@@ -1432,7 +1435,7 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
   // Phone first (owner, 19 Oct 2026): the request list comes straight after the heading and the
   // one-line week card; tomorrow's reminders are one tappable line at the bottom; the three-step
   // panel sits under the list on a phone and stays on top on a wide screen (CSS order, .rqflow).
-  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}${CUST_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}${CUST_CSS}${QT_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
 ${setupBanner(missingPayment)}
     <div class="rqgrid">${customerSpine(shown)}<div class="rqcol"><div class="rqflow"><div class="rqpanel">${requestsPanel(folderUrl)}</div>
     <div class="rqmain"><h1>Requests</h1>${extraTop}${week}${holdsBox}${err}
@@ -1443,7 +1446,7 @@ ${setupBanner(missingPayment)}
     ${idsBox}</div></div>
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
-    <script>${DASH_JS}${NEW_JS}${CUST_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { screen: '', panelWide: true, spine: true });
+    <script>${DASH_JS}${NEW_JS}${CUST_JS}${QT_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { screen: '', panelWide: true, spine: true });
 }
 
 export function invoicesPage({ invoices }) {
