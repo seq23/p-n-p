@@ -292,6 +292,23 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
   // Hold controls and the thank-you box on a card carry no big button of their own.
   const hc = VM.holdControls({ name: 'H', untilMs: Date.now() + 7200000, items: 'Giant Uno', phone: '901-555-0100' }, { rk: 'x', sms: sms('r'), canEmail: true, depositTarget: null, compact: true });
   must(bigButtons(hc) === 0 && /data-msg="holdEnding"><a class="msglink"[^>]*>Text a reminder</.test(hc), 'hold controls on a card carry a big button (or lose Text a reminder)');
+  // "Wait for the deposit" on a held rental (owner-approved sample, 20 Oct 2026): "Games reserved
+  // until Fri 23 Oct, 11:59 PM" + the Reserve their games longer control; reserved by hand (no end
+  // date) shows that and the same control (Save sets now + N days). Never "Hold longer".
+  {
+    const end = Date.parse('2026-10-24T04:59:00Z');
+    const dep = (hold) => V.requestCard(wr, { st: { status: 'invoiced' }, inv: bal('sent', 0), kinds: ['rental_pickup', 'rental_return'], bookings: [{ kind: 'rental_pickup', date: '2026-10-30', time: null }], today: '2026-10-20', msgs, hold });
+    const t = dep({ state: 'held', by_hand: 0, untilMs: end });
+    const nb = (t.match(/<section class="nextbox" data-next-step="deposit">[\s\S]*?<\/section>/) || [''])[0];
+    must(/<p class="holdline" data-hold-line>Games reserved until Fri 23 Oct, 11:59 PM<\/p>/.test(nb) && /data-reserve-longer data-until-ms="\d+"><summary class="btn ghost ressum"[^>]*><b>Reserve their games longer<\/b><span class="ressub">Give more time to pay<\/span><\/summary>/.test(nb)
+      && nb.includes('data-res-current>Held until Fri 23 Oct, 11:59 PM</p>') && nb.includes(`data-res-new>New date: <b>${VM.reservedWords(VM.reserveNewEnd(end, 3))}</b>`) && /name="days" value="3"[\s\S]*>more days<\/label>[\s\S]*>Save<\/button>[\s\S]*>Cancel<\/button>/.test(nb)
+      && !/Hold longer|[Gg]ames held until/.test(t), 'the Wait for the deposit step does not say "Games reserved until Fri 23 Oct, 11:59 PM" with the Reserve their games longer control (or still says Hold longer / Games held until)');
+    must(VM.reservedWords(end) === 'Fri 23 Oct, 11:59 PM' && VM.reservedWords(Date.parse('2026-10-27T04:59:00Z')) === 'Mon 26 Oct, 11:59 PM', 'reserved-until dates are not written like "Fri 23 Oct, 11:59 PM" in Memphis time');
+    const bh = dep({ state: 'held', by_hand: 1, untilMs: NaN });
+    const nb2 = (bh.match(/<section class="nextbox" data-next-step="deposit">[\s\S]*?<\/section>/) || [''])[0];
+    must(/<p class="holdline" data-hold-line>Reserved by hand \(no end date\)<\/p>/.test(nb2) && /data-reserve-longer data-until-ms="">/.test(nb2) && nb2.includes('data-res-current>Reserved by hand (no end date)</p>') && /data-res-new>New date: <b>/.test(nb2), 'a hold reserved by hand (no end date) does not say so on the deposit step, or has no Reserve their games longer control');
+    must(!/id="(hd[^"]*)"[\s\S]*id="\1"/.test(t), 'two Reserve their games longer boxes on one card share an id');
+  }
   must(bigButtons(VM.thankYouBox({ thankyouEmailedAt: '' }, { rk: 'x', sms: sms('t'), canEmail: true })) === 0, 'the thank-you box carries a big button');
 }
 must(/data-week-counts|data-filters/.test(html) && (html.match(/data-filter="/g) || []).length === 6, 'the six filter chips are missing');

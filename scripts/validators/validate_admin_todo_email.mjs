@@ -7,7 +7,10 @@
  *     no time within 2 days), sections shown only when non-empty and always in the order 1-5, each
  *     with its "why" sentence from the mock.
  *  3. Money: due today or late only; the refundable damage deposit is never owed; every unpaid
- *     rental hold is "Waiting for deposit · held until <time>" with the invoice's amount due.
+ *     rental hold is "Waiting for deposit · Games reserved until <time>" with the invoice's amount due
+ *     and "Reserve their games longer" (never "Hold longer") as its link.
+ *  2b. The sections SHOWN are numbered 1, 2, 3 ... with no gap (owner, 20 Oct 2026): an empty
+ *     middle section does not leave 1, 2, 3, 5 in the HTML marks or the plain text.
  *  3b. Set a time is CONFIRMED jobs only (owner, 20 Oct 2026): an invoiced-unpaid held rental is
  *     NOT in it (it is in Money); a deposit-paid rental with no time IS; an unconfirmed party job
  *     is not, the same job after "Yes, book it" is.
@@ -117,15 +120,21 @@ must(!m5.some((x) => /Fay F/.test(x.t)), 'Money lists a balance due tomorrow');
 must(!m5.some((x) => /Dee D|Sam R/.test(x.t)), 'Money lists a damage deposit as owed (deposits are never owed)');
 const owedRow = m5.find((x) => /Alex S/.test(x.t));
 must(owedRow && owedRow.btns.some((b) => b.label === 'Text a reminder' && /^sms:/.test(b.href)) && owedRow.btns.some((b) => b.label === 'Mark paid' && b.href === `/admin/invoices/${inv['PNP-T-1']}`), 'the owed line lacks Text a reminder / Mark paid');
-must(m5.some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · held until today 3 PM' && x.d === 'Invoice not sent yet' && x.btns.map((b) => b.label).join() === 'Hold longer,Open card' && x.btns[0].solid && x.btns.every((b) => b.href === card(reqB.key))), `Money lacks the hold ending today: ${JSON.stringify(titles(m5))}`);
+must(m5.some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && x.d === 'Invoice not sent yet' && x.btns.map((b) => b.label).join() === 'Reserve their games longer,Open card' && x.btns[0].solid && x.btns.every((b) => b.href === card(reqB.key))), `Money lacks the hold ending today: ${JSON.stringify(titles(m5))}`);
 must(m5.some((x) => x.type === 'overdue' && /^Ollie O\. · games not returned yet$/.test(x.t)), 'Money lacks the overdue return');
+{
+  // The rendered email with that hold in it: the new words, the new link text, nothing old.
+  const hm = T.renderTodo(await T.todoData(db, TODAY, NOW));
+  must(/Weekend R\. · Waiting for deposit · Games reserved until today 3 PM<\/div>[\s\S]*?>Reserve their games longer<\/a>/.test(hm.html) && hm.text.includes('- Weekend R. · Waiting for deposit · Games reserved until today 3 PM (Invoice not sent yet): https://porchandparty901.com/admin/')
+    && !/Hold longer|[Hh]eld until|held by hand/.test(hm.html) && !/Hold longer|[Hh]eld until|held by hand/.test(hm.text), 'the rendered email still says "Hold longer" / "held until", or the hold line lacks its Reserve their games longer link');
+}
 must(m5.findIndex((x) => x.type === 'owed') < m5.findIndex((x) => x.type === 'hold') && m5.findIndex((x) => x.type === 'hold') < m5.findIndex((x) => x.type === 'overdue'), 'Money is not balances, then holds, then returns');
 // Every unpaid hold is in Money (owner, 20 Oct 2026), not only one ending today: a later end
 // time says its day; a hold kept by hand says so.
 await run("UPDATE holds SET until = '2026-10-21 20:00:00' WHERE request_key = ?1", reqB.key);
-must((await T.todoData(db, TODAY, NOW)).sections[5].filter((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · held until Wed 21 Oct 3 PM').length === 1, 'a hold ending tomorrow is not in Money as waiting for deposit (with its day)');
+must((await T.todoData(db, TODAY, NOW)).sections[5].filter((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · Games reserved until Wed 21 Oct 3 PM').length === 1, 'a hold ending tomorrow is not in Money as waiting for deposit (with its day)');
 await run("UPDATE holds SET by_hand = 1, until = NULL WHERE request_key = ?1", reqB.key);
-must((await T.todoData(db, TODAY, NOW)).sections[5].some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · held by hand'), 'a hold kept by hand is not in Money as waiting for deposit');
+must((await T.todoData(db, TODAY, NOW)).sections[5].some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · Reserved by hand (no end date)'), 'a hold kept by hand is not in Money as waiting for deposit');
 await run("UPDATE holds SET until = '2026-10-20 20:00:00', by_hand = 0 WHERE request_key = ?1", reqB.key);
 
 // ---- 3b. Set a time is CONFIRMED jobs only (owner, 20 Oct 2026; the Denisha C. email) ------------
@@ -141,7 +150,7 @@ await markCalled(db, reqB.key, { confirm: true, how: 'test' });
 let h3 = (await T.todoData(db, TODAY, NOW)).sections;
 must(!h3[3].some((x) => x.key === reqB.key), `an invoiced-unpaid HELD rental is in Set a time: ${JSON.stringify(titles(h3[3]))}`);
 const wait = h3[5].filter((x) => x.type === 'hold' && x.key === reqB.key);
-must(wait.length === 1 && wait[0].t === 'Weekend R. · Waiting for deposit · held until today 3 PM' && wait[0].d === '$160 due on the invoice' && wait[0].due === 16000 && wait[0].btns.map((b) => b.label).join() === 'Hold longer,Open card', `an invoiced-unpaid held rental is not in Money as waiting for deposit with its amount due: ${JSON.stringify(wait)}`);
+must(wait.length === 1 && wait[0].t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && wait[0].d === '$160 due on the invoice' && wait[0].due === 16000 && wait[0].btns.map((b) => b.label).join() === 'Reserve their games longer,Open card', `an invoiced-unpaid held rental is not in Money as waiting for deposit with its amount due: ${JSON.stringify(wait)}`);
 // Already in Money (its invoice is due today): listed once, as owed, never twice.
 await run("UPDATE invoices SET due_date = ?2 WHERE id = ?1", inv6, TODAY);
 h3 = (await T.todoData(db, TODAY, NOW)).sections;
@@ -223,6 +232,16 @@ must(/Open the admin<\/a> · This email comes every day at 7 AM\./.test(msg.html
 must((msg.html.match(/data-hi/g) || []).length === d.sections[2].filter((x) => x.hi).length + d.sections[3].filter((x) => x.hi).length, 'highlighted items in the HTML do not match the highlight rules');
 must(/max-width:600px/.test(msg.html) && !/<table/.test(msg.html), 'the email is not one 600px column without tables (outside Monday)');
 must(msg.text.length > 200 && /1\. TODAY'S JOBS[\s\S]*2\. CALL THESE PEOPLE BACK[\s\S]*3\. SET A TIME[\s\S]*4\. BOOK IT OR DECIDE[\s\S]*5\. MONEY[\s\S]*TOMORROW, WED 21 OCT/.test(msg.text), 'the plain text alternative lacks the sections in order');
+must([...msg.html.matchAll(/data-num="(\d)"/g)].map((x) => x[1]).join() === '1,2,3,4,5' && /data-section="5" data-num="5"><div[^>]*><span[^>]*>5<\/span>/.test(msg.html), 'with all five sections the marks are not 1-5');
+// ---- 2b. an empty middle section leaves no gap in the numbers (owner, 20 Oct 2026) -------------
+{
+  const gap = T.renderTodo({ ...d, sections: { ...d.sections, 4: [] } });
+  const marks = [...gap.html.matchAll(/data-section="(\d)" data-num="(\d)"><div[^>]*><span[^>]*>(\d)<\/span>/g)].map((x) => `${x[1]}:${x[2]}:${x[3]}`);
+  must(marks.join() === '1:1:1,2:2:2,3:3:3,5:4:4', `with section 4 empty the HTML marks read ${marks} (want 1, 2, 3, 4 with Money as 4)`);
+  must(/1\. TODAY'S JOBS[\s\S]*2\. CALL THESE PEOPLE BACK[\s\S]*3\. SET A TIME[\s\S]*\n4\. MONEY\n/.test(gap.text) && !/^5\. /m.test(gap.text) && !/BOOK IT OR DECIDE/.test(gap.text), 'with section 4 empty the plain text is not numbered 1, 2, 3, 4 (MONEY as 4)');
+  const two = T.renderTodo({ ...d, sections: { ...d.sections, 1: [], 3: [] } });
+  must([...two.html.matchAll(/data-num="(\d)"/g)].map((x) => x[1]).join() === '1,2,3' && /\n1\. CALL THESE PEOPLE BACK\n[\s\S]*\n2\. BOOK IT OR DECIDE\n[\s\S]*\n3\. MONEY\n/.test(two.text), 'with sections 1 and 3 empty the shown sections are not numbered 1, 2, 3');
+}
 must([...msg.html.matchAll(/href="([^"]+)"/g)].every((x) => /^(tel:|sms:|https:\/\/porchandparty901\.com\/admin\/)/.test(x[1].replace(/&amp;/g, '&'))), 'a link goes somewhere other than /admin, tel: or sms:');
 // ---- 7. no PII -------------------------------------------------------------------------------------
 const visible = msg.html.replace(/<a [^>]*href="[^"]*"/g, '<a').replace(/<[^>]+>/g, ' ');
@@ -248,6 +267,7 @@ for (const p of people) {
   const cm2 = T.renderTodo(await T.todoData(c.db, '2026-10-21', Date.parse('2026-10-21T12:00:00Z')));
   must(!/data-all-clear/.test(cm2.html) && /Tomorrow, Thu 22 Oct[\s\S]*9 AM · Quinn Q\. · party setup/.test(cm2.html) && !/data-section/.test(cm2.html), 'a day with only a job tomorrow is "All clear" or shows empty sections');
   const quiet = T.renderTodo({ ...cd, tomorrowJobs: [], sections: { ...cd.sections, 5: [{ svc: 'rentals', t: 'X Y. · games not returned yet', d: 'Due back Mon 19 Oct', btns: [] }] } });
+  must(/data-section="5" data-num="1"><div[^>]*><span[^>]*>1<\/span>/.test(quiet.html) && /\n1\. MONEY\n/.test(quiet.text) && !/5\. MONEY/.test(quiet.text), 'Money alone is not numbered 1');
   must(/Nothing booked\./.test(quiet.html) && /data-section="5"/.test(quiet.html) && !/data-section="[1-4]"/.test(quiet.html), 'an empty Tomorrow does not read "Nothing booked." or empty sections show');
   must(!/<hr/.test(quiet.html.split('data-section="5"')[0].split('</h1>')[1] || ''), 'a divider sits above the first section shown');
 }

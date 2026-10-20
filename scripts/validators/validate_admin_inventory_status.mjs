@@ -5,7 +5,7 @@
  * Fails unless:
  *  1. every item's status is computed from the bookings across the whole rental span (pickup day
  *     through return day): In · Out: <First L.>, back <Tue 20 Oct> · N of M out (multi-quantity) ·
- *     On hold until <time> (held, unpaid) · Next booked: <range> · Not offered (removed by hand,
+ *     Reserved until <time> (held, unpaid; "Reserved by hand (no end date)" by hand) · Next booked: <range> · Not offered (removed by hand,
  *     never In / Out, distinct from out); overdue stays out; a checked-in return frees it;
  *  2. the real production case (19 Oct 2026, hand-typed words with extra words) is out today and
  *     the 30-31 Oct rental is "Next booked"; names match in any case / punctuation / spacing;
@@ -85,14 +85,14 @@ const two = [...one, ...bk('k2', 'Cy Dee', '2026-11-04', '2026-11-06', 'giant co
 must(statusOn(two, '2026-11-05')['giant-color-stack'].label === '2 of 2 out, back Fri 6 Nov', `both sets out reads "${statusOn(two, '2026-11-05')['giant-color-stack'].label}"`);
 const yard = [...bk('k3', 'Eve Fox', '2026-11-05', '2026-11-07', 'Whole Yard bundle')];
 must(statusOn(yard, '2026-11-06')['giant-color-stack'].label === '2 of 2 out, back Sat 7 Nov', 'a Whole Yard (both sets) does not read 2 of 2 out');
-// Holds: held (unpaid) -> "On hold until <Memphis time>"; by hand -> "until you decide".
+// Holds: held (unpaid) -> "Reserved until <Memphis time>"; by hand -> "Reserved by hand (no end date)".
 const held = [...bk('h1', 'Gia Holt', '2026-10-19', '2026-10-20', 'Cornhole set')];
 const hTimed = statusOn(held, '2026-10-19', { holds: [{ request_key: 'h1', state: 'held', until: '2026-10-20 20:40:00' }] });
-must(hTimed.cornhole.state === 'hold' && hTimed.cornhole.label === 'On hold until Tue 20 Oct, 3:40 PM', `a held rental reads "${hTimed.cornhole.label}", not "On hold until Tue 20 Oct, 3:40 PM" (Memphis time)`);
+must(hTimed.cornhole.state === 'hold' && hTimed.cornhole.label === 'Reserved until Tue 20 Oct, 3:40 PM', `a held rental reads "${hTimed.cornhole.label}", not "Reserved until Tue 20 Oct, 3:40 PM" (Memphis time)`);
 const hHand = statusOn(held, '2026-10-19', { holds: [{ request_key: 'h1', state: 'held', until: null, by_hand: 1 }] });
-must(hHand.cornhole.label === 'On hold until you decide', 'a hold kept by hand does not say "On hold until you decide"');
+must(hHand.cornhole.label === 'Reserved by hand (no end date)', 'a hold kept by hand does not say "Reserved by hand (no end date)"');
 const hFuture = statusOn(bk('h2', 'Ike Jay', '2026-10-30', '2026-10-31', 'Cornhole set'), '2026-10-19', { holds: [{ request_key: 'h2', state: 'held', until: null }] });
-must(hFuture.cornhole.state === 'in' && hFuture.cornhole.next.words === 'Next booked: Fri 30 Oct – Sat 31 Oct (on hold)', 'a future held rental is not "Next booked … (on hold)"');
+must(hFuture.cornhole.state === 'in' && hFuture.cornhole.next.words === 'Next booked: Fri 30 Oct – Sat 31 Oct (reserved)', 'a future held rental is not "Next booked … (reserved)"');
 must(statusOn(held, '2026-10-19', { holds: [{ request_key: 'h1', state: 'confirmed', until: null }] }).cornhole.state === 'out', 'a confirmed hold still reads as on hold');
 // Not offered: removed by hand -> Not offered, even with a booking out today; never In / Out.
 const removedData = JSON.parse(JSON.stringify(DATA));
@@ -151,7 +151,7 @@ for (const slug of ['giant-uno', 'grab-the-mic', 'inflatable-movie-screen', 'pro
 }
 must((pill(card('giant-color-stack')) || {}).label === '1 of 2 out', '/admin/inventory: Giant Color Stack is not "1 of 2 out"');
 const hp = pill(card('cornhole'));
-must(hp && hp.state === 'hold' && /^On hold until \w{3} \d{1,2} \w{3}, \d{1,2}:40 PM$/.test(hp.label), `/admin/inventory: the held Cornhole set shows ${JSON.stringify(hp)}`);
+must(hp && hp.state === 'hold' && /^Reserved until \w{3} \d{1,2} \w{3}, \d{1,2}:40 PM$/.test(hp.label), `/admin/inventory: the held Cornhole set shows ${JSON.stringify(hp)}`);
 must(/data-inv-next>Next booked: /.test(card('giant-connect-four')) && (pill(card('giant-connect-four')) || {}).label === 'In', '/admin/inventory: Giant Connect Four is not In with Next booked');
 const removedCards = T.items.filter((i) => i.removed).map((i) => card(i.slug));
 must(removedCards.length && removedCards.every((c) => /data-state="off">Not offered</.test(c) && /Bring back/.test(c) && /data-inv-now="off"/.test(c)), '/admin/inventory: Not offered items lack the grey Not offered pill or Bring back');
@@ -165,7 +165,7 @@ const det = await get('/admin/inventory/giant-uno');
 must(det.status === 200 && (det.text.match(/data-inv-booking/g) || []).length === 2 && /Tamara C\.[^<]*out now/.test(det.text) && /Dee C\./.test(det.text), 'the Giant Uno page does not list its two upcoming bookings (out now + next)');
 must(/href="\/admin\/inventory\/giant-uno\/edit"[^>]*>Edit</.test(det.text) && /action="\/admin\/inventory\/giant-uno\/remove"/.test(det.text) && /href="\/admin\/day\/[\d-]+"[^>]*data-help="inv.bookingDay"/.test(det.text), 'the item page lacks Edit, Remove or Open that day');
 const detH = await get('/admin/inventory/cornhole');
-must(/data-hold[^>]*>[\s\S]*?On hold until/.test(detH.text), 'the held booking on the item page does not say On hold until');
+must(/data-hold[^>]*>[\s\S]*?Reserved until/.test(detH.text) && !/On hold until|\(on hold\)/.test(detH.text), 'the held booking on the item page does not say Reserved until (or still says On hold)');
 const detOff = await get(`/admin/inventory/${T.items.find((i) => i.removed).slug}`);
 must(/data-state="off">Not offered</.test(detOff.text) && /\/restore"/.test(detOff.text) && !/\/remove"/.test(detOff.text), 'a Not offered item page lacks Bring back (or offers Remove)');
 // The /request availability answer and the Calendar booking picker use the same matcher.
@@ -181,7 +181,7 @@ for (const [from, to] of [['/admin/settings/inventory', '/admin/inventory'], ['/
 }
 // Help text: every inventory control explained, never "available" as an item status.
 for (const key of ['nav.inventory', 'inv.open', 'inv.openOff', 'inv.bookingDay', 'inv.add', 'set.inventoryLink']) must(HELP[key] && HELP[key].title, `no help text for ${key}`);
-must(/In[\s\S]*Out[\s\S]*1 of 2 out[\s\S]*On hold[\s\S]*Next booked/.test(HELP['inv.open'].more), 'the item help does not explain In, Out, 1 of 2 out, On hold and Next booked');
+must(/In[\s\S]*Out[\s\S]*1 of 2 out[\s\S]*Reserved[\s\S]*Next booked/.test(HELP['inv.open'].more), 'the item help does not explain In, Out, 1 of 2 out, Reserved and Next booked');
 must(!Object.entries(HELP).filter(([k]) => k === 'nav.inventory' || k.startsWith('inv.open') || k === 'inv.bookingDay').some(([, h]) => /availab/i.test(`${h.title} ${h.more}`)), 'Inventory help text uses the word "available"');
 
 // ---- 5. Settings: calm sections, nothing missing --------------------------------------------

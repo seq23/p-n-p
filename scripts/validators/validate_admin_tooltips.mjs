@@ -293,6 +293,19 @@ for (const key of Object.keys(HELP)) {
 for (const key of used) if (!helpHtml.includes(`data-help-entry="${key}"`)) errors.push(`button ${key} is missing from the help page`);
 for (const [key, e] of Object.entries(HELP)) if (e.warn === '' && /delete|void|paid|deposit/i.test(key) && !/no$|undo|unvoid|see/i.test(key)) errors.push(`${key}: a money or delete action has no warning line on the help page`);
 if (!/data-status-meanings/.test(helpHtml)) errors.push('help page lacks "What each status means"');
+// "Hold longer" is gone everywhere (owner-approved sample, 20 Oct 2026): every admin screen and the
+// help page say "Reserve their games longer"; at least one screen here carries the control.
+{
+  let withControl = 0;
+  for (const [p, , r] of pages) {
+    const t = String((r && r.text) || '');
+    if (/Hold longer|Give them more time|On hold until|data-hold-longer/.test(t)) errors.push(`${p} still says "Hold longer" / "Give them more time" / "On hold until"`);
+    if (/data-reserve-longer[\s\S]*?<b>Reserve their games longer<\/b><span class="ressub">Give more time to pay<\/span>[\s\S]*?data-res-new>New date: <b>/.test(t)) withControl += 1;
+  }
+  if (/Hold longer|Give them more time|On hold until/.test(helpHtml)) errors.push('the help page still says "Hold longer" / "Give them more time" / "On hold until"');
+  if (!helpHtml.includes('Reserve their games longer')) errors.push('the help page does not explain Reserve their games longer');
+  if (withControl < 1) errors.push('Rule 0: no admin screen rendered the Reserve their games longer control');
+}
 if (pages.length < 20 || controls < 150) errors.push(`Rule 0: only ${pages.length} screens / ${controls} controls checked`);
 
 if (errors.length) {

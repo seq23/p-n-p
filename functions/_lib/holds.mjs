@@ -30,7 +30,7 @@ export async function createHold(db, key, { now = Date.now(), settings = {} } = 
   await db.prepare(`INSERT INTO holds (request_key, state, until, by_hand) VALUES (?1, 'held', ?2, ?3)
     ON CONFLICT(request_key) DO UPDATE SET state = 'held', until = excluded.until, by_hand = excluded.by_hand, reminded_for = NULL, updated_at = datetime('now')`)
     .bind(key, until, s.autoExpire ? 0 : 1).run();
-  await logEvent(db, key, until ? `Games held until ${until} UTC (${s.hours} hours)` : 'Games held by hand (automatic expiry is off in Settings)', 'website form');
+  await logEvent(db, key, until ? `Games reserved until ${until} UTC (${s.hours} hours)` : 'Games reserved by hand (automatic expiry is off in Settings)', 'website form');
   return { until, byHand: !s.autoExpire };
 }
 
