@@ -242,7 +242,7 @@ async function dashboard(env, url) {
   const tdFacts = await loadTakedownFacts(env.DB);
   for (const [key, rows] of Object.entries(tdFacts.bookingsBy)) {
     kinds[key] = rows.map((k) => k.kind);
-    bookingsBy[key] = rows.map((k) => ({ id: k.id, kind: k.kind, date: k.date, time: k.time, done_at: k.done_at }));
+    bookingsBy[key] = rows.map((k) => ({ id: k.id, kind: k.kind, date: k.date, time: k.time, done_at: k.done_at, edited_by_hand: k.edited_by_hand }));
   }
   const events = {};
   const { results: evRows } = await env.DB.prepare('SELECT request_key, at, what, who FROM request_events ORDER BY id').all();
@@ -482,7 +482,10 @@ async function changeStatus(env, request, id) {
   const loaded = await loadInvoice(env.DB, id);
   if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>', { screen: 'notfound', back: { href: '/admin/invoices', label: 'Back to invoices' } }), 404);
   const { invoice, lines } = loaded;
-  const next = { texted: 'sent', deposit_paid: 'deposit_paid', paid: 'paid', done: 'done', void: 'void', unvoid: 'draft', unpaid: 'sent' }[action];
+  // "Mark as not paid" puts the invoice back where it was before the money: Sent when it went out,
+  // else still a Draft (a payment taken on a never-sent draft is not an invoice sent, so undoing it
+  // brings Step 1 "Call or text back" back too: progress.mjs pastFirstCall).
+  const next = { texted: 'sent', deposit_paid: 'deposit_paid', paid: 'paid', done: 'done', void: 'void', unvoid: 'draft', unpaid: invoice.sent_at ? 'sent' : 'draft' }[action];
   if (!next) return redirect(`/admin/invoices/${id}`);
   if (invoice.status === 'void' && action !== 'unvoid') return go('e', 'This invoice is void. It cannot be sent or marked paid. Tap Bring back (undo Void) first.');
   if (invoice.status !== 'void' && action === 'unvoid') return go('m', 'This invoice is not void.');

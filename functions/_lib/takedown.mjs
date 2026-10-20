@@ -95,7 +95,7 @@ export function takedownStepWords(td, shortDate = (d) => d) {
 // The facts the console needs for every request, in two queries: bookings with their done
 // mark, and the invoices that carry the takedown add-on.
 export async function loadTakedownFacts(db) {
-  const { results: b } = await db.prepare('SELECT id, request_key, kind, date, time, done_at FROM bookings WHERE request_key IS NOT NULL').all();
+  const { results: b } = await db.prepare('SELECT id, request_key, kind, date, time, done_at, edited_by_hand FROM bookings WHERE request_key IS NOT NULL').all();
   const bookingsBy = {};
   for (const row of b || []) (bookingsBy[row.request_key] = bookingsBy[row.request_key] || []).push(row);
   const { results: l } = await db.prepare("SELECT DISTINCT invoice_id FROM invoice_lines WHERE lower(description) LIKE 'takedown%'").all();
