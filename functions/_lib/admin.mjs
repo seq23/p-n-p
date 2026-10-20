@@ -572,6 +572,15 @@ async function idPhoto(env, url) {
   return new Response(obj.body, { headers: { 'Content-Type': row.id_type || 'image/jpeg', 'Cache-Control': 'private, no-store', 'Content-Disposition': 'inline; filename="photo-id"' } });
 }
 
+// The no-JS fallback for "Open ID photo" (the card normally opens it over itself): a same-tab
+// page with the admin bar and Back to the card. Never cached, like the photo.
+async function idPhotoView(env, url) {
+  const key = decodeKey(url.searchParams.get('r') || '');
+  const row = key ? await env.DB.prepare('SELECT name, id_object, id_deleted_at FROM requests WHERE request_key = ?1').bind(key).first() : null;
+  if (!row || !row.id_object || row.id_deleted_at) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request.</p>', { screen: 'notfound', back: { href: key ? `/admin/#c-${b64urlText(key)}` : '/admin/', label: 'Back to requests' } }), 404, { 'Cache-Control': 'private, no-store' });
+  return htmlResponse(V.idPhotoPage(row, b64urlText(key)), 200, { 'Cache-Control': 'private, no-store' });
+}
+
 // "Delete this ID": permanent, asked first, logged (who and when). Site photos are removed from
 // private storage; for the old Google Form request the Drive file is hers to delete (the site
 // cannot reach her personal Drive), so the card says where it is.
@@ -678,7 +687,9 @@ async function tappedMessage(env, request) {
 async function confirmedScreen(env, url) {
   const key = decodeKey(url.searchParams.get('r') || '');
   const ctx = key ? await messageCtx(env.DB, key) : null;
-  const back = BACK_OK(url.searchParams.get('back'));
+  const back0 = BACK_OK(url.searchParams.get('back'));
+  // Done goes back to Requests on this customer's card, not the top of the list (20 Oct 2026).
+  const back = back0 === '/admin/' && key ? `/admin/#c-${b64urlText(key)}` : back0;
   if (!ctx) return redirect(back);
   return htmlResponse(VM2.confirmedPage({ rk: b64urlText(key), name: ctx.name, sms: smsFor('confirmation', ctx), emailed: ctx.row.source !== PHONE_SOURCE && Boolean(ctx.row.confirm_emailed_at), texted: Boolean(ctx.row.confirmed_texted_at), canEmail: ctx.row.source !== PHONE_SOURCE && hasEmail(ctx.email), phone: ctx.row.source === PHONE_SOURCE, flash: url.searchParams.get('m') || '', back }));
 }
@@ -715,10 +726,44 @@ export async function login(env, request) {
 // background; (2) on a page, retry a queued sheet update and say "Google Sheet will catch up
 // shortly" while one is waiting. Neither ever blocks or breaks the page.
 const NO_SYNC = /^\/admin\/(login|logout|settings\/password|settings\/sheet-sync)$/;
+// After an action on a request card, land back on that card (owner, 20 Oct 2026): a POST that
+// answers with a redirect to Requests (/admin/?m=…) without an anchor gets #c-<key> of the card
+// it came from: the form's r, else the invoice's or the booking's request. A real anchor in the
+// address, so the phone's own swipe-back and Back behave the same. Exported for the validator.
+const CARD_RK = /^[A-Za-z0-9_-]{1,400}$/;
+export async function cardAnchorFor(env, path, form) {
+  const r = form && typeof form.get === 'function' ? String(form.get('r') || '') : '';
+  if (r && CARD_RK.test(r) && decodeKey(r)) return `#c-${r}`;
+  let key = '';
+  const inv = path.match(/^\/admin\/invoices\/(\d+)\//);
+  const bk = path.match(/^\/admin\/calendar\/bookings\/(\d+)\//);
+  try {
+    if (inv) key = ((await env.DB.prepare('SELECT request_key FROM invoices WHERE id = ?1').bind(Number(inv[1])).first()) || {}).request_key || '';
+    else if (bk) key = ((await env.DB.prepare('SELECT request_key FROM bookings WHERE id = ?1').bind(Number(bk[1])).first()) || {}).request_key || '';
+  } catch { key = ''; }
+  return key ? `#c-${b64urlText(key)}` : '';
+}
+export function toRequestsWithoutAnchor(res) {
+  if (!res || res.status < 300 || res.status >= 400) return false;
+  const loc = res.headers.get('Location') || '';
+  return /^\/admin\/(\?|$)/.test(loc) && !loc.includes('#') && !/[?&](put|pa)=/.test(loc);
+}
+
 export async function handleAdmin(context) {
   await INVD.useInventory(context.env);
+  const peek = context.request.method.toUpperCase() === 'POST' ? context.request.clone() : null;
   let res = await routeAdmin(context);
   const { request, env } = context;
+  if (peek && toRequestsWithoutAnchor(res)) {
+    let form = null;
+    try { form = await peek.formData(); } catch { form = null; }
+    const anchor = await cardAnchorFor(env, new URL(request.url).pathname, form);
+    if (anchor) {
+      const headers = new Headers(res.headers);
+      headers.set('Location', `${res.headers.get('Location')}${anchor}`);
+      res = new Response(null, { status: res.status, headers });
+    }
+  }
   const url = new URL(request.url);
   const method = request.method.toUpperCase();
   const later = (p) => { if (typeof context.waitUntil === 'function') context.waitUntil(p.catch(() => {})); };
@@ -830,6 +875,7 @@ async function routeAdmin(context) {
     if (segs.length === 3 && method === 'POST') return AE.editRoute(env, request, segs[2]);
   }
   if (segs[0] === 'requests' && segs[1] === 'id' && segs.length === 2 && method === 'GET') return idPhoto(env, url);
+  if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'view' && method === 'GET') return idPhotoView(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'upload' && method === 'POST') return addId(env, request);
   if (segs[0] === 'requests' && segs[1] === 'archive' && method === 'POST') return AC.archiveRequest(env, request, true);

@@ -5,10 +5,10 @@
 // Big buttons, plain words, every control explained from helptext.mjs. Where the page sits in the
 // admin is INVENTORY_HOME (one line) plus the nav link in views.mjs layout().
 import { esc, shortDate } from './util.mjs';
-import { tip } from './helptext.mjs';
+import { tip, stepsBar } from './helptext.mjs';
 import { layout, act, confirmStep, hiddenInputs } from './views.mjs';
 import INV from '../../scripts/lib/inventory.js';
-import { photoUrl } from './inventory.mjs';
+import { photoUrl, inventoryTotals } from './inventory.mjs';
 
 const money = (n) => (n == null || Number.isNaN(n) ? '' : `$${n}`);
 export const INVENTORY_HOME = '/admin/inventory';
@@ -44,9 +44,8 @@ export const INV_CSS = `
 .inv-errors li{margin:4px 0}
 a.inv-item{color:var(--ink);text-decoration:none}a.inv-item:hover,a.inv-item:focus{border-color:var(--accent);outline:2px solid var(--accent)}
 .inv-pill{display:inline-block;border-radius:999px;padding:4px 12px;font:600 1rem Inter,Arial,sans-serif;border:2px solid;margin:0 0 4px}
-.inv-pill[data-state=in]{background:#e4f1e1;border-color:#8fc485;color:#24561c}
-.inv-pill[data-state=out],.inv-pill[data-state=some]{background:#e3eefb;border-color:#8fb3e0;color:#1d3f6e}
-.inv-pill[data-state=hold]{background:#fff3dc;border-color:#e2b65d;color:#6b4a07}
+.inv-pill[data-state=in],.inv-pill[data-state=some]{background:#2f6b2a;border-color:#2f6b2a;color:#fff}
+.inv-pill[data-state=out],.inv-pill[data-state=hold]{background:#b3261e;border-color:#b3261e;color:#fff}
 .inv-pill[data-state=off]{background:#ececec;border-color:#bdbdbd;color:#444}
 .inv-next{display:block;color:var(--muted);font-size:.95rem}
 .inv-open{display:block;margin-top:4px;color:var(--accent);font-weight:600}
@@ -56,6 +55,21 @@ a.inv-item{color:var(--ink);text-decoration:none}a.inv-item:hover,a.inv-item:foc
 .inv-bookings li{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:#fff}
 .inv-bookings li[data-now]{border-color:#8fb3e0;background:#f3f8fe}.inv-bookings li[data-hold]{border-color:#e2b65d;background:#fffaf0}
 .inv-bookings strong{display:block}
+.inv-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.inv-sum{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 14px}
+.inv-tile{border-radius:14px;padding:12px 14px;display:grid;border:2px solid}.inv-tile b{font:700 2.2rem/1.1 Inter,Arial,sans-serif;font-variant-numeric:tabular-nums}.inv-tile span{font-weight:700;font-size:1.05rem}
+.inv-tile.out{background:#fbe5e2;border-color:#e3ada2;color:#8f1f17}.inv-tile.in{background:#e4f1e1;border-color:#b2d3ab;color:#24561c}
+.inv-sh{font:700 .85rem Inter,Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+.inv-now{display:grid;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden}
+a.inv-nrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;padding:12px 14px;min-height:56px;border-top:1px solid var(--line);color:var(--ink);text-decoration:none}
+a.inv-nrow:first-child{border-top:0}a.inv-nrow:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.inv-nrow .n{font-weight:700;font-size:1.08rem}.inv-nrow .d{grid-column:1 / -1;color:var(--muted);font-size:.95rem}
+.inv-np{font:700 .9rem Inter,Arial,sans-serif;letter-spacing:.04em;padding:4px 12px;border-radius:999px;text-align:center;white-space:nowrap}
+.inv-np.out{background:#b3261e;color:#fff}.inv-np.in{background:#2f6b2a;color:#fff}.inv-np.off{background:#ececec;color:#444;border:1px solid #bdbdbd}
+details.inv-tools{margin-top:18px;border:2px solid var(--line);border-radius:14px;background:#fff;padding:0 14px}
+details.inv-tools>summary{list-style:none;cursor:pointer;min-height:56px;display:flex;align-items:center;gap:8px;font-weight:700;font-size:1.08rem;color:var(--accent)}
+details.inv-tools>summary::-webkit-details-marker{display:none}details.inv-tools>summary::before{content:"\\25B8"}details.inv-tools[open]>summary::before{content:"\\25BE"}
+details.inv-tools[open]{padding-bottom:14px}
 details.inv-more{margin-top:14px}details.inv-more>summary{min-height:48px;display:flex;align-items:center;font-weight:600;color:var(--accent);cursor:pointer}
 @media(min-width:1100px){.wide .inv-list{grid-template-columns:1fr 1fr 1fr}}@media(min-width:900px){.inv-list{grid-template-columns:1fr 1fr}.inv-item{grid-template-columns:120px 1fr}.inv-photo{width:120px;height:90px}}
 `;
@@ -90,6 +104,33 @@ function itemCard(row, item, data, st, futureCount = 0) {
   if (!off) return `<a class="inv-item" href="${INVENTORY_HOME}/${esc(row.slug)}" ${attrs}${tip('inv.open')}>${inner}<span class="inv-open">See its bookings, edit or remove &rarr;</span></div></a>`;
   return `<article class="inv-item removed" ${attrs}>${inner}${futureCount ? `<p class="inv-note" data-inv-future>${futureCount} future ${futureCount === 1 ? 'booking' : 'bookings'}</p>` : ''}</div>
     <div class="inv-buttons">${act(`<a class="btn ghost" href="${INVENTORY_HOME}/${esc(row.slug)}"${tip('inv.openOff')}>Open</a>`, 'inv.openOff')}${restoreForm(row.slug)}</div></article>`;
+}
+
+// Games per set (owner, 20 Oct 2026): Giant Color Stack is a set of 2 games. Quantity counts sets
+// (what a booking takes out); perSet (optional, default 1) only changes the words.
+export const perSetOf = (item) => (Number.isInteger(item && item.perSet) && item.perSet > 1 ? item.perSet : 1);
+
+// One line of the phone list: OUT (red) / IN (green, "IN 2", "1 of 2 IN") / NOT OFFERED (grey),
+// from the same itemStatuses the cards use (bookings, #95 matcher). Never a second list.
+export function nowRow(row, item, st) {
+  const off = item.availableNow === false || (st && st.offered === false);
+  const stock = (st && st.stock) || item.quantity || 1;
+  const used = Math.min(stock, (st && st.used) || 0);
+  const per = perSetOf(item);
+  const units = (n) => (per > 1 ? `${n} ${n === 1 ? 'set' : 'sets'}` : String(n));
+  let kind; let pill;
+  if (off) { kind = 'off'; pill = 'NOT OFFERED'; }
+  else if (!used) { kind = 'in'; pill = stock > 1 ? `IN ${units(stock)}${per > 1 ? ` (${stock * per} games)` : ''}` : 'IN'; }
+  else if (used < stock) { kind = 'in'; pill = `${stock - used} of ${units(stock)} IN`; }
+  else { kind = 'out'; pill = 'OUT'; }
+  const now = !off && st ? (st.upcoming || []).filter((u) => u.outNow) : [];
+  const whoOf = (u) => `${u.name}${stock > 1 && u.count > 1 ? ` (${units(u.count)})` : ''} · ${u.hold ? u.hold.replace(/^Reserved/, 'reserved') : `${u.late ? 'was due back' : 'back'} ${shortDate(u.end)}`}`;
+  const bits = [];
+  if (now.length) bits.push(`${kind === 'in' ? `${units(used)} out: ` : ''}${now.map(whoOf).join('; ')}`);
+  if (per > 1 && stock === 1 && !off) bits.push(`${per} games in the set`);
+  if (row.section === 'adminItems' && !off) bits.push('not on website');
+  const d = bits.join(' · ');
+  return { kind, html: `<a class="inv-nrow" href="${INVENTORY_HOME}/${esc(row.slug)}" data-inv-row="${esc(row.slug)}" data-inv-now="${kind}"${tip('inv.row')}><span class="n">${esc(item.name)}</span><span class="inv-np ${kind}" data-inv-np>${esc(pill)}</span>${d ? `<span class="d" data-inv-who>${esc(d)}</span>` : ''}</a>` };
 }
 
 // The website-update box: "Website updating…", "Live ✓", or a plain failure with Try again.
@@ -135,12 +176,22 @@ export function inventoryPage({ state, words, statuses = {}, future = {}, keyMis
   const gone = INV.SECTIONS.flatMap((sec) => list(sec, true));
   const off = (data.bundles || []).filter((b) => b.offBecause);
   const allGames = (data.bundles || []).find((b) => b.allGames);
-  const counts = Object.values(statuses).filter((st) => st.offered);
-  const outNow = counts.filter((st) => st.state !== 'in').length;
-  const body = `<h1>Inventory</h1>
+  // Phone first (owner-approved mock-up, 20 Oct 2026): the OUT / IN tiles (units, live from the
+  // inventory and the bookings), then Out games, In games, Not offered; the editing tools fold below.
+  const rowsAll = INV.SECTIONS.flatMap((sec) => (data[sec] || []).map((i) => nowRow(bySlug[i.slug] || { slug: i.slug, section: sec }, i, statuses[i.slug])));
+  const pick = (k) => rowsAll.filter((r) => r.kind === k).map((r) => r.html).join('');
+  const totals = inventoryTotals(statuses);
+  const busy = ['running', 'deploying', 'queued', 'superseded', 'failed', 'needs_key'].includes(words && words.state);
+  const body = `<h1 class="inv-sr">Inventory</h1>
+  <div class="inv-sum" data-inv-summary><div class="inv-tile out" data-inv-tile="out"><b data-inv-total-out>${totals.out}</b><span>OUT now</span></div><div class="inv-tile in" data-inv-tile="in"><b data-inv-total-in>${totals.in}</b><span>IN</span></div></div>
   ${flash ? `<div class="notice ok"><strong>${esc(flash)}</strong></div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
-  <section id="inventory" data-inventory>
-    <p>Everything you rent out, and whether it is <strong>In</strong> (in the shed today) or <strong>Out</strong> with a customer. In and Out come from your bookings by themselves.${outNow ? ` <strong data-inv-outcount>Out or reserved today: ${outNow}.</strong>` : ''}</p>
+  <div data-inv-now-list>
+    ${pick('out') ? `<h2 class="inv-sh">Out now</h2><div class="inv-now" data-inv-out-list>${pick('out')}</div>` : '<p class="inv-sh" data-inv-none-out>Nothing is out right now</p>'}
+    ${pick('in') || pick('off') ? `<h2 class="inv-sh">In</h2><div class="inv-now" data-inv-in-list>${pick('in')}${pick('off')}</div>` : ''}
+  </div>
+  <details class="inv-tools" id="inventory" data-inv-edit data-inventory${flash || error || busy ? ' open' : ''}><summary${tip('inv.editTools')}>Edit games: add a game, photo, description, Offered / Not offered</summary>
+    ${stepsBar('inventoryList')}
+    <p>Everything you rent out, and whether it is <strong>In</strong> (in the shed today) or <strong>Out</strong> with a customer. In and Out come from your bookings by themselves.</p>
     <div class="inv-add">${act(`<a class="btn primary" href="${INVENTORY_HOME}/new"${tip('inv.add')}>+ Add a game or item</a>`, 'inv.add')}</div>
     ${statusBox(words)}
     ${keyMissing ? KEY_STOP : ''}
@@ -155,8 +206,8 @@ export function inventoryPage({ state, words, statuses = {}, future = {}, keyMis
       <div><label for="rw">Weekend price ($)</label><input id="rw" name="rate_weekend" inputmode="numeric" value="${esc(data.rates.weekend)}"></div></div>
       <div style="margin-top:12px">${act(`<button class="btn ghost" type="submit"${tip('inv.rates')}>Save the game price</button>`, 'inv.rates')}</div>
     </form>
-  </section>${POLL_JS}`;
-  return layout('Inventory', `<style>${INV_CSS}</style>${body}`, { wide: true, screen: 'inventoryList', back: { href: '/admin/', label: 'Back to requests' } });
+  </details>${POLL_JS}`;
+  return layout('Inventory', `<style>${INV_CSS}</style>${body}`, { wide: true, back: { href: '/admin/', label: 'Back to requests' } });
 }
 
 // /admin/inventory/<slug>: In / Out today, the upcoming bookings, then Edit / Remove / Bring back.
@@ -213,6 +264,8 @@ export function itemFormPage({ item = {}, section = 'games', isNew = true, error
     </fieldset>
     <label for="in">Name</label><input id="in" name="name" required maxlength="${INV.LIMITS.name}" value="${esc(item.name || '')}" autocomplete="off">
     <label for="iq">How many do you have?</label><input id="iq" name="quantity" type="number" min="1" max="${INV.LIMITS.quantity}" inputmode="numeric" required value="${esc(item.quantity || 1)}">
+    <label for="ips">Games in one set (leave 1 unless one rental is a set of games)</label><input id="ips" name="per_set" type="number" min="1" max="${INV.LIMITS.perSet}" inputmode="numeric" value="${esc(perSetOf(item))}" data-inv-per-set>
+    <p class="inv-note">Giant Color Stack is a set of 2 games: "How many" counts sets, this counts the games in each.</p>
     <p class="inv-note" id="inv-game-price" data-inv-game-price>Every game is ${money(data.rates.day)} a day and ${money(data.rates.weekend)} a weekend. Change it for all games under Game price on the Inventory page.</p>
     <div id="inv-prices" class="inv-two" data-inv-prices><div><label for="idp">Day price ($)</label><input id="idp" name="day_price" inputmode="numeric" value="${esc(item.dayPrice != null ? item.dayPrice : '')}"></div>
       <div><label for="iwp">Weekend price ($)</label><input id="iwp" name="weekend_price" inputmode="numeric" value="${esc(item.weekendPrice != null ? item.weekendPrice : '')}"></div></div>

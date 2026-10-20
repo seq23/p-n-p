@@ -632,9 +632,9 @@ Old addresses redirect: `/admin/settings/inventory[/new|/<slug>]` -> `/admin/inv
 `INVENTORY_HOME` in `views-inventory.mjs` (moving it is that line plus the nav link in `layout()`).
 - **Two separate ideas, never both called "available"** (owner, 19 Oct 2026): **Offered / Not
   offered** is set by hand (Remove / Bring back); **In / Out** is computed from the bookings. Each item
-  shows one pill: "In" (green) · "Out: <First L.>, back <Tue 20 Oct>" (blue; "was due back" when
-  overdue and not checked in) · "1 of 2 out" (multi-set items) · "Reserved until <Memphis time>"
-  (amber; a website hold not paid yet; "Reserved by hand (no end date)" when held by hand) · a small "Next booked:
+  shows one pill: "In" (solid green) · "Out: <First L.>, back <Tue 20 Oct>" (solid red; "was due back" when
+  overdue and not checked in) · "1 of 2 out" (multi-set items, green: some are in) · "Reserved until <Memphis time>"
+  (solid red: it is taken today; a website hold not paid yet; "Reserved by hand (no end date)" when held by hand) · a small "Next booked:
   <range>" line · "Not offered" (grey, its own group at the bottom with Bring back, never In / Out).
   Tap an item -> `/admin/inventory/<slug>`: its upcoming bookings (each with Open that day), then
   Edit / Remove / Bring back. Code: `itemStatuses` in `functions/_lib/inventory.mjs`, built on
@@ -647,6 +647,30 @@ Old addresses redirect: `/admin/settings/inventory[/new|/<slug>]` -> `/admin/inv
   Inventory all read it, so a customer can book an item only when it is offered AND not out on their
   dates. `npm run validate:admin-inventory-status` (in validate:admin) compares Inventory's Out with
   the availability answer and the clash check for every item over 24 days.
+
+## On a phone: Inventory first, Back everywhere, Call / Text (owner-approved mock-up, 20 Oct 2026)
+Guarded by `validate:admin-phone-fixes` (scripts/validators/validate_admin_phone_fixes.mjs).
+- **Inventory reads phone-first.** The first thing on `/admin/inventory` is two tiles, **N OUT now**
+  (red) and **N IN** (green): units (sets), not rows, from `inventoryTotals` in `inventory.mjs` over the
+  same `itemStatuses` (live inventory + bookings); Not offered items count in neither. Then one list:
+  Out games (solid red **OUT**, "<First L.> · back <Tue 20 Oct>"), then In (solid green **IN**, "IN 2",
+  "1 of 2 IN"), then grey **NOT OFFERED** (`nowRow` in `views-inventory.mjs`). The editing tools (add,
+  photo, description, Offered / Not offered, game price) sit below in "Edit games", folded shut unless
+  a save message is showing.
+- **Games per set** (`perSet`, optional, default 1, 2-10): Giant Color Stack is a set of 2 games.
+  Quantity still counts sets (what a booking takes out); perSet only changes the words: "IN 2 sets
+  (4 games)", "1 of 2 sets IN". Editor field "Games in one set"; the public site's wording is unchanged.
+- **The top bar** (`layout()` in `views.mjs`): every signed-in screen opens with "← Back" (history
+  back when she came from an admin screen, else the screen's parent) and where she is on the right.
+  A Home Screen icon has no browser Back button.
+- **Actions land on the card.** A POST that redirects to Requests (`/admin/?m=…`) with no anchor gets
+  `#c-<key>` of the card it came from (the form's `r`, else the invoice's or booking's request):
+  `cardAnchorFor` / `toRequestsWithoutAnchor` in `admin.mjs`. The "Confirmed" screen's Done goes to the card too.
+- **Open ID photo** opens over the card (full-screen viewer, big ✕ Close, Escape, tap outside or swipe
+  down; focus goes back to the link). The image is still the private no-store `/admin/requests/id`.
+  Without JS the link is a same-tab page, `/admin/requests/id/view`, with the top bar and Back to the card.
+- **📞 Call / 💬 Text** sit top right of every request card at every step when a phone number exists
+  (`quickContact`): `tel:` and a blank `sms:` from her own phone. No paid SMS.
 
 ## Settings (calm layout, owner 19 Oct 2026)
 Short sections, each opening with one sentence, folded on a phone and open on a computer

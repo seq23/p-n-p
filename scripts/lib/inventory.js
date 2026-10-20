@@ -16,7 +16,7 @@
 
 const SECTIONS = ['games', 'extras', 'adminItems'];
 const USES = ['both', 'indoor', 'outdoor'];
-const LIMITS = { name: 60, size: 120, blurb: 400, alt: 300, short: 40, quantity: 20, price: 2000, deposit: 1000, rate: 500 };
+const LIMITS = { name: 60, size: 120, blurb: 400, alt: 300, short: 40, quantity: 20, price: 2000, deposit: 1000, rate: 500, perSet: 10 };
 const SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const NUMBER_WORDS = ['zero', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine', 'ten'];
 
@@ -180,6 +180,8 @@ function validate(data, { hasImage = () => true } = {}) {
     if (/[<>"]/.test(name)) errors.push(`${label}: the name cannot use < > or ".`);
     names.push({ name, slug: i.slug });
     if (!isInt(i.quantity) || i.quantity < 1 || i.quantity > LIMITS.quantity) errors.push(`${label}: "How many" must be a whole number from 1 to ${LIMITS.quantity}.`);
+    // perSet (optional, owner 20 Oct 2026): games in one set (Giant Color Stack: a set of 2). Quantity still counts sets.
+    if (i.perSet != null && (!isInt(i.perSet) || i.perSet < 2 || i.perSet > LIMITS.perSet)) errors.push(`${label}: "Games in one set" must be a whole number from 1 to ${LIMITS.perSet}.`);
     if (typeof i.availableNow !== 'boolean') errors.push(`${label}: it must be either available or removed.`);
     if (i.deposit != null && (!isInt(i.deposit) || i.deposit < 0 || i.deposit > LIMITS.deposit)) errors.push(`${label}: the deposit must be a whole number of dollars from $0 to $${LIMITS.deposit}.`);
     if (section === 'adminItems') {
