@@ -941,7 +941,7 @@ const holdUntilWords = (h) => {
 };
 
 // The draft invoice on a card (owner-approved mock-up, 20 Oct 2026): "📄 Invoice draft ready:
-// $300.00" + "Made from Carmen's request. Nothing has been sent. Check the price, then send."
+// $300.00" + "Made from Coco's request. Nothing has been sent. Check the price, then send."
 // ("Made from ... request" only for the auto draft, invoices.auto_draft).
 export function draftWords(r, inv) {
   const total = inv.total_cents != null ? inv.total_cents : invoiceTotal(inv.lines || []);

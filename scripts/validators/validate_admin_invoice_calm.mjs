@@ -56,7 +56,7 @@ must(T.celebrationFromCents === fromCents('celebration') && T.grazingFromCents =
 
 // ---- 1. Party & decor from the website -------------------------------------------------------
 const mailsBefore = s.env.sent.length;
-const party = await s.siteRequest({ service: 'party', party_event: 'Birthday', party_where: 'Home', party_guests: '15–40', party_budget: '$300–$500', party_takedown: 'yes', event_date: plus(20), location: 'Cordova', name: 'Carmen Example', phone: '901-555-0701', email: 'carmen.example@example.com' });
+const party = await s.siteRequest({ service: 'party', party_event: 'Birthday', party_where: 'Home', party_guests: '15–40', party_budget: '$300–$500', party_takedown: 'yes', event_date: plus(20), location: 'Cordova', name: 'Coco Example', phone: '901-555-0701', email: 'coco.example@example.com' });
 must(party.status === 303 && party.row, 'the party request did not go through');
 const pKey = party.row.request_key;
 let pInv = await invsOf(pKey);
@@ -130,16 +130,16 @@ must(rb && rb.depositOwed === rb.refundable && rb.refundable > 0, 'a draft renta
 const np = NP.notPaidRows(bals, await L.linesByInvoice(s.db), {}, todayISO());
 must(!np.owed.some((r) => r.id === pd.id) && np.drafts.some((r) => r.id === pd.id), 'Not paid yet lists a draft as owed');
 const moneyPage = nq((await s.get('/admin/money')).text);
-must(!/Carmen Example[^<]*<\/a>[^]*?\$375 due/.test(moneyPage), 'Money counts the draft as owed');
+must(!/Coco Example[^<]*<\/a>[^]*?\$375 due/.test(moneyPage), 'Money counts the draft as owed');
 const todo = await TODO.todoData(s.db, todayISO());
-must(!JSON.stringify(todo).includes('Carmen E. · $'), 'the 7 AM email counts a draft as owed');
+must(!JSON.stringify(todo).includes('Coco E. · $'), 'the 7 AM email counts a draft as owed');
 dash = (await s.get('/admin/')).text;
 const pc = nq(cardOf(dash, pKey));
 must(!/\$375 due/.test(pc), 'the card says a draft is due');
 
 // ---- 4. The card ---------------------------------------------------------------------------
 const total = pl.reduce((t, l) => t + l.qty * l.unit_cents, 0);
-must(pc.includes(`📄 Invoice draft ready: ${money(total)}`) && pc.includes("Made from Carmen's request. Nothing has been sent. Check the price, then send."), 'the card lacks "📄 Invoice draft ready" with "Made from Carmen\'s request"');
+must(pc.includes(`📄 Invoice draft ready: ${money(total)}`) && pc.includes("Made from Coco's request. Nothing has been sent. Check the price, then send."), 'the card lacks "📄 Invoice draft ready" with "Made from Coco\'s request"');
 must(new RegExp(`href="/admin/invoices/${pd.id}/edit" data-help="card\\.checkDraft"[^>]*>Check and send the invoice<`).test(pc), 'the card lacks "Check and send the invoice" (while Call back is the next step)');
 must((pc.match(/class="btn primary"/g) || []).length <= 1 && !/data-help="card\.checkDraft"[^>]*class="btn primary"|class="btn primary"[^>]*data-help="card\.checkDraft"/.test(pc), 'the card has more than one big button');
 must(!/data-help="card\.createInvoice"/.test(pc), 'the card still offers Create invoice next to its draft');
@@ -155,7 +155,7 @@ const ed0 = (await s.get(`/admin/invoices/${pd.id}/edit`)).text;
 const autos = [...ed0.matchAll(/name="line_auto" value="([^"]*)"/g)].map((m) => m[1]);
 must(autos.length === 3 && autos[0] === autoTag(pl[0]) && autos[1] === autoTag(pl[1]) && autos[2] === '', `the editor does not carry each line's auto mark (${autos.join(',')})`);
 must(autoTag(pl[0]) === `start:${lineSig(pl[0])}`, 'autoTag is not kind:sig');
-const form = (ls, tags) => ({ customer_name: 'Carmen Example', customer_email: 'carmen.example@example.com', customer_phone: '901-555-0701', issue_date: pd.issue_date, due_date: pd.due_date, pay_plan: 'half', deposit: '', notes: '', go: 'save',
+const form = (ls, tags) => ({ customer_name: 'Coco Example', customer_email: 'coco.example@example.com', customer_phone: '901-555-0701', issue_date: pd.issue_date, due_date: pd.due_date, pay_plan: 'half', deposit: '', notes: '', go: 'save',
   line_desc: ls.map((l) => l.description), line_qty: ls.map((l) => String(l.qty)), line_price: ls.map((l) => (l.unit_cents / 100).toFixed(2)), line_note: ls.map((l) => l.note), line_refundable: ls.map(() => '0'), line_auto: tags });
 await s.post(`/admin/invoices/${pd.id}`, form([{ ...pl[0], unit_cents: 42000 }, pl[1]], autos.slice(0, 2)));
 let after = await linesOf(pd.id);
