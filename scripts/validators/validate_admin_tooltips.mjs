@@ -270,7 +270,7 @@ for (const [p, o, res] of pages) {
   if (/class="subnav"/.test(html)) errors.push(`${p}: the old sub-nav button row is back (the steps panel replaced it)`);
   if (/^\/admin\/money(\?|$)/.test(p) && !/data-steps-panel/.test(html)) errors.push(`${p}: no steps panel (3 steps, each with its buttons)`);
   if (/^\/admin\/calendar(\?| \(|$)/.test(p) && !/data-steps="calendar" data-steps-panel data-calm/.test(html)) errors.push(`${p}: no calm steps panel (5 steps beside the month)`);
-  if (!o.home && !/class="back"|&larr; Back to requests/.test(html)) errors.push(`${p}: no Back link`);
+  if (!o.home && !/class="back"|&larr; Back to main page/.test(html)) errors.push(`${p}: no Back link`);
   if (o.auth !== false && !o.print && !/href="\/admin\/help"/.test(html)) errors.push(`${p}: no link to How to use this`);
   if (o.print && !/href="\/admin\/help"/.test(html)) errors.push(`${p}: print page has no link to How to use this`);
   if (o.home && o.auth !== false) {

@@ -9,7 +9,7 @@ import { esc } from './util.mjs';
 // Screens in the order the help page lists them.
 export const SCREENS = [
   ['every', 'On every screen'],
-  ['requests', 'Requests'],
+  ['requests', 'Customers (main page)'],
   ['card', 'A request card'],
   ['edit', 'Change anything on this request (the Edit link on a card)'],
   ['payment', 'Payment (on a request card and on an invoice)'],
@@ -53,7 +53,7 @@ export const STEPS = {
   returns: ['Tick every item that came back.', 'Note anything missing or damaged, and add a photo.', 'Tap Save: it is returned.'],
   search: ['Type part of a name, a phone number or an email.', 'Read their bookings and what they paid.', 'Tap Open to go to one.'],
   checklistPrint: ['Tap Print.', 'Take the paper to the visit and fill it in by hand.', 'Or tap Open online checklist to fill it in on your phone.'],
-  notfound: ['This page does not exist.', 'Tap Back to requests.', 'Or tap How to use this at the top.'],
+  notfound: ['This page does not exist.', 'Tap Back to main page.', 'Or tap How to use this at the top.'],
   money: ['See who still owes you.', 'See what came in this month.', 'Keep receipts for taxes.'],
   tip: ['Type the tip and how they gave it.', 'Pick the job it was for, if any.', 'Tap Save. It shows on Money and on that job.'],
   moneyDetail: ['Read the payments or jobs behind the total.', 'Tap a name to open it.', 'Tap Back to Money when done.'],
@@ -70,16 +70,16 @@ const H = (screen, label, title, helper, more, warn = '') => ({ screen, label, t
 
 export const HELP = {
   // On every screen
-  'nav.brand': H('every', 'Porch & Party', 'Goes back to the list of requests.', '', 'The name at the very top. Tap it any time to get back to Requests.'),
-  'nav.requests': H('every', 'Requests', 'Shows the new requests people sent from the website form.', '', 'The main list. New requests from the website form show up here within a minute.'),
+  'nav.brand': H('every', 'Porch & Party', 'Goes back to the main page (Customers).', '', 'The name at the very top. Tap it any time to get back to the main page.'),
+  'nav.requests': H('every', 'Customers (main page)', 'The main page: every request, newest first.', '', 'The main list. New requests from the website form show up here within a minute. The main page has no ← Back because it is home.'),
   'nav.calendar': H('every', 'Calendar & Bookings', 'Shows every booking for all four services, as a month or as a list.', '', 'Porch decorating, party decor, grazing tables and game rentals, all in one place.'),
   'nav.money': H('every', 'Money', 'Shows money received, what is still owed, expenses and the year-end summary for taxes.', '', 'Month by month, in plain numbers.'),
   'nav.settings': H('every', 'Settings', 'Opens your payment details, password and calendar link.', '', 'Your Zelle, Cash App, QR code, password and the Google Calendar link.'),
   'nav.pricing': H('every', 'Quick Pricing Summary', 'Opens every price on one page, ready to text, email or print for a customer.', '', 'The last button in the menu: rentals, porch, party & decor and grazing, read from the same files as the website.'),
   'nav.help': H('every', 'Help', 'Opens a one-page guide to every button. You can print it.', '', 'This page. Every button in the console is explained here.'),
-  'nav.menu': H('every', 'Menu (on a phone)', 'Opens or closes the list of screens: Requests, Calendar & Bookings, Money and the rest.', '', 'On a phone the screens sit behind the ☰ Menu button at the top. Tap it, then tap a screen; the one you are on is highlighted. ✕ Close menu folds it away.'),
+  'nav.menu': H('every', 'Menu (on a phone)', 'Opens or closes the list of screens: Customers (main page), Calendar & Bookings, Money and the rest.', '', 'On a phone the screens sit behind the ☰ Menu button at the top. Tap it, then tap a screen; the one you are on is highlighted. ✕ Close menu folds it away.'),
   'nav.signout': H('every', 'Sign out', 'Signs this phone or computer out of the console.', '', 'Use it on a shared computer. You will need the password to get back in.'),
-  'nav.back': H('every', 'Back', 'Goes back to the screen you came from.', '', 'The bar at the top of every screen: ← Back on the left (the screen you came from, scrolled to the same card), where you are on the right. It never changes anything.'),
+  'nav.back': H('every', 'Back', 'Goes back to the screen you came from.', '', 'The bar at the top of every screen except the main page: ← Back on the left (the screen you came from, scrolled to the same card; it reads ← Back to main page when that is where it goes), where you are on the right. It never changes anything.'),
   'settings.open': H('every', 'Open Settings', 'Opens Settings so you can add your Zelle, Cash App and QR code.', 'Customers need these to pay you.', 'Shows up in a yellow box when your payment details are missing.'),
 
   // Requests screen
@@ -231,7 +231,7 @@ export const HELP = {
   'req.reminders': H('requests', 'Reminders for tomorrow', "Opens tomorrow's reminders: one Text reminder button per booking.", '', 'They sit at the bottom of Requests so new requests come first. Customers with an email also get it by themselves at about 10 AM.'),
   'req.new': H('requests', 'NEW', 'This request came in and you have not opened it yet. Tap the badge to mark it seen.', '', 'The badge also goes away by itself once you tap anything on the card, open Edit or More, or send an invoice.'),
   'req.weekJump': H('requests', 'A name in this week\'s list', 'Jumps down to that request\'s card on this page.', '', 'NEW beside a name means you have not opened it yet.'),
-  'req.weekList': H('requests', "See this week's requests", 'Lists the requests that came in this week, Monday to Sunday.', '', 'The line above it counts every request sent this week by service, with last week next to it for comparison.'),
+  'req.weekMore': H('requests', '+ more (this week)', 'Jumps down to the first of this week\'s requests not named in the banner.', '', 'The banner names the newest 6. Every request is still in the list below, newest first.'),
   'card.idPhoto': H('card', 'Open ID photo', 'Shows the photo ID this customer uploaded, on top of their card.', '', 'It opens over the card. Tap ✕ Close, press Escape, tap outside the photo or swipe down, and you are back on the same card.'),
   'card.idClose': H('card', '✕ Close (photo ID)', 'Closes the photo ID and puts you back on the same card.', '', 'Escape, tapping outside the photo or swiping down closes it too.'),
   'card.idBack': H('card', 'Back to the card', 'Goes back to this customer\'s card on Requests.', '', 'Only shows on the photo page a phone opens when the photo cannot open over the card.'),

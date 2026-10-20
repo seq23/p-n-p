@@ -13,8 +13,8 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   the ID (site: a private photo, signed-in view; old form: the Drive link), "Agreed to rules on
   ...", "Referred by ...", every answer and the progress line. "Delete this ID" (asked first,
   permanent, logged) is the only way an ID is ever deleted; "IDs ready to delete" lists requests
-  paid in full (rentals: returned). The top shows "This week: N new requests (by service)" for
-  Mon-Sun America/Chicago with last week beside it; Money shows "Requests this month".
+  paid in full (rentals: returned). The top shows the week banner ("This week: N new · last week M",
+  Mon-Sun America/Chicago; see "Main page top" below); Money shows "Requests this month".
 - **Walk-through checklist**: `/admin/checklist` prints the four-page checklist (blank, or
   `?r=` pre-filled from a request). `/admin/checklist/online?r=` is the same checklist as a form,
   autosaved to `request_checklist`, with up to 10 photos (`checklist_photos`, ≤ 1.5 MB each after
@@ -85,7 +85,7 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   moves every number, private facts never in text / email / print, the send path end to end.
 
 ## Request cards + admin homepage (JOB B, owner-approved 18 Oct 2026, migration 0008)
-- **Main nav**: Requests · Calendar & Bookings · Money · Inventory · Settings · Help · Quick Pricing Summary (Inventory added 19 Oct 2026; Quick Pricing Summary, the last button, 20 Oct 2026). Put away and Invoices
+- **Main nav**: Customers (main page) (was "Requests" until 20 Oct 2026) · Calendar & Bookings · Money · Inventory · Settings · Help · Quick Pricing Summary (Inventory added 19 Oct 2026; Quick Pricing Summary, the last button, 20 Oct 2026). Put away and Invoices
   left the nav: Put away is the collapsed "Put away (N)" section at the bottom of Requests ("Show
   put-away requests", `#put-away`, the only whitelisted disclosure in `validate:admin-tooltips`);
   `/admin/archive` redirects to `/admin/?pa=1#put-away` with it open. All invoices are linked from
@@ -443,8 +443,7 @@ another tab/retry queue, the cron hook).
 - **Guard**: `npm run validate:request-form` and `npm run validate:request-messages` (in `validate:admin`).
 
 ## Requests on a phone (owner, 19 Oct 2026)
-The request list comes right after the heading and a one-line week card ("Latest: <name>" with
-"N NEW"). Tomorrow's reminders are one tappable line at the bottom ("3 reminders ▸"). The
+The request list comes right after the heading and the thin week banner (see "Main page top"). Tomorrow's reminders are one tappable line at the bottom ("3 reminders ▸"). The
 three-step panel sits under the list on a phone, on top from 900 px. Each new website request
 wears **NEW** until Valerie taps it, opens More / Edit / any button on the card, arrives
 from the New-request email link, or acts on it (status, invoice, put away). Opened is stored in
@@ -705,9 +704,22 @@ Guarded by `validate:admin-phone-fixes` (scripts/validators/validate_admin_phone
   count); perSet is the games in one set (2), so the row reads "IN 1 set (2 games)", "1 of 2 games IN",
   "OUT", and invoices say "Giant Color Stack (1 set of 2)" (the older "(2 sets)" still reads as 2).
   Editor field "Games in one set". Cornhole has no perSet: 1 set, 1 game.
-- **The top bar** (`layout()` in `views.mjs`): every signed-in screen opens with "← Back" (history
-  back when she came from an admin screen, else the screen's parent) and where she is on the right.
+- **The top bar** (`layout()` in `views.mjs`): every signed-in screen except the main page opens with
+  "← Back" (history back when she came from an admin screen, else the screen's parent) and where she
+  is on the right; it reads "← Back to main page" when its target is `/admin/` (`backLabel`).
   A Home Screen icon has no browser Back button.
+
+## Main page top (owner-approved mock-up, 20 Oct 2026)
+- **No "← Back" on `/admin/`** (`layout(..., { home: true })`): the bar is the heading
+  "Main page: Customers" with "Every request, newest first" under it. The menu item (phone ☰ panel
+  and laptop nav, one `<nav>`) is "Customers (main page)", so home is always named.
+- **Week banner** (`weekBox`): one thin line, nothing to open, no arrow, no service breakdown.
+  "This week: N new · last week M", then this week's requests newest first (short names, " · "
+  between), each unopened one with the NEW badge (`data-week-new`; opening the card removes it with
+  the card's own NEW). A name jumps to `#c-<key>`. More than 6: the newest 6, then "+K more" to the
+  first card not named. Phone: names on the line under the count; from 900 px one line with "|".
+  Quiet week: "This week: no new requests · last week M".
+- Proof: `npm run validate:admin-main-page`.
 - **Actions land on the card.** A POST that redirects to Requests (`/admin/?m=…`) with no anchor gets
   `#c-<key>` of the card it came from (the form's `r`, else the invoice's or booking's request):
   `cardAnchorFor` / `toRequestsWithoutAnchor` in `admin.mjs`. The "Confirmed" screen's Done goes to the card too.

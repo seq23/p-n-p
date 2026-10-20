@@ -21,6 +21,7 @@ import { isPhone, rentalDates, rentalSpanWords, rentalLength } from './phone-req
 import { lateWords, tiers, stepWords } from './missed.mjs';
 import { dayWords } from './reminders.mjs';
 import { quickMenu, QT_CSS, QT_JS } from './views-quick-texts.mjs';
+import { shortName } from './requested.mjs';
 
 const CSS = `
 :root{--cream:#faf7f2;--ink:#3b302a;--accent:#b85f40;--line:#e3d8cb;--muted:#5f5148;--card:#fff;--ok:#3f6b3a;--warn:#8a5212}
@@ -95,6 +96,7 @@ table.list a{display:inline-block;min-height:32px}
 const EXTRA_CSS = `
 .back{display:inline-flex;align-items:center;min-height:48px;font-weight:600;font-size:1.05rem;text-decoration:none;margin:0 0 4px}
 .adminbar{display:flex;align-items:center;gap:10px;margin:-4px 0 10px;padding:0 0 6px;border-bottom:1px solid var(--line)}.adminbar .back{margin:0;padding:0 8px 0 0;font-size:1.1rem}
+.adminbar.mainhead{margin:-4px 0 12px}.adminbar.mainhead h1{margin:0;font-size:1.5rem;line-height:1.2}.adminbar.mainhead h1 small{display:block;font:400 .95rem Inter,Arial,sans-serif;color:var(--muted);margin-top:2px}
 .adminbar .where{margin-left:auto;color:var(--muted);font-size:.98rem;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .idview{position:fixed;inset:0;z-index:60;background:rgba(20,16,12,.94);color:#fff;display:grid;grid-template-rows:auto 1fr auto}.idview[hidden]{display:none}
 .idview .idtop{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:max(12px,env(safe-area-inset-top)) 14px 12px}
@@ -155,12 +157,12 @@ ${kindCss()}
 @media print{header.top,.subnav,.noprint,.back,.topsteps{display:none!important}body{background:#fff}.card{border:0;padding:0;margin:0 0 10px}.gloss .g{padding:4px 0}}
 `;
 
-export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false, panelWide = false, where = '', spine = false } = {}) {
+export function layout(title, body, { authed = true, home = false, screen = '', back = null, subnav = '', wide = false, panelWide = false, where = '', spine = false } = {}) {
   // The screen she is on is marked in the menu (phone menu, owner-approved 20 Oct 2026).
   const on = NAV_CURRENT[title] || '';
   const cur = (href) => (href === on ? ' aria-current="page"' : '');
   const nav = authed ? `<nav aria-label="Main">
-    <a href="/admin/"${cur('/admin/')}${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${cur('/admin/calendar')}${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${cur('/admin/money')}${tip('nav.money')}>Money</a><a href="/admin/inventory"${cur('/admin/inventory')}${tip('nav.inventory')}>Inventory</a><a href="/admin/settings"${cur('/admin/settings')}${tip('nav.settings')}>Settings</a><a href="/admin/help"${cur('/admin/help')}${tip('nav.help')}>Help</a><a href="/admin/pricing"${cur('/admin/pricing')}${tip('nav.pricing')}>Quick Pricing Summary</a>
+    <a href="/admin/"${cur('/admin/')}${tip('nav.requests')}>Customers (main page)</a><a href="/admin/calendar"${cur('/admin/calendar')}${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${cur('/admin/money')}${tip('nav.money')}>Money</a><a href="/admin/inventory"${cur('/admin/inventory')}${tip('nav.inventory')}>Inventory</a><a href="/admin/settings"${cur('/admin/settings')}${tip('nav.settings')}>Settings</a><a href="/admin/help"${cur('/admin/help')}${tip('nav.help')}>Help</a><a href="/admin/pricing"${cur('/admin/pricing')}${tip('nav.pricing')}>Quick Pricing Summary</a>
     <form method="post" action="/admin/logout" style="display:inline"><button type="submit"${tip('nav.signout')}>Sign out</button></form></nav>` : '';
   // Phone (< 900 px): one short line, "Porch & Party" + a labelled "☰ Menu ▾" button; the panel
   // opens below as big rows and the button reads "✕ Close menu". Without JS the button is a
@@ -169,8 +171,14 @@ export function layout(title, body, { authed = true, screen = '', back = null, s
   // The same top bar on every screen (owner, 20 Oct 2026): "← Back" on the left (history.back()
   // when she came from another admin screen, else the screen's parent), where she is on the right.
   // A Home Screen icon has no browser Back button, so this is it.
+  // The main page (Customers, /admin/) has nowhere to go back to, so no "← Back": it says plainly
+  // that it is the main page. Every other screen keeps "← Back", reading "← Back to main page" when
+  // that is where it goes (owner-approved mock-up, 20 Oct 2026).
   const parent = back && back.href ? back.href : '/admin/';
-  const backLink = authed ? `<nav class="adminbar noprint" aria-label="Back" data-adminbar><a class="back" href="${esc(parent)}" data-back${tip('nav.back')}>&larr; Back</a><span class="where" data-where>${esc(where || title)}</span></nav>` : '';
+  const backWords = backLabel(parent);
+  const backLink = !authed ? '' : home
+    ? `<div class="adminbar mainhead" data-adminbar data-mainpage><h1>${MAIN_PAGE_TITLE}<small>Every request, newest first</small></h1></div>`
+    : `<nav class="adminbar noprint" aria-label="Back" data-adminbar><a class="back" href="${esc(parent)}" data-back${tip('nav.back')}>&larr; ${backWords}</a><span class="where" data-where>${esc(where || title)}</span></nav>`;
   const viewer = authed && body.includes('data-id-open') ? ID_VIEWER : '';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
@@ -182,9 +190,16 @@ export function layout(title, body, { authed = true, screen = '', back = null, s
 <main class="wrap${wide ? ' wide' : ''}${panelWide ? ' panelwide' : ''}${spine ? ' hasspine' : ''}">${backLink}${screen ? stepsBar(screen) : ''}${body}</main>${viewer}${authed ? `<script>${MENU_JS}${ADMIN_JS}</script>` : ''}</body></html>`;
 }
 
-const BACK_REQUESTS = { href: '/admin/', label: 'Back to requests' };
+const BACK_REQUESTS = { href: '/admin/', label: 'Back to main page' };
+// The main page's heading and its name in the menu (owner-approved mock-up, 20 Oct 2026).
+export const MAIN_PAGE_TITLE = 'Main page: Customers';
+export const MAIN_PAGE_NAV = 'Customers (main page)';
+// "Back to main page" when Back goes to /admin/ (any card or query on it), plain "Back" otherwise.
+export function backLabel(href) {
+  return /^\/admin\/(?:[?#]|$)/.test(String(href || '')) ? 'Back to main page' : 'Back';
+}
 // Which menu row is "you are here", by the screen's title (the seven top-level screens).
-export const NAV_CURRENT = { Requests: '/admin/', Calendar: '/admin/calendar', Money: '/admin/money', Inventory: '/admin/inventory', Settings: '/admin/settings', 'How to use this': '/admin/help', 'Quick Pricing Summary': '/admin/pricing' };
+export const NAV_CURRENT = { [MAIN_PAGE_NAV]: '/admin/', Calendar: '/admin/calendar', Money: '/admin/money', Inventory: '/admin/inventory', Settings: '/admin/settings', 'How to use this': '/admin/help', 'Quick Pricing Summary': '/admin/pricing' };
 // The phone menu: the button opens/closes the panel without touching the address bar; a screen
 // under one of the seven (e.g. /admin/money/...) marks its parent row.
 const MENU_JS = `(function(){var h=document.querySelector('[data-topbar]');if(!h)return;var o=h.querySelector('[data-menu-btn]');if(!o)return;
@@ -342,9 +357,10 @@ button.newb.big{min-height:44px;padding:0 16px;font-size:1rem;cursor:pointer}
 article[data-new]{box-shadow:0 0 0 3px #f3b493}
 .rqflow{display:flex;flex-direction:column}.rqmain{order:1}.rqpanel{order:2;margin-top:18px}
 @media(min-width:900px){.rqpanel{order:0;margin-top:0}}
-.weekcard{padding-top:12px;padding-bottom:12px}.weekcard .weekline{margin:0}.weekcard details{margin-top:6px}
-.weekcard .wkn{display:none}@media(min-width:600px){.weekcard .wkn{display:inline}}
-.weekcard summary{display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px}.weekcard li a{color:inherit}
+.weekcard{padding:8px 12px;margin-bottom:10px}.weekcard .wkline{margin:0;line-height:1.7}.weekcard .wkhead{font-weight:700}
+.weekcard .wknames{display:block}.weekcard .wkbar{display:none;color:var(--muted);padding:0 10px}.weekcard .wkdot{color:var(--muted);padding:0 8px}
+.weekcard .wknames a{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:3px 0}.weekcard .wki{white-space:nowrap}.weekcard .wki .newb{margin-right:5px}
+@media(min-width:900px){.weekcard .wknames{display:inline}.weekcard .wkbar{display:inline}}
 .remline{padding:0}.remline>summary{display:flex;flex-wrap:wrap;align-items:center;gap:4px 10px;min-height:56px;padding:12px 16px;cursor:pointer;list-style:none;font-size:1.1rem}
 .remline>summary::-webkit-details-marker{display:none}.remline .remcount{font-weight:700}.remline .remchev{margin-left:auto;font-size:1.2rem;color:var(--accent);transition:transform .15s}
 .remline[open] .remchev{transform:rotate(90deg)}.remline .remin{padding:0 16px 14px;border-top:1px solid var(--line)}.remline .remin h2{margin-top:12px}
@@ -352,7 +368,7 @@ article[data-new]{box-shadow:0 0 0 3px #f3b493}
 // Opening a card clears its NEW: the badge itself, Show details, Edit, any button or link on it,
 // or arriving at #c-<card> from the New-request email.
 const NEW_JS = `(function(){
-  function seen(card,how){if(!card||!card.hasAttribute('data-new'))return;card.removeAttribute('data-new');var b=card.querySelector('[data-new-badge]');if(b)b.remove();
+  function seen(card,how){if(!card||!card.hasAttribute('data-new'))return;card.removeAttribute('data-new');var b=card.querySelector('[data-new-badge]');if(b)b.remove();var w=document.querySelector('[data-week-new="'+card.getAttribute('data-card')+'"]');if(w)w.remove();
     var f=new FormData();f.append('r',card.getAttribute('data-card'));f.append('how',how);try{fetch('/admin/requests/opened',{method:'POST',body:f,headers:{'X-Pnp-Fetch':'1'},credentials:'same-origin',keepalive:true});}catch(e){}}
   document.addEventListener('click',function(e){var c=e.target.closest('article[data-new]');if(!c)return;var t=e.target.closest('[data-new-badge],summary,a,button');if(t)seen(c,t.matches('[data-new-badge]')?'badge':'card');});
   if(/^#c-/.test(location.hash)){var c=document.getElementById(location.hash.slice(1));if(c){seen(c,'link');c.scrollIntoView();}}
@@ -496,18 +512,22 @@ function detailsGroupBody(r, rk, { referrers = {}, used = new Set(), archived = 
     ${other.length ? `<div data-other-answers><h4>Other answers</h4>${kv(other.map((x) => [x.label, answerWords(x.value)]))}</div>` : ''}</div>`;
 }
 
-// Top of Requests: this week (Mon–Sun, Memphis) by service, and last week.
+// Top of the main page: a thin banner, nothing to open (owner-approved mock-up, 20 Oct 2026).
+// "This week: N new · last week M", then this week's requests newest first, separated by dots,
+// each unopened one with NEW. A name jumps to its card. More than 6: the newest 6, then "+K more"
+// jumping to the first card not named. Phone: the names sit on the line under the count; laptop:
+// one line, a "|" after the count.
+export const WEEK_NAMES_MAX = 6;
 export function weekBox(w, newKeys = new Set()) {
   const n = w.thisWeek.length;
-  const parts = [['porch', 'porch'], ['party', 'party & decor'], ['grazing', 'grazing'], ['rentals', 'rentals']].filter(([k]) => w.byService[k]).map(([k, word]) => `${w.byService[k]} ${word}`);
-  const fresh = w.thisWeek.filter((r) => newKeys.has(r.key));
-  const badge = (txt) => `<span class="newb" data-new-count>${esc(txt)}</span>`;
-  const list = w.thisWeek.map((r) => `<li>${newKeys.has(r.key) ? `${badge('NEW')} ` : ''}<a href="#c-${esc(b64urlText(r.key))}"${tip('req.weekJump')}>${esc(r.name || 'No name given')}</a> <span class="muted">${esc(shortDate(new Date(r.sortTime).toISOString().slice(0, 10)))}</span></li>`).join('');
-  // The collapsed line names the newest request and says how many are NEW (owner, 19 Oct 2026).
-  const newest = w.thisWeek.slice().sort((a, b) => (b.sortTime || 0) - (a.sortTime || 0))[0];
-  const sum = n ? `<span class="wkl">Latest: ${esc(newest.name || 'No name given')}</span>${fresh.length ? ` ${badge(fresh.length === 1 ? 'NEW' : `${fresh.length} NEW`)}` : ''}${n > 1 ? ` <span class="muted wkn">· see all ${n}</span>` : ''}` : '';
-  return `<section class="card weekcard" data-week-counts><p class="weekline"><strong>This week: ${n} new request${n === 1 ? '' : 's'}</strong>${parts.length ? ` (${esc(parts.join(', '))})` : ''} <span class="muted">· Last week: ${w.lastWeek.length}</span></p>
-    ${n ? `<details class="disclose" data-week-list><summary${tip('req.weekList')}>${sum}</summary><ul>${list}</ul></details>` : ''}</section>`;
+  const last = `<span class="muted">· last week ${w.lastWeek.length}</span>`;
+  if (!n) return `<section class="card weekcard" data-week-counts><p class="wkline"><span class="wkhead">This week: no new requests</span> ${last}</p></section>`;
+  const newest = w.thisWeek.slice().sort((a, b) => (b.sortTime || 0) - (a.sortTime || 0));
+  const item = (r) => { const k = esc(b64urlText(r.key)); return `<span class="wki">${newKeys.has(r.key) ? `<span class="newb" data-new-count data-week-new="${k}">NEW</span>` : ''}<a href="#c-${k}"${tip('req.weekJump')}>${esc(shortName(r.name))}</a></span>`; };
+  const shown = newest.slice(0, WEEK_NAMES_MAX).map(item);
+  const rest = newest.slice(WEEK_NAMES_MAX);
+  if (rest.length) shown.push(`<span class="wki"><a href="#c-${esc(b64urlText(rest[0].key))}" data-week-more${tip('req.weekMore')}>+${rest.length} more</a></span>`);
+  return `<section class="card weekcard" data-week-counts><p class="wkline"><span class="wkhead">This week: ${n} new</span> ${last}<span class="wkbar" aria-hidden="true">|</span><span class="wknames" data-week-list>${shown.join('<span class="wkdot" aria-hidden="true">·</span>')}</span></p></section>`;
 }
 
 // A gentle list: requests paid in full (and for rentals, returned) that still hold an ID photo.
@@ -1435,10 +1455,10 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
   // Phone first (owner, 19 Oct 2026): the request list comes straight after the heading and the
   // one-line week card; tomorrow's reminders are one tappable line at the bottom; the three-step
   // panel sits under the list on a phone and stays on top on a wide screen (CSS order, .rqflow).
-  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}${CUST_CSS}${QT_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+  return layout(MAIN_PAGE_NAV, `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}${CUST_CSS}${QT_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
 ${setupBanner(missingPayment)}
     <div class="rqgrid">${customerSpine(shown)}<div class="rqcol"><div class="rqflow"><div class="rqpanel">${requestsPanel(folderUrl)}</div>
-    <div class="rqmain"><h1>Requests</h1>${extraTop}${week}${holdsBox}${err}
+    <div class="rqmain">${extraTop}${week}${holdsBox}${err}
     ${filterChips(f)}${filterSelect(f, active)}${customerBar(shown)}
     <div data-request-list>${shown.length ? shown.map((x) => x.html()).join('') : (sheetError ? '' : empty)}</div>
     ${remindersLine}</div></div>
@@ -1446,7 +1466,7 @@ ${setupBanner(missingPayment)}
     ${idsBox}</div></div>
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
-    <script>${DASH_JS}${NEW_JS}${CUST_JS}${QT_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { screen: '', panelWide: true, spine: true });
+    <script>${DASH_JS}${NEW_JS}${CUST_JS}${QT_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { home: true, screen: '', panelWide: true, spine: true });
 }
 
 export function invoicesPage({ invoices }) {
@@ -1914,7 +1934,7 @@ export function checklistOnlinePage({ request, rk, sections, photos, values, max
     <div class="card"><label class="ckl"><input type="checkbox" id="cl-done"${done ? ' checked' : ''}><span><strong>Checklist done</strong></span></label></div>
     <div class="actions three">${act(`<a class="btn" href="/admin/invoices/new?r=${esc(rk)}"${tip('card.createInvoice')}>Create invoice</a>`, 'card.createInvoice')}
       ${act(`<a class="btn ghost" href="/admin/checklist?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.printChecklist')}>Print checklist</a>`, 'card.printChecklist')}
-      <a class="btn ghost" href="/admin/"${tip('nav.back')}>Back to requests</a></div>
+      <a class="btn ghost" href="/admin/"${tip('nav.back')}>Back to main page</a></div>
   </div>
   <script>${CHECKLIST_JS}</script>`, { screen: 'checklist', back: BACK_REQUESTS });
 }

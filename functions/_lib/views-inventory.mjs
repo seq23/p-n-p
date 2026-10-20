@@ -208,7 +208,7 @@ export function inventoryPage({ state, words, statuses = {}, future = {}, keyMis
       <div style="margin-top:12px">${act(`<button class="btn ghost" type="submit"${tip('inv.rates')}>Save the game price</button>`, 'inv.rates')}</div>
     </form>
   </details>${POLL_JS}`;
-  return layout('Inventory', `<style>${INV_CSS}</style>${body}`, { wide: true, back: { href: '/admin/', label: 'Back to requests' } });
+  return layout('Inventory', `<style>${INV_CSS}</style>${body}`, { wide: true, back: { href: '/admin/', label: 'Back to main page' } });
 }
 
 // /admin/inventory/<slug>: In / Out today, the upcoming bookings, then Edit / Remove / Bring back.
