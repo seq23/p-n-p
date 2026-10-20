@@ -97,6 +97,10 @@ must(NOTE.pickupNote([{ description: 'Party decor setup', qty: 1, unit_cents: 30
   must(ST.waitingDays(ms('2026-10-20T05:10:00Z'), '2026-10-20') === 0, '12:10 AM Memphis is not "today"');
   must(ST.waitingDays(ms('2026-10-16T15:00:00Z'), '2026-10-19') === 3, 'three Memphis days is not 3');
   must(ST.waitingDays(ms('2026-11-01T06:30:00Z'), '2026-11-02') === 1, 'across the end of daylight saving is not 1 day');
+  // The callers pass the real sent instant (steps.mjs sentMs from submitted_at, UTC), never the
+  // wall-clock sortTime: a request in at 12:20 AM Memphis (05:20 UTC) is "Sent today" that day.
+  must(ST.sentMs({ submittedAt: '2026-10-20 05:20:00' }) === ms('2026-10-20T05:20:00Z') && ST.waitingDays(ST.sentMs({ submittedAt: '2026-10-20 05:20:00' }), '2026-10-20') === 0, 'a request sent at 12:20 AM Memphis is not "Sent today" that day');
+  for (const f of ['functions/_lib/callback-list.mjs', 'functions/_lib/views.mjs']) must(/waitingDays\(sentMs\(r\), today\)/.test(read(f)) && !/waitingDays\(r\.sortTime/.test(read(f)), `${f} reads the waiting days from the wall-clock sortTime`);
   must(ST.waitingWords(0) === 'Sent today' && ST.waitingWords(1) === 'Waiting since yesterday' && ST.waitingWords(4) === 'Waiting 4 days' && CB.WAIT_HIGHLIGHT_DAYS === 3, 'the waiting words / highlight are not "Sent today" / "since yesterday" / "N days", 3+');
 }
 

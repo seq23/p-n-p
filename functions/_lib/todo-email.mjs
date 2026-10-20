@@ -7,10 +7,14 @@
 // Numbered sections, each shown ONLY when it has something in it, in this order:
 //   1 Today's jobs          today's bookings: time, who, job, place, what to bring, money
 //   2 Call these people back open requests whose Called back step is not ticked (callback-list.mjs)
-//   3 Set a time            every booking from today on with a day but no time
+//   3 Set a time            every CONFIRMED booking from today on with a day but no time (owner,
+//                           20 Oct 2026): a rental only once its deposit is paid (steps.mjs depositIn,
+//                           and no current hold in holds.mjs), a porch / party / grazing job only once
+//                           confirmed (steps.mjs isConfirmed: "Yes, book it", phone, money in); a
+//                           booking Valerie typed on the calendar with no request is hers, so it counts
 //   4 Book it or decide     called back but nothing on the calendar; takedowns / pickups with no day
-//   5 Money                 balances due today or late (the damage deposit is never owed), holds
-//                           ending today, games not returned
+//   5 Money                 balances due today or late (the damage deposit is never owed), every
+//                           unpaid rental hold ("Waiting for deposit · held until ..."), games not returned
 // then "Tomorrow, <day>" and, on Mondays, "Your week" (weekly.mjs figures; the Settings switch
 // weekly_summary = include it). Nothing in 1-5 and nothing tomorrow: the email says only
 // "All clear today". Customers appear as first name + last initial only; a phone number is only
@@ -87,6 +91,17 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   const who = (b) => shortName(b.customer_name || (reqBy[b.request_key] && reqBy[b.request_key].name));
   const phoneOf = (b) => b.phone || (reqBy[b.request_key] && reqBy[b.request_key].phone) || '';
   const timeOr = (b) => timeWords(b.time) || 'time not set';
+  // Confirmed (reuses steps.mjs and holds.mjs; no new definition): a rental needs its deposit paid
+  // and no current hold; any other job needs its request confirmed. No request = Valerie's own.
+  const factsBy = Object.fromEntries(facts.map((f) => [f.r.key, f]));
+  const heldKeys = new Set(holds.map((h) => h.request_key));
+  const confirmedJob = (b) => {
+    if (!b.request_key) return true;
+    const f = factsBy[b.request_key];
+    if (!f) return false;
+    if (serviceOfKind(b.kind) === 'rentals') return Boolean(f.s.depositIn) && !heldKeys.has(b.request_key);
+    return Boolean(f.s.confirmed);
+  };
 
   // 1. Today's jobs.
   const jobs = open.filter((b) => b.date === today).sort(daySort).map((b) => {
@@ -113,9 +128,10 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     btns: [...callText(c.phone), { label: 'Open card', href: cardHref(c.key) }],
   }));
 
-  // 3. Set a time: every open booking from today on with no time, soonest first.
+  // 3. Set a time: every CONFIRMED open booking from today on with no time, soonest first. An
+  // unpaid rental hold (invoiced or not) is never asked for a time: it is in Money instead.
   const soon = addDays(today, SET_TIME_HIGHLIGHT_DAYS);
-  const setTime = open.filter((b) => b.date >= today && !/^\d{2}:\d{2}$/.test(String(b.time || '')))
+  const setTime = open.filter((b) => b.date >= today && !/^\d{2}:\d{2}$/.test(String(b.time || '')) && confirmedJob(b))
     .sort((a, b) => String(a.date).localeCompare(String(b.date)) || daySort(a, b)).map((b) => {
       const job = JOB_WORDS[b.kind] || 'job';
       const body = renderMessage('setTime', { name: b.customer_name || (reqBy[b.request_key] && reqBy[b.request_key].name), job, day: dayWords(b.date) }).text;
@@ -160,10 +176,19 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, t: `${shortName(row.name)} · ${usd(row.owed)} still owed`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}`,
       btns: [...(sms ? [{ label: 'Text a reminder', href: sms }] : []), { label: 'Mark paid', href: `/admin/invoices/${row.id}` }] });
   }
+  // Every unpaid rental hold (owner, 20 Oct 2026): waiting for its deposit, with the invoice's
+  // amount due, unless Money already lists that request.
   for (const h of holds) {
-    if (h.by_hand || !Number.isFinite(h.untilMs) || chicagoDate(new Date(h.untilMs)) > today) continue;
     if (statuses[h.request_key] && (statuses[h.request_key].archived_at || statuses[h.request_key].status === 'void')) continue;
-    moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, t: `${shortName(h.name)} · games held until today ${memphisTime(h.untilMs)}`, d: 'Deposit not paid yet', btns: [{ label: 'Hold longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
+    if (reqBy[h.request_key] && reqBy[h.request_key].is_test) continue;
+    if (moneyItems.some((x) => x.key && x.key === h.request_key)) continue;
+    const timed = !h.by_hand && Number.isFinite(h.untilMs);
+    const endDay = timed ? chicagoDate(new Date(h.untilMs)) : '';
+    const until = !timed ? 'held by hand' : `held until ${endDay === today ? 'today' : dayWords(endDay)} ${memphisTime(h.untilMs)}`;
+    const bal = h.invoice_id ? bals[h.invoice_id] : null;
+    const due = bal && !bal.void ? bal.owed + bal.depositOwed : 0;
+    const d = bal && !bal.void ? (due > 0 ? `${usd(due)} due on the invoice` : 'Deposit not paid yet') : 'Invoice not sent yet';
+    moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [{ label: 'Hold longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
   }
   for (const b of overdueReturns(bookings, returns, today)) {
     moneyItems.push({ type: 'overdue', svc: 'rentals', key: b.request_key || '', t: `${who(b)} · games not returned yet`, d: `Due back ${dayWords(b.date)}`, btns: [...callText(phoneOf(b)), { label: 'Open card', href: bookingHref(b) }] });
