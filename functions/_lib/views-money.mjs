@@ -6,7 +6,7 @@ import { serviceBadge } from './cards.mjs';
 import { smsLink } from './reminders.mjs';
 import { render } from './messages.mjs';
 import { layout, act, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS } from './views.mjs';
-import { CATEGORY_KEYS, CATEGORY_LABELS, METHOD_LABELS, FOOTER } from './money.mjs';
+import { CATEGORY_KEYS, CATEGORY_LABELS, METHOD_LABELS, FOOTER, TIP_METHODS } from './money.mjs';
 import { KIND_LABELS } from './kinds.mjs';
 import { LOW_CONFIDENCE } from './expenses.mjs';
 
@@ -22,6 +22,57 @@ const MONEY_CSS = `
 .nptotal{font-size:1.25rem;font-weight:700;margin:6px 0 0}
 .exp{display:block;padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink)}
 @media print{.noprint{display:none!important}}
+`;
+
+// The calm Money tab (owner-approved 19 Oct 2026): a few big plain numbers first, then the
+// lists; light rules instead of boxes; phone first (390 px), laptop no worse.
+const CALM_CSS = `
+.mhead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:4px 12px;margin:4px 0 10px}.mhead h1{margin:0}
+.seg{display:grid;grid-template-columns:1fr 1fr;background:#efe8df;border-radius:12px;padding:4px;gap:4px;margin:0 0 10px}
+.seg a{display:flex;align-items:center;justify-content:center;min-height:46px;border-radius:9px;text-decoration:none;color:var(--ink);font-weight:600}
+.seg a.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.mnav{display:grid;grid-template-columns:56px 1fr 56px;align-items:center;gap:6px;margin:0 0 6px}
+.mnav a.arrow{display:flex;align-items:center;justify-content:center;min-height:48px;border-radius:12px;background:#fff;border:1px solid var(--line);text-decoration:none;font-size:1.6rem;line-height:1;color:var(--accent)}
+.mnav strong{text-align:center;font-family:"Cormorant Garamond",Georgia,serif;font-size:1.45rem;font-weight:600}
+.thism{text-align:center;margin:0 0 8px}.thism a{font-weight:600}
+.ticks{display:grid;gap:4px;margin:6px 0 14px}
+.tick{display:flex;gap:12px;align-items:flex-start;padding:8px 4px;margin:0;cursor:pointer;font-weight:600;color:var(--ink);font-size:1.02rem}
+.tick input{width:26px;height:26px;margin:1px 0 0;flex:none;accent-color:var(--accent)}
+.tick small{display:block;font-weight:400;color:var(--muted);font-size:.92rem;line-height:1.35}
+.figs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 0 18px}
+.fig{display:block;text-decoration:none;color:var(--ink);background:#fff;border-radius:14px;padding:12px 14px;min-width:0}
+.fig .fl{display:block;color:var(--muted);font-size:.95rem}
+.fig .fv{display:block;font-size:1.55rem;font-weight:700;letter-spacing:-.01em;line-height:1.2;margin-top:2px;overflow-wrap:anywhere}
+.fig .fs{display:block;color:var(--muted);font-size:.85rem;line-height:1.3;margin-top:2px}
+.fig.main{grid-column:1/-1}.fig.main .fv{font-size:2.1rem}
+.fig.owe .fv{color:#8f3427}.fig.exp{background:#f6f2fb}.fig.exp .fv{color:#5b4a8a}
+.mlist{list-style:none;margin:0;padding:0}
+.job{padding:12px 2px;border-bottom:1px solid var(--line)}.job:last-child{border-bottom:0}
+.job .jt{display:flex;flex-wrap:wrap;gap:6px 8px;align-items:center}.job .jt a,.job .jt strong{font-size:1.1rem;font-weight:700;color:var(--ink)}
+.sv{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.82rem;font-weight:600;border:1px solid;color:#2b2420;white-space:nowrap}
+.job .jd{color:var(--muted);font-size:.95rem;margin:2px 0 4px}
+.jn{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:2px 8px;margin:0}
+.jn div{min-width:0}.jn dt{color:var(--muted);font-size:.8rem}.jn dd{margin:0;font-weight:600;white-space:nowrap}
+.jn dd.owe{color:#8f3427}.jn dd.zero{color:var(--muted);font-weight:400}
+.job .dep{color:var(--muted);font-size:.85rem;margin-top:2px}
+.job.unconf{border:2px dashed #b9aea3;border-radius:12px;padding:10px 12px;margin:8px 0;background:#f6f3ef;color:#5f5148}
+.job.unconf .jt a,.job.unconf .jt strong{color:#5f5148}
+.nc{display:inline-block;padding:1px 9px;border-radius:999px;font-size:.82rem;font-weight:700;background:#e6e0d9;color:#4a3f37}
+.grp{margin:14px 0 2px;font-size:1.25rem}
+.sect{background:#fff;border-radius:14px;padding:14px 16px;margin:0 0 14px}
+.sect h2{margin:0 0 6px}
+.two{display:grid;grid-template-columns:1fr;gap:10px;margin:6px 0 10px}
+.row{display:flex;justify-content:space-between;gap:10px;padding:12px 2px;border-bottom:1px solid var(--line);text-decoration:none;color:var(--ink);min-height:48px;align-items:center}
+.row:last-child{border-bottom:0}.row .rw{min-width:0}.row .rw .muted{font-size:.92rem}.row .ra{font-weight:700;white-space:nowrap}
+.checkline{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-radius:12px;background:#fff3dc;color:#7a4a0c;font-weight:700;text-decoration:none;margin:4px 0 8px;min-height:48px}
+details.more{margin:0 0 14px}details.more>summary{cursor:pointer;font-weight:600;color:var(--accent);padding:12px 2px;min-height:48px;list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+.hist{list-style:none;padding:0;margin:0}.hist li{padding:6px 0;border-bottom:1px solid var(--line);font-size:.95rem}
+.radios{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:4px 0 6px}
+.radios label{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-height:50px;font-weight:600;margin:0;background:#fff}
+.radios input{width:22px;height:22px;margin:0;accent-color:var(--accent)}
+@media(min-width:700px){.figs{grid-template-columns:repeat(5,minmax(0,1fr))}.fig.main{grid-column:auto}.fig.main .fv{font-size:1.75rem}.two{grid-template-columns:1fr 1fr}.ticks{grid-template-columns:1fr 1fr}.radios{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:380px){.jn{grid-template-columns:repeat(2,minmax(0,1fr))}}
 `;
 
 const monthName = (m) => new Date(`${m}-15T12:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
@@ -74,74 +125,157 @@ export function moneyPanel() {
   ]);
 }
 
-export function moneyPage({ month, year, requestsThisMonth = 0, t, months, needs, recent, depositsHeld, flash = '', error = '', notPaid = null }) {
-  const tot = (what, label, value, sub = '') => `<a class="tot" href="/admin/money/detail?month=${month}&amp;what=${what}"${tip('mon.total')}><div class="muted">${esc(label)}</div><div class="big" data-total="${what}">${esc(value)}${sub ? `<small>${esc(sub)}</small>` : ''}</div></a>`;
+// The URL that keeps the view (moneyState in admin-money.mjs reads it back).
+export function moneyHref(state, over = {}) {
+  const st = { ...state, ...over };
+  const q = [];
+  if (st.view === 'all') q.push('view=all'); else q.push(`month=${st.month}`);
+  if (st.includeUnconfirmed) q.push('unconf=1');
+  if (st.includeDeposits) q.push('deposits=in');
+  if (st.year) q.push(`year=${st.year}`);
+  return `/admin/money?${q.join('&')}`;
+}
+
+const dayWords = (iso) => (/^\d{4}-\d{2}-\d{2}$/.test(String(iso || '')) ? new Date(`${iso}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }) : 'No date yet');
+const chips = (services) => services.map((k) => { const b = serviceBadge(k); return b ? `<span class="sv" style="border-color:${b.bar};background:${b.tint}">${esc(b.label)}</span>` : '<span class="sv" style="border-color:#c9bfb4;background:#f3efe9">Other</span>'; }).join('');
+
+// One job: name, service chip, date, total, paid, still owed, tips. Unconfirmed: dashed and
+// grey, "Not confirmed", and what it would bring in ("Expected if confirmed"), never "paid".
+export function jobRow(r, { includeDeposits = false } = {}) {
+  const total = r.charges + (includeDeposits ? r.refundable : 0);
+  const paid = r.paidCharges + (includeDeposits ? r.paidDeposit : 0);
+  const amt = (v, cls = '') => `<dd class="${v ? cls : 'zero'}">${esc(money(v))}</dd>`;
+  const name = r.invoiceId ? `<a href="/admin/invoices/${r.invoiceId}"${tip('mon.jobOpen')}>${esc(r.name)}</a>` : (r.date ? `<a href="/admin/day/${esc(r.date)}"${tip('mon.jobDay')}>${esc(r.name)}</a>` : `<strong>${esc(r.name)}</strong>`);
+  const nums = r.confirmed
+    ? `<dl class="jn"><div><dt>Total</dt><dd data-job-total>${esc(money(total))}</dd></div><div><dt>Paid</dt>${amt(paid)}</div><div><dt>Still owed</dt>${amt(r.owed, 'owe')}</div><div><dt>Tips</dt>${amt(r.tips)}</div></dl>`
+    : `<dl class="jn"><div style="grid-column:span 2"><dt>Expected if confirmed</dt><dd data-job-expected>${r.hasPrice ? esc(money(r.expected)) : 'No price yet'}</dd></div><div><dt>Tips</dt>${amt(r.tips)}</div></dl>`;
+  const dep = includeDeposits && r.refundable ? `<div class="dep" data-job-deposit>Total includes ${esc(money(r.refundable))} deposit (given back later)</div>` : '';
+  return `<li class="job${r.confirmed ? '' : ' unconf'}" data-job data-confirmed="${r.confirmed ? 1 : 0}" data-job-key="${esc(r.key)}">
+    <div class="jt">${name}${chips(r.services)}${r.confirmed ? '' : '<span class="nc" data-not-confirmed>Not confirmed</span>'}</div>
+    <div class="jd">${esc(dayWords(r.date))}${r.number ? ` · ${esc(r.number)}` : ''}</div>${nums}${dep}</li>`;
+}
+
+export function moneyPage({ month, year, state, today = '', requestsThisMonth = 0, t, sum, shown, months, needs, expenses = [], tips = [], depositsHeld, flash = '', error = '', notPaid = null }) {
+  const here = moneyHref(state);
+  const back = encodeURIComponent(here);
+  const all = state.view === 'all';
+  const detail = (what) => `/admin/money/detail?${all ? 'view=all&amp;' : ''}month=${month}&amp;what=${encodeURIComponent(what)}&amp;back=${back}`;
+  const fig = (what, label, value, sub = '', cls = '') => `<a class="fig${cls ? ` ${cls}` : ''}" href="${detail(what)}"${tip('mon.total')}><span class="fl">${esc(label)}</span><span class="fv" data-total="${esc(what)}">${esc(value)}</span>${sub ? `<span class="fs">${esc(sub)}</span>` : ''}</a>`;
+  const depSub = sum.includeDeposits ? (sum.depositsIn ? `includes ${money(sum.depositsIn)} deposit (given back later)` : '') : (sum.depositsIn ? `leaves out ${money(sum.depositsIn)} of damage deposits` : '');
+  const thisMonth = today.slice(0, 7);
   const max = Math.max(1, ...months.map((m) => m.received));
-  return layout('Money', `<style>${MONEY_CSS}${CARD_CSS}</style>
+  const list = (rows) => `<ul class="mlist" data-jobs-list>${rows.map((r) => jobRow(r, state)).join('')}</ul>`;
+  const jobsHtml = all
+    ? `${shown.upcoming.length ? `<h3 class="grp" data-group="upcoming">Upcoming</h3>${list(shown.upcoming)}` : ''}${shown.past.length ? `<h3 class="grp" data-group="past">Past</h3>${list(shown.past)}` : ''}${shown.list.length ? '' : '<p class="muted">No jobs yet.</p>'}`
+    : (shown.list.length ? list(shown.list) : `<p class="muted">No jobs in ${esc(monthName(month))}.</p>`);
+  const tipRow = (x) => `<a class="row" href="/admin/money/tips/${x.id}?back=${back}"${tip('tip.open')} data-tip-row><span class="rw"><strong>${esc(TIP_METHODS[x.method] || 'Other')}</strong> · ${esc(shortDate(x.date))}${x.job_label ? `<div class="muted">${esc(x.job_label)}</div>` : ''}${x.note ? `<div class="muted">${esc(x.note)}</div>` : ''}</span><span class="ra">${esc(money(x.amount_cents))}</span></a>`;
+  const expRow = (e) => `<a class="row" href="/admin/money/expenses/${e.id}"${tip('exp.open')} data-expense-row><span class="rw"><strong>${esc(e.vendor || 'Expense')}</strong><div class="muted">${esc(shortDate(e.date))} · ${esc(e.category)}</div></span><span class="ra">${esc(money(e.total_cents))}</span></a>`;
+  return layout('Money', `<style>${MONEY_CSS}${CARD_CSS}${CALM_CSS}</style>
     ${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
-    ${moneyPanel()}
-    ${notPaid ? notPaidBox(notPaid) : ''}
-    <h1>Money: ${esc(monthName(month))}</h1>
-    <div class="monthbar">
-      <a class="btn ghost" href="/admin/money?month=${shift(month, -1)}"${tip('mon.prev')}>&lsaquo; Previous</a>
-      <a class="btn ghost" href="/admin/money"${tip('mon.this')}>This month</a>
-      <a class="btn ghost" href="/admin/money?month=${shift(month, 1)}"${tip('mon.next')}>Next &rsaquo;</a>
-    </div>
-    <section class="card">
-      ${tot('received', 'Money received', `Money received: ${money(t.received)}`, t.depositsIn ? `includes ${money(t.depositsIn)} of damage deposits (not income)` : '')}
-      ${tot('owed', "Still owed for this month's jobs", `Still owed for this month's jobs: ${money(t.owed)}`)}
-      ${tot('jobs', 'Jobs this month', `Jobs this month: ${t.jobs}`)}
-      <div class="tot" data-requests-month><div class="muted">New requests that came in this month</div><div class="big">Requests this month: ${esc(String(requestsThisMonth))}</div></div>
-      ${tot('expenses', 'Expenses', `Expenses: ${money(t.expenses)}`)}
-      <div class="tot" data-left><div class="muted">A simple difference (income minus expenses), not profit or tax</div><div class="big">Left after expenses: ${esc(money(t.left))}</div></div>
-      <h3>By service</h3>
-      ${CATEGORY_KEYS.map((k) => tot(`category:${k}`, CATEGORY_LABELS[k], `${CATEGORY_LABELS[k]}: ${money(t.byCategory[k] || 0)}`)).join('')}
-      ${tot('deposits', 'Damage deposits (never income)', `Damage deposits held: ${money(depositsHeld)} · refunded: ${money(t.depositRefunds)}`, t.kept ? `kept for damage this month: ${money(t.kept)} (income)` : '')}
+    <div class="mhead"><h1>Money</h1></div>
+    <section data-money-controls>
+      <nav class="seg" aria-label="Show">
+        <a class="${all ? '' : 'on'}" href="${esc(moneyHref(state, { view: 'month' }))}"${all ? '' : ' aria-current="page"'}${tip('mon.viewMonth')}>By month</a>
+        <a class="${all ? 'on' : ''}" href="${esc(moneyHref(state, { view: 'all' }))}"${all ? ' aria-current="page"' : ''}${tip('mon.viewAll')}>All jobs</a>
+      </nav>
+      ${all ? '' : `<div class="mnav" data-month="${esc(month)}"><a class="arrow" href="${esc(moneyHref(state, { month: shift(month, -1) }))}" aria-label="Previous month"${tip('mon.prev')}>&lsaquo;</a><strong>${esc(monthName(month))}</strong><a class="arrow" href="${esc(moneyHref(state, { month: shift(month, 1) }))}" aria-label="Next month"${tip('mon.next')}>&rsaquo;</a></div>
+      ${month !== thisMonth ? `<p class="thism"><a href="${esc(moneyHref(state, { month: thisMonth }))}"${tip('mon.this')}>Back to this month</a></p>` : ''}`}
+      <form class="ticks" method="get" action="/admin/money" data-ticks>
+        ${all ? '<input type="hidden" name="view" value="all">' : `<input type="hidden" name="month" value="${esc(month)}">`}<input type="hidden" name="f" value="1">
+        <label class="tick"><input type="checkbox" name="unconf" value="1"${state.includeUnconfirmed ? ' checked' : ''} onchange="this.form.submit()" data-tick="unconf"${tip('mon.unconf')}><span>Include unconfirmed jobs<small>Requests you have not said yes to yet. They show grey, and their price is counted apart.</small></span></label>
+        <label class="tick"><input type="checkbox" name="deposits" value="out"${state.includeDeposits ? '' : ' checked'} onchange="this.form.submit()" data-tick="deposits"${tip('mon.refundables')}><span>Leave out refundable deposits<small>Damage deposits ($50) are given back, so they are not your money</small></span></label>
+        <noscript><button class="btn ghost" type="submit"${tip('mon.apply')}>Show</button></noscript>
+      </form>
     </section>
-    <section class="card"><h2>Expenses</h2>
-      <ol class="steps"><li>Take a photo of the receipt (or pick one).</li><li>Check what the computer read — fix anything wrong.</li><li>Tap Save.</li></ol>
-      <div class="actions">
-        ${act(`<label class="btn primary"${tip('exp.add')}>Add a receipt<input id="receipt-input" type="file" accept="image/*,application/pdf" multiple style="display:none"></label>`, 'exp.add')}
-        ${act(`<a class="btn ghost" href="/admin/money/expenses/new"${tip('exp.manual')}>Type it in instead</a>`, 'exp.manual')}
+    <section class="figs" data-money-summary>
+      ${fig('received', all ? 'Money in (all time)' : 'Money in', money(sum.moneyIn), depSub, 'main')}
+      ${fig('owed', 'Still owed', money(sum.owed), all ? 'on booked jobs' : 'on this month\'s booked jobs', 'owe')}
+      ${fig('tips', 'Tips', money(sum.tips), 'on top of invoices')}
+      ${fig('expenses', 'Expenses', money(sum.expenses), '', 'exp')}
+      <div class="fig" data-left><span class="fl">Left after expenses</span><span class="fv">${esc(money(sum.left))}</span><span class="fs">money in + tips − expenses (not profit or tax)</span></div>
+      ${state.includeUnconfirmed ? `<div class="fig" data-expected style="border:2px dashed #b9aea3;background:#f6f3ef"><span class="fl">Expected if confirmed</span><span class="fv" data-total="expected">${esc(money(sum.expected))}</span><span class="fs">${sum.unconfirmedCount} not confirmed · not money in yet</span></div>` : ''}
+    </section>
+    ${notPaid ? notPaidBox(notPaid) : ''}
+    <section class="sect" data-jobs><h2>${all ? 'All jobs' : `Jobs in ${esc(monthName(month).split(' ')[0])}`}</h2>${jobsHtml}</section>
+    <section class="sect" id="tips" data-tips><div class="spread"><h2>Tips</h2><strong data-tips-total>${esc(money(sum.tips))}</strong></div>
+      <div class="two">${act(`<a class="btn" href="/admin/money/tips/new?back=${back}"${tip('mon.tipAdd')}>+ Record a tip</a>`, 'mon.tipAdd')}</div>
+      ${tips.length ? tips.map(tipRow).join('') : `<p class="muted" style="margin:0">No tips ${all ? 'yet' : 'this month'}. Tips are kept apart: never on an invoice, never owed.</p>`}
+    </section>
+    <section class="sect" id="expenses" data-expenses><div class="spread"><h2>Expenses</h2><strong>${esc(money(sum.expenses))}</strong></div>
+      <div class="two">
+        ${act(`<a class="btn" href="/admin/money/expenses/new"${tip('exp.manual')}>+ Add an expense</a>`, 'exp.manual')}
+        ${act(`<label class="btn ghost"${tip('exp.add')}>Upload a receipt<input id="receipt-input" type="file" accept="image/*,application/pdf" multiple style="display:none"></label>`, 'exp.add')}
       </div>
       <div id="receipt-state" class="muted" aria-live="polite"></div>
-      ${needs.length ? `<h3>Needs checking</h3>${needs.map((e) => `<a class="exp" href="/admin/money/expenses/${e.id}"${tip('exp.open')}><strong>${esc(e.vendor || 'Receipt')}</strong> · ${esc(e.date || 'no date')} · ${esc(money(e.total_cents))} <span class="money owe">Needs checking</span></a>`).join('')}` : ''}
-      <h3>Saved</h3>${recent.length ? recent.map((e) => `<a class="exp" href="/admin/money/expenses/${e.id}"${tip('exp.open')}><strong>${esc(e.vendor || 'Expense')}</strong> · ${esc(shortDate(e.date))} · ${esc(e.category)} · ${esc(money(e.total_cents))}</a>`).join('') : '<p class="muted">No expenses yet.</p>'}
+      ${needs.length ? `<a class="checkline" href="/admin/money/expenses/${needs[needs.length - 1].id}"${tip('exp.check')} data-check-receipts><span>Check ${needs.length} ${needs.length === 1 ? 'receipt' : 'receipts'}</span><span aria-hidden="true">&rsaquo;</span></a>` : ''}
+      ${expenses.length ? expenses.map(expRow).join('') : `<p class="muted" style="margin:0">No expenses ${all ? 'yet' : 'this month'}.</p>`}
     </section>
-    <section class="card"><h2>${esc(year)}, month by month</h2>
-      <div class="monthbar">
-        <a class="btn ghost" href="/admin/money?month=${month}&amp;year=${Number(year) - 1}"${tip('mon.yearPrev')}>&lsaquo; ${Number(year) - 1}</a>
-        ${act(`<a class="btn" href="/admin/money/year?year=${year}"${tip('mon.taxes')}>Year-end summary for taxes</a>`, 'mon.taxes')}
-        <a class="btn ghost" href="/admin/money?month=${month}&amp;year=${Number(year) + 1}"${tip('mon.yearNext')}>${Number(year) + 1} &rsaquo;</a>
-      </div>
-      <table class="sumlines" data-year-list>${months.map((m) => `<tr><td><a href="/admin/money?month=${m.month}"${tip('mon.month')}>${esc(monthName(m.month))}</a><div class="mbar" role="presentation"><span style="width:${Math.round((m.received / max) * 100)}%"></span></div></td>
-        <td class="amt">${esc(money(m.received))}<div class="muted">${m.jobs} ${m.jobs === 1 ? 'job' : 'jobs'}</div></td></tr>`).join('')}</table>
-    </section>
+    <details class="more" data-more-numbers><summary${tip('mon.more')}>More numbers: by service, deposits, month by month ›</summary>
+      <section class="sect">
+        <div class="row" data-requests-month><span class="rw">New requests that came in ${esc(monthName(month))}</span><span class="ra">Requests this month: ${esc(String(requestsThisMonth))}</span></div>
+        ${[['jobs', `Jobs ${all ? '(all time)' : 'this month'}`, String(t.jobs)], ...CATEGORY_KEYS.map((k) => [`category:${k}`, CATEGORY_LABELS[k], money(t.byCategory[k] || 0)]), ['deposits', 'Damage deposits held (never income)', `${money(depositsHeld)} · refunded ${money(t.depositRefunds)}${t.kept ? ` · kept ${money(t.kept)}` : ''}`]]
+    .map(([w, l, v]) => `<a class="row" href="${detail(w)}"${tip('mon.total')}><span class="rw">${esc(l)}</span><span class="ra" data-total="${esc(w)}">${esc(v)}</span></a>`).join('')}
+      </section>
+      <section class="sect"><h2>${esc(year)}, month by month</h2>
+        <div class="monthbar">
+          <a class="btn ghost" href="${esc(moneyHref(state, { year: Number(year) - 1 }))}"${tip('mon.yearPrev')}>&lsaquo; ${Number(year) - 1}</a>
+          <a class="btn ghost" href="/admin/money/year?year=${year}"${tip('mon.taxes')}>Taxes</a>
+          <a class="btn ghost" href="${esc(moneyHref(state, { year: Number(year) + 1 }))}"${tip('mon.yearNext')}>${Number(year) + 1} &rsaquo;</a>
+        </div>
+        <table class="sumlines" data-year-list>${months.map((m) => `<tr><td><a href="${esc(moneyHref(state, { view: 'month', month: m.month, year: '' }))}"${tip('mon.month')}>${esc(monthName(m.month))}</a><div class="mbar" role="presentation"><span style="width:${Math.round((m.received / max) * 100)}%"></span></div></td>
+          <td class="amt">${esc(money(m.received))}<div class="muted">${m.jobs} ${m.jobs === 1 ? 'job' : 'jobs'}</div></td></tr>`).join('')}</table>
+      </section>
+    </details>
+    ${moneyPanel()}
     <script>${UPLOAD_JS}</script>`, { screen: '', back: BACK_REQUESTS, panelWide: true });
 }
 
-export function detailPage({ month, what, t, byInv }) {
+// "+ Record a tip" and a tip's own page (change it, remove it, its history).
+export function tipForm({ tip: x, jobs = [], picked = '', jobValue, back = '/admin/money', log = [], error = '' }) {
+  const amount = x.amount_cents ? (x.amount_cents / 100).toFixed(2) : '';
+  return layout(x.id ? 'Change a tip' : 'Record a tip', `<style>${MONEY_CSS}${CARD_CSS}${CALM_CSS}</style>
+    <h1>${x.id ? 'Change a tip' : 'Record a tip'}</h1>
+    ${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+    <p class="muted">A tip is money on top of the invoice. It is kept apart: never on the invoice, never owed.</p>
+    <form class="sect" method="post" action="/admin/money/tips${x.id ? `/${x.id}` : ''}" data-tip-form>
+      <input type="hidden" name="back" value="${esc(back)}">
+      <label for="t-amount">How much? ($)</label><input id="t-amount" name="amount" inputmode="decimal" required value="${esc(amount)}" placeholder="20.00"${tip('tip.amount')}>
+      <label for="t-date">Date</label><input id="t-date" name="date" type="date" value="${esc(x.date)}"${tip('tip.date')}>
+      <label>How did they give it?</label>
+      <div class="radios">${Object.entries(TIP_METHODS).map(([v, l]) => `<label><input type="radio" name="method" value="${v}"${x.method === v ? ' checked' : ''}${tip('tip.method')}>${esc(l)}</label>`).join('')}</div>
+      <label for="t-job">Which job? (optional)</label><select id="t-job" name="job"${tip('tip.job')}><option value="|">Not for a particular job</option>${jobs.map((j) => `<option value="${esc(jobValue(j))}"${jobValue(j) === picked ? ' selected' : ''}>${esc(j.name)}${j.date ? ` · ${esc(shortDate(j.date))}` : ''}</option>`).join('')}</select>
+      <label for="t-note">Note (optional)</label><textarea id="t-note" name="note" rows="2">${esc(x.note || '')}</textarea>
+      <div style="margin-top:16px">${act(`<button class="btn primary" type="submit"${tip('tip.save')}>${x.id ? 'Save the change' : 'Save the tip'}</button>`, 'tip.save')}</div>
+    </form>
+    ${x.id ? confirmStep({ key: 'tip.delete', yesKey: 'tip.deleteYes', label: 'Remove this tip', question: `Remove this ${money(x.amount_cents)} tip? It comes off the totals; its history stays.`, action: `/admin/money/tips/${x.id}/delete`, hidden: hiddenInputs({ back }), danger: true }) : ''}
+    ${log.length ? `<section class="sect" data-history><h2>History</h2><ul class="hist">${log.map((h) => `<li><strong>${esc(h.action)}</strong> · ${esc(String(h.at).slice(0, 16))}${h.detail ? `<div class="muted">${esc(h.detail)}</div>` : ''}</li>`).join('')}</ul></section>` : ''}`,
+  { screen: 'tip', back: { href: back, label: 'Back to Money' } });
+}
+
+export function detailPage({ month, what, t, byInv, all = false, back = '' }) {
   let title = ''; let rows = '';
   const payRow = (p) => { const x = byInv[p.invoice_id]; return `<tr><td>${esc(shortDate(p.received_on))} · ${esc(x ? x.inv.customer_name : '')} <span class="muted">${esc(x ? x.inv.number : '')}</span><div class="muted">${esc(p.kind === 'payment' ? (METHOD_LABELS[p.method] || p.method || 'Not recorded') : p.note)}</div></td><td class="amt">${esc(money(p.amount_cents))}</td></tr>`; };
   if (what === 'received') { title = 'Money received'; rows = t.payments.filter((p) => p.kind === 'payment').map(payRow).join(''); }
   else if (what === 'deposits') { title = 'Damage deposits'; rows = t.payments.filter((p) => p.deposit > 0 || p.kind !== 'payment').map(payRow).join(''); }
   else if (what === 'owed') { title = "Still owed for this month's jobs"; rows = t.owedList.map((o) => `<tr><td><a href="/admin/invoices/${o.invoice.id}"${tip('card.openInvoice')}>${esc(o.invoice.customer_name)}</a> · ${esc(KIND_LABELS[o.booking.kind])} ${esc(shortDate(o.booking.date))}</td><td class="amt">${esc(money(o.owed))}</td></tr>`).join(''); }
   else if (what === 'jobs') { title = 'Jobs this month'; rows = t.jobList.map((b) => `<tr><td><a href="/admin/day/${esc(b.date)}"${tip('cal.day')}>${esc(shortDate(b.date))}</a> · ${esc(KIND_LABELS[b.kind])} · ${esc(b.customer_name)}</td><td></td></tr>`).join(''); }
+  else if (what === 'tips') { title = 'Tips'; rows = t.tipList.map((x) => `<tr><td><a href="/admin/money/tips/${x.id}"${tip('tip.open')}>${esc(shortDate(x.date))} · ${esc(TIP_METHODS[x.method] || 'Other')}</a>${x.job_label ? `<div class="muted">${esc(x.job_label)}</div>` : ''}</td><td class="amt">${esc(money(x.amount_cents))}</td></tr>`).join(''); }
   else if (what === 'expenses') { title = 'Expenses'; rows = t.expenseList.map((e) => `<tr><td><a href="/admin/money/expenses/${e.id}"${tip('exp.open')}>${esc(e.vendor || 'Expense')}</a> · ${esc(shortDate(e.date))} · ${esc(e.category)}</td><td class="amt">${esc(money(e.total_cents))}</td></tr>`).join(''); }
   else if (what.startsWith('category:')) {
     const k = what.slice(9); title = CATEGORY_LABELS[k] || 'Category';
     rows = t.payments.filter((p) => p.cats && p.cats[k]).map((p) => { const x = byInv[p.invoice_id]; return `<tr><td>${esc(shortDate(p.received_on))} · ${esc(x ? x.inv.customer_name : '')}</td><td class="amt">${esc(money(p.cats[k]))}</td></tr>`; }).join('');
   }
-  return layout(title || 'Money', `<style>${MONEY_CSS}</style><h1>${esc(title)}: ${esc(monthName(month))}</h1><div class="card"><table class="sumlines" data-detail>${rows || '<tr><td>Nothing this month.</td><td></td></tr>'}</table></div>`,
-    { screen: 'moneyDetail', back: { href: `/admin/money?month=${month}`, label: 'Back to Money' } });
+  const backHref = /^\/admin\/money(\?[^#\s]*)?$/.test(back) ? back : (all ? '/admin/money?view=all' : `/admin/money?month=${month}`);
+  return layout(title || 'Money', `<style>${MONEY_CSS}</style><h1>${esc(title)}: ${esc(all ? 'all time' : monthName(month))}</h1><div class="card"><table class="sumlines" data-detail>${rows || `<tr><td>Nothing ${all ? 'yet' : 'this month'}.</td><td></td></tr>`}</table></div>`,
+    { screen: 'moneyDetail', back: { href: backHref, label: 'Back to Money' } });
 }
 
-export function expenseForm({ expense: e, cats, conf, manual }) {
+export function expenseForm({ expense: e, cats, conf, manual, log = [] }) {
   const low = (k) => !manual && e.status === 'needs_check' && (conf[k] === undefined || conf[k] < LOW_CONFIDENCE);
   const field = (k, label, html) => `<div${low(k) ? ' class="amberbox"' : ''}><label for="f-${k}">${esc(label)}</label>${html}${low(k) ? '<div class="amber-note" data-check>Please check this</div>' : ''}</div>`;
   const cls = (k) => (low(k) ? ' class="amber"' : '');
-  return layout(e.id ? 'Check a receipt' : 'Type in an expense', `<style>${MONEY_CSS}</style>
-    <h1>${e.id ? (e.status === 'saved' ? 'Change an expense' : 'Check what the computer read') : 'Type in an expense'}</h1>
+  return layout(e.id ? 'Check a receipt' : 'Add an expense', `<style>${MONEY_CSS}${CALM_CSS}</style>
+    <h1>${e.id ? (e.status === 'saved' ? 'Change an expense' : 'Check what the computer read') : 'Add an expense'}</h1>
     ${conf.message ? `<div class="notice warn">${esc(conf.message)}</div>` : ''}
     ${e.status === 'needs_check' && e.id ? '<div class="notice warn"><strong>Needs checking.</strong> Nothing is saved until you tap Save.</div>' : ''}
     ${e.receipt_key ? `<div class="card">${/pdf/.test(e.receipt_type) ? '' : `<img src="/admin/money/expenses/${e.id}/receipt" alt="The receipt" style="max-width:100%;border-radius:10px">`}
@@ -156,7 +290,8 @@ export function expenseForm({ expense: e, cats, conf, manual }) {
       <label for="f-note">Note (optional)</label><textarea id="f-note" name="note" rows="3">${esc(e.note || '')}</textarea>
       <div style="margin-top:16px">${act(`<button class="btn primary" type="submit"${tip('exp.save')}>Save</button>`, 'exp.save')}</div>
     </form>
-    ${e.id ? confirmStep({ key: 'exp.delete', yesKey: 'exp.deleteYes', label: 'Delete this expense', question: 'Are you sure? The expense and its receipt picture will be gone for good.', action: `/admin/money/expenses/${e.id}/delete`, hidden: '', danger: true }) : ''}`,
+    ${e.id ? confirmStep({ key: 'exp.delete', yesKey: 'exp.deleteYes', label: 'Delete this expense', question: 'Are you sure? The expense and its receipt picture will be gone for good.', action: `/admin/money/expenses/${e.id}/delete`, hidden: '', danger: true }) : ''}
+    ${log.length ? `<section class="card" data-history><h2>History</h2><ul class="hist">${log.map((h) => `<li><strong>${esc(h.action)}</strong> · ${esc(String(h.at).slice(0, 16))}${h.detail ? `<div class="muted">${esc(h.detail)}</div>` : ''}</li>`).join('')}</ul></section>` : ''}`,
   { screen: 'expense', back: { href: '/admin/money', label: 'Back to Money' } });
 }
 

@@ -334,7 +334,13 @@ const inv = await s.invoiceFor(reqA, { go: 'send' });
 await s.db.prepare("UPDATE invoices SET due_date = '2020-01-01' WHERE id = ?1").bind(inv.id).run();
 const money = (await s.get('/admin/money')).text;
 const npBox = money.slice(money.indexOf('data-not-paid-box'), money.indexOf('</section>', money.indexOf('data-not-paid-box')));
-must(money.indexOf('data-not-paid-box') > -1 && money.indexOf('data-not-paid-box') < money.indexOf('<h1>Money'), 'Not paid yet is not at the top of Money');
+// Calm Money (19 Oct 2026): the big numbers first, then Not paid yet straight under them, before
+// every list (jobs, tips, expenses, more numbers).
+{
+  const at = (m) => money.indexOf(m);
+  must(at('data-money-summary') > -1 && at('data-not-paid-box') > at('data-money-summary') && ['data-jobs', 'data-tips', 'data-expenses', 'data-more-numbers', 'data-steps-panel'].every((m) => at(m) > at('data-not-paid-box')), 'Not paid yet is not right under the big numbers, above every list on Money');
+  must(!money.slice(at('data-money-summary'), at('data-not-paid-box')).includes('<section class="sect"'), 'a list sits between the big numbers and Not paid yet');
+}
 must(npBox.includes('Test Renter') && /days late/.test(npBox) && /class="late"/.test(npBox), 'the overdue customer is not listed red with "days late"');
 must(/>Call</.test(npBox) && /href="sms:\d+\?&amp;body=[^"]*still%20due[^"]*PNP-/.test(npBox) && />Email a reminder</.test(npBox) && />Open invoice</.test(npBox) && />Mark paid</.test(npBox), 'a Not paid yet row lacks Call / Text a reminder / Email a reminder / Open invoice / Mark paid');
 must(/data-not-paid-total>1 customer owes \$[\d,.]+ in all/.test(npBox), 'no total line');

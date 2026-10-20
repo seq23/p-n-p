@@ -62,6 +62,8 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
   const jobsDone = new Set((done || []).map((d) => d.request_key)).size + returnedLastWeek;
   const received = (await db.prepare("SELECT COALESCE(SUM(amount_cents), 0) AS c FROM payments WHERE voided_at IS NULL AND kind = 'payment' AND received_on BETWEEN ?1 AND ?2").bind(lastMon, lastSun).first()).c;
   const expenses = (await db.prepare("SELECT COALESCE(SUM(total_cents), 0) AS c FROM expenses WHERE status = 'saved' AND date BETWEEN ?1 AND ?2").bind(lastMon, lastSun).first()).c;
+  // Tips (tips table, migration 0019): their own figure, never part of money received.
+  const tips = await db.prepare('SELECT COALESCE(SUM(amount_cents), 0) AS c FROM tips WHERE removed_at IS NULL AND date BETWEEN ?1 AND ?2').bind(lastMon, lastSun).first().then((r) => r.c).catch(() => 0);
   // The next 14 days.
   const all = await listBookings(db);
   const voidKeys = new Set(Object.values(statuses).filter((s) => s.status === 'void').map((s) => s.request_key));
@@ -106,7 +108,7 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
   const unconfirmed = requests.filter((r) => unconf.has(r.key));
   return {
     week: { start: thisMon, end: thisSun }, upcoming: { start: thisMon, end: lastDay }, lastWeek: { start: lastMon, end: lastSun },
-    last: { byService: wk.lastByService, total: wk.lastWeek.length, jobsDone, received, expenses },
+    last: { byService: wk.lastByService, total: wk.lastWeek.length, jobsDone, received, tips, expenses },
     this: { days, toCollect: toCollect.reduce((s, r) => s + r.owed, 0), toCollectCount: toCollect.length },
     needs: {
       holds: holds.map((h) => shortName(h.name)), overdue: overdue.map((b) => shortName(b.customer_name)), damage: damage.map((r) => shortName(r.name)),
@@ -126,7 +128,7 @@ export function renderSummary(d) {
   sec(`Last week (${dayWord(d.lastWeek.start)} – ${dayWord(d.lastWeek.end)})`);
   line(`New requests: ${d.last.total}${svc ? ` (${svc})` : ''}`, '/admin/');
   line(`Jobs done: ${d.last.jobsDone}`, '/admin/calendar');
-  line(`Money received: ${money(d.last.received)}`, '/admin/money');
+  line(`Money received: ${money(d.last.received)} · tips: ${money(d.last.tips || 0)}`, '/admin/money');
   line(`Expenses: ${money(d.last.expenses)}`, '/admin/money');
   sec(`Next 14 days (${dayWord(d.upcoming.start)} – ${dayWord(d.upcoming.end)})`);
   if (!d.this.days.length) line('Nothing booked in the next 14 days.', '/admin/calendar');

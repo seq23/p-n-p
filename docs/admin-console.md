@@ -462,6 +462,26 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   availability, the calendar, the Day sheet and the clash checks count it; removing the line frees it.
 - Proof: `npm run validate:admin-step-cards` (in validate:admin).
 
+## Money tab (calm layout, owner-approved 19 Oct 2026)
+- **Order**: the big numbers (Money in, Still owed, Tips, Expenses, Left after expenses; plus
+  "Expected if confirmed" when ticked), then **Not paid yet**, then Jobs, Tips, Expenses, and
+  "More numbers" (by service, deposits held, requests this month, month by month, taxes).
+- **View** (kept in the URL): `By month` (`?month=YYYY-MM`, ‹ ›, this month by default) or
+  `All jobs` (`?view=all`: Upcoming nearest first, then Past newest first). A job row shows name,
+  service chip, date, total, paid, still owed, tips (`jobRows` / `viewRows` in `money.mjs`).
+- **Include unconfirmed jobs** (`unconf=1`, default off): requests not confirmed by the rule in
+  `steps.mjs` show dashed, "Not confirmed"; their invoice charges go only into "Expected if
+  confirmed", never into Money in or Still owed.
+- **Leave out refundable deposits** (default on; `deposits=in` turns it off): Money in = charges
+  received + deposits kept for damage; off, everything received, labelled "deposit (given back
+  later)". A deposit is never owed.
+- **Tips** (table `tips`, migration 0019): "+ Record a tip" (amount, date, Cash / Zelle / Cash App /
+  Other, optional recent job, note). Never a payment, never on an invoice or in its balance, never
+  owed; on the job row, the request card history and the Monday summary ("· tips: $X").
+- **Expenses**: "+ Add an expense" (by hand) and "Upload a receipt" (read by Workers AI, checked
+  and saved by her; "Check N receipts" while any wait). Tip and expense changes are kept in
+  `money_history` and shown under History. `npm run validate:admin-money-calm` proves all of it.
+
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 Legacy intake: the site's /request form replaced it and takes its choices from the live inventory.
 Old answers keep these strings forever, so each must still name an item (available or removed)

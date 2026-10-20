@@ -835,6 +835,16 @@ async function routeAdmin(context) {
     if (segs[1] === 'year.csv' && method === 'GET') return AM.yearCsv(env, url);
     if (segs[1] === 'year' && segs[2] === 'email' && method === 'POST') return AM.yearEmail(env, url);
     if (segs[1] === 'receipts.zip' && method === 'GET') return AM.receiptsZip(env, url);
+    if (segs[1] === 'tips') {
+      if (segs.length === 2 && method === 'POST') return AM.saveTip(env, request, null);
+      if (segs[2] === 'new' && segs.length === 3 && method === 'GET') return AM.tipPage(env, url, 'new');
+      const tid = Number(segs[2]);
+      if (Number.isInteger(tid) && tid > 0) {
+        if (segs.length === 3 && method === 'GET') return AM.tipPage(env, url, tid);
+        if (segs.length === 3 && method === 'POST') return AM.saveTip(env, request, tid);
+        if (segs[3] === 'delete' && method === 'POST') return AM.removeTip(env, request, tid);
+      }
+    }
     if (segs[1] === 'expenses') {
       if (segs.length === 2 && method === 'POST') return AM.saveExpense(env, request, null);
       if (segs[2] === 'new' && method === 'GET') return AM.expensePage(env, 'new');

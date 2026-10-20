@@ -6,11 +6,14 @@
 // (payments.received_on is written with chicagoDate()).
 import { lineTotal } from './util.mjs';
 import { SERVICE_KINDS, serviceOfLine, serviceOfKind } from './kinds.mjs';
+import { askedDate } from './requested.mjs';
 
 export const CATEGORY_KEYS = [...Object.keys(SERVICE_KINDS), 'other'];
 export const CATEGORY_LABELS = {
   rentals: 'Rentals', porch: 'Porch decorating', party: 'Party & decor', grazing: 'Grazing tables', other: 'Other',
 };
+// How a tip was given (tips table, migration 0019). A tip is never a payment on an invoice.
+export const TIP_METHODS = { cash: 'Cash', zelle: 'Zelle', cashapp: 'Cash App', other: 'Other' };
 export const METHOD_LABELS = { zelle: 'Zelle', cashapp: 'Cash App', cash: 'Cash', card: 'Card', other: 'Other', unknown: 'Not recorded' };
 export const DEFAULT_EXPENSE_CATEGORIES = ['Supplies & decor', 'Food for grazing tables', 'Game equipment', 'Gas & mileage', 'Advertising', 'Rentals & storage', 'Fees (Zelle/Cash App/bank)', 'Other'];
 export const START_KINDS = new Set(['rental_pickup', 'porch_install', 'party_setup', 'grazing_setup', 'other']);
@@ -28,17 +31,19 @@ export function methodKey(m) {
 
 export async function loadMoneyData(db, { rentalLine } = {}) {
   const q = async (sql) => (await db.prepare(sql).all()).results || [];
-  const [invoices, lines, payments, bookings, statuses, expenses] = await Promise.all([
+  const [invoices, lines, payments, bookings, statuses, expenses, tips] = await Promise.all([
     q('SELECT * FROM invoices'), q('SELECT * FROM invoice_lines ORDER BY invoice_id, position, id'),
     q('SELECT * FROM payments WHERE voided_at IS NULL ORDER BY invoice_id, received_on, id'),
     q('SELECT * FROM bookings ORDER BY date, id'), q('SELECT * FROM request_status'),
     q("SELECT * FROM expenses WHERE status = 'saved' ORDER BY date, id"),
+    // Before migration 0019 is applied the table is missing: no tips, never an error page.
+    q('SELECT * FROM tips WHERE removed_at IS NULL ORDER BY date, id').catch(() => []),
   ]);
-  return prepare({ invoices, lines, payments, bookings, statuses, expenses, rentalLine });
+  return prepare({ invoices, lines, payments, bookings, statuses, expenses, tips, rentalLine });
 }
 
 // Split each invoice's charges by service, and each payment into charge and deposit parts.
-export function prepare({ invoices, lines, payments, bookings = [], statuses = [], expenses = [], rentalLine = null }) {
+export function prepare({ invoices, lines, payments, bookings = [], statuses = [], expenses = [], tips = [], rentalLine = null }) {
   const byInv = {};
   for (const inv of invoices) byInv[inv.id] = { inv, lines: [], charges: 0, refundable: 0, cats: {} };
   for (const l of lines) {
@@ -64,7 +69,7 @@ export function prepare({ invoices, lines, payments, bookings = [], statuses = [
     running[p.invoice_id] = before + p.amount_cents;
     allocated.push({ ...p, kind, charge, deposit: p.amount_cents - charge, cats: splitByShare(charge, x.cats, x.charges) });
   }
-  return { byInv, payments: allocated, bookings, statuses, expenses };
+  return { byInv, payments: allocated, bookings, statuses, expenses, tips: tips.filter((t) => !t.removed_at) };
 }
 
 // Largest-remainder split so the parts always add up to the whole, to the cent.
@@ -86,6 +91,7 @@ export function periodTotals(data, prefix) {
   const out = {
     received: 0, revenue: 0, byCategory: Object.fromEntries(CATEGORY_KEYS.map((k) => [k, 0])), byMethod: {},
     depositsIn: 0, refunds: 0, depositRefunds: 0, kept: 0, payments: [], jobs: 0, jobList: [], owed: 0, owedList: [], expenses: 0, expenseList: [], expenseByCategory: {},
+    tips: 0, tipList: [],
   };
   for (const p of data.payments) {
     if (!inPeriod(p.received_on, prefix)) continue;
@@ -115,8 +121,99 @@ export function periodTotals(data, prefix) {
     out.expenses += e.total_cents; out.expenseList.push(e);
     out.expenseByCategory[e.category] = (out.expenseByCategory[e.category] || 0) + e.total_cents;
   }
+  // Tips: their own line, never part of received, revenue, owed or an invoice balance.
+  for (const t of data.tips || []) {
+    if (!inPeriod(t.date, prefix)) continue;
+    out.tips += t.amount_cents; out.tipList.push(t);
+  }
   out.left = out.revenue + out.kept - out.expenses;
   return out;
+}
+
+// ---- The calm Money tab (owner-approved 19 Oct 2026) -----------------------------------------
+// One row per job: its name, services, date, total, paid, still owed and tips. A job is a
+// request (or a booking made without one) with a first booking, an invoice, or (unconfirmed
+// only) just the day it asked for. Void requests and invoices are never jobs. Money per job
+// comes from the payments record via prepare(): a payment covers the charges first, the rest is
+// the refundable damage deposit. Still owed is charges minus paid and never includes a deposit
+// or a tip. confirmed follows steps.mjs (unconfirmed: a Set of request keys from unconfirmedKeys).
+export function jobRows(data, { requests = [], unconfirmed = new Set() } = {}) {
+  const st = Object.fromEntries((data.statuses || []).map((s) => [s.request_key, s]));
+  const voidKey = (k) => Boolean(k && st[k] && st[k].status === 'void');
+  const reqBy = Object.fromEntries(requests.map((r) => [r.key, r]));
+  const groups = new Map();
+  const group = (id) => { if (!groups.has(id)) groups.set(id, { id, bookings: [], requestKey: '', invoiceId: null }); return groups.get(id); };
+  for (const b of data.bookings || []) {
+    if (!START_KINDS.has(b.kind) || voidKey(b.request_key)) continue;
+    const g = group(b.request_key ? `r:${b.request_key}` : (b.invoice_id ? `i:${b.invoice_id}` : `b:${b.id}`));
+    g.bookings.push(b); if (b.request_key) g.requestKey = b.request_key; if (b.invoice_id && !g.invoiceId) g.invoiceId = b.invoice_id;
+  }
+  for (const r of requests) {
+    if (r.isTest || voidKey(r.key)) continue;
+    const s = st[r.key] || {};
+    if (!(groups.has(`r:${r.key}`) || s.invoice_id || unconfirmed.has(r.key))) continue;
+    const g = group(`r:${r.key}`); g.requestKey = r.key; if (s.invoice_id) g.invoiceId = s.invoice_id;
+  }
+  const rows = [];
+  for (const g of groups.values()) {
+    const x = g.invoiceId ? data.byInv[g.invoiceId] : null;
+    if (x && x.inv.status === 'void') continue;
+    const r = g.requestKey ? reqBy[g.requestKey] : null;
+    const first = g.bookings.slice().sort((a, b) => String(a.date).localeCompare(String(b.date)))[0] || null;
+    const services = [...new Set([...g.bookings.map((b) => serviceOfKind(b.kind)), ...((r && r.services) || []), ...(x ? Object.keys(x.cats) : [])])].filter((k) => k && k !== 'other');
+    const date = first ? first.date : (r ? (services.map((k) => askedDate(r, k)).find(Boolean) || '') : '');
+    const pays = x ? data.payments.filter((p) => p.invoice_id === x.inv.id && p.kind === 'payment') : [];
+    const paidCharges = pays.reduce((n, p) => n + p.charge, 0);
+    const paidDeposit = pays.reduce((n, p) => n + p.deposit, 0);
+    const tips = (data.tips || []).filter((t) => (g.requestKey && t.request_key === g.requestKey) || (x && t.invoice_id === x.inv.id));
+    const confirmed = !(g.requestKey && unconfirmed.has(g.requestKey));
+    const charges = x ? x.charges : 0;
+    rows.push({
+      key: g.id, requestKey: g.requestKey, invoiceId: x ? x.inv.id : null, number: x ? x.inv.number : '',
+      name: (x && x.inv.customer_name) || (r && r.name) || (first && first.customer_name) || 'No name',
+      services: services.length ? services : ['other'], date, confirmed, hasPrice: Boolean(x),
+      charges, refundable: x ? x.refundable : 0, paidCharges, paidDeposit,
+      owed: confirmed ? Math.max(0, charges - paidCharges) : 0,
+      expected: confirmed ? 0 : charges,
+      tips: tips.reduce((n, t) => n + t.amount_cents, 0), tipCount: tips.length,
+    });
+  }
+  return rows;
+}
+
+// The rows a view shows. view 'month' (with month 'YYYY-MM') or 'all'. Unconfirmed rows only
+// when includeUnconfirmed. 'all' is grouped: upcoming (nearest first) then past (newest first).
+export function viewRows(rows, { view = 'month', month = '', today = '', includeUnconfirmed = false } = {}) {
+  const shown = rows.filter((r) => (includeUnconfirmed || r.confirmed) && (view === 'all' || String(r.date).startsWith(month)));
+  const by = (a, b) => String(a.date).localeCompare(String(b.date)) || a.name.localeCompare(b.name);
+  if (view !== 'all') return { list: shown.sort(by), upcoming: [], past: [] };
+  const upcoming = shown.filter((r) => r.date && r.date >= today).sort(by);
+  const past = shown.filter((r) => !r.date || r.date < today).sort((a, b) => by(b, a));
+  return { list: [...upcoming, ...past], upcoming, past };
+}
+
+// The big plain numbers at the top of Money for one view.
+//   moneyIn   payments received in the period. includeDeposits false (the default): the
+//             refundable damage deposits are left out (charges received + deposits kept for
+//             damage, which are income). true: everything received, deposits included.
+//   owed      still owed on the CONFIRMED jobs shown (charges only; never a deposit or a tip).
+//   tips      tips dated in the period, their own line.
+//   expected  unconfirmed jobs' invoice charges, only when includeUnconfirmed: never added to
+//             money in or owed.
+export function moneySummary(data, rows, { view = 'month', month = '', includeDeposits = false, includeUnconfirmed = false, today = '' } = {}) {
+  const t = periodTotals(data, view === 'all' ? '' : month);
+  const { list } = viewRows(rows, { view, month, today, includeUnconfirmed });
+  const confirmed = list.filter((r) => r.confirmed);
+  const moneyIn = includeDeposits ? t.received : t.revenue + t.kept;
+  return {
+    t, moneyIn, depositsIn: t.depositsIn, includeDeposits,
+    owed: confirmed.reduce((n, r) => n + r.owed, 0),
+    tips: t.tips, expenses: t.expenses,
+    left: t.revenue + t.kept + t.tips - t.expenses,
+    expected: includeUnconfirmed ? list.filter((r) => !r.confirmed).reduce((n, r) => n + r.expected, 0) : 0,
+    unconfirmedCount: list.filter((r) => !r.confirmed).length,
+    jobs: confirmed.length,
+  };
 }
 
 // Damage deposits still held at the end of a period (a liability, never income).
