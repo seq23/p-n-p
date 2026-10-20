@@ -199,11 +199,13 @@ export async function syncMoneyStatus(db, invoiceId) {
   const { results: lines } = await db.prepare('SELECT * FROM invoice_lines WHERE invoice_id = ?1').bind(invoiceId).all();
   const paid = (await paidByInvoice(db, [invoiceId]))[invoiceId] || 0;
   const bal = balanceOf(inv, lines || [], paid);
-  const next = bal.total > 0 && bal.remaining === 0 ? 'paid' : (bal.paid > 0 ? 'deposit_paid' : 'sent');
+  // No money left on an invoice that never went out (a payment taken on a draft, then removed):
+  // it is a Draft again, not "Sent", so Step 1 comes back on the card (progress.mjs pastFirstCall).
+  const next = bal.total > 0 && bal.remaining === 0 ? 'paid' : (bal.paid > 0 ? 'deposit_paid' : (inv.sent_at ? 'sent' : 'draft'));
   if (next !== inv.status) await db.prepare("UPDATE invoices SET status = ?2, updated_at = datetime('now') WHERE id = ?1").bind(invoiceId, next).run();
   if (inv.request_key) {
     await db.prepare("UPDATE request_status SET status = ?2, updated_at = datetime('now') WHERE request_key = ?1 AND status IN ('invoiced','deposit_paid','paid')")
-      .bind(inv.request_key, MONEY_STATUS[next]).run();
+      .bind(inv.request_key, next === 'draft' ? 'new' : MONEY_STATUS[next]).run();
   }
   return next;
 }

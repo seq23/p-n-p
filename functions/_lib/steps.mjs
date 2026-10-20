@@ -3,7 +3,8 @@
 // DERIVED from what already happened, so doing a thing anywhere (the invoice page, Money, the
 // Edit page, the Day sheet, Mark returned) ticks it here by itself:
 //   called        "Called back": request_steps.called_at (migration 0018), a phone-call request,
-//                 or any later step already done (nobody sends an invoice before talking)
+//                 or any later fact (progress.mjs pastFirstCall: invoice sent, money in, booked by
+//                 hand, picked up, job done) - derived, never written back, so undo restores it
 //   invoiced      the invoice went out (email or "texted"), or money already came in
 //   deposit       a deposit (or more) is recorded on Money
 //   setup         porch "Install done" / party, grazing "Setup done": request_status.job_done_at
@@ -19,6 +20,8 @@
 // The one place a request counts as CONFIRMED (its calendar chips solid, off the Unconfirmed
 // requests list): she answered "Yes, book it", or it came by phone, or money came in, or the job
 // is done. Everything else on the calendar is a tentative, outlined "Requested · not confirmed".
+
+import { pastFirstCall, bookedByHand } from './progress.mjs';
 
 export const STEP_LABELS = {
   called: 'Called back', invoiced: 'Invoice sent', deposit: 'Deposit paid',
@@ -110,7 +113,7 @@ export function deriveSteps({ r = {}, services = [], pr, inv = null, st = {}, bo
   const owed = bal ? bal.owed : 0;
   const extraPaid = services.includes('rentals') && !services.some((k) => DECOR.includes(k)) && picked && !paidFull && Boolean(inv);
   const plan = stepPlan(services, { extraPaid });
-  const later = sent || depositIn || jobDone || picked;
+  const later = pastFirstCall({ sent, depositIn, jobDone, picked, booked: bookedByHand(st, bookings) });
   const doneOf = {
     called: Boolean(stored && stored.called_at) || r.source === 'phone' || later,
     invoiced: sent, deposit: depositIn, setup: setupDone, takedown: facts.takedown.done, pickup: facts.pickup.done,

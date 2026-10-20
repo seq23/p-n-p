@@ -24,7 +24,7 @@ export async function requestFacts(db, today) {
   const [requests, stored, bals, returns] = await Promise.all([loadRequestsFromDb(db), loadStored(db), balances(db), loadReturns(db)]);
   const { results: st } = await db.prepare('SELECT * FROM request_status').all();
   const statuses = Object.fromEntries((st || []).map((x) => [x.request_key, x]));
-  const { results: bk } = await db.prepare('SELECT id, request_key, kind, date, time, done_at FROM bookings WHERE request_key IS NOT NULL').all();
+  const { results: bk } = await db.prepare('SELECT id, request_key, kind, date, time, done_at, edited_by_hand FROM bookings WHERE request_key IS NOT NULL').all();
   const bookingsBy = {};
   for (const b of bk || []) (bookingsBy[b.request_key] = bookingsBy[b.request_key] || []).push(b);
   const out = [];

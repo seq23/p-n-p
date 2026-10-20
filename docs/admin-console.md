@@ -511,6 +511,16 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
     "Called back" and the "Yes, book it" answer are stored: `request_steps` (migration 0018,
     additive; requests already Scheduled were backfilled as called + confirmed). The next step is
     the first one not done, except on the job's own day (setup / pickup), when the job comes first.
+  - **A later step ticks Step 1** (owner, 20 Oct 2026; `progress.mjs pastFirstCall`): once the
+    invoice went out (email or Mark as sent by text), a payment is recorded (even on the draft),
+    she put the job on the calendar herself (`progress.mjs bookedByHand`: the request is Scheduled,
+    or a first booking was made or moved by hand; the website's own pencilled game pickup / return
+    never counts), the games were picked up or the job is done, "Call or text <name> back" counts
+    as done by itself. Derived on every read, never written: no old row changes, and undoing the
+    later fact (Void then Bring back, "Mark as not paid", taking the booking off the calendar,
+    Undo job done) brings Step 1 back on the card, the callback list and the 7 AM email's "Call
+    these people back". A "Called back" she tapped stays. "Mark as not paid" on an invoice that
+    never went out makes it a Draft again (not "Sent"). Guard: `validate:admin-step-tick`.
   - Undo: a tap on the card is taken back there (Called back, Setup done, Takedown / Pickup done or
     not needed, Picked up, Returned via the check-in); a money or invoice step only explains where
     to change it (the invoice / Edit page). Nothing deletes a payment or an invoice.
