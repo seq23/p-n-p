@@ -99,10 +99,10 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   const page = (await s.get(`/admin/money/expenses/${up.json.id}`)).text;
   must(page.includes('Please check this') && page.includes('Needs checking'), 'low-confidence field (tax 0.4) is not highlighted');
   const money = (await s.get('/admin/money?month=2026-10')).text;
-  must(money.includes('Expenses: $0.00'), 'an unchecked receipt already counts in the totals (auto-saved)');
+  must(money.includes('data-total="expenses">$0.00<') && /data-check-receipts>[\s\S]{0,60}Check 1 receipt</.test(money), 'an unchecked receipt already counts in the totals (auto-saved), or is not offered as "Check 1 receipt"');
   await s.post(`/admin/money/expenses/${up.json.id}`, { vendor: 'Party City', date: '2026-10-12', total: '42.17', tax: '3.17', category: 'Supplies & decor', payment_method: 'card', note: '' });
   must((await s.one('SELECT status FROM expenses WHERE id = ?1', up.json.id)).status === 'saved', 'Save does not save');
-  must((await s.get('/admin/money?month=2026-10')).text.includes('Expenses: $42.17'), 'a saved expense is not in the month');
+  { const m = (await s.get('/admin/money?month=2026-10')).text; must(m.includes('data-total="expenses">$42.17<') && !m.includes('data-check-receipts') && /data-expense-row>[\s\S]{0,120}Party City[\s\S]{0,200}\$42\.17/.test(m), 'a saved expense is not in the month (total and its own row)'); }
   // Workers AI answers { response: {...} } (an object) when the model's text was JSON.
   s.env.aiReply.value = { vendor: 'Sample Party Supply Co', date: '2026-10-12', total: 30.44, tax: 2.7, suggested_category: 'Supplies & decor', confidence: { vendor: 1, date: 1, total: 1, tax: 1 } };
   const obj = await s.upload(PNG, 'image/jpeg');

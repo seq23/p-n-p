@@ -242,7 +242,7 @@ function confirmStep({ key, yesKey, label, question, action, hidden, danger = fa
 }
 const LABEL = { 'dep.refundYes': 'Yes, record the refund', 'dep.keepYes': 'Yes, keep it for damage', 'exp.deleteYes': 'Yes, delete the expense', 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
   'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'hold.releaseYes': 'Yes, release the games', 'hold.depositYes': 'Yes, mark deposit received', 'set.newTokenYes': 'Yes, make a new link', 'td.jobDoneYes': 'Yes, mark job done', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned',
-  'edit.removeBookingYes': 'Yes, remove the booking', 'edit.removePaymentYes': 'Yes, remove this payment' };
+  'edit.removeBookingYes': 'Yes, remove the booking', 'edit.removePaymentYes': 'Yes, remove this payment', 'tip.deleteYes': 'Yes, remove the tip' };
 
 const hiddenInputs = (obj) => Object.entries(obj).map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(v)}">`).join('');
 

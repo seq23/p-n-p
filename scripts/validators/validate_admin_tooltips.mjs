@@ -55,6 +55,9 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 const up1 = await s.upload(PNG, 'image/jpeg');
 const up2 = await s.upload(PNG, 'image/jpeg');
 await s.post(`/admin/money/expenses/${up2.json.id}`, { vendor: 'Party City', date: '2026-10-12', total: '42.17', tax: '3.17', category: 'Supplies & decor', payment_method: 'card', note: '' });
+// A tip (calm Money, 19 Oct 2026) so its list row, its page and Remove render.
+await s.post('/admin/money/tips', { amount: '20', date: '2026-10-12', method: 'zelle', job: '|', note: 'thank you', back: '/admin/money?month=2026-10' });
+const tipId = (await s.one('SELECT MAX(id) AS id FROM tips')).id;
 
 // Site-form rentals: one held (ending soon), one held by hand; a site porch job done with
 // the thank-you turned off; the deposit-received screen.
@@ -92,7 +95,8 @@ const screens = [
   ['/admin/nothing-here'],
   ['/admin/money'], ['/admin/money?month=2026-10'], ['/admin/money/year?year=2026'], ['/admin/money/expenses/new'],
   [`/admin/money/expenses/${up1.json.id}`], [`/admin/money/expenses/${up2.json.id}`],
-  ...['received', 'owed', 'jobs', 'expenses', 'deposits', 'category:rentals'].map((w) => [`/admin/money/detail?month=2026-10&what=${w}`]),
+  ['/admin/money?view=all&unconf=1&deposits=in'], ['/admin/money/tips/new'], [`/admin/money/tips/${tipId}`],
+  ...['received', 'owed', 'jobs', 'expenses', 'deposits', 'category:rentals', 'tips'].map((w) => [`/admin/money/detail?month=2026-10&what=${w}`]),
 ];
 // Archive one so Put away has rows (after the dashboard renders above are collected below).
 const pages = [...early];

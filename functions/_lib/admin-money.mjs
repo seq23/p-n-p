@@ -13,7 +13,8 @@ import * as S from './sheets-sync.mjs';
 import { accessToken, WRITE_SCOPES } from './sheet.mjs';
 import { balances, recordDepositOutcome } from './ledger.mjs';
 import { contextFor, statusMap } from './admin-calendar.mjs';
-import { listBookings } from './calendar.mjs';
+import { listBookings, loadReturns } from './calendar.mjs';
+import { unconfirmedKeys, loadStored } from './steps.mjs';
 import { renderYearPdf } from './pdf-year.mjs';
 import { makeZip } from './zip.mjs';
 import * as VM from './views-money.mjs';
@@ -23,15 +24,40 @@ export const moneyData = (db) => M.loadMoneyData(db, { rentalLine });
 const okMonth = (m) => (/^\d{4}-(0[1-9]|1[0-2])$/.test(String(m || '')) ? m : chicagoDate().slice(0, 7));
 const okYear = (y) => (/^\d{4}$/.test(String(y || '')) ? String(y) : chicagoDate().slice(0, 4));
 
+// The view on Money, remembered in the URL so a refresh keeps it (owner, 19 Oct 2026):
+//   view=all            All jobs (default: By month, month=YYYY-MM, this month by default)
+//   unconf=1            Include unconfirmed jobs (default off)
+//   deposits=in         count refundable damage deposits (default: left out). The tick-box form
+//                       sends f=1 and deposits=out while ticked, so an unticked box reads as "in".
+export function moneyState(url) {
+  const q = url.searchParams;
+  const view = q.get('view') === 'all' ? 'all' : 'month';
+  const includeDeposits = q.get('deposits') === 'in' || (q.get('f') === '1' && q.get('deposits') !== 'out');
+  return { view, month: okMonth(q.get('month')), includeUnconfirmed: q.get('unconf') === '1', includeDeposits };
+}
+
+// Every job row, with "confirmed" from the one rule in steps.mjs (same as the calendar).
+export async function moneyJobs(env, data, requests) {
+  const [statuses, bals, returns, stored] = await Promise.all([statusMap(env.DB), balances(env.DB), loadReturns(env.DB), loadStored(env.DB)]);
+  const unconfirmed = unconfirmedKeys({ requests, statuses, invoices: bals, returns, stored });
+  return M.jobRows(data, { requests, unconfirmed });
+}
+
 export async function moneyPage(env, url) {
-  const month = okMonth(url.searchParams.get('month'));
+  const state = moneyState(url);
+  const { month } = state;
   const year = url.searchParams.get('year') ? okYear(url.searchParams.get('year')) : month.slice(0, 4);
+  const today = chicagoDate();
   const data = await moneyData(env.DB);
   const { results: needs } = await env.DB.prepare("SELECT * FROM expenses WHERE status = 'needs_check' ORDER BY id DESC").all();
-  const { results: recent } = await env.DB.prepare("SELECT * FROM expenses WHERE status = 'saved' ORDER BY date DESC, id DESC LIMIT 30").all();
   const requests = await loadRequests(env).catch(() => []);
-  const notPaid = await notPaidYet(env.DB, requests, chicagoDate());
-  return htmlResponse(VM.moneyPage({ notPaid, month, year, requestsThisMonth: monthCount(requests, month), t: M.periodTotals(data, month), months: M.yearSummary(data, year).months, needs: needs || [], recent: recent || [], depositsHeld: M.depositsHeldAt(data, `${month}-31`), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+  const notPaid = await notPaidYet(env.DB, requests, today);
+  const rows = await moneyJobs(env, data, requests);
+  const sum = M.moneySummary(data, rows, { ...state, today });
+  const shown = M.viewRows(rows, { ...state, today });
+  const expenses = state.view === 'all' ? data.expenses.slice().reverse() : sum.t.expenseList.slice().reverse();
+  const tips = (state.view === 'all' ? data.tips : sum.t.tipList).slice().reverse();
+  return htmlResponse(VM.moneyPage({ notPaid, state, today, month, year, requestsThisMonth: monthCount(requests, month), t: sum.t, sum, shown, months: M.yearSummary(data, year).months, needs: needs || [], expenses, tips, depositsHeld: M.depositsHeldAt(data, `${month}-31`), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
 }
 
 // "Email a reminder" on Not paid yet: one tap, from hello@, logs reminded_at on the invoice.
@@ -52,9 +78,10 @@ export async function remindRoute(env, request) {
 
 export async function moneyDetail(env, url) {
   const month = okMonth(url.searchParams.get('month'));
+  const all = url.searchParams.get('view') === 'all';
   const what = String(url.searchParams.get('what') || 'received');
   const data = await moneyData(env.DB);
-  return htmlResponse(VM.detailPage({ month, what, t: M.periodTotals(data, month), byInv: data.byInv }));
+  return htmlResponse(VM.detailPage({ month, all, what, t: M.periodTotals(data, all ? '' : month), byInv: data.byInv, back: String(url.searchParams.get('back') || '') }));
 }
 
 export async function yearPage(env, url) {
@@ -149,7 +176,7 @@ export async function expensePage(env, id) {
   if (!e) return redirect('/admin/money?e=That expense is gone.');
   let conf = {};
   try { conf = JSON.parse(e.ai_confidence || '{}'); } catch { conf = {}; }
-  return htmlResponse(VM.expenseForm({ expense: e, cats, conf, manual: !e.receipt_key }));
+  return htmlResponse(VM.expenseForm({ expense: e, cats, conf, manual: !e.receipt_key, log: await historyOf(env.DB, 'expense', e.id) }));
 }
 
 export async function saveExpense(env, request, id) {
@@ -157,12 +184,15 @@ export async function saveExpense(env, request, id) {
   const cats = X.categoriesFrom(await getSettings(env.DB));
   const e = X.parseExpenseForm(form, cats);
   if (!e.total_cents) return redirect(`/admin/money/expenses/${id || 'new'}?e=${encodeURIComponent('Type the amount first.')}`);
+  const before = id ? await env.DB.prepare('SELECT * FROM expenses WHERE id = ?1').bind(id).first() : null;
   if (id) {
     await env.DB.prepare(`UPDATE expenses SET vendor=?1, date=?2, total_cents=?3, tax_cents=?4, category=?5, payment_method=?6, note=?7, status='saved', updated_at=datetime('now') WHERE id=?8`)
       .bind(e.vendor, e.date, e.total_cents, e.tax_cents, e.category, e.payment_method, e.note, id).run();
+    await history(env.DB, 'expense', id, before && before.status === 'needs_check' ? 'checked and saved' : 'changed', changes(before, e, EXPENSE_FIELDS));
   } else {
-    await env.DB.prepare(`INSERT INTO expenses (vendor, date, total_cents, tax_cents, category, payment_method, note, status) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'saved')`)
-      .bind(e.vendor, e.date, e.total_cents, e.tax_cents, e.category, e.payment_method, e.note).run();
+    const row = await env.DB.prepare(`INSERT INTO expenses (vendor, date, total_cents, tax_cents, category, payment_method, note, status) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, 'saved') RETURNING id`)
+      .bind(e.vendor, e.date, e.total_cents, e.tax_cents, e.category, e.payment_method, e.note).first();
+    await history(env.DB, 'expense', row.id, 'added by hand', `${money(e.total_cents)} · ${e.date} · ${e.vendor || e.category}`);
   }
   const next = await env.DB.prepare("SELECT id FROM expenses WHERE status = 'needs_check' ORDER BY id LIMIT 1").first();
   if (next) return redirect(`/admin/money/expenses/${next.id}?m=${encodeURIComponent('Saved ✓ Next receipt to check:')}`);
@@ -170,9 +200,10 @@ export async function saveExpense(env, request, id) {
 }
 
 export async function deleteExpense(env, id) {
-  const e = await env.DB.prepare('SELECT receipt_key FROM expenses WHERE id = ?1').bind(id).first();
+  const e = await env.DB.prepare('SELECT * FROM expenses WHERE id = ?1').bind(id).first();
   if (e && e.receipt_key && env.RECEIPTS) await env.RECEIPTS.delete(e.receipt_key);
   await env.DB.prepare('DELETE FROM expenses WHERE id = ?1').bind(id).run();
+  if (e) await history(env.DB, 'expense', id, 'deleted', `${money(e.total_cents)} · ${e.date} · ${e.vendor || e.category}`);
   return redirect('/admin/money?m=Expense deleted.');
 }
 
@@ -190,6 +221,98 @@ export async function saveCategories(env, request) {
   if (!list.includes('Other')) list.push('Other');
   await putSetting(env.DB, 'expense_categories', JSON.stringify(list));
   return redirect('/admin/settings?m=Expense categories saved ✓');
+}
+
+// ---- History of a tip or an expense (money_history, migration 0019) -------------------------
+
+const EXPENSE_FIELDS = [['vendor', 'store'], ['date', 'date'], ['total_cents', 'total', true], ['tax_cents', 'tax', true], ['category', 'category'], ['payment_method', 'how paid'], ['note', 'note']];
+const TIP_FIELDS = [['amount_cents', 'amount', true], ['date', 'date'], ['method', 'how paid'], ['job_label', 'job'], ['note', 'note']];
+function changes(before, after, fields) {
+  if (!before) return '';
+  return fields.filter(([k]) => String(before[k] ?? '') !== String(after[k] ?? '')).map(([k, label, cents]) => `${label} ${cents ? money(before[k] || 0) : (before[k] || '(blank)')} → ${cents ? money(after[k] || 0) : (after[k] || '(blank)')}`).join('; ');
+}
+export async function history(db, item, id, action, detail = '') {
+  try { await db.prepare('INSERT INTO money_history (item, item_id, action, detail) VALUES (?1, ?2, ?3, ?4)').bind(item, id, action, String(detail).slice(0, 1000)).run(); } catch { /* table missing before 0019: the change itself still saves */ }
+}
+export async function historyOf(db, item, id) {
+  try { return (await db.prepare('SELECT * FROM money_history WHERE item = ?1 AND item_id = ?2 ORDER BY id DESC').bind(item, id).all()).results || []; } catch { return []; }
+}
+
+// ---- Tips (owner-approved 19 Oct 2026) ------------------------------------------------------
+// Stored apart from payments (tips table): never on an invoice, never in a balance, never owed.
+// Each tip may name a job (its request and/or invoice); that request's card history says so.
+
+async function tipJobs(env) {
+  const data = await moneyData(env.DB);
+  const requests = await loadRequests(env).catch(() => []);
+  const rows = (await moneyJobs(env, data, requests)).filter((r) => r.confirmed);
+  const today = chicagoDate();
+  const from = shiftDays(today, -90); const to = shiftDays(today, 30);
+  return rows.filter((r) => !r.date || (r.date >= from && r.date <= to)).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+}
+const shiftDays = (iso, n) => { const d = new Date(`${iso}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const jobValue = (r) => `${r.requestKey || ''}|${r.invoiceId || ''}`;
+const safeBack = (b) => (/^\/admin\/money(\?[^#\s]*)?$/.test(String(b || '')) ? String(b) : '/admin/money');
+
+export async function tipPage(env, url, id) {
+  const jobs = await tipJobs(env);
+  const back = safeBack(url.searchParams.get('back'));
+  if (id === 'new') {
+    const r = String(url.searchParams.get('r') || '');
+    return htmlResponse(VM.tipForm({ tip: { id: null, amount_cents: 0, date: chicagoDate(), method: 'cash', note: '' }, jobs, picked: jobs.find((j) => j.requestKey && j.requestKey === r) ? jobValue(jobs.find((j) => j.requestKey === r)) : '', jobValue, back, error: url.searchParams.get('e') || '' }));
+  }
+  const t = await env.DB.prepare('SELECT * FROM tips WHERE id = ?1').bind(id).first();
+  if (!t || t.removed_at) return redirect(`/admin/money?e=${encodeURIComponent('That tip is gone.')}`);
+  const picked = `${t.request_key || ''}|${t.invoice_id || ''}`;
+  const known = jobs.some((j) => jobValue(j) === picked);
+  const list = known || picked === '|' ? jobs : [{ requestKey: t.request_key, invoiceId: t.invoice_id, name: t.job_label || 'The job it was for', date: '', services: [] }, ...jobs];
+  return htmlResponse(VM.tipForm({ tip: t, jobs: list, picked, jobValue, back, log: await historyOf(env.DB, 'tip', t.id), error: url.searchParams.get('e') || '' }));
+}
+
+export function parseTipForm(form, jobs = []) {
+  const amount = toCents(form.get('amount'));
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(String(form.get('date') || '')) ? String(form.get('date')) : chicagoDate();
+  const method = Object.keys(M.TIP_METHODS).includes(String(form.get('method'))) ? String(form.get('method')) : 'other';
+  // value is "<request key>|<invoice id>"; request keys can hold a "|" themselves.
+  const raw = String(form.get('job') || '|'); const cut = raw.lastIndexOf('|');
+  const rk = cut < 0 ? raw : raw.slice(0, cut); const iv = cut < 0 ? '' : raw.slice(cut + 1);
+  const job = jobs.find((j) => jobValue(j) === `${rk}|${iv}`);
+  return { amount_cents: amount, date, method, request_key: rk || null, invoice_id: Number(iv) || null, job_label: job ? `${job.name}${job.date ? ` · ${shortDate(job.date)}` : ''}` : (rk || iv ? String(form.get('job_label') || '') : ''), note: String(form.get('note') || '').trim().slice(0, 500) };
+}
+
+export async function saveTip(env, request, id) {
+  const form = await request.formData();
+  const back = safeBack(form.get('back'));
+  const jobs = await tipJobs(env);
+  const before = id ? await env.DB.prepare('SELECT * FROM tips WHERE id = ?1 AND removed_at IS NULL').bind(id).first() : null;
+  if (id && !before) return redirect(`/admin/money?e=${encodeURIComponent('That tip is gone.')}`);
+  const t = parseTipForm(form, before ? [{ requestKey: before.request_key, invoiceId: before.invoice_id, name: before.job_label, date: '' }, ...jobs] : jobs);
+  if (before && t.request_key === before.request_key && t.invoice_id === before.invoice_id) t.job_label = before.job_label;
+  if (!(t.amount_cents > 0)) return redirect(`/admin/money/tips/${id || 'new'}?back=${encodeURIComponent(back)}&e=${encodeURIComponent('Type the tip amount first.')}`);
+  const how = M.TIP_METHODS[t.method];
+  if (id) {
+    await env.DB.prepare("UPDATE tips SET amount_cents=?1, date=?2, method=?3, request_key=?4, invoice_id=?5, job_label=?6, note=?7, updated_at=datetime('now') WHERE id=?8")
+      .bind(t.amount_cents, t.date, t.method, t.request_key, t.invoice_id, t.job_label, t.note, id).run();
+    await history(env.DB, 'tip', id, 'changed', changes(before, t, TIP_FIELDS));
+    if (t.request_key) await logEvent(env.DB, t.request_key, `Tip changed: ${money(t.amount_cents)} (${how})`, 'admin');
+  } else {
+    const row = await env.DB.prepare('INSERT INTO tips (amount_cents, date, method, request_key, invoice_id, job_label, note) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7) RETURNING id')
+      .bind(t.amount_cents, t.date, t.method, t.request_key, t.invoice_id, t.job_label, t.note).first();
+    await history(env.DB, 'tip', row.id, 'recorded', `${money(t.amount_cents)} · ${t.date} · ${how}${t.job_label ? ` · ${t.job_label}` : ''}`);
+    if (t.request_key) await logEvent(env.DB, t.request_key, `Tip recorded: ${money(t.amount_cents)} (${how}) on ${t.date}`, 'admin');
+  }
+  return redirect(`${back}${back.includes('?') ? '&' : '?'}m=${encodeURIComponent(`Tip ${id ? 'changed' : 'recorded'}: ${money(t.amount_cents)} ✓`)}#tips`);
+}
+
+export async function removeTip(env, request, id) {
+  const form = await request.formData().catch(() => null);
+  const back = safeBack(form && form.get('back'));
+  const t = await env.DB.prepare('SELECT * FROM tips WHERE id = ?1 AND removed_at IS NULL').bind(id).first();
+  if (!t) return redirect(back);
+  await env.DB.prepare("UPDATE tips SET removed_at = datetime('now'), updated_at = datetime('now') WHERE id = ?1").bind(id).run();
+  await history(env.DB, 'tip', id, 'removed', `${money(t.amount_cents)} · ${t.date} · ${M.TIP_METHODS[t.method] || t.method}`);
+  if (t.request_key) await logEvent(env.DB, t.request_key, `Tip removed: ${money(t.amount_cents)}`, 'admin');
+  return redirect(`${back}${back.includes('?') ? '&' : '?'}m=${encodeURIComponent('Tip removed.')}#tips`);
 }
 
 // ---- Damage deposit outcome ----------------------------------------------------------------
