@@ -228,7 +228,7 @@ must((await s.get('/admin/search?q=test', { auth: false })).location === '/admin
 must((await s.post('/admin/day/2026-10-24/email', {}, { headers: { Origin: 'https://evil.example' } })).status === 403, 'Email it to me accepts a cross-site POST');
 
 // Only the request cards of a Requests page (the weekly count box lists the week's names too).
-const cardsOf = (html) => html.split('<article class="card" data-card=').slice(1).map((c) => c.slice(0, c.indexOf('</article>'))).join('\n');
+const cardsOf = (html) => html.split(/<article class="card[^"]*" data-card=/).slice(1).map((c) => c.slice(0, c.indexOf('</article>'))).join('\n');
 // Archive round trip.
 {
   const r = await s.post('/admin/requests/archive', { r: s.rk(reqB.key) }, { headers: { 'X-Pnp-Fetch': '1' } });
@@ -315,7 +315,11 @@ let invA;
   let st = await s.one('SELECT status, prev_status FROM request_status WHERE request_key = ?1', reqB.key);
   must(st && st.status === 'scheduled', 'scheduling does not mark the request Scheduled');
   const dash = (await s.get('/admin/')).text;
-  must(/Scheduled <span data-scheduled>Sat 31 Oct<\/span>/.test(dash) && !/Scheduled for Sat 31 Oct/.test(dash), 'the progress line does not carry "Scheduled Sat 31 Oct" (or a duplicate Scheduled pill is back)');
+  // Step cards (19 Oct 2026): the booked day is on the card's one date line, and booking it by
+  // hand confirmed the request (solid on the calendar, off Unconfirmed requests); no status pill.
+  const wr = dash.split(/<article /).find((c) => /data-card=/.test(c) && c.includes('Weekend Renter')) || '';
+  must(/data-when>[^<]*Sat 31 Oct[^<]*Mon 2 Nov/.test(wr) && /data-confirmed="1"/.test(wr) && !/Scheduled for Sat 31 Oct/.test(dash), `the card does not carry the booked days on its date line, or is not confirmed after booking by hand (or a Scheduled pill is back): ${(wr.match(/data-when>[^<]*/) || [''])[0]}`);
+  must(!(await s.get('/admin/calendar')).text.match(/data-unconfirmed-row[^>]*>\s*<strong>Weekend Renter/), 'a request booked by hand is still on Unconfirmed requests');
   const invB = await s.invoiceFor(reqB, { go: 'send' });
   const rows = await s.all('SELECT kind, date, edited_by_hand FROM bookings WHERE request_key = ?1 ORDER BY kind', reqB.key);
   must(rows.length === 2 && rows.find((r) => r.kind === 'rental_pickup').date === '2026-10-31', `invoice send changed her scheduled date or duplicated: ${JSON.stringify(rows)}`);
@@ -358,11 +362,17 @@ let invA;
   must(!(await s.one('SELECT id FROM booking_notes WHERE id = ?1', note.id)), 'deleting a note did not persist');
 }
 
-// Unscheduled list excludes archived / void / scheduled.
+// Unconfirmed requests (owner, 19 Oct 2026; was "Unscheduled requests"): never archived, void or
+// test requests; everything not confirmed, booked or not; confirmed = "Yes, book it", a phone
+// request, money in, or the job done (steps.mjs, the one rule).
 {
-  const statuses = { a: { status: 'void' }, b: { status: 'new', archived_at: 'x' }, c: { status: 'scheduled' }, d: { status: 'invoiced' } };
-  const list = C.unscheduledRequests(['a', 'b', 'c', 'd', 'e', 'f'].map((key) => ({ key })), statuses, new Set(['f'])).map((r) => r.key).join(',');
-  must(list === 'd,e', `unscheduled list is ${list}`);
+  const ST = await mod('functions/_lib/steps.mjs');
+  const statuses = { a: { status: 'void' }, b: { status: 'new', archived_at: 'x' }, c: { status: 'scheduled' }, d: { status: 'invoiced', invoice_id: 1 }, g: { status: 'deposit_paid', invoice_id: 2 }, h: { status: 'job_done', job_done_at: 'x' }, j: { status: 'invoiced', invoice_id: 3 } };
+  const reqs = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k'].map((key) => ({ key, source: key === 'i' ? 'phone' : 'site', isTest: key === 'k' }));
+  const unconf = ST.unconfirmedKeys({ requests: reqs, statuses, invoices: { 1: { paid: 0 }, 2: { paid: 0 }, 3: { balance: { paid: 2500 } } }, returns: {}, stored: { c: { confirmed_at: 'x' }, f: { called_at: 'x', confirmed_at: null } } });
+  const list = C.unconfirmedRequests(reqs, statuses, unconf).map((r) => r.key).join(',');
+  must(list === 'd,e,f', `unconfirmed list is ${list} (want d,e,f: not confirmed; c said yes, g and j paid, h done, i phone; a void, b put away, k test)`);
+  must(!('unscheduledRequests' in C), 'the old Unscheduled list (scheduled = off the list) is still exported');
 }
 
 // Rental check-in: damage path, amber chip, undo restores, frees overlap.

@@ -182,5 +182,10 @@
     "cancelFreeHours": 48,
     "weatherRescheduleDays": 30,
     "provenance": "Owner-approved 2026-10-17: decor, porch and grazing dates are held by 50% of the quote, the rest is due by the time of arrival to set up; rentals are in data/rentals/games.json (deposit + holdPercent, rest at pickup)."
+  },
+  "invoiceQuickAdds": {
+    "_why": "The quick-add buttons in the admin invoice editor (owner-approved 19 Oct 2026; functions/_lib/views.mjs invoiceEditorPage, functions/_lib/extra-games.mjs). Prices in whole dollars; a missing price means Valerie types it. Admin only: never on a public page.",
+    "deliveryFee": 20,
+    "extraGame": 20
   }
 }

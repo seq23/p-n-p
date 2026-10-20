@@ -9,7 +9,9 @@
  *  2. a key used on a screen is missing from /admin/help, or a map entry is never rendered;
  *  3. a screen lacks the numbered 1-2-3 steps, or a Back link (Requests and Sign in excepted),
  *     or the link to How to use this;
- *  4. the Requests screen has any "More" disclosure, or any disclosure with an id outside the
+ *  4. the Requests screen has any "More" disclosure other than each step card's ONE "More:
+ *     answers, history, other buttons" (owner-approved step cards, 19 Oct 2026: exactly one per
+ *     card, inside the card, after its next-step box), or any disclosure with an id outside the
  *     whitelist (only #put-away, the collapsed Put away section), or lacks the steps panel with
  *     each button in its owner-approved step (JOB B, 18 Oct 2026); Calendar & Bookings and Money
  *     carry the same panel; /admin/archive redirects to the opened Put away section.
@@ -172,6 +174,40 @@ pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/req
     schedule: { 'graze|x': { date: '2026-10-24' }, 'party|x': { date: '2026-10-25' } }, kinds: { 'graze|x': ['grazing_setup'], 'party|x': ['party_setup'] }, foodPerHead: { low: 12, high: 18 } }) }]);
 }
 
+// Step cards (owner-approved 19 Oct 2026): every step's next-step box renders, so every new
+// control is checked for its help entry: called back but not booked (Book it now), a held rental
+// waiting for its deposit (Hold longer), pickup day with the rest owed (Mark picked up + They paid
+// the rest), back with a damage deposit to give back (Deposit returned, finish + Keep some for
+// damage), a booked grazing pickup (Mark pickup done), setup day with the takedown not decided
+// (the Mark setup done question). And a confirmed held rental on the calendar (Held chip) with its
+// hold controls (Release these games), through the real routes.
+{
+  const views = await mod('functions/_lib/views.mjs');
+  const T = '2026-10-24';
+  const lines = [{ description: 'Pick 3 bundle', qty: 1, unit_cents: 11000, refundable: 0 }, { description: 'Damage deposit', qty: 1, unit_cents: 5000, refundable: 1 }];
+  const inv = (id, status, paid) => ({ id, status, number: `PNP-2026-01${id}`, total_cents: 16000, deposit_due_cents: 5000, pay_plan: 'custom', lines, balance: { total: 16000, charges: 11000, refundable: 5000, paid, owed: Math.max(0, 11000 - paid), depositOwed: Math.max(0, 5000 - Math.max(0, paid - 11000)), remaining: Math.max(0, 16000 - paid), void: false } });
+  const rent = { ...reqA, key: 'sc|rent', name: 'Sky Steps', services: ['rentals'], source: 'site', phone: '901-555-0190' };
+  const graze = { ...reqA, key: 'sc|graze', name: 'Gus Steps', services: ['grazing'], gamesAnswer: '', wantsRentals: false, wantsDecor: true, rentals: [], decor: [], other: [], source: 'site' };
+  const party = { ...graze, key: 'sc|party', name: 'Pam Steps', services: ['party'], takedownPlan: 'not_sure' };
+  const pk = (extra = {}) => [{ id: 71, kind: 'rental_pickup', date: T, time: null, ...extra }, { id: 72, kind: 'rental_return', date: '2026-10-26', time: null }];
+  const one = (label, r, o) => pages.push([`dashboardPage(steps: ${label})`, { home: true, direct: true }, { status: 200, text: views.dashboardPage({ requests: [r], checklists: {}, returns: {}, folderUrl: 'https://drive.google.com/x', sheetError: '', flash: '', missingPayment: [], today: T, ...o }) }]);
+  one('called, not booked', rent, { statuses: { [rent.key]: { status: 'new' } }, stored: { [rent.key]: { called_at: 'x', confirmed_at: null } } });
+  one('held, deposit next', rent, { statuses: { [rent.key]: { status: 'invoiced', invoice_id: 1 } }, invoices: { 1: inv(1, 'sent', 0) }, bookings: { [rent.key]: pk({ date: '2026-10-30' }) }, kinds: { [rent.key]: ['rental_pickup', 'rental_return'] },
+    holds: { [rent.key]: { state: 'held', by_hand: 0, untilMs: Date.parse('2026-10-25T20:00:00Z') } }, holdHtml: { [rent.key]: '<p>hold controls</p>' } });
+  one('pickup day, rest owed', rent, { statuses: { [rent.key]: { status: 'deposit_paid', invoice_id: 2 } }, invoices: { 2: inv(2, 'deposit_paid', 5000) }, bookings: { [rent.key]: pk() }, kinds: { [rent.key]: ['rental_pickup', 'rental_return'] }, stored: { [rent.key]: { called_at: 'x', confirmed_at: 'x' } } });
+  one('back, deposit to give back', rent, { statuses: { [rent.key]: { status: 'paid', invoice_id: 3, job_done_at: '2026-10-26 12:00:00' } }, invoices: { 3: inv(3, 'paid', 16000) }, bookings: { [rent.key]: pk({ done_at: '2026-10-24 12:00:00' }) }, kinds: { [rent.key]: ['rental_pickup', 'rental_return'] }, returns: { [rent.key]: { returned_at: '2026-10-26 12:00:00', damaged: 0 } } });
+  one('grazing pickup booked', graze, { statuses: { [graze.key]: { status: 'job_done', job_done_at: '2026-10-24 12:00:00', invoice_id: 4 } }, invoices: { 4: inv(4, 'deposit_paid', 5000) }, bookings: { [graze.key]: [{ id: 81, kind: 'grazing_setup', date: T }, { id: 82, kind: 'grazing_pickup', date: T }] }, kinds: { [graze.key]: ['grazing_setup', 'grazing_pickup'] }, schedule: { [graze.key]: { date: T } } });
+  one('setup day, takedown not decided', party, { statuses: { [party.key]: { status: 'deposit_paid' } }, bookings: { [party.key]: [{ id: 91, kind: 'party_setup', date: T }] }, kinds: { [party.key]: ['party_setup'] }, schedule: { [party.key]: { date: T } } });
+  // A held rental she said yes to: still held (now by hand), solid on the calendar with "Held".
+  await s.post('/admin/requests/talked', { r: s.rk(handReq.row.request_key), go: 'yes', date: dplus(12), return_date: dplus(14) });
+  pages.push(['/admin/calendar (confirmed held rental)', {}, await s.get(`/admin/calendar?month=${dplus(12).slice(0, 7)}`)]);
+  pages.push(['/admin/ (confirmed held rental)', { home: true }, await s.get('/admin/')]);
+  // The invoice editor's "+ Extra game" with games to pick (a rental with its days booked).
+  const ri = await s.one('SELECT invoice_id FROM request_status WHERE request_key = ?1', handReq.row.request_key);
+  if (ri && ri.invoice_id) { const ed = await s.get(`/admin/invoices/${ri.invoice_id}/edit`); if (!/data-quick-game-pick/.test(ed.text)) errors.push(`the rental invoice editor has no game picker: ${(ed.text.match(/data-quick-game>[\s\S]{0,300}/) || [''])[0]}`); pages.push([`/admin/invoices/${ri.invoice_id}/edit (extra game)`, {}, ed]); }
+  else errors.push('the held rental has no draft invoice, so + Extra game goes untested');
+}
+
 const used = new Set();
 let controls = 0;
 let helpHtml = '';
@@ -179,7 +215,8 @@ for (const [p, o, res] of pages) {
   if (res.status >= 500 || (res.status !== 200 && res.status !== 404)) { errors.push(`${p} answered ${res.status}`); continue; }
   const html = res.text;
   if (o.help) helpHtml = html;
-  const tags = html.match(/<(a|button|summary)\b[^>]*>|<label\b[^>]*class="btn[^"]*"[^>]*>|<(?:input|div|span)\b[^>]*data-help="[^"]*"[^>]*>/g) || [];
+  // A <select> that carries a help key (the extra-game picker, 19 Oct 2026) is checked like any control.
+  const tags = html.match(/<(a|button|summary)\b[^>]*>|<label\b[^>]*class="btn[^"]*"[^>]*>|<(?:input|div|span|select)\b[^>]*data-help="[^"]*"[^>]*>/g) || [];
   for (const tag of tags) {
     controls += 1;
     const key = (tag.match(/data-help="([^"]+)"/) || [])[1];
@@ -198,7 +235,17 @@ for (const [p, o, res] of pages) {
   if (o.auth !== false && !o.print && !/href="\/admin\/help"/.test(html)) errors.push(`${p}: no link to How to use this`);
   if (o.print && !/href="\/admin\/help"/.test(html)) errors.push(`${p}: print page has no link to How to use this`);
   if (o.home && o.auth !== false) {
-    if (/<summary[^>]*>[^<]*\bMore\b/.test(html)) errors.push(`${p}: the Requests screen still has a "More" toggle`);
+    // The only "More" toggle on Requests is each step card's own one (owner-approved 19 Oct 2026).
+    const MORE_CARD = '<summary data-help="card.details" title="';
+    const mores = [...html.matchAll(/<summary([^>]*)>([^<]*\bMore\b[^<]*)</g)];
+    for (const m of mores) if (!m[0].startsWith(MORE_CARD) || m[2] !== 'More: answers, history, other buttons') errors.push(`${p}: a "More" toggle that is not a card's "More: answers, history, other buttons": ${m[0].slice(0, 80)}`);
+    for (const a of html.split('<article').slice(1)) {
+      const card = a.slice(0, a.indexOf('</article>'));
+      if (!/data-reqcard/.test(card)) continue;
+      const n = (card.match(/More: answers, history, other buttons/g) || []).length;
+      if (n !== 1) errors.push(`${p}: a request card has ${n} "More" toggles (must be exactly one)`);
+      if (card.indexOf('data-next-step') < 0 || card.indexOf('data-next-step') > card.indexOf('data-details')) errors.push(`${p}: a request card's "More" comes before (or without) its next-step box`);
+    }
     const DISCLOSURE_WHITELIST = ['put-away'];
     for (const m of html.matchAll(/<details\b[^>]*\bid="([^"]+)"/g)) if (!DISCLOSURE_WHITELIST.includes(m[1])) errors.push(`${p}: disclosure #${m[1]} is not on the whitelist (only the Put away section may be one)`);
     const lis = steps ? steps.split('<li>').slice(1) : [];

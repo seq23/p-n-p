@@ -181,7 +181,7 @@ scheduling links).
 
 ## Change anything on this request (owner-approved 18 Oct 2026, migration 0011)
 - **Edit link** on every request card at every stage (New to Finished, Void and Put away
-  included), next to the status chips, never under Show details (`card.edit`). It opens ONE page,
+  included), in the card's "More" row with Add a note and Put away (step cards, 19 Oct 2026; `card.edit`). It opens ONE page,
   `/admin/requests/edit?r=…` (`functions/_lib/admin-edit.mjs`), sections in order, one Save each:
   1 **Bookings** (each booking's day, time, done tick, notes; Remove booking asks first),
   2 **Done dates** (Job done, Returned, Takedown done; empty = take it back through the same undo
@@ -265,7 +265,7 @@ the top of every screen, and a printable guide at `/admin/help`.
   rental pickup on the form's "Pickup date" and return on its "Return date" (older requests:
   One day = next day; Weekend = the next Monday), porch / party / grazing on "Event date", takedown on "Takedown date". A booking she
   made or changed by hand (`edited_by_hand`) keeps her date on every re-send. "Put on the
-  calendar" on a card (or drag a request from "Unscheduled requests" onto a day on a computer)
+  calendar" on a card (or drag a request from "Unconfirmed requests" onto a day on a computer)
   opens the pre-filled scheduling screen and marks the request Scheduled; deleting its last
   booking puts the request back to its previous status. Drag a booking to move it (confirm), or
   "Move to another day". Month view (games-out badge, "$ due", "Not returned yet") or List view
@@ -404,10 +404,63 @@ another tab/retry queue, the cron hook).
 The request list comes right after the heading and a one-line week card ("Latest: <name>" with
 "N NEW"). Tomorrow's reminders are one tappable line at the bottom ("3 reminders ▸"). The
 three-step panel sits under the list on a phone, on top from 900 px. Each new website request
-wears **NEW** until Valerie taps it, opens Show details / Edit / any button on the card, arrives
+wears **NEW** until Valerie taps it, opens More / Edit / any button on the card, arrives
 from the New-request email link, or acts on it (status, invoice, put away). Opened is stored in
 `request_opened` (migration 0016, every older request backfilled as opened); the rule is
 `functions/_lib/request-new.mjs` (`npm run validate:admin-requests-phone`).
+
+## Step cards, tentative -> confirmed, invoice quick-adds (owner-approved 19 Oct 2026, migration 0018)
+- **Step cards** (`requestCard` in `views.mjs`, rules in `functions/_lib/steps.mjs`): NEW, service,
+  name, one date line; a green bar, "N of M done" and the named steps (done = green ✓, current
+  bold, later grey) with ONE "undo" beside the last ✓; then ONE "Next step · step N" box (one
+  sentence, one big button, small Call / Text where useful). Everything else (answers, phone and
+  email, ID, notes, history, Edit, Add a note, Print checklist, Put away, the Payment box, the
+  other buttons, Void) is under "More: answers, history, other buttons".
+  - Rentals: Called back -> Invoice sent ("Review & send invoice" opens the website's draft in the
+    editor) -> Deposit paid ("Games held until <time>" + "Hold longer" holding the hold controls)
+    -> Picked up ("Mark picked up", with "They paid the rest now" ticked when money is owed) ->
+    Returned -> Deposit given back ("Deposit returned, finish" records the refund; "Keep some for
+    damage" opens the invoice). A rental picked up with money still owed gets "Paid in full" too.
+  - Party & decor / Porch / Grazing: Called back -> Invoice sent ("Create invoice") -> Deposit paid
+    -> Setup done (porch: Install done) -> Takedown done (or "Not needed"; grazing: Pickup,
+    optional) -> Paid in full.
+  - Every step is DERIVED (invoice sent, payments on Money, job_done_at, bookings.done_at, the
+    check-in, the takedown, damage-deposit refund/kept rows), so doing it anywhere ticks it. Only
+    "Called back" and the "Yes, book it" answer are stored: `request_steps` (migration 0018,
+    additive; requests already Scheduled were backfilled as called + confirmed). The next step is
+    the first one not done, except on the job's own day (setup / pickup), when the job comes first.
+  - Undo: a tap on the card is taken back there (Called back, Setup done, Takedown / Pickup done or
+    not needed, Picked up, Returned via the check-in); a money or invoice step only explains where
+    to change it (the invoice / Edit page). Nothing deletes a payment or an invoice.
+- **"I've talked to them"** asks "Are you taking this job?": **Yes, book it** (the day(s) editable
+  right there; books the install / setup or the rental pickup + return as her bookings, books the
+  form's takedown day, keeps a held rental held with no end time), **Not yet** (called only; "Not
+  booked yet: Book it now" stays on the card), **No, put it away** (puts it away, frees held games).
+  Routes: `functions/_lib/admin-steps.mjs` (`/admin/requests/talked`, `/called`, `/note`);
+  `/admin/calendar/bookings/:id/done` marks a takedown, grazing pickup or rental pickup done.
+- **Tentative -> confirmed** (`steps.mjs isConfirmed`, the one rule): confirmed = "Yes, book it",
+  a booking she made from the request (Book it / drag / the booking screen), a phone request, money
+  in, or the job done. Until then every date of the request is an OUTLINED "Requested · not
+  confirmed" chip (held rentals: "(games held)"; their games still count as out), on the month,
+  the phone day list, Upcoming (now with requested days), the list view and the Day sheet. The
+  Calendar's **Unconfirmed requests** list (was "Unscheduled requests") shows each with its
+  "Asked for <day>" chip (opens that month), Open the request and Book it; the Monday summary has
+  "Unconfirmed requests" under Needs you (redeploy the mailer after a change).
+- **Dates without a year** (`calendar.mjs parseFormDate`): "11/3", "11-3", "Nov 3", "November
+  3rd", "Tue 3 Nov"... read as the next 3 Nov on or after today (Memphis); the engine's Date.parse
+  is only used with a four-digit year (it picked 2001). The 19 Oct report ("3 Nov request shows as
+  unscheduled, no chip"): the answer was stored right (2026-11-03) and its chip was on November,
+  but October's month (grid and phone list) stops at 31 Oct, Upcoming listed only bookings, and the
+  old list gave no date; Upcoming and Unconfirmed requests now show it.
+- **Invoice quick-adds** (`invoiceEditorPage`): + Delivery fee, + Discount (she types it, kept
+  negative), + Setup / takedown fee, + Damage deposit (refundable), and on a rental + Extra game:
+  the games free for the whole pickup -> return span (booked or already-in-the-rental ones
+  disabled), "Complimentary (no charge)" -> a $0 line (note `free`) + the invoice note
+  "Complimentary Nth game: <game>". Prices: `data/offers/services.json invoiceQuickAdds` only.
+  Paid or free, the game is written onto the rental's bookings as "<game> (extra game)"
+  (`functions/_lib/extra-games.mjs syncExtraGames`, on every invoice save / send / texted), so
+  availability, the calendar, the Day sheet and the clash checks count it; removing the line frees it.
+- Proof: `npm run validate:admin-step-cards` (in validate:admin).
 
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 Legacy intake: the site's /request form replaced it and takes its choices from the live inventory.

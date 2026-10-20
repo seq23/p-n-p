@@ -5,10 +5,12 @@
 // screen opens with a numbered 1-2-3 and (except Requests itself) a Back link.
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
-import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, cardWaiting, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, inlineRowKind } from './cards.mjs';
+import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, inlineRowKind, SCHEDULE_FIRST } from './cards.mjs';
+import { deriveSteps, undoFor } from './steps.mjs';
+import { parseFormDate } from './calendar.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
-import { takedownState, takedownStepWords, inlineDefaultDate } from './takedown.mjs';
+import { takedownState, inlineDefaultDate } from './takedown.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
 import { isPhone, rentalDates, rentalSpanWords } from './phone-requests.mjs';
 
@@ -492,10 +494,6 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .tdsub{font-weight:600;color:#92400e}.tdsub.done{color:inherit;font-weight:400}.tdbox{margin:10px 0}.tdbox .secrow{margin-top:8px}.linkbtn{background:none;border:0;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}
 `;
 
-function badges(services) {
-  return `<div class="svcs" data-badges>${services.map((k) => { const b = serviceBadge(k); return b ? `<span class="svc" data-service="${k}" style="border-color:${b.bar};background:${b.tint}">${esc(b.label)}</span>` : ''; }).join('')}</div>`;
-}
-
 function factsLine(f) {
   const bits = [];
   if (f.date) bits.push(`<span data-fact-date>${esc(f.dateWord)} ${esc(shortDate(f.date))}</span>`);
@@ -531,8 +529,9 @@ function cardButton(keyKind, ctx, primary, { helper = true } = {}) {
     case 'td.markDone': return ctx.td && ctx.td.booking ? `<form method="post" action="/admin/calendar/bookings/${ctx.td.booking.id}/takedown-done">${wrap(`<button class="${cls}" type="submit"${tip(key)}>Mark takedown done</button>`)}</form>` : '';
     case 'card.jobDone':
       // Takedown not decided yet: ask once, at the moment of Job done; never blocks it.
-      if (ctx.tdNotSure) return confirmStep({ key, yesKey: 'td.jobDoneYes', label: 'Mark job done', cls: primary ? 'primary' : 'ghost', question: `The takedown is not decided yet for ${ctx.who}. Mark the job done anyway? You can still schedule the takedown later.`, action: '/admin/requests/jobdone', hidden: hiddenInputs({ r: rk }), helper: primary });
-      return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Mark job done</button>`)}</form>`;
+      // On a step card the words name the step: "Mark setup done" / "Mark install done".
+      if (ctx.tdNotSure) return confirmStep({ key, yesKey: 'td.jobDoneYes', label: ctx.jobWord || 'Mark job done', cls: primary ? 'primary' : 'ghost', question: `The takedown is not decided yet for ${ctx.who}. Mark the job done anyway? You can still schedule the takedown later.`, action: '/admin/requests/jobdone', hidden: hiddenInputs({ r: rk }), helper: primary });
+      return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>${esc(ctx.jobWord || 'Mark job done')}</button>`)}</form>`;
     case 'card.undoJobDone': return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk, undo: '1' })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Undo job done</button>`)}</form>`;
     case 'card.archive': return `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}${wrap(`<button class="${primary ? 'btn primary' : 'btn ghost'}" type="submit"${tip(key)}>Done — put away</button>`)}</form>`;
     case 'pa.bringBack': return `<form method="post" action="/admin/requests/unarchive">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Bring back</button>`)}</form>`;
@@ -625,72 +624,303 @@ function messagesLine(msgs, { rk, services, primary, returned, quiet }) {
 
 const chicagoToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 
+// ---- Step cards (owner-approved 19 Oct 2026, the "one step at a time" mock-up) --------------
+// Top: NEW, service, name, one date line. Then the green bar, "N of M done" and the named steps
+// (done = green ✓, the current one bold, later ones grey) with "undo" beside the last ✓. Then
+// ONE "Next step" box: one plain sentence and ONE big button. Everything else (answers, phone
+// and email, ID, notes, history, Edit, Add a note, Print checklist, Put away, the other
+// buttons, the Payment box) is under "More: answers, history, other buttons". The steps come
+// from steps.mjs (derived from the facts, so doing a thing anywhere ticks its step here).
+export const STEP_CSS = `
+.stepcard{display:grid;gap:12px}
+.stepcard .schead{display:grid;gap:4px}.stepcard .svcs{margin:0}.stepcard .sctags{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.stepcard h3.who{font-size:1.6rem;margin:0}.stepcard .scwhen{color:var(--muted);font-size:1rem;margin:0}
+.scbar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:2px 0 0}.scbar i{display:block;height:100%;background:var(--ok)}
+.scof{font-size:.9rem;color:var(--muted);margin:4px 0 0}
+.sclist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:2px}
+.sclist li{display:flex;align-items:center;gap:10px;padding:6px 6px;border-radius:8px;font-size:1rem;flex-wrap:wrap}
+.sclist .ck{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;font-size:.85rem;font-weight:700;flex:none;background:#fff}
+.sclist li.d .ck{background:var(--ok);border-color:var(--ok);color:#fff}.sclist li.d .t{color:var(--muted)}
+.sclist li.c{background:var(--cream);font-weight:700}.sclist li.c .ck{border-color:var(--accent);color:var(--accent)}
+.sclist li.u{color:#8a7d73}
+.sclist details.undo{margin-left:auto}.sclist details.undo[open]{flex-basis:100%;margin-left:36px}
+.undolink{list-style:none;cursor:pointer;color:var(--muted);font-size:.9rem;text-decoration:underline;min-height:32px;display:inline-flex;align-items:center;padding:0 4px}
+.undolink::-webkit-details-marker{display:none}
+.undobox{margin:6px 0 4px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;font-weight:400}
+.undobox form{margin:8px 0 0}.undobox .btn{min-height:48px}
+.nextbox{border-radius:12px;background:var(--cream);border:1px solid var(--line);padding:12px;display:grid;gap:10px}
+.nextbox .lbl{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:700;margin:0}
+.nextbox .what{font-weight:700;font-size:1.15rem;line-height:1.3;margin:0}
+.nextbox .why{font-size:.98rem;color:var(--muted);margin:0}
+.nextbox .actions{margin:0}.nextbox .hint{margin:4px 0 0}
+.nextbox .smallrow{display:flex;gap:8px}.nextbox .smallrow>*{flex:1}.nextbox .smallrow .btn{min-height:48px}
+.holdline{background:#fdf3d8;color:#7a4a0c;border-radius:8px;padding:8px 10px;font-weight:600;margin:0}
+.nextbox .tdrow{margin:0}.nextbox .nextslot{margin:0}
+.nextbox .done-msg{color:var(--ok);font-weight:700;font-size:1.1rem;margin:0}
+.tentline{margin:0;padding:8px 10px;border:2px dashed #b9aea5;border-radius:10px;color:var(--muted);font-size:.95rem}
+details.talk>summary{list-style:none}details.talk>summary::-webkit-details-marker{display:none}
+details.talk[open]>summary{margin-bottom:10px}
+.talkbox{display:grid;gap:10px;padding:12px;border:2px solid var(--accent);border-radius:12px;background:#fff}
+.talkbox .q{margin:0;font-size:1.15rem}
+.talkbox label{font-weight:600}.talkbox input[type=date]{min-height:48px;font-size:1.05rem}
+.talkbox form{margin:0;display:grid;gap:8px}
+.btn.yes{background:var(--ok);border-color:var(--ok);color:#fff;min-height:56px;font-size:1.1rem}
+.pickform{display:grid;gap:8px;margin:0}.pickform .choice{display:flex;gap:10px;align-items:center;font-weight:600}
+.pickform .choice input{width:24px;height:24px}
+details.more>summary{font-weight:600}
+.morerow{display:flex;flex-wrap:wrap;gap:6px 8px;margin:10px 0 0}.morerow .act{margin:0}
+.morerow .btn,.morerow .editlink{width:auto;min-height:44px;font-size:.95rem;padding:6px 14px;border-width:1px;border-radius:999px}
+.morerow form{margin:0}
+.noteform{margin:10px 0 0}.noteform textarea{min-height:70px}
+@media(min-width:700px){.nextbox .actions .btn.primary{max-width:420px}}
+`;
+
+const wdOf = (d) => shortDate(d).split(' ')[0];
+function whenLine(r, services, bookings) {
+  const booked = (k) => ((bookings || []).find((b) => b.kind === k) || {}).date || '';
+  const rentalsOnly = services.length === 1 && services[0] === 'rentals';
+  const ans = (re) => parseFormDate(answerOf(r, re));
+  if (rentalsOnly) {
+    const ev = ans(/what date is your event|^event date/i);
+    const { pickup, ret } = rentalDates(r, bookings);
+    if (ev && pickup) return `Event ${shortDate(ev)} · pick up ${pickup === ev ? 'that morning' : wdOf(pickup)}${ret ? `, return ${wdOf(ret)}` : ''}`;
+    if (pickup) return `Pick up ${shortDate(pickup)}${ret ? `, return ${shortDate(ret)}` : ''}`;
+    return ev ? `Event ${shortDate(ev)}` : '';
+  }
+  const first = services.filter((k) => SCHEDULE_FIRST[k] && k !== 'rentals').map((k) => booked(SCHEDULE_FIRST[k][1])).filter(Boolean).sort()[0] || ans(/event date/i);
+  const what = r.porchLine ? `Porch: ${String(r.porchLine).split(' · ')[0]}` : (r.eventType || '');
+  const where = answerOf(r, /^location|address|where is it/i);
+  const tail = [what, where ? `at ${where}` : ''].filter(Boolean).join(' ');
+  return [first ? shortDate(first) : '', tail].filter(Boolean).join(' · ');
+}
+
+// The checklist with the one undo beside the last ✓.
+function stepList(s, undo, ctx) {
+  const pct = s.total ? Math.round((100 * s.doneCount) / s.total) : 0;
+  const items = s.steps.map((x) => {
+    const cls = x.done ? 'd' : (x.key === s.current ? 'c' : 'u');
+    const u = undo && s.lastDone && s.lastDone.key === x.key ? undoHtml(undo, ctx) : '';
+    return `<li class="${cls}" data-step="${esc(x.key)}"${x.done ? ' data-step-done' : ''}${x.key === s.current ? ' data-step-current' : ''}><span class="ck" aria-hidden="true">${x.done ? '✓' : x.n}</span><span class="t">${esc(x.label)}${x.done ? '<span class="sr"> (done)</span>' : ''}</span>${u}</li>`;
+  }).join('');
+  return `<div class="scprog" data-step-progress><div class="scbar" role="progressbar" aria-valuemin="0" aria-valuemax="${s.total}" aria-valuenow="${s.doneCount}" aria-label="Steps done"><i style="width:${pct}%"></i></div>
+    <p class="scof" data-step-count>${s.finished ? 'Finished ✓' : `${s.doneCount} of ${s.total} done`}</p><ol class="sclist" data-progress data-step-list>${items}</ol></div>`;
+}
+
+function undoHtml(u, ctx) {
+  let body;
+  if (u.kind === 'form') {
+    body = `<p style="margin:0"><strong>${esc(u.question)}</strong></p><form method="post" action="${esc(u.action)}">${hiddenInputs({ r: ctx.rk, ...u.fields })}<button class="btn ghost" type="submit"${tip('step.undoYes')}>Yes, take it back</button></form>`;
+  } else if (u.kind === 'returns') {
+    body = `<p style="margin:0">${esc(u.question)}</p><p style="margin:8px 0 0"><a href="/admin/returns?k=${esc(ctx.rk)}"${tip('ret.see')}>See the check-in</a></p>`;
+  } else {
+    body = `<p style="margin:0">${esc(u.words)}</p>${u.link === 'invoice' && ctx.inv ? `<p style="margin:8px 0 0"><a href="/admin/invoices/${ctx.inv.id}"${tip('step.undoOpen')}>Open the invoice</a> · <a href="/admin/requests/edit?r=${esc(ctx.rk)}"${tip('card.edit')}>Edit page</a></p>` : ''}`;
+  }
+  return `<details class="undo" data-undo="${esc(u.key)}" data-undo-kind="${esc(u.kind)}"><summary class="undolink"${tip('step.undo')}>undo</summary><div class="undobox">${body}</div></details>`;
+}
+
+// "Are you taking this job?" Yes, book it (the date editable right here) / Not yet / No, put it away.
+function talkBox(r, s, x, { withNo = true } = {}) {
+  const { rk, services, bookings } = x;
+  const rentalsOnly = services.length === 1 && services[0] === 'rentals';
+  let dates;
+  if (services.includes('rentals')) {
+    const { pickup, ret } = rentalDates(r, bookings);
+    dates = `<label for="tp-${esc(rk)}">Pickup day</label><input type="date" id="tp-${esc(rk)}" name="date" value="${esc(pickup || '')}" required${tip('step.date')}>
+      <label for="tr-${esc(rk)}">Return day</label><input type="date" id="tr-${esc(rk)}" name="return_date" value="${esc(ret || '')}" required${tip('step.date')}>`;
+  }
+  if (!rentalsOnly) {
+    const first = services.filter((k) => k !== 'rentals').map((k) => ((bookings || []).find((b) => b.kind === SCHEDULE_FIRST[k][1]) || {}).date).filter(Boolean).sort()[0] || parseFormDate(answerOf(r, /event date/i));
+    const word = services.includes('porch') ? 'Install day' : 'Setup day';
+    dates = `${dates || ''}<label for="te-${esc(rk)}">${word}</label><input type="date" id="te-${esc(rk)}" name="${services.includes('rentals') ? 'event_date' : 'date'}" value="${esc(first || '')}" required${tip('step.date')}>`;
+  }
+  const yes = `<form method="post" action="/admin/requests/talked" data-talk-yes>${hiddenInputs({ r: rk, go: 'yes' })}${dates}<button class="btn yes" type="submit"${tip('step.bookYes')}>Yes, book it</button></form>`;
+  const later = `<form method="post" action="/admin/requests/talked">${hiddenInputs({ r: rk, go: 'later' })}<button class="btn ghost" type="submit"${tip('step.notYet')}>Not yet</button></form>`;
+  const no = withNo ? `<form method="post" action="/admin/requests/talked">${hiddenInputs({ r: rk, go: 'no' })}<button class="btn danger" type="submit"${tip('step.putAwayNo')}>No, put it away</button></form>` : '';
+  return `<div class="talkbox" data-talk-box><p class="q"><strong>Are you taking this job?</strong></p>${yes}${s.called ? '' : later}${no}</div>`;
+}
+
+const holdUntilWords = (h) => {
+  if (!h) return '';
+  if (h.by_hand) return 'Games held for them (no end time)';
+  if (!Number.isFinite(h.untilMs)) return '';
+  const tz = 'America/Chicago';
+  const d = new Date(h.untilMs);
+  const day = d.toLocaleDateString('en-US', { weekday: 'short', timeZone: tz });
+  const t = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }).replace(':00', '');
+  return `Games held until ${day} ${t}`;
+};
+
+// The ONE next-step box. -> { html, big } (big = the help key of its one big button, or '').
+function nextBox(r, s, x) {
+  const { rk, services, inv, ctx, dates, bookings, tdS, hold, holdHtml, pickupPlace, today } = x;
+  const who = firstName(r.name);
+  const rentalsOnly = services.length === 1 && services[0] === 'rentals';
+  const box = (what, why, actions, extra = '', big = '') => ({ big, html: `<section class="nextbox" data-next-step="${esc(s.current)}"><p class="lbl">Next step · step ${s.currentN}</p><p class="what" data-next-what>${esc(what)}</p>${why ? `<p class="why">${esc(why)}</p>` : ''}${actions}${extra}</section>` });
+  const bigA = (key, href, label, extra = '') => `<div class="actions" data-primary>${act(`<a class="btn primary" href="${esc(href)}"${extra}${tip(key)}>${esc(label)}</a>`, key)}</div>`;
+  const wait = (key, words, date) => `<p class="nextslot" data-primary-wait data-next-wait="${esc(key)}"${tip(key)}>Next: ${esc(words)}${date ? ` (${esc(shortDate(date))})` : ''}</p>`;
+  const tent = s.called && !s.confirmed && !s.jobDone ? `<details class="talk" data-book-later><summary class="tentline"${tip('step.bookLater')}>Not booked yet: the date is pencilled in. <u>Book it now</u></summary>${talkBox(r, s, x)}</details>` : '';
+  const money = (c) => `$${(c / 100).toFixed(2).replace(/\.00$/, '')}`;
+  const bal = inv && inv.balance;
+  const plan = inv ? payPlanOf(inv, inv.total_cents || 0) : 'half';
+  const firstKind = services.filter((k) => k !== 'rentals').map((k) => SCHEDULE_FIRST[k][1])[0];
+  const firstB = firstKind ? (bookings || []).find((b) => b.kind === firstKind) : null;
+  switch (s.current) {
+    case 'void': return { big: 'pay.unvoid', html: `<section class="nextbox" data-next-step="void"><p class="what">Void — cancelled</p><p class="why">The customer was not told. Tap Bring back if it was a mistake.</p><div class="actions" data-primary>${cardButton('pay.unvoid', ctx, true)}</div></section>` };
+    case 'finished': return { big: 'card.archive', html: `<section class="nextbox" data-next-step="finished"><p class="done-msg" data-put-away-prompt>✓ All done. This request moves to Finished.</p><div class="actions" data-primary>${cardButton('card.archive', ctx, true)}</div></section>` };
+    case 'called': {
+      const tel = r.phone ? `<a class="btn ghost" href="tel:${esc(String(r.phone).replace(/[^\d+]/g, ''))}"${tip('step.call')}>Call</a>` : '';
+      const sms = r.phone ? `<a class="btn ghost" href="sms:${esc(String(r.phone).replace(/[^\d+]/g, ''))}"${tip('step.text')}>Text</a>` : '';
+      const why = rentalsOnly ? 'Confirm the games and the date. If you already talked, tap the button.' : 'Talk about what they want and the date. If you already talked, tap the button.';
+      return box(`Call or text ${who} back`, why, `${tel || sms ? `<div class="smallrow">${tel}${sms}</div>` : ''}<details class="talk" data-talk><summary class="btn primary"${tip('step.talked')}>I've talked to them</summary>${talkBox(r, s, x)}</details>${hint('step.talked')}`, '', 'step.talked');
+    }
+    case 'invoiced': {
+      const lines = inv && inv.lines ? inv.lines : null;
+      if (inv && inv.status === 'draft') {
+        const sum = lines && lines.length ? `It is already filled in: ${lines.filter((l) => !l.refundable).map((l) => l.description).slice(0, 2).join(', ')}${bal ? `, ${money(bal.charges)}` : ''}${bal && bal.refundable ? `, plus the ${money(bal.refundable)} deposit` : ''}. Check it, then send.` : 'It is already filled in. Check it, then send.';
+        return box('Send the invoice', sum, `${bigA('step.reviewSend', `/admin/invoices/${inv.id}/edit`, 'Review & send invoice')}`, tent, 'step.reviewSend');
+      }
+      return box(rentalsOnly ? 'Send the invoice' : 'Send the quote or invoice', rentalsOnly ? 'The games and prices fill in by themselves. Check it, then send.' : 'Use what you agreed on the call.', bigA('card.createInvoice', `/admin/invoices/new?r=${rk}`, 'Create invoice'), tent, 'card.createInvoice');
+    }
+    case 'deposit': {
+      const full = plan === 'full';
+      const amt = inv ? (full ? (bal ? bal.remaining : 0) : inv.deposit_due_cents) : 0;
+      const holdBit = hold ? `<p class="holdline" data-hold-line>${esc(holdUntilWords(hold))}</p>${holdHtml ? `<details class="disclose" data-hold-longer><summary${tip('step.holdLonger')}>Hold longer</summary>${holdHtml}</details>` : ''}` : '';
+      const key = full ? 'pay.paid' : 'pay.deposit';
+      return box(full ? 'Wait for the payment' : 'Wait for the deposit', `Tap the button when the ${amt ? `${money(amt)} ` : ''}${full ? 'payment' : 'deposit'} comes in.`, `${holdBit}<div class="actions" data-primary>${cardButton(key, ctx, true)}</div>`, tent, key);
+    }
+    case 'setup': {
+      const word = services.includes('porch') ? 'Install' : 'Setup';
+      if (!firstB) {
+        const k = services.includes('porch') ? 'card.schedInstall' : 'card.schedSetup';
+        return box(`Book the ${word.toLowerCase()} day`, 'Pick the day on the calendar. The setup checklist goes on the Day sheet.', bigA(k, `/admin/calendar/new?r=${rk}&kind=${firstKind}`, `Book the ${word.toLowerCase()} day`), '', k);
+      }
+      const where = answerOf(r, /^location|address|where is it/i);
+      const why = [r.eventType, where ? `at ${where}` : '', firstB.time ? prettyTimeOf(firstB.time) : ''].filter(Boolean).join(', ');
+      const reached = !today || today >= firstB.date;
+      const btn = reached ? `<div class="actions" data-primary>${cardButton('card.jobDone', { ...ctx, jobWord: `Mark ${word.toLowerCase()} done` }, true)}</div>` : wait('card.jobDone', `Mark ${word.toLowerCase()} done, on the day`, firstB.date);
+      return box(`${word} day: ${shortDate(firstB.date)}`, `${why ? `${why}. ` : ''}The Day sheet has the checklist.`, btn, '', reached ? 'card.jobDone' : '');
+    }
+    case 'takedown': case 'pickup': {
+      const grazing = s.current === 'pickup';
+      const kind = grazing ? 'grazing_pickup' : (services.includes('porch') ? 'porch_takedown' : 'party_takedown');
+      const b = (bookings || []).find((y) => y.kind === kind);
+      const notNeeded = `<form method="post" action="/admin/requests/takedown">${hiddenInputs({ r: rk, plan: 'customer_handles' })}<button class="btn ghost" type="submit"${tip('step.notNeeded')}>Not needed</button></form>`;
+      if (b && grazing) {
+        return box(`Pickup: ${shortDate(b.date)}`, 'Pick up the grazing table things. Or tap "Not needed".', `<div class="actions" data-primary><form method="post" action="/admin/calendar/bookings/${b.id}/done">${hiddenInputs({ r: rk })}${act(`<button class="btn primary" type="submit"${tip('step.pickupDone')}>Mark pickup done</button>`, 'step.pickupDone')}</form></div><div class="smallrow">${notNeeded}</div>`, '', 'step.pickupDone');
+      }
+      const row = takedownRow({ kind, tdS, r, rk, bookings, eventDate: dates.eventDate, primaryDone: true, saved: Boolean(x.tdSaved), savedWords: x.tdSaved });
+      const what = b ? `Takedown: ${shortDate(b.date)}` : (grazing ? 'Pickup (optional)' : 'Book the takedown');
+      const why = b ? 'Or tap "Not needed" if they are keeping the decor.' : (grazing ? 'Book a pickup day, or tap "Not needed".' : 'Pick the day and tap Save. Or tap "Not needed" if they are keeping the decor.');
+      return box(what, why, `${row}<div class="smallrow">${notNeeded}</div>`, '', b ? 'td.markDone' : 'td.save');
+    }
+    case 'picked': {
+      const pb = s.pickupBooking;
+      if (!pb) return box('Book the pickup and return', 'Pick both days on the calendar.', bigA('card.schedPickup', `/admin/calendar/new?r=${rk}&kind=rental_pickup`, 'Book pickup + return'), tent, 'card.schedPickup');
+      const owed = bal ? bal.owed : 0;
+      const why = `At ${pickupPlace || 'Mt. Moriah Station'}. Hand over the games${owed > 0 ? `, collect the rest (${money(owed)})` : ''}.`;
+      // No pickup time yet: the small "Text about pickup time" sits in the box (never big).
+      const m = ctx.msgs && ctx.msgs.pickup && ctx.msgs.pickup.sms;
+      const timeText = m && !pb.time ? `<div class="smallrow"><a class="btn ghost" href="${esc(m.href)}" data-msg-tap="pickupTime" data-rk="${esc(rk)}"${tip('msg.pickupText')}>Text about pickup time</a></div>` : '';
+      if (today && today < pb.date) return box(`Pickup: ${shortDate(pb.date)}`, why, `${timeText}${wait('step.picked', 'Mark picked up, on pickup day', pb.date)}`, tent, '');
+      const pay = owed > 0 && inv ? `<label class="choice"><input type="checkbox" name="paid_rest" value="1" checked${tip('step.paidRest')}> They paid the rest (${money(owed)}) now</label>${methodPicker()}` : '';
+      const btn = `<button class="btn primary" type="submit"${tip('step.picked')}>Mark picked up</button>`;
+      return box(`Pickup: ${shortDate(pb.date)}`, why, `<form class="pickform" method="post" action="/admin/calendar/bookings/${pb.id}/done" data-primary>${hiddenInputs({ r: rk })}${pay}${pay ? act(btn, 'step.picked') : `<div class="act">${btn}</div>`}</form>`, '', 'step.picked');
+    }
+    case 'returned': {
+      const { ret } = rentalDates(r, bookings);
+      return box(`Return: ${ret ? shortDate(ret) : 'not set'}`, 'Check every game is back and nothing is damaged.', `<div class="actions" data-primary>${cardButton('ret.mark', ctx, true)}</div>`, '', 'ret.mark');
+    }
+    case 'deposit_back': {
+      if (!inv || !s.refundable) return box('Make the invoice', 'The damage deposit is on the invoice.', bigA('card.createInvoice', `/admin/invoices/new?r=${rk}`, 'Create invoice'), '', 'card.createInvoice');
+      const damaged = x.ret && x.ret.damaged;
+      const amt = s.held;
+      const form = `<form class="pickform" method="post" action="/admin/invoices/${inv.id}/deposit" data-primary>${hiddenInputs({ kind: 'refund', amount: (amt / 100).toFixed(2), back: `/admin/#c-${rk}` })}${methodPicker()}${act(`<button class="btn primary" type="submit"${tip('step.depositBack')}>Deposit returned, finish</button>`, 'step.depositBack')}</form>`;
+      const keep = `<p style="margin:0"><a href="/admin/invoices/${inv.id}#deposit"${tip('step.keepDamage')}>Keep some for damage</a></p>`;
+      return box(`Give back the ${money(amt)} deposit`, damaged ? 'Something came back damaged: keep some for damage, or give it all back.' : 'Everything came back fine? Return the deposit and the rental is finished.', `${form}${keep}`, '', 'step.depositBack');
+    }
+    case 'paid': {
+      const owed = bal ? bal.owed : 0;
+      return box('Collect the rest', owed > 0 ? `${money(owed)} still owed.` : 'Mark it paid when the rest is in.', `<div class="actions" data-primary>${cardButton('pay.paid', ctx, true)}</div>`, '', 'pay.paid');
+    }
+    default: return { big: '', html: '' };
+  }
+}
+
 // One request card. o: everything dashboardPage knows about this request.
 export function requestCard(r, o) {
   const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace,
-    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '', isNew = false } = o;
+    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '', isNew = false, stored = null, depositOut = null, hold = null, holdHtml = '' } = o;
   const rk = b64urlText(r.key);
   const services = servicesOf(r);
   const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
   const tdS = takedownState({ services, takedownPlan: r.takedownPlan, takedownDate: r.takedownDate, invoiceTakedown, bookings, today });
   const pr = deriveProgress({ st, inv, scheduled: Boolean(sched), ret, rental, takedown: tdS });
-  const stage = cardStage({ pr, inv, archived });
+  // The bookings the steps read: the real ones, else (older callers) the earliest booked day.
+  const firstK = services.map((k) => SCHEDULE_FIRST[k] && SCHEDULE_FIRST[k][1]).filter(Boolean);
+  const bk = bookings.length ? bookings : (sched ? (kinds.length ? kinds : firstK).map((kind) => ({ kind, date: sched.date })) : []);
+  const s = deriveSteps({ r, services, pr, inv, st, bookings: bk, ret, tdS, stored, depositOut, today });
+  // Finished means every step on the card is done (cards.mjs cardStage reads the same facts).
+  const stage = cardStage({ pr: { ...pr, finished: pr.finished && s.finished }, inv, archived });
   const returned = Boolean(ret && ret.returned_at);
   const plan = inv ? payPlanOf(inv, inv.total_cents || 0) : 'half';
   const dates = cardDates({ r, services, bookings: bookings.length ? bookings : (sched ? kinds.map((kind) => ({ kind, date: sched.date })) : []), today });
   const rules = cardButtons({ services, stage, inv, plan, sched: Boolean(sched), kinds, returned, jobDoneAt: Boolean(st.job_done_at), takedownPlan: r.takedownPlan,
     eventReached: dates.eventReached, pickupReached: dates.pickupReached, pickupTimeSet: dates.pickupTimeSet, canText: Boolean(msgs && msgs.pickup && msgs.pickup.sms),
-    takedown: tdS, paidFull: pr.steps.some((x) => x.key === 'paid' && x.done) || pr.paidEarly });
-  const waiting = cardWaiting({ services, stage, primary: rules.primary, returned, jobDoneAt: Boolean(st.job_done_at), dates, takedown: tdS });
-  const quietStage = ['void', 'finished', 'archived'].includes(stage);
+    takedown: tdS, paidFull: s.paidFull });
+  const quiet = ['void', 'finished', 'archived'].includes(stage);
   const rowKind = inlineRowKind({ services, stage });
   const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: tdS.status === 'not_sure', msgs, td: tdS };
-  // The takedown row's own button is the one big button when it is the next step.
-  const rowPrimary = stage === 'job_done' && (rules.primary === 'td.markDone' || (!rules.primary && ['to_schedule', 'not_sure'].includes(tdS.status)));
-  const row = rowKind ? takedownRow({ kind: rowKind, tdS, r, rk, bookings, eventDate: dates.eventDate, primaryDone: rowPrimary, saved: Boolean(tdSaved), savedWords: tdSaved }) : '';
   const first = serviceBadge(services[0]);
   const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
-  // No status pills beside the name (owner, 18 Oct 2026: "Paid in full" / "Scheduled for Sat 17
-  // Oct" repeated the progress line). Only what the progress line cannot say: Void (no progress
-  // line), Finished, and Returned — check damage.
   const chips = [
     isNew ? `<button type="button" class="newb big" data-new-badge${tip('req.new')}>NEW</button>` : '',
     isPhone(r) ? `<span class="chip phone" data-phone-chip${tip('card.phoneChip')}>From a phone call</span>` : '',
     pr.void ? '<span class="chip void" data-step="void">Void — cancelled</span>' : '',
-    pr.finished && !pr.void ? '<span class="chip paid" data-step="paid">Finished: job done and paid</span>' : '',
+    stage === 'finished' ? '<span class="chip paid" data-finished>Finished: job done and paid</span>' : '',
     returned && ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : '',
   ].join('');
-  const paidStep = pr.steps.find((x) => x.key === 'paid');
-  const paidNow = (paidStep && paidStep.done) || pr.paidEarly;
-  const unpaidLink = paidNow && !archived && !pr.void ? `<span class="paidundo" data-paid-undo>${confirmStep({ key: 'pay.unpaid', yesKey: 'pay.unpaidYes', label: 'undo paid', question: `Mark ${ctx.who} as not paid? Only do this to fix a mistake.`, action: ctx.payTarget.action, hidden: hiddenInputs({ ...ctx.payTarget.extra, [ctx.payTarget.field]: 'unpaid' }), link: true, helper: false })}</span>` : '';
-  const progress = pr.void || archived ? '' : `<ol class="progress mini" data-progress aria-label="Step ${pr.steps.findIndex((x) => x.key === pr.current) + 1} of 6">${pr.steps.map((x) => `<li class="${x.done || (x.key === 'paid' && pr.paidEarly) ? 'done' : ''}${x.key === pr.current ? ' now' : ''}"><span class="pn">${x.done || (x.key === 'paid' && pr.paidEarly) ? '✓' : x.n}</span> ${esc(x.label)}${x.key === 'scheduled' && sched && !pr.void ? ` <span data-scheduled>${esc(shortDate(sched.date))}</span>` : ''}${x.key === 'job_done' && tdS.status !== 'none' ? `<span class="tdsub${tdS.pending ? '' : ' done'}" data-takedown-step="${esc(tdS.status)}"> · ${esc(takedownStepWords(tdS, shortDate))}</span>` : ''}</li>`).join('')}</ol>${unpaidLink}`;
+  const svcBadges = services.map((k) => { const b = serviceBadge(k); return b ? `<span class="svc" data-service="${k}" style="border-color:${b.bar};background:${b.tint}">${esc(b.label)}</span>` : ''; }).join('');
+  const x = { rk, services, inv, ctx, dates, bookings: bk, tdS, hold, holdHtml, pickupPlace, today, ret, tdSaved };
+  const nb = archived ? { big: 'pa.bringBack', html: `<section class="nextbox" data-next-step="archived"><p class="what">Put away</p><div class="actions" data-primary>${cardButton('pa.bringBack', ctx, true)}</div></section>` } : nextBox(r, s, x);
+  const undo = archived || pr.void ? null : undoFor(s, { tdS, stored });
+  const steps = archived || pr.void ? '' : stepList(s, undo, ctx);
+  const big = nb.big;
+  // The takedown / pickup line lives in the next-step box while it IS the next step; otherwise
+  // under More, never twice.
+  const rowInBox = ['takedown', 'pickup'].includes(s.current) && !archived && !pr.void;
+  const row = rowKind && !rowInBox ? takedownRow({ kind: rowKind, tdS, r, rk, bookings, eventDate: dates.eventDate, primaryDone: false, saved: Boolean(tdSaved), savedWords: tdSaved }) : '';
   const g = services.includes('grazing') ? grazingFacts(r, foodPerHead) : null;
   const gLine = g && (g.guests || g.estimate) ? `<div class="want" data-grazing-facts>${esc([g.guests ? `Guests: ${g.guests}` : '', g.estimate].filter(Boolean).join(' · '))}</div>` : '';
-  const quiet = ['void', 'finished', 'archived'].includes(stage);
-  const finishedNote = stage === 'finished' ? '<div class="notice ok" data-put-away-prompt><strong>Finished: the job is done and it is paid in full.</strong> Put it away?</div>' : '';
   const damage = returned && ret.damaged && stage !== 'archived' && stage !== 'void' ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : '';
-  const payment = quiet ? '' : cardPaymentBox(r, st, inv, rules.primary, ctx);
-  return `<article class="card" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
-      ${badges(services)}
-      <div class="spread"><h3 class="who">${esc(r.name || 'No name given')}</h3><div class="row">${chips}<a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a></div></div>
-      ${factsLine(keyFacts(r, services, { pickupPlace }))}
-      ${wantSummary(r, bookings).map((w) => `<div class="want">${esc(w)}</div>`).join('')}${gLine}
-      ${progress}
-      ${quiet ? '' : extras}
-      ${damage}${finishedNote}
-      ${row}
-      ${rules.primary && rules.primary !== 'td.markDone' ? `<div class="actions" data-primary>${cardButton(rules.primary, ctx, true)}</div>` : ''}
-      ${waiting ? `<p class="nextslot" data-primary-wait data-next-wait="${esc(waiting.key)}"${tip(waiting.key)}>Next: ${esc(waiting.words)}${waiting.date ? ` (${esc(shortDate(waiting.date))})` : ''}</p>` : ''}
-      ${rules.secondary.length ? `<div class="secrow" data-secondary>${rules.secondary.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
-      ${messagesLine(msgs, { rk, services, primary: rules.primary, returned, quiet })}
-      ${payment}
-      ${quiet ? '' : bottom}
-      <details class="disclose" data-details><summary${tip('card.details')}>Show details</summary>
-        <div class="muted" style="margin-top:4px">${esc(friendlyWhen(r))}${archived && st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</div>
+  const payment = quiet ? '' : cardPaymentBox(r, st, inv, big, ctx);
+  const bigBase = String(big).split('|')[0];
+  const others = [...rules.secondary, ...rules.more].filter((k) => k.split('|')[0] !== bigBase && k !== 'card.printChecklist');
+  const decorish = services.some((k) => k !== 'rentals');
+  const moreRow = `<div class="morerow" data-more-row><a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a>
+      <details class="disclose" data-add-note><summary${tip('card.addNote')}>Add a note</summary><form class="noteform" method="post" action="/admin/requests/note">${hiddenInputs({ r: rk })}<label for="nt-${esc(rk)}">Note (only you see this)</label><textarea id="nt-${esc(rk)}" name="body" required></textarea>${act(`<button class="btn ghost" type="submit"${tip('card.noteSave')}>Save note</button>`, 'card.noteSave')}</form></details>
+      ${decorish && !archived ? `<div class="act"><a class="btn ghost" href="/admin/checklist?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.printChecklist')}>Print checklist</a></div>` : ''}
+      ${!archived && !quiet ? `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('card.putAway')}>Put away</button></div></form>` : ''}
+      ${stage === 'void' ? cardButton('card.archive', ctx, false) : ''}</div>`;
+  // The hold controls sit behind "Hold longer" on the deposit step; at any other step they are under More.
+  const extrasHere = quiet ? '' : `${extras}${holdHtml && s.current !== 'deposit' ? holdHtml : ''}`;
+  return `<article class="card stepcard" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
+      <div class="schead"><div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
+        <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}</div>
+      ${steps}
+      ${nb.html}
+      <details class="disclose more" data-details><summary${tip('card.details')}>More: answers, history, other buttons</summary>
+        ${factsLine(keyFacts(r, services, { pickupPlace }))}
+        ${wantSummary(r, bookings).map((w) => `<div class="want">${esc(w)}</div>`).join('')}${gLine}
+        ${extrasHere}${damage}${row}
+        ${others.length ? `<div class="secrow" data-secondary>${others.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
+        ${messagesLine(msgs, { rk, services, primary: big, returned, quiet })}
+        ${payment}
+        ${quiet ? '' : bottom}
+        ${moreRow}
+        <div class="muted" style="margin-top:8px">${esc(friendlyWhen(r))}${archived && st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</div>
         ${cl && cl !== 'none' ? `<div class="muted" style="margin-top:4px">Checklist ${cl === 'done' ? 'done ✓' : 'started'}</div>` : ''}
         ${requestDetailsBody(r, { referrers })}
         ${historyHtml(events, notes)}
-        ${rules.more.length ? `<div class="secrow" data-more-buttons>${rules.more.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
         ${quiet ? '' : voidLink(r, inv, ctx)}
       </details>
     </article>`;
@@ -715,7 +945,8 @@ export function requestsPanel(folderUrl) {
 
 // schedule: { [request_key]: { date } } earliest booking per request; kinds: { [request_key]: [kind] }.
 export function dashboardPage({ newKeys = new Set(), remindersLine = '', requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '',
-  cardMsgs = {}, cardBottom = {}, tdSaved = null, bookings = {}, takedownInvoices = new Set(), today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station' }) {
+  cardMsgs = {}, cardBottom = {}, tdSaved = null, bookings = {}, takedownInvoices = new Set(), today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station',
+  stored = {}, depositOut = {}, holds = {}, holdHtml = {} }) {
   const err = sheetError ? `<div class="notice err"><strong>The requests could not be loaded right now.</strong> ${/not shared/i.test(sheetError)
     ? `The responses sheet needs to be shared with the site. In Google Sheets tap Share and add <code>${esc(SA_EMAIL)}</code> as a Viewer.`
     : 'Please try again in a minute.'}<div class="muted" style="margin-top:6px;font-size:.95rem">Details: ${esc(sheetError)}</div></div>` : '';
@@ -723,7 +954,8 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
   const one = (r, isArchived) => {
     const st = statuses[r.key] || { status: 'new' };
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
-    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '', isNew: !isArchived && newKeys.has(r.key) }) };
+    return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '', isNew: !isArchived && newKeys.has(r.key),
+      stored: stored[r.key] || null, depositOut: inv ? depositOut[inv.id] || null : null, hold: holds[r.key] || null, holdHtml: holdHtml[r.key] || '' }) };
   };
   const shown = requests.map((r) => one(r, false)).filter((x) => matchesFilter(f, x));
   const putRows = archived.map((r) => one(r, true)).filter((x) => matchesFilter(f, x));
@@ -737,7 +969,7 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
   // Phone first (owner, 19 Oct 2026): the request list comes straight after the heading and the
   // one-line week card; tomorrow's reminders are one tappable line at the bottom; the three-step
   // panel sits under the list on a phone and stays on top on a wide screen (CSS order, .rqflow).
-  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}</style>${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}</style>${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
 ${setupBanner(missingPayment)}
     <div class="rqflow"><div class="rqpanel">${requestsPanel(folderUrl)}</div>
     <div class="rqmain"><h1>Requests</h1>${extraTop}${week}${holdsBox}${err}
@@ -797,6 +1029,18 @@ const EDITOR_JS = `
   form.addEventListener('change',recalc);
   form.addEventListener('click',function(e){if(e.target.matches('[data-remove]')){e.target.closest('[data-line]').remove();recalc();}});
   document.getElementById('add-line').addEventListener('click',function(){list.insertAdjacentHTML('beforeend',tpl.innerHTML);recalc();});
+  function addLine(desc,price,o){o=o||{};list.insertAdjacentHTML('beforeend',tpl.innerHTML);var el=list.lastElementChild;el.querySelector('[name=line_desc]').value=desc;
+    var pr=el.querySelector('[data-price]');if(price!==null&&price!==undefined)pr.value=price;else pr.value='';if(o.discount){el.setAttribute('data-discount','');pr.placeholder='Amount off, e.g. 20';pr.removeAttribute('min');}
+    if(o.refundable)el.querySelector('[name=line_refundable]').value='1';if(o.note)el.querySelector('[name=line_note]').value=o.note;recalc();
+    if(price===null||price===undefined){var dt=form.querySelector('details.more');if(dt)dt.open=true;pr.focus();}return el;}
+  form.addEventListener('click',function(e){var q=e.target.closest('[data-quick]');if(!q)return;
+    if(q.hasAttribute('data-q-game')){var sel=form.querySelector('[data-quick-game-pick]'),opt=sel&&sel.options[sel.selectedIndex];if(!opt||opt.disabled)return;var name=opt.value,comp=form.querySelector('[data-quick-comp]').checked;
+      var n=Number(q.getAttribute('data-base'))+[].slice.call(list.querySelectorAll('[name=line_desc]')).filter(function(i){return /^Extra game: /.test(i.value);}).length+1;
+      addLine('Extra game: '+name,comp?'0.00':q.getAttribute('data-price'),{note:comp?'free':''});
+      if(comp){var nt=form.querySelector('[name=notes]'),ord=['','1st','2nd','3rd'][n]||(n+'th'),line='Complimentary '+ord+' game: '+name;nt.value=nt.value?nt.value.replace(/\\s*$/,'')+'\\n'+line:line;}
+      opt.disabled=true;opt.textContent=name+' (added)';recalc();return;}
+    addLine(q.getAttribute('data-desc'),q.hasAttribute('data-price')?q.getAttribute('data-price'):null,{discount:q.hasAttribute('data-discount'),refundable:q.hasAttribute('data-refundable')});});
+  form.addEventListener('change',function(e){var l=e.target.closest('[data-discount]');if(l&&e.target.matches('[data-price]')){var v=parseFloat(e.target.value);if(v>0){e.target.value=(-v).toFixed(2);recalc();}}},true);
   form.addEventListener('submit',function(e){var b=e.submitter||document.activeElement;if(b&&b.name==='go'&&b.value==='send'){
     var pn=document.getElementById('price-needed');if(pn&&!pn.hidden){e.preventDefault();var dt=form.querySelector('details');dt.open=true;pn.scrollIntoView({behavior:'smooth'});
       var first=[].slice.call(list.querySelectorAll('[data-line]')).find(function(el){return el.querySelector('[name=line_desc]').value.trim()&&!(parseFloat(el.querySelector('[data-price]').value)>0)&&el.querySelector('[name=line_note]').value!=='free';});if(first)first.querySelector('[data-price]').focus();return;}
@@ -830,11 +1074,33 @@ function paymentWarning(pay) {
 
 // One screen: the prefilled invoice as the customer will see it, and ONE button that sends it.
 // Changing anything is possible (under "Change what goes into the total") but never required.
-export function invoiceEditorPage({ invoice, lines, request, action, title, warnings = [], pay, mode = 'new', backHref = '/admin/' }) {
+// The quick-add buttons (owner-approved 19 Oct 2026): one tap adds a ready line; the prices come
+// from data/offers/services.json invoiceQuickAdds (quickAddsFor in admin.mjs), never typed here.
+// A line with no price opens the lines and puts the cursor in its price. "+ Extra game" (rentals
+// only) lists the games free for the whole pickup -> return span; booked ones cannot be picked.
+function quickAdds(q) {
+  if (!q) return '';
+  const d = (c) => (c / 100).toFixed(2);
+  const b = (key, label, attrs) => `<button type="button" class="btn ghost" data-quick ${attrs}${tip(key)}>${esc(label)}</button>`;
+  const games = q.rental ? `<details class="disclose qgame" data-quick-game><summary${tip('ed.qExtraGame')}>+ Extra game</summary>
+      ${q.games.length ? `<p class="muted" style="margin:6px 0">Free for the whole rental${q.span ? ` (${esc(q.span)})` : ''}. Booked ones cannot be picked.</p>
+      <label for="qg">Which game</label><select id="qg" data-quick-game-pick${tip('ed.qGamePick')}>${q.games.map((g) => `<option value="${esc(g.name)}"${g.free ? '' : ' disabled'}>${esc(g.name)}${g.mine ? ' (already in this rental)' : (g.free ? '' : ' (booked those days)')}</option>`).join('')}</select>
+      <label class="choice" style="display:flex;gap:10px;align-items:center;margin-top:8px"><input type="checkbox" data-quick-comp style="width:24px;height:24px"${tip('ed.qComp')}> Complimentary (no charge)</label>
+      <div style="margin-top:8px">${b('ed.qAddGame', 'Add this game', `data-q-game data-price="${d(q.extraGameCents)}" data-base="${Number(q.baseCount) || 0}"`)}</div>`
+    : '<p class="muted" style="margin:6px 0">Book the pickup and return days first: then the free games show here.</p>'}</details>` : '';
+  return `<div class="card quickadds" data-quick-adds><div class="muted">Add a line in one tap</div><div class="qrow">
+      ${b('ed.qDelivery', '+ Delivery fee', `data-desc="Delivery fee" data-price="${d(q.deliveryCents)}"`)}
+      ${b('ed.qDiscount', '+ Discount', 'data-desc="Discount" data-discount')}
+      ${b('ed.qSetupFee', '+ Setup / takedown fee', 'data-desc="Setup / takedown fee"')}
+      ${b('ed.qDamage', '+ Damage deposit', 'data-desc="Damage deposit (refundable)" data-refundable')}
+    </div>${games}</div>`;
+}
+
+export function invoiceEditorPage({ invoice, lines, request, action, title, warnings = [], pay, mode = 'new', backHref = '/admin/', quick = null }) {
   const blank = { description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 };
   const who = firstName(invoice.customer_name);
   const sendLabel = mode === 'new' ? `Send to ${who}` : `Save and send to ${who}`;
-  return layout(title, `<h1>${esc(title)}</h1>
+  return layout(title, `<style>.quickadds .qrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.quickadds .qrow .btn{min-height:48px;font-size:1rem;padding:8px 10px}.quickadds .qgame{margin-top:10px}.quickadds select{min-height:48px;font-size:1.05rem}</style><h1>${esc(title)}</h1>
   ${pay ? paymentWarning(pay) : ''}
   ${warnings.map((w) => `<div class="notice warn">${esc(w)}</div>`).join('')}
   <div class="notice err" id="price-needed"${lines.some((l) => l.description && needsPrice(l)) ? '' : ' hidden'}><strong>Add a price first:</strong> <span>${esc(lines.filter((l) => l.description && needsPrice(l)).map((l) => l.description).join(', '))}</span>. Tap <strong>Change what goes into the total</strong>, type the price, then send.</div>
@@ -853,6 +1119,7 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
         <div class="spread"><span id="sum-due-label">Rest due by</span><strong id="sum-due">${esc(prettyDate(invoice.due_date))}</strong></div>
       </div>
     </div>
+    ${quickAdds(quick)}
     <div class="card">
       <div class="muted">How they pay</div>
       <div class="plans">

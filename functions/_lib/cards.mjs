@@ -4,6 +4,7 @@
 // shows only Bring back / Put away. validate:admin-cards walks every service x stage.
 import { SERVICE_KINDS } from './kinds.mjs';
 import { STEP_KEYS } from './progress.mjs';
+import { parseFormDate } from './calendar.mjs';
 
 export const CARD_SERVICES = ['porch', 'party', 'grazing', 'rentals'];
 
@@ -214,7 +215,8 @@ export function inlineRowKind({ services, stage }) {
 export const TAKEDOWN_PLANS = ['scheduled', 'not_sure', 'customer_handles'];
 
 // ---- Key facts: the one line under the name (date, where, Call) -----------------------
-const iso = (s) => { const m = String(s || '').match(/^(\d{4})-(\d{2})-(\d{2})$/) || String(s || '').match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/); if (!m) return ''; return m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[1].padStart(2, '0')}-${m[2].padStart(2, '0')}`; };
+// Every date answer reads through the one parser (calendar.mjs parseFormDate: "11/3" -> the next 3 Nov).
+const iso = (s) => parseFormDate(s);
 export function keyFacts(r, services, { pickupPlace = 'Mt. Moriah Station' } = {}) {
   const rentalOnly = services.length === 1 && services[0] === 'rentals';
   const date = iso(answerOf(r, rentalOnly ? /pickup date|delivery date/i : /event date/i)) || iso(answerOf(r, /pickup date|event date/i));
