@@ -11,7 +11,7 @@ import { serviceInfo, serviceKey, SERVICE_KINDS } from './kinds.mjs';
 import { gamesAskedOn } from './requested.mjs';
 import { PHONE_SERVICES, PHONE_SERVICE_WORDS, NOTE_CHOICE, FIRST_KIND } from './phone-requests.mjs';
 import { balanceWords, depositWords, dueWords } from './ledger.mjs';
-import { reminderText, smsLink, normalizePhone, hasEmail } from './reminders.mjs';
+import { reminderText, smsLink, normalizePhone, hasEmail, dayWords } from './reminders.mjs';
 import { reservedWords, RESERVED_BY_HAND } from './views-messages.mjs';
 import { fromSql } from './holds.mjs';
 
@@ -336,7 +336,7 @@ function phoneJob(b, c, day, yesFor) {
   const phone = normalizePhone(b.phone);
   const rk = b.request_key ? b64urlText(b.request_key) : '';
   const yes = c.tentative && b.request_key && yesFor[b.request_key] ? yesBox(yesFor[b.request_key], `p${day.replace(/-/g, '')}${b.id}`) : '';
-  return `<details class="pj${c.tentative ? ' tent' : ''}" style="border-color:${esc(s.bar)}" data-pjob="${b.id}"${c.tentative ? ' data-tentative' : ''}><summary${tip('cal.pjob')}><span class="k ${esc(b.kind)}${tentClass(c)}${c.missed ? ' missed' : ''}"${c.missed ? ' data-missed-chip' : ''} data-list-booking="${b.id}"${tentAttrs(b, c)}>${esc(tentWords(c, held))}${esc(words)}</span><span class="pjw">${c.tentative ? 'Not confirmed yet · call them back' : 'Booked'} · tap for more</span></summary>
+  return `<details class="pj${c.tentative ? ' tent' : ''}" style="border-color:${esc(s.bar)}" data-pjob="${b.id}"${c.tentative ? ' data-tentative' : ''}><summary${tip('cal.pjob')}><span class="k ${esc(b.kind)}${tentClass(c)}${c.missed ? ' missed' : (c.tidy ? ' tidy' : '')}"${c.missed ? ' data-missed-chip' : (c.tidy ? ' data-tidy-chip' : '')} data-list-booking="${b.id}"${tentAttrs(b, c)}>${esc(tentWords(c, held))}${esc(words)}</span><span class="pjw">${c.tentative ? 'Not confirmed yet · call them back' : 'Booked'} · tap for more</span></summary>
     <span class="pjb"><dl class="jd">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
     <span class="jb">${phone ? `<a class="btn ghost" href="tel:${phone}"${tip('day.call')}>Call</a><a class="btn ghost" href="sms:${phone}"${tip('cal.jobText')}>Text</a>` : ''}${rk ? `<a class="btn ghost" href="/admin/#c-${esc(rk)}"${tip('cal.openCard')}>Open their card</a>` : `<a class="btn ghost" href="/admin/day/${esc(day)}"${tip('cal.daySheet')}>Open the day sheet</a>`}${yes}</span></span></details>`;
 }
@@ -389,7 +389,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
         const mark = b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : '';
         const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
         const c = ctx(b);
-        return `<span class="k ${esc(b.kind)}${tentClass(c)}${c.missed ? ' missed' : ''}"${c.missed ? ' data-missed-chip' : ''} draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''}${tentAttrs(b, c)} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(gridTent(c, held))}${esc(bookingLabel(b, c))}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
+        return `<span class="k ${esc(b.kind)}${tentClass(c)}${c.missed ? ' missed' : (c.tidy ? ' tidy' : '')}"${c.missed ? ' data-missed-chip' : (c.tidy ? ' data-tidy-chip' : '')} draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''}${tentAttrs(b, c)} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(gridTent(c, held))}${esc(bookingLabel(b, c))}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
       }).join('')}
       ${outChips(windows, day, today, 'span')}
       ${(reqByDay[day] || []).map((c) => requestedChip(c, 'span')).join('')}
@@ -466,7 +466,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
     ${flash ? `<div class="notice ok" data-cal-flash>${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
     <h1 class="vh">Calendar &amp; Bookings</h1>
     ${holdsBox}
-    <style>.k.missed{background:#c0392b !important;color:#fff !important;border-color:#c0392b !important}</style>
+    <style>.k.missed{background:#c0392b !important;color:#fff !important;border-color:#c0392b !important}.k.tidy{background:#fdf3d0 !important;color:#5c4400 !important;border-color:#e9cf7a !important}</style>
     ${overdueBox(overdue)}
     ${warn}
     <div class="calm" data-steps="calendar" data-steps-panel data-calm>
@@ -771,6 +771,32 @@ export function returnPage({ who, items, saved, returnKeyB64, depositWordsText =
     </form>
     ${returned ? `<div style="margin-top:14px">${confirmStep({ key: 'ret.undo', yesKey: 'ret.undoYes', label: 'Undo returned', question: `Undo "returned" for ${who}? The rental goes back to not returned and the request gets its old status back.`, action: `/admin/returns/undo?k=${esc(returnKeyB64)}`, hidden: '', danger: true })}</div>` : ''}
     <script>${PHOTO_JS}</script>`, { screen: 'returns', back: BACK_CAL });
+}
+
+// The confirm screen behind every "✓ Yes" in the 7 AM email (admin-calendar.mjs confirmDonePage):
+// "Mark <Name>'s games back?" (with "Anything damaged or missing?", default "No, all fine") or
+// "Mark <Name>'s takedown done?", the items and the due day, ✓ Yes (a same-origin POST) and Cancel.
+// Already done: "Already marked back ✓" / "Already marked done ✓" and no form.
+export function confirmDonePage({ id, r = '', who, isReturn, noun = 'job', items = [], due, done, damaged = false, card }) {
+  const title = isReturn ? `Mark ${who}'s games back?` : `Mark ${who}'s ${noun} done?`;
+  const list = items.length ? `<ul class="confirm-items" data-confirm-items>${items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  const dueLine = `<p data-confirm-due><strong>${isReturn ? 'Due back' : 'Due'} ${esc(dayWords(due))}</strong></p>`;
+  const cancel = `<a class="btn ghost" href="${esc(card)}" data-confirm-cancel${tip('confirm.cancel')}>Cancel</a>`;
+  if (done) {
+    return layout(isReturn ? 'Already marked back' : 'Already marked done', `<h1 data-confirm-done>${isReturn ? 'Already marked back ✓' : 'Already marked done ✓'}</h1>
+    <p>${esc(isReturn ? `${who}'s games are already checked in${damaged ? ' (something came back damaged or missing)' : ''}.` : `${who}'s ${noun} is already marked done.`)} Nothing was changed.</p>${dueLine}${list}
+    <div class="act"><a class="btn primary" href="${esc(card)}" data-confirm-card${tip('confirm.openCard')}>Open the card</a></div>`, { screen: 'returns' });
+  }
+  const damage = isReturn ? `<fieldset class="card" data-confirm-damage style="padding:10px 14px"><legend><strong>Anything damaged or missing?</strong></legend>
+      <label class="itemcheck"><input type="radio" name="damage" value="no" checked> No, all fine</label>
+      <label class="itemcheck"><input type="radio" name="damage" value="yes"> Yes, something is damaged or missing</label>
+      ${items.length ? `<p class="muted" style="margin:8px 0 4px">If yes, tick which (optional):</p>${items.map((x) => `<label class="itemcheck"><input type="checkbox" name="damaged" value="${esc(x)}"> ${esc(x)}</label>`).join('')}` : ''}
+      <label for="cn">What is wrong (optional)</label><input id="cn" name="notes" value=""></fieldset>` : '';
+  const yes = isReturn ? '✓ Yes, they\'re back' : '✓ Yes, it\'s done';
+  return layout(title, `<h1 data-confirm-title>${esc(title)}</h1>${dueLine}${list}
+    <form method="post" action="/admin/confirm-done" data-confirm-form>${hiddenInputs({ b: id, r })}${damage}
+      <div class="row" style="gap:10px;margin-top:12px">${act(`<button class="btn primary" type="submit"${tip(isReturn ? 'confirm.yesBack' : 'confirm.yesDone')}>${esc(yes)}</button>`, isReturn ? 'confirm.yesBack' : 'confirm.yesDone')}<div class="act">${cancel}</div></div>
+    </form>`, { screen: 'returns' });
 }
 
 // ---- Find a customer -----------------------------------------------------------------------

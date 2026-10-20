@@ -18,7 +18,7 @@ import { takedownState, inlineDefaultDate } from './takedown.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
 import SERVICES_DATA from '../../data/offers/services.json';
 import { isPhone, rentalDates, rentalSpanWords, rentalLength } from './phone-requests.mjs';
-import { lateWords, missedCountWords } from './missed.mjs';
+import { lateWords, tiers, stepWords } from './missed.mjs';
 import { dayWords } from './reminders.mjs';
 
 const CSS = `
@@ -990,49 +990,87 @@ function nextBox(r, s, x) {
   }
 }
 
-// The next step on a card whose job was missed (owner-approved mock-up, panel 7): "Call <first
-// name> and set a new <job> day", Pick a new day (the booking's own edit page), Mark done (it
-// happened) through the route that job is normally marked done with, and Not needed where the
-// card has it (porch / party takedown, grazing pickup).
-const DONE_ROUTE_KINDS = /_takedown$|^rental_pickup$|^grazing_pickup$|^other$/;
-function missedNextBox(m, { rk, ctx, s }) {
-  const done = /^(porch_install|party_setup|grazing_setup)$/.test(m.kind)
-    ? cardButton('card.jobDone', { ...ctx, jobWord: 'Mark done (it happened)' }, false)
-    : (m.kind === 'rental_return'
-      ? `<div class="act"><a class="btn ghost" href="/admin/returns?k=${esc(b64urlText(m.returnKey))}" data-missed-done${tip('ret.mark')}>Mark done (it happened)</a></div>`
-      : (DONE_ROUTE_KINDS.test(m.kind) ? `<form method="post" action="/admin/calendar/bookings/${esc(m.id)}/done" data-missed-done>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('step.missedDone')}>Mark done (it happened)</button></div></form>` : ''));
+// The next step on a card with a past step not ticked (missed.mjs classify, owner-approved
+// mock-up "Did this happen? vs Real problem", 20 Oct 2026):
+//   yellow  "Did <first name> pick up the games on Sun 18 Oct?" with ✓ Yes, it happened (the
+//           booking's done route) and ✗ No (turns it red)
+//   red     "Are <Name>'s games back?" / "Is <Name>'s takedown done?" with ✓ Yes (a return goes
+//           through the confirm screen, which asks "Anything damaged or missing?"), Call, Pick a
+//           new day and, for a takedown / grazing pickup, Not needed
+//   red ✗No "<Name> did not pick up on <day>": Call, Pick a new day, ✓ Yes, it happened
+const DONE_ROUTE_KINDS = /_takedown$|^rental_pickup$|^grazing_pickup$|^other$|^porch_install$|^party_setup$|^grazing_setup$/;
+const telOf = (p) => String(p || '').replace(/[^\d+]/g, '');
+export const confirmHref = (m) => `/admin/confirm-done?b=${encodeURIComponent(m.id)}&r=${encodeURIComponent(m.key ? b64urlText(m.key) : '')}`;
+// ✓ Yes for one item: a return / collect opens the confirm screen (damage question); anything else
+// posts the booking's done route at once (a tap inside the admin).
+function yesControl(m, { rk = '', cls = 'btn primary', key = 'step.tidyYes' } = {}) {
+  if (m.kind === 'rental_return') return `<a class="${cls}" href="${esc(confirmHref(m))}" data-tidy-yes="${esc(m.id)}"${tip('step.redYesBack')}>${esc(m.yes)}</a>`;
+  if (!DONE_ROUTE_KINDS.test(m.kind)) return '';
+  return `<form method="post" action="/admin/calendar/bookings/${esc(m.id)}/done" data-tidy-yes="${esc(m.id)}">${hiddenInputs({ r: rk || (m.key ? b64urlText(m.key) : '') })}<button class="${cls}" type="submit"${tip(m.tier === 'red' && m.reason === 'out' ? 'step.redYesDone' : key)}>${esc(m.yes)}</button></form>`;
+}
+function noControl(m, { rk = '', cls = 'btn ghost' } = {}) {
+  return `<form method="post" action="/admin/missed/not-happened" data-tidy-no="${esc(m.id)}">${hiddenInputs({ b: m.id, r: rk || (m.key ? b64urlText(m.key) : '') })}<button class="${cls}" type="submit"${tip('step.tidyNo')}>${esc(m.no || '✗ No')}</button></form>`;
+}
+function missedNextBox(m, { rk }) {
+  const call = telOf(m.phone) ? `<div class="act"><a class="btn ghost" href="tel:${esc(telOf(m.phone))}"${tip('step.call')}>Call</a></div>` : '';
+  const newDay = (primary) => `<a class="btn ${primary ? 'primary' : 'ghost'}" href="/admin/calendar/bookings/${esc(m.id)}/edit" data-missed-new-day${tip('step.missedNewDay')}>Pick a new day</a>`;
+  if (m.tier === 'yellow') {
+    return { big: 'step.tidyYes', html: `<section class="nextbox tidybox" data-next-step="tidy" data-tidy-step="${esc(m.kind)}"><p class="lbl">Next step · did this happen?</p><p class="what" data-next-what>${esc(m.question)}</p><p class="why">${esc(`Not ticked off yet. If it happened, tap Yes and the card moves on.`)}</p>
+    <div class="actions" data-primary>${act(yesControl(m, { rk }), 'step.tidyYes')}<div class="act">${noControl(m, { rk })}</div></div></section>` };
+  }
+  if (m.reason === 'not_happened') {
+    return { big: 'step.missedNewDay', html: `<section class="nextbox missbox" data-next-step="missed" data-missed-step="${esc(m.kind)}" data-red-reason="not_happened"><p class="lbl">Next step · call them</p><p class="what" data-next-what>${esc(m.question)}</p><p class="why">${esc('Call them and pick a new day.')}</p>
+    <div class="actions" data-primary>${act(newDay(true), 'step.missedNewDay')}${call}<div class="act">${yesControl(m, { rk, cls: 'btn ghost' })}</div></div></section>` };
+  }
   const notNeeded = /_takedown$|^grazing_pickup$/.test(m.kind) ? `<div class="smallrow"><form method="post" action="/admin/requests/takedown">${hiddenInputs({ r: rk, plan: 'customer_handles' })}<button class="btn ghost" type="submit"${tip('step.notNeeded')}>Not needed</button></form></div>` : '';
-  return { big: 'step.missedNewDay', html: `<section class="nextbox missbox" data-next-step="missed" data-missed-step="${esc(m.kind)}"><p class="lbl">Next step · overdue</p><p class="what" data-next-what>${esc(`Call ${m.first} and set a new ${m.short} day`)}</p><p class="why">${esc(`Was due ${dayWords(m.date)} · ${lateWords(m.days)} · not marked done.`)}</p>
-    <div class="actions" data-primary>${act(`<a class="btn primary" href="/admin/calendar/bookings/${esc(m.id)}/edit" data-missed-new-day${tip('step.missedNewDay')}>Pick a new day</a>`, 'step.missedNewDay')}${done}</div>${notNeeded}</section>` };
+  return { big: m.kind === 'rental_return' ? 'step.redYesBack' : 'step.redYesDone', html: `<section class="nextbox missbox" data-next-step="missed" data-missed-step="${esc(m.kind)}" data-red-reason="out"><p class="lbl">Next step · check this</p><p class="what" data-next-what>${esc(m.question)}</p><p class="why">${esc(`${m.due} · ${lateWords(m.days)} · ${m.notYet}.`)}</p>
+    <div class="actions" data-primary>${act(yesControl(m, { rk }), m.kind === 'rental_return' ? 'step.redYesBack' : 'step.redYesDone')}${call}<div class="act">${newDay(false)}</div></div>${notNeeded}</section>` };
 }
 
-// The thin red strip at the top of Requests (panel 7): one line for one missed job, a <details>
-// of thin rows for several (oldest first). Card ↓ jumps to the card (#c-<key>), which never
-// moves; ✕ hides the strip until tomorrow morning on every device (missed.mjs dismissStrip).
-export const MISSED_CSS = `.mstrip1,.mstrip{background:#c0392b;color:#fff;border-radius:8px;font-size:.95rem;margin:0 0 10px}
-.mstrip1{display:flex;align-items:center;gap:10px;padding:2px 4px 2px 12px;min-height:40px}
-.mstrip1 .st,.mstrip .st{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.mstrip1 a,.mstrip .mrow a,.mstrip .see{color:#fff;font-weight:700;text-decoration:underline;flex:none}
-.mstrip>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:2px 4px 2px 12px;min-height:40px;cursor:pointer}
-.mstrip>summary::-webkit-details-marker{display:none}
-.mstrip form,.mstrip1 form{margin:0;flex:none}
-.mstrip .sx,.mstrip1 .sx{background:transparent;border:0;color:#fff;font:inherit;font-weight:700;width:40px;height:36px;border-radius:6px;cursor:pointer}
-.mstrip .mrow{display:flex;align-items:center;gap:12px;padding:7px 12px;border-top:1px solid rgba(255,255,255,.35)}
+// The strips at the top of Requests (the mock-up): a red one for real problems (things still out,
+// ✗ No answers), a thin yellow one for steps to tick off. Each row has its ✓ Yes right there;
+// Card ↓ jumps to the card (#c-<key>), which never moves. ✕ hides the RED strip until tomorrow
+// morning on every device (missed.mjs dismissStrip); the yellow one has no ✕ (it is quiet already).
+export const MISSED_CSS = `.mstrip,.ystrip{border-radius:8px;font-size:.95rem;margin:0 0 10px}
+.mstrip{background:#c0392b;color:#fff}
+.ystrip{background:#fdf3d0;color:#5c4400;border:1px solid #e9cf7a}
+.mstrip .st,.ystrip .st{flex:1;min-width:0}
+.mstrip>summary .st,.ystrip>summary .st{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mstrip a,.mstrip .see{color:#fff;font-weight:700;text-decoration:underline;flex:none}
+.ystrip a,.ystrip .see{color:#5c4400;font-weight:700;flex:none}
+.mstrip>summary,.ystrip>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:2px 4px 2px 12px;min-height:40px;cursor:pointer}
+.mstrip>summary::-webkit-details-marker,.ystrip>summary::-webkit-details-marker{display:none}
+.mstrip form,.ystrip form{margin:0;flex:none}
+.mstrip .sx{background:transparent;border:0;color:#fff;font:inherit;font-weight:700;width:40px;height:36px;border-radius:6px;cursor:pointer}
+.mstrip .mrow,.ystrip .yrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 12px;border-top:1px solid rgba(255,255,255,.35)}
+.ystrip .yrow{border-top-color:#e9cf7a}
+.tap{font:inherit;font-weight:700;font-size:.9rem;border-radius:8px;padding:7px 12px;min-height:40px;cursor:pointer;border:1.5px solid currentColor;background:transparent;color:inherit;text-decoration:none;display:inline-flex;align-items:center}
+.ystrip .tap.yes{background:#1f7a3f;border-color:#1f7a3f;color:#fff}
+.mstrip .tap.yes{background:#fff;color:#c0392b;border-color:#fff;text-decoration:none}
 .card.miss{border:2px solid #c0392b !important}
 .mchip{display:inline-block;background:#c0392b;color:#fff;font-weight:800;font-size:.85rem;padding:3px 12px;border-radius:99px;margin:0 0 6px}
-.nextbox.missbox{border-color:#c0392b}.nextbox.missbox .lbl{color:#c0392b}`;
-const telOf = (p) => String(p || '').replace(/[^\d+]/g, '');
-export function missedStrip(missed = []) {
-  if (!missed.length) return '';
+.ychip{display:inline-block;background:#fdf3d0;color:#5c4400;border:1px solid #e9cf7a;font-weight:700;font-size:.85rem;padding:3px 12px;border-radius:99px;margin:0 0 6px}
+.nextbox.missbox{border-color:#c0392b}.nextbox.missbox .lbl{color:#c0392b}
+.nextbox.tidybox{border-color:#e9cf7a}.nextbox.tidybox .lbl{color:#7a5a00}`;
+// missed: missedFrom's list (every tier); hidden: the red strip's ✕ is in force today.
+export function missedStrip(missed = [], { hidden = false } = {}) {
+  const { red, yellow } = tiers(missed);
   const cardOf = (m) => (m.key ? `#c-${b64urlText(m.key)}` : `/admin/day/${m.date}`);
   const call = (m) => (telOf(m.phone) ? `<a href="tel:${esc(telOf(m.phone))}"${tip('step.call')}>Call</a>` : '');
-  const x = `<form method="post" action="/admin/missed/dismiss" data-missed-dismiss>${hiddenInputs({ ids: missed.map((m) => m.id).join(',') })}<button type="submit" class="sx" aria-label="Dismiss until tomorrow"${tip('req.missedDismiss')}>✕</button></form>`;
-  if (missed.length === 1) {
-    const m = missed[0];
-    return `<div class="mstrip1" role="alert" data-missed-strip data-missed-count="1"><span class="st">⚠ <b>Missed:</b> ${esc(`${m.who} ${m.strip}, ${dayWords(m.date)}`)}</span>${call(m)}<a href="${esc(cardOf(m))}" data-missed-card${tip('req.missedCard')}>Card ↓</a>${x}</div>`;
+  const card = (m) => `<a href="${esc(cardOf(m))}" data-missed-card${tip('req.missedCard')}>Card ↓</a>`;
+  let out = '';
+  if (red.length && !hidden) {
+    const x = `<form method="post" action="/admin/missed/dismiss" data-missed-dismiss>${hiddenInputs({ ids: red.map((m) => m.id).join(',') })}<button type="submit" class="sx" aria-label="Hide until tomorrow"${tip('req.missedDismiss')}>✕</button></form>`;
+    const title = red.some((m) => m.reason === 'not_happened') ? `⚠ <b>Check these</b> · ${red.length}` : `⚠ <b>Not back yet</b> · ${red.length} to check`;
+    const words = (m) => (m.reason === 'out' ? `${esc(m.question)} ${esc(m.due.replace(/^Due back /, 'Due '))}` : `${esc(m.question)}`);
+    out += `<details class="mstrip" open role="alert" data-missed-strip data-missed-count="${red.length}"><summary${tip('req.missedSee')}><span class="st">${title}</span><span class="see">▾</span>${x}</summary>
+    ${red.map((m) => `<div class="mrow" data-missed-row="${esc(m.id)}" data-red-reason="${esc(m.reason)}"><span class="st">${words(m)}</span>${m.reason === 'out' ? yesControl(m, { cls: 'tap yes' }) : ''}${call(m)}${card(m)}</div>`).join('')}</details>`;
   }
-  return `<details class="mstrip" role="alert" data-missed-strip data-missed-count="${missed.length}"><summary${tip('req.missedSee')}><span class="st">⚠ <b>${esc(missedCountWords(missed.length))}</b></span><span class="see">See them ▾</span>${x}</summary>
-    ${missed.map((m) => `<div class="mrow" data-missed-row="${esc(m.id)}"><span class="st">${esc(`${m.who} · ${m.strip} · ${dayWords(m.date)}`)}</span>${call(m)}<a href="${esc(cardOf(m))}" data-missed-card${tip('req.missedCard')}>Card ↓</a></div>`).join('')}</details>`;
+  if (yellow.length) {
+    out += `<details class="ystrip" data-tidy-strip data-tidy-count="${yellow.length}"><summary${tip('req.tidySee')}><span class="st">Did this happen? · <b>${esc(stepWords(yellow.length))}</b></span><span class="see">▾</span></summary>
+    ${yellow.map((m) => `<div class="yrow" data-tidy-row="${esc(m.id)}"><span class="st">${esc(m.row)}</span>${yesControl(m, { cls: 'tap yes' })}${noControl(m, { cls: 'tap' })}${card(m)}</div>`).join('')}</details>`;
+  }
+  return out;
 }
 
 // One request card. o: everything dashboardPage knows about this request.
@@ -1070,10 +1108,13 @@ export function requestCard(r, o) {
   ].join('');
   const svcBadges = services.map((k) => { const b = serviceBadge(k); return b ? `<span class="svc" data-service="${k}" style="border-color:${b.bar};background:${b.tint}">${esc(b.label)}</span>` : ''; }).join('');
   const x = { rk, services, inv, ctx, dates, bookings: bk, tdS, hold, holdHtml, pickupPlace, today, ret, tdSaved };
-  // A missed job (missed.mjs, oldest first) takes over the next step; the card stays in its place.
-  const miss = !archived && !pr.void && missed.length ? missed[0] : null;
+  // A past step not ticked (missed.mjs classify: red first, then yellow, oldest first) takes over
+  // the next step; the card stays in its place. Red: red border + tag; yellow: a yellow tag only.
+  const T = !archived && !pr.void ? tiers(missed) : { red: [], yellow: [] };
+  const miss = T.red[0] || T.yellow[0] || null;
+  const red = Boolean(miss && miss.tier === 'red');
   const nb = archived ? { big: 'pa.bringBack', html: `<section class="nextbox" data-next-step="archived"><p class="what">Put away</p><div class="actions" data-primary>${cardButton('pa.bringBack', ctx, true)}</div></section>` }
-    : (miss ? missedNextBox(miss, { rk, ctx, s }) : nextBox(r, s, x));
+    : (miss ? missedNextBox(miss, { rk }) : nextBox(r, s, x));
   const undo = archived || pr.void ? null : undoFor(s, { tdS, stored });
   const steps = archived || pr.void ? '' : stepList(s, undo, ctx);
   const big = nb.big;
@@ -1129,8 +1170,8 @@ export function requestCard(r, o) {
       ${!archived && !quiet ? `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('card.putAway')}>Put away</button></div></form>` : ''}
       ${stage === 'void' && !bottomBtns.some((k) => k.startsWith('card.archive')) ? cardButton('card.archive', ctx, false) : ''}${bottomBtns.map((k) => cardButton(k, ctx, false)).join('')}
       ${quiet ? '' : voidLink(r, inv, ctx)}</div>`;
-  return `<article class="card stepcard${miss ? ' miss' : ''}" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''}${miss ? ` data-missed="${esc(miss.id)}"` : ''} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
-      ${miss ? `<span class="mchip" data-missed-tag>⚠ MISSED · ${esc(lateWords(miss.days))}</span>` : ''}<div class="schead">${quickContact(r)}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
+  return `<article class="card stepcard${red ? ' miss' : (miss ? ' tidy' : '')}" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''}${red ? ` data-missed="${esc(miss.id)}"` : (miss ? ` data-tidy="${esc(miss.id)}"` : '')} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
+      ${red ? `<span class="mchip" data-missed-tag>⚠ ${esc(miss.tag)}</span>` : (miss ? `<span class="ychip" data-tidy-tag>${esc(miss.tag)}</span>` : '')}<div class="schead">${quickContact(r)}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
         <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
         ${bizLine}</div>
       ${latest}

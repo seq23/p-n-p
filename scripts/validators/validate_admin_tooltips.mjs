@@ -39,6 +39,8 @@ const tmr = R.tomorrowChicago();
 await s.post('/admin/calendar/bookings', { kind: 'grazing_setup', date: tmr, time: '14:00', customer_name: 'Gia Graze', phone: '901-555-0123', email: 'gia@example.com', place: '12 Oak St', items: 'Grazing table', note: 'Side gate' });
 await s.post('/admin/calendar/bookings', { kind: 'porch_install', date: tmr, customer_name: 'No Phone', phone: '', email: 'np@example.com', place: '', items: '' });
 await s.post('/admin/calendar/bookings', { kind: 'rental_pickup', date: '2026-01-05', return_date: '2026-01-06', customer_name: 'Late Larry', phone: '901-555-0999', email: '', place: '', items: 'Giant Uno' });
+// A takedown long past and not done (red: "Is Tina T.'s takedown done?" with ✓ Yes, it's done).
+await s.post('/admin/calendar/bookings', { kind: 'party_takedown', date: '2026-01-07', customer_name: 'Tina Takedown', phone: '901-555-0997', email: '', place: '', items: 'Party decor' });
 // A weekend-long rental (pickup tomorrow, back 4 days later): "Rental out" chips on the days between.
 const outMid = (() => { const d = new Date(`${tmr}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 2); return d.toISOString().slice(0, 10); })();
 const outEnd = (() => { const d = new Date(`${tmr}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 4); return d.toISOString().slice(0, 10); })();
@@ -46,6 +48,8 @@ await s.post('/admin/calendar/bookings', { kind: 'rental_pickup', date: tmr, ret
 const late = await s.one("SELECT id FROM bookings WHERE customer_name = 'Late Larry' AND kind = 'rental_return'");
 const pick = await s.one("SELECT id, date FROM bookings WHERE request_key = ?1 AND kind = 'rental_pickup'", reqA.key);
 const note = await s.one('SELECT id FROM booking_notes LIMIT 1');
+const lateTd = await s.one("SELECT id FROM bookings WHERE customer_name = 'Tina Takedown'");
+const retA = await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind = 'rental_return'", reqA.key);
 await s.post(`/admin/returns?k=${s.rk(reqA.key)}`, { back: ['Cornhole Set'] });
 await s.post('/admin/settings', { business_name: 'Porch & Party' });
 const v = await s.invoiceFor(reqB, { go: 'save' });
@@ -86,6 +90,8 @@ const screens = [
   [`/admin/calendar/bookings/${pick.id}/edit`], [`/admin/calendar/bookings/${pick.id}/move`],
   ['/admin/calendar/link'],
   [`/admin/returns?k=${s.rk(reqA.key)}`], [`/admin/returns?k=${s.rk(`booking:${late.id}`)}`],
+  // The confirm screen behind the 7 AM email's ✓ Yes: a late return, a late takedown, an already-back return.
+  [`/admin/confirm-done?b=${late.id}&r=`], [`/admin/confirm-done?b=${lateTd.id}&r=`], ...(retA ? [[`/admin/confirm-done?b=${retA.id}&r=${s.rk(reqA.key)}`]] : []),
   ['/admin/invoices'], ['/admin/invoices/new'], [`/admin/invoices/new?r=${s.rk(reqA.key)}`],
   [`/admin/invoices/${invA.id}`], [`/admin/invoices/${invB.id}`], [`/admin/invoices/${draftWithEmail.id}`], [`/admin/invoices/${v.id}`], [`/admin/invoices/${paidInv.id}`], [`/admin/invoices/${invA.id}/edit`],
   ['/admin/settings'], ['/admin/help', { help: true }], ['/admin/packages'],

@@ -19,19 +19,29 @@
 //   4 Book it or decide     called back but nothing on the calendar; takedowns / pickups with no day
 //   5 Money                 balances due today or late (the damage deposit is never owed), every
 //                           unpaid rental hold ("Waiting for deposit · Games reserved until ...")
-// Above section 1, a red alarm box "⚠ MISSED · CALL THEM FIRST" (owner-approved mock-up, panel 7,
-// 20 Oct 2026): every missed job (missed.mjs: any open booking before today not done and not Not
-// needed, a late rental return included, which therefore is no longer in Money), oldest first,
-// with Call now (tel:), Text (sms:) and Open card; the subject then starts "⚠ N missed job(s) · ".
+// Past steps not ticked (missed.mjs: any open booking before today not done and not Not needed)
+// come in two tiers (missed.mjs classify, owner-approved mock-up "Did this happen? vs Real
+// problem", 20 Oct 2026):
+//   RED     things still out (a late return / collect, a takedown, a grazing pickup) and ✗ No
+//           answers: a red box "⚠ CHECK THESE FIRST" above section 1, each a question ("Are
+//           Tamaira T.'s games back?" / "Due back Tue 20 Oct · not marked back yet") with
+//           "✓ Yes, they're back" / "✓ Yes, it's done" (-> /admin/confirm-done, a confirm screen:
+//           GET never changes anything), 📞 Call and Open card. The subject then starts
+//           "⚠ N not back yet · " ("⚠ N to check · " when a ✗ No is among them). A late return is
+//           never also in Money.
+//   YELLOW  hand-overs not ticked (pickup, delivery, setup, install, grazing drop-off): ONE quiet
+//           line at the very bottom, "Tidy up: N step(s) to tick off (<who>'s <step>, ...). Open
+//           admin". Never in the subject, never in the red box.
 // then "Tomorrow, <day>" and, on Mondays, "Your week" (weekly.mjs figures; the Settings switch
-// weekly_summary = include it). Nothing missed, nothing in 1-5 and nothing tomorrow: the email
-// says only "All clear today" (never while a job is missed). Customers appear as first name + last initial only; a phone number is only
+// weekly_summary = include it). Nothing red, nothing yellow, nothing in 1-5 and nothing tomorrow:
+// the email says only "All clear today" (never while a red item exists). Only yellow: the email
+// still goes, with just the Tidy up line. Customers appear as first name + last initial only; a phone number is only
 // ever inside a Call (tel:) / Text (sms:) link, never shown. Every other link goes into /admin.
 import { requestFacts, callbackRows, serviceWords } from './callback-list.mjs';
 import { waitingWords, depositOutcomes } from './steps.mjs';
 import { shortName, askedDate } from './requested.mjs';
 import { listBookings, loadReturns, addDays, daySort, deliveryAddress } from './calendar.mjs';
-import { JOB_WORDS, DELIVERY_JOB_WORDS, missedFrom, isLiveBooking, lateWords, missedCountWords } from './missed.mjs';
+import { JOB_WORDS, DELIVERY_JOB_WORDS, missedFrom, isLiveBooking, tiers, subjectWarning, stepWords, notHappenedSet } from './missed.mjs';
 import { serviceOfKind } from './kinds.mjs';
 import { currentHolds } from './holds.mjs';
 import { balances, linesByInvoice, dueWords } from './ledger.mjs';
@@ -58,7 +68,8 @@ export const SECTION_WHY = {
 // The job in her words ("party takedown", "games return") and the business-delivery Delivery /
 // Collect words live in missed.mjs (one list for the email, the strip and the card).
 export { JOB_WORDS, DELIVERY_JOB_WORDS };
-export const MISSED_TITLE = '⚠ MISSED · CALL THEM FIRST';
+export const MISSED_TITLE = '⚠ CHECK THESE FIRST';
+export const TIDY_WORDS = 'Tidy up';
 const RENTAL_PLACE = 'Mt. Moriah Station';
 const usd = (c) => money(c).replace(/\.00$/, '');
 
@@ -118,13 +129,17 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   const delivered = (b) => Boolean(DELIVERY_JOB_WORDS[b.kind] && b.request_key && factsBy[b.request_key] && deliveryAddress(factsBy[b.request_key].r));
   const jobOf = (b) => (delivered(b) ? DELIVERY_JOB_WORDS[b.kind] : (JOB_WORDS[b.kind] || 'job'));
 
-  // ⚠ Missed (above section 1): oldest first; Call now is the solid button.
-  const missed = missedFrom({ bookings, returns, today, statuses, reqBy, delivered }).map((m) => {
+  // Past steps not ticked, in two tiers (missed.mjs tiers): red in the box above section 1 (oldest
+  // first; ✓ Yes is the solid button and opens the confirm screen), yellow on the Tidy up line.
+  const T = tiers(missedFrom({ bookings, returns, today, statuses, reqBy, delivered, notHappened: await notHappenedSet(db) }));
+  const missed = T.red.map((m) => {
     const tel = telHref(m.phone);
-    const job = m.kind === 'rental_return' ? (m.short === 'collect' ? 'games not collected' : 'games not returned') : m.job;
-    return { ...m, svc: serviceOfKind(m.kind), t: `${m.who} · ${job}`, d: `Was due ${dayWords(m.date)} · ${lateWords(m.days)} · not marked done`,
-      btns: [...(tel ? [{ label: '📞 Call now', href: tel, solid: true }, { label: 'Text', href: `sms:${normalizePhone(m.phone)}` }] : []), { label: 'Open card', href: m.key ? cardHref(m.key) : `/admin/day/${m.date}` }] };
+    const card = { label: 'Open card', href: m.key ? cardHref(m.key) : `/admin/day/${m.date}` };
+    const yes = m.reason === 'out' ? [{ label: m.yes, href: `/admin/confirm-done?b=${encodeURIComponent(m.id)}&r=${encodeURIComponent(m.key ? b64urlText(m.key) : '')}`, solid: true }] : [];
+    return { ...m, svc: serviceOfKind(m.kind), t: m.question, d: m.reason === 'out' ? `${m.due} · ${m.notYet}` : `You said it did not happen · call them and pick a new day`,
+      btns: [...yes, ...(tel ? [{ label: '📞 Call', href: tel, solid: !yes.length }] : []), card] };
   });
+  const tidy = T.yellow.map((m) => ({ id: m.id, key: m.key, t: m.tidy }));
 
   // 1. Today's jobs.
   const jobs = open.filter((b) => b.date === today).sort(daySort).map((b) => {
@@ -224,10 +239,14 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const w = await weeklyData(db, today, nowMs);
     week = { newRequests: w.last.total, jobsDone: w.last.jobsDone, moneyIn: w.last.received, tips: w.last.tips || 0, expenses: w.last.expenses, next14: w.upcomingJobs };
   }
-  return { today, tomorrow, monday, missed, sections: { 1: jobs, 2: callbacks, 3: setTime, 4: decide, 5: moneyItems }, tomorrowJobs, week };
+  return { today, tomorrow, monday, missed, tidy, sections: { 1: jobs, 2: callbacks, 3: setTime, 4: decide, 5: moneyItems }, tomorrowJobs, week };
 }
 
-export const isAllClear = (d) => !(d.missed || []).length && [1, 2, 3, 4, 5].every((n) => !d.sections[n].length) && !d.tomorrowJobs.length;
+const nothingElse = (d) => !(d.missed || []).length && [1, 2, 3, 4, 5].every((n) => !d.sections[n].length) && !d.tomorrowJobs.length;
+export const isAllClear = (d) => nothingElse(d) && !(d.tidy || []).length;
+// Only yellow steps to tick off: the email still goes, with just the Tidy up line.
+export const isTidyOnly = (d) => nothingElse(d) && (d.tidy || []).length > 0;
+export const tidyLine = (tidy = []) => `${TIDY_WORDS}: ${stepWords(tidy.length)} (${tidy.map((x) => x.t).join(', ')}).`;
 
 // ---- the email: subject, html, text (the approved mock: one calm 600px column) --------------
 const C = { red: '#b42318', redBg: '#fdecea', bg: '#eef0f2', mail: '#ffffff', fg: '#2c2520', muted: '#6f6359', line: '#ece4da', accent: '#b65f3e', soft: '#faf6f0', hi: '#fdf0e6', ok: '#2f7a46' };
@@ -239,7 +258,7 @@ function btnHtml(b, tone = C.accent) {
   const fill = b.solid ? `background:${tone};color:#ffffff;` : `background:${C.mail};color:${tone};`;
   return `<a href="${esc(abs(b.href))}" style="display:inline-block;margin:0 8px 6px 0;font-size:14px;font-weight:700;${fill}border:1.5px solid ${tone};border-radius:8px;padding:4px 12px;text-decoration:none;">${esc(b.label)}</a>`;
 }
-// The red alarm box at the very top (panel 7): one block per missed job, oldest first.
+// The red box at the very top: one block per red item, oldest first.
 function missedHtml(list) {
   return `<div data-missed style="background:${C.redBg};border:2px solid ${C.red};border-radius:10px;padding:12px 14px;margin:0 0 20px;">`
     + `<div style="color:${C.red};font-weight:800;font-size:15px;letter-spacing:.04em;margin:0 0 6px;">${esc(MISSED_TITLE)}</div>`
@@ -269,7 +288,10 @@ function weekHtml(w) {
 
 export function renderTodo(d) {
   const missed = d.missed || [];
-  const subject = `${missed.length ? `⚠ ${missedCountWords(missed.length)} · ` : ''}Your to-do list for ${dayWords(d.today)} · Porch & Party`;
+  const tidy = d.tidy || [];
+  const subject = `${subjectWarning(missed)}Your to-do list for ${dayWords(d.today)} · Porch & Party`;
+  const tidyHtml = tidy.length ? `<div data-tidy style="border-top:1px solid ${C.line};margin:20px 0 0;padding-top:10px;color:${C.muted};font-size:15px;">${esc(tidyLine(tidy))} <a href="${SITE}/admin/" style="color:${C.accent};font-weight:700;">Open admin</a></div>` : '';
+  const tidyText = tidy.length ? ['', `${tidyLine(tidy)} Open admin: ${SITE}/admin/`] : [];
   const footHtml = `<p style="margin:20px 0 0;font-size:14px;color:${C.muted};text-align:center;"><a href="${SITE}/admin/" style="color:${C.accent};">Open the admin</a> · This email comes every day at 7 AM.</p>`;
   const T = [];
   const weekText = (w) => ['', 'YOUR WEEK (MONDAY SUMMARY)', ...WEEK_ROWS(w).map(([k, v]) => `- ${k}: ${v}`)];
@@ -279,10 +301,18 @@ export function renderTodo(d) {
   }
   const H = [`<h1 style="font-family:${SERIF};font-size:26px;line-height:1.2;font-weight:600;margin:0 0 6px;">Good morning, Valerie</h1><p style="margin:0 0 20px;color:${C.muted};">Here is what needs you today, in order.</p>`];
   T.push('Good morning, Valerie', 'Here is what needs you today, in order.');
+  if (isTidyOnly(d)) {
+    H.push(tidyHtml, d.week ? `${HR}${weekHtml(d.week)}` : '', footHtml);
+    T.push(...tidyText, ...(d.week ? weekText(d.week) : []), '', `Open the admin: ${SITE}/admin/ · This email comes every day at 7 AM.`);
+    return { subject, html: page(H.join('')), text: T.join('\n') };
+  }
   if (missed.length) {
     H.push(missedHtml(missed));
     T.push('', MISSED_TITLE);
-    for (const m of missed) T.push(`- ${m.t} (${m.d}): ${SITE}${m.btns[m.btns.length - 1].href}`);
+    for (const m of missed) {
+      T.push(`- ${m.t} (${m.d})`);
+      for (const b of m.btns) if (b.href.startsWith('/admin')) T.push(`  ${b.label}: ${SITE}${b.href}`);
+    }
   }
   // The sections SHOWN are numbered 1, 2, 3 ... in order (owner, 20 Oct 2026): an empty section
   // leaves no gap in the numbers. data-section stays the section's fixed key.
@@ -306,7 +336,8 @@ export function renderTodo(d) {
   H.push(`<div data-tomorrow style="background:${C.soft};border-radius:10px;padding:12px 14px;margin:20px 0 0;font-size:15px;"><div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:${C.muted};font-weight:700;">Tomorrow, ${esc(dayWords(d.tomorrow))}</div>${tom}</div>`);
   T.push('', `TOMORROW, ${dayWords(d.tomorrow).toUpperCase()}`, ...(d.tomorrowJobs.length ? d.tomorrowJobs.map((j) => `- ${j.t}`) : ['Nothing booked.']));
   if (d.week) { H.push(`${HR}${weekHtml(d.week)}`); T.push(...weekText(d.week)); }
-  H.push(footHtml);
+  H.push(tidyHtml, footHtml);
+  T.push(...tidyText);
   T.push('', `Open the admin: ${SITE}/admin/ · This email comes every day at 7 AM.`);
   return { subject, html: page(H.join('')), text: T.join('\n') };
 }

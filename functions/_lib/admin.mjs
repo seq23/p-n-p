@@ -262,7 +262,8 @@ async function dashboard(env, url) {
   const missed = await MS.loadMissed(env.DB, mToday, { delivered: (b) => Boolean(b.request_key && reqByKey[b.request_key] && C.deliveryAddress(reqByKey[b.request_key])) });
   const missedBy = {};
   for (const m of missed) if (m.key) (missedBy[m.key] = missedBy[m.key] || []).push(m);
-  const missedTop = MS.stripHidden(missed, settings[MS.DISMISS_KEY], mToday) ? '' : V.missedStrip(missed);
+  // The ✕ hides only the RED strip (missed.mjs tiers); the yellow "Did this happen?" strip stays.
+  const missedTop = V.missedStrip(missed, { hidden: MS.stripHidden(MS.tiers(missed).red, settings[MS.DISMISS_KEY], mToday) });
   const referrers = {};
   for (const r of requests) if (r.referralCode) referrers[r.referralCode] = r.name;
   const idsReady = requests.filter((r) => idOnFile(r) && readyToDeleteId(r, statuses[r.key], statuses[r.key] && statuses[r.key].invoice_id ? invoices[statuses[r.key].invoice_id] : null, returns[r.key]));
@@ -861,8 +862,14 @@ async function routeAdmin(context) {
   if (segs[0] === 'missed' && segs[1] === 'dismiss' && method === 'POST') {
     const form = await request.formData();
     await MS.dismissStrip(env.DB, chicagoDate(), String(form.get('ids') || '').split(','));
-    return redirect('/admin/?m=' + encodeURIComponent('Hidden until tomorrow morning. The card still shows MISSED.'));
+    return redirect('/admin/?m=' + encodeURIComponent('Red strip hidden until tomorrow morning. The cards still show it.'));
   }
+  // ✗ No on a "Did this happen?" item: one history line the detector reads; the item turns red.
+  if (segs[0] === 'missed' && segs[1] === 'not-happened' && method === 'POST') return AC.notHappenedRoute(env, request);
+  // "✓ Yes" from the 7 AM email: GET only shows the confirm screen (email scanners open links);
+  // the POST (same-origin, guard.mjs) marks it.
+  if (segs[0] === 'confirm-done' && segs.length === 1 && method === 'GET') return AC.confirmDonePage(env, url);
+  if (segs[0] === 'confirm-done' && segs.length === 1 && method === 'POST') return AC.confirmDoneRoute(env, request);
   if (segs[0] === 'requests' && segs[1] === 'takedown' && method === 'POST') {
     // The takedown is never required: Not sure yet / Customer will handle it (+ note), or '' to ask again.
     const form = await request.formData();
