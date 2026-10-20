@@ -49,7 +49,7 @@ const unesc = (h) => String(h).replace(/&#39;|&#x27;/g, "'").replace(/&amp;/g, '
   const today = '2026-10-21';
   const B = (id, kind, date, extra = {}) => ({ id, kind, date, time: null, done_at: null, request_key: null, customer_name: `Person${id} Last`, phone: '', ...extra });
   const bookings = [
-    B(1, 'party_takedown', '2026-10-20', { request_key: 'k1' }),
+    B(1, 'party_takedown', '2026-10-20', { request_key: 'k1', phone: '+1 901.555.0101' }),
     B(2, 'porch_install', '2026-10-19', { request_key: 'k2' }),
     B(3, 'party_setup', '2026-10-19', { request_key: 'k3' }),
     B(4, 'rental_pickup', '2026-10-18'),
@@ -66,12 +66,15 @@ const unesc = (h) => String(h).replace(/&#39;|&#x27;/g, "'").replace(/&amp;/g, '
     B(15, 'rental_return', '2026-10-12', { done_at: '2026-10-12 20:00:00' }),
   ];
   const statuses = { k3: { request_key: 'k3', status: 'job_done', job_done_at: '2026-10-19 22:00:00' } };
-  const reqBy = { k8: { request_key: 'k8', takedown_plan: 'customer_handles', name: 'Gina Grazer' }, k14: { request_key: 'k14', takedown_plan: 'scheduled', name: 'Pia Porch' } };
+  const reqBy = { k8: { request_key: 'k8', takedown_plan: 'customer_handles', name: 'Gina Grazer' }, k14: { request_key: 'k14', takedown_plan: 'scheduled', name: 'Pia Porch', phone: '(901) 555-0414' } };
   const returns = { k5: { returned_at: '2026-10-19 18:00:00' }, k7: { returned_at: '2026-10-20 18:00:00' } };
   const m = MS.missedFrom({ bookings, returns, today, statuses, reqBy });
   const ids = m.map((x) => x.id);
   must(JSON.stringify(ids) === JSON.stringify([15, 14, 13, 10, 4, 2, 1, 6]), `missed ids (oldest first) are ${JSON.stringify(ids)}`);
   must(ids.includes(1), 'a party takedown before today not marked done is not missed');
+  // The phone rides through missedFrom and tiers: the booking's own, else the request's (both formats she stores).
+  const redBy = Object.fromEntries(MS.tiers(m).red.map((x) => [x.id, x]));
+  must(redBy[1] && redBy[1].phone === '+1 901.555.0101' && redBy[14] && redBy[14].phone === '(901) 555-0414', `a red item lost its booking / request phone: ${JSON.stringify([redBy[1] && redBy[1].phone, redBy[14] && redBy[14].phone])}`);
   must(ids.includes(2), 'a porch install before today (job not done) is not missed');
   must(!ids.includes(3), 'a setup whose job is marked done on the card is missed');
   must(ids.includes(4), 'a rental pickup before today not marked picked up is not missed');
@@ -194,7 +197,16 @@ const unesc = (h) => String(h).replace(/&#39;|&#x27;/g, "'").replace(/&amp;/g, '
   must(html.indexOf('data-tidy') > html.indexOf('data-tomorrow') && html.indexOf('data-tidy') < html.indexOf('This email comes every day'), 'the Tidy up line is not at the very bottom');
   must(msg.text.includes("⚠ CHECK THESE FIRST\n- Are Tamaira T.'s games back? (Due back Tue 20 Oct · not marked back yet)\n  ✓ Yes, they're back: https://porchandparty901.com/admin/confirm-done?b=") && msg.text.includes("\nTidy up: 1 step to tick off (Tamaira T.'s pickup). Open admin: https://porchandparty901.com/admin/"), `the plain text lacks the red box or Tidy up: ${msg.text}`);
   must(!/MISSED|missed job/.test(msg.html + msg.text + msg.subject), 'the old MISSED words are still in the email');
-  must(!msg.text.replace(/\D/g, ' ').includes('5550301') && !msg.html.replace(/href="[^"]*"/g, '').includes('555-03') && !/Hassan|Tee\b/.test(msg.html + msg.text), 'the email shows a phone number or a full surname');
+  // A red item whose booking or request has a phone shows 📞 Call with its tel: link, in the HTML
+  // AND the plain text (the text dropped it, 20 Oct 2026: only /admin buttons were printed).
+  must(d.missed.length === 2 && d.missed.every((x) => x.btns.some((b) => b.label === '📞 Call' && /^tel:\d{10}$/.test(b.href))), `a red item with a phone has no 📞 Call: ${JSON.stringify(d.missed.map((x) => x.btns))}`);
+  for (const x of d.missed) {
+    const item = html.slice(html.indexOf(`data-missed-item="${x.id}"`), html.indexOf('</div></div>', html.indexOf(`data-missed-item="${x.id}"`)));
+    must(/<a href="tel:\d{10}"[^>]*>📞 Call<\/a>/.test(item), `the red box item ${x.id} has no 📞 Call tel: link in the HTML`);
+  }
+  must(new RegExp(`- Are Tamaira T\\.'s games back\\? \\(Due back Tue 20 Oct · not marked back yet\\)\\n  ✓ Yes, they're back: https://porchandparty901\\.com/admin/confirm-done\\?b=${ret}&r=\\n  📞 Call: tel:9015550302\\n  Open card: https://porchandparty901\\.com/admin/day/2026-10-20\\n- Is Ali H\\.'s takedown done\\? \\(Due Tue 20 Oct · not marked done yet\\)\\n  ✓ Yes, it's done: https://porchandparty901\\.com/admin/confirm-done\\?b=${td}&r=\\n  📞 Call: tel:9015550301\\n  Open card: `).test(msg.text), `the plain-text red box lacks ✓ Yes / 📞 Call tel: / Open card per item: ${msg.text.slice(0, 700)}`);
+  // No phone number outside a tel: link, in either part.
+  must(!msg.text.replace(/^  📞 Call: tel:\d+$/gm, '').replace(/\D/g, ' ').includes('5550301') && !msg.html.replace(/href="[^"]*"/g, '').includes('555-03') && !/Hassan|Tee\b/.test(msg.html + msg.text), 'the email shows a phone number or a full surname');
   // Tue 20 Oct: the return and takedown are due TODAY (normal: section 1), the pickup is yellow.
   const TUE = '2026-10-20';
   d = await T.todoData(db, TUE, Date.parse(`${TUE}T12:00:00Z`));

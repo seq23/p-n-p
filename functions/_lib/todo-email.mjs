@@ -311,7 +311,8 @@ export function renderTodo(d) {
     T.push('', MISSED_TITLE);
     for (const m of missed) {
       T.push(`- ${m.t} (${m.d})`);
-      for (const b of m.btns) if (b.href.startsWith('/admin')) T.push(`  ${b.label}: ${SITE}${b.href}`);
+      // Every button, Call included (tel: as is): the plain text dropped 📞 Call before (20 Oct 2026).
+      for (const b of m.btns) T.push(`  ${b.label}: ${abs(b.href)}`);
     }
   }
   // The sections SHOWN are numbered 1, 2, 3 ... in order (owner, 20 Oct 2026): an empty section
