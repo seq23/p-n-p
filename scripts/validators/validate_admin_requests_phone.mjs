@@ -9,12 +9,16 @@
  *     the list, or the Calendar loses its open reminders box;
  *  3. a new website request does not wear NEW on its card and in the week card's collapsed line,
  *     or keeps it after the badge is tapped, after Edit is opened, or once acted on (an invoice);
- *     or a phone-call request, or a request already in D1 before migration 0016, wears it.
+ *     or a phone-call request, or a request already in D1 before migration 0016, wears it;
+ *  4. (19 Oct 2026 repair) a website RENTAL request, which gets a draft invoice at submit, does not
+ *     wear NEW; or a system history line (hold expired, mailer, auto-booked takedown) clears NEW;
+ *     or status past New / put away does not clear it; or migration 0017 fails to un-open the 0016
+ *     backfill for recent still-New website requests, or touches anything else.
  * Rule 0: fewer than 25 checks is a failure.
  */
 import fs from 'node:fs';
 import path from 'node:path';
-import { mod, ROOT } from './lib/admin_harness.mjs';
+import { mod, ROOT, applyMigration } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
 
 const errors = [];
@@ -29,8 +33,12 @@ const site = { key: 'k', source: 'site' };
 must(RN.isNewRequest(site, {}) === true, 'a fresh website request is not NEW');
 must(RN.isNewRequest(site, { opened: true }) === false, 'an opened request is still NEW');
 must(RN.isNewRequest({ ...site, source: 'phone' }, {}) === false, 'a phone-call request is NEW');
-must(RN.isNewRequest(site, { st: { status: 'invoiced' } }) === false && RN.isNewRequest(site, { st: { status: 'new', invoice_id: 3 } }) === false && RN.isNewRequest(site, { st: { status: 'new', archived_at: 'x' } }) === false, 'a request acted on (status, invoice, put away) is still NEW');
-must(RN.isNewRequest(site, { events: [{ who: 'website form' }] }) === true && RN.isNewRequest(site, { events: [{ who: 'Valerie' }] }) === false, 'history from Valerie does not clear NEW, or the form\'s own history does');
+must(RN.isNewRequest(site, { st: { status: 'invoiced' } }) === false && RN.isNewRequest(site, { st: { status: 'deposit_paid', invoice_id: 3 } }) === false, 'a request past New is still NEW');
+must(RN.isNewRequest(site, { st: { status: 'new', archived_at: 'x' } }) === false && RN.isNewRequest(site, { st: { status: 'new', invoice_id: 3, archived_at: 'x' } }) === false, 'a request put away is still NEW');
+must(RN.isNewRequest(site, { st: { status: 'new', invoice_id: 3 } }) === true, 'a website rental with its automatic draft invoice (status still New) is not NEW');
+must(RN.isNewRequest(site, { st: { status: 'new', invoice_id: 3 }, opened: true }) === false, 'an opened rental is still NEW');
+must(RN.isNewRequest({ ...site, source: 'phone' }, { st: { status: 'new' } }) === false && RN.isNewRequest({ ...site, source: 'phone' }, { st: null }) === false, 'a phone-call request with status New is NEW');
+must(RN.isNewRequest(site, { st: { status: 'new' }, events: [{ who: 'automatic' }, { who: 'admin' }, { who: 'mailer' }] }) === true, 'system history lines clear NEW');
 
 // Migration 0016: additive, backfills every existing request as opened.
 const mig = fs.readFileSync(path.join(ROOT, 'migrations/0016_request_opened.sql'), 'utf8');
@@ -38,6 +46,12 @@ must(/CREATE TABLE IF NOT EXISTS request_opened/.test(mig) && /INSERT OR IGNORE 
 
 const s = await session();
 const env = s.env;
+// Production order: the fixture requests were in D1 when 0016 backfilled them, then 0017 repaired
+// the backfill. Re-running both here (0016 is idempotent) puts this DB where production is.
+applyMigration(s.db, 16);
+applyMigration(s.db, 17);
+const before = await s.all("SELECT r.request_key, r.submitted_at, o.how FROM requests r LEFT JOIN request_opened o ON o.request_key = r.request_key WHERE r.source <> 'phone'");
+must(before.length > 0 && before.every((r) => r.submitted_at < '2026-10-16' && r.how === 'before the NEW badge'), `the fixture requests are not all pre-16-Oct and backfilled as opened: ${JSON.stringify(before.map((r) => [r.submitted_at, r.how]))}`);
 const today = F.chicagoToday();
 const plus = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const tomorrow = (() => { const d = new Date(`${R.chicagoDate()}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 10); })();
@@ -72,8 +86,7 @@ const summary = week.slice(week.indexOf('<summary'), week.indexOf('</summary>'))
 must(/Latest: Olive Other/.test(summary) && /data-new-count>2 NEW</.test(summary), `the week card's collapsed line does not name the latest and show "2 NEW": ${summary}`);
 must((week.match(/data-new-count>NEW</g) || []).length === 2, 'the week list does not mark each new request NEW');
 must(/requests\/opened/.test(dash) && /location\.hash/.test(dash), 'the page does not clear NEW when a card is opened or reached from the email link');
-const old = s.requests.find((r) => r.source !== 'phone');
-must(!old || !cardOf(dash, s.rk(old.key)).includes('data-new-badge') || !(await s.one('SELECT 1 AS x FROM requests WHERE request_key = ?1', old.key)), 'a request stored before the badge wears NEW');
+must(before.every((r) => dash.includes(`id="c-${s.rk(r.request_key)}"`) && !cardOf(dash, s.rk(r.request_key)).includes('data-new-badge')), 'a request stored (and backfilled) before 16 Oct wears NEW, or is missing from the list');
 // Badge tap.
 const tap = await s.post('/admin/requests/opened', { r: rkA, how: 'badge' });
 must(tap.status === 200 && JSON.parse(tap.text).recorded === true, 'tapping the badge did not record it');
@@ -92,6 +105,41 @@ const pia = reqs.find((r) => r.key === c.row.request_key);
 must(cardOf((await s.get('/admin/')).text, s.rk(pia.key)).includes('data-new-badge'), 'the third request is not NEW before it is acted on');
 await s.invoiceFor(pia, { go: 'send' });
 must(!cardOf((await s.get('/admin/')).text, s.rk(pia.key)).includes('data-new-badge'), 'sending an invoice did not clear NEW');
+// A website RENTAL: the draft invoice made at submit must not clear NEW (19 Oct 2026 repair).
+const rent = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', rental_date: plus(21), pickup_when: 'morning', return_when: 'after', name: 'Rhea Rental', phone: '(901) 555-0164', email: 'rhea.rental@example.com' });
+const rentSt = rent.row && await s.one('SELECT status, invoice_id FROM request_status WHERE request_key = ?1', rent.row.request_key);
+must(rent.status === 303 && rentSt && rentSt.status === 'new' && rentSt.invoice_id, `the rental test request did not get its automatic draft invoice: ${JSON.stringify(rentSt)}`);
+const rkR = s.rk(rent.row.request_key);
+must(cardOf((await s.get('/admin/')).text, rkR).includes('data-new-badge'), 'a website rental request with its automatic draft invoice does not wear NEW');
+// System history lines (hold expired, mailer, auto-booked takedown) must not clear it.
+for (const who of ['automatic', 'admin', 'mailer', 'website form']) await s.db.prepare('INSERT INTO request_events (request_key, who, what) VALUES (?1, ?2, ?3)').bind(rent.row.request_key, who, `system line by ${who}`).run();
+must(cardOf((await s.get('/admin/')).text, rkR).includes('data-new-badge'), 'a system history line cleared NEW on the rental');
+// Status past New clears it with no tap; putting it back to New restores it; put away clears it.
+await s.db.prepare("UPDATE request_status SET status = 'deposit_paid' WHERE request_key = ?1").bind(rent.row.request_key).run();
+must(!cardOf((await s.get('/admin/')).text, rkR).includes('data-new-badge'), 'a status past New did not clear NEW');
+await s.db.prepare("UPDATE request_status SET status = 'new', archived_at = datetime('now') WHERE request_key = ?1").bind(rent.row.request_key).run();
+must(!cardOf((await s.get('/admin/')).text, rkR).includes('data-new-badge'), 'a put-away request wears NEW');
+await s.db.prepare('UPDATE request_status SET archived_at = NULL WHERE request_key = ?1').bind(rent.row.request_key).run();
+must(cardOf((await s.get('/admin/')).text, rkR).includes('data-new-badge'), 'the rental did not wear NEW again once back to New and not put away');
+// Opened clears it.
+await s.post('/admin/requests/opened', { r: rkR, how: 'card' });
+must(!cardOf((await s.get('/admin/')).text, rkR).includes('data-new-badge'), 'opening the rental card did not clear NEW');
+// Migration 0017: un-opens only the 0016 backfill, only for recent still-New website requests.
+const mig17 = fs.readFileSync(path.join(ROOT, 'migrations/0017_request_opened_repair.sql'), 'utf8');
+must(/DELETE FROM request_opened/.test(mig17) && /how = 'before the NEW badge'/.test(mig17) && !/DROP|UPDATE|INSERT/i.test(mig17.replace(/^--.*$/gm, '')), 'migration 0017 is not a narrow delete of the 0016 backfill');
+const seed = [['m17|recent', 'site', '2026-10-19 16:00:00', null, 'before the NEW badge'], ['m17|recentnew', 'site', '2026-10-17 09:00:00', 'new', 'before the NEW badge'],
+  ['m17|old', 'site', '2026-10-10 09:00:00', null, 'before the NEW badge'], ['m17|paid', 'site', '2026-10-18 09:00:00', 'paid', 'before the NEW badge'],
+  ['m17|phone', 'phone', '2026-10-18 09:00:00', null, 'before the NEW badge'], ['m17|away', 'site', '2026-10-18 09:00:00', 'new', 'before the NEW badge'],
+  ['m17|real', 'site', '2026-10-19 10:00:00', null, 'badge']];
+for (const [k, src, at, st, how] of seed) {
+  await s.db.prepare("INSERT INTO requests (request_key, source, submitted_at, services, name, email, phone, answers) VALUES (?1, ?2, ?3, '[\"party\"]', 'M Seventeen', '', '9015550199', '[]')").bind(k, src, at).run();
+  if (st) await s.db.prepare('INSERT INTO request_status (request_key, status, archived_at) VALUES (?1, ?2, ?3)').bind(k, st, k === 'm17|away' ? '2026-10-19' : null).run();
+  await s.db.prepare('INSERT INTO request_opened (request_key, how) VALUES (?1, ?2)').bind(k, how).run();
+}
+await s.db.exec(mig17.replace(/^--.*$/gm, '').replace(/\s+/g, ' ').trim());
+const left = new Set((await s.all("SELECT request_key FROM request_opened WHERE request_key LIKE 'm17|%'")).map((r) => r.request_key));
+must(!left.has('m17|recent') && !left.has('m17|recentnew'), 'migration 0017 left the backfill on a recent still-New website request');
+must(['m17|old', 'm17|paid', 'm17|phone', 'm17|away', 'm17|real'].every((k) => left.has(k)), `migration 0017 removed a row it must keep: kept ${[...left].join(',')}`);
 // A phone request never.
 const ph = await s.db.prepare("INSERT INTO requests (request_key, source, submitted_at, services, name, email, phone, answers) VALUES ('phone|2026-10-19|9015550100', 'phone', datetime('now'), '[\"party\"]', 'Phone Caller', '', '9015550100', '[]')").run();
 must(ph && !cardOf((await s.get('/admin/')).text, s.rk('phone|2026-10-19|9015550100')).includes('data-new-badge'), 'a phone-call request wears NEW');
