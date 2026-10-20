@@ -6,9 +6,12 @@
 //
 // Sections, each shown ONLY when it has something in it, in this order (the ones shown are
 // numbered 1, 2, 3 ... with no gaps):
-//   1 Today's jobs          today's bookings: time, who, job, place, what to bring, money
+//   1 Today's jobs          today's bookings: time, who, job, place, what to bring, money; a
+//                           CONFIRMED job today with no time carries the set-time prompt on its own
+//                           line ("No time yet · Text them to pick one", Call + Text) and is never
+//                           repeated in 3 (owner, 20 Oct 2026)
 //   2 Call these people back open requests whose Called back step is not ticked (callback-list.mjs)
-//   3 Set a time            every CONFIRMED booking from today on with a day but no time (owner,
+//   3 Set a time            every CONFIRMED booking from TOMORROW on with a day but no time (owner,
 //                           20 Oct 2026): a rental only once its deposit is paid (steps.mjs depositIn,
 //                           and no current hold in holds.mjs), a porch / party / grazing job only once
 //                           confirmed (steps.mjs isConfirmed: "Yes, book it", phone, money in); a
@@ -65,6 +68,9 @@ const callText = (phone, body = '') => {
   if (!tel) return [];
   return [{ label: 'Call', href: tel }, { label: 'Text', href: body ? smsLink(phone, body) : `sms:${normalizePhone(phone)}` }];
 };
+// The set-time prompt on a job today with no time (owner, 20 Oct 2026).
+export const TODAY_SET_TIME_PROMPT = 'No time yet · Text them to pick one';
+const hasTime = (b) => /^\d{2}:\d{2}$/.test(String(b.time || ''));
 const memphisTime = (ms) => new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit' }).format(new Date(ms)).replace(':00', '');
 
 // Everything the email says, from D1. today = the Memphis date of the email.
@@ -103,6 +109,14 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     if (serviceOfKind(b.kind) === 'rentals') return Boolean(f.s.depositIn) && !heldKeys.has(b.request_key);
     return Boolean(f.s.confirmed);
   };
+  // The set-time Call / Text (Text prefilled from the setTime message template).
+  const setTimeBtns = (b) => {
+    const job = JOB_WORDS[b.kind] || 'job';
+    const body = renderMessage('setTime', { name: b.customer_name || (reqBy[b.request_key] && reqBy[b.request_key].name), job, day: dayWords(b.date) }).text;
+    return callText(phoneOf(b), body);
+  };
+  // A CONFIRMED open job with a day but no time is asked for one: today's in section 1, the rest in 3.
+  const needsTime = (b) => !hasTime(b) && confirmedJob(b);
 
   // 1. Today's jobs.
   const jobs = open.filter((b) => b.date === today).sort(daySort).map((b) => {
@@ -118,7 +132,8 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
       const held = Math.max(0, bal.refundable - bal.depositOwed - (out.refunded || 0) - (out.kept || 0));
       if (held > 0) bits.push(`give back ${usd(held)} deposit`);
     }
-    return { svc, t: `${timeOr(b)} · ${who(b)} · ${JOB_WORDS[b.kind] || 'job'}`, d: bits.filter(Boolean).join(' · '), btns: [{ label: 'Open card', href: bookingHref(b) }], key: b.request_key || '', id: b.id, invoice: invoiceOf(b), job: JOB_WORDS[b.kind] || 'job' };
+    const ask = needsTime(b);
+    return { svc, t: `${timeOr(b)} · ${who(b)} · ${JOB_WORDS[b.kind] || 'job'}`, d: bits.filter(Boolean).join(' · '), p: ask ? TODAY_SET_TIME_PROMPT : '', btns: [...(ask ? setTimeBtns(b) : []), { label: 'Open card', href: bookingHref(b) }], key: b.request_key || '', id: b.id, invoice: invoiceOf(b), job: JOB_WORDS[b.kind] || 'job' };
   });
 
   // 2. Call these people back (oldest first).
@@ -129,14 +144,14 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     btns: [...callText(c.phone), { label: 'Open card', href: cardHref(c.key) }],
   }));
 
-  // 3. Set a time: every CONFIRMED open booking from today on with no time, soonest first. An
-  // unpaid rental hold (invoiced or not) is never asked for a time: it is in Money instead.
+  // 3. Set a time: every CONFIRMED open booking from TOMORROW on with no time, soonest first (a job
+  // today is asked in section 1, never twice). An unpaid rental hold (invoiced or not) is never
+  // asked for a time: it is in Money instead.
   const soon = addDays(today, SET_TIME_HIGHLIGHT_DAYS);
-  const setTime = open.filter((b) => b.date >= today && !/^\d{2}:\d{2}$/.test(String(b.time || '')) && confirmedJob(b))
+  const setTime = open.filter((b) => b.date > today && needsTime(b))
     .sort((a, b) => String(a.date).localeCompare(String(b.date)) || daySort(a, b)).map((b) => {
       const job = JOB_WORDS[b.kind] || 'job';
-      const body = renderMessage('setTime', { name: b.customer_name || (reqBy[b.request_key] && reqBy[b.request_key].name), job, day: dayWords(b.date) }).text;
-      return { svc: serviceOfKind(b.kind), t: `${who(b)} · ${job} ${dayWords(b.date)}`, d: 'No time yet', hi: b.date <= soon, date: b.date, key: b.request_key || '', id: b.id, btns: callText(phoneOf(b), body) };
+      return { svc: serviceOfKind(b.kind), t: `${who(b)} · ${job} ${dayWords(b.date)}`, d: 'No time yet', hi: b.date <= soon, date: b.date, key: b.request_key || '', id: b.id, btns: setTimeBtns(b) };
     });
 
   // 4. Book it or decide.
@@ -222,6 +237,7 @@ function itemHtml(it) {
   const hi = it.hi ? `background:${C.hi};border-radius:0 8px 8px 0;` : '';
   return `<div data-item${it.hi ? ' data-hi' : ''} style="border-left:4px solid ${BAR[it.svc] || BAR.other};${hi}padding:6px 8px 6px 12px;margin:0 0 8px 38px;">`
     + `<div style="font-weight:700;">${esc(it.t)}</div>${it.d ? `<div style="color:${C.muted};font-size:15px;">${esc(it.d)}</div>` : ''}`
+    + `${it.p ? `<div data-set-time style="color:${C.accent};font-size:15px;font-weight:700;">${esc(it.p)}</div>` : ''}`
     + `${it.btns && it.btns.length ? `<div style="margin-top:6px;">${it.btns.map(btnHtml).join('')}</div>` : ''}</div>`;
 }
 function headHtml(mark, title, markBg = C.accent) {
@@ -263,6 +279,7 @@ export function renderTodo(d) {
     for (const it of items) {
       const link = (it.btns || []).find((b) => b.href.startsWith('/admin'));
       T.push(`- ${it.t}${it.d ? ` (${it.d})` : ''}${link ? `: ${SITE}${link.href}` : ''}`);
+      if (it.p) T.push(`  ${it.p}`);
     }
   }
   const tom = d.tomorrowJobs.length ? d.tomorrowJobs.map((j) => `<div>${esc(j.t)}</div>`).join('') : '<div>Nothing booked.</div>';

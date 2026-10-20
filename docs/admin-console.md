@@ -168,9 +168,10 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   saving needs no change. To the Settings day-list email. Subject "Your to-do list for <Tue 20 Oct>
   · Porch & Party". Numbered sections, each shown only when it has something: 1 Today's jobs (time
   or "time not set", First L., job, place, what to bring, what to collect or the deposit to give
-  back), 2 Call these people back (`callback-list.mjs`: Called back not ticked, never phone or put
+  back; a confirmed job today with no time carries "No time yet · Text them to pick one" on its own
+  line with Call and Text, and is never repeated in Set a time), 2 Call these people back (`callback-list.mjs`: Called back not ticked, never phone or put
   away, oldest first, "Waiting N days", highlighted from 2 days), 3 Set a time (every CONFIRMED booking
-  from today on with no time: a rental only once its deposit is paid and no hold is current, a porch /
+  from tomorrow on with no time: a rental only once its deposit is paid and no hold is current, a porch /
   party / grazing job only once confirmed (`isConfirmed`), a hand-typed booking always; soonest first, highlighted within 2 days, Text prefilled from the `setTime`
   message template), 4 Book it or decide (called back with nothing on the calendar; takedowns and
   grazing pickups with no day), 5 Money (balances due today or late, never the damage deposit;

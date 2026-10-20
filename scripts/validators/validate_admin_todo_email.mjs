@@ -11,6 +11,9 @@
  *     and "Reserve their games longer" (never "Hold longer") as its link.
  *  2b. The sections SHOWN are numbered 1, 2, 3 ... with no gap (owner, 20 Oct 2026): an empty
  *     middle section does not leave 1, 2, 3, 5 in the HTML marks or the plain text.
+ *  3a. A job TODAY with no time appears ONCE (owner, 20 Oct 2026): in Today's jobs with the
+ *     set-time prompt "No time yet · Text them to pick one" on its own line and Call / Text (sms:),
+ *     never in Set a time; Set a time is tomorrow onward; an unconfirmed job today gets no prompt.
  *  3b. Set a time is CONFIRMED jobs only (owner, 20 Oct 2026): an invoiced-unpaid held rental is
  *     NOT in it (it is in Money); a deposit-paid rental with no time IS; an unconfirmed party job
  *     is not, the same job after "Yes, book it" is.
@@ -102,16 +105,45 @@ for (const [day, words, hi] of [['2026-10-14', 'Waiting 2 days', true], ['2026-1
   must(x && x.d === words && x.hi === hi, `on ${day} the 12 Oct request reads ${x && x.d} / highlight ${x && x.hi} (want ${words} / ${hi})`);
 }
 must(T.CALLBACK_HIGHLIGHT_DAYS === 2 && T.SET_TIME_HIGHLIGHT_DAYS === 2, 'the highlight thresholds are not 2 days');
-// 3. Set a time: every CONFIRMED open booking from today on with no time, soonest first, highlight
-// within 2 days. Hand-typed bookings (no request) are Valerie's own, so confirmed. reqA is not
+// 3. Set a time: every CONFIRMED open booking from TOMORROW on with no time, soonest first, highlight
+// within 2 days (Una's porch install today is asked in Today's jobs instead, see 3a). Hand-typed bookings (no request) are Valerie's own, so confirmed. reqA is not
 // confirmed (not called, no "Yes, book it", no money), so its party takedown Sun 25 Oct is NOT here.
-must(JSON.stringify(titles(S[3])) === JSON.stringify(['Una U. · porch install Tue 20 Oct', 'Danesha M. · games pickup Thu 22 Oct', 'Kim P. · porch takedown Fri 23 Oct']), `Set a time is ${JSON.stringify(titles(S[3]))}`);
+must(JSON.stringify(titles(S[3])) === JSON.stringify(['Danesha M. · games pickup Thu 22 Oct', 'Kim P. · porch takedown Fri 23 Oct']), `Set a time is ${JSON.stringify(titles(S[3]))}`);
+must(S[3].every((x) => x.date > TODAY), 'Set a time lists a job dated today');
 must(!S[3].some((x) => x.key === reqA.key), 'Set a time asks an UNCONFIRMED party request for a time');
-must(!titles(S[3]).some((t) => /Pat P|Ollie O|Alex S|Tia T/.test(t)), 'Set a time lists a past day or a booking that has a time');
+must(!titles(S[3]).some((t) => /Pat P|Ollie O|Alex S|Tia T|Una U/.test(t)), 'Set a time lists a past day, today, or a booking that has a time');
 const hiOf = (re) => (S[3].find((x) => re.test(x.t)) || {}).hi;
-must(hiOf(/Una U/) === true && hiOf(/Danesha M/) === true && hiOf(/Kim P/) === false, 'Set a time highlight is not "within 2 days"');
+must(hiOf(/Danesha M/) === true && hiOf(/Kim P/) === false, 'Set a time highlight is not "within 2 days"');
 const sms = (S[3].find((x) => /Danesha/.test(x.t)) || { btns: [] }).btns.find((b) => b.label === 'Text');
 must(sms && decodeURIComponent(sms.href.split('body=')[1] || '') === "Hi Danesha, it's Porch & Party. What time works for your games pickup on Thu 22 Oct?", `the Set a time text is "${sms && decodeURIComponent(sms.href.split('body=')[1] || '')}"`);
+// ---- 3a. a job TODAY with no time: once, in Today's jobs with the prompt (owner, 20 Oct 2026) -----
+{
+  const una = S[1].filter((x) => /Una U/.test(x.t));
+  must(una.length === 1 && una[0].t === 'time not set · Una U. · porch install' && una[0].p === T.TODAY_SET_TIME_PROMPT && T.TODAY_SET_TIME_PROMPT === 'No time yet · Text them to pick one', `today's untimed job lacks the set-time prompt: ${JSON.stringify(una)}`);
+  must(una[0].btns.map((b) => b.label).join() === 'Call,Text,Open card' && /^tel:\d+$/.test(una[0].btns[0].href) && /^sms:/.test(una[0].btns[1].href)
+    && decodeURIComponent(una[0].btns[1].href.split('body=')[1] || '') === "Hi Una, it's Porch & Party. What time works for your porch install on Tue 20 Oct?", `today's untimed job lacks Call / Text (prefilled): ${JSON.stringify(una[0].btns)}`);
+  must(S[1].filter((x) => x.p).length === 1 && S[1].filter((x) => !/^time not set/.test(x.t)).every((x) => !x.p && !x.btns.some((b) => /^(tel|sms):/.test(b.href))), 'a job with a time carries the set-time prompt');
+  const ids1 = new Set(S[1].map((x) => x.id));
+  must(!S[3].some((x) => ids1.has(x.id)), 'a job appears in both Today\'s jobs and Set a time');
+  const um = T.renderTodo(d);
+  must((um.html.match(/No time yet · Text them to pick one/g) || []).length === 1 && /time not set · Una U\. · porch install<\/div>[\s\S]{0,400}?<div data-set-time[^>]*>No time yet · Text them to pick one<\/div>[\s\S]{0,800}?>Call<\/a>[\s\S]{0,800}?>Text<\/a>/.test(um.html), 'the rendered Today\'s jobs line lacks the prompt on its own line with Call and Text');
+  must(/\n- time not set · Una U\. · porch install[^\n]*\n  No time yet · Text them to pick one\n/.test(um.text) && (um.text.match(/Una U\./g) || []).length === 1, 'the plain text does not show Una once, with the prompt under her job');
+  // An UNCONFIRMED job today with no time (reqA: not called, no "Yes, book it", no money) is in
+  // Today's jobs as "time not set" but never gets the prompt (#100).
+  const tmp = await run("INSERT INTO bookings (kind, date, time, customer_name, request_key) VALUES ('party_setup', ?1, NULL, 'Test Renter', ?2)", TODAY, reqA.key);
+  const ud = await T.todoData(db, TODAY, NOW);
+  const un = ud.sections[1].find((x) => x.key === reqA.key);
+  must(un && /^time not set · /.test(un.t) && !un.p && !un.btns.some((b) => /^(tel|sms):/.test(b.href)) && !ud.sections[3].some((x) => x.key === reqA.key && x.date === TODAY), `an UNCONFIRMED job today gets the set-time prompt: ${JSON.stringify(un)}`);
+  await run('DELETE FROM bookings WHERE id = ?1', tmp.meta.last_row_id);
+  // A FUTURE job with no time is in Set a time, not Today's jobs.
+  must(S[3].some((x) => /Danesha M/.test(x.t) && x.d === 'No time yet') && !S[1].some((x) => /Danesha M/.test(x.t)), 'a future job with no time is not in Set a time');
+  // The 20 Oct shape: today's jobs (both untimed, both prompted), call backs, money; no Set a time,
+  // numbered 1, 2, 3 with no gap.
+  const oct20 = T.renderTodo({ ...d, sections: { 1: [{ ...una[0], t: 'time not set · Ali H. · party takedown' }, { ...una[0], t: 'time not set · Tamaira T. · games return' }], 2: d.sections[2].slice(0, 1), 3: [], 4: [], 5: d.sections[5].slice(0, 1) } });
+  const m20 = [...oct20.html.matchAll(/data-section="(\d)" data-num="(\d)"><div[^>]*><span[^>]*>(\d)<\/span>/g)].map((x) => `${x[1]}:${x[2]}:${x[3]}`);
+  must(m20.join() === '1:1:1,2:2:2,5:3:3' && /\n1\. TODAY'S JOBS\n[\s\S]*\n2\. CALL THESE PEOPLE BACK\n[\s\S]*\n3\. MONEY\n/.test(oct20.text) && !/SET A TIME/.test(oct20.text) && (oct20.text.match(/No time yet · Text them to pick one/g) || []).length === 2, `the 20 Oct shape renders ${m20} (want Today's jobs 1, Call back 2, Money 3, no Set a time)`);
+}
+
 // 5. Money.
 const m5 = S[5];
 must(m5.some((x) => x.type === 'owed' && x.t === 'Alex S. · $180 still owed' && x.d === 'Due today, at the takedown'), `Money lacks "Alex S. · $180 still owed / Due today, at the takedown": ${JSON.stringify(titles(m5))}`);
