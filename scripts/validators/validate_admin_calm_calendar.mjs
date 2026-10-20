@@ -130,7 +130,7 @@ await s.post(`/admin/invoices/${inv.id}/status`, { action: 'paid', method: 'cash
 const paidJob = (phoneDayOf(await cal(plus(2)), plus(2)).match(/<details class="pj"[^>]*data-pjob="\d+">[^]*?<\/details>/) || [])[0] || '';
 must(/<dt>Collect<\/dt><dd>Paid in full ✓<\/dd>/.test(paidJob), 'a paid job does not say Paid in full ✓');
 const rentJob = (phoneDayOf(rentHtml, rentDay).match(/<details class="pj tent"[^>]*data-pjob="\d+"[^>]*>[^]*?<\/details>/) || [])[0] || '';
-must(/<dt>Games<\/dt><dd>[^<]*Giant Uno/i.test(rentJob) && /<dt>Hold<\/dt>/.test(rentJob) && /data-yes-book/.test(rentJob), `the held rental's phone job lacks Games / Hold / Yes, book it (${rentJob.slice(0, 300)})`);
+must(/<dt>Games<\/dt><dd>[^<]*Giant Uno/i.test(rentJob) && /<dt>Reserved<\/dt><dd>(Games reserved until \w{3} \d{1,2} \w{3}, \d{1,2}:\d{2} (AM|PM)|Reserved by hand \(no end date\)), waiting for the deposit<\/dd>/.test(rentJob) && !/<dt>Hold<\/dt>|Games held/.test(rentJob) && /data-yes-book/.test(rentJob), `the held rental's phone job lacks Games / Reserved ("Games reserved until <date>, waiting for the deposit") / Yes, book it (${rentJob.slice(0, 300)})`);
 must(/<a href="\/admin\/day\/[0-9-]+" data-help="cal.daySheet"[^>]*>Open the day sheet<\/a>/.test(pPorch), 'the phone day has no Open the day sheet link');
 // Deposit line: a refundable damage deposit on an invoice shows on the job.
 {

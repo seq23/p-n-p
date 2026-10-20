@@ -490,7 +490,7 @@ export function holdUntilWords(until) {
 // Returns slug -> { state: 'in' | 'out' | 'some' | 'hold' | 'off', label, next, upcoming: [...] }.
 export function itemStatuses({ table, data, windows, holds = [], today }) {
   const held = new Map((holds || []).filter((h) => h.state === 'held').map((h) => [h.request_key, h]));
-  const holdWords = (w) => { const h = held.get(w.key); if (!h) return ''; return h.until ? `On hold until ${holdUntilWords(h.until)}` : 'On hold until you decide'; };
+  const holdWords = (w) => { const h = held.get(w.key); if (!h) return ''; return h.until ? `Reserved until ${holdUntilWords(h.until)}` : 'Reserved by hand (no end date)'; };
   const offered = new Map(INV.allItems(data).map(({ item }) => [item.slug, item.availableNow !== false]));
   const out = {};
   for (const it of table.items) {
@@ -499,7 +499,7 @@ export function itemStatuses({ table, data, windows, holds = [], today }) {
       .map((w) => ({ key: w.key, name: shortName(w.name), start: w.start, end: w.end, count: countOf(w, it.name), outNow: isOut(w, today, today), late: isOut(w, today, today) && w.end < today, hold: holdWords(w) }));
     const now = upcoming.filter((u) => u.outNow);
     const nextW = upcoming.find((u) => !u.outNow);
-    const next = nextW ? { ...nextW, words: `Next booked: ${shortDate(nextW.start)}${nextW.end !== nextW.start ? ` – ${shortDate(nextW.end)}` : ''}${nextW.hold ? ' (on hold)' : ''}` } : null;
+    const next = nextW ? { ...nextW, words: `Next booked: ${shortDate(nextW.start)}${nextW.end !== nextW.start ? ` – ${shortDate(nextW.end)}` : ''}${nextW.hold ? ' (reserved)' : ''}` } : null;
     const stock = it.quantity || 1;
     const used = now.reduce((n, u) => n + u.count, 0);
     const isOffered = offered.has(it.slug) ? offered.get(it.slug) : !it.removed;

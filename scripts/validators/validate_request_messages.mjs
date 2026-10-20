@@ -3,7 +3,7 @@
  * Rental holds Valerie controls, and every message to customers (owner, 18 Oct 2026). Drives
  * the real public form, admin router, cron functions and mailer Worker over a fresh local
  * database (never production). Fails when:
- *  1. "Give them more time" (+24 h, +48 h, a picked Memphis day/time), "Keep holding" and
+ *  1. "Reserve their games longer" (owner-approved sample 20 Oct 2026; +N days, a picked Memphis day/time), "Keep holding" and
  *     "Release" do not do exactly that, or are not logged on the request;
  *  2. the hold reminder is not sent once per end time (and again after an extension);
  *  3. "Holds ending soon" (Requests, Calendar, tab badge, Held view, Day sheet) misses a hold,
@@ -37,6 +37,7 @@ const CM = await mod('functions/_lib/customer-messages.mjs');
 const A = await mod('functions/_lib/admin.mjs');
 const C = await mod('functions/_lib/calendar.mjs');
 const W = await mod('workers/pnp-mailer/src/index.js');
+const VM = await mod('functions/_lib/views-messages.mjs');
 
 const s = await session();
 const today = F.chicagoToday();
@@ -51,7 +52,7 @@ const rental = async (n, games, extra = {}) => {
 // ---- 1. Hold controls ------------------------------------------------------------------
 const a = await rental(1, ['giant-uno']);
 const h0 = await H.getHold(s.db, a.request_key);
-// Owner, 19 Oct 2026: the hold is 48 hours from the request by default; "Hold longer" adds 3 days
+// Owner, 19-20 Oct 2026: the hold is 48 hours from the request by default; "Reserve their games longer" adds 3 days
 // (prefilled) on top of the CURRENT end time, or exactly the days she types; repeatable, no limit
 // on how many times; every press logged. One source: services.json rentalHolds.
 const HR = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8')).rentalHolds;
@@ -60,7 +61,8 @@ must(Math.abs(H.fromSql(h0.until) - H.fromSql(a.submitted_at) - 48 * 3600000) < 
 const DAY = 24 * 3600000;
 let r = await s.post('/admin/holds/extend', { r: s.rk(a.request_key), days: '3', back: '/admin/', card: '1' });
 let h1 = await H.getHold(s.db, a.request_key);
-must(r.status === 303 && /Held%20until%20[^&]*%E2%9C%93/.test(r.location) && /#c-/.test(r.location) && H.fromSql(h1.until) - H.fromSql(h0.until) === 3 * DAY, `Hold longer (3 days, prefilled) did not add 3 days to the current end, or did not answer "Held until ... ✓" on the card (${h0.until} -> ${h1.until}, ${r.location})`);
+const saidM = (loc) => { const m = /[?&]m=([^&#]*)/.exec(loc || ''); return m ? decodeURIComponent(m[1]) : ''; };
+must(r.status === 303 && saidM(r.location) === `✓ Games reserved until ${VM.reservedWords(H.fromSql(h1.until))}` && /^✓ Games reserved until \w{3} \d{1,2} \w{3}, \d{1,2}:\d{2} (AM|PM)$/.test(saidM(r.location)) && /#c-/.test(r.location) && H.fromSql(h1.until) - H.fromSql(h0.until) === 3 * DAY, `Reserve their games longer (3 days, prefilled) did not add 3 days to the current end, or did not answer exactly "✓ Games reserved until <new date>" on the card (${h0.until} -> ${h1.until}, ${r.location})`);
 await s.post('/admin/holds/extend', { r: s.rk(a.request_key), days: '3' });
 const h2 = await H.getHold(s.db, a.request_key);
 must(H.fromSql(h2.until) - H.fromSql(h0.until) === 6 * DAY, `two presses are not +6 days from the original end (${h0.until} -> ${h2.until})`);
@@ -69,15 +71,37 @@ const h3 = await H.getHold(s.db, a.request_key);
 must(H.fromSql(h3.until) - H.fromSql(h2.until) === 5 * DAY, 'a typed 5 days did not add exactly 5 days on top of the current end');
 await s.post('/admin/holds/extend', { r: s.rk(a.request_key) });
 const h4 = await H.getHold(s.db, a.request_key);
-must(H.fromSql(h4.until) - H.fromSql(h3.until) === 3 * DAY, 'Hold with no number did not default to 3 days');
+must(H.fromSql(h4.until) - H.fromSql(h3.until) === 3 * DAY, 'Save with no number did not default to 3 days');
 for (const bad of ['0', '-2', '2.5', 'abc']) {
   const x = await s.post('/admin/holds/extend', { r: s.rk(a.request_key), days: bad });
   must(/e=/.test(x.location) && (await H.getHold(s.db, a.request_key)).until === h4.until, `a typed "${bad}" days was accepted`);
 }
 must((await ev(a.request_key)).filter((e) => /^Hold extended to .* by Valerie$/.test(e)).length === 4, 'each extension is not logged "Hold extended to ... by Valerie"');
 {
+  // The approved sample: a two-line button, then inline "Held until <end>", [3] more days + Save,
+  // a live "New date" line (server-rendered for 3, then the same formatter as she types), Cancel.
   const card = (await s.get('/admin/')).text;
-  must(/<summary class="btn ghost" data-help="hold\.longer"[^>]*>Hold longer<\/summary>[\s\S]*?name="days" value="3"[\s\S]*?>Hold<\/button>/.test(card) && !/\+24 hours|\+48 hours|Give them more time|Hold until then|Keep holding/.test(card), 'Hold longer is not ONE button + a days box (3) + Hold, or an old 24/48 h choice is still shown');
+  const one = (card.match(/<details class="reslonger" data-reserve-longer data-until-ms="(\d+)">[\s\S]*?<\/details>/g) || []).find((x) => x.includes(`value="${s.rk(a.request_key)}"`)) || '';
+  const end = H.fromSql(h4.until);
+  must(one && new RegExp(`data-until-ms="${end}"`).test(one)
+    && /<summary class="btn ghost ressum" data-help="hold\.longer"[^>]*><b>Reserve their games longer<\/b><span class="ressub">Give more time to pay<\/span><\/summary>/.test(one)
+    && one.includes(`<p class="muted" data-res-current>Held until ${VM.reservedWords(end)}</p>`)
+    && /<input id="hdc?-[^"]+" type="number" name="days" value="3" min="1"[^>]*data-res-days[^>]*><label for="hdc?-[^"]+">more days<\/label>/.test(one)
+    && /<button class="btn primary ressave" type="submit" data-help="hold\.go"[^>]*>Save<\/button>/.test(one)
+    && one.includes(`<p class="resnew" data-res-new>New date: <b>${VM.reservedWords(end + 3 * DAY)}</b></p>`)
+    && /<button class="rescancel" type="button" data-res-cancel data-help="hold\.cancel"[^>]*>Cancel<\/button>/.test(one)
+    && card.includes('window.__pnpRes'),
+  'the card does not carry the approved Reserve their games longer control (two-line button, Held until <end>, 3 more days + Save, live New date for +3 days, Cancel) after four extensions (it must be repeatable)');
+  must(!/Hold longer|Give them more time|\+24 hours|\+48 hours|Hold until then|Keep holding|>Hold<\/button>|holdlonger|[Gg]ames held until|On hold until/.test(card), 'the Requests page still shows "Hold longer", "Games held until" or an old 24/48 h choice');
+  // The live "New date" line formats exactly like the server, across a daylight-saving change.
+  const js = VM.RESERVE_JS;
+  const fsrc = (/function words\(ms\)\{[\s\S]*?return day\+', '\+t;\}/.exec(js) || [''])[0];
+  must(fsrc, 'the live New date script has no date formatter');
+  const words = new Function(`${fsrc}; return words;`)();
+  for (const ms of [Date.parse('2026-10-24T04:59:00Z'), Date.parse('2026-11-01T06:30:00Z'), Date.parse('2026-11-01T08:00:00Z'), Date.parse('2027-03-14T09:15:00Z'), Date.now()]) must(words(ms) === VM.reservedWords(ms), `the live New date reads "${words(ms)}" where the server says "${VM.reservedWords(ms)}"`);
+  must(words(Date.parse('2026-10-24T04:59:00Z')) === 'Fri 23 Oct, 11:59 PM', `the sample date reads "${words(Date.parse('2026-10-24T04:59:00Z'))}", not "Fri 23 Oct, 11:59 PM"`);
+  must(/addEventListener\('input'[\s\S]*data-res-days[\s\S]*upd\(box\)/.test(js) && /base\+n\*86400000/.test(js) && /Math\.max\(Date\.now\(\)/.test(js) && /data-res-cancel[\s\S]*box\.open=false/.test(js), 'the New date line does not follow what she types (current end, or now, + N days) or Cancel does not close the box');
+  must(VM.reserveNewEnd(end, 5, Date.now()) === end + 5 * DAY && VM.reserveNewEnd(NaN, 3, 1000) === 1000 + 3 * DAY && VM.reserveNewEnd(500, 3, 1000) === 1000 + 3 * DAY, 'the New date is not current end (or now) + N days');
 }
 // Picked Memphis times: daylight (UTC-5) and standard (UTC-6).
 must(A.chicagoLocalToMs('2026-10-26T15:00') === Date.parse('2026-10-26T20:00:00Z') && A.chicagoLocalToMs('2026-12-01T15:00') === Date.parse('2026-12-01T21:00:00Z'), 'a picked day and time is not read as Memphis time');
@@ -90,7 +114,19 @@ r = await s.post('/admin/holds/keep', { r: s.rk(a.request_key) });
 const hk = await H.getHold(s.db, a.request_key);
 must(hk.by_hand === 1 && hk.until === null && (await H.expireHolds(s.db, Date.now() + 365 * 86400000)) === 0, 'Keep holding did not turn off the end time');
 let dash = (await s.get('/admin/')).text;
-must(dash.includes('Held by hand (no end time)') && dash.includes('Release these games'), 'a held-by-hand hold does not show "Held by hand" and Release these games');
+must(dash.includes('Reserved by hand (no end date)') && dash.includes('Release these games') && !dash.includes('Held by hand (no end time)'), 'a held-by-hand hold does not show "Reserved by hand (no end date)" and Release these games');
+{
+  // Reserved by hand (no end date): the card still has the control, its current line says so, and
+  // Save sets an end of now + N days.
+  const one = (dash.match(/<details class="reslonger" data-reserve-longer data-until-ms="">[\s\S]*?<\/details>/g) || []).find((x) => x.includes(`value="${s.rk(a.request_key)}"`)) || '';
+  must(one.includes('<p class="muted" data-res-current>Reserved by hand (no end date)</p>') && /name="days" value="3"/.test(one), 'a hold reserved by hand has no Reserve their games longer control on its card');
+  const t0 = Date.now();
+  const rh = await s.post('/admin/holds/extend', { r: s.rk(a.request_key), days: '4', back: '/admin/', card: '1' });
+  const hh = await H.getHold(s.db, a.request_key);
+  const got = H.fromSql(hh.until);
+  must(hh.by_hand === 0 && got >= t0 + 4 * DAY - 2000 && got <= Date.now() + 4 * DAY + 1000 && saidM(rh.location) === `✓ Games reserved until ${VM.reservedWords(got)}`, `Reserve their games longer on a hold with no end date did not set now + 4 days (${hh.until}, ${rh.location})`);
+  await s.post('/admin/holds/keep', { r: s.rk(a.request_key) });
+}
 must((await ev(a.request_key)).some((e) => /Held by hand/.test(e)), 'Keep holding is not logged');
 r = await s.post('/admin/holds/release', { r: s.rk(a.request_key) });
 must((await H.getHold(s.db, a.request_key)).state === 'released' && (await s.all('SELECT id FROM bookings WHERE request_key = ?1', a.request_key)).length === 0, 'Release did not free the games');
@@ -101,6 +137,10 @@ await H.expireHolds(s.db, H.fromSql((await H.getHold(s.db, e1.request_key)).unti
 must((await H.getHold(s.db, e1.request_key)).state === 'expired', 'setup: hold did not expire');
 dash = (await s.get('/admin/')).text;
 must(dash.includes('data-hold-expired') && dash.includes('Hold expired.'), 'the card does not say "Hold expired"');
+{
+  const note = (/<div class="notice warn" data-hold-expired>[\s\S]*?<\/details>/.exec(dash) || [''])[0];
+  must(note.includes('data-reserve-longer') && note.includes(`value="${s.rk(e1.request_key)}"`) && /<b>Reserve their games longer<\/b><span class="ressub">Give more time to pay<\/span>/.test(note) && /data-res-new>New date: <b>/.test(note) && !/Give them more time/.test(dash), 'the Hold expired notice does not carry the Reserve their games longer control');
+}
 await s.post('/admin/holds/extend', { r: s.rk(e1.request_key), hours: '24' });
 must((await H.getHold(s.db, e1.request_key)).state === 'held' && (await s.all('SELECT kind FROM bookings WHERE request_key = ?1', e1.request_key)).length === 2, 'more time on an expired hold did not put its games back');
 
@@ -127,13 +167,14 @@ dash = (await s.get('/admin/')).text;
 const box = dash.slice(dash.indexOf('data-holds-soon'), dash.indexOf('</section>', dash.indexOf('data-holds-soon')));
 must(box.includes('Rita Rent4') && box.includes('Rita Rent3') && box.indexOf('Rita Rent4') < box.indexOf('Rita Rent3'), 'Holds ending soon is missing a hold or is not soonest first');
 must(/ends red/.test(box) && /ends amber/.test(box) && /Ends today|Ends tomorrow/.test(box) && /\(in \d+ (minutes|hours?)\)/.test(box), 'ending-soon rows lack the amber/red end time in words');
-must(!box.includes('Rita Rent1') && box.includes('Text a reminder') && box.includes('Hold longer') && box.includes('Mark deposit received') && box.includes('Release now'), 'ending-soon rows lack their buttons, or list a released hold');
+must(!box.includes('Rita Rent1') && box.includes('Text a reminder') && box.includes('<b>Reserve their games longer</b>') && box.includes('data-res-new>New date: <b>') && !box.includes('Hold longer') && box.includes('Mark deposit received') && box.includes('Release now'), 'ending-soon rows lack their buttons (Reserve their games longer with its New date line), or list a released hold');
 must(/data-holds-badge> \d+ holds ending soon/.test(dash), 'the Requests tab has no "N holds ending soon" badge');
 const cal = (await s.get('/admin/calendar')).text;
 must(cal.includes('data-holds-soon') && cal.includes('data-held-view') && cal.includes('data-view="held"'), 'Calendar & Bookings lacks the ending-soon box or the Held view');
 const held = cal.slice(cal.indexOf('data-held-view'), cal.indexOf('</section>', cal.indexOf('data-held-view')));
-must(held.includes('Rita Rent4') && held.includes('Held by hand (no end time)'), 'the Held view does not list timed holds and held-by-hand apart');
-must(cal.includes('data-held-booking'), 'a held rental booking does not read "Held — waiting for deposit" on the calendar');
+must(held.includes('Rita Rent4') && held.includes('<h3>Reserved by hand (no end date)</h3>') && /Games reserved until \w{3} \d{1,2} \w{3}, \d{1,2}:\d{2} (AM|PM)/.test(held), 'the Held view does not list timed holds ("Games reserved until ...") and reserved-by-hand apart');
+must(!/Hold longer|[Gg]ames held until|Held by hand \(no end time\)/.test(cal), 'Calendar & Bookings still says "Hold longer" / "Games held until" / "Held by hand (no end time)"');
+must(/data-held-booking>(Games reserved until \w{3} \d{1,2} \w{3}, \d{1,2}:\d{2} (AM|PM)|Reserved by hand \(no end date\)) — waiting for deposit</.test(cal), 'a held rental booking does not read "Games reserved until <date> — waiting for deposit" on the calendar');
 const endDay = C.chicagoDayOf((await H.getHold(s.db, c.request_key)).until);
 const day = (await s.get(`/admin/day/${endDay}`)).text;
 const sheetText = C.daySheetText(endDay, [], { holds: [{ timeLabel: '1:17 PM', name: 'Rita Rent4', items: 'Giant Color Stack', phone: '901-555-0204' }] });
@@ -247,4 +288,4 @@ must(found.includes('Sent you 1 customer'), 'Find a customer does not say "Sent 
 
 if (checks < 50) errors.push(`only ${checks} checks ran`);
 if (errors.length) { console.error(`VALIDATION FAIL: holds and customer messages (${errors.length} of ${checks} checks)\n- ${errors.join('\n- ')}`); process.exit(1); }
-console.log(`validate_request_messages: OK (${checks} checks: hold 48 h + Hold longer 3 days / typed N days on the current end + keep/release + logs, reminder once per end time, ending-soon box/badge/Held view/Day sheet, confirmation once + text, thank-you next morning once with every skip rule, referral block, no review/discount, no paid SMS, 10 AM Memphis cron, Sent you N)`);
+console.log(`validate_request_messages: OK (${checks} checks: hold 48 h + Reserve their games longer 3 days (approved control, live New date, by hand, expired) / typed N days on the current end + keep/release + logs, reminder once per end time, ending-soon box/badge/Held view/Day sheet, confirmation once + text, thank-you next morning once with every skip rule, referral block, no review/discount, no paid SMS, 10 AM Memphis cron, Sent you N)`);

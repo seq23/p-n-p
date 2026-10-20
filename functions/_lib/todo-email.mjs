@@ -4,7 +4,8 @@
 // saving needs no change. To the Settings day-list email. Idempotent per Memphis day: the run
 // claims settings.todo_email_day = <today> before sending and releases it if the send fails.
 //
-// Numbered sections, each shown ONLY when it has something in it, in this order:
+// Sections, each shown ONLY when it has something in it, in this order (the ones shown are
+// numbered 1, 2, 3 ... with no gaps):
 //   1 Today's jobs          today's bookings: time, who, job, place, what to bring, money
 //   2 Call these people back open requests whose Called back step is not ticked (callback-list.mjs)
 //   3 Set a time            every CONFIRMED booking from today on with a day but no time (owner,
@@ -14,7 +15,7 @@
 //                           booking Valerie typed on the calendar with no request is hers, so it counts
 //   4 Book it or decide     called back but nothing on the calendar; takedowns / pickups with no day
 //   5 Money                 balances due today or late (the damage deposit is never owed), every
-//                           unpaid rental hold ("Waiting for deposit · held until ..."), games not returned
+//                           unpaid rental hold ("Waiting for deposit · Games reserved until ..."), games not returned
 // then "Tomorrow, <day>" and, on Mondays, "Your week" (weekly.mjs figures; the Settings switch
 // weekly_summary = include it). Nothing in 1-5 and nothing tomorrow: the email says only
 // "All clear today". Customers appear as first name + last initial only; a phone number is only
@@ -184,11 +185,11 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     if (moneyItems.some((x) => x.key && x.key === h.request_key)) continue;
     const timed = !h.by_hand && Number.isFinite(h.untilMs);
     const endDay = timed ? chicagoDate(new Date(h.untilMs)) : '';
-    const until = !timed ? 'held by hand' : `held until ${endDay === today ? 'today' : dayWords(endDay)} ${memphisTime(h.untilMs)}`;
+    const until = !timed ? 'Reserved by hand (no end date)' : `Games reserved until ${endDay === today ? 'today' : dayWords(endDay)} ${memphisTime(h.untilMs)}`;
     const bal = h.invoice_id ? bals[h.invoice_id] : null;
     const due = bal && !bal.void ? bal.owed + bal.depositOwed : 0;
     const d = bal && !bal.void ? (due > 0 ? `${usd(due)} due on the invoice` : 'Deposit not paid yet') : 'Invoice not sent yet';
-    moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [{ label: 'Hold longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
+    moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [{ label: 'Reserve their games longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
   }
   for (const b of overdueReturns(bookings, returns, today)) {
     moneyItems.push({ type: 'overdue', svc: 'rentals', key: b.request_key || '', t: `${who(b)} · games not returned yet`, d: `Due back ${dayWords(b.date)}`, btns: [...callText(phoneOf(b)), { label: 'Open card', href: bookingHref(b) }] });
@@ -247,13 +248,17 @@ export function renderTodo(d) {
   }
   const H = [`<h1 style="font-family:${SERIF};font-size:26px;line-height:1.2;font-weight:600;margin:0 0 6px;">Good morning, Valerie</h1><p style="margin:0 0 20px;color:${C.muted};">Here is what needs you today, in order.</p>`];
   T.push('Good morning, Valerie', 'Here is what needs you today, in order.');
+  // The sections SHOWN are numbered 1, 2, 3 ... in order (owner, 20 Oct 2026): an empty section
+  // leaves no gap in the numbers. data-section stays the section's fixed key.
   let first = true;
+  let shown = 0;
   for (const n of [1, 2, 3, 4, 5]) {
     const items = d.sections[n];
     if (!items.length) continue;
-    H.push(`${first ? '' : HR}<div data-section="${n}">${headHtml(String(n), SECTION_TITLES[n])}${SECTION_WHY[n] ? `<p style="margin:0 0 10px 38px;color:${C.muted};font-size:15px;">${esc(SECTION_WHY[n])}</p>` : ''}${items.map(itemHtml).join('')}</div>`);
+    shown += 1;
+    H.push(`${first ? '' : HR}<div data-section="${n}" data-num="${shown}">${headHtml(String(shown), SECTION_TITLES[n])}${SECTION_WHY[n] ? `<p style="margin:0 0 10px 38px;color:${C.muted};font-size:15px;">${esc(SECTION_WHY[n])}</p>` : ''}${items.map(itemHtml).join('')}</div>`);
     first = false;
-    T.push('', `${n}. ${SECTION_TITLES[n].toUpperCase()}`);
+    T.push('', `${shown}. ${SECTION_TITLES[n].toUpperCase()}`);
     if (SECTION_WHY[n]) T.push(SECTION_WHY[n]);
     for (const it of items) {
       const link = (it.btns || []).find((b) => b.href.startsWith('/admin'));

@@ -140,7 +140,7 @@ export function inventoryPage({ state, words, statuses = {}, future = {}, keyMis
   const body = `<h1>Inventory</h1>
   ${flash ? `<div class="notice ok"><strong>${esc(flash)}</strong></div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
   <section id="inventory" data-inventory>
-    <p>Everything you rent out, and whether it is <strong>In</strong> (in the shed today) or <strong>Out</strong> with a customer. In and Out come from your bookings by themselves.${outNow ? ` <strong data-inv-outcount>Out or on hold today: ${outNow}.</strong>` : ''}</p>
+    <p>Everything you rent out, and whether it is <strong>In</strong> (in the shed today) or <strong>Out</strong> with a customer. In and Out come from your bookings by themselves.${outNow ? ` <strong data-inv-outcount>Out or reserved today: ${outNow}.</strong>` : ''}</p>
     <div class="inv-add">${act(`<a class="btn primary" href="${INVENTORY_HOME}/new"${tip('inv.add')}>+ Add a game or item</a>`, 'inv.add')}</div>
     ${statusBox(words)}
     ${keyMissing ? KEY_STOP : ''}

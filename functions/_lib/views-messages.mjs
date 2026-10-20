@@ -43,23 +43,49 @@ export function heldUntilWords(untilMs, now = Date.now()) {
   return `${wd} ${day}, ${time}`;
 }
 
-// "Hold longer" -> a small row: [3] days + Hold. card: answer back on that request card.
-export function holdLongerRow(rk, { back = '/admin/', card = false } = {}) {
-  return `<details class="holdlonger" data-hold-longer><summary class="btn ghost"${tip('hold.longer')}>Hold longer</summary>
-    <form class="hlrow" method="post" action="/admin/holds/extend">${hiddenInputs({ r: rk, back, ...(card ? { card: '1' } : {}) })}
-      <label for="hd-${esc(rk)}">Days</label><input id="hd-${esc(rk)}" type="number" name="days" value="${HOLD_EXTEND_DAYS}" min="1" max="${HOLD_EXTEND_MAX_DAYS}" step="1" inputmode="numeric" required${tip('hold.days')}>
-      <button class="btn ghost" type="submit"${tip('hold.go')}>Hold</button></form></details>`;
+// "Fri 23 Oct, 11:59 PM" (Memphis): the one way a reserved-until date is written in the admin.
+// RESERVE_JS formats the live "New date" the same way (same Intl options, same timezone).
+export function reservedWords(untilMs) {
+  if (!Number.isFinite(untilMs)) return '';
+  const d = new Date(untilMs);
+  const day = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'America/Chicago' }).replace(',', '');
+  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' });
+  return `${day}, ${time}`;
 }
+export const RESERVED_BY_HAND = 'Reserved by hand (no end date)';
+// The new end the server will set for N more days (holds.mjs extendHold): from the current end,
+// or from now when there is none or it has passed.
+export const reserveNewEnd = (untilMs, days, now = Date.now()) => Math.max(now, Number.isFinite(untilMs) ? untilMs : now) + days * 24 * MS_H;
+
+// "Reserve their games longer" (owner-approved sample, 20 Oct 2026): a two-line button
+// ("Give more time to pay") that opens inline: "Held until <end>", [3] more days + Save, a live
+// "New date: <...>" line that follows what she types, and Cancel. Save adds N days to the
+// current end (a hold with no end date: now + N days) and comes back "✓ Games reserved until
+// <new date>"; the control is there again, so it is repeatable. card: answer back on that card.
+export function reserveLongerControl(rk, { untilMs = NaN, back = '/admin/', card = false, now = Date.now() } = {}) {
+  const timed = Number.isFinite(untilMs);
+  const id = `hd${card ? "c" : ""}-${esc(rk)}`; // a card can show it twice (step box + More)
+  return `<details class="reslonger" data-reserve-longer data-until-ms="${timed ? untilMs : ''}"><summary class="btn ghost ressum"${tip('hold.longer')}><b>Reserve their games longer</b><span class="ressub">Give more time to pay</span></summary>
+    <div class="resext"><p class="restitle">Reserve their games longer</p><p class="muted" data-res-current>${timed ? `Held until ${esc(reservedWords(untilMs))}` : RESERVED_BY_HAND}</p>
+    <form class="hlrow" method="post" action="/admin/holds/extend">${hiddenInputs({ r: rk, back, ...(card ? { card: '1' } : {}) })}
+      <input id="${id}" type="number" name="days" value="${HOLD_EXTEND_DAYS}" min="1" max="${HOLD_EXTEND_MAX_DAYS}" step="1" inputmode="numeric" required aria-label="More days" data-res-days${tip('hold.days')}><label for="${id}">more days</label>
+      <button class="btn primary ressave" type="submit"${tip('hold.go')}>Save</button></form>
+    <p class="resnew" data-res-new>New date: <b>${esc(reservedWords(reserveNewEnd(untilMs, HOLD_EXTEND_DAYS, now)))}</b></p>
+    <button class="rescancel" type="button" data-res-cancel${tip('hold.cancel')}>Cancel</button></div></details>${RESERVE_JS}`;
+}
+
+// The live "New date" line and Cancel. Idempotent: many controls on a page bind it once.
+export const RESERVE_JS = `<script>(function(){if(window.__pnpRes)return;window.__pnpRes=1;var MAX=${HOLD_EXTEND_MAX_DAYS};function words(ms){var d=new Date(ms);var day=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'America/Chicago'}).replace(',','');var t=d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/Chicago'});return day+', '+t;}function upd(box){var i=box.querySelector('[data-res-days]'),o=box.querySelector('[data-res-new]');if(!i||!o)return;var n=Number(i.value);var u=Number(box.getAttribute('data-until-ms'));var base=Math.max(Date.now(),box.getAttribute('data-until-ms')&&isFinite(u)?u:Date.now());if(!(Number.isInteger(n)&&n>=1&&n<=MAX)){o.textContent='Type a whole number of days, 1 to '+MAX+'.';return;}o.innerHTML='New date: <b></b>';o.querySelector('b').textContent=words(base+n*86400000);}document.addEventListener('input',function(e){var box=e.target.closest&&e.target.closest('[data-reserve-longer]');if(box&&e.target.matches('[data-res-days]'))upd(box);});document.addEventListener('toggle',function(e){var box=e.target;if(box.matches&&box.matches('[data-reserve-longer]')&&box.open){upd(box);var i=box.querySelector('[data-res-days]');if(i)i.focus();}},true);document.addEventListener('click',function(e){var c=e.target.closest&&e.target.closest('[data-res-cancel]');if(!c)return;var box=c.closest('[data-reserve-longer]');if(box)box.open=false;});})();</script>`;
 
 // The hold controls for one held rental (request card, holds box, calendar). compact: on a
 // request card, where the card's ONE big button is its primary, so the reminder is a small
 // "Text a reminder · Email it" pair.
 export function holdControls(h, { rk, sms = null, canEmail = false, now = Date.now(), depositTarget = null, back = '/admin/', compact = false }) {
-  const ends = h.by_hand ? { text: 'Held by hand (no end time)', level: 'amber' } : endsWords(h.untilMs, now);
+  const ends = h.by_hand ? { text: RESERVED_BY_HAND, level: 'amber' } : endsWords(h.untilMs, now);
   const hidden = hiddenInputs({ r: rk, back });
-  // "Hold longer" (owner, 19 Oct 2026): two taps: the button, then Hold (3 days prefilled; the
-  // number she types is honoured). No 24 / 48 hour menus, no other choices.
-  const more = holdLongerRow(rk, { back });
+  // "Reserve their games longer" (owner, 20 Oct 2026): the button, then Save (3 days prefilled;
+  // the number she types is honoured). No 24 / 48 hour menus, no other choices.
+  const more = reserveLongerControl(rk, { untilMs: h.by_hand ? NaN : h.untilMs, back, now });
   const keep = '';
   const release = confirmStep({ key: h.by_hand ? 'hold.releaseHand' : 'hold.release', yesKey: 'hold.releaseYes', label: h.by_hand ? 'Release these games' : 'Release now', question: `Release ${h.name || 'this customer'}'s games now? They come off the calendar and others can book them.`, action: '/admin/holds/release', hidden, danger: true });
   const deposit = depositTarget ? confirmStep({ key: 'hold.deposit', yesKey: 'hold.depositYes', label: 'Mark deposit received', question: `Mark ${h.name || 'this customer'}'s deposit as received? Only do this after the money is in your account. The hold becomes a confirmed booking.`, action: depositTarget.action, hidden: hiddenInputs(depositTarget.fields) }) : '';
@@ -71,7 +97,7 @@ export function holdControls(h, { rk, sms = null, canEmail = false, now = Date.n
     <div class="actions">${deposit}${keep}${release}</div>${more}</div>`;
 }
 
-export const HOLD_CSS = '.holdlonger>summary{list-style:none;display:inline-flex;width:auto;min-height:48px}.holdlonger>summary::-webkit-details-marker{display:none}.hlrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}.hlrow input{width:5.5em;min-height:48px;font-size:1.1rem;margin:0}.hlrow .btn{width:auto;min-height:48px;padding:8px 22px}.hold{border:2px solid #ebcf96;background:#fffaf0;border-radius:12px;padding:10px 12px;margin:10px 0}.ends.amber{color:#7a4a0c}.ends.red{color:#8f3427}.hold .actions{margin-top:6px}';
+export const HOLD_CSS = '.reslonger{margin-top:8px}.reslonger>summary.ressum{list-style:none;display:grid;gap:1px;width:100%;min-height:48px;text-align:left;justify-items:start;padding:10px 12px}.reslonger>summary::-webkit-details-marker{display:none}.ressum b{font-size:1rem}.ressum .ressub{font-size:.85rem;color:#6f6359;font-weight:400}.reslonger[open]>summary{display:none}.resext{border:1.5px solid #b65f3e;border-radius:10px;padding:12px;display:grid;gap:8px}.resext p{margin:0}.restitle{font-weight:700}.resnew b{color:#2f7a46}.rescancel{background:none;border:0;color:#6f6359;text-decoration:underline;padding:0;justify-self:start;min-height:32px;cursor:pointer;font:inherit}.hlrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0}.hlrow input{width:5.5em;min-height:48px;font-size:1.1rem;margin:0}.hlrow .btn{width:auto;min-height:48px;padding:8px 22px}.hold{border:2px solid #ebcf96;background:#fffaf0;border-radius:12px;padding:10px 12px;margin:10px 0}.ends.amber{color:#7a4a0c}.ends.red{color:#8f3427}.hold .actions{margin-top:6px}';
 
 // "Holds ending soon" (top of Requests and Calendar): every unpaid hold ending within the
 // Settings threshold, soonest first.
@@ -87,9 +113,9 @@ export function holdsSoonBox(rows, { now = Date.now(), soonHours = 12, back = '/
 export function heldPane(holds, { now = Date.now() } = {}) {
   const timed = holds.filter((h) => !h.by_hand);
   const byHand = holds.filter((h) => h.by_hand);
-  const row = (h) => `<div class="item" data-held-row><strong>${esc(h.name || 'No name')}</strong> · ${esc(h.items || '')}<br><span class="muted">${h.by_hand ? 'No end time' : esc(endsWords(h.untilMs, now).text)}${h.pickup ? ` · pickup ${esc(h.pickup)}` : ''}</span></div>`;
+  const row = (h) => `<div class="item" data-held-row><strong>${esc(h.name || 'No name')}</strong> · ${esc(h.items || '')}<br><span class="muted">${h.by_hand ? RESERVED_BY_HAND : `Games reserved until ${esc(reservedWords(h.untilMs))}`}${h.pickup ? ` · pickup ${esc(h.pickup)}` : ''}</span></div>`;
   return `<section class="card upcoming" data-held-view><h2>Held (waiting for a deposit)</h2>${timed.length ? timed.map(row).join('') : '<p class="muted">No holds with an end time.</p>'}
-    <h3>Held by hand (no end time)</h3>${byHand.length ? byHand.map(row).join('') : '<p class="muted">None.</p>'}</section>`;
+    <h3>${RESERVED_BY_HAND}</h3>${byHand.length ? byHand.map(row).join('') : '<p class="muted">None.</p>'}</section>`;
 }
 
 // After "Mark deposit received": the big "Text them it's confirmed" button.

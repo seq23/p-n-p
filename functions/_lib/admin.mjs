@@ -190,12 +190,14 @@ async function cardExtras(env, requests, statuses, holds) {
     const h = byKey[r.key];
     // On the card the hold's deposit button shows only when there is no invoice: with one, the
     // card's primary / Payment box already carries Mark deposit received.
-    // The hold controls sit behind the step card's small "Hold longer" link (owner, 19 Oct 2026:
-    // no 24/48 h choice up front); the card shows "Games held until <time>" itself.
+    // The hold controls sit behind the step card's "Reserve their games longer" button (owner,
+    // 20 Oct 2026: no 24/48 h choice up front); the card shows "Games reserved until <time>" itself.
     if (h) holdHtml[r.key] = `<style>${VM2.HOLD_CSS}</style>${VM2.holdControls(h, { rk, sms: h.sms, canEmail: h.canEmail, depositTarget: st.invoice_id ? null : h.depositTarget, compact: true })}`;
     else {
       const old = r.source === 'site' && r.wantsRentals ? await getHold(env.DB, r.key) : null;
-      if (old && old.state === 'expired') bits.push('<div class="notice warn" data-hold-expired><strong>Hold expired.</strong> No deposit came in by the end time, so the games were freed. Use Give them more time on a new request, or book it by hand.</div>');
+      // "Give them more time" is the same Reserve their games longer control (owner, 20 Oct 2026):
+      // Save puts the games back on the calendar for now + N days.
+      if (old && old.state === 'expired') bits.push(`<div class="notice warn" data-hold-expired><strong>Hold expired.</strong> No deposit came in by the end time, so the games were freed. Reserve their games longer to put them back, or book it by hand.<style>${VM2.HOLD_CSS}</style>${VM2.reserveLongerControl(rk, { untilMs: fromSql(old.until), card: true })}</div>`);
     }
     if (st.job_done_at && st.status !== 'void' && r.source) {
       const ctx = await messageCtx(env.DB, r.key);
@@ -619,7 +621,7 @@ async function holdAction(env, request, what) {
   const go = (k, m) => redirect(`${back}${back.includes('?') ? '&' : '?'}${k}=${encodeURIComponent(m)}${anchor}`);
   if (!key) return go('e', 'Which request?');
   if (what === 'extend') {
-    // "Hold longer" (owner, 19 Oct 2026): N days, prefilled 3 (holds.mjs HOLD_EXTEND_DAYS); the
+    // "Reserve their games longer" (owner, 19-20 Oct 2026): N days, prefilled 3 (holds.mjs HOLD_EXTEND_DAYS); the
     // number she types is honoured exactly. The old hours / picked-time posts still work.
     const until = form.get('until') ? chicagoLocalToMs(String(form.get('until'))) : 0;
     const daysRaw = String(form.get('days') || '').trim();
@@ -640,9 +642,9 @@ async function holdAction(env, request, what) {
         if (pickup && ret) await C.upsertBookings(env.DB, [{ ...base, kind: 'rental_pickup', date: pickup }, { ...base, kind: 'rental_return', date: ret }]);
       }
     }
-    return go('m', `Held until ${VM2.heldUntilWords(fromSql(r.until))} ✓`);
+    return go('m', `✓ Games reserved until ${VM2.reservedWords(fromSql(r.until))}`);
   }
-  if (what === 'keep') return go('m', (await keepHolding(env.DB, key)) ? 'Held by hand ✓ It stays held until you release it.' : 'That hold is not active any more.');
+  if (what === 'keep') return go('m', (await keepHolding(env.DB, key)) ? 'Reserved by hand ✓ Their games stay reserved until you release them.' : 'That hold is not active any more.');
   return go('m', (await releaseHold(env.DB, key)) ? 'Games released ✓ They are free for others.' : 'That hold is not active any more.');
 }
 

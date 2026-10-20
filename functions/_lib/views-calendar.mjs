@@ -12,6 +12,8 @@ import { gamesAskedOn } from './requested.mjs';
 import { PHONE_SERVICES, PHONE_SERVICE_WORDS, NOTE_CHOICE, FIRST_KIND } from './phone-requests.mjs';
 import { balanceWords, depositWords } from './ledger.mjs';
 import { reminderText, smsLink, normalizePhone, hasEmail } from './reminders.mjs';
+import { reservedWords, RESERVED_BY_HAND } from './views-messages.mjs';
+import { fromSql } from './holds.mjs';
 
 const RENTAL = new Set(['rental_pickup', 'rental_return']);
 const kindTag = (k, label = '') => `<span class="k ${esc(k)}">${esc(label || KIND_LABELS[k] || k)}</span>`;
@@ -29,7 +31,7 @@ function tel(phone) {
 // ctx: { bal, notes, ret, today }
 export function statusBits(b, { bal, notes = [], ret, today, hold = null }) {
   const bits = [];
-  if (hold && hold.state === 'held' && RENTAL.has(b.kind)) bits.push(`<span class="money owe" data-held-booking>Held — waiting for deposit${hold.until ? '' : ' (held by hand)'}</span>`);
+  if (hold && hold.state === 'held' && RENTAL.has(b.kind)) bits.push(`<span class="money owe" data-held-booking>${hold.until ? `Games reserved until ${esc(reservedWords(fromSql(hold.until)))}` : RESERVED_BY_HAND} — waiting for deposit</span>`);
   if (bal && !bal.void) {
     bits.push(bal.owed > 0 ? `<span class="money owe" data-owed>${esc(balanceWords(bal))}</span>` : `<span class="money ok" data-paid>${esc(balanceWords(bal))}</span>`);
     if (b.kind === 'rental_pickup' && bal.owed > 0) bits.push(`<span class="money owe" data-collect>Collect ${esc(money(bal.owed))} at pickup</span>`);
@@ -329,7 +331,7 @@ function phoneJob(b, c, day, yesFor) {
   if (b.items) rows.push([RENTAL.has(b.kind) ? 'Games' : 'Bring', b.items]);
   rows.push(['Collect', bal ? (bal.owed > 0 ? `${money(bal.owed)} still to collect` : 'Paid in full ✓') : 'No invoice yet']);
   if (bal && bal.refundable) rows.push(['Deposit', depositWords(bal)]);
-  if (held) rows.push(['Hold', 'Games held, waiting for the deposit']);
+  if (held) rows.push(['Reserved', c.hold.until ? `Games reserved until ${reservedWords(fromSql(c.hold.until))}, waiting for the deposit` : `${RESERVED_BY_HAND}, waiting for the deposit`]);
   if (c.notes && c.notes.length) rows.push(['Note', firstLine(c.notes[0].body)]);
   const phone = normalizePhone(b.phone);
   const rk = b.request_key ? b64urlText(b.request_key) : '';

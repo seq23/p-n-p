@@ -189,7 +189,7 @@
     "extraGame": 20
   },
   "rentalHolds": {
-    "_why": "Website rental holds (owner, 19 Oct 2026): games are held this many hours from the request by default (Settings can change it), and the admin's Hold longer adds extendDays unless Valerie types another number. Read by functions/_lib/hold-rules.mjs, the /request form and the public rentals copy; never typed elsewhere.",
+    "_why": "Website rental holds (owner, 19 Oct 2026): games are held this many hours from the request by default (Settings can change it), and the admin's Reserve their games longer adds extendDays unless Valerie types another number. Read by functions/_lib/hold-rules.mjs, the /request form and the public rentals copy; never typed elsewhere.",
     "defaultHours": 48,
     "extendDays": 3,
     "maxExtendDays": 60

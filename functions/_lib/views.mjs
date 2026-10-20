@@ -7,7 +7,7 @@ import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABE
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
 import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, inlineRowKind, SCHEDULE_FIRST } from './cards.mjs';
 import { HOLD_DEFAULT_HOURS } from './hold-rules.mjs';
-import { holdLongerRow, heldUntilWords, HOLD_CSS } from './views-messages.mjs';
+import { reserveLongerControl, reservedWords, RESERVED_BY_HAND, HOLD_CSS } from './views-messages.mjs';
 import { deriveSteps, undoFor, waitingDays, waitingWords, sentMs, WAIT_HIGHLIGHT_DAYS } from './steps.mjs';
 import { parseFormDate, deliveryAddress } from './calendar.mjs';
 import { kindCss } from './kinds.mjs';
@@ -752,9 +752,9 @@ function talkBox(r, s, x, { withNo = true } = {}) {
 
 const holdUntilWords = (h) => {
   if (!h) return '';
-  if (h.by_hand) return 'Games held for them (no end time)';
+  if (h.by_hand) return RESERVED_BY_HAND;
   if (!Number.isFinite(h.untilMs)) return '';
-  return `Games held until ${heldUntilWords(h.untilMs)}`;
+  return `Games reserved until ${reservedWords(h.untilMs)}`;
 };
 
 // The ONE next-step box. -> { html, big } (big = the help key of its one big button, or '').
@@ -794,8 +794,9 @@ function nextBox(r, s, x) {
     case 'deposit': {
       const full = plan === 'full';
       const amt = inv ? (full ? (bal ? bal.remaining : 0) : inv.deposit_due_cents) : 0;
-      // "Games held until Wed 3 PM" + "Hold longer" (two taps: the button, then Hold for 3 days).
-      const holdBit = hold ? `<p class="holdline" data-hold-line>${esc(holdUntilWords(hold))}</p>${hold.by_hand ? '' : `<style>${HOLD_CSS}</style>${holdLongerRow(rk, { card: true })}`}` : '';
+      // "Games reserved until Fri 23 Oct, 11:59 PM" + "Reserve their games longer" (the button,
+      // then Save for 3 days). Reserved by hand (no end date): the same control sets now + N days.
+      const holdBit = hold ? `<p class="holdline" data-hold-line>${esc(holdUntilWords(hold))}</p><style>${HOLD_CSS}</style>${reserveLongerControl(rk, { untilMs: hold.by_hand ? NaN : hold.untilMs, card: true })}` : '';
       const key = full ? 'pay.paid' : 'pay.deposit';
       return box(full ? 'Wait for the payment' : 'Wait for the deposit', `Tap the button when the ${amt ? `${money(amt)} ` : ''}${full ? 'payment' : 'deposit'} comes in.`, `${holdBit}<div class="actions" data-primary>${cardButton(key, ctx, true)}</div>`, tent, key);
     }

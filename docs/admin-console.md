@@ -174,8 +174,8 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   party / grazing job only once confirmed (`isConfirmed`), a hand-typed booking always; soonest first, highlighted within 2 days, Text prefilled from the `setTime`
   message template), 4 Book it or decide (called back with nothing on the calendar; takedowns and
   grazing pickups with no day), 5 Money (balances due today or late, never the damage deposit;
-  every unpaid rental hold as "Waiting for deposit · held until <time>" with the invoice's amount
-  due, Hold longer and Open card, unless Money already lists that request; games not returned). Then "Tomorrow, <day>" and the footer.
+  every unpaid rental hold as "Waiting for deposit · Games reserved until <time>" with the invoice's amount
+  due, Reserve their games longer and Open card, unless Money already lists that request; games not returned). The sections shown are numbered 1, 2, 3 ... with no gap for an empty one. Then "Tomorrow, <day>" and the footer.
   Nothing in 1-5 and nothing tomorrow: only "All clear today". First name + last initial only; a
   phone only inside Call (tel:) / Text (sms:) links; every other link into /admin; HTML (one 600px
   column) plus plain text. Once per Memphis day (claims `settings.todo_email_day`; released if the
@@ -398,7 +398,7 @@ another tab/retry queue, the cron hook).
   and the card says "Referred by <name>". No reward, no discount, no review ask.
 - **Holds (Valerie's controls)**: on a held rental card, in "Holds ending soon" (top of Requests and
   Calendar & Bookings, threshold in Settings, tab badge "N holds ending soon") and in the
-  Calendar's Held view: Hold longer (see "Rental extras": 3 days, or the days she types), Keep
+  Calendar's Held view: Reserve their games longer (see "Rental extras": 3 days, or the days she types), Keep
   holding — I'll handle it (no end time), Release now, Mark deposit received, Call, Text a
   reminder / Email them. Settings: hold length, automatic expiry switch, reminder on/off and
   hours before the end. Every change is logged on the request. Holds ending a day are on its Day
@@ -433,7 +433,7 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   email, ID, notes, history, Edit, Add a note, Print checklist, Put away, the Payment box, the
   other buttons, Void) is under "More: answers, history, other buttons".
   - Rentals: Called back -> Invoice sent ("Review & send invoice" opens the website's draft in the
-    editor) -> Deposit paid ("Games held until <time>" + "Hold longer" holding the hold controls)
+    editor) -> Deposit paid ("Games reserved until <time>" + "Reserve their games longer" holding the hold controls)
     -> Picked up ("Mark picked up", with "They paid the rest now" ticked when money is owed) ->
     Returned -> Deposit given back ("Deposit returned, finish" records the refund; "Keep some for
     damage" opens the invoice). A rental picked up with money still owed gets "Paid in full" too.
@@ -561,10 +561,13 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   calendar, Upcoming, the list and the Day sheet (`calendar.mjs deliveryAddress / rentalPlace`).
   Home rentals stay pickup and return at the safe exchange zone. Facebook listings are hand-written:
   add the same sentence there.
-- **Holds**: 48 hours from the request by default, "Hold longer" = one button, then a days box
-  prefilled 3 + Hold: each press adds 3 days (or exactly the days typed) on top of the CURRENT end
-  time, repeatable, each logged; the card says "Games held until Wed 3 PM" and then "Held until
-  <new time> ✓". No 24 / 48 h menus. Numbers: `data/offers/services.json rentalHolds`
+- **Holds**: 48 hours from the request by default. "Reserve their games longer" (subtext "Give
+  more time to pay", owner-approved sample 20 Oct 2026) opens inline: "Held until <end>", a box
+  prefilled 3 + "more days" + Save, a live "New date: <...>" line that follows what she types
+  (same Memphis-time rule as the server), and Cancel. Save adds 3 days (or exactly the days typed)
+  on top of the CURRENT end time (reserved by hand with no end date: now + N days), repeatable,
+  each logged; the card says "Games reserved until Fri 23 Oct, 11:59 PM" and then "✓ Games
+  reserved until <new date>". The Hold expired notice carries the same control. No 24 / 48 h menus. Numbers: `data/offers/services.json rentalHolds`
   (`functions/_lib/hold-rules.mjs`); the public pages read the same. Existing holds are untouched.
 - **Waiting N days** on step 1 of a card ("Sent today", "Waiting since yesterday", "Waiting N
   days", red from 3): Memphis calendar days (`steps.mjs waitingDays / waitingWords`).
@@ -630,8 +633,8 @@ Old addresses redirect: `/admin/settings/inventory[/new|/<slug>]` -> `/admin/inv
 - **Two separate ideas, never both called "available"** (owner, 19 Oct 2026): **Offered / Not
   offered** is set by hand (Remove / Bring back); **In / Out** is computed from the bookings. Each item
   shows one pill: "In" (green) · "Out: <First L.>, back <Tue 20 Oct>" (blue; "was due back" when
-  overdue and not checked in) · "1 of 2 out" (multi-set items) · "On hold until <Memphis time>"
-  (amber; a website hold not paid yet; "until you decide" when held by hand) · a small "Next booked:
+  overdue and not checked in) · "1 of 2 out" (multi-set items) · "Reserved until <Memphis time>"
+  (amber; a website hold not paid yet; "Reserved by hand (no end date)" when held by hand) · a small "Next booked:
   <range>" line · "Not offered" (grey, its own group at the bottom with Bring back, never In / Out).
   Tap an item -> `/admin/inventory/<slug>`: its upcoming bookings (each with Open that day), then
   Edit / Remove / Bring back. Code: `itemStatuses` in `functions/_lib/inventory.mjs`, built on
