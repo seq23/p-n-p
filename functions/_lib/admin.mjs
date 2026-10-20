@@ -42,6 +42,7 @@ import * as VI from './views-inventory.mjs';
 import { categoriesFrom } from './expenses.mjs';
 import { liveChecklistSource } from './checklist-source.mjs';
 import { renderPrintPage, prefillFromRequest, renderOnlineSections, checklistState, invoiceFromChecklist, fieldIndex } from './checklist.mjs';
+import * as QT from './quick-texts.mjs';
 
 const MAX_PHOTOS = 10;
 const PHOTO_MAX_BYTES = 1500000;
@@ -690,6 +691,15 @@ async function emailMessage(env, request) {
 async function tappedMessage(env, request) {
   const form = await request.formData();
   const key = decodeKey(form.get('r'));
+  // A quick text (the 💬 Text ▾ menu): one history line "Texted: <title>", and the older tap
+  // column when it is one of those messages (confirmed, hold reminder, thank-you).
+  const quick = String(form.get('quick') || '');
+  if (key && (quick === 'blank' || QT.QUICK_BY_ID[quick])) {
+    await logEvent(env.DB, key, `Texted: ${quick === 'blank' ? 'Blank text' : QT.QUICK_BY_ID[quick].t}`, 'Valerie');
+    const qcol = TAP_COLUMNS[QT.QUICK_TAP_TEMPLATE[quick] || ''];
+    if (qcol) await env.DB.prepare(`UPDATE requests SET ${qcol} = COALESCE(${qcol}, datetime('now')) WHERE request_key = ?1`).bind(key).run();
+    return Response.json({ ok: true });
+  }
   const col = TAP_COLUMNS[String(form.get('template') || '')];
   if (key && col) await env.DB.prepare(`UPDATE requests SET ${col} = COALESCE(${col}, datetime('now')) WHERE request_key = ?1`).bind(key).run();
   return Response.json({ ok: true });

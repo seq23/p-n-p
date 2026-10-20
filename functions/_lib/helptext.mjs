@@ -236,7 +236,14 @@ export const HELP = {
   'card.idClose': H('card', '✕ Close (photo ID)', 'Closes the photo ID and puts you back on the same card.', '', 'Escape, tapping outside the photo or swiping down closes it too.'),
   'card.idBack': H('card', 'Back to the card', 'Goes back to this customer\'s card on Requests.', '', 'Only shows on the photo page a phone opens when the photo cannot open over the card.'),
   'card.quickCall': H('card', '📞 Call', 'Calls this customer from your phone.', '', 'Top right of every request card, at every step, whenever they gave a phone number.'),
-  'card.quickText': H('card', '💬 Text', 'Opens a blank text to this customer on your phone.', '', 'Top right of every request card. It is a normal text from your phone: nothing is paid for and nothing is written for you.'),
+  'card.quickText': H('card', '💬 Text ▾', 'Opens your quick texts for this customer: a blank text or a ready-made one, filled in for you.', '', 'Top right of every request card, whenever they gave a phone number. The 3 texts that fit where the job is right now are first, in green. It is a normal text from your phone: nothing is paid for, and you press Send yourself.'),
+  'qt.blank': H('card', '✏️ Blank text', 'Starts a text with just their name and your sign-off, for you to write.', '', 'In the 💬 Text ▾ list, at the top.'),
+  'qt.option': H('card', 'A ready-made text', 'Shows this text filled in for this customer, ready to change and send.', '', 'Blanks like "__ minutes" are for you to fill in. Every text ends "— Valerie at Porch & Party".'),
+  'qt.all': H('card', 'All texts for this job ▾', 'Shows every text for this kind of job, in groups.', '', 'Game rentals or Porch, party and grazing, then Any job, then Booking and money.'),
+  'qt.close': H('card', '✕ Close', 'Closes the texts list. Nothing is sent.', '', ''),
+  'qt.back': H('card', '← Back to texts', 'Goes back to the list of texts. Nothing is sent.', '', ''),
+  'qt.send': H('card', 'Open in Messages', 'Opens Messages with these words, ready for you to press Send.', '', 'On a laptop it works only when the Mac is linked to your iPhone. The card notes "Texted: <the text>" in its history.'),
+  'qt.copy': H('card', 'Copy text', 'Copies these words so you can paste them into any message.', '', ''),
 
   // Payment
   'pay.deposit': H('payment', 'Mark deposit received', 'Records that the deposit is in your account. It asks you to be sure first.', 'Only after the deposit is in your account.', 'Tap it, read the question, then tap Yes. The status changes to Deposit paid.', 'Money: only do this after the money is in your account.'),

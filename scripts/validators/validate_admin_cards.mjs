@@ -311,9 +311,13 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
     const dep = (hold) => V.requestCard(wr, { st: { status: 'invoiced' }, inv: bal('sent', 0), kinds: ['rental_pickup', 'rental_return'], bookings: [{ kind: 'rental_pickup', date: '2026-10-30', time: null }], today: '2026-10-20', msgs, hold });
     const t = dep({ state: 'held', by_hand: 0, untilMs: end });
     const nb = (t.match(/<section class="nextbox" data-next-step="deposit">[\s\S]*?<\/section>/) || [''])[0];
+    // The quick-texts menu (validate:admin-quick-texts) carries the approved text "Reminder: games
+    // held until…"; that is the ONLY place the card may say it, and only once, as a text to send.
+    const qtm = (t.match(/<template data-qt-menu>[\s\S]*?<\/template>/) || [''])[0];
+    must(qtm && (t.match(/[Gg]ames held until/g) || []).length === (qtm.match(/[Gg]ames held until/g) || []).length && (qtm.match(/>Reminder: games held until…</g) || []).length === 1, 'the card says "games held until" outside the one quick text (or the quick text is missing)');
     must(/<p class="holdline" data-hold-line>Games reserved until Fri 23 Oct, 11:59 PM<\/p>/.test(nb) && /data-reserve-longer data-until-ms="\d+"><summary class="btn ghost ressum"[^>]*><b>Reserve their games longer<\/b><span class="ressub">Give more time to pay<\/span><\/summary>/.test(nb)
       && nb.includes('data-res-current>Held until Fri 23 Oct, 11:59 PM</p>') && nb.includes(`data-res-new>New date: <b>${VM.reservedWords(VM.reserveNewEnd(end, 3))}</b>`) && /name="days" value="3"[\s\S]*>more days<\/label>[\s\S]*>Save<\/button>[\s\S]*>Cancel<\/button>/.test(nb)
-      && !/Hold longer|[Gg]ames held until/.test(t), 'the Wait for the deposit step does not say "Games reserved until Fri 23 Oct, 11:59 PM" with the Reserve their games longer control (or still says Hold longer / Games held until)');
+      && !/Hold longer|[Gg]ames held until/.test(t.replace(/<template data-qt-menu>[\s\S]*?<\/template>/, '')), 'the Wait for the deposit step does not say "Games reserved until Fri 23 Oct, 11:59 PM" with the Reserve their games longer control (or still says Hold longer / Games held until)');
     must(VM.reservedWords(end) === 'Fri 23 Oct, 11:59 PM' && VM.reservedWords(Date.parse('2026-10-27T04:59:00Z')) === 'Mon 26 Oct, 11:59 PM', 'reserved-until dates are not written like "Fri 23 Oct, 11:59 PM" in Memphis time');
     const bh = dep({ state: 'held', by_hand: 1, untilMs: NaN });
     const nb2 = (bh.match(/<section class="nextbox" data-next-step="deposit">[\s\S]*?<\/section>/) || [''])[0];
