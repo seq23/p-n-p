@@ -6,6 +6,7 @@ import { SERVICE_KINDS } from './kinds.mjs';
 import { STEP_KEYS } from './progress.mjs';
 import { parseFormDate } from './calendar.mjs';
 import { singlePayment } from './util.mjs';
+import { owes } from './ledger.mjs';
 
 export const CARD_SERVICES = ['porch', 'party', 'grazing', 'rentals'];
 
@@ -190,8 +191,13 @@ export function cardWaiting({ services, stage, primary, returned = false, jobDon
 // ONE money button at most, and never the same one as the primary (it would show twice).
 // Void is never here: it is a small link under Show details.
 export const PAY_STATES = ['none', 'draft', 'sent', 'deposit', 'paid'];
+// A stored "paid" status never outvotes the payments: with money still to pay (ledger.mjs
+// balanceOf, e.g. a line added after it was paid) the box reads "Deposit in · $X due".
 export function payState({ inv = null, status = 'new' }) {
-  if (inv) return ({ draft: 'draft', deposit_paid: 'deposit', paid: 'paid', done: 'paid', void: 'void' })[inv.status] || 'sent';
+  if (inv) {
+    const st = ({ draft: 'draft', deposit_paid: 'deposit', paid: 'paid', done: 'paid', void: 'void' })[inv.status] || 'sent';
+    return st === 'paid' && inv.balance && owes(inv.balance) ? 'deposit' : st;
+  }
   return ({ deposit_paid: 'deposit', paid: 'paid', done: 'paid', void: 'void' })[status] || 'none';
 }
 export function cardPayment({ inv = null, status = 'new', plan = 'half', primary = '' }) {

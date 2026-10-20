@@ -56,10 +56,12 @@ must(R.chicagoDate(new Date('2027-01-01T05:30:00Z')) === '2026-12-31', 'a paymen
   const data = M.prepare({ invoices, lines, payments, bookings, statuses: [], expenses: [{ id: 1, date: '2026-10-12', vendor: 'Party City', category: 'Supplies & decor', total_cents: 4217, tax_cents: 317 }] });
   const sep = M.periodTotals(data, '2026-09');
   const oct = M.periodTotals(data, '2026-10');
-  must(sep.received === 8000 && sep.revenue === 8000 && sep.depositsIn === 0, 'September: the deposit payment should be income (charges first)');
-  must(oct.received === 18000 && oct.revenue === 3000 + 10000 && oct.depositsIn === 5000, `October: received ${oct.received}, income ${oct.revenue}, deposits ${oct.depositsIn}`);
+  // A payment takes the refundable damage deposit first (ledger.mjs splitPayment, the one split the
+  // invoice, card and note use): Ann's $80 deposit is $50 damage deposit held + $30 income.
+  must(sep.received === 8000 && sep.revenue === 3000 && sep.depositsIn === 5000, `September: the deposit payment should be $50 deposit held + $30 income (deposit first), got income ${sep.revenue}, deposits ${sep.depositsIn}`);
+  must(oct.received === 18000 && oct.revenue === 8000 + 10000 && oct.depositsIn === 0 && sep.revenue + oct.revenue === 11000 + 10000 && sep.depositsIn + oct.depositsIn === 5000, `October: received ${oct.received}, income ${oct.revenue}, deposits ${oct.depositsIn}`);
   must(!oct.payments.some((p) => p.invoice_id === 2), 'a void invoice payment is counted');
-  must(oct.byCategory.rentals === 3000 && oct.byCategory.party + oct.byCategory.grazing === 10000 && Object.values(oct.byCategory).reduce((a, b) => a + b, 0) === oct.revenue, `category split does not add up: ${JSON.stringify(oct.byCategory)}`);
+  must(oct.byCategory.rentals === 8000 && sep.byCategory.rentals === 3000 && oct.byCategory.party + oct.byCategory.grazing === 10000 && Object.values(oct.byCategory).reduce((a, b) => a + b, 0) === oct.revenue, `category split does not add up: ${JSON.stringify(oct.byCategory)}`);
   must(oct.kept === 2000 && oct.refunds === 3000 && oct.depositRefunds === 3000, 'refunds or deposits kept wrong');
   must(oct.jobs === 2 && oct.owed === 10000, `jobs ${oct.jobs} / still owed ${oct.owed} (void excluded, one job per invoice start)`);
   must(oct.expenses === 4217 && oct.left === oct.revenue + oct.kept - 4217, 'expenses or left-after-expenses wrong');

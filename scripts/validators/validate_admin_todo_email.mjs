@@ -70,7 +70,8 @@ await db.prepare(`INSERT INTO invoice_lines (invoice_id, description, qty, unit_
   (?3, 'Pick 3 bundle', 1, 11000, 0), (?3, 'Refundable damage deposit', 1, 5000, 1),
   (?4, 'Porch package', 1, 30000, 0),
   (?5, 'Grazing table', 1, 9000, 0)`).bind(inv['PNP-T-1'], inv['PNP-T-2'], inv['PNP-T-3'], inv['PNP-T-4'], inv['PNP-T-5']).run();
-// Sam paid everything incl. the deposit; Dee paid the charges but not the deposit (deposit only "owed").
+// Sam paid everything incl. the deposit; Dee paid $110 of $160: the damage deposit is taken first
+// (ledger.mjs splitPayment), so $50 of the charges is still owed and she is listed, never "Paid in full".
 await run("INSERT INTO payments (invoice_id, amount_cents, received_on, method, note, kind) VALUES (?1, 16000, '2026-10-12', 'zelle', '', 'payment'), (?2, 11000, '2026-10-05', 'zelle', '', 'payment')", inv['PNP-T-2'], inv['PNP-T-3']);
 await db.prepare(`INSERT INTO bookings (kind, date, time, customer_name, phone, place, items, invoice_id) VALUES
   ('party_takedown', ?1, '10:00', 'Alex Smithfield', '901-555-0201', 'Germantown', 'the ladder and 2 bins', ?2),
@@ -150,7 +151,8 @@ const m5 = S[5];
 must(m5.some((x) => x.type === 'owed' && x.t === 'Alex S. · $180 due' && x.d === 'Due today, at the takedown · No deposit. ① All of it · by Tue 20 Oct $180'), `Money lacks "Alex S. · $180 due / Due today, at the takedown · No deposit. ① All of it · by Tue 20 Oct $180": ${JSON.stringify(m5.map((x) => [x.t, x.d]))}`);
 must(m5.some((x) => x.type === 'owed' && x.t === 'Lou L. · $90 due' && /3 days late/.test(x.d)), 'Money lacks the late balance');
 must(!m5.some((x) => /Fay F/.test(x.t)), 'Money lists a balance due tomorrow');
-must(!m5.some((x) => /Dee D|Sam R/.test(x.t)), 'Money lists a damage deposit as owed (deposits are never owed)');
+must(!m5.some((x) => /Sam R/.test(x.t)), 'Money lists a customer who paid everything');
+must(m5.filter((x) => /Dee D/.test(x.t)).length === 1 && m5.some((x) => x.type === 'owed' && x.t === 'Dee D. · $50 due' && /10 days late/.test(x.d) && !/refundable/.test(x.t)), `Money does not list Dee D. (paid $110 of $160) as "$50 due": ${JSON.stringify(m5.filter((x) => /Dee D/.test(x.t)))}`);
 const owedRow = m5.find((x) => /Alex S/.test(x.t));
 must(owedRow && owedRow.btns.some((b) => b.label === 'Text a reminder' && /^sms:/.test(b.href)) && owedRow.btns.some((b) => b.label === 'Mark paid' && b.href === `/admin/invoices/${inv['PNP-T-1']}`), 'the owed line lacks Text a reminder / Mark paid');
 must(m5.some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && x.d === 'Invoice not sent yet' && x.btns.map((b) => b.label).join() === 'Reserve their games longer,Open card' && x.btns[0].solid && x.btns.every((b) => b.href === card(reqB.key))), `Money lacks the hold ending today: ${JSON.stringify(titles(m5))}`);
@@ -294,7 +296,10 @@ for (const p of people) {
   if (p.email) must(!msg.html.includes(p.email) && !msg.text.includes(p.email), `the email shows ${p.name}'s email`);
   const digits = String(p.phone || '').replace(/\D/g, '');
   // The plain text may carry the number ONLY as a red-box "  📞 Call: tel:<digits>" line (the Call link).
-  if (digits) must(!visible.replace(/\D/g, ' ').includes(digits.slice(-7)) && !msg.text.replace(/^  📞 Call: tel:\d+$/gm, '').replace(/\D/g, '').includes(digits.slice(-7)) && !visible.includes(p.phone), `the email shows ${p.name}'s phone outside a Call/Text link`);
+  // A phone written any way (5550101, 555-0101, 555 0101, (901) 555.0101) counts; digits from two
+  // different numbers on a line (a date next to an amount) are not glued into one.
+  const runs = (t) => t.replace(/(\d)[ .\-()]{1,2}(?=\d)/g, '$1').split(/\D+/);
+  if (digits) must(!visible.replace(/\D/g, ' ').includes(digits.slice(-7)) && !runs(visible).some((r) => r.includes(digits.slice(-7))) && !runs(msg.text.replace(/^  📞 Call: tel:\d+$/gm, '')).some((r) => r.includes(digits.slice(-7))) && !visible.includes(p.phone), `the email shows ${p.name}'s phone outside a Call/Text link`);
 }
 
 // ---- 4. all clear ------------------------------------------------------------------------------------

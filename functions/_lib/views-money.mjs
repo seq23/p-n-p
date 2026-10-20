@@ -94,13 +94,13 @@ const UPLOAD_JS = `
 export function notPaidBox(np, { prettyDue = (d) => shortDate(d) } = {}) {
   const row = (r) => {
     const badges = r.services.map((k) => { const b = serviceBadge(k); return b ? `<span class="svc" style="border-color:${b.bar};background:${b.tint}">${esc(b.label)}</span>` : ''; }).join('');
-    const sms = smsLink(r.phone, render('paymentReminder', { name: r.name, amount: money(r.owed), due: r.due ? prettyDue(r.due) : '', late: r.tone === 'late', number: r.number }).text);
+    const sms = smsLink(r.phone, render('paymentReminder', { name: r.name, amount: money(r.remaining), due: r.due ? prettyDue(r.due) : '', late: r.tone === 'late', number: r.number }).text);
     const tel = String(r.phone || '').replace(/[^\d+]/g, '');
     return `<article class="np" data-not-paid="${r.id}"><div class="svcs">${badges}</div>
       <div class="spread"><strong style="font-size:1.25rem">${esc(r.name)}</strong><span class="${esc(r.tone)}" data-due-words>${esc(r.words)}</span></div>
       <div class="muted">${esc(r.whatFor)} · ${esc(r.number)}</div>
       <div class="nums"><span>Total ${esc(money(r.total))}</span><span>Paid ${esc(money(r.paid))}</span></div>
-      <div><span class="owed" data-owed>${esc(r.dueWords || `${money(r.owed)} due`)}</span></div>
+      <div><span class="owed" data-owed>${esc(r.dueWords || `${money(r.remaining)} due`)}</span></div>
       ${r.remindedAt ? `<div class="muted" data-reminded>Reminder emailed ${esc(String(r.remindedAt).slice(0, 10))}</div>` : ''}
       <div class="secrow">
         ${tel ? `<div class="act"><a class="btn ghost" href="tel:${esc(tel)}"${tip('np.call')}>Call</a></div>` : ''}
@@ -108,11 +108,11 @@ export function notPaidBox(np, { prettyDue = (d) => shortDate(d) } = {}) {
         ${r.email ? `<form method="post" action="/admin/money/remind">${hiddenInputs({ invoice: r.id })}<div class="act"><button class="btn ghost" type="submit"${tip('np.email')}>Email a reminder</button></div></form>` : ''}
         <div class="act"><a class="btn ghost" href="/admin/invoices/${r.id}"${tip('np.open')}>Open invoice</a></div>
       </div>
-      ${confirmStep({ key: 'np.paid', yesKey: 'pay.paidYes', label: 'Mark paid', question: `Mark ${r.name} as paid in full (${money(r.owed)})? Only do this after the money is in your account.`, action: `/admin/invoices/${r.id}/status`, hidden: hiddenInputs({ action: 'paid', back: '/admin/money' }), extra: `<label>How did they pay?</label><select name="method">${[['zelle', 'Zelle'], ['cashapp', 'Cash App'], ['cash', 'Cash'], ['card', 'Card'], ['other', 'Other']].map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>` })}
+      ${confirmStep({ key: 'np.paid', yesKey: 'pay.paidYes', label: 'Mark paid', question: `Mark ${r.name} as paid in full (${money(r.remaining)})? Only do this after the money is in your account.`, action: `/admin/invoices/${r.id}/status`, hidden: hiddenInputs({ action: 'paid', back: '/admin/money' }), extra: `<label>How did they pay?</label><select name="method">${[['zelle', 'Zelle'], ['cashapp', 'Cash App'], ['cash', 'Cash'], ['card', 'Card'], ['other', 'Other']].map(([v, l]) => `<option value="${v}">${l}</option>`).join('')}</select>` })}
     </article>`;
   };
   return `<section class="card" id="not-paid" data-not-paid-box><h2>Not paid yet</h2>
-    ${np.owed.length ? `${np.owed.map(row).join('')}<p class="nptotal" data-not-paid-total>${np.count} ${np.count === 1 ? 'customer owes' : 'customers owe'} ${esc(money(np.total))} in all.</p>` : '<p class="muted" style="margin:0">Everyone has paid. Nothing is owed on a sent invoice.</p>'}
+    ${np.owed.length ? `${np.owed.map(row).join('')}<p class="nptotal" data-not-paid-total>${np.count} ${np.count === 1 ? 'customer owes' : 'customers owe'} ${esc(money(np.total))} in all${np.depositTotal ? ` (${esc(money(np.total - np.depositTotal))} + ${esc(money(np.depositTotal))} refundable deposits)` : ''}.</p>` : '<p class="muted" style="margin:0">Everyone has paid. Nothing is owed on a sent invoice.</p>'}
     ${np.drafts.length ? `<h3>Invoice not sent yet</h3>${np.drafts.map((r) => `<div class="exp" data-draft><a href="/admin/invoices/${r.id}"${tip('np.open')}><strong>${esc(r.name)}</strong></a> · ${esc(r.number)} · ${esc(money(r.total))}</div>`).join('')}<p class="muted">Not counted as owed until you send them.</p>` : ''}
   </section>`;
 }
@@ -144,10 +144,12 @@ const chips = (services) => services.map((k) => { const b = serviceBadge(k); ret
 export function jobRow(r, { includeDeposits = false } = {}) {
   const total = r.charges + (includeDeposits ? r.refundable : 0);
   const paid = r.paidCharges + (includeDeposits ? r.paidDeposit : 0);
+  // Total - Paid = Still owed on every row (ledger.mjs balanceOf numbers, via money.mjs jobRows).
+  const owed = r.owed + (includeDeposits ? (r.depositOwed || 0) : 0);
   const amt = (v, cls = '') => `<dd class="${v ? cls : 'zero'}">${esc(money(v))}</dd>`;
   const name = r.invoiceId ? `<a href="/admin/invoices/${r.invoiceId}"${tip('mon.jobOpen')}>${esc(r.name)}</a>` : (r.date ? `<a href="/admin/day/${esc(r.date)}"${tip('mon.jobDay')}>${esc(r.name)}</a>` : `<strong>${esc(r.name)}</strong>`);
   const nums = r.confirmed
-    ? `<dl class="jn"><div><dt>Total</dt><dd data-job-total>${esc(money(total))}</dd></div><div><dt>Paid</dt>${amt(paid)}</div><div><dt>Still owed</dt>${amt(r.owed, 'owe')}</div><div><dt>Tips</dt>${amt(r.tips)}</div></dl>`
+    ? `<dl class="jn"><div><dt>Total</dt><dd data-job-total>${esc(money(total))}</dd></div><div><dt>Paid</dt>${amt(paid)}</div><div><dt>Still owed</dt>${amt(owed, 'owe')}</div><div><dt>Tips</dt>${amt(r.tips)}</div></dl>`
     : `<dl class="jn"><div style="grid-column:span 2"><dt>Expected if confirmed</dt><dd data-job-expected>${r.hasPrice ? esc(money(r.expected)) : 'No price yet'}</dd></div><div><dt>Tips</dt>${amt(r.tips)}</div></dl>`;
   const dep = includeDeposits && r.refundable ? `<div class="dep" data-job-deposit>Total includes ${esc(money(r.refundable))} deposit (given back later)</div>` : '';
   return `<li class="job${r.confirmed ? '' : ' unconf'}" data-job data-confirmed="${r.confirmed ? 1 : 0}" data-job-key="${esc(r.key)}">

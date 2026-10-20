@@ -23,11 +23,12 @@ function cashtag(value) {
 }
 
 // pickup: the rentals pickup line (invoice-note.mjs pickupNote, worded per invoice), '' on a decor-only invoice.
-export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, pickup = '' }) {
+// paid / payments: what has come in when it goes out (ledger.mjs), so a paid step reads "✓ paid".
+export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, pickup = '', paid = 0, payments = [] }) {
   const total = invoiceTotal(lines);
   // "How you pay" (owner-approved mock-up, 20 Oct 2026; pay-steps.mjs): ① Deposit now (holds your
   // date), ② The rest, by Wed 28 Oct, the sum written out. Replaces the one-number "due now" band.
-  const cs = customerSteps(payStepsOf(invoice, lines));
+  const cs = customerSteps(payStepsOf(invoice, lines, { paid, payments }));
   const pay = paymentStatus(settings);
   const business = settings.business_name || 'Porch & Party';
   const footerLine = settings.business_address || 'Memphis, Tennessee';
@@ -80,8 +81,9 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
       <tr><td style="padding:16px;font-family:${SANS};font-size:15px;color:${C.ink};">
         <div style="font-family:${SERIF};font-size:20px;font-weight:600;margin-bottom:4px;">How you pay</div>
         ${cs.head ? `<div style="font-size:15px;margin-bottom:4px;" data-no-deposit>${esc(cs.head)}</div>` : ''}
-        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${cs.rows.map((r) => `<tr data-pay-step="${r.n}"><td style="padding:4px 0;font-family:${SANS};font-size:15px;color:${C.ink};">${r.mark} ${esc(r.words)}</td><td align="right" style="padding:4px 0;font-family:${SANS};font-size:15px;font-weight:600;color:${C.ink};white-space:nowrap;">${money(r.cents)}</td></tr>`).join('')}</table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${cs.rows.map((r) => `<tr data-pay-step="${r.n}"><td style="padding:4px 0;font-family:${SANS};font-size:15px;color:${C.ink};">${r.mark} ${esc(r.words)}${r.tag ? ` <span data-step-paid style="color:#2f5a2b;font-weight:600;">${esc(r.tag)}</span>` : ''}</td><td align="right" style="padding:4px 0;font-family:${SANS};font-size:15px;font-weight:600;color:${C.ink};white-space:nowrap;">${money(r.cents)}</td></tr>`).join('')}</table>
         ${cs.sum ? `<div style="color:${C.muted};font-size:14px;margin-top:4px;" data-pay-sum>${esc(cs.sum)}</div>` : ''}
+        ${cs.owed ? `<div style="font-size:15px;font-weight:600;margin-top:4px;" data-still-owed>${esc(cs.owed)}</div>` : ''}
         ${pickup ? `<div style="color:${C.ink};font-size:14px;margin-top:8px;" data-pickup-line>${esc(pickup)}</div>` : ''}
       </td></tr>
     </table>
@@ -109,8 +111,9 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
     '',
     'How you pay',
     ...(cs.head ? [cs.head] : []),
-    ...cs.rows.map((r) => `${r.mark} ${r.words}: ${money(r.cents)}`),
+    ...cs.rows.map((r) => `${r.mark} ${r.words}: ${money(r.cents)}${r.tag ? ` ${r.tag}` : ''}`),
     ...(cs.sum ? [cs.sum] : []),
+    ...(cs.owed ? [cs.owed] : []),
     ...(pickup ? [pickup] : []),
     '',
     'How to pay:',

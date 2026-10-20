@@ -68,11 +68,11 @@ export async function remindRoute(env, request) {
   const np = await notPaidYet(env.DB, requests, chicagoDate());
   const row = np.owed.find((r) => r.id === id);
   if (!row) return redirect(`/admin/money?e=${encodeURIComponent('That invoice has nothing owed on it any more.')}#not-paid`);
-  const ctx = { name: row.name, email: row.email, phone: row.phone, amount: money(row.owed), due: row.due ? shortDate(row.due) : '', late: row.tone === 'late', number: row.number };
+  const ctx = { name: row.name, email: row.email, phone: row.phone, amount: money(row.remaining), due: row.due ? shortDate(row.due) : '', late: row.tone === 'late', number: row.number };
   const sent = await sendMessage(env, 'email', 'paymentReminder', ctx);
   if (!sent.ok) return redirect(`/admin/money?e=${encodeURIComponent(`The reminder did not go out: ${sent.error}`)}#not-paid`);
   await env.DB.prepare("UPDATE invoices SET reminded_at = datetime('now') WHERE id = ?1").bind(id).run();
-  if (row.requestKey) await logEvent(env.DB, row.requestKey, `Payment reminder emailed (${money(row.owed)} owed on ${row.number})`, 'admin');
+  if (row.requestKey) await logEvent(env.DB, row.requestKey, `Payment reminder emailed (${money(row.remaining)} owed on ${row.number})`, 'admin');
   return redirect(`/admin/money?m=${encodeURIComponent(`Reminder emailed to ${row.name.split(/\s+/)[0]} ✓`)}#not-paid`);
 }
 

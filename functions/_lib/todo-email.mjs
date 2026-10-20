@@ -44,7 +44,7 @@ import { listBookings, loadReturns, addDays, daySort, deliveryAddress } from './
 import { JOB_WORDS, DELIVERY_JOB_WORDS, missedFrom, isLiveBooking, tiers, subjectWarning, stepWords, notHappenedSet } from './missed.mjs';
 import { serviceOfKind } from './kinds.mjs';
 import { currentHolds } from './holds.mjs';
-import { balances, linesByInvoice, dueWords, paymentsByInvoice } from './ledger.mjs';
+import { balances, linesByInvoice, dueWords, owes, paymentsByInvoice } from './ledger.mjs';
 import { payStepsOf, payStepsLine } from './pay-steps.mjs';
 import { notPaidRows } from './notpaid.mjs';
 import { chicagoDate, chicagoHour, dayWords, timeWords, smsLink, normalizePhone } from './reminders.mjs';
@@ -150,7 +150,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const items = String(b.items || '').trim().replace(/\s+/g, ' ').slice(0, 160);
     // What to bring to a setup / install, what to load at a takedown / pickup; rentals: the games.
     if (items) bits.push(svc === 'rentals' ? items : `${/takedown|pickup/.test(b.kind) ? 'load' : 'bring'} ${items}`);
-    if (bal && bal.owed > 0 && b.kind !== 'rental_return') bits.push(`collect ${dueWords(bal, usd).replace(' due', '')}`);
+    if (owes(bal) && b.kind !== 'rental_return') bits.push(`collect ${dueWords(bal, usd).replace(' due', '')}`);
     if (bal && b.kind === 'rental_return') {
       const out = outcomes[invoiceOf(b)] || { refunded: 0, kept: 0 };
       const held = Math.max(0, bal.refundable - bal.depositOwed - (out.refunded || 0) - (out.kept || 0));
@@ -211,9 +211,9 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   const np = notPaidRows(bals, linesBy, requestsByKey, today);
   for (const row of np.owed.filter((x) => Number.isFinite(x.days) && x.days <= 0)) {
     const job = jobs.find((j) => j.invoice === row.id || (j.key && j.key === row.requestKey));
-    const body = renderMessage('paymentReminder', { name: row.name, amount: usd(row.owed), due: row.due ? dayWords(row.due) : '', late: row.tone === 'late', number: row.number }).text;
+    const body = renderMessage('paymentReminder', { name: row.name, amount: usd(row.remaining), due: row.due ? dayWords(row.due) : '', late: row.tone === 'late', number: row.number }).text;
     const sms = smsLink(row.phone, body);
-    moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, t: `${shortName(row.name)} · ${dueWords(bals[row.id], usd) || `${usd(row.owed)} due`}`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}${(() => { const b = bals[row.id]; const w = b ? payStepsLine(payStepsOf(b.invoice, linesBy[row.id] || [], { paid: b.paid, payments: paysBy[row.id] || [] }), usd) : ''; return w ? ` · ${w}` : ''; })()}`,
+    moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, t: `${shortName(row.name)} · ${dueWords(bals[row.id], usd) || `${usd(row.remaining)} due`}`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}${(() => { const b = bals[row.id]; const w = b ? payStepsLine(payStepsOf(b.invoice, linesBy[row.id] || [], { paid: b.paid, payments: paysBy[row.id] || [] }), usd) : ''; return w ? ` · ${w}` : ''; })()}`,
       btns: [...(sms ? [{ label: 'Text a reminder', href: sms }] : []), { label: 'Mark paid', href: `/admin/invoices/${row.id}` }] });
   }
   // Every unpaid rental hold (owner, 20 Oct 2026): waiting for its deposit, with the invoice's

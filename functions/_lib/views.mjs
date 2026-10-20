@@ -11,7 +11,7 @@ import { HOLD_DEFAULT_HOURS } from './hold-rules.mjs';
 import { reserveLongerControl, reservedWords, RESERVED_BY_HAND, HOLD_CSS } from './views-messages.mjs';
 import { deriveSteps, undoFor, waitingDays, waitingWords, sentMs, WAIT_HIGHLIGHT_DAYS } from './steps.mjs';
 import { parseFormDate, deliveryAddress, PICKUP_CHOICES, RETURN_CHOICES } from './calendar.mjs';
-import { dueWords } from './ledger.mjs';
+import { dueWords, dueCents, balanceWords } from './ledger.mjs';
 import { DELIVERY_LINE } from './invoice-note.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
@@ -1031,7 +1031,8 @@ function nextBox(r, s, x) {
     case 'picked': {
       const pb = s.pickupBooking;
       if (!pb) return box('Book the pickup and return', 'Pick both days on the calendar.', bigA('card.schedPickup', `/admin/calendar/new?r=${rk}&kind=rental_pickup`, 'Book pickup + return'), tent, 'card.schedPickup');
-      const owed = bal ? bal.owed : 0;
+      // Still to pay (ledger.mjs dueCents: charges + any damage deposit not collected yet).
+      const owed = dueCents(bal);
       const addr = deliveryAddress(r);
       const due = dueWords(bal);
       const to = [answerOf(r, /^business name$/i), addr].filter(Boolean).join(', ');
@@ -1061,7 +1062,7 @@ function nextBox(r, s, x) {
       return box(`Give back the ${money(amt)} deposit`, damaged ? 'Something came back damaged: keep some for damage, or give it all back.' : 'Everything came back fine? Return the deposit and the rental is finished.', `${form}${keep}`, '', 'step.depositBack');
     }
     case 'paid': {
-      const owed = bal ? bal.owed : 0;
+      const owed = dueCents(bal);
       return box('Collect the rest', owed > 0 ? `${dueWords(bal)}.` : 'Mark it paid when the rest is in.', `<div class="actions" data-primary>${cardButton('pay.paid', ctx, true)}</div>`, '', 'pay.paid');
     }
     default: return { big: '', html: '' };
@@ -1771,7 +1772,7 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
   else if (invoice.status === 'draft') main = `<div class="actions">${act(sendForm(`Send invoice to ${esc(who)}`, 'primary', 'iv.send'), 'iv.send')}${act(textBtn('ghost'), 'iv.text')}${act(status('texted', 'Mark as sent by text', 'iv.texted'), 'iv.texted')}</div>`;
   else main = `<div class="actions">${act(sendForm('Resend', 'ghost', 'iv.resend'), 'iv.resend')}${act(textBtn('ghost'), 'iv.text')}</div>`;
   const payment = paymentBox({ who: invoice.customer_name || 'this customer', status: invoice.status, plan, rest: balance && !balance.draft ? balance.remaining : ps.rest, number: invoice.number,
-    balanceLine: balance && !balance.void ? esc([balance.owed > 0 ? dueWords(balance) : 'Paid in full ✓', balance.paid ? `${money(balance.paid)} received` : '', balance.refundable ? `Damage deposit ${money(balance.refundable)}, refundable` : ''].filter(Boolean).join(' · ')) : '',
+    balanceLine: balance && !balance.void ? esc([balanceWords(balance), balance.paid ? `${money(balance.paid)} received` : '', balance.refundable ? `Damage deposit ${money(balance.refundable)}, refundable` : ''].filter(Boolean).join(' · ')) : '',
     target: { action: `/admin/invoices/${id}/status`, field: 'action', extra: {} } });
   const preview = emailHtml && !voided ? `<div class="card" style="padding:0;overflow:hidden"><div class="muted" style="padding:10px 14px;border-bottom:1px solid var(--line)">The email the customer gets</div>
     <iframe class="emailframe" title="Invoice email" srcdoc="${esc(emailHtml)}" onload="try{this.style.height=(this.contentDocument.documentElement.scrollHeight+24)+'px'}catch(e){}"></iframe></div>` : '';

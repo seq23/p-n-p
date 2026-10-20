@@ -136,8 +136,11 @@ const PICKUP = 'Pay the rest ($85.00) at pickup. Text or call 901-355-1518 to se
   }
   must(/pickupRows/.test(fs.readFileSync(path.join(ROOT, 'functions/_lib/pdf.mjs'), 'utf8')), 'pdf.mjs no longer draws the pickup line in the pay box');
   const adminSrc = fs.readFileSync(path.join(ROOT, 'functions/_lib/admin.mjs'), 'utf8');
-  must((adminSrc.match(/await noteFor\(env, /g) || []).length >= 3 && /pickup: await noteFor\(env, invoice, lines\)/.test(adminSrc) && /textMessage\(\{[^}]*pickup \}\)/.test(adminSrc) && /invoiceViewPage\(\{[^}]*pickup,/.test(adminSrc) && !/pickupLine/.test(adminSrc),
+  must((adminSrc.match(/await noteFor\(env, /g) || []).length >= 3 && /pickup: await noteFor\(env, invoice, lines\)/.test(adminSrc) && /textMessage\(\{[^}]*pickup, \.\.\.\(await paidFor\(env, loaded\.invoice\)\) \}\)/.test(adminSrc) && /invoiceViewPage\(\{[^}]*pickup,/.test(adminSrc) && !/pickupLine/.test(adminSrc),
     'admin.mjs does not pass the pickup line to the email, PDF, text message and invoice page');
+  // The email, PDF and text carry what has come in (paidFor), so their "✓ paid" / "Still owed"
+  // match the invoice page (validate:admin-balance-one renders them all).
+  must((adminSrc.match(/\.\.\.\(await paidFor\(env, (?:loaded\.)?invoice\)\)/g) || []).length === 3, 'admin.mjs does not pass the payments to the email, PDF and text message');
 }
 
 const migration = path.join(ROOT, 'migrations/0003_pay_plan.sql');

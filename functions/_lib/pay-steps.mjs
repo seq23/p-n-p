@@ -15,8 +15,11 @@
 //
 // The numbers are the ones every invoice has always shown: the amount now is the stored
 // deposit_due_cents (the whole total for All now, nothing for No deposit), the rest is the total
-// minus that. Nothing is saved here.
-import { esc, money, invoiceTotal, lineTotal, payPlanOf, shortDate } from './util.mjs';
+// minus that. Paid / still owed / paid in full come from ledger.mjs balanceOf, the one source
+// every other surface reads too (the rental note in invoice-note.mjs reads this function). Nothing
+// is saved here.
+import { esc, money, payPlanOf, shortDate } from './util.mjs';
+import { balanceOf } from './ledger.mjs';
 
 export const dollars = (c) => money(c).replace(/\.00$/, '');
 const CIRCLED = ['', '①', '②', '③'];
@@ -24,18 +27,21 @@ export const circled = (n) => CIRCLED[n] || `${n}.`;
 
 // paid: cents received (non-voided payments); payments: [{ cents, on }] oldest first, for dates.
 export function payStepsOf(invoice, lines, { paid = 0, payments = [] } = {}) {
-  const total = invoiceTotal(lines || []);
-  const refundable = (lines || []).filter((l) => l.refundable).reduce((s, l) => s + lineTotal(l), 0);
+  const got = Math.max(0, Math.round(paid || (payments || []).reduce((s, p) => s + (p.cents || 0), 0)));
+  const bal = balanceOf(invoice || {}, lines || [], got);
+  const { total, refundable } = bal;
   const plan = payPlanOf(invoice || {}, total);
   const due = (invoice && invoice.due_date) || '';
   const byDate = due ? `by ${shortDate(due)}` : 'by the due date';
+  // The amount now is the stored deposit_due_cents (what "Mark deposit received" records, ledger.mjs
+  // recordPayment; the editor saves it with util.mjs amountDueNow), the total for All now, nothing
+  // for No deposit.
   let now = plan === 'full' ? total : (plan === 'none' ? 0 : Math.max(0, Math.min(total, Math.round(Number(invoice && invoice.deposit_due_cents) || 0))));
   if (total <= 0) now = 0;
   const steps = [];
   if (now >= total && total > 0) steps.push({ n: 1, what: 'All of it', when: 'now', why: '', cents: total });
   else if (now <= 0) steps.push({ n: 1, what: 'All of it', when: byDate, why: '', cents: total });
   else steps.push({ n: 1, what: 'Deposit', when: 'now', why: 'holds the date', cents: now }, { n: 2, what: 'The rest', when: byDate, why: '', cents: total - now });
-  const got = Math.max(0, Math.round(paid || (payments || []).reduce((s, p) => s + (p.cents || 0), 0)));
   let need = 0;
   for (const s of steps) {
     need += s.cents;
@@ -48,7 +54,7 @@ export function payStepsOf(invoice, lines, { paid = 0, payments = [] } = {}) {
   const noDeposit = total > 0 && now <= 0;
   return {
     plan, total, refundable, charges: total - refundable, now, rest: total - now, steps, noDeposit,
-    paid: got, stillOwed: Math.max(0, total - got), dueDay: due ? shortDate(due) : '',
+    paid: got, stillOwed: bal.remaining, paidInFull: bal.paidInFull, balance: bal, dueDay: due ? shortDate(due) : '',
     sumWords: steps.length > 1 ? `${steps.map((s) => dollars(s.cents)).join(' + ')} = ${dollars(total)} total` : '',
     totalWords: refundable > 0 ? `${dollars(total - refundable)} rental + ${dollars(refundable)} refundable damage deposit` : '',
   };
@@ -83,8 +89,10 @@ export function payStepsLine(ps, fmt = dollars) {
 
 // The customer's words (email, PDF, text): "How you pay", "① Deposit now (holds your date)",
 // "② The rest, by Wed 28 Oct", "① All of it, now" / "① All of it, by Wed 28 Oct".
+// A paid step carries tag "✓ paid Tue 20 Oct"; with money in and money left, owed reads
+// "Still owed $150.00" (the same number as the admin box, ledger.mjs balanceOf remaining).
 export function customerSteps(ps) {
-  if (!ps || ps.total <= 0) return { head: '', rows: [], sum: '', totalWords: '' };
-  const rows = ps.steps.map((s) => ({ n: s.n, mark: circled(s.n), words: s.what === 'Deposit' ? 'Deposit now (holds your date)' : `${s.what}, ${s.when}`, cents: s.cents, paid: s.paid, paidOn: s.paidOn || '' }));
-  return { head: ps.noDeposit ? 'Nothing to pay now.' : '', rows, sum: ps.sumWords, totalWords: ps.totalWords };
+  if (!ps || ps.total <= 0) return { head: '', rows: [], sum: '', totalWords: '', owed: '' };
+  const rows = ps.steps.map((s) => ({ n: s.n, mark: circled(s.n), words: s.what === 'Deposit' ? 'Deposit now (holds your date)' : `${s.what}, ${s.when}`, cents: s.cents, paid: s.paid, paidOn: s.paidOn || '', tag: s.paid ? paidWords(s) : '' }));
+  return { head: ps.noDeposit ? 'Nothing to pay now.' : '', rows, sum: ps.sumWords, totalWords: ps.totalWords, owed: ps.paid > 0 && ps.stillOwed > 0 ? `Still owed ${money(ps.stillOwed)}` : '' };
 }
