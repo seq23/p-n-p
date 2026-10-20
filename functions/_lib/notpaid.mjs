@@ -3,7 +3,7 @@
 // balance.owed); void invoices are never listed; drafts are listed apart as "Invoice not sent
 // yet". The same rows feed the top of Money, the "Not paid yet" filter on Requests, the Day sheet
 // and the Monday summary, so the count and total can never disagree.
-import { balances, linesByInvoice } from './ledger.mjs';
+import { balances, linesByInvoice, dueWords as amountDueWords } from './ledger.mjs';
 import { serviceOfLine } from './kinds.mjs';
 import { isRentalInvoice } from './pricing.mjs';
 import { PRICE_TABLE } from './prices.mjs';
@@ -37,7 +37,7 @@ export function notPaidRows(bals, linesBy, requestsByKey, today) {
     const row = {
       id: inv.id, number: inv.number, name: inv.customer_name || (req && req.name) || 'No name', phone: inv.customer_phone || (req && req.phone) || '',
       email: inv.customer_email || (req && req.email) || '', requestKey: inv.request_key || '', services, whatFor,
-      total: b.charges, paid: Math.min(b.paid, b.charges), owed: b.owed, due: inv.due_date, remindedAt: inv.reminded_at || '', status: inv.status,
+      total: b.charges, paid: Math.min(b.paid, b.charges), owed: b.owed, dueWords: amountDueWords(b), due: inv.due_date, remindedAt: inv.reminded_at || '', status: inv.status,
       ...dueWords(inv.due_date, today),
     };
     if (inv.status === 'draft') { if (b.charges > 0) drafts.push(row); continue; }

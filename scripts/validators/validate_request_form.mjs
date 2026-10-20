@@ -158,7 +158,7 @@ must(libSrc.filter(([, t]) => /env\.IDS\.get\(/.test(t)).map(([f]) => f).join() 
 const toml = fs.readFileSync(path.join(ROOT, 'wrangler.toml'), 'utf8');
 must(/binding = "IDS"\s*\nbucket_name = "pnp-ids"/.test(toml) && !/pnp-ids[\s\S]{0,200}(custom_domain|public|r2\.dev)\s*=/.test(toml), 'wrangler.toml does not bind the private pnp-ids bucket as IDS');
 let dash = await s.get('/admin/');
-must(dash.text.includes(`/admin/requests/id?r=${rkPorch}`) && dash.text.includes('Agreed to rules on') && dash.text.includes(`(version ${F.RULES_VERSION})`), 'the card does not show the ID link and "Agreed to rules on ..."');
+must(dash.text.includes(`/admin/requests/id?r=${rkPorch}`) && /data-rules>✓ Agreed to the rules, [A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2} \(version /.test(dash.text) && dash.text.includes(`(version ${F.RULES_VERSION})`), 'the card does not show the ID link and "✓ Agreed to the rules, <day>, <time> (version N)"');
 must(dash.text.includes('data-week-counts') && /This week: \d+ new requests?<\/strong> \(/.test(dash.text), 'the weekly count is missing from Requests');
 const del = await s.post('/admin/requests/id/delete', { r: rkPorch });
 must(del.status === 303 && /ID%20deleted%20for%20good/.test(del.location), 'Delete this ID did not confirm');

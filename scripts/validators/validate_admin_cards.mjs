@@ -180,31 +180,42 @@ for (const [k, s] of Object.entries(SERVICE_KINDS)) {
 const card = (h, name) => { const i = h.indexOf(`>${name}</h3>`); const a = h.lastIndexOf('<article', i); return i < 0 ? '' : h.slice(a, h.indexOf('</article>', i)); };
 const pc = card(html, 'Pat Porch');
 must(/border-left-color:#c2410c/.test(pc), 'porch card has no orange left border');
-must(/data-facts>[\s\S]*Event Sat 24 Oct[\s\S]*Germantown[\s\S]*href="tel:9015550100"[^>]*>Call</.test(pc), 'porch card key-facts line lacks date, where and Call');
+// "More about <first name>" (owner-approved mock-up, 20 Oct 2026): the date and place once, under
+// What they booked (open first); Call / Text only once, top right (the old facts line's second Call is gone).
+must(/<details class="grp" data-more-group="booked" open><summary data-help="card\.grpBooked"[^>]*>What they booked<\/summary>[\s\S]*data-booked-event><b>Event:<\/b> Sat 24 Oct[\s\S]*data-booked-where><b>Where:<\/b> Germantown</.test(pc), 'porch card: What they booked (open) lacks the event day and where');
+must(/data-quick-contact>[\s\S]*data-card-call/.test(pc.slice(0, pc.indexOf('data-next-step'))) && !/>(?:&#128222; )?Call</.test(pc.slice(pc.indexOf('data-details'))) && !/data-facts/.test(pc), 'porch card: Call is not top right, a second Call is under More, or the old facts line is back');
 must((pc.match(/class="btn primary"/g) || []).length === 1, 'porch card does not have exactly ONE big primary button');
-must(/<details class="disclose more" data-details><summary[^>]*>More: answers, history, other buttons<\/summary>[\s\S]*Location/.test(pc) && !/Location/.test(pc.slice(0, pc.indexOf('data-details'))), 'answers are not behind More: answers, history, other buttons (or show above it)');
-must(!/More: answers, history, other buttons[\s\S]*class="btn primary"/.test(pc), 'an action is hidden behind More');
+must(/<details class="disclose more" data-details><summary data-help="card\.details"[^>]*>More about Pat<\/summary>[\s\S]*Where:<\/b> Germantown/.test(pc) && !/Where:|data-booked/.test(pc.slice(0, pc.indexOf('data-details'))), 'answers are not behind "More about Pat" (or show above it)');
+must(!/More about Pat<\/summary>[\s\S]*class="btn primary"/.test(pc), 'an action is hidden behind More');
+// Only the first group opens by itself; the four groups in the owner's order, then the quiet row.
+{
+  const more = pc.slice(pc.indexOf('data-details'));
+  const order = ['data-more-group="booked"', 'data-more-group="money"', 'data-more-group="details"', 'data-more-group="history"', 'data-more-row'].map((x) => more.indexOf(x));
+  must(order.every((x, i) => x > 0 && (i === 0 || x > order[i - 1])), `More groups are not booked, money, details, history, then the quiet row (${order})`);
+  must((more.match(/<details class="grp"[^>]*\sopen>/g) || []).length === 1 && /data-more-group="booked" open>/.test(more), 'a group other than What they booked opens by itself');
+  must(!/What they picked/.test(pc), 'the "What they picked" row is back (the service badge says it)');
+}
 // Calm card render: no invoice -> one quiet line and no money buttons; Void a small link under
 // Show details, never a big button; at most 3 secondary buttons; at most one helper line.
 const beforeDetails = (c) => c.slice(0, c.indexOf('data-details'));
 must(/<p class="payline muted" data-payment data-pay-state="none" data-pay-words>No invoice yet\.<\/p>/.test(pc), 'no-invoice card lacks the single quiet "No invoice yet." line');
 must(!/data-help="pay\.(deposit|paid|unpaid|void)"/.test(beforeDetails(pc)), 'no-invoice card shows a payment button');
-must(/data-void-link>[\s\S]*<summary class="linkbtn danger" data-help="pay\.void"[^>]*>Void this request…<\/summary>[\s\S]*Yes, void it/.test(pc.slice(pc.indexOf('data-details'))), 'Void is not a small danger link (with its confirm) under Show details');
+must(/data-more-row>[\s\S]*data-void-link>[\s\S]*<summary class="linkbtn danger" data-help="card\.cancelJob"[^>]*>Cancel this job…<\/summary>[\s\S]*Cancel this job for Pat Porch\?[\s\S]*name="status" value="void"[\s\S]*Yes, void it/.test(pc.slice(pc.indexOf('data-details'))) && !/Void this request/.test(pc), '"Cancel this job…" is not the small danger link (with its confirm, the same Void action) in the quiet row of More');
 must(!/Done — put away/.test(pc), 'Done — put away shows on a New card');
 const gc = card(html, 'Gia Graze');
 must(/data-grazing-facts>Guests: 15–40 · Food estimate: \$180–\$720</.test(gc), `grazing card lacks guest count + food estimate (${(gc.match(/data-grazing-facts>[^<]*/) || [''])[0]})`);
 const rc = card(html, 'Rae Rent');
-must(/Pickup Fri 23 Oct/.test(rc) && /Pickup at Mt\. Moriah Station/.test(rc), 'rental key facts do not read the pickup day and place');
+must(/data-booked-pickup><b>Pickup:<\/b> Fri 23 Oct · Mt\. Moriah Station</.test(rc), 'rental What they booked does not read the pickup day and place');
 for (const word of ['checklist', 'Schedule takedown', 'Schedule install', 'Mark job done']) must(!new RegExp(word, 'i').test(rc.replace(/<[^>]+>/g, ' ')) && !new RegExp(`data-help="(card\\.checklist|card\\.printChecklist|card\\.sched(Install|Takedown)|card\\.jobDone)"`).test(rc), `rental card shows "${word}"`);
-must(/data-pay-words>Invoice sent · owes \$500\.00/.test(rc) && !/data-owes|chip sched|data-paid-early/.test(rc), 'rental card with a sent unpaid invoice does not say what is owed in the Payment box (or a duplicate status pill is back)');
-must(/data-pay-state="sent"><p class="words" data-pay-words>Invoice sent · owes \$500\.00</.test(rc), 'sent card does not say "Invoice sent · owes $X"');
+must(/data-pay-words>Invoice sent · \$500 due/.test(rc) && !/data-owes|chip sched|data-paid-early/.test(rc), 'rental card with a sent unpaid invoice does not say what is due in the Payment box (or a duplicate status pill is back)');
+must(/data-pay-state="sent"><p class="words" data-pay-words>Invoice sent · \$500 due</.test(rc) && !/\bowes\b/.test(rc), 'sent card does not say "Invoice sent · $X due" (or still says "owes")');
 must((rc.match(/<summary[^>]*data-help="pay\.deposit"/g) || []).length === 1 && !/data-help="pay\.paid"/.test(rc), 'sent card does not show exactly ONE Mark deposit received');
 // Deposit in / paid in full renders.
 const depInv = { ...owing, id: 10, status: 'deposit_paid', balance: { ...owing.balance, paid: 25000, owed: 25000, remaining: 25000 } };
 const paidInv = { ...owing, id: 11, status: 'paid', balance: { ...owing.balance, paid: 50000, owed: 0, remaining: 0 } };
 const html2 = V.dashboardPage({ requests: reqs, statuses: { y: { status: 'deposit_paid', invoice_id: 10 }, g: { status: 'paid', invoice_id: 11 }, r: { status: 'invoiced', invoice_id: 9 } }, invoices: { 9: owing, 10: depInv, 11: paidInv }, folderUrl: 'x', sheetError: '', flash: '', missingPayment: [], foodPerHead: { low: 12, high: 18 } });
 const yc = card(html2, 'Pia Party');
-must(/data-pay-state="deposit"><p class="words" data-pay-words>Deposit in · still owes \$250\.00</.test(yc), 'deposit card does not say "Deposit in · still owes $X"');
+must(/data-pay-state="deposit"><p class="words" data-pay-words>Deposit in · \$250 due</.test(yc) && !/still owes/.test(yc), 'deposit card does not say "Deposit in · $X due"');
 must((yc.match(/data-help="pay\.paid"/g) || []).length === 1 && !/data-help="pay\.deposit"/.test(yc) && /<summary class="linkbtn" data-help="pay\.unpaid"[^>]*>That was a mistake: mark as not paid</.test(yc), 'deposit card lacks ONE Mark paid in full + the small undo link');
 const gc2 = card(html2, 'Gia Graze');
 // Paid in full (owner, 18 Oct 2026): no Payment box at all (the progress line says it); the

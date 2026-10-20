@@ -111,8 +111,8 @@ must(Boolean(card), 'phone request: no card on Requests');
 must(/data-phone-chip[^>]*data-help="card.phoneChip"[^>]*>From a phone call</.test(card), 'phone card: no "From a phone call" chip with its tooltip');
 must(/data-progress/.test(card) && /data-edit-link/.test(card), 'phone card: no steps or Edit link');
 must(/data-id-phone>Not collected \(phone booking\)</.test(card) && /data-id-upload/.test(card) && /data-help="card.idUpload"/.test(card), 'phone card: the ID line is not "Not collected (phone booking)" + the optional upload');
-must(/Not asked \(phone booking\)/.test(card), 'phone card: the rules line is not "Not asked (phone booking)"');
-must(/pickup Sun 18 Oct, back Tue 20 Oct \(2 days\)/.test(card) && !/for one day/.test(card), 'phone card: the rental length is not read from the booked days');
+must(/data-rules>Rules: not asked \(phone booking\)</.test(card), 'phone card: the rules line is not "Rules: not asked (phone booking)"');
+must(/data-booked-pickup><b>Pickup:<\/b> Sun 18 Oct · /.test(card) && /data-booked-return><b>Back:<\/b> Tue 20 Oct \(2 days\)</.test(card) && !/for one day/.test(card), 'phone card: the rental length is not read from the booked days');
 must(!/Confirmation email sent/.test(card), 'phone card: shows Confirmation email sent');
 must(!/data-hold|Held — waiting/.test(card), 'phone card: shows a hold');
 
@@ -214,7 +214,7 @@ must((await one("SELECT COUNT(*) AS n FROM holds h JOIN requests r ON r.request_
   const sent0 = B.env.sent.length;
   must((await CM.autoConfirm(B.env, 'site|hand')).sent === false && B.env.sent.length === sent0, 'backfill: the converted request would get a confirmation email');
   const tamCard = cardOf((await B.get('/admin/')).text, 'site|hand');
-  must(/From a phone call/.test(tamCard) && !/Confirmation email sent/.test(tamCard) && /pickup Sun 18 Oct, back Tue 20 Oct \(2 days\)/.test(tamCard), 'backfill: the converted card lacks the chip / still says Confirmation email sent / wrong rental length');
+  must(/From a phone call/.test(tamCard) && !/Confirmation email sent/.test(tamCard) && /data-booked-pickup><b>Pickup:<\/b> Sun 18 Oct · /.test(tamCard) && /data-booked-return><b>Back:<\/b> Tue 20 Oct \(2 days\)</.test(tamCard), 'backfill: the converted card lacks the chip / still says Confirmation email sent / wrong rental length');
   const again = PR.backfillPlan(await read());
   must(again.stmts.length === 0 && again.created.length === 0 && again.converted.length === 0, `backfill: not idempotent (${again.stmts.length} statements on the second run)`);
   must(fs.readFileSync(path.join(ROOT, 'package.json'), 'utf8').includes('"admin:backfill-phone": "node scripts/admin/backfill_phone_requests.mjs"'), 'backfill: npm run admin:backfill-phone is not registered');

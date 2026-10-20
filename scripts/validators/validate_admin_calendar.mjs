@@ -164,7 +164,11 @@ must(exp('Movie Night bundle, weekend: Inflatable Movie Screen, Giant Uno, Grab 
   must(half.owed === 3500 && half.depositOwed === 5000 && half.remaining === 8500, 'half-plan balance after deposit is wrong');
   must(L.balanceOf({ status: 'paid' }, lines, 17000).owed === 0 && L.balanceOf({ status: 'paid' }, lines, 17000).depositOwed === 0, 'paid in full still owes');
   must(L.balanceOf({ status: 'void' }, lines, 0).owed === 0 && L.balanceWords(L.balanceOf({ status: 'void' }, lines, 0)) === '', 'void invoice shows a balance');
-  must(L.balanceWords(b0) === 'Owes $120.00' && L.balanceWords(L.balanceOf({}, lines, 17000)) === 'Paid in full ✓', 'balance words wrong');
+  must(L.balanceWords(b0) === '$170 due ($120 + $50 refundable deposit)' && L.balanceWords(L.balanceOf({}, lines, 17000)) === 'Paid in full ✓', `balance words wrong (${L.balanceWords(b0)})`);
+  // One wording for an amount due (owner, 20 Oct 2026): the deposit apart in words, the numbers unchanged.
+  must(L.dueWords(half) === '$85 due ($35 + $50 refundable deposit)' && L.dueCents(half) === 8500 && half.owed === 3500, `dueWords after the half deposit (${L.dueWords(half)})`);
+  must(L.dueWords(L.balanceOf({ status: 'sent' }, lines.slice(0, 1), 0)) === '$120 due', 'dueWords without a refundable deposit is not "$X due"');
+  must(L.dueWords(L.balanceOf({ status: 'paid' }, lines, 12000)) === '$50 due (refundable deposit)' && L.dueWords(L.balanceOf({ status: 'paid' }, lines, 17000)) === '' && L.dueWords(L.balanceOf({ status: 'void' }, lines, 0)) === '', 'dueWords: deposit-only / paid / void wrong');
 }
 // Derived steps.
 {

@@ -5,16 +5,19 @@
 // screen opens with a numbered 1-2-3 and (except Requests itself) a Back link.
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
-import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, inlineRowKind, SCHEDULE_FIRST } from './cards.mjs';
+import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, inlineRowKind, SCHEDULE_FIRST } from './cards.mjs';
 import { HOLD_DEFAULT_HOURS } from './hold-rules.mjs';
 import { reserveLongerControl, reservedWords, RESERVED_BY_HAND, HOLD_CSS } from './views-messages.mjs';
 import { deriveSteps, undoFor, waitingDays, waitingWords, sentMs, WAIT_HIGHLIGHT_DAYS } from './steps.mjs';
-import { parseFormDate, deliveryAddress } from './calendar.mjs';
+import { parseFormDate, deliveryAddress, PICKUP_CHOICES, RETURN_CHOICES } from './calendar.mjs';
+import { dueWords } from './ledger.mjs';
+import { DELIVERY_LINE } from './invoice-note.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 import { takedownState, inlineDefaultDate } from './takedown.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
-import { isPhone, rentalDates, rentalSpanWords } from './phone-requests.mjs';
+import SERVICES_DATA from '../../data/offers/services.json';
+import { isPhone, rentalDates, rentalSpanWords, rentalLength } from './phone-requests.mjs';
 
 const CSS = `
 :root{--cream:#faf7f2;--ink:#3b302a;--accent:#b85f40;--line:#e3d8cb;--muted:#5f5148;--card:#fff;--ok:#3f6b3a;--warn:#8a5212}
@@ -407,24 +410,60 @@ function deleteIdStep(r, rk) {
   return confirmStep({ key: 'card.idDelete', yesKey: 'card.idDeleteYes', label: 'Delete this ID', question: `Delete ${r.name || 'this customer'}'s ID photo for good? It cannot be brought back.`, action: '/admin/requests/id/delete', hidden: hiddenInputs({ r: rk }), danger: true });
 }
 
-function requestDetailsBody(r, { referrers = {} } = {}) {
-  const rk = b64urlText(r.key);
-  return `${kv([
-      ['Phone', r.phone ? `<a href="tel:${esc(r.phone.replace(/[^\d+]/g, ''))}"${tip('card.phone')}>${esc(r.phone)}</a>` : '', true],
-      ['Email', r.email ? `<a href="mailto:${esc(r.email)}"${tip('card.email')}>${esc(r.email)}</a>` : '', true],
-      ['Date of birth', r.dob],
+// ---- "More about <first name>" (owner-approved mock-up, 20 Oct 2026, panel 6) -----------------
+// Raw ISO dates in answers read as words ("2026-10-30" -> "Fri 30 Oct"); a date of birth keeps its
+// year. Display only: the stored answers are never rewritten.
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+export function answerWords(v) {
+  const t = String(v == null ? '' : v).trim();
+  return ISO_DAY.test(t) ? shortDate(t) : t;
+}
+export function dobWords(v) {
+  const t = String(v || '').trim();
+  if (!ISO_DAY.test(t)) return t;
+  const d = new Date(`${t}T12:00:00Z`);
+  return Number.isNaN(d.getTime()) ? t : `${d.getUTCDate()} ${d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })} ${d.getUTCFullYear()}`;
+}
+// History lines that carry a raw UTC timestamp ("held until 2026-10-21 02:37:53 UTC") read in
+// plain Memphis words ("held until Tue 20 Oct, 9:37 PM"). Display only: request_events rows are
+// never rewritten.
+const UTC_STAMP = /(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})(?::\d{2})?(?:\.\d+)?\s*(?:UTC|Z)\b/g;
+export function plainHistory(what) {
+  return String(what || '').replace(UTC_STAMP, (all, day, hm) => {
+    const d = new Date(`${day}T${hm}:00Z`);
+    if (Number.isNaN(d.getTime())) return all;
+    const dd = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+    return `${shortDate(dd)}, ${d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' })}`;
+  });
+}
+// "Tue 20 Oct" (Memphis) for a D1 UTC datetime.
+function memphisDay(utc) {
+  const d = new Date(`${String(utc || '').replace(' ', 'T')}Z`);
+  if (Number.isNaN(d.getTime())) return '';
+  return shortDate(new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d));
+}
+
+// The answers a group already shows (never repeated under "Other answers").
+const SHOWN_ELSEWHERE = /^(business delivery|business name|delivery address)$/i;
+
+// Group 3: their details and ID. used: the answer labels the other groups already show.
+function detailsGroupBody(r, rk, { referrers = {}, used = new Set(), archived = false, st = {} } = {}) {
+  const other = [...r.rentals, ...r.decor, ...r.other].filter((x) => !used.has(x.label) && !SHOWN_ELSEWHERE.test(String(x.label || '')));
+  const rules = r.agreedAt ? `<p class="gl ok" data-rules>✓ Agreed to the rules, ${esc(memphisDay(r.agreedAt) || memphisWhen(r.agreedAt))}${r.rulesVersion ? ` (version ${esc(r.rulesVersion)})` : ''}</p>`
+    : (isPhone(r) ? '<p class="gl muted" data-rules>Rules: not asked (phone booking)</p>' : '');
+  const robot = r.robotCheck === 'no-js' ? '<p class="gl warnline" data-robot-check>⚠ Sent without the robot check (their phone had JavaScript off). Check it looks real.</p>' : '';
+  const asked = `<p class="gl muted" data-asked>${esc(friendlyWhen(r))}${archived && st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</p>`;
+  return `<div data-details-body>${kv([
+      ['Phone', r.phone ? `<a href="tel:${esc(r.phone.replace(/[^\d+]/g, ''))}" data-detail-phone${tip('card.phone')}>${esc(r.phone)}</a>` : '', true],
+      ['Email', r.email ? `<a href="mailto:${esc(r.email)}" data-detail-email${tip('card.email')}>${esc(r.email)}</a>` : '', true],
+      ['Date of birth', dobWords(r.dob)],
       ['Social media', [r.social1, r.social2].filter(Boolean).map((u) => link(u, '', 'card.social')).join('<br>'), true],
-      ['Photo ID', idCell(r, rk), true],
-      ['Rules', r.agreedAt ? `Agreed to rules on ${memphisWhen(r.agreedAt)} (version ${r.rulesVersion})` : (isPhone(r) ? 'Not asked (phone booking)' : '')],
-      ['Referred by', r.referredBy ? (referrers[r.referredBy] || 'a past customer') : ''],
-      ['Robot check', r.robotCheck === 'no-js' ? 'Sent without the robot check (their phone had JavaScript off). Check it looks real.' : ''],
       ['Found us through', r.heard],
-      ['What they picked', r.need],
-      ...r.rentals.map((x) => [x.label, x.value]),
-      ...r.decor.map((x) => [x.label, x.value]),
-      ...r.other.map((x) => [x.label, x.value]),
-    ])}
-    ${deleteIdStep(r, rk)}`;
+      ['Referred by', r.referredBy ? (referrers[r.referredBy] || 'a past customer') : ''],
+    ])}${asked}${rules}${robot}
+    ${(() => { const id = idCell(r, rk); return id ? `<div class="gl" data-id-cell><b>Photo ID:</b> ${id}</div>` : ''; })()}
+    ${deleteIdStep(r, rk)}
+    ${other.length ? `<div data-other-answers><h4>Other answers</h4>${kv(other.map((x) => [x.label, answerWords(x.value)]))}</div>` : ''}</div>`;
 }
 
 // Top of Requests: this week (Mon–Sun, Memphis) by service, and last week.
@@ -456,12 +495,13 @@ function cardPaymentBox(r, st, inv, primary, ctx) {
   const t = ctx.payTarget;
   const p = cardPayment({ inv, status: st.status, plan: inv ? payPlanOf(inv, inv.total_cents || 0) : 'half', primary });
   const bal = inv && inv.balance;
-  const owed = bal ? bal.owed : (inv ? Math.max(0, (inv.total_cents || 0)) : 0);
-  const dmg = bal && bal.refundable ? ` · damage deposit ${money(bal.refundable)}, refundable` : '';
+  // The one way to say what is due (ledger.mjs dueWords): "$180 due ($130 + $50 refundable deposit)".
+  const due = dueWords(bal || { owed: inv ? Math.max(0, inv.total_cents || 0) : 0, refundable: 0 });
+  const dmg = bal && bal.refundable && !(bal.depositOwed > 0) ? ` · damage deposit ${money(bal.refundable)}, refundable (collected)` : '';
   const words = {
     none: 'No invoice yet.', draft: 'Invoice made, not sent yet.',
-    sent: `Invoice sent · owes ${money(owed)}`,
-    deposit: inv ? `Deposit in · still owes ${money(owed)}` : 'Deposit in.',
+    sent: `Invoice sent · ${due || 'nothing due'}`,
+    deposit: inv ? `Deposit in · ${due || 'nothing more due'}` : 'Deposit in.',
     paid: 'Paid in full ✓',
   }[p.state] || '';
   // Paid in full: no box at all (owner, 18 Oct 2026: the progress line already says it; the undo
@@ -474,12 +514,13 @@ function cardPaymentBox(r, st, inv, primary, ctx) {
   return `<section class="paybox calm" data-payment data-pay-state="${p.state}"><p class="words" data-pay-words>${esc(words + dmg)}</p>${out.length ? `<div class="payacts">${out.join('')}</div>` : ''}</section>`;
 }
 
-// Void, as a small danger link under Show details (never a big button on a card).
+// "Cancel this job…" (was "Void this request…", owner, 20 Oct 2026): the same Void action with
+// its confirm step, as a small danger link in the quiet bottom row of More (never a big button).
 function voidLink(r, inv, ctx) {
   const t = ctx.payTarget;
-  const q = inv && inv.number ? `Void invoice ${inv.number} for ${ctx.who}? The customer is not told. Use this when the job is cancelled or the invoice was a mistake.`
-    : `Void the request from ${ctx.who}? The customer is not told. Use this when the job is cancelled or the request was a mistake.`;
-  return `<div class="voidlink" data-void-link>${confirmStep({ key: 'pay.void', yesKey: 'pay.voidYes', label: 'Void this request…', question: q, action: t.action, hidden: hiddenInputs({ ...t.extra, [t.field]: 'void' }), danger: true, link: true })}</div>`;
+  const q = inv && inv.number ? `Cancel this job for ${ctx.who}? Invoice ${inv.number} is voided. The customer is not told. Use this when the job is cancelled or the invoice was a mistake.`
+    : `Cancel this job for ${ctx.who}? The request is voided. The customer is not told. Use this when the job is cancelled or the request was a mistake.`;
+  return `<div class="voidlink" data-void-link>${confirmStep({ key: 'card.cancelJob', yesKey: 'pay.voidYes', label: 'Cancel this job…', question: q, action: t.action, hidden: hiddenInputs({ ...t.extra, [t.field]: 'void' }), danger: true, link: true })}</div>`;
 }
 
 // ---- Request cards (JOB B, owner-approved 18 Oct 2026) -----------------------------------
@@ -546,14 +587,6 @@ export function quickContact(r) {
   const n = String((r && r.phone) || '').replace(/[^\d+]/g, '');
   if (n.replace(/\D/g, '').length < 7) return '';
   return `<div class="qa" data-quick-contact><a href="tel:${esc(n)}" data-card-call${tip('card.quickCall')}>&#128222; Call</a><a href="sms:${esc(n)}" data-card-text${tip('card.quickText')}>&#128172; Text</a></div>`;
-}
-
-function factsLine(f) {
-  const bits = [];
-  if (f.date) bits.push(`<span data-fact-date>${esc(f.dateWord)} ${esc(shortDate(f.date))}</span>`);
-  if (f.where) bits.push(`<span data-fact-where>${esc(f.where)}</span>`);
-  const call = f.phone ? `<a class="call" href="tel:${esc(f.phone.replace(/[^\d+]/g, ''))}"${tip('card.call')}>Call</a>` : '';
-  return bits.length || call ? `<div class="facts" data-facts>${bits.join('<span class="muted">·</span>')}${call}</div>` : '';
 }
 
 const CARD_LABEL = {
@@ -646,10 +679,14 @@ function payTargetFor(r, inv) {
   return inv ? { action: `/admin/invoices/${inv.id}/status`, field: 'action', extra: { back: '/admin/' } } : { action: '/admin/requests/status', field: 'status', extra: { r: b64urlText(r.key) } };
 }
 
+// Group 4: all notes first, then the history newest first (the newest 5, then "Show all (N)").
+export const HISTORY_SHOWN = 5;
 function historyHtml(events = [], notes = []) {
-  const ev = events.map((e) => `<li><span class="muted">${esc(memphisWhen(e.at))}</span> ${esc(e.what)}</li>`).join('');
-  const nt = notes.map((n) => `<li>${esc(n.body)}</li>`).join('');
-  return `${nt ? `<h4>Notes (only you see these)</h4><ul data-notes>${nt}</ul>` : ''}${ev ? `<h4>History</h4><ul data-history>${ev}</ul>` : ''}`;
+  const nt = [...notes].reverse().map((n) => `<li data-note><span class="muted">${esc(n.created_at ? memphisDay(n.created_at) : 'Note')}</span> ${esc(n.body)}</li>`).join('');
+  const ev = [...events].reverse().map((e) => `<li><span class="muted">${esc(memphisWhen(e.at))}</span> ${esc(plainHistory(e.what))}</li>`);
+  const shown = ev.slice(0, HISTORY_SHOWN).join('');
+  const rest = ev.slice(HISTORY_SHOWN).join('');
+  return `${nt ? `<h4>Notes (only you see these)</h4><ul data-notes>${nt}</ul>` : ''}${ev.length ? `<h4>History</h4><ul data-history>${shown}</ul>${rest ? `<details class="histall" data-history-all><summary${tip('card.historyAll')}>Show all (${ev.length})</summary><ul>${rest}</ul></details>` : ''}` : ''}${nt || ev.length ? '' : '<p class="muted" data-history-empty>Nothing yet.</p>'}`;
 }
 
 // A message pair as small links, never a big button (owner, 18 Oct 2026): "Text about pickup
@@ -681,10 +718,12 @@ const chicagoToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America
 // ---- Step cards (owner-approved 19 Oct 2026, the "one step at a time" mock-up) --------------
 // Top: NEW, service, name, one date line. Then the green bar, "N of M done" and the named steps
 // (done = green ✓, the current one bold, later ones grey) with "undo" beside the last ✓. Then
-// ONE "Next step" box: one plain sentence and ONE big button. Everything else (answers, phone
-// and email, ID, notes, history, Edit, Add a note, Print checklist, Put away, the other
-// buttons, the Payment box) is under "More: answers, history, other buttons". The steps come
-// from steps.mjs (derived from the facts, so doing a thing anywhere ticks its step here).
+// ONE "Next step" box: one plain sentence and ONE big button. Above it, always (owner-approved
+// mock-up, 20 Oct 2026): Call / Text, the dates, the 🚚 Business delivery tag and the Latest
+// note with "+ Add a note". Everything else is under "More about <first name>", in four groups
+// (What they booked (open), Money, Their details and ID, Notes and history) and a quiet row
+// (Edit · Print checklist · Put away · Cancel this job…). The steps come from steps.mjs (derived
+// from the facts, so doing a thing anywhere ticks its step here).
 export const STEP_CSS = `
 .stepcard{display:grid;gap:12px}
 .stepcard .schead{display:grid;gap:4px;grid-template-columns:minmax(0,1fr) auto;align-items:start}.stepcard .schead>*{grid-column:1}.stepcard .schead>.qa{grid-column:2;grid-row:1 / span 3}
@@ -728,6 +767,23 @@ details.more>summary{font-weight:600}
 .morerow .btn,.morerow .editlink{width:auto;min-height:44px;font-size:.95rem;padding:6px 14px;border-width:1px;border-radius:999px}
 .morerow form{margin:0}
 .noteform{margin:10px 0 0}.noteform textarea{min-height:70px}
+.biztag{display:inline-block;padding:2px 10px;border-radius:999px;background:#e8f0fe;color:#1e3a8a;font-weight:700;margin-right:4px}
+.nextbox .biz{margin:0;font-weight:700;color:#1e3a8a}
+.lnote{display:grid;gap:4px;padding:10px 12px;border-radius:10px;background:#fffaf0;border:1px solid #ebcf96}.lnote.empty{background:none;border:0;padding:0}
+.lnote .lnh{margin:0}.lnote .lnb{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1rem}
+.lnote details.addnote>summary{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:700;text-decoration:underline;cursor:pointer;list-style:none}
+.lnote details.addnote>summary::-webkit-details-marker{display:none}
+details.grp{border-top:1px solid var(--line);padding:2px 0}details.grp>summary{display:flex;align-items:center;gap:8px;min-height:48px;font-weight:700;font-size:1.05rem;cursor:pointer}
+details.grp>summary small{font-weight:400;color:var(--muted);font-size:.9rem}
+.gin{display:grid;gap:6px;padding:0 0 10px}.gin .gl{margin:0;overflow-wrap:anywhere}.gin .gl.ok{color:#2f5a2b}.gin .warnline{color:#8f3427;font-weight:600}
+.gin .glink{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:700}
+.gin ul{margin:0;padding-left:18px}.gin h4{margin:6px 0 2px}
+.morerow.quiet{border-top:1px solid var(--line);padding-top:8px;align-items:center}.morerow .voidlink{margin:0;border:0;padding:0}
+.dlform{display:grid;gap:8px;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}.dlform .dlq{margin:0}
+.dlform .choice{display:flex;gap:10px;align-items:center;min-height:44px}.dlform .choice input{width:24px;height:24px;flex:none}
+.dlform .dlfields{display:grid;gap:4px}.dlform:has(input[data-how=pickup]:checked) .dlfields{display:none}
+.dlform .btn{min-height:48px}
+details.dlprompt>summary{display:inline-flex;align-items:center;min-height:44px;color:#1e3a8a;font-weight:700;text-decoration:underline;cursor:pointer;list-style:none}
 @media(min-width:700px){.nextbox .actions .btn.primary{max-width:420px}}
 `;
 
@@ -834,7 +890,8 @@ function nextBox(r, s, x) {
       // How long they have waited (Memphis days; the daily "Call these people back" email says the same).
       const wd = waitingDays(sentMs(r), today);
       const waitLine = `<p class="waitline${wd >= WAIT_HIGHLIGHT_DAYS ? ' late' : ''}" data-waiting="${wd}">${esc(waitingWords(wd))}</p>`;
-      return box(`Call or text ${who} back`, why, `${waitLine}${tel || sms ? `<div class="smallrow">${tel}${sms}</div>` : ''}<details class="talk" data-talk><summary class="btn primary"${tip('step.talked')}>I've talked to them</summary>${talkBox(r, s, x)}</details>${hint('step.talked')}`, '', 'step.talked');
+      const how = services.includes('rentals') ? `<div class="dlstep" data-delivery-step>${deliveryForm(r, rk)}</div>` : '';
+      return box(`Call or text ${who} back`, why, `${waitLine}${tel || sms ? `<div class="smallrow">${tel}${sms}</div>` : ''}<details class="talk" data-talk><summary class="btn primary"${tip('step.talked')}>I've talked to them</summary>${talkBox(r, s, x)}</details>${hint('step.talked')}${how}`, '', 'step.talked');
     }
     case 'invoiced': {
       const lines = inv && inv.lines ? inv.lines : null;
@@ -851,7 +908,9 @@ function nextBox(r, s, x) {
       // then Save for 3 days). Reserved by hand (no end date): the same control sets now + N days.
       const holdBit = hold ? `<p class="holdline" data-hold-line>${esc(holdUntilWords(hold))}</p><style>${HOLD_CSS}</style>${reserveLongerControl(rk, { untilMs: hold.by_hand ? NaN : hold.untilMs, card: true })}` : '';
       const key = full ? 'pay.paid' : 'pay.deposit';
-      return box(full ? 'Wait for the payment' : 'Wait for the deposit', `Tap the button when the ${amt ? `${money(amt)} ` : ''}${full ? 'payment' : 'deposit'} comes in.`, `${holdBit}<div class="actions" data-primary>${cardButton(key, ctx, true)}</div>`, tent, key);
+      const due = inv && inv.status !== 'draft' ? dueWords(bal) : '';
+      const moneyLine = due ? `<p class="why" data-next-money>Invoice sent · ${esc(due)}</p>` : '';
+      return box(full ? 'Wait for the payment' : 'Wait for the deposit', `Tap the button when the ${amt ? `${money(amt)} ` : ''}${full ? 'payment' : 'deposit'} comes in.`, `${moneyLine}${holdBit}<div class="actions" data-primary>${cardButton(key, ctx, true)}</div>`, tent, key);
     }
     case 'setup': {
       const word = services.includes('porch') ? 'Install' : 'Setup';
@@ -883,19 +942,24 @@ function nextBox(r, s, x) {
       if (!pb) return box('Book the pickup and return', 'Pick both days on the calendar.', bigA('card.schedPickup', `/admin/calendar/new?r=${rk}&kind=rental_pickup`, 'Book pickup + return'), tent, 'card.schedPickup');
       const owed = bal ? bal.owed : 0;
       const addr = deliveryAddress(r);
-      const why = addr ? `Deliver to ${addr}. Hand over the games${owed > 0 ? `, collect the rest (${money(owed)})` : ''}.` : `At ${pickupPlace || 'Mt. Moriah Station'}. Hand over the games${owed > 0 ? `, collect the rest (${money(owed)})` : ''}.`;
+      const due = dueWords(bal);
+      const to = [answerOf(r, /^business name$/i), addr].filter(Boolean).join(', ');
+      const why = addr ? `Deliver to ${to}. Hand over the games.${due ? ` ${due}.` : ''}` : `At ${pickupPlace || 'Mt. Moriah Station'}. Hand over the games.${due ? ` ${due}.` : ''}`;
       const pw = addr ? 'Delivery' : 'Pickup';
+      const bizTag = addr ? '<p class="biz" data-next-biz>🚚 Business delivery</p>' : '';
       // No pickup time yet: the small "Text about pickup time" sits in the box (never big).
       const m = ctx.msgs && ctx.msgs.pickup && ctx.msgs.pickup.sms;
       const timeText = m && !pb.time ? `<div class="smallrow"><a class="btn ghost" href="${esc(m.href)}" data-msg-tap="pickupTime" data-rk="${esc(rk)}"${tip('msg.pickupText')}>Text about pickup time</a></div>` : '';
-      if (today && today < pb.date) return box(`${pw}: ${shortDate(pb.date)}`, why, `${timeText}${wait('step.picked', addr ? 'Mark delivered, on delivery day' : 'Mark picked up, on pickup day', pb.date)}`, tent, '');
+      if (today && today < pb.date) return box(`${pw}: ${shortDate(pb.date)}`, why, `${bizTag}${timeText}${wait('step.picked', addr ? 'Mark delivered, on delivery day' : 'Mark picked up, on pickup day', pb.date)}`, tent, '');
       const pay = owed > 0 && inv ? `<label class="choice"><input type="checkbox" name="paid_rest" value="1" checked${tip('step.paidRest')}> They paid the rest (${money(owed)}) now</label>${methodPicker()}` : '';
       const btn = `<button class="btn primary" type="submit"${tip('step.picked')}>${addr ? 'Mark delivered' : 'Mark picked up'}</button>`;
-      return box(`${pw}: ${shortDate(pb.date)}`, why, `<form class="pickform" method="post" action="/admin/calendar/bookings/${pb.id}/done" data-primary>${hiddenInputs({ r: rk })}${pay}${pay ? act(btn, 'step.picked') : `<div class="act">${btn}</div>`}</form>`, '', 'step.picked');
+      return box(`${pw}: ${shortDate(pb.date)}`, why, `${bizTag}<form class="pickform" method="post" action="/admin/calendar/bookings/${pb.id}/done" data-primary>${hiddenInputs({ r: rk })}${pay}${pay ? act(btn, 'step.picked') : `<div class="act">${btn}</div>`}</form>`, '', 'step.picked');
     }
     case 'returned': {
       const { ret } = rentalDates(r, bookings);
-      return box(`${deliveryAddress(r) ? 'Collect' : 'Return'}: ${ret ? shortDate(ret) : 'not set'}`, deliveryAddress(r) ? `Collect the games from ${deliveryAddress(r)}. Check every game is back and nothing is damaged.` : 'Check every game is back and nothing is damaged.', `<div class="actions" data-primary>${cardButton('ret.mark', ctx, true)}</div>`, '', 'ret.mark');
+      const addr = deliveryAddress(r);
+      const from = [answerOf(r, /^business name$/i), addr].filter(Boolean).join(', ');
+      return box(`${addr ? 'Collect' : 'Return'}: ${ret ? shortDate(ret) : 'not set'}`, addr ? `Collect the games from ${from}. Check every game is back and nothing is damaged.` : 'Check every game is back and nothing is damaged.', `${addr ? '<p class="biz" data-next-biz>🚚 Business delivery</p>' : ''}<div class="actions" data-primary>${cardButton('ret.mark', ctx, true)}</div>`, '', 'ret.mark');
     }
     case 'deposit_back': {
       if (!inv || !s.refundable) return box('Make the invoice', 'The damage deposit is on the invoice.', bigA('card.createInvoice', `/admin/invoices/new?r=${rk}`, 'Create invoice'), '', 'card.createInvoice');
@@ -907,7 +971,7 @@ function nextBox(r, s, x) {
     }
     case 'paid': {
       const owed = bal ? bal.owed : 0;
-      return box('Collect the rest', owed > 0 ? `${money(owed)} still owed.` : 'Mark it paid when the rest is in.', `<div class="actions" data-primary>${cardButton('pay.paid', ctx, true)}</div>`, '', 'pay.paid');
+      return box('Collect the rest', owed > 0 ? `${dueWords(bal)}.` : 'Mark it paid when the rest is in.', `<div class="actions" data-primary>${cardButton('pay.paid', ctx, true)}</div>`, '', 'pay.paid');
     }
     default: return { big: '', html: '' };
   }
@@ -961,37 +1025,130 @@ export function requestCard(r, o) {
   const damage = returned && ret.damaged && stage !== 'archived' && stage !== 'void' ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : '';
   const payment = quiet ? '' : cardPaymentBox(r, st, inv, big, ctx);
   const bigBase = String(big).split('|')[0];
-  const others = [...rules.secondary, ...rules.more].filter((k) => k.split('|')[0] !== bigBase && k !== 'card.printChecklist');
+  const others = [...rules.secondary, ...rules.more].filter((k) => k.split('|')[0] !== bigBase && k !== 'card.printChecklist' && k.split('|')[0] !== 'card.seeCal');
+  // The other buttons, each in the group it belongs to: money ones under Money, the put-away /
+  // bring-back ones in the quiet bottom row, the rest (calendar, checklist, returns, job done)
+  // under What they booked.
+  const MONEY_KEYS = /^(card\.(createInvoice|openInvoice)|pay\.)/;
+  const BOTTOM_KEYS = /^(card\.archive|pa\.bringBack)$/;
+  const btnRow = (keys, attr) => (keys.length ? `<div class="secrow" ${attr}>${keys.map((k) => cardButton(k, ctx, false)).join('')}</div>` : '');
+  const moneyBtns = others.filter((k) => MONEY_KEYS.test(k.split('|')[0]));
+  const bottomBtns = others.filter((k) => BOTTOM_KEYS.test(k.split('|')[0]));
+  const bookedBtns = others.filter((k) => !moneyBtns.includes(k) && !bottomBtns.includes(k));
   const decorish = services.some((k) => k !== 'rentals');
-  const moreRow = `<div class="morerow" data-more-row><a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a>
-      <details class="disclose" data-add-note><summary${tip('card.addNote')}>Add a note</summary><form class="noteform" method="post" action="/admin/requests/note">${hiddenInputs({ r: rk })}<label for="nt-${esc(rk)}">Note (only you see this)</label><textarea id="nt-${esc(rk)}" name="body" required></textarea>${act(`<button class="btn ghost" type="submit"${tip('card.noteSave')}>Save note</button>`, 'card.noteSave')}</form></details>
+  // The hold controls (Text a reminder, Release the games now) and the other notices sit under Money.
+  const extrasHere = quiet ? '' : `${extras}${holdHtml || ''}`;
+  const who = firstName(r.name);
+  const addr = deliveryAddress(r);
+  const biz = answerOf(r, /^business name$/i);
+  // Reverse case: the invoice has a Delivery fee line but the request has no business delivery.
+  const feeNoAddr = !addr && services.includes('rentals') && inv && (inv.lines || []).some((l) => DELIVERY_LINE.test(String(l.description || '')));
+  const bizLine = addr ? `<p class="scdelivery" data-business-delivery><span class="biztag">🚚 Business delivery</span> ${esc([biz, addr].filter(Boolean).join(', '))}</p>`
+    : (feeNoAddr && !quiet ? `<details class="dlprompt" data-delivery-prompt><summary${tip('card.deliveryPrompt')}>🚚 Business delivery: add the business name and address</summary>${deliveryForm(r, rk, { prompt: true, place: pickupPlace, idp: 'dp' })}</details>` : '');
+  // Latest note (owner-approved mock-up, 20 Oct 2026): the newest note in full, its day, and
+  // "+ Add a note" right there (never behind More).
+  const last = notes.length ? notes[notes.length - 1] : null;
+  const noteForm = `<details class="disclose addnote" data-add-note><summary${tip('card.addNote')}>+ Add a note</summary><form class="noteform" method="post" action="/admin/requests/note">${hiddenInputs({ r: rk })}<label for="nt-${esc(rk)}">Note (only you see this)</label><textarea id="nt-${esc(rk)}" name="body" required></textarea>${act(`<button class="btn ghost" type="submit"${tip('card.noteSave')}>Save note</button>`, 'card.noteSave')}</form></details>`;
+  const latest = `<div class="lnote${last ? '' : ' empty'}" data-latest-note>${last ? `<p class="lnh"><b>Latest note</b>${last.created_at ? ` <span class="muted" data-latest-note-day>${esc(memphisDay(last.created_at))}</span>` : ''}</p><p class="lnb" data-latest-note-body>${esc(last.body)}</p>` : ''}${noteForm}</div>`;
+  // 1. What they booked (open).
+  const bk1 = bookedGroupBody(r, { services, bookings: bk, pickupPlace, row, gLine, cl, sched });
+  const grp = (key, title, small, body, open = false) => `<details class="grp" data-more-group="${key}"${open ? ' open' : ''}><summary${tip(`card.grp${key[0].toUpperCase()}${key.slice(1)}`)}>${esc(title)}${small ? ` <small>${esc(small)}</small>` : ''}</summary><div class="gin">${body}</div></details>`;
+  const booked = grp('booked', 'What they booked', '', `${bk1.html}${btnRow(bookedBtns, 'data-secondary')}`, true);
+  // 2. Money.
+  const moneySmall = inv && inv.balance && inv.status !== 'draft' ? (dueWords(inv.balance) || (inv.balance.void ? 'void' : 'paid')) : (inv ? 'not sent yet' : 'no invoice yet');
+  const reserveHere = hold && s.current !== 'deposit' && !quiet ? `<style>${HOLD_CSS}</style>${reserveLongerControl(rk, { untilMs: hold.by_hand ? NaN : hold.untilMs, card: true })}` : '';
+  const moneyBody = `${payment}${btnRow(moneyBtns, 'data-money-buttons')}${messagesLine(msgs, { rk, services, primary: big, returned, quiet })}${extrasHere}${reserveHere}${damage}${quiet ? '' : bottom}`;
+  const moneyG = grp('money', 'Money', moneySmall, moneyBody || '<p class="muted" style="margin:0">Nothing here yet.</p>');
+  // 3. Their details and ID.
+  const detailsG = grp('details', 'Their details and ID', 'phone, email, ID, rules', detailsGroupBody(r, rk, { referrers, used: bk1.used, archived, st }));
+  // 4. Notes and history.
+  const historyG = grp('history', 'Notes and history', 'newest first', historyHtml(events, notes));
+  const moreRow = `<div class="morerow quiet" data-more-row><a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a>
       ${decorish && !archived ? `<div class="act"><a class="btn ghost" href="/admin/checklist?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.printChecklist')}>Print checklist</a></div>` : ''}
       ${!archived && !quiet ? `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('card.putAway')}>Put away</button></div></form>` : ''}
-      ${stage === 'void' ? cardButton('card.archive', ctx, false) : ''}</div>`;
-  // The rest of the hold controls (text a reminder, release) are under More.
-  const extrasHere = quiet ? '' : `${extras}${holdHtml || ''}`;
+      ${stage === 'void' && !bottomBtns.some((k) => k.startsWith('card.archive')) ? cardButton('card.archive', ctx, false) : ''}${bottomBtns.map((k) => cardButton(k, ctx, false)).join('')}
+      ${quiet ? '' : voidLink(r, inv, ctx)}</div>`;
   return `<article class="card stepcard" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
       <div class="schead">${quickContact(r)}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
         <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
-        ${deliveryAddress(r) ? `<p class="scdelivery" data-business-delivery><strong>Business delivery</strong>: ${esc([answerOf(r, /^business name$/i), deliveryAddress(r)].filter(Boolean).join(', '))}</p>` : ''}</div>
+        ${bizLine}</div>
+      ${latest}
       ${steps}
       ${nb.html}
-      <details class="disclose more" data-details><summary${tip('card.details')}>More: answers, history, other buttons</summary>
-        ${factsLine(keyFacts(r, services, { pickupPlace }))}
-        ${wantSummary(r, bookings).map((w) => `<div class="want">${esc(w)}</div>`).join('')}${gLine}
-        ${extrasHere}${damage}${row}
-        ${others.length ? `<div class="secrow" data-secondary>${others.map((k) => cardButton(k, ctx, false)).join('')}</div>` : ''}
-        ${messagesLine(msgs, { rk, services, primary: big, returned, quiet })}
-        ${payment}
-        ${quiet ? '' : bottom}
+      <details class="disclose more" data-details><summary${tip('card.details')}>More about ${esc(r.name ? who : 'this request')}</summary>
+        ${booked}${moneyG}${detailsG}${historyG}
         ${moreRow}
-        <div class="muted" style="margin-top:8px">${esc(friendlyWhen(r))}${archived && st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</div>
-        ${cl && cl !== 'none' ? `<div class="muted" style="margin-top:4px">Checklist ${cl === 'done' ? 'done ✓' : 'started'}</div>` : ''}
-        ${requestDetailsBody(r, { referrers })}
-        ${historyHtml(events, notes)}
-        ${quiet ? '' : voidLink(r, inv, ctx)}
       </details>
     </article>`;
+}
+
+// Group 1: what they booked, each fact once. -> { html, used: the answer labels it shows }.
+const lengthWords = (v) => (/weekend/i.test(v) ? 'the weekend' : (/^(day|one day|1 day|a day)$/i.test(String(v).trim()) ? 'one day' : String(v || '').trim().toLowerCase()));
+const choiceWords = (v, choices) => {
+  const t = String(v || '').trim();
+  const hit = [...choices.day, ...choices.weekend].find(([k, l]) => k === t || l.toLowerCase() === t.toLowerCase());
+  return (hit ? hit[1] : t).replace(/^The /, 'the ');
+};
+function bookedGroupBody(r, { services, bookings = [], pickupPlace = 'Mt. Moriah Station', row = '', gLine = '', cl = '', sched = null }) {
+  const used = new Set();
+  const all = [...r.rentals, ...r.decor, ...r.other];
+  const ans = (re) => { const hit = all.find((x) => re.test(String(x.label || ''))); if (hit) used.add(hit.label); return hit ? String(hit.value || '') : ''; };
+  const lines = [];
+  const line = (k, v, attr) => { if (v) lines.push(`<p class="gl" ${attr}><b>${esc(k)}:</b> ${esc(v)}</p>`); };
+  if (services.includes('rentals')) {
+    const games = ans(/^which games/i) || r.gamesAnswer;
+    line('Games', games, 'data-booked-games');
+    const ev = parseFormDate(ans(/what date is your event/i));
+    const { pickup, ret } = rentalDates(r, bookings);
+    // How long: from the pickup and return days when both are known (owner, 18 Oct 2026), else the answer.
+    const L = pickup && ret ? rentalLength(pickup, ret) : null;
+    const len = L ? (L.weekend ? 'the weekend' : (L.days === 1 ? 'one day' : L.length)) : lengthWords(ans(/^how long/i) || r.durationAnswer || '');
+    ans(/^how long/i);
+    const occ = ans(/occasion/i);
+    line('Event', ev || occ ? [ev ? shortDate(ev) : '', len, occ].filter(Boolean).join(' · ') : '', 'data-booked-event');
+    const lenTail = !(ev || occ) && len ? ` (${len})` : '';
+    ans(/^pickup date|^delivery date/i); ans(/^return date/i);
+    const pw = choiceWords(ans(/when do you pick up/i), PICKUP_CHOICES);
+    const rw = choiceWords(ans(/when do you bring/i), RETURN_CHOICES);
+    const pb = bookings.find((b) => b.kind === 'rental_pickup');
+    const place = ans(/^pickup place/i) || (pb && pb.place) || pickupPlace;
+    const addr = deliveryAddress(r);
+    const when = (d, w) => [d ? shortDate(d) : 'not set', w].filter(Boolean).join(', ');
+    if (addr) {
+      line('Delivery', `${when(pickup, pw)} · Deliver to ${[answerOf(r, /^business name$/i), addr].filter(Boolean).join(', ')}`, 'data-booked-pickup');
+      line('Collect', `${when(ret, rw)}${lenTail}`, 'data-booked-return');
+    } else {
+      line('Pickup', `${when(pickup, pw)} · ${addr || place}`, 'data-booked-pickup');
+      line('Back', `${when(ret, rw)}${lenTail}`, 'data-booked-return');
+    }
+  }
+  if (services.some((k) => k !== 'rentals')) {
+    if (r.porchLine) { ans(/season or occasion/i); ans(/^how much decor/i); ans(/^book both/i); ans(/^add-ons/i); line('Porch', `${r.porchLine}${r.porchAddOns ? `. Add-ons: ${r.porchAddOns}` : ''}`, 'data-booked-porch'); }
+    const type = r.porchLine ? '' : ans(/event type/i);
+    const ev = parseFormDate(ans(/^event date/i));
+    line('Event', [ev ? shortDate(ev) : '', type].filter(Boolean).join(' · '), 'data-booked-event');
+    line('Where', ans(/^location|where is it/i), 'data-booked-where');
+    if (gLine) { ans(/how many guests/i); ans(/source the food/i); }
+  }
+  const calDate = (sched && sched.date) || ((bookings || []).map((b) => b.date).filter(Boolean).sort()[0]) || '';
+  const cal = calDate ? `<p class="gl"><a class="glink" href="/admin/day/${esc(calDate)}" data-see-cal${tip('card.seeCal')}>See it on the calendar</a></p>` : '';
+  const clLine = cl && cl !== 'none' ? `<p class="gl muted" data-checklist-state>Checklist ${cl === 'done' ? 'done ✓' : 'started'}</p>` : '';
+  return { used, html: `<div data-booked>${lines.join('')}${gLine}${row}${clLine}${cal}</div>` };
+}
+
+// "How do they get the games?" (Step 1, rentals; the reverse prompt uses the same form).
+const FEE_DOLLARS = Number((SERVICES_DATA.invoiceQuickAdds || {}).deliveryFee || 0);
+export function deliveryForm(r, rk, { prompt = false, place = 'Mt. Moriah Station', idp = 'dl' } = {}) {
+  const addr = deliveryAddress(r);
+  const on = prompt || Boolean(addr);
+  const id = (k) => `${idp}${k}-${esc(rk)}`;
+  return `<form class="dlform" method="post" action="/admin/requests/delivery" data-delivery-form>${hiddenInputs({ r: rk })}
+    <p class="dlq"><strong>How do they get the games?</strong></p>
+    <label class="choice"><input type="radio" name="how" value="pickup"${on ? '' : ' checked'} data-how="pickup"> <span>They pick up at ${esc(place || 'Mt. Moriah Station')}</span></label>
+    <label class="choice"><input type="radio" name="how" value="delivery"${on ? ' checked' : ''} data-how="delivery"> <span><b>Business delivery</b>${FEE_DOLLARS ? ` (+$${FEE_DOLLARS} on the invoice)` : ''}</span></label>
+    <div class="dlfields" data-delivery-fields><label for="${id('n')}">Business name</label><input id="${id('n')}" name="delivery_name" value="${esc(answerOf(r, /^business name$/i))}" autocomplete="off">
+    <label for="${id('a')}">Delivery address</label><input id="${id('a')}" name="delivery_address" value="${esc(addr)}" autocomplete="off"></div>
+    <div class="act"><button class="btn ghost" type="submit"${tip('step.deliverySave')}>Save</button></div></form>`;
 }
 
 function filterChips(filter, base = '/admin/') {
@@ -1265,7 +1422,7 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
   else if (invoice.status === 'draft') main = `<div class="actions">${act(sendForm(`Send invoice to ${esc(who)}`, 'primary', 'iv.send'), 'iv.send')}${act(textBtn('ghost'), 'iv.text')}${act(status('texted', 'Mark as sent by text', 'iv.texted'), 'iv.texted')}</div>`;
   else main = `<div class="actions">${act(sendForm('Resend', 'ghost', 'iv.resend'), 'iv.resend')}${act(textBtn('ghost'), 'iv.text')}</div>`;
   const payment = paymentBox({ who: invoice.customer_name || 'this customer', status: invoice.status, plan, rest: balance ? balance.remaining : total - now, number: invoice.number,
-    balanceLine: balance && !balance.void ? esc([balance.owed > 0 ? `Owes ${money(balance.owed)}` : 'Paid in full ✓', balance.paid ? `${money(balance.paid)} received` : '', balance.refundable ? `Damage deposit ${money(balance.refundable)}, refundable` : ''].filter(Boolean).join(' · ')) : '',
+    balanceLine: balance && !balance.void ? esc([balance.owed > 0 ? dueWords(balance) : 'Paid in full ✓', balance.paid ? `${money(balance.paid)} received` : '', balance.refundable ? `Damage deposit ${money(balance.refundable)}, refundable` : ''].filter(Boolean).join(' · ')) : '',
     target: { action: `/admin/invoices/${id}/status`, field: 'action', extra: {} } });
   const preview = emailHtml && !voided ? `<div class="card" style="padding:0;overflow:hidden"><div class="muted" style="padding:10px 14px;border-bottom:1px solid var(--line)">The email the customer gets</div>
     <iframe class="emailframe" title="Invoice email" srcdoc="${esc(emailHtml)}" onload="try{this.style.height=(this.contentDocument.documentElement.scrollHeight+24)+'px'}catch(e){}"></iframe></div>` : '';

@@ -250,7 +250,7 @@ async function dashboard(env, url) {
   const { results: evRows } = await env.DB.prepare('SELECT request_key, at, what, who FROM request_events ORDER BY id').all();
   for (const e of evRows || []) (events[e.request_key] = events[e.request_key] || []).push(e);
   const notes = {};
-  const { results: noteRows } = await env.DB.prepare('SELECT request_key, body FROM booking_notes WHERE request_key IS NOT NULL ORDER BY id').all();
+  const { results: noteRows } = await env.DB.prepare('SELECT id, request_key, body, created_at FROM booking_notes WHERE request_key IS NOT NULL ORDER BY id').all();
   for (const n of noteRows || []) (notes[n.request_key] = notes[n.request_key] || []).push(n);
   const { reminders, tomorrowLabel, overdue } = await AC.remindersAndOverdue(env.DB);
   const referrers = {};
@@ -869,6 +869,7 @@ async function routeAdmin(context) {
   if (segs[0] === 'requests' && segs[1] === 'talked' && method === 'POST') return AS.talkedRoute(env, request);
   if (segs[0] === 'requests' && segs[1] === 'called' && method === 'POST') return AS.calledRoute(env, request);
   if (segs[0] === 'requests' && segs[1] === 'note' && method === 'POST') return AS.noteRoute(env, request);
+  if (segs[0] === 'requests' && segs[1] === 'delivery' && method === 'POST') return AS.deliveryRoute(env, request);
   // "Change anything on this request" (owner, 18 Oct 2026): one page, one Save per section, at any stage.
   if (segs[0] === 'requests' && segs[1] === 'edit') {
     if (segs.length === 2 && method === 'GET') { await RN.markOpened(env.DB, decodeKey(url.searchParams.get('r') || ''), 'edit'); return AE.editPage(env, url); }

@@ -16,7 +16,7 @@ import { esc, money, redirect, htmlResponse, b64urlText, fromB64urlText, shortDa
 import { loadRequests, logEvent, eventsFor, DETAIL_FIELDS, ADDRESS_RE, NOTES_RE, detailAnswer, deliveryOf } from './requests.mjs';
 import { chicagoDate } from './reminders.mjs';
 import * as C from './calendar.mjs';
-import { balanceOf, paidByInvoice, linesFromForm, saveLines, syncMoneyStatus, recordPayment } from './ledger.mjs';
+import { balanceOf, paidByInvoice, linesFromForm, saveLines, syncMoneyStatus, recordPayment, dueWords } from './ledger.mjs';
 import { servicesOf, TAKEDOWN_PLANS } from './cards.mjs';
 import { deriveProgress, STEP_KEYS } from './progress.mjs';
 import { takedownState, loadTakedownFacts, TAKEDOWN_KINDS } from './takedown.mjs';
@@ -171,7 +171,7 @@ function invoiceSection(d, rk) {
       <div style="margin-top:10px"><button type="button" class="btn ghost" id="add-line"${tip('ed.addLine')}>Add a line</button></div>
       ${save('edit.saveInvoice', 'Save invoice')}`, ' id="edit-inv"')}
     <div data-balance><div class="sumline"><span>Total</span><strong>${money(balance.total)}</strong></div><div class="sumline"><span>Paid</span><strong>${money(balance.paid)}</strong></div>
-      <div class="sumline"><span>Still owes</span><strong data-owed="${balance.owed}">${money(balance.owed)}</strong></div>${balance.refundable ? `<div class="sumline"><span>Damage deposit (refundable, never owed)</span><span>${money(balance.refundable)}</span></div>` : ''}</div>
+      <div class="sumline"><span>Due</span><strong data-owed="${balance.owed}" data-due-words>${esc(dueWords(balance) || 'Nothing due')}</strong></div>${balance.refundable ? `<div class="sumline"><span>Damage deposit (refundable, never owed)</span><span>${money(balance.refundable)}</span></div>` : ''}</div>
     <script>${LINES_JS}</script></section>`;
 }
 

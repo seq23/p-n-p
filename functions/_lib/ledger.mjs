@@ -22,9 +22,23 @@ export function balanceOf(invoice, lines, paidCents) {
   };
 }
 
+// The ONE way an amount due is said (owner, 20 Oct 2026): with a refundable damage deposit not
+// collected yet, "$180 due ($130 + $50 refundable deposit)"; without one, "$130 due". Words only:
+// balance.owed (charges) and balance.depositOwed are the same numbers as always, the deposit is
+// still never "owed". '' when nothing is due (or the invoice is void).
+export const dollars = (c) => money(c).replace(/\.00$/, '');
+export function dueWords(bal, fmt = dollars) {
+  if (!bal || bal.void) return '';
+  const owed = Math.max(0, bal.owed || 0);
+  const dep = bal.refundable > 0 ? Math.max(0, bal.depositOwed || 0) : 0;
+  if (dep > 0) return owed > 0 ? `${fmt(owed + dep)} due (${fmt(owed)} + ${fmt(dep)} refundable deposit)` : `${fmt(dep)} due (refundable deposit)`;
+  return owed > 0 ? `${fmt(owed)} due` : '';
+}
+export const dueCents = (bal) => (!bal || bal.void ? 0 : Math.max(0, bal.owed || 0) + (bal.refundable > 0 ? Math.max(0, bal.depositOwed || 0) : 0));
+
 export function balanceWords(bal) {
   if (!bal || bal.void) return '';
-  return bal.owed > 0 ? `Owes ${money(bal.owed)}` : 'Paid in full ✓';
+  return bal.owed > 0 ? dueWords(bal) : 'Paid in full ✓';
 }
 
 export function depositWords(bal) {

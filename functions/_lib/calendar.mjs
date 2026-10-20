@@ -761,6 +761,8 @@ export function daySort(a, b) {
 }
 
 const usd = (c) => `$${(Math.round(c) / 100).toFixed(2).replace(/\.00$/, '')}`;
+// A business-delivery rental reads Delivery / Collect in the day list too (views-calendar.mjs DELIVERY_WORDS).
+const DAY_DELIVERY_WORDS = { rental_pickup: 'Delivery', rental_return: 'Collect' };
 
 // Short plain text of one day for an SMS to herself. Cut on a whole line, politely, with a
 // link to the full list when it would run long.
@@ -769,10 +771,10 @@ export function daySheetText(date, rows, { max = 480, host = 'porchandparty901.c
   const holdLines = holds.map((h) => `Hold ends ${h.timeLabel} - ${h.name || 'No name'}${h.items ? ` (${h.items})` : ''}: deposit not in yet${h.phone ? `, ${h.phone}` : ''}`);
   const outLines = outRows.map((w) => `Rental out - ${w.name || 'No name'}${namesText(w).length ? ` (${namesText(w).join(', ')})` : ''}, back ${new Date(`${w.end}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' })}`);
   const lines = [...holdLines, ...outLines, ...rows.map((r) => {
-    const bits = [`${r.timeLabel ? `${r.timeLabel} ` : ''}${KIND_LABELS[r.kind] || 'Booking'} - ${r.customer_name || 'No name'}`];
+    const bits = [`${r.timeLabel ? `${r.timeLabel} ` : ''}${(r.delivery && DAY_DELIVERY_WORDS[r.kind]) || KIND_LABELS[r.kind] || 'Booking'} - ${r.customer_name || 'No name'}`];
     if (r.phone) bits.push(r.phone);
     if (r.items) bits.push(r.items);
-    if (r.owed > 0) bits.push(`collect ${usd(r.owed)}`);
+    if (r.owed > 0) bits.push(`collect ${(r.dueWords || usd(r.owed)).replace(' due', '')}`);
     if (r.note) bits.push(`note: ${firstLine(r.note, 40)}`);
     return bits.join(', ');
   })];
