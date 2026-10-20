@@ -89,6 +89,8 @@ const screens = [
   ['/admin/invoices'], ['/admin/invoices/new'], [`/admin/invoices/new?r=${s.rk(reqA.key)}`],
   [`/admin/invoices/${invA.id}`], [`/admin/invoices/${invB.id}`], [`/admin/invoices/${draftWithEmail.id}`], [`/admin/invoices/${v.id}`], [`/admin/invoices/${paidInv.id}`], [`/admin/invoices/${invA.id}/edit`],
   ['/admin/settings'], ['/admin/help', { help: true }], ['/admin/packages'],
+  // Quick Pricing Summary (20 Oct 2026): plain, after a send, and after a refused send.
+  ['/admin/pricing'], ['/admin/pricing?s=rentals&sent=hana%40example.com'], ['/admin/pricing?s=all&to=x&err=That%20email%20address%20does%20not%20look%20right.'],
   // Settings -> Inventory (18 Oct 2026): the Add and Edit forms.
   ['/admin/inventory'], ['/admin/inventory/new'], ['/admin/inventory/giant-uno'], ['/admin/inventory/giant-uno/edit'], ['/admin/inventory/giant-tumble-tower'], ['/admin/inventory/projector'],
   [`/admin/confirmed?r=${s.rk(heldReq.row.request_key)}&m=Deposit%20received&back=/admin/`],

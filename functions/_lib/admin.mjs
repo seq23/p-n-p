@@ -36,6 +36,7 @@ import * as MS from './missed.mjs';
 import * as AM from './admin-money.mjs';
 import { paidByInvoice, balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice } from './ledger.mjs';
 import * as AE from './admin-edit.mjs';
+import * as APR from './admin-pricing.mjs';
 import * as INVD from './inventory.mjs';
 import * as VI from './views-inventory.mjs';
 import { categoriesFrom } from './expenses.mjs';
@@ -1011,6 +1012,9 @@ async function routeAdmin(context) {
     }
   }
   if (segs[0] === 'help' && method === 'GET') return htmlResponse(V.helpPage());
+  // Quick Pricing Summary (owner, 20 Oct 2026): the last button in the menu.
+  if (segs[0] === 'pricing' && segs.length === 1 && method === 'GET') return APR.pricingRoute(env, url);
+  if (segs[0] === 'pricing' && segs[1] === 'email' && segs.length === 2 && method === 'POST') return APR.emailRoute(env, request);
   if (segs[0] === 'packages' && segs.length === 1 && method === 'GET') return htmlResponse(V.porchPackagesPage(PRICE_TABLE.porchPackages));
   if (segs[0] === 'checklist' && method === 'GET') {
     if (segs.length === 1) return checklistPrint(env, url);
