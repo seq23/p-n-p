@@ -182,10 +182,10 @@ const pc = card(html, 'Pat Porch');
 must(/border-left-color:#c2410c/.test(pc), 'porch card has no orange left border');
 // "More about <first name>" (owner-approved mock-up, 20 Oct 2026): the date and place once, under
 // What they booked (open first); Call / Text only once, top right (the old facts line's second Call is gone).
-must(/<details class="grp" data-more-group="booked" open><summary data-help="card\.grpBooked"[^>]*>What they booked<\/summary>[\s\S]*data-booked-event><b>Event:<\/b> Sat 24 Oct[\s\S]*data-booked-where><b>Where:<\/b> Germantown</.test(pc), 'porch card: What they booked (open) lacks the event day and where');
+must(/<details class="grp" data-more-group="booked" open><summary data-help="card\.grpBooked"[^>]*><span class="gt">What they booked <span class="tapopen" data-tap-open>Tap to open<\/span><\/span><span class="gchev" aria-hidden="true">›<\/span><\/summary>[\s\S]*data-booked-event><b>Event:<\/b> Sat 24 Oct[\s\S]*data-booked-where><b>Where:<\/b> Germantown</.test(pc), 'porch card: What they booked (open) lacks the event day and where');
 must(/data-quick-contact>[\s\S]*data-card-call/.test(pc.slice(0, pc.indexOf('data-next-step'))) && !/>(?:&#128222; )?Call</.test(pc.slice(pc.indexOf('data-details'))) && !/data-facts/.test(pc), 'porch card: Call is not top right, a second Call is under More, or the old facts line is back');
 must((pc.match(/class="btn primary"/g) || []).length === 1, 'porch card does not have exactly ONE big primary button');
-must(/<details class="disclose more" data-details><summary data-help="card\.details"[^>]*>More about Pat<\/summary>[\s\S]*Where:<\/b> Germantown/.test(pc) && !/Where:|data-booked/.test(pc.slice(0, pc.indexOf('data-details'))), 'answers are not behind "More about Pat" (or show above it)');
+must(/<details class="disclose more" data-details><summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>Show more about Pat<\/span><span class="mhide" data-more-hide>Hide more about Pat<\/span><span class="mchev" aria-hidden="true">▾<\/span><\/summary>\s*<p class="mhint" data-more-hint>Tap any line below to see more\.<\/p>[\s\S]*Where:<\/b> Germantown/.test(pc) && !/Where:|data-booked/.test(pc.slice(0, pc.indexOf('data-details'))), 'answers are not behind "Show more about Pat" (or show above it)');
 must(!/More about Pat<\/summary>[\s\S]*class="btn primary"/.test(pc), 'an action is hidden behind More');
 // Only the first group opens by itself; the four groups in the owner's order, then the quiet row.
 {

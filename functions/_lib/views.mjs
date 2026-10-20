@@ -775,8 +775,19 @@ details.more>summary{font-weight:600}
 .lnote .lnh{margin:0}.lnote .lnb{margin:0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:1rem}
 .lnote details.addnote>summary{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:700;text-decoration:underline;cursor:pointer;list-style:none}
 .lnote details.addnote>summary::-webkit-details-marker{display:none}
-details.grp{border-top:1px solid var(--line);padding:2px 0}details.grp>summary{display:flex;align-items:center;gap:8px;min-height:48px;font-weight:700;font-size:1.05rem;cursor:pointer}
+details.grp{padding:0}details.grp>summary{display:flex;align-items:center;gap:8px;min-height:48px;font-weight:700;font-size:1.05rem;cursor:pointer}
 details.grp>summary small{font-weight:400;color:var(--muted);font-size:.9rem}
+details.disclose.more{border-top:0}
+details.disclose.more>summary{justify-content:space-between;gap:10px;min-height:48px;padding:10px 14px;background:#f6efe6;border:1px solid var(--line);border-radius:12px;color:var(--ink);font-size:1.05rem}
+details.disclose.more>summary::before{content:none}details.disclose.more>summary::marker{content:""}
+details.disclose.more .mhide{display:none}details.disclose.more[open]>summary .mshow{display:none}details.disclose.more[open]>summary .mhide{display:inline}
+.mchev{flex:none;font-size:1.6rem;line-height:1;color:var(--accent);transition:transform .15s}details.disclose.more[open]>summary .mchev{transform:rotate(180deg)}
+.mhint{margin:10px 2px 4px;color:var(--muted);font-size:.95rem}
+details.grp>summary{list-style:none;justify-content:space-between;padding:8px 12px;margin:6px 0;background:#fbf7f1;border:1px solid var(--line);border-radius:10px}
+details.grp>summary::-webkit-details-marker{display:none}details.grp>summary::marker{content:""}
+details.grp>summary .gt{flex:1;min-width:0}.tapopen{font-weight:400;color:var(--muted);font-size:.85rem;white-space:nowrap}details.grp[open]>summary .tapopen{display:none}
+.gchev{flex:none;font-size:1.8rem;line-height:1;color:var(--accent);transition:transform .15s}details.grp[open]>summary .gchev{transform:rotate(90deg)}
+details.disclose>summary:focus-visible,details.grp>summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .gin{display:grid;gap:6px;padding:0 0 10px}.gin .gl{margin:0;overflow-wrap:anywhere}.gin .gl.ok{color:#2f5a2b}.gin .warnline{color:#8f3427;font-weight:600}
 .gin .glink{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:700}
 .gin ul{margin:0;padding-left:18px}.gin h4{margin:6px 0 2px}
@@ -1102,7 +1113,7 @@ export function requestCard(r, o) {
   const latest = `<div class="lnote${last ? '' : ' empty'}" data-latest-note>${last ? `<p class="lnh"><b>Latest note</b>${last.created_at ? ` <span class="muted" data-latest-note-day>${esc(memphisDay(last.created_at))}</span>` : ''}</p><p class="lnb" data-latest-note-body>${esc(last.body)}</p>` : ''}${noteForm}</div>`;
   // 1. What they booked (open).
   const bk1 = bookedGroupBody(r, { services, bookings: bk, pickupPlace, row, gLine, cl, sched });
-  const grp = (key, title, small, body, open = false) => `<details class="grp" data-more-group="${key}"${open ? ' open' : ''}><summary${tip(`card.grp${key[0].toUpperCase()}${key.slice(1)}`)}>${esc(title)}${small ? ` <small>${esc(small)}</small>` : ''}</summary><div class="gin">${body}</div></details>`;
+  const grp = (key, title, small, body, open = false) => `<details class="grp" data-more-group="${key}"${open ? ' open' : ''}><summary${tip(`card.grp${key[0].toUpperCase()}${key.slice(1)}`)}><span class="gt">${esc(title)}${small ? ` <small>${esc(small)}</small>` : ''} <span class="tapopen" data-tap-open>Tap to open</span></span><span class="gchev" aria-hidden="true">›</span></summary><div class="gin">${body}</div></details>`;
   const booked = grp('booked', 'What they booked', '', `${bk1.html}${btnRow(bookedBtns, 'data-secondary')}`, true);
   // 2. Money.
   const moneySmall = inv && inv.balance && inv.status !== 'draft' ? (dueWords(inv.balance) || (inv.balance.void ? 'void' : 'paid')) : (inv ? 'not sent yet' : 'no invoice yet');
@@ -1125,7 +1136,8 @@ export function requestCard(r, o) {
       ${latest}
       ${steps}
       ${nb.html}
-      <details class="disclose more" data-details><summary${tip('card.details')}>More about ${esc(r.name ? who : 'this request')}</summary>
+      <details class="disclose more" data-details><summary${tip('card.details')}><span class="mshow" data-more-show>Show more about ${esc(r.name ? who : 'this request')}</span><span class="mhide" data-more-hide>Hide more about ${esc(r.name ? who : 'this request')}</span><span class="mchev" aria-hidden="true">▾</span></summary>
+        <p class="mhint" data-more-hint>Tap any line below to see more.</p>
         ${booked}${moneyG}${detailsG}${historyG}
         ${moreRow}
       </details>

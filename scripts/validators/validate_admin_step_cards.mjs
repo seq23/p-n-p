@@ -189,7 +189,7 @@ for (const [svc, row] of Object.entries(made)) {
   const c = await card(row.request_key);
   must(cur(c) === 'called' && /data-confirmed="0"/.test(c) && /<summary class="btn primary" data-help="step\.talked"[^>]*>I've talked to them<\/summary>/.test(c) && /Are you taking this job\?/.test(c), `${svc}: a new card's next step is not "I've talked to them" -> "Are you taking this job?"`);
   must((c.match(/class="btn primary"/g) || []).length === 1 || (svc === 'rentals'), `${svc}: more than one big button on a new card`);
-  must(/data-step-count>0 of \d done</.test(c) && new RegExp(`<summary data-help="card\\.details"[^>]*>More about ${svcReq[svc].name.split(' ')[0]}</summary>`).test(c), `${svc}: no "0 of M done" / "More about <first name>" on a new card`);
+  must(/data-step-count>0 of \d done</.test(c) && (() => { const f = svcReq[svc].name.split(' ')[0]; return new RegExp(`<summary data-help="card\\.details"[^>]*><span class="mshow" data-more-show>Show more about ${f}</span><span class="mhide" data-more-hide>Hide more about ${f}</span><span class="mchev" aria-hidden="true">▾</span></summary>`).test(c); })(), `${svc}: no "0 of M done" / "Show more about <first name>" (Hide when open) on a new card`);
 }
 // Not yet: called, still tentative and listed.
 {
