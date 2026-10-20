@@ -547,12 +547,15 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   own. Nothing stored is rewritten: sent invoices keep their stored notes and lines.
 - **Business delivery** (`scripts/lib/business_delivery.js`): "Renting for a business? We can
   deliver to your business for $20." on /rentals/ (Where, the pickup FAQ, How pickup works), the
-  FAQ rentals section, /rules, llms.txt and /request; the price is `data/offers/services.json
-  invoiceQuickAdds.deliveryFee` (the invoice quick-add's). /request rentals: a tick box "This is
-  for a business — deliver to us ($20)" revealing Business name + Delivery address (both required
-  when ticked; answers "Business delivery", "Business name", "Delivery address"). Ticked: the draft
-  invoice gets the "Delivery fee" line, the card shows "Business delivery: <business>, <address>",
-  the pickup / return bookings are at that address and read "Delivery" / "Collect" on the
+  FAQ rentals section, /rules and llms.txt; the price is `data/offers/services.json
+  invoiceQuickAdds.deliveryFee` (the invoice quick-add's). The /request form does NOT offer it
+  (owner, 19 Oct 2026: removed so nobody lies about being a business or gets ideas); the server
+  ignores any business_delivery / business_name / delivery_address it is sent. Valerie sets it
+  herself: Change anything on this request → Customer details → Business delivery (name +
+  address; empty address = pickup), stored in `requests.details_edits` and laid over the answers
+  "Business delivery", "Business name", "Delivery address" (`requests.mjs applyEdits`), and adds
+  "+ Delivery fee" on the invoice. Set: the card shows "Business delivery: <business>, <address>",
+  the pickup / return bookings move to that address (and back when cleared) and read "Delivery" / "Collect" on the
   calendar, Upcoming, the list and the Day sheet (`calendar.mjs deliveryAddress / rentalPlace`).
   Home rentals stay pickup and return at the safe exchange zone. Facebook listings are hand-written:
   add the same sentence there.

@@ -10,7 +10,7 @@
 //                                          (the ONLINE invoice page only, view: true; no email or
 //                                          extra invoice is ever sent for it: elsewhere a paid
 //                                          invoice reads as "This covers everything.")
-// Business delivery (the request's "deliver to us" tick, or a Delivery fee line): "at delivery"
+// Business delivery (set by Valerie on the request, or a Delivery fee line): "at delivery"
 // and "Text or call P to set your delivery time unless otherwise agreed upon." (no PLACE).
 // R never counts the refundable damage deposit (it is never owed). The phone and the place come
 // from data/rentals/games.json pickup (pricing.mjs table.pickupPhone / pickupPlace), never typed.
@@ -28,7 +28,7 @@ export function handTyped(invoice) {
   return Boolean(n) && n !== LEGACY_DRAFT_NOTE;
 }
 
-// The request's own "This is for a business — deliver to us" tick (the /request rentals path).
+// The request's "Business delivery: Yes" answer (Valerie's Customer details edit, or an older form tick).
 export function businessDelivery(r) {
   const all = r ? [...(r.rentals || []), ...(r.decor || []), ...(r.other || [])] : [];
   return all.some((x) => /^business delivery$/i.test(String(x.label || '')) && /^yes/i.test(String(x.value || '')));

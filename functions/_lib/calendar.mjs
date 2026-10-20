@@ -154,8 +154,9 @@ export function requestReturnDate(request, pickupISO) {
   return returnDateFor(pickupISO, request && request.durationAnswer);
 }
 
-// Business delivery (owner, 19 Oct 2026): the request's "Delivery address" when it ticked
-// "This is for a business — deliver to us"; '' for a home rental (pickup at the safe zone).
+// Business delivery (owner, 19 Oct 2026): the request's "Delivery address" when Valerie set
+// business delivery (admin Change anything → Customer details; requests.mjs applyEdits; older
+// requests from the form's former tick box read the same); '' for a pickup at the safe zone.
 export function deliveryAddress(request) {
   if (!request || !/^yes/i.test(String(answer(request, /^business delivery$/i) || ''))) return '';
   return String(answer(request, /^delivery address$/i) || '').trim();

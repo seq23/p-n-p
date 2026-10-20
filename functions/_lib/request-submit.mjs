@@ -8,7 +8,6 @@
 // cannot run Turnstile, so a submission with no Turnstile token is still taken (honeypot + timing
 // + a tighter rate limit) and the admin card says "sent without the robot check".
 import offers from '../../data/offers/services.json';
-import BD from '../../scripts/lib/business_delivery.js';
 import games from '../../data/rentals/games.json';
 import { useInventory } from './inventory.mjs';
 import { PRICE_TABLE } from './prices.mjs';
@@ -180,12 +179,6 @@ async function submit(context) {
     await expireHolds(env.DB);
     const left = await availabilityFor(env.DB, clean.pickup_date, clean.return_date, today);
     quote = F.rentalQuote(clean.games, clean.duration, PRICE_TABLE, games.holdPercent);
-    // A business delivery adds the delivery fee line (the invoice quick-add's price), paid at delivery.
-    if (quote && clean.business) {
-      const fee = Math.round(BD.deliveryFee(offers) * 100);
-      quote = { ...quote, lines: [...quote.lines.filter((l) => !l.refundable), { description: BD.DELIVERY_LINE_DESC, qty: 1, unit_cents: fee, note: `To ${clean.business.name}, ${clean.business.address}`, refundable: 0 }, ...quote.lines.filter((l) => l.refundable)],
-        rental: quote.rental + fee, total: quote.total + fee, atPickup: quote.atPickup + fee };
-    }
     // How many of each item the quote takes out: a Whole Yard it lands on carries both Giant
     // Color Stack sets, so one set already out makes it unbookable (18 Oct 2026).
     const takes = C.expandItems(quote ? quote.lines.filter((l) => !l.refundable).map((l) => l.description).join(', ') : '', PRICE_TABLE).counts;
@@ -225,8 +218,7 @@ async function submit(context) {
   if (quote) {
     const hold = await createHold(env.DB, key, { now, settings });
     const items = quote.picked.map((i) => i.name).join(', ');
-    // Business delivery: the games go to (and come back from) the business address.
-    const base = { request_key: key, invoice_id: null, time: null, customer_name: clean.name, phone: clean.phone, email: clean.email, place: clean.business ? clean.business.address : PRICE_TABLE.pickupPlace };
+    const base = { request_key: key, invoice_id: null, time: null, customer_name: clean.name, phone: clean.phone, email: clean.email, place: PRICE_TABLE.pickupPlace };
     await C.upsertBookings(env.DB, [{ ...base, kind: 'rental_pickup', date: clean.pickup_date, items }, { ...base, kind: 'rental_return', date: clean.return_date, items }]);
     const invoiceId = await createDraftInvoice(env, { key, name: clean.name, email: clean.email, phone: clean.phone, lines: quote.lines, depositCents: quote.dueNow, dueDate: clean.pickup_date, notes: '' });
     await env.DB.prepare('UPDATE bookings SET invoice_id = ?1 WHERE request_key = ?2').bind(invoiceId, key).run();

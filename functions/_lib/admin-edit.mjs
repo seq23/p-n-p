@@ -13,7 +13,7 @@
 // Every change writes a history line "old → new (by Valerie)" through logEvent. The sheet sync
 // runs after every admin POST (admin.mjs handleAdmin). Proof: npm run validate:admin-edit.
 import { esc, money, redirect, htmlResponse, b64urlText, fromB64urlText, shortDate, invoiceTotal, toCents, payPlanOf, amountDueNow } from './util.mjs';
-import { loadRequests, logEvent, eventsFor, DETAIL_FIELDS, ADDRESS_RE, NOTES_RE, detailAnswer } from './requests.mjs';
+import { loadRequests, logEvent, eventsFor, DETAIL_FIELDS, ADDRESS_RE, NOTES_RE, detailAnswer, deliveryOf } from './requests.mjs';
 import { chicagoDate } from './reminders.mjs';
 import * as C from './calendar.mjs';
 import { balanceOf, paidByInvoice, linesFromForm, saveLines, syncMoneyStatus, recordPayment } from './ledger.mjs';
@@ -215,7 +215,8 @@ function statusSection(d, rk) {
 
 export function customerValues(r) {
   const a = detailAnswer(r, ADDRESS_RE); const n = detailAnswer(r, NOTES_RE);
-  return { name: r.name || '', phone: r.phone || '', email: r.email || '', address: a ? String(a.item.value || '') : '', notes: n ? String(n.item.value || '') : '' };
+  const dl = deliveryOf(r);
+  return { name: r.name || '', phone: r.phone || '', email: r.email || '', address: a ? String(a.item.value || '') : '', notes: n ? String(n.item.value || '') : '', delivery_name: dl.name, delivery_address: dl.address };
 }
 function customerSection(d, rk) {
   const v = customerValues(d.r);
@@ -225,6 +226,10 @@ function customerSection(d, rk) {
       ${field('ce', 'Email', `<input id="ce" name="email" type="email" value="${esc(v.email)}" autocomplete="off">`)}</div>
       ${field('ca', 'Address or where it is', `<input id="ca" name="address" value="${esc(v.address)}" autocomplete="off">`)}
       ${field('cno', 'Their notes', `<textarea id="cno" name="notes">${esc(v.notes)}</textarea>`)}
+      ${d.services.includes('rentals') ? `<fieldset class="delivery" data-edit-delivery><legend>Business delivery (you set this; the website form does not offer it)</legend>
+      <div class="two">${field('cdn', 'Business name', `<input id="cdn" name="delivery_name" value="${esc(v.delivery_name)}" autocomplete="off">`)}
+      ${field('cda', 'Delivery address (empty = they pick up)', `<input id="cda" name="delivery_address" value="${esc(v.delivery_address)}" autocomplete="off">`)}</div>
+      <p class="muted">With an address, the calendar, Day sheet and card say Delivery and Collect at that address. Add "+ Delivery fee" on the invoice for the charge.</p></fieldset>` : ''}
       <p class="muted">Their bookings and any invoice not yet void change to match. Nothing is sent to them.</p>
       ${save('edit.saveCustomer', 'Save customer details')}`)}</section>`;
 }
@@ -485,10 +490,12 @@ async function saveCustomer({ db, f, d, key, rk }) {
   const was = customerValues(d.r);
   const next = {};
   for (const k of DETAIL_FIELDS) next[k] = String(f.get(k) ?? was[k]).trim().slice(0, k === 'notes' ? 4000 : 500);
-  const out = DETAIL_FIELDS.filter((k) => next[k] !== was[k]).map((k) => changed({ name: 'Name', phone: 'Phone', email: 'Email', address: 'Address', notes: 'Their notes' }[k], was[k], next[k]));
+  const out = DETAIL_FIELDS.filter((k) => next[k] !== was[k]).map((k) => changed({ name: 'Name', phone: 'Phone', email: 'Email', address: 'Address', notes: 'Their notes', delivery_name: 'Business delivery name', delivery_address: 'Business delivery address' }[k], was[k], next[k]));
   if (!out.length) return back(rk, 'customer', 'Nothing changed.');
   const edits = { ...(d.r.detailsEdits || {}) };
   for (const k of DETAIL_FIELDS) if (next[k] !== was[k]) edits[k] = next[k];
+  // Business delivery is one fact: both halves are stored together (requests.mjs applyEdits).
+  if (next.delivery_name !== was.delivery_name || next.delivery_address !== was.delivery_address) { edits.delivery_name = next.delivery_name; edits.delivery_address = next.delivery_address; }
   await db.prepare('UPDATE requests SET details_edits = ?2, name = ?3, phone = ?4, email = ?5, name_norm = ?6, phone_digits = ?7 WHERE request_key = ?1')
     .bind(key, JSON.stringify(edits), next.name, next.phone, next.email, C.normName(next.name), C.digitsOf(next.phone)).run();
   // Their bookings (calendar, Google Calendar, reminders, Bookings tab) and live invoices follow.
@@ -497,6 +504,11 @@ async function saveCustomer({ db, f, d, key, rk }) {
     .bind(key, next.name, next.phone, next.email, C.normName(next.name), C.digitsOf(next.phone), was.address, next.address).run();
   await db.prepare("UPDATE invoices SET customer_name = ?2, customer_phone = ?3, customer_email = ?4, name_norm = ?5, updated_at = datetime('now') WHERE request_key = ?1 AND status <> 'void'")
     .bind(key, next.name, next.phone, next.email, C.normName(next.name)).run();
+  // The rental pickup / return go to the business address, or back to the safe exchange zone.
+  if (next.delivery_address !== was.delivery_address) {
+    await db.prepare(`UPDATE bookings SET place = ?3, updated_at = datetime('now') WHERE request_key = ?1 AND kind IN ('rental_pickup', 'rental_return') AND (place = ?2 OR place = '' OR place = ?4)`)
+      .bind(key, was.delivery_address || TRACK_TABLE.pickupPlace, next.delivery_address || TRACK_TABLE.pickupPlace, TRACK_TABLE.pickupPlace).run();
+  }
   for (const line of out) await log(db, key, line);
   return back(rk, 'customer', 'Customer details saved ✓ Nothing was sent to them.');
 }
