@@ -1,24 +1,19 @@
-// The Monday summary email to Valerie (owner-approved 18 Oct 2026, JOB B). Automatic every
-// Monday at 7:00 AM America/Chicago from the pnp-mailer hourly cron (12:00 UTC in daylight time,
-// 13:00 UTC in standard time: only the run whose Memphis weekday is Monday and hour is 7 sends),
-// to the Settings day-list email, switchable in Settings (default ON), and on demand from
-// Settings ("Send me this week's summary now"). Idempotent per week: the run claims
-// settings.weekly_summary_week = <Monday ISO> before sending, so a retried cron never sends twice.
-// Customers appear as first name + last initial only; every line links into /admin.
-import { fromRow, weekCounts, SERVICE_KEYS, SERVICE_WORDS, idOnFile } from './requests.mjs';
+// The Monday figures for Valerie (owner-approved 18 Oct 2026, JOB B). Since 19 Oct 2026 there is
+// no separate Monday email: the daily 7 AM to-do email (todo-email.mjs) carries a "Your week" box
+// on Mondays with last week's new requests, jobs done, money in, tips, expenses and the jobs in
+// the next 14 days, read from weeklyData here. Settings -> weekly_summary (default ON) now means
+// "include Your week on Mondays". Customers appear as first name + last initial only.
+import { fromRow, weekCounts, idOnFile } from './requests.mjs';
 import { notPaidYet } from './notpaid.mjs';
 import { listBookings, loadReturns, rentalWindows, usageOn, overdueReturns, addDays, outBetween } from './calendar.mjs';
 import { KIND_LABELS } from './kinds.mjs';
 import { currentHolds, endingSoon } from './holds.mjs';
-import { chicagoDate, chicagoHour } from './reminders.mjs';
 import { balances } from './ledger.mjs';
 import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
 import { unconfirmedKeys, loadStored } from './steps.mjs';
-import { getSettings, money, esc, FROM_EMAIL } from './util.mjs';
-import { useInventory } from './inventory.mjs';
+import { getSettings } from './util.mjs';
 import { TRACK_TABLE as PRICE_TABLE } from './prices.mjs';
 
-const SITE = 'https://porchandparty901.com';
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 export function mondayOfIso(iso) {
@@ -33,12 +28,6 @@ export function shortName(name) {
   const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return 'No name';
   return parts.length > 1 ? `${parts[0]} ${parts[parts.length - 1][0].toUpperCase()}.` : parts[0];
-}
-
-// Is `now` the Monday 7 AM Memphis run?
-export function isSummaryHour(now = new Date()) {
-  const today = chicagoDate(now);
-  return new Date(`${today}T12:00:00Z`).getUTCDay() === 1 && chicagoHour(now) === 7;
 }
 
 // Everything the summary says, from D1. today = a Memphis date in the week being summarised.
@@ -108,6 +97,8 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
   const unconfirmed = requests.filter((r) => unconf.has(r.key));
   return {
     week: { start: thisMon, end: thisSun }, upcoming: { start: thisMon, end: lastDay }, lastWeek: { start: lastMon, end: lastSun },
+    // Jobs in the next 14 days (the "Your week" box): every live booking in the window.
+    upcomingJobs: week.length,
     last: { byService: wk.lastByService, total: wk.lastWeek.length, jobsDone, received, tips, expenses },
     this: { days, toCollect: toCollect.reduce((s, r) => s + r.owed, 0), toCollectCount: toCollect.length },
     needs: {
@@ -116,71 +107,4 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
       receipts, notPaid: { count: np.count, total: np.total }, unconfirmed: unconfirmed.map((r) => shortName(r.name)),
     },
   };
-}
-
-// The email: subject, html, text. Plain words, links into /admin.
-export function renderSummary(d) {
-  const L = [];
-  const H = [];
-  const sec = (title) => { L.push('', title.toUpperCase()); H.push(`<h2 style="font-family:Georgia,serif;font-size:22px;margin:22px 0 6px;">${esc(title)}</h2>`); };
-  const line = (text, href = '') => { L.push(`- ${text}${href ? ` (${SITE}${href})` : ''}`); H.push(`<p style="margin:4px 0;">${href ? `<a href="${SITE}${esc(href)}" style="color:#b85f40;">${esc(text)}</a>` : esc(text)}</p>`); };
-  const svc = SERVICE_KEYS.filter((k) => d.last.byService[k]).map((k) => `${d.last.byService[k]} ${SERVICE_WORDS[k]}`).join(', ');
-  sec(`Last week (${dayWord(d.lastWeek.start)} – ${dayWord(d.lastWeek.end)})`);
-  line(`New requests: ${d.last.total}${svc ? ` (${svc})` : ''}`, '/admin/');
-  line(`Jobs done: ${d.last.jobsDone}`, '/admin/calendar');
-  line(`Money received: ${money(d.last.received)} · tips: ${money(d.last.tips || 0)}`, '/admin/money');
-  line(`Expenses: ${money(d.last.expenses)}`, '/admin/money');
-  sec(`Next 14 days (${dayWord(d.upcoming.start)} – ${dayWord(d.upcoming.end)})`);
-  if (!d.this.days.length) line('Nothing booked in the next 14 days.', '/admin/calendar');
-  for (const day of d.this.days) {
-    const what = day.bookings.map((b) => `${b.kind}: ${b.who}${b.time ? ` at ${b.time}` : ''}`).join('; ');
-    line(`${dayWord(day.date)}: ${what || 'no bookings'}${day.games ? ` · ${day.games} ${day.games === 1 ? 'game' : 'games'} out` : ''}`, `/admin/day/${day.date}`);
-  }
-  line(`Still to collect from these customers: ${money(d.this.toCollect)}${d.this.toCollectCount ? ` (${d.this.toCollectCount})` : ''}`, '/admin/money#not-paid');
-  sec('Needs you');
-  const n = d.needs;
-  const list = (label, names, href) => { if (names.length) line(`${label}: ${names.length} (${names.join(', ')})`, href); };
-  list('Holds ending soon', n.holds, '/admin/calendar');
-  list('Games not returned yet', n.overdue, '/admin/calendar');
-  list('Damage to decide (refund or keep the deposit)', n.damage, '/admin/');
-  list('Takedowns to schedule', n.takedownsToSchedule || [], '/admin/calendar#takedowns-to-schedule');
-  list('Takedowns not decided', n.takedowns, '/admin/calendar#still-to-decide');
-  list('Unconfirmed requests', n.unconfirmed || [], '/admin/calendar');
-  list('No reply after 2 days', n.noReply, '/admin/');
-  list('IDs ready to delete', n.idsReady, '/admin/');
-  if (n.receipts) line(`Receipts needing checking: ${n.receipts}`, '/admin/money');
-  if (n.notPaid.count) line(`Not paid yet: ${n.notPaid.count} ${n.notPaid.count === 1 ? 'customer owes' : 'customers owe'} ${money(n.notPaid.total)}`, '/admin/money#not-paid');
-  if (L[L.length - 1] === 'NEEDS YOU') line('Nothing needs you this week.');
-  const subject = `Your week at Porch & Party: ${dayWord(d.week.start)}`;
-  const text = [`Good morning Valerie, here is your week.`, ...L, '', `Open the console: ${SITE}/admin/`].join('\n');
-  const html = `<!doctype html><html><body style="margin:0;background:#faf7f2;"><div style="max-width:600px;margin:0 auto;padding:20px;font-family:Inter,Arial,sans-serif;font-size:16px;color:#3b302a;">
-<div style="font-family:Georgia,serif;font-size:28px;">Porch &amp; Party</div><p>Good morning Valerie, here is your week.</p>${H.join('')}
-<p style="margin-top:22px;"><a href="${SITE}/admin/" style="color:#b85f40;font-weight:600;">Open the console</a></p></div></body></html>`;
-  return { subject, text, html };
-}
-
-// Send it. force: the Settings button (sends even if this week's already went, and does not
-// claim the week). Returns { ok, skipped?, error? }.
-export async function sendWeeklySummary(env, { now = new Date(), force = false, send } = {}) {
-  const db = env.DB;
-  await useInventory(env); // the games counts follow Settings -> Inventory
-  const settings = await getSettings(db);
-  if (!force && settings.weekly_summary === '0') return { ok: true, skipped: 'switched off in Settings' };
-  const today = chicagoDate(now);
-  const week = mondayOfIso(today);
-  if (!force) {
-    const claim = await db.prepare(`INSERT INTO settings (key, value) VALUES ('weekly_summary_week', ?1)
-      ON CONFLICT(key) DO UPDATE SET value = excluded.value WHERE settings.value <> excluded.value`).bind(week).run();
-    if (!(claim && claim.meta && claim.meta.changes)) return { ok: true, skipped: `already sent for the week of ${week}` };
-  }
-  const msg = renderSummary(await weeklyData(db, today, now.getTime()));
-  const to = settings.day_list_email || FROM_EMAIL;
-  try {
-    const ok = await send({ to, subject: msg.subject, html: msg.html, text: msg.text });
-    if (!ok) throw new Error('the mailer did not accept it');
-    return { ok: true, to, week };
-  } catch (e) {
-    if (!force) await db.prepare("DELETE FROM settings WHERE key = 'weekly_summary_week' AND value = ?1").bind(week).run();
-    return { ok: false, error: String(e && e.message ? e.message : e) };
-  }
 }

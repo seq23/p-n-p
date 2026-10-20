@@ -222,11 +222,13 @@ await db.prepare("INSERT INTO payments (invoice_id, amount_cents, received_on, m
 await db.prepare("INSERT INTO tips (amount_cents, date, method) VALUES (2500, '2026-10-15', 'cash'), (600, '2026-10-20', 'cash')").run();
 await db.prepare("INSERT INTO tips (amount_cents, date, method, removed_at) VALUES (999, '2026-10-16', 'cash', datetime('now'))").run();
 const wd = await W.weeklyData(db, '2026-10-19');
-const wk = W.renderSummary(wd);
+const TD = await mod('functions/_lib/todo-email.mjs');
+const wk = TD.renderTodo(await TD.todoData(db, '2026-10-19'));
 const paidLast = (await s.one("SELECT SUM(amount_cents) AS c FROM payments WHERE voided_at IS NULL AND kind = 'payment' AND received_on BETWEEN '2026-10-12' AND '2026-10-18'")).c || 0;
 const tipsLast = (await s.one("SELECT SUM(amount_cents) AS c FROM tips WHERE removed_at IS NULL AND date BETWEEN '2026-10-12' AND '2026-10-18'")).c || 0;
 must(wd.last.tips === tipsLast && wd.last.received === paidLast, `weekly last-week tips ${wd.last.tips} (want ${tipsLast}) / received ${wd.last.received} (want ${paidLast}; tips never in it)`);
-must(wk.text.includes(`- Money received: ${usd(paidLast)} · tips: ${usd(tipsLast)} (`) && wk.html.includes(`Money received: ${usd(paidLast)} · tips: ${usd(tipsLast)}`), 'the Monday summary money line lacks the separate tips figure');
+const u0 = (c) => usd(c).replace(/\.00$/, '');
+must(wk.text.includes(`- Money in last week: ${u0(paidLast)}\n- Tips: ${u0(tipsLast)}\n`) && wk.html.includes(`Money in last week</td><td style="padding:4px 0;border-bottom:1px solid #ece4da;text-align:right;font-weight:700;">${u0(paidLast)}<`) && wk.html.includes(`>Tips</td><td style="padding:4px 0;border-bottom:1px solid #ece4da;text-align:right;font-weight:700;">${u0(tipsLast)}<`), 'the Monday email Your week lacks money in and the separate tips figure');
 
 // 7. Nothing that was on Money before is missing.
 const page = (await s.get('/admin/money?month=2026-10')).text;

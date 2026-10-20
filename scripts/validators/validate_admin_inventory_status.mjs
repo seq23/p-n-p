@@ -193,12 +193,13 @@ must(secs.length === 8 && secs.every((x) => x[2].trim().split(/(?<=[.!?])\s/).le
 must(/window\.matchMedia\('\(max-width:700px\)'\)[\s\S]*d\.open=false/.test(set.text), 'Settings sections do not fold on a phone');
 must(/<details class="set-sec" id="inventory"[\s\S]*?href="\/admin\/inventory"/.test(set.text), 'Settings -> Inventory does not link to /admin/inventory');
 // Everything the Settings page had before the calm layout (19 Oct 2026, 4d43d25): form actions,
-// field names and buttons.
-const ACTIONS = ['/admin/settings', '/admin/settings/calendar-token', '/admin/settings/weekly', '/admin/settings/weekly-now', '/admin/settings/sheet-sync', '/admin/settings/holds', '/admin/settings/categories', '/admin/settings/password'];
+// field names and buttons. The Monday "send now" became the daily to-do email's "Send me today's
+// list now" (todo-now) with its own on/off (todo), 19 Oct 2026.
+const ACTIONS = ['/admin/settings', '/admin/settings/calendar-token', '/admin/settings/weekly', '/admin/settings/todo', '/admin/settings/todo-now', '/admin/settings/sheet-sync', '/admin/settings/holds', '/admin/settings/categories', '/admin/settings/password'];
 for (const a of ACTIONS) must(set.text.includes(`action="${a}"`), `Settings lost the form posting to ${a}`);
-const FIELDS = ['zelle', 'cashapp', 'qr', 'business_name', 'business_address', 'id_folder_url', 'day_list_phone', 'day_list_email', 'weekly_summary', 'hold_hours', 'hold_auto_expire', 'hold_reminder', 'hold_reminder_hours', 'hold_soon_hours', 'categories', 'current', 'next', 'confirm'];
+const FIELDS = ['zelle', 'cashapp', 'qr', 'business_name', 'business_address', 'id_folder_url', 'day_list_phone', 'day_list_email', 'weekly_summary', 'todo_email', 'hold_hours', 'hold_auto_expire', 'hold_reminder', 'hold_reminder_hours', 'hold_soon_hours', 'categories', 'current', 'next', 'confirm'];
 for (const f of FIELDS) must(set.text.includes(`name="${f}"`), `Settings lost the field ${f}`);
-const BUTTONS = ['set.save', 'set.saveDayList', 'set.weeklyToggle', 'set.weeklyNow', 'set.sheetSync', 'set.holds', 'set.categories', 'set.passwordSave', 'set.newToken', 'cal.link', 'set.business', 'set.password', 'set.inventoryLink'];
+const BUTTONS = ['set.save', 'set.saveDayList', 'set.weeklyToggle', 'set.todoToggle', 'set.todoNow', 'set.sheetSync', 'set.holds', 'set.categories', 'set.passwordSave', 'set.newToken', 'cal.link', 'set.business', 'set.password', 'set.inventoryLink'];
 for (const b of BUTTONS) must(set.text.includes(`data-help="${b}"`), `Settings lost the ${b} control`);
 must(/data-inv-status/.test(set.text) && /<details class="set-sec" id="website"[\s\S]*?data-inv-status/.test(set.text), 'Settings has no Website auto-update status box');
 // Saving still works the same way.

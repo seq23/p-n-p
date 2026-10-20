@@ -61,6 +61,8 @@ Object.assign(TEMPLATES, {
   pickupTime: (ctx) => ({ subject: 'Your game pickup time — Porch & Party', lines: [`Hi ${first(ctx.name)}, this is Valerie with Porch & Party. What time works for your game pickup on ${ctx.day} at Mt. Moriah Station? Text me here and I will meet you there.`] }),
   // The day-before reminder (its wording lives in reminders.mjs REMINDER_TEMPLATES).
   reminder: (ctx) => ({ subject: `Reminder from Porch & Party: tomorrow, ${ctx.dayShort || ''}`.trim(), lines: [ctx.reminderText || `Hi ${first(ctx.name)}, this is Valerie with Porch & Party. Reminder: we have you booked for tomorrow. Text me here if anything changes.`] }),
+  // Valerie's daily to-do email, "Set a time" (owner-approved 19 Oct 2026): a booking with a day but no time.
+  setTime: (ctx) => ({ subject: 'What time works? — Porch & Party', lines: [`Hi ${first(ctx.name)}, it's Porch & Party. What time works for your ${ctx.job} on ${ctx.day}?`] }),
   // "Not paid yet" on Money: a friendly balance reminder (Text a reminder / Email a reminder).
   paymentReminder: (ctx) => ({ subject: `Friendly reminder: ${ctx.amount} still due — Porch & Party`, lines: [`Hi ${first(ctx.name)}, this is Valerie with Porch & Party. Friendly reminder: ${ctx.amount} is still due on invoice ${ctx.number}${ctx.due ? (ctx.late ? `, which was due ${ctx.due}` : `, due ${ctx.due}`) : ''}. It is the invoice I emailed or texted you; you can pay by Zelle or Cash App as it shows. Text me here with any questions. Thank you!`] }),
   // After the job (owner: no review ask, no discount, ever).

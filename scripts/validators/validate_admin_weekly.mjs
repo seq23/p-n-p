@@ -1,30 +1,32 @@
 #!/usr/bin/env node
 /**
- * The Monday summary email (JOB B, owner-approved 18 Oct 2026).
- *  1. Timing: only the hourly cron run that is Monday 7 AM America/Chicago sends (12:00 UTC in
- *     daylight time, 13:00 UTC in standard time), so daylight saving needs no change.
+ * The Monday summary (JOB B, owner-approved 18 Oct 2026), since 19 Oct 2026 the "Your week" box
+ * of the daily 7 AM to-do email (todo-email.mjs): Monday is ONE email.
+ *  1. Timing: the Monday 7 AM America/Chicago run (12:00 UTC in daylight time, 13:00 UTC in
+ *     standard time) carries Your week; no other day does; no separate weekly email ever goes.
  *  2. Window: "last week" is the Memphis Mon-Sun before this Monday; nothing outside it counts.
- *  3. Idempotent per week (a retried cron never sends twice); the next week sends again;
- *     switched off in Settings it never sends; "Send me this week's summary now" always sends.
+ *  3. Once per Monday (a retried cron never sends twice); the next Monday sends again; the
+ *     Settings switch off leaves Your week out of the Monday email (the to-do list still goes).
  *  4. No PII: first name + last initial only, never a phone number, email or full surname.
- *  5. Every section and line is there, with links into /admin.
+ *  5. Every figure of the box is there and matches weeklyData; the data keeps every line.
  * Rule 0: fewer than 30 checks is a failure.
  */
 import { mod } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
 
 const W = await mod('functions/_lib/weekly.mjs');
+const T = await mod('functions/_lib/todo-email.mjs');
 const mailer = await mod('workers/pnp-mailer/src/index.js');
 const errors = [];
 let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
 
 // ---- 1. timing ----------------------------------------------------------------------------
-must(W.isSummaryHour(new Date('2026-10-19T12:00:00Z')), 'Monday 12:00 UTC in daylight time (7 AM Memphis) is not the summary hour');
-must(!W.isSummaryHour(new Date('2026-10-19T13:00:00Z')), 'Monday 13:00 UTC in daylight time (8 AM Memphis) sends');
-must(W.isSummaryHour(new Date('2026-11-02T13:00:00Z')), 'Monday 13:00 UTC in standard time (7 AM Memphis) is not the summary hour');
-must(!W.isSummaryHour(new Date('2026-11-02T12:00:00Z')), 'Monday 12:00 UTC in standard time (6 AM Memphis) sends');
-must(!W.isSummaryHour(new Date('2026-10-18T12:00:00Z')) && !W.isSummaryHour(new Date('2026-10-20T12:00:00Z')), 'a day other than Monday sends');
+must(T.isTodoHour(new Date('2026-10-19T12:00:00Z')) && T.isMondayIso('2026-10-19'), 'Monday 12:00 UTC in daylight time (7 AM Memphis) is not the Monday email hour');
+must(!T.isTodoHour(new Date('2026-10-19T13:00:00Z')), 'Monday 13:00 UTC in daylight time (8 AM Memphis) sends');
+must(T.isTodoHour(new Date('2026-11-02T13:00:00Z')) && T.isMondayIso('2026-11-02'), 'Monday 13:00 UTC in standard time (7 AM Memphis) is not the Monday email hour');
+must(!T.isTodoHour(new Date('2026-11-02T12:00:00Z')), 'Monday 12:00 UTC in standard time (6 AM Memphis) sends');
+must(!T.isMondayIso('2026-10-18') && !T.isMondayIso('2026-10-20'), 'a day other than Monday counts as Monday');
 must(W.shortName('Jane Q. Doe') === 'Jane D.' && W.shortName('Cher') === 'Cher' && W.shortName('') === 'No name', 'shortName is not first name + last initial');
 must(W.mondayOfIso('2026-10-25') === '2026-10-19' && W.mondayOfIso('2026-10-19') === '2026-10-19', 'mondayOfIso is wrong');
 
@@ -52,10 +54,13 @@ must(d.needs.takedowns.includes('Weekend R.'), 'takedowns not decided missing');
 must(d.needs.noReply.includes('Weekend R.'), 'requests with no reply after 2 days missing');
 must(d.needs.receipts === 1, 'receipts needing checking missing');
 must(d.needs.notPaid.count >= 1 && d.needs.notPaid.total > 0, 'not paid yet missing');
-const msg = W.renderSummary(d);
-for (const h of ['LAST WEEK', 'NEXT 14 DAYS', 'NEEDS YOU']) must(msg.text.includes(h), `the summary has no "${h}" section`);
-for (const line of ['New requests: 2', 'Jobs done:', 'Money received: $123.00', 'Expenses: $42.17', 'Still to collect', 'Takedowns not decided: 1 (Weekend R.)', 'No reply after 2 days', 'Receipts needing checking: 1', 'Not paid yet:']) must(msg.text.includes(line), `the summary lacks "${line}"`);
-must(/https:\/\/porchandparty901\.com\/admin\/day\/2026-10-21/.test(msg.text) && /href="https:\/\/porchandparty901\.com\/admin\/money#not-paid"/.test(msg.html), 'the summary does not link into /admin');
+must(d.upcomingJobs === d.this.days.reduce((n, x) => n + x.bookings.filter((b) => b.kind !== 'Rental out').length, 0), `jobs in the next 14 days ${d.upcomingJobs} disagrees with the 14-day list`);
+const td = await T.todoData(db, '2026-10-19', Date.parse('2026-10-19T12:00:00Z'));
+const msg = T.renderTodo(td);
+must(td.week && td.week.newRequests === 2 && td.week.moneyIn === 12300 && td.week.expenses === 4217 && td.week.next14 === d.upcomingJobs && td.week.jobsDone === d.last.jobsDone, `Your week figures ${JSON.stringify(td.week)} differ from weeklyData`);
+for (const line of ['New requests last week: 2', 'Jobs done last week: ', 'Money in last week: $123', 'Tips: $0', 'Expenses: $42.17', `Jobs in the next 14 days: ${d.upcomingJobs}`]) must(msg.text.includes(line), `the Monday email lacks "${line}"`);
+must(/data-week[\s\S]*Your week \(Monday summary\)[\s\S]*Money in last week<\/td><td[^>]*>\$123</.test(msg.html), 'the Monday email has no Your week box');
+must(msg.subject === 'Your to-do list for Mon 19 Oct · Porch & Party', `the Monday subject is "${msg.subject}"`);
 // ---- 4. no PII ---------------------------------------------------------------------------------
 const people = [...s.requests, { name: 'Paula Porchington', phone: '901-555-0777' }, { name: 'Gary Gameson', phone: '901-555-0778' }];
 for (const p of people) {
@@ -65,28 +70,29 @@ for (const p of people) {
   if (p.phone) must(!msg.text.includes(String(p.phone).replace(/\D/g, '').slice(-7)) && !msg.text.includes(p.phone), `the summary shows ${p.name}'s phone`);
 }
 
-// ---- 3. idempotent per week, off switch, send now ------------------------------------------
+// ---- 3. once per Monday, off switch -------------------------------------------------------------
 const sent = [];
 const env = { ...s.env, EMAIL: { send: async (m) => { sent.push(m); return { messageId: 'x' }; } } };
+const mondays = () => sent.filter((m) => /^Your to-do list for Mon /.test(m.subject));
 const r1 = await mailer.runReminders(env, new Date('2026-10-19T12:00:00Z'));
-must(r1.weekly && r1.weekly.ok && sent.length === 1 && /Your week at Porch & Party/.test(sent[0].subject), `the Monday 7 AM cron did not send the summary (${JSON.stringify(r1.weekly)})`);
-must(sent[0].to === 'hello@porchandparty901.com', 'the summary did not go to the day-list email (default hello@)');
+must(r1.todo && r1.todo.ok && sent.length === 1 && mondays().length === 1 && /data-week/.test(sent[0].html), `the Monday 7 AM cron did not send ONE email with Your week (${JSON.stringify(r1.todo)})`);
+must(!sent.some((m) => /Your week at Porch & Party/.test(m.subject)), 'the separate weekly summary email was sent');
+must(sent[0].to === 'hello@porchandparty901.com', 'the Monday email did not go to the day-list email (default hello@)');
 const r2 = await mailer.runReminders(env, new Date('2026-10-19T12:00:00Z'));
-must(sent.length === 1 && /already sent/.test(r2.weekly && r2.weekly.skipped), 'a retried Monday run sent the summary twice');
+must(sent.length === 1 && /already sent/.test(r2.todo && r2.todo.skipped), 'a retried Monday run sent twice');
 await mailer.runReminders(env, new Date('2026-10-19T15:00:00Z'));
-must(sent.filter((m) => /Your week/.test(m.subject)).length === 1, 'a later Monday run sent the summary again');
+must(sent.length === 1, 'a later Monday run sent again');
+await mailer.runReminders(env, new Date('2026-10-20T12:00:00Z'));
+must(sent.length === 2 && !/data-week/.test(sent[1].html), 'the Tuesday email has Your week');
 await mailer.runReminders(env, new Date('2026-10-26T12:00:00Z'));
-must(sent.filter((m) => /Your week/.test(m.subject)).length === 2, 'the next Monday did not send');
+must(mondays().length === 2 && /data-week/.test(mondays()[1].html), 'the next Monday did not send Your week');
 await db.prepare("INSERT INTO settings (key, value) VALUES ('day_list_email', 'val@example.com') ON CONFLICT(key) DO UPDATE SET value = excluded.value").run();
 const off = await s.post('/admin/settings/weekly', { weekly_summary: '0' });
 must(off.status === 303 && (await s.one("SELECT value FROM settings WHERE key = 'weekly_summary'")).value === '0', 'the Settings switch did not turn the summary off');
-const r3 = await mailer.runReminders(env, new Date('2026-11-02T13:00:00Z'));
-must(/switched off/.test(r3.weekly && r3.weekly.skipped) && sent.filter((m) => /Your week/.test(m.subject)).length === 2, 'the summary was sent while switched off');
+await mailer.runReminders(env, new Date('2026-11-02T13:00:00Z'));
+must(mondays().length === 3 && !/data-week/.test(mondays()[2].html) && mondays()[2].to === 'val@example.com', 'with the summary off the Monday email still has Your week (or did not go)');
 const settingsPage = (await s.get('/admin/settings')).text;
-must(/data-weekly-settings[\s\S]*It is <strong>off<\/strong>[\s\S]*Turn the Monday summary on[\s\S]*Send me this week&#39;s summary now|data-weekly-settings[\s\S]*It is <strong>off<\/strong>[\s\S]*Turn the Monday summary on[\s\S]*Send me this week's summary now/.test(settingsPage), 'Settings lacks the on/off switch and "Send me this week\'s summary now"');
-const before = s.env.sent.length;
-const now = await s.post('/admin/settings/weekly-now', {});
-must(now.status === 303 && /on%20its%20way/.test(now.location) && s.env.sent.length === before + 1 && s.env.sent.at(-1).to === 'val@example.com' && /Your week/.test(s.env.sent.at(-1).subject), 'Send me this week\'s summary now did not send to the day-list email');
+must(/data-weekly-settings[\s\S]*It is <strong>off<\/strong>[\s\S]*Turn the Monday summary on/.test(settingsPage) && !/weekly-now/.test(settingsPage), 'Settings lacks the Monday summary switch (or still offers a separate weekly send)');
 await s.post('/admin/settings/weekly', { weekly_summary: '1' });
 must((await s.one("SELECT value FROM settings WHERE key = 'weekly_summary'")).value === '1', 'the switch did not turn the summary back on');
 // Default ON: a fresh database with no setting sends.
@@ -94,8 +100,8 @@ must(!(await (await session()).one("SELECT value FROM settings WHERE key = 'week
 // The cron is registered hourly and documented with the UTC hours.
 const fs = await import('node:fs');
 const toml = fs.readFileSync(new URL('../../workers/pnp-mailer/wrangler.toml', import.meta.url), 'utf8');
-must(/crons = \["0 \* \* \* \*"\]/.test(toml) && /12:00 UTC \(CDT\) or\s*\n?#?\s*13:00 UTC \(CST\)/.test(toml), 'wrangler.toml does not keep the hourly cron with the Monday 7 AM UTC hours documented');
+must(/crons = \["0 \* \* \* \*"\]/.test(toml) && /"Your week"\) goes in the run that is 7 AM America\/Chicago:\s*\n#\s*12:00 UTC \(CDT\) or 13:00 UTC \(CST\)/.test(toml), 'wrangler.toml does not keep the hourly cron with the Monday 7 AM UTC hours documented');
 
 if (checks < 30) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) { console.error(`VALIDATION FAIL: weekly summary (${errors.length} of ${checks})`); for (const e of errors) console.error(`- ${e}`); process.exit(1); }
-console.log(`validate_admin_weekly: OK (${checks} checks: Monday 7 AM Memphis in CDT and CST, windows, idempotent per week, off switch, send now, no PII, sections and links)`);
+console.log(`validate_admin_weekly: OK (${checks} checks: Monday 7 AM Memphis in CDT and CST, one Monday email with Your week, windows, once per Monday, off switch, no PII, figures match)`);
