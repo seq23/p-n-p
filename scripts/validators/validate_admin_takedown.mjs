@@ -172,7 +172,13 @@ must(!/Dee Takedown/.test(boxOf((await s.get(`/admin/day/${plus(5)}`)).text)), '
 const wk = await W.weeklyData(s.db, today, Date.now());
 must((wk.needs.takedownsToSchedule || []).some((x) => /^Dee T\./.test(x)), 'the Monday summary "Needs you" misses the takedown to schedule');
 {
+  const ST = await mod('functions/_lib/steps.mjs');
+  const dee = (await TODO.todoData(s.db, today, Date.now()));
+  const deeKey = (dee.sections[2].find((x) => /^Dee T\./.test(x.t)) || {}).key;
+  must(deeKey && !dee.sections[4].some((x) => x.key === deeKey), 'before the call back, the takedown to schedule is not part of "Call these people back" (it shows in Book it or decide)');
+  if (deeKey) await ST.markCalled(s.db, deeKey, { how: 'test' });
   const tdd = await TODO.todoData(s.db, today, Date.now());
+  if (deeKey) await ST.undoCalled(s.db, deeKey);
   const row = tdd.sections[4].find((x) => x.type === 'takedown' && /^Dee T\. · porch takedown$/.test(x.t));
   must(row && row.btns.map((b) => b.label).join() === 'Schedule takedown,Not needed' && /data-section="4"[\s\S]*Dee T\. · porch takedown[\s\S]*Schedule takedown/.test(TODO.renderTodo(tdd).html), 'the daily to-do email has no "Schedule takedown" line for the takedown to schedule');
 }
