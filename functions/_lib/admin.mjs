@@ -578,9 +578,9 @@ async function changePassword(env, request) {
 async function idPhoto(env, url) {
   const key = decodeKey(url.searchParams.get('r') || '');
   const row = key ? await env.DB.prepare('SELECT id_object, id_type, id_deleted_at FROM requests WHERE request_key = ?1').bind(key).first() : null;
-  if (!row || !row.id_object || row.id_deleted_at || !env.IDS) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
+  if (!row || !row.id_object || row.id_deleted_at || !env.IDS) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to main page' } }), 404);
   const obj = await env.IDS.get(row.id_object);
-  if (!obj) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
+  if (!obj) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to main page' } }), 404);
   return new Response(obj.body, { headers: { 'Content-Type': row.id_type || 'image/jpeg', 'Cache-Control': 'private, no-store', 'Content-Disposition': 'inline; filename="photo-id"' } });
 }
 
@@ -589,7 +589,7 @@ async function idPhoto(env, url) {
 async function idPhotoView(env, url) {
   const key = decodeKey(url.searchParams.get('r') || '');
   const row = key ? await env.DB.prepare('SELECT name, id_object, id_deleted_at FROM requests WHERE request_key = ?1').bind(key).first() : null;
-  if (!row || !row.id_object || row.id_deleted_at) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request.</p>', { screen: 'notfound', back: { href: key ? `/admin/#c-${b64urlText(key)}` : '/admin/', label: 'Back to requests' } }), 404, { 'Cache-Control': 'private, no-store' });
+  if (!row || !row.id_object || row.id_deleted_at) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request.</p>', { screen: 'notfound', back: { href: key ? `/admin/#c-${b64urlText(key)}` : '/admin/', label: 'Back to main page' } }), 404, { 'Cache-Control': 'private, no-store' });
   return htmlResponse(V.idPhotoPage(row, b64urlText(key)), 200, { 'Cache-Control': 'private, no-store' });
 }
 
@@ -790,12 +790,12 @@ export async function handleAdmin(context) {
   const later = (p) => { if (typeof context.waitUntil === 'function') context.waitUntil(p.catch(() => {})); };
   if (method === 'POST' && res.status < 400 && !NO_SYNC.test(url.pathname.replace(/\/+$/, ''))) later(AM.syncSafely(env));
   if (method === 'GET' && res.status === 200 && /text\/html/.test(res.headers.get('Content-Type') || '') && env.DB && await isAuthed(request, env)) {
-    // The tab badge: "2 holds ending soon" on Requests and Calendar & Bookings.
+    // The tab badge: "2 holds ending soon" on Customers (main page) and Calendar & Bookings.
     let soon = 0;
     try { soon = endingSoon(await currentHolds(env.DB), Date.now(), await getSettings(env.DB)).length; } catch { soon = 0; }
     if (soon) {
       const badge = `<span class="navbadge" data-holds-badge> ${soon} ${soon === 1 ? 'hold' : 'holds'} ending soon</span>`;
-      const html = (await res.text()).replace(/(<a href="\/admin\/"[^>]*>Requests)(<\/a>)/, `$1${badge}$2`).replace(/(<a href="\/admin\/calendar"[^>]*>Calendar &amp; Bookings)(<\/a>)/, `$1${badge}$2`)
+      const html = (await res.text()).replace(/(<a href="\/admin\/"[^>]*>Customers \(main page\))(<\/a>)/, `$1${badge}$2`).replace(/(<a href="\/admin\/calendar"[^>]*>Calendar &amp; Bookings)(<\/a>)/, `$1${badge}$2`)
         .replace('</style>', '.navbadge{background:#fff3dc;color:#7a4a0c;border:1px solid #ebcf96;border-radius:999px;padding:0 6px;font-size:.8rem;font-weight:700;margin-left:4px}</style>');
       res = new Response(html, { status: res.status, headers: res.headers });
     }
@@ -1076,7 +1076,7 @@ async function routeAdmin(context) {
       return redirect('/admin/settings?m=Hold settings saved ✓');
     }
   }
-  return htmlResponse(V.layout('Not found', '<p>Nothing here.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
+  return htmlResponse(V.layout('Not found', '<p>Nothing here.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to main page' } }), 404);
 }
 
 // ---- Settings -> Inventory (functions/_lib/inventory.mjs) ----------------------------------------

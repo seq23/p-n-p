@@ -165,7 +165,9 @@ for (const [p, current] of SCREENS) {
   must((nav.match(/<a href="\/admin\//g) || []).length === 7 && /Sign out<\/button>/.test(nav), `${p}: the panel does not hold every nav item`);
   const marked = [...nav.matchAll(/<a href="([^"]+)" aria-current="page"/g)].map((m) => m[1]);
   must(JSON.stringify(marked) === JSON.stringify(current ? [current] : []), `${p}: the current screen marked is ${JSON.stringify(marked)}`);
-  must(/<nav class="adminbar noprint" aria-label="Back" data-adminbar>/.test(t), `${p}: the ← Back bar is gone`);
+  // The main page has no ← Back, it says it is the main page; every other screen keeps the ← Back bar.
+  if (p === '/admin/') must(/<div class="adminbar mainhead" data-adminbar data-mainpage><h1>Main page: Customers<small>Every request, newest first<\/small><\/h1><\/div>/.test(t) && !/&larr; Back|\sdata-back[\s>]|aria-label="Back"/.test(t), `${p}: the main page has a ← Back, or lacks "Main page: Customers"`);
+  else must(/<nav class="adminbar noprint" aria-label="Back" data-adminbar>/.test(t) && !/data-mainpage/.test(t), `${p}: the ← Back bar is gone`);
   must(/header\.top\.open \.navpanel,header\.top:target \.navpanel\{display:block\}/.test(t) && /header\.top \.navpanel\{display:none;flex-basis:100%/.test(t) && /@media\(max-width:899px\)\{header\.top\{/.test(t), `${p}: the menu panel is not hidden on a phone with a :target (no-JS) and .open fallback`);
   must(/header\.top\.open \.mclose,header\.top:target \.mclose\{display:inline-flex\}/.test(t) && /header\.top\.open \.mopen,header\.top:target \.mopen\{display:none\}/.test(t), `${p}: the button does not become "✕ Close menu" when open`);
   must(/\.menubtn\{display:none\}/.test(t), `${p}: the Menu button shows on a laptop`);

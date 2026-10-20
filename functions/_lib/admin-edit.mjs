@@ -243,13 +243,13 @@ export function editPageHtml(d, { flash = '', error = '', warn = '' } = {}) {
     <p style="font-size:1.15rem"><strong>${esc(d.r.name || 'No name given')}</strong> · now: ${esc(STEP_WORDS[currentStep(d)])}${d.pr.finished ? ' · Finished' : ''}${d.st.archived_at ? ' · Put away' : ''}</p>
     ${bookingsSection(d, rk)}${datesSection(d, rk)}${invoiceSection(d, rk)}${paymentsSection(d, rk)}${statusSection(d, rk)}${customerSection(d, rk)}
     ${ev ? `<section class="card" data-edit-history><h2>History</h2><ul>${ev}</ul></section>` : ''}</div>`;
-  return V.layout('Change anything on this request', body, { screen: 'edit', back: { href: d.st.archived_at ? '/admin/?pa=1#put-away' : `/admin/#c-${rk}`, label: 'Back to requests' } });
+  return V.layout('Change anything on this request', body, { screen: 'edit', back: { href: d.st.archived_at ? '/admin/?pa=1#put-away' : `/admin/#c-${rk}`, label: 'Back to main page' } });
 }
 
 export async function editPage(env, url) {
   const key = decodeKey(url.searchParams.get('r'));
   const d = key ? await loadEdit(env, key) : null;
-  if (!d) return htmlResponse(V.layout('Not found', '<p>That request was not found.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to requests' } }), 404);
+  if (!d) return htmlResponse(V.layout('Not found', '<p>That request was not found.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to main page' } }), 404);
   return htmlResponse(editPageHtml(d, { flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', warn: url.searchParams.get('w') || '' }));
 }
 

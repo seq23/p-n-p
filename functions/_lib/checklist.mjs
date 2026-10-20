@@ -114,7 +114,7 @@ td[data-field]{font-family:var(--serif);font-size:13px}
 
 export function renderPrintPage(source, values = {}, { who = '', onlineHref = '' } = {}) {
   const { html } = annotate(source, values);
-  const toolbar = `<div class="pp-toolbar"><a href="/admin/"${tip('nav.back')}>&larr; Back to requests</a><button type="button" onclick="window.print()"${tip('cl.printNow')}>Print</button>
+  const toolbar = `<div class="pp-toolbar"><a href="/admin/"${tip('nav.back')}>&larr; Back to main page</a><button type="button" onclick="window.print()"${tip('cl.printNow')}>Print</button>
 ${onlineHref ? `<a href="${esc(onlineHref)}"${tip('cl.openOnline')}>Open online checklist</a>` : ''}<a href="/admin/help"${tip('nav.help')}>How to use this</a>
 ${stepsBar('checklistPrint')}
 <span>${who ? `Pre-filled for ${esc(who)}` : 'Blank checklist'}</span></div>`;

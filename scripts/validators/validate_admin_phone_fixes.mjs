@@ -229,11 +229,17 @@ const img = await get(`/admin/requests/id?r=${rkId}`);
 must(img.status === 200 && /no-store/.test(img.headers.get('Cache-Control') || ''), 'the private photo route lost no-store');
 
 // ---- 6. The top bar everywhere, and actions land on the card ----------------------------------
-for (const p of ['/admin/', '/admin/inventory', '/admin/inventory/giant-uno', '/admin/calendar', '/admin/money', '/admin/settings', '/admin/help', '/admin/pricing', '/admin/invoices', `/admin/requests/edit?r=${rkId}`, `/admin/requests/id/view?r=${rkId}`]) {
+const labels = new Set();
+for (const p of ['/admin/inventory', '/admin/inventory/giant-uno', '/admin/calendar', '/admin/money', '/admin/settings', '/admin/help', '/admin/pricing', '/admin/invoices', `/admin/requests/edit?r=${rkId}`, `/admin/requests/id/view?r=${rkId}`]) {
   const r = await get(p);
-  must(/<nav class="adminbar noprint" aria-label="Back" data-adminbar><a class="back" href="\/admin\/[^"]*" data-back[^>]*>&larr; Back<\/a><span class="where" data-where>[^<]+<\/span><\/nav>/.test(r.text), `${p}: no top bar with ← Back and where you are`);
+  // "← Back to main page" when Back goes to /admin/ (any card on it), "← Back" anywhere else.
+  const bar = r.text.match(/<nav class="adminbar noprint" aria-label="Back" data-adminbar><a class="back" href="(\/admin\/[^"]*)" data-back[^>]*>&larr; ([^<]+)<\/a><span class="where" data-where>[^<]+<\/span><\/nav>/);
+  must(bar && bar[2] === (/^\/admin\/(?:[?#]|$)/.test(bar[1]) ? 'Back to main page' : 'Back'), `${p}: no top bar with ← Back (to main page when it goes there) and where you are: ${bar ? bar.slice(1).join(' -> ') : 'none'}`);
+  if (bar) labels.add(bar[2]);
   must(/history\.back\(\)/.test(r.text) && /r\.origin===location\.origin/.test(r.text), `${p}: Back does not use the history when she came from an admin screen`);
 }
+must(labels.has('Back to main page') && labels.has('Back'), `the screens do not show both "← Back to main page" and plain "← Back": ${[...labels]}`);
+{ const home = (await get('/admin/')).text; must(/data-mainpage><h1>Main page: Customers<small>Every request, newest first<\/small><\/h1>/.test(home) && !/&larr; Back|\sdata-back[\s>]/.test(home), '/admin/: the main page has a ← Back, or does not say "Main page: Customers"'); }
 must(/data-where>Inventory</.test(html) && /href="\/admin\/inventory" data-back/.test((await get('/admin/inventory/giant-uno')).text), 'the bar does not say where she is, or an item page Back has no parent');
 const loc = (r) => r.location || '';
 const card = `#c-${rkId}`;

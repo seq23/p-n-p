@@ -7,7 +7,7 @@
  *     list on a phone, CSS order, and stay on top from 900 px);
  *  2. tomorrow's reminders are not ONE collapsed tappable line ("N reminders", a <details>) AFTER
  *     the list, or the Calendar loses its open reminders box;
- *  3. a new website request does not wear NEW on its card and in the week card's collapsed line,
+ *  3. a new website request does not wear NEW on its card and in the week banner (newest first),
  *     or keeps it after the badge is tapped, after Edit is opened, or once acted on (an invoice);
  *     or a phone-call request, or a request already in D1 before migration 0016, wears it;
  *  4. (19 Oct 2026 repair) a website RENTAL request, which gets a draft invoice at submit, does not
@@ -85,9 +85,11 @@ must((step4.match(/data-reminder="/g) || []).length === 3 && (cal.match(/data-re
 must(/data-reqcard data-new/.test(cardOf(dash, rkA)) && /data-new-badge[^>]*>NEW</.test(cardOf(dash, rkA)), 'a new website request does not wear NEW');
 must(/data-new-badge[^>]*>NEW</.test(cardOf(dash, rkB)), 'the second new request does not wear NEW');
 const week = dash.slice(at('data-week-counts'), dash.indexOf('</section>', at('data-week-counts')));
-const summary = week.slice(week.indexOf('<summary'), week.indexOf('</summary>'));
-must(/Latest: Olive Other/.test(summary) && /data-new-count>2 NEW</.test(summary), `the week card's collapsed line does not name the latest and show "2 NEW": ${summary}`);
-must((week.match(/data-new-count>NEW</g) || []).length === 2, 'the week list does not mark each new request NEW');
+// The week banner (owner-approved mock-up, 20 Oct 2026): nothing to open, newest first, NEW on each unopened one.
+const wkNew = (html) => { const w = html.slice(html.indexOf('data-week-counts'), html.indexOf('</section>', html.indexOf('data-week-counts'))); return [...w.matchAll(/data-week-new="([^"]+)">NEW<\/span><a href="#c-\1"/g)].map((m) => m[1]); };
+must(!/<details|<summary|▾|▸/.test(week) && /<span class="wkhead">This week: [1-9]\d* new<\/span> <span class="muted">· last week \d+<\/span>/.test(week), `the week banner is not a thin "This week: N new · last week M" line with nothing to open: ${week.slice(0, 300)}`);
+must(JSON.stringify(wkNew(dash)) === JSON.stringify([rkB, rkA]) && week.indexOf('>Olive O.</a>') > 0, `the week banner does not mark each new request NEW, newest first: ${wkNew(dash)}`);
+must(dash.includes(`var w=document.querySelector('[data-week-new="'+card.getAttribute('data-card')+'"]');if(w)w.remove();`), 'opening a card does not take its NEW off the week banner');
 must(/requests\/opened/.test(dash) && /location\.hash/.test(dash), 'the page does not clear NEW when a card is opened or reached from the email link');
 must(before.every((r) => dash.includes(`id="c-${s.rk(r.request_key)}"`) && !cardOf(dash, s.rk(r.request_key)).includes('data-new-badge')), 'a request stored (and backfilled) before 16 Oct wears NEW, or is missing from the list');
 // Badge tap.
@@ -96,7 +98,7 @@ must(tap.status === 200 && JSON.parse(tap.text).recorded === true, 'tapping the 
 must(JSON.parse((await s.post('/admin/requests/opened', { r: rkA })).text).recorded === false, 'opening twice records twice');
 dash = (await s.get('/admin/')).text;
 must(!cardOf(dash, rkA).includes('data-new-badge') && cardOf(dash, rkB).includes('data-new-badge'), 'NEW did not clear on the tapped card only');
-must(/data-new-count>NEW</.test(dash.slice(dash.indexOf('<summary', dash.indexOf('data-week-counts')), dash.indexOf('</summary>', dash.indexOf('data-week-counts')))), 'the week line does not drop to one NEW');
+must(JSON.stringify(wkNew(dash)) === JSON.stringify([rkB]), `the week banner does not drop to one NEW (the untapped one): ${wkNew(dash)}`);
 // Edit opens it.
 await s.get(`/admin/requests/edit?r=${rkB}`);
 dash = (await s.get('/admin/')).text;
