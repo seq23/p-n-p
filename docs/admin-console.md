@@ -197,7 +197,12 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   grazing pickups with no day), 5 Money (balances due today or late, never the damage deposit;
   every unpaid rental hold as "Waiting for deposit · Games reserved until <time>" with the invoice's amount
   due, Reserve their games longer and Open card, unless Money already lists that request; games not returned). The sections shown are numbered 1, 2, 3 ... with no gap for an empty one. Then "Tomorrow, <day>" and the footer.
-  Nothing in 1-5 and nothing tomorrow: only "All clear today". First name + last initial only; a
+  Above section 1, only when something of ours is still out (see "Missed jobs" below): a red
+  "⚠ CHECK THESE FIRST" box, one question per item with ✓ Yes (opens the confirm screen), 📞 Call
+  and Open card, and the subject starts "⚠ N not back yet · " ("⚠ N to check · " when a ✗ No is
+  among them). Steps that were simply not ticked go on one quiet "Tidy up: N steps to tick off"
+  line at the very bottom and never touch the subject.
+  Nothing in 1-5, nothing red, nothing to tidy and nothing tomorrow: only "All clear today". First name + last initial only; a
   phone only inside Call (tel:) / Text (sms:) links; every other link into /admin; HTML (one 600px
   column) plus plain text. Once per Memphis day (claims `settings.todo_email_day`; released if the
   send fails). Settings -> Emails: "Daily to-do email" on/off (`todo_email`, default on) and "Send
@@ -749,6 +754,47 @@ Password. Every form, field and button that was there is still there and saves t
   held to the rules by `validate:admin-inventory` and `validate:rentals`. Facebook listings are
   hand-written: after an inventory change, `validate:rentals` lists the lines to update on Facebook.
 
+## Missed jobs: yellow "Did this happen?" vs red "not back yet" (owner-approved mock-up, 20 Oct 2026)
+Code: `functions/_lib/missed.mjs` (`missedFrom`, `classify`, `tiers`, `subjectWarning`); the
+Requests strip, the card, the calendar chip and the 7 AM email all use this one classifier.
+A booking dated before today that is not done is one of two things:
+- **Yellow, "Did this happen?"**: hand-overs (rental pickup, delivery, setup, install, grazing
+  drop-off, hand-typed "other"). Almost always just a step nobody ticked. Requests shows a thin
+  yellow strip "Did this happen? · N steps to tick off"; the card gets a yellow tag and the next
+  step "Did <first name> … on <day>?" with **✓ Yes, it happened** (marks it done) and **✗ No**.
+  ✗ No is stored as a `request_events` row (`not-happened:<booking id>@<date>`, cleared by moving
+  the booking) and turns the item red. Never in the email subject; one "Tidy up" line in the email.
+- **Red, worded as a question**: our things still out (rental return / collect, porch or party
+  takedown, grazing pickup), only from the DAY AFTER the due day, plus any ✗ No. Thin red strip on
+  Requests (✕ hides it until the next Memphis morning on every device: `settings.missed_strip_dismissed`
+  holds the day and the items shown; a newly missed item brings it back), red card border and tag,
+  red calendar chip, and the email's "⚠ CHECK THESE FIRST" box. Clears itself once done, moved to
+  today or later, or marked Not needed.
+- **Auto-tick**: marking a later step ticks the earlier one (games back -> pickup / delivery;
+  takedown done -> setup / install; grazing pickup -> grazing setup), with one history line. Only
+  at the moment the later step is marked; nothing is rewritten in bulk.
+- **Confirm screen**: the email's ✓ Yes links go to `GET /admin/confirm-done?b=<booking>&r=<card>`,
+  which changes nothing (mail scanners open links). It asks "Mark <Name>'s games back?" with the
+  items, due day and "Anything damaged or missing?" (default "No, all fine"); the POST marks it,
+  auto-ticks, and returns to the card with a green note. Already done: "Already marked back ✓".
+Proof: `npm run validate:admin-missed-jobs`.
+
+## Phone menu, filter pull-down, customer numbers (owner-approved mock-up, 20 Oct 2026)
+- **Customer numbers**: every active card on Requests is "Customer N" with a numbered circle in its
+  service colour on the card's left edge. Numbers count DOWN the page: the oldest active request is
+  Customer 1, the newest the highest, by arrival time over all active requests, so a filter never
+  renumbers. Put-away cards have no number; putting one away moves everyone newer down by one.
+- **Laptop (900px and wider)**: menu and filter bubbles unchanged; a sticky "Customers" spine in its
+  own left column ("CUSTOMER N", first name, service), each a link to the card; the card on screen
+  is highlighted.
+- **Phone (under 900px)**: every admin page opens with one line, "Porch & Party" + "☰ Menu ▾"; the
+  panel lists every page as big rows ("✕ Close menu" while open; works without JS). On Requests the
+  filter is a labelled pull-down "Filter: tap to choose ▾" starting on "All requests (N)", with
+  counts, using the same links as the bubbles; right under it a dark sticky bar
+  "‹ Customer N · Name ▾ ›" (‹ › previous / next, the name opens a jump list). The 1·2·3 shortcuts
+  panel stays at the bottom on a phone (owner, 20 Oct 2026).
+Proof: `npm run validate:admin-customer-nav`.
+
 ## Where things live
 | Piece | Place |
 |---|---|
@@ -756,11 +802,14 @@ Password. Every form, field and button that was there is still there and saves t
 | Guard (auth, noindex, same-origin POST) | `functions/_lib/guard.mjs`, run by both `_middleware.js` |
 | D1 | `pnp-admin`, binding `DB`, schema in `migrations/`. Pages deploys do NOT apply migrations: after a merge that adds one, run `npm run admin:migrate` (additive migrations only) |
 | Receipts | R2 bucket `pnp-receipts` (binding `RECEIPTS`, private), Workers AI binding `AI` (wrangler.toml) |
-| Reminders cron | `workers/pnp-mailer` `scheduled` handler, crons 15:00 + 16:00 UTC gated to 10 AM Memphis, D1 binding `DB` |
+| Mailer cron | `workers/pnp-mailer` `scheduled` handler, hourly `0 * * * *`; each job gates on the Memphis hour (`chicagoHour`): the 7 AM to-do email, 10 AM reminders, hold expiry. D1 binding `DB`. Redeploy with `npm run mailer:deploy` after any change to code it imports |
 | Email | Cloudflare Email Service. Pages cannot hold `send_email`, so the private Worker `workers/pnp-mailer` holds it and Pages calls it through the `MAILER` service binding (`npm run mailer:deploy`) |
-| Secrets (Pages, production) | `PNP_ADMIN_PASSWORD` (bootstrap password), `PNP_ADMIN_SESSION_KEY` (cookie signing), `GOOGLE_SA_JSON` (service-account key) |
+| Secrets (Pages, production) | `PNP_ADMIN_PASSWORD` (bootstrap password), `PNP_ADMIN_SESSION_KEY` (cookie signing), `GOOGLE_SA_JSON` (service-account key), `PNP_GITHUB_TOKEN` (optional: starts the inventory publish workflow at once) |
 
 ## Rules the code enforces
+- Live data (owner, 19 Oct 2026): a build never changes existing production invoices, lines,
+  payments, requests, bookings or holds, and migrations are additive only. Fixes to one customer's
+  data are made by hand, logged as a request event, and only when the owner asks.
 - One shared password. Changing it in Settings stores a salted SHA-256 in D1 that overrides the
   secret and signs every device out. Sessions: signed HttpOnly, Secure, SameSite=Lax cookie, 30 days.
   Sign-in: 10 attempts per hour per IP.
