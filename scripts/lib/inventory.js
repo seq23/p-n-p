@@ -25,6 +25,13 @@ const words = (n) => NUMBER_WORDS[n] || String(n);
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${Number(n).toFixed(2)}`);
 const isInt = (n) => Number.isInteger(n);
 const lcFirst = (s) => String(s).charAt(0).toLowerCase() + String(s).slice(1);
+// Games per set (owner, 20 Oct 2026): ONE Giant Color Stack set = 2 games (2 stacks). quantity
+// counts games (what bundles, clash checks and availability use: 2); perSet is the games in one
+// set, so the set count is quantity / perSet (1). Default 1 (Cornhole is one game, one set).
+const perSetOf = (i) => (Number.isInteger(i && i.perSet) && i.perSet > 1 ? i.perSet : 1);
+// How a count of one item reads in parentheses: "1 set of 2" (a whole Color Stack set),
+// "3 games" (a part of a set), "2 sets" (an item with no perSet, unchanged).
+const countWords = (c, per = 1) => (per > 1 ? (c % per === 0 ? `${c / per} ${c / per === 1 ? 'set' : 'sets'} of ${per}` : `${c} ${c === 1 ? 'game' : 'games'}`) : `${c} sets`);
 
 function slugify(name) {
   return String(name || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/&/g, ' and ')
@@ -180,7 +187,7 @@ function validate(data, { hasImage = () => true } = {}) {
     if (/[<>"]/.test(name)) errors.push(`${label}: the name cannot use < > or ".`);
     names.push({ name, slug: i.slug });
     if (!isInt(i.quantity) || i.quantity < 1 || i.quantity > LIMITS.quantity) errors.push(`${label}: "How many" must be a whole number from 1 to ${LIMITS.quantity}.`);
-    // perSet (optional, owner 20 Oct 2026): games in one set (Giant Color Stack: a set of 2). Quantity still counts sets.
+    // perSet (optional, owner 20 Oct 2026): games in one set (Giant Color Stack: 1 set of 2 games). Quantity counts games (2).
     if (i.perSet != null && (!isInt(i.perSet) || i.perSet < 2 || i.perSet > LIMITS.perSet)) errors.push(`${label}: "Games in one set" must be a whole number from 1 to ${LIMITS.perSet}.`);
     if (typeof i.availableNow !== 'boolean') errors.push(`${label}: it must be either available or removed.`);
     if (i.deposit != null && (!isInt(i.deposit) || i.deposit < 0 || i.deposit > LIMITS.deposit)) errors.push(`${label}: the deposit must be a whole number of dollars from $0 to $${LIMITS.deposit}.`);
@@ -245,7 +252,8 @@ function suggestAlt(name, kind = 'game') {
 
 // The llms*.txt line for one public item.
 function llmsLine(data, i, section) {
-  const many = i.quantity > 1 ? ` (${words(i.quantity)} available)` : '';
+  const per = perSetOf(i);
+  const many = per > 1 && i.quantity % per === 0 ? ` (${words(i.quantity / per)} ${i.quantity / per === 1 ? 'set' : 'sets'} of ${words(per)})` : i.quantity > 1 ? ` (${words(i.quantity)} available)` : '';
   if (section === 'extras') return `- ${i.name}: ${money(i.dayPrice)} a day, ${money(i.weekendPrice)} a weekend. ${i.blurb}${many ? ` ${words(i.quantity).replace(/^./, (c) => c.toUpperCase())} available.` : ''}`;
   return `- ${i.llms || `${i.name}, ${i.size}`}${many}`;
 }
@@ -253,5 +261,5 @@ function llmsLine(data, i, section) {
 module.exports = {
   SECTIONS, USES, LIMITS, slugify, joinAnd, allItems, publicGames, publicExtras, gameUnits, setsOf, available,
   extraPhrase, extraShort, extraThe, rentalsPhrase, ALL_GAMES_WORDS, bundleValue, bundleBlocker, resolve, offeredBundles,
-  depositOf, stringify, hash, inventoryOf, merge, validate, newItem, suggestAlt, llmsLine, money, words, lcFirst,
+  depositOf, stringify, hash, inventoryOf, merge, validate, newItem, suggestAlt, llmsLine, money, words, lcFirst, perSetOf, countWords,
 };

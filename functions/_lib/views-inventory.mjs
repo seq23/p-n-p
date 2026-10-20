@@ -106,9 +106,10 @@ function itemCard(row, item, data, st, futureCount = 0) {
     <div class="inv-buttons">${act(`<a class="btn ghost" href="${INVENTORY_HOME}/${esc(row.slug)}"${tip('inv.openOff')}>Open</a>`, 'inv.openOff')}${restoreForm(row.slug)}</div></article>`;
 }
 
-// Games per set (owner, 20 Oct 2026): Giant Color Stack is a set of 2 games. Quantity counts sets
-// (what a booking takes out); perSet (optional, default 1) only changes the words.
-export const perSetOf = (item) => (Number.isInteger(item && item.perSet) && item.perSet > 1 ? item.perSet : 1);
+// Games per set (owner, 20 Oct 2026): ONE Giant Color Stack set = 2 games. Quantity counts games
+// (what a booking, a bundle and the tiles count: 2); perSet = games in one set, so the row reads
+// "IN 1 set (2 games)". One shared definition (scripts/lib/inventory.js).
+export const perSetOf = INV.perSetOf;
 
 // One line of the phone list: OUT (red) / IN (green, "IN 2", "1 of 2 IN") / NOT OFFERED (grey),
 // from the same itemStatuses the cards use (bookings, #95 matcher). Never a second list.
@@ -117,17 +118,17 @@ export function nowRow(row, item, st) {
   const stock = (st && st.stock) || item.quantity || 1;
   const used = Math.min(stock, (st && st.used) || 0);
   const per = perSetOf(item);
-  const units = (n) => (per > 1 ? `${n} ${n === 1 ? 'set' : 'sets'}` : String(n));
+  const units = (n) => (per > 1 ? `${n} ${n === 1 ? 'game' : 'games'}` : String(n));
+  const sets = (n) => `${n} ${n === 1 ? 'set' : 'sets'}`;
   let kind; let pill;
   if (off) { kind = 'off'; pill = 'NOT OFFERED'; }
-  else if (!used) { kind = 'in'; pill = stock > 1 ? `IN ${units(stock)}${per > 1 ? ` (${stock * per} games)` : ''}` : 'IN'; }
+  else if (!used) { kind = 'in'; pill = per > 1 && stock % per === 0 ? `IN ${sets(stock / per)} (${units(stock)})` : stock > 1 ? `IN ${units(stock)}` : 'IN'; }
   else if (used < stock) { kind = 'in'; pill = `${stock - used} of ${units(stock)} IN`; }
   else { kind = 'out'; pill = 'OUT'; }
   const now = !off && st ? (st.upcoming || []).filter((u) => u.outNow) : [];
   const whoOf = (u) => `${u.name}${stock > 1 && u.count > 1 ? ` (${units(u.count)})` : ''} · ${u.hold ? u.hold.replace(/^Reserved/, 'reserved') : `${u.late ? 'was due back' : 'back'} ${shortDate(u.end)}`}`;
   const bits = [];
   if (now.length) bits.push(`${kind === 'in' ? `${units(used)} out: ` : ''}${now.map(whoOf).join('; ')}`);
-  if (per > 1 && stock === 1 && !off) bits.push(`${per} games in the set`);
   if (row.section === 'adminItems' && !off) bits.push('not on website');
   const d = bits.join(' · ');
   return { kind, html: `<a class="inv-nrow" href="${INVENTORY_HOME}/${esc(row.slug)}" data-inv-row="${esc(row.slug)}" data-inv-now="${kind}"${tip('inv.row')}><span class="n">${esc(item.name)}</span><span class="inv-np ${kind}" data-inv-np>${esc(pill)}</span>${d ? `<span class="d" data-inv-who>${esc(d)}</span>` : ''}</a>` };
@@ -216,7 +217,7 @@ export function itemDetailPage({ row, item, data, status, futureCount = 0, flash
   const st = off ? { state: 'off', label: 'Not offered' } : status;
   const ups = (status && status.upcoming) || [];
   const li = (u) => `<li data-inv-booking${u.outNow ? ' data-now' : ''}${u.hold ? ' data-hold' : ''}><strong>${esc(shortDate(u.start))}${u.end !== u.start ? ` &rarr; ${esc(shortDate(u.end))}` : ''}</strong>
-    ${esc(u.name)}${u.count > 1 ? ` · ${u.count} sets` : ''}${u.outNow ? (u.late ? ` · out now, was due back ${esc(shortDate(u.end))}` : ' · out now') : ''}${u.hold ? ` · ${esc(u.hold)}` : ''}
+    ${esc(u.name)}${u.count > 1 ? ` · ${perSetOf(item) > 1 ? `${u.count} games` : `${u.count} sets`}` : ''}${u.outNow ? (u.late ? ` · out now, was due back ${esc(shortDate(u.end))}` : ' · out now') : ''}${u.hold ? ` · ${esc(u.hold)}` : ''}
     <a href="/admin/day/${esc(u.start)}"${tip('inv.bookingDay')}>Open that day</a></li>`;
   const body = `<h1>${esc(item.name)}</h1>
   ${flash ? `<div class="notice ok"><strong>${esc(flash)}</strong></div>` : ''}
@@ -265,7 +266,7 @@ export function itemFormPage({ item = {}, section = 'games', isNew = true, error
     <label for="in">Name</label><input id="in" name="name" required maxlength="${INV.LIMITS.name}" value="${esc(item.name || '')}" autocomplete="off">
     <label for="iq">How many do you have?</label><input id="iq" name="quantity" type="number" min="1" max="${INV.LIMITS.quantity}" inputmode="numeric" required value="${esc(item.quantity || 1)}">
     <label for="ips">Games in one set (leave 1 unless one rental is a set of games)</label><input id="ips" name="per_set" type="number" min="1" max="${INV.LIMITS.perSet}" inputmode="numeric" value="${esc(perSetOf(item))}" data-inv-per-set>
-    <p class="inv-note">Giant Color Stack is a set of 2 games: "How many" counts sets, this counts the games in each.</p>
+    <p class="inv-note">Giant Color Stack is 1 set of 2 games: "How many" counts games (2), this counts the games in one set (2).</p>
     <p class="inv-note" id="inv-game-price" data-inv-game-price>Every game is ${money(data.rates.day)} a day and ${money(data.rates.weekend)} a weekend. Change it for all games under Game price on the Inventory page.</p>
     <div id="inv-prices" class="inv-two" data-inv-prices><div><label for="idp">Day price ($)</label><input id="idp" name="day_price" inputmode="numeric" value="${esc(item.dayPrice != null ? item.dayPrice : '')}"></div>
       <div><label for="iwp">Weekend price ($)</label><input id="iwp" name="weekend_price" inputmode="numeric" value="${esc(item.weekendPrice != null ? item.weekendPrice : '')}"></div></div>

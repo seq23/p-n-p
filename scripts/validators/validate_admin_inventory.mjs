@@ -138,7 +138,7 @@ must(wy && wy.games === 7 && P.GAMES.bundles.find((b) => b.slug === 'whole-yard'
 must(P.GAMES.bundles.find((b) => b.slug === 'whole-party').includes === 'All games (available now: 7), the movie screen and the card table', 'The Whole Party does not take the new game');
 must(!/\ball\s+(\d+|seven|six)\s+(games|items)\b/i.test(JSON.stringify(P.GAMES.bundles.map((b) => [b.includes, b.alt]))), 'a bundle still says "All N games"');
 const wyLines = prefillLines({ wantsRentals: true, gamesAnswer: 'Whole Yard, all 6 games ($195)', durationAnswer: 'One day (24 hours)' }, P.PRICE_TABLE);
-must(/Giant Jenga/.test(wyLines[0].description) && /Giant Color Stack \(2 sets\)/.test(wyLines[0].description), `a Whole Yard invoice does not carry the new game and both Color Stack sets: "${wyLines[0].description}"`);
+must(/Giant Jenga/.test(wyLines[0].description) && /Giant Color Stack \(1 set of 2\)/.test(wyLines[0].description) && !/2 sets/.test(wyLines[0].description), `a Whole Yard invoice does not carry the new game and both Color Stack sets: "${wyLines[0].description}"`);
 must(C.expandItems('Whole Yard bundle', P.TRACK_TABLE).names.includes('Giant Jenga'), 'bundle counting (availability) does not include the new game in Whole Yard');
 const p3 = prefillLines({ wantsRentals: true, gamesAnswer: 'Pick 3 bundle ($110), Giant Jenga, Giant Uno, Cornhole set', durationAnswer: 'One day (24 hours)' }, P.PRICE_TABLE);
 must(/^Pick 3 bundle, 1 day: .*Giant Jenga/.test(p3[0].description), 'a Pick 3 cannot include the new game');

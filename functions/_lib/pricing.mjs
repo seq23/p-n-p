@@ -25,7 +25,7 @@ export function buildPriceTable(source, services, porchPackages = null) {
   const deposit = (i) => cents(INV.depositOf(games, i));
   const items = [
     ...(games.games || []).filter((g) => g.availableNow).map((g) => ({
-      slug: g.slug, name: g.name, choice: g.formChoice, kind: 'game', quantity: g.quantity || 1, sets: INV.setsOf(g), dayCents: cents(games.rates.day), weekendCents: cents(games.rates.weekend), depositCents: deposit(g),
+      slug: g.slug, name: g.name, choice: g.formChoice, kind: 'game', quantity: g.quantity || 1, sets: INV.setsOf(g), perSet: INV.perSetOf(g), dayCents: cents(games.rates.day), weekendCents: cents(games.rates.weekend), depositCents: deposit(g),
     })),
     ...(games.extras || []).filter((x) => x.availableNow).map((x) => ({
       slug: x.slug, name: x.name, choice: x.formChoice, kind: 'extra', quantity: x.quantity || 1, dayCents: cents(x.dayPrice), weekendCents: cents(x.weekendPrice), depositCents: deposit(x),
@@ -196,7 +196,7 @@ export function prefillLines(request, table) {
           for (const i of table.items.filter((x) => x.kind === 'game' && x.sets > 1)) for (let k = 1; k < i.sets; k += 1) queue.push(i.name);
         }
       }
-      const sets = (list) => list.filter((n, k) => list.indexOf(n) === k).map((n) => { const c = list.filter((x) => x === n).length; return c > 1 ? `${n} (${c} sets)` : n; });
+      const sets = (list) => list.filter((n, k) => list.indexOf(n) === k).map((n) => { const c = list.filter((x) => x === n).length; return c > 1 ? `${n} (${INV.countWords(c, (table.items.find((i) => i.name === n) || {}).perSet)})` : n; });
       const take = (n) => {
         const got = queue.splice(0, n);
         const real = got.filter(Boolean); const choice = got.length - real.length;
