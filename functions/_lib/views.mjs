@@ -18,6 +18,8 @@ import { takedownState, inlineDefaultDate } from './takedown.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
 import SERVICES_DATA from '../../data/offers/services.json';
 import { isPhone, rentalDates, rentalSpanWords, rentalLength } from './phone-requests.mjs';
+import { lateWords, missedCountWords } from './missed.mjs';
+import { dayWords } from './reminders.mjs';
 
 const CSS = `
 :root{--cream:#faf7f2;--ink:#3b302a;--accent:#b85f40;--line:#e3d8cb;--muted:#5f5148;--card:#fff;--ok:#3f6b3a;--warn:#8a5212}
@@ -977,10 +979,55 @@ function nextBox(r, s, x) {
   }
 }
 
+// The next step on a card whose job was missed (owner-approved mock-up, panel 7): "Call <first
+// name> and set a new <job> day", Pick a new day (the booking's own edit page), Mark done (it
+// happened) through the route that job is normally marked done with, and Not needed where the
+// card has it (porch / party takedown, grazing pickup).
+const DONE_ROUTE_KINDS = /_takedown$|^rental_pickup$|^grazing_pickup$|^other$/;
+function missedNextBox(m, { rk, ctx, s }) {
+  const done = /^(porch_install|party_setup|grazing_setup)$/.test(m.kind)
+    ? cardButton('card.jobDone', { ...ctx, jobWord: 'Mark done (it happened)' }, false)
+    : (m.kind === 'rental_return'
+      ? `<div class="act"><a class="btn ghost" href="/admin/returns?k=${esc(b64urlText(m.returnKey))}" data-missed-done${tip('ret.mark')}>Mark done (it happened)</a></div>`
+      : (DONE_ROUTE_KINDS.test(m.kind) ? `<form method="post" action="/admin/calendar/bookings/${esc(m.id)}/done" data-missed-done>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('step.missedDone')}>Mark done (it happened)</button></div></form>` : ''));
+  const notNeeded = /_takedown$|^grazing_pickup$/.test(m.kind) ? `<div class="smallrow"><form method="post" action="/admin/requests/takedown">${hiddenInputs({ r: rk, plan: 'customer_handles' })}<button class="btn ghost" type="submit"${tip('step.notNeeded')}>Not needed</button></form></div>` : '';
+  return { big: 'step.missedNewDay', html: `<section class="nextbox missbox" data-next-step="missed" data-missed-step="${esc(m.kind)}"><p class="lbl">Next step · overdue</p><p class="what" data-next-what>${esc(`Call ${m.first} and set a new ${m.short} day`)}</p><p class="why">${esc(`Was due ${dayWords(m.date)} · ${lateWords(m.days)} · not marked done.`)}</p>
+    <div class="actions" data-primary>${act(`<a class="btn primary" href="/admin/calendar/bookings/${esc(m.id)}/edit" data-missed-new-day${tip('step.missedNewDay')}>Pick a new day</a>`, 'step.missedNewDay')}${done}</div>${notNeeded}</section>` };
+}
+
+// The thin red strip at the top of Requests (panel 7): one line for one missed job, a <details>
+// of thin rows for several (oldest first). Card ↓ jumps to the card (#c-<key>), which never
+// moves; ✕ hides the strip until tomorrow morning on every device (missed.mjs dismissStrip).
+export const MISSED_CSS = `.mstrip1,.mstrip{background:#c0392b;color:#fff;border-radius:8px;font-size:.95rem;margin:0 0 10px}
+.mstrip1{display:flex;align-items:center;gap:10px;padding:2px 4px 2px 12px;min-height:40px}
+.mstrip1 .st,.mstrip .st{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mstrip1 a,.mstrip .mrow a,.mstrip .see{color:#fff;font-weight:700;text-decoration:underline;flex:none}
+.mstrip>summary{list-style:none;display:flex;align-items:center;gap:10px;padding:2px 4px 2px 12px;min-height:40px;cursor:pointer}
+.mstrip>summary::-webkit-details-marker{display:none}
+.mstrip form,.mstrip1 form{margin:0;flex:none}
+.mstrip .sx,.mstrip1 .sx{background:transparent;border:0;color:#fff;font:inherit;font-weight:700;width:40px;height:36px;border-radius:6px;cursor:pointer}
+.mstrip .mrow{display:flex;align-items:center;gap:12px;padding:7px 12px;border-top:1px solid rgba(255,255,255,.35)}
+.card.miss{border:2px solid #c0392b !important}
+.mchip{display:inline-block;background:#c0392b;color:#fff;font-weight:800;font-size:.85rem;padding:3px 12px;border-radius:99px;margin:0 0 6px}
+.nextbox.missbox{border-color:#c0392b}.nextbox.missbox .lbl{color:#c0392b}`;
+const telOf = (p) => String(p || '').replace(/[^\d+]/g, '');
+export function missedStrip(missed = []) {
+  if (!missed.length) return '';
+  const cardOf = (m) => (m.key ? `#c-${b64urlText(m.key)}` : `/admin/day/${m.date}`);
+  const call = (m) => (telOf(m.phone) ? `<a href="tel:${esc(telOf(m.phone))}"${tip('step.call')}>Call</a>` : '');
+  const x = `<form method="post" action="/admin/missed/dismiss" data-missed-dismiss>${hiddenInputs({ ids: missed.map((m) => m.id).join(',') })}<button type="submit" class="sx" aria-label="Dismiss until tomorrow"${tip('req.missedDismiss')}>✕</button></form>`;
+  if (missed.length === 1) {
+    const m = missed[0];
+    return `<div class="mstrip1" role="alert" data-missed-strip data-missed-count="1"><span class="st">⚠ <b>Missed:</b> ${esc(`${m.who} ${m.strip}, ${dayWords(m.date)}`)}</span>${call(m)}<a href="${esc(cardOf(m))}" data-missed-card${tip('req.missedCard')}>Card ↓</a>${x}</div>`;
+  }
+  return `<details class="mstrip" role="alert" data-missed-strip data-missed-count="${missed.length}"><summary${tip('req.missedSee')}><span class="st">⚠ <b>${esc(missedCountWords(missed.length))}</b></span><span class="see">See them ▾</span>${x}</summary>
+    ${missed.map((m) => `<div class="mrow" data-missed-row="${esc(m.id)}"><span class="st">${esc(`${m.who} · ${m.strip} · ${dayWords(m.date)}`)}</span>${call(m)}<a href="${esc(cardOf(m))}" data-missed-card${tip('req.missedCard')}>Card ↓</a></div>`).join('')}</details>`;
+}
+
 // One request card. o: everything dashboardPage knows about this request.
 export function requestCard(r, o) {
   const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace,
-    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '', isNew = false, stored = null, depositOut = null, hold = null, holdHtml = '' } = o;
+    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '', isNew = false, stored = null, depositOut = null, hold = null, holdHtml = '', missed = [] } = o;
   const rk = b64urlText(r.key);
   const services = servicesOf(r);
   const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
@@ -1012,13 +1059,16 @@ export function requestCard(r, o) {
   ].join('');
   const svcBadges = services.map((k) => { const b = serviceBadge(k); return b ? `<span class="svc" data-service="${k}" style="border-color:${b.bar};background:${b.tint}">${esc(b.label)}</span>` : ''; }).join('');
   const x = { rk, services, inv, ctx, dates, bookings: bk, tdS, hold, holdHtml, pickupPlace, today, ret, tdSaved };
-  const nb = archived ? { big: 'pa.bringBack', html: `<section class="nextbox" data-next-step="archived"><p class="what">Put away</p><div class="actions" data-primary>${cardButton('pa.bringBack', ctx, true)}</div></section>` } : nextBox(r, s, x);
+  // A missed job (missed.mjs, oldest first) takes over the next step; the card stays in its place.
+  const miss = !archived && !pr.void && missed.length ? missed[0] : null;
+  const nb = archived ? { big: 'pa.bringBack', html: `<section class="nextbox" data-next-step="archived"><p class="what">Put away</p><div class="actions" data-primary>${cardButton('pa.bringBack', ctx, true)}</div></section>` }
+    : (miss ? missedNextBox(miss, { rk, ctx, s }) : nextBox(r, s, x));
   const undo = archived || pr.void ? null : undoFor(s, { tdS, stored });
   const steps = archived || pr.void ? '' : stepList(s, undo, ctx);
   const big = nb.big;
   // The takedown / pickup line lives in the next-step box while it IS the next step; otherwise
   // under More, never twice.
-  const rowInBox = ['takedown', 'pickup'].includes(s.current) && !archived && !pr.void;
+  const rowInBox = ['takedown', 'pickup'].includes(s.current) && !archived && !pr.void && !miss;
   const row = rowKind && !rowInBox ? takedownRow({ kind: rowKind, tdS, r, rk, bookings, eventDate: dates.eventDate, primaryDone: false, saved: Boolean(tdSaved), savedWords: tdSaved }) : '';
   const g = services.includes('grazing') ? grazingFacts(r, foodPerHead) : null;
   const gLine = g && (g.guests || g.estimate) ? `<div class="want" data-grazing-facts>${esc([g.guests ? `Guests: ${g.guests}` : '', g.estimate].filter(Boolean).join(' · '))}</div>` : '';
@@ -1068,8 +1118,8 @@ export function requestCard(r, o) {
       ${!archived && !quiet ? `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('card.putAway')}>Put away</button></div></form>` : ''}
       ${stage === 'void' && !bottomBtns.some((k) => k.startsWith('card.archive')) ? cardButton('card.archive', ctx, false) : ''}${bottomBtns.map((k) => cardButton(k, ctx, false)).join('')}
       ${quiet ? '' : voidLink(r, inv, ctx)}</div>`;
-  return `<article class="card stepcard" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
-      <div class="schead">${quickContact(r)}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
+  return `<article class="card stepcard${miss ? ' miss' : ''}" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''}${miss ? ` data-missed="${esc(miss.id)}"` : ''} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
+      ${miss ? `<span class="mchip" data-missed-tag>⚠ MISSED · ${esc(lateWords(miss.days))}</span>` : ''}<div class="schead">${quickContact(r)}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
         <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
         ${bizLine}</div>
       ${latest}
@@ -1171,7 +1221,7 @@ export function requestsPanel(folderUrl) {
 // schedule: { [request_key]: { date } } earliest booking per request; kinds: { [request_key]: [kind] }.
 export function dashboardPage({ newKeys = new Set(), remindersLine = '', requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '',
   cardMsgs = {}, cardBottom = {}, tdSaved = null, bookings = {}, takedownInvoices = new Set(), today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station',
-  stored = {}, depositOut = {}, holds = {}, holdHtml = {} }) {
+  stored = {}, depositOut = {}, holds = {}, holdHtml = {}, missedBy = {}, missedTop = '' }) {
   const err = sheetError ? `<div class="notice err"><strong>The requests could not be loaded right now.</strong> ${/not shared/i.test(sheetError)
     ? `The responses sheet needs to be shared with the site. In Google Sheets tap Share and add <code>${esc(SA_EMAIL)}</code> as a Viewer.`
     : 'Please try again in a minute.'}<div class="muted" style="margin-top:6px;font-size:.95rem">Details: ${esc(sheetError)}</div></div>` : '';
@@ -1180,7 +1230,7 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
     const st = statuses[r.key] || { status: 'new' };
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
     return { r, inv, services: servicesOf(r), html: () => requestCard(r, { st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '', isNew: !isArchived && newKeys.has(r.key),
-      stored: stored[r.key] || null, depositOut: inv ? depositOut[inv.id] || null : null, hold: holds[r.key] || null, holdHtml: holdHtml[r.key] || '' }) };
+      stored: stored[r.key] || null, depositOut: inv ? depositOut[inv.id] || null : null, hold: holds[r.key] || null, holdHtml: holdHtml[r.key] || '', missed: isArchived ? [] : (missedBy[r.key] || []) }) };
   };
   const shown = requests.map((r) => one(r, false)).filter((x) => matchesFilter(f, x));
   const putRows = archived.map((r) => one(r, true)).filter((x) => matchesFilter(f, x));
@@ -1194,7 +1244,7 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
   // Phone first (owner, 19 Oct 2026): the request list comes straight after the heading and the
   // one-line week card; tomorrow's reminders are one tappable line at the bottom; the three-step
   // panel sits under the list on a phone and stays on top on a wide screen (CSS order, .rqflow).
-  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}</style>${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+  return layout('Requests', `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
 ${setupBanner(missingPayment)}
     <div class="rqflow"><div class="rqpanel">${requestsPanel(folderUrl)}</div>
     <div class="rqmain"><h1>Requests</h1>${extraTop}${week}${holdsBox}${err}
