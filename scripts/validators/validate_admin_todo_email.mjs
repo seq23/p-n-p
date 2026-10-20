@@ -292,7 +292,8 @@ for (const p of people) {
   if (parts.length > 1) must(!visible.includes(parts.slice(1).join(' ')) && !msg.text.includes(parts.slice(1).join(' ')) && !msg.subject.includes(parts.slice(1).join(' ')), `the email shows ${p.name}'s full surname`);
   if (p.email) must(!msg.html.includes(p.email) && !msg.text.includes(p.email), `the email shows ${p.name}'s email`);
   const digits = String(p.phone || '').replace(/\D/g, '');
-  if (digits) must(!visible.replace(/\D/g, ' ').includes(digits.slice(-7)) && !msg.text.replace(/\D/g, '').includes(digits.slice(-7)) && !visible.includes(p.phone), `the email shows ${p.name}'s phone outside a Call/Text link`);
+  // The plain text may carry the number ONLY as a red-box "  📞 Call: tel:<digits>" line (the Call link).
+  if (digits) must(!visible.replace(/\D/g, ' ').includes(digits.slice(-7)) && !msg.text.replace(/^  📞 Call: tel:\d+$/gm, '').replace(/\D/g, '').includes(digits.slice(-7)) && !visible.includes(p.phone), `the email shows ${p.name}'s phone outside a Call/Text link`);
 }
 
 // ---- 4. all clear ------------------------------------------------------------------------------------
