@@ -131,7 +131,7 @@ export function nowRow(row, item, st) {
   if (now.length) bits.push(`${kind === 'in' ? `${units(used)} out: ` : ''}${now.map(whoOf).join('; ')}`);
   if (row.section === 'adminItems' && !off) bits.push('not on website');
   const d = bits.join(' · ');
-  return { kind, html: `<a class="inv-nrow" href="${INVENTORY_HOME}/${esc(row.slug)}" data-inv-row="${esc(row.slug)}" data-inv-now="${kind}"${tip('inv.row')}><span class="n">${esc(item.name)}</span><span class="inv-np ${kind}" data-inv-np>${esc(pill)}</span>${d ? `<span class="d" data-inv-who>${esc(d)}</span>` : ''}</a>` };
+  return { kind, html: `<a class="inv-nrow" href="${INVENTORY_HOME}/${esc(row.slug)}" data-inv-row="${esc(row.slug)}" data-inv-now="${kind}"${tip('invt.row')}><span class="n">${esc(item.name)}</span><span class="inv-np ${kind}" data-inv-np>${esc(pill)}</span>${d ? `<span class="d" data-inv-who>${esc(d)}</span>` : ''}</a>` };
 }
 
 // The website-update box: "Website updating…", "Live ✓", or a plain failure with Try again.
