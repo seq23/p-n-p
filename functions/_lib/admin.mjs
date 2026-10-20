@@ -27,7 +27,7 @@ import { prefillLines, porchPrefill, isRentalInvoice } from './pricing.mjs';
 import { pickupNote, businessDelivery } from './invoice-note.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
-import { sendWeeklySummary } from './weekly.mjs';
+import { sendTodoEmail } from './todo-email.mjs';
 import SERVICES_DATA from '../../data/offers/services.json';
 import * as VC from './views-calendar.mjs';
 import * as C from './calendar.mjs';
@@ -966,11 +966,17 @@ async function routeAdmin(context) {
       const form = await request.formData();
       const on = form.get('weekly_summary') !== '0';
       await putSetting(env.DB, 'weekly_summary', on ? '1' : '0');
-      return redirect(`/admin/settings?m=${encodeURIComponent(on ? 'The Monday summary is on ✓' : 'The Monday summary is off.')}`);
+      return redirect(`/admin/settings?m=${encodeURIComponent(on ? 'Your week is back in the Monday email ✓' : 'The Monday email will not have Your week.')}`);
     }
-    if (segs[1] === 'weekly-now' && method === 'POST') {
-      const r = await sendWeeklySummary(env, { force: true, send: viaMailer(env) });
-      return redirect(r.ok ? `/admin/settings?m=${encodeURIComponent(`This week's summary is on its way to ${r.to} ✓`)}` : `/admin/settings?e=${encodeURIComponent(`The summary did not go out: ${r.error}`)}`);
+    if (segs[1] === 'todo' && method === 'POST') {
+      const form = await request.formData();
+      const on = form.get('todo_email') !== '0';
+      await putSetting(env.DB, 'todo_email', on ? '1' : '0');
+      return redirect(`/admin/settings?m=${encodeURIComponent(on ? 'The daily to-do email is on ✓' : 'The daily to-do email is off.')}`);
+    }
+    if (segs[1] === 'todo-now' && method === 'POST') {
+      const r = await sendTodoEmail(env, { force: true, send: viaMailer(env) });
+      return redirect(r.ok ? `/admin/settings?m=${encodeURIComponent(`Today's list is on its way to ${r.to} ✓`)}` : `/admin/settings?e=${encodeURIComponent(`Today's list did not go out: ${r.error}`)}`);
     }
     if (segs[1] === 'categories' && method === 'POST') return AM.saveCategories(env, request);
     if (segs[1] === 'holds' && method === 'POST') {

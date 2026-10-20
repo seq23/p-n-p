@@ -26,12 +26,12 @@ export function tomorrowChicago(now = new Date()) {
   return d.toISOString().slice(0, 10);
 }
 
-function dayWords(iso) {
+export function dayWords(iso) {
   const d = new Date(`${iso}T12:00:00Z`);
   return `${d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })} ${d.getUTCDate()} ${d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })}`;
 }
 
-function timeWords(hhmm) {
+export function timeWords(hhmm) {
   const m = String(hhmm || '').match(/^(\d{2}):(\d{2})$/);
   if (!m) return '';
   const h = Number(m[1]);

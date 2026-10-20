@@ -37,6 +37,7 @@ const TD = await mod('functions/_lib/takedown.mjs');
 const EG = await mod('functions/_lib/extra-games.mjs');
 const F = await mod('functions/_lib/request-form.mjs');
 const W = await mod('functions/_lib/weekly.mjs');
+const TODO = await mod('functions/_lib/todo-email.mjs');
 
 // ---- 1. Step derivation, service x state ------------------------------------------------
 const T = '2026-10-24';
@@ -235,8 +236,11 @@ const partyKey = made.party.request_key;
   const d = await W.weeklyData(s.db, today).catch((e) => ({ error: String(e) }));
   const names = (d && d.needs && d.needs.unconfirmed) || [];
   must(names.includes('Rex S.') && names.includes('Poe S.') && !names.includes('Pia S.') && !names.includes('Gil S.'), `the Monday summary's Unconfirmed requests are ${JSON.stringify(names)} ${d && d.error ? d.error : ''}`);
-  const mail = W.renderSummary(d);
-  must(new RegExp(`Unconfirmed requests: ${names.length} \\([^)]*Rex S\\.`).test(mail.text || '') && /Unconfirmed requests: \d+ \(/.test(mail.html || ''), 'the Monday summary email has no "Unconfirmed requests" line');
+  // The daily to-do email (Monday = the summary) puts every unconfirmed request in front of her:
+  // not called yet -> "Call these people back", called -> "Set a time" / "Book it or decide".
+  const td = await TODO.todoData(s.db, today);
+  const mail = TODO.renderTodo(td);
+  for (const n of ['Rex S.', 'Poe S.']) must(new RegExp(`data-section="[234]"[\\s\\S]*${n.replace('.', '\\.')} ·`).test(mail.html) && mail.text.includes(`- ${n} ·`), `the daily to-do email does not list the unconfirmed ${n}`);
 }
 
 // 2. The party ticks itself from the invoice, Money and the job (never from this card).

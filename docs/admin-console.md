@@ -161,21 +161,35 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   games grid "3 of 8 games out" with OUT tiles light red with a light diagonal X ("Out · back Tue
   20 Oct · Ada") and IN tiles light green ("In"), words always there for a black-and-white print.
   Print hides the banner, nav and buttons; Letter, one page for a normal day.
-- **Monday summary email** (`functions/_lib/weekly.mjs`): automatic every Monday 7:00 AM
-  America/Chicago from the pnp-mailer hourly cron `0 * * * *` (the run whose Memphis weekday is
-  Monday and hour is 7: 12:00 UTC in daylight time, 13:00 UTC in standard time, so daylight saving
-  needs no change), to the Settings day-list email. Last week (new requests by service, jobs done,
-  money received, expenses), Next 14 days (bookings by date, games out per day, still to collect),
-  Needs you (holds ending soon, overdue returns, damage to decide, takedowns not decided, requests
-  with no reply after 2 days, IDs ready to delete, receipts needing checking, not paid yet). First
-  name + last initial only; every line links into /admin. Idempotent per week (claims
-  `settings.weekly_summary_week` before sending; released if the send fails). Settings: on/off
-  (`weekly_summary`, default on) and "Send me this week's summary now". Redeploy the Worker with
-  `npm run mailer:deploy` after a change; `npx wrangler@4.151.0 deployments list` (in
-  workers/pnp-mailer) or the dashboard's Triggers tab shows the cron.
+- **Daily to-do email** (`functions/_lib/todo-email.mjs`, owner-approved mock 19 Oct 2026): every
+  day at 7:00 AM America/Chicago from the pnp-mailer hourly cron `0 * * * *`. UTC mapping: the run
+  whose Memphis hour is 7 sends, which is 12:00 UTC in daylight time (CDT, UTC-5, mid-March to
+  early November) and 13:00 UTC in standard time (CST, UTC-6); `chicagoHour` decides, so daylight
+  saving needs no change. To the Settings day-list email. Subject "Your to-do list for <Tue 20 Oct>
+  · Porch & Party". Numbered sections, each shown only when it has something: 1 Today's jobs (time
+  or "time not set", First L., job, place, what to bring, what to collect or the deposit to give
+  back), 2 Call these people back (`callback-list.mjs`: Called back not ticked, never phone or put
+  away, oldest first, "Waiting N days", highlighted from 2 days), 3 Set a time (every booking from
+  today on with no time, soonest first, highlighted within 2 days, Text prefilled from the `setTime`
+  message template), 4 Book it or decide (called back with nothing on the calendar; takedowns and
+  grazing pickups with no day), 5 Money (balances due today or late, never the damage deposit;
+  holds ending today with Hold longer; games not returned). Then "Tomorrow, <day>" and the footer.
+  Nothing in 1-5 and nothing tomorrow: only "All clear today". First name + last initial only; a
+  phone only inside Call (tel:) / Text (sms:) links; every other link into /admin; HTML (one 600px
+  column) plus plain text. Once per Memphis day (claims `settings.todo_email_day`; released if the
+  send fails). Settings -> Emails: "Daily to-do email" on/off (`todo_email`, default on) and "Send
+  me today's list now".
+- **Monday = one email**: on Mondays the to-do email ends with "Your week (Monday summary)": new
+  requests last week, jobs done, money in, tips, expenses, jobs in the next 14 days, from
+  `weeklyData` (`functions/_lib/weekly.mjs`). There is no separate weekly email any more; the
+  Settings switch `weekly_summary` (default on) now means "include Your week on Mondays". Redeploy
+  the Worker with `npm run mailer:deploy` after a change; `npx wrangler@4.151.0 deployments list`
+  (in workers/pnp-mailer) or the dashboard's Triggers tab shows the cron.
 
-Proof: `npm run validate:admin-weekly` (CDT/CST hours, windows, once per week, off switch, send
-now, no PII, sections and links) and `npm run validate:admin-cards` (rules table over every service x stage, colours, key facts,
+Proof: `npm run validate:admin-todo-email` (7 AM in CDT/CST, each section's rules, order and
+highlights, deposits never owed, all clear, Monday merge, once a day, failure release, off switch,
+send now, no PII), `npm run validate:admin-weekly` (one Monday email with Your week, windows, the
+switch, figures) and `npm run validate:admin-cards` (rules table over every service x stage, colours, key facts,
 filters, Put away section, Not paid yet math and the Money list end to end, reminders, contextual
 scheduling links).
 
@@ -397,7 +411,7 @@ another tab/retry queue, the cron hook).
   Email a friend, Share on Facebook, the customer's /r/<code>). No review ask, no discount.
 - **Mailer cron** (`workers/pnp-mailer`, `npm run mailer:deploy`): hourly `0 * * * *` UTC: hold
   expiry and hold reminders; at 10 AM Memphis: day-before reminders, thank-yous, sheet resync;
-  Monday 7 AM Memphis: Valerie's weekly summary.
+  7 AM Memphis every day: Valerie's to-do email (Your week on Mondays).
 - **Guard**: `npm run validate:request-form` and `npm run validate:request-messages` (in `validate:admin`).
 
 ## Requests on a phone (owner, 19 Oct 2026)

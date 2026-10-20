@@ -28,6 +28,7 @@ const K = await mod('functions/_lib/cards.mjs');
 const V = await mod('functions/_lib/views.mjs');
 const RQ = await mod('functions/_lib/requests.mjs');
 const W = await mod('functions/_lib/weekly.mjs');
+const TODO = await mod('functions/_lib/todo-email.mjs');
 const fixture = (await mod('data/admin/fixture-request.json')).default;
 const errors = [];
 let checks = 0;
@@ -170,7 +171,11 @@ must(/Dee Takedown/.test(boxOf(day)), 'the Day sheet for the takedown day does n
 must(!/Dee Takedown/.test(boxOf((await s.get(`/admin/day/${plus(5)}`)).text)), 'another day lists the takedown to schedule');
 const wk = await W.weeklyData(s.db, today, Date.now());
 must((wk.needs.takedownsToSchedule || []).some((x) => /^Dee T\./.test(x)), 'the Monday summary "Needs you" misses the takedown to schedule');
-must(/Takedowns to schedule: \d+ \([^)]*Dee T\./.test(W.renderSummary(wk).text), 'the Monday summary text has no "Takedowns to schedule" line');
+{
+  const tdd = await TODO.todoData(s.db, today, Date.now());
+  const row = tdd.sections[4].find((x) => x.type === 'takedown' && /^Dee T\. · porch takedown$/.test(x.t));
+  must(row && row.btns.map((b) => b.label).join() === 'Schedule takedown,Not needed' && /data-section="4"[\s\S]*Dee T\. · porch takedown[\s\S]*Schedule takedown/.test(TODO.renderTodo(tdd).html), 'the daily to-do email has no "Schedule takedown" line for the takedown to schedule');
+}
 const form = (await s.get(`/admin/calendar/new?r=${rk}&kind=porch_takedown`)).text;
 must(new RegExp(`name="date"[^>]*value="${tdDay}"|value="${tdDay}"[^>]*name="date"`).test(form), 'Schedule takedown does not prefill the requested takedown date');
 // Book it (she confirms), then Mark takedown done is refused before its day and works on it.

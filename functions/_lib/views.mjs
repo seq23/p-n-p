@@ -1357,10 +1357,14 @@ export function settingsPage({ settings, flash, error, hasQr, categories = [], p
     <label for="dle">My email for my day list</label><input id="dle" name="day_list_email" type="email" value="${esc(settings.day_list_email || 'hello@porchandparty901.com')}">
     <div style="margin-top:12px">${act(`<button class="btn" type="submit"${tip('set.saveDayList')}>Save my day list details</button>`, 'set.saveDayList')}</div>
   </form>
-  <div data-weekly-settings><h3>Monday summary email</h3>
-    <p>Every Monday at 7 AM: last week, this week and what needs you, to ${esc(settings.day_list_email || 'hello@porchandparty901.com')}. It is ${settings.weekly_summary === '0' ? '<strong>off</strong>' : '<strong>on</strong>'}.</p>
+  <div data-todo-settings><h3>Daily to-do email</h3>
+    <p>Every day at 7 AM: today's jobs, who to call back, times to set, what to book and money, to ${esc(settings.day_list_email || 'hello@porchandparty901.com')}. It is ${settings.todo_email === '0' ? '<strong>off</strong>' : '<strong>on</strong>'}.</p>
+    <form method="post" action="/admin/settings/todo">${hiddenInputs({ todo_email: settings.todo_email === '0' ? '1' : '0' })}${act(`<button class="btn ghost" type="submit"${tip('set.todoToggle')}>${settings.todo_email === '0' ? 'Turn the daily to-do email on' : 'Turn the daily to-do email off'}</button>`, 'set.todoToggle')}</form>
+    <form method="post" action="/admin/settings/todo-now" style="margin-top:10px">${act(`<button class="btn ghost" type="submit"${tip('set.todoNow')}>Send me today's list now</button>`, 'set.todoNow')}</form>
+  </div>
+  <div data-weekly-settings><h3>Your week, on Mondays</h3>
+    <p>On Mondays the to-do email ends with Your week: last week's new requests, jobs done, money in, tips, expenses and the jobs in the next 14 days. It is ${settings.weekly_summary === '0' ? '<strong>off</strong>' : '<strong>on</strong>'}.</p>
     <form method="post" action="/admin/settings/weekly">${hiddenInputs({ weekly_summary: settings.weekly_summary === '0' ? '1' : '0' })}${act(`<button class="btn ghost" type="submit"${tip('set.weeklyToggle')}>${settings.weekly_summary === '0' ? 'Turn the Monday summary on' : 'Turn the Monday summary off'}</button>`, 'set.weeklyToggle')}</form>
-    <form method="post" action="/admin/settings/weekly-now" style="margin-top:10px">${act(`<button class="btn ghost" type="submit"${tip('set.weeklyNow')}>Send me this week's summary now</button>`, 'set.weeklyNow')}</form>
   </div>
   <form method="post" action="/admin/settings/holds" data-hold-settings><h3>Game rental holds and their reminder</h3>
     <p class="muted">A rental booked on the website holds its games while the customer pays the deposit.</p>

@@ -15,8 +15,8 @@ allowed_sender_addresses = ["hello@porchandparty901.com"]
 # Every hour on the hour (UTC): rental hold expiry and hold reminders. The daily work (day-before
 # reminders, thank-you emails, sheet resync) runs only in the run that is 10 AM America/Chicago:
 # 15:00 UTC in daylight time (CDT, UTC-5), 16:00 UTC in standard time (CST, UTC-6). Valerie's
-# Monday summary goes in the run that is Monday 7 AM America/Chicago: 12:00 UTC (CDT) or
-# 13:00 UTC (CST), so daylight saving needs no change here either.
+# daily to-do email (Mondays with "Your week") goes in the run that is 7 AM America/Chicago:
+# 12:00 UTC (CDT) or 13:00 UTC (CST), so daylight saving needs no change here either.
 [triggers]
 crons = ["0 * * * *"]
 
