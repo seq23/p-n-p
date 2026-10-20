@@ -3,9 +3,12 @@
 import {
   SHEET_URL, FROM_EMAIL, esc, redirect, htmlResponse, getSettings, putSetting, toCents, invoiceTotal,
   halfDeposit, PAY_PLANS, payPlanOf, amountDueNow, todayISO, fromB64urlText, bytesToB64, b64ToBytes, needsPrice, b64urlText,
-  ownerCopy,
+  ownerCopy, shortDate,
 } from './util.mjs';
 import * as RN from './request-new.mjs';
+import * as ST from './steps.mjs';
+import * as AS from './admin-steps.mjs';
+import { syncExtraGames, freeGamesFor, extraGamesOf } from './extra-games.mjs';
 import { checkPassword, hashPassword, issueCookie, clearCookie, clientIp, rateLimited, recordAttempt, loginConfigured, isAuthed } from './auth.mjs';
 import { driveFileId, idFolderId } from './sheet.mjs';
 import { loadRequests, weekCounts, monthCount, idOnFile, logEvent } from './requests.mjs';
@@ -18,7 +21,7 @@ import { cleanImage } from './image-clean.mjs';
 import { sendMessage } from './messages.mjs';
 import * as VM2 from './views-messages.mjs';
 import { hasEmail } from './reminders.mjs';
-import { PRICE_TABLE, CONTACT } from './prices.mjs';
+import { PRICE_TABLE, TRACK_TABLE, CONTACT } from './prices.mjs';
 import { renderInvoicePdf, textMessage } from './pdf.mjs';
 import { prefillLines, porchPrefill, pickupNote, isRentalInvoice } from './pricing.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
@@ -29,7 +32,7 @@ import * as VC from './views-calendar.mjs';
 import * as C from './calendar.mjs';
 import * as AC from './admin-calendar.mjs';
 import * as AM from './admin-money.mjs';
-import { balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines } from './ledger.mjs';
+import { balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice } from './ledger.mjs';
 import * as AE from './admin-edit.mjs';
 import * as INVD from './inventory.mjs';
 import * as VI from './views-inventory.mjs';
@@ -177,6 +180,7 @@ async function cardExtras(env, requests, statuses, holds) {
   const out = {};
   const msgs = {};
   const bottom = {};
+  const holdHtml = {};
   const byKey = Object.fromEntries(holds.map((h) => [h.request_key, h]));
   for (const r of requests) {
     const rk = b64urlText(r.key);
@@ -185,7 +189,9 @@ async function cardExtras(env, requests, statuses, holds) {
     const h = byKey[r.key];
     // On the card the hold's deposit button shows only when there is no invoice: with one, the
     // card's primary / Payment box already carries Mark deposit received.
-    if (h) bits.push(`<style>${VM2.HOLD_CSS}</style>${VM2.holdControls(h, { rk, sms: h.sms, canEmail: h.canEmail, depositTarget: st.invoice_id ? null : h.depositTarget, compact: true })}`);
+    // The hold controls sit behind the step card's small "Hold longer" link (owner, 19 Oct 2026:
+    // no 24/48 h choice up front); the card shows "Games held until <time>" itself.
+    if (h) holdHtml[r.key] = `<style>${VM2.HOLD_CSS}</style>${VM2.holdControls(h, { rk, sms: h.sms, canEmail: h.canEmail, depositTarget: st.invoice_id ? null : h.depositTarget, compact: true })}`;
     else {
       const old = r.source === 'site' && r.wantsRentals ? await getHold(env.DB, r.key) : null;
       if (old && old.state === 'expired') bits.push('<div class="notice warn" data-hold-expired><strong>Hold expired.</strong> No deposit came in by the end time, so the games were freed. Use Give them more time on a new request, or book it by hand.</div>');
@@ -207,7 +213,7 @@ async function cardExtras(env, requests, statuses, holds) {
     }
     if (bits.length) out[r.key] = bits.join('');
   }
-  return { extras: out, msgs, bottom };
+  return { extras: out, msgs, bottom, holdHtml };
 }
 
 async function dashboard(env, url) {
@@ -221,7 +227,8 @@ async function dashboard(env, url) {
   for (const row of saved.results || []) { try { checklists[row.request_key] = checklistState(JSON.parse(row.data)); } catch { /* unreadable row: no badge */ } }
   const bals = await balances(env.DB);
   const invoices = {};
-  for (const [id, b] of Object.entries(bals)) invoices[id] = { ...b.invoice, total_cents: b.total, balance: b };
+  const linesBy = await linesByInvoice(env.DB);
+  for (const [id, b] of Object.entries(bals)) invoices[id] = { ...b.invoice, total_cents: b.total, balance: b, lines: linesBy[id] || [] };
   const schedule = {};
   const { results: booked } = await env.DB.prepare("SELECT request_key, MIN(date) AS date FROM bookings WHERE request_key IS NOT NULL AND kind NOT IN ('porch_takedown','party_takedown','grazing_pickup','rental_return') GROUP BY request_key").all();
   for (const r of booked || []) schedule[r.request_key] = { date: r.date };
@@ -248,19 +255,46 @@ async function dashboard(env, url) {
   const idsReady = requests.filter((r) => idOnFile(r) && readyToDeleteId(r, statuses[r.key], statuses[r.key] && statuses[r.key].invoice_id ? invoices[statuses[r.key].invoice_id] : null, returns[r.key]));
   const week = weekCounts(requests, chicagoDate());
   const holds = await holdsWithButtons(env);
-  const { extras, msgs, bottom } = await cardExtras(env, open, statuses, holds);
+  const { extras, msgs, bottom, holdHtml } = await cardExtras(env, open, statuses, holds);
+  const stored = await ST.loadStored(env.DB);
+  const depositOut = await ST.depositOutcomes(env.DB);
+  const holdsBy = Object.fromEntries(holds.map((h) => [h.request_key, h]));
   const tdKey = url.searchParams.get('tdok') ? decodeKey(url.searchParams.get('tdok')) : '';
   const soon = endingSoon(holds, Date.now(), settings);
   // NEW until opened or acted on (request-new.mjs, migration 0016).
   const opened = await RN.openedSet(env.DB);
   const newKeys = new Set(open.filter((r) => RN.isNewRequest(r, { st: statuses[r.key], opened: opened.has(r.key) })).map((r) => r.key));
   return htmlResponse(V.dashboardPage({ newKeys, requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
+    stored, depositOut, holds: holdsBy, holdHtml,
     weekBox: V.weekBox(week, newKeys), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, cardBottom: bottom, tdSaved: tdKey ? { key: tdKey, words: url.searchParams.get('tdm') || 'Saved ✓' } : null, bookings: bookingsBy, takedownInvoices: tdFacts.invoiceIds, today: chicagoDate(),
     archived, filter: url.searchParams.get('f') || 'all', openPutAway: url.searchParams.get('pa') === '1', kinds, events, notes,
     foodPerHead: SERVICES_DATA.services.grazing.foodPerHead || null, pickupPlace: PRICE_TABLE.pickupPlace,
     holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length || Object.keys(msgs).length || Object.keys(bottom).length ? VM2.TAP_JS : ''}`,
     flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
     extraTop: VC.overdueBox(overdue), remindersLine: VC.remindersBox(reminders, tomorrowLabel, { line: true }) }));
+}
+
+// The invoice editor's quick-add buttons (owner-approved 19 Oct 2026): the prices come from
+// data/offers/services.json invoiceQuickAdds; on a rental, the games free for its whole pickup ->
+// return span (extra-games.mjs), booked ones shown as not free.
+async function quickAddsFor(env, key, lines) {
+  const q = SERVICES_DATA.invoiceQuickAdds || {};
+  const out = { deliveryCents: Math.round(Number(q.deliveryFee || 0) * 100), extraGameCents: Math.round(Number(q.extraGame || 0) * 100), rental: false, games: [], span: '', baseCount: 0 };
+  const request = key ? await findRequest(env, key) : null;
+  out.rental = Boolean((request && (request.gamesAnswer || (request.wantsRentals && !request.wantsDecor))) || isRentalInvoice(lines, PRICE_TABLE));
+  if (!out.rental) return out;
+  const { results: bk } = key ? await env.DB.prepare("SELECT kind, date, items FROM bookings WHERE request_key = ?1 AND kind IN ('rental_pickup','rental_return')").bind(key).all() : { results: [] };
+  const d = request ? rentalDates(request, bk || []) : { pickup: '', ret: '' };
+  const pickup = d.pickup || '';
+  const ret = d.ret || (pickup ? C.addDays(pickup, 1) : '');
+  out.span = pickup ? `${shortDate(pickup)} to ${shortDate(ret)}` : '';
+  const pk = (bk || []).find((b) => b.kind === 'rental_pickup');
+  const own = [pk && pk.items, request && request.gamesAnswer, ...(lines || []).filter((l) => !l.refundable).map((l) => l.description)].filter(Boolean).join(', ');
+  const windows = C.rentalWindows(await C.listBookings(env.DB), await C.loadReturns(env.DB), TRACK_TABLE);
+  out.games = pickup ? freeGamesFor({ windows, pickup, ret, today: chicagoDate(), table: TRACK_TABLE, key: key || '', ownItems: own }) : [];
+  const ex = C.expandItems(own, TRACK_TABLE);
+  out.baseCount = TRACK_TABLE.items.filter((i) => i.kind === 'game' && ex.names.includes(i.name)).length - extraGamesOf(lines, TRACK_TABLE).length + (ex.unnamed || 0);
+  return out;
 }
 
 async function newInvoice(env, url) {
@@ -299,7 +333,8 @@ async function newInvoice(env, url) {
     deposit_due_cents: amountDueNow(depositCents !== null ? 'custom' : 'half', invoiceTotal(lines), depositCents || 0),
   };
   const pay = paymentStatus(await getSettings(env.DB));
-  return htmlResponse(V.invoiceEditorPage({ invoice, lines, request, action: '/admin/invoices', title: request ? `Invoice for ${V.firstName(request.name)}` : 'New invoice', warnings, pay, mode: 'new' }));
+  const quick = await quickAddsFor(env, key, lines);
+  return htmlResponse(V.invoiceEditorPage({ invoice, lines, request, action: '/admin/invoices', title: request ? `Invoice for ${V.firstName(request.name)}` : 'New invoice', warnings, pay, mode: 'new', quick }));
 }
 
 async function createInvoice(env, request) {
@@ -325,6 +360,7 @@ async function createInvoice(env, request) {
     await setRequestStatus(env.DB, key, existing && existing.status !== 'void' ? existing.status : 'new', id);
   }
   await syncInvoiceBookings(env, id);
+  if (key) await syncExtraGames(env.DB, key);
   if (form.get('go') === 'send') return afterSend(id, await deliver(env, id, false));
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(afterSaveMessage(form.get('go')))}`);
 }
@@ -363,6 +399,9 @@ async function updateInvoice(env, request, id) {
   await env.DB.prepare(`UPDATE invoices SET customer_name=?1, customer_email=?2, customer_phone=?3, issue_date=?4, due_date=?5, deposit_due_cents=?6, notes=?7, pay_plan=?9, name_norm=?10, updated_at=datetime('now') WHERE id=?8`)
     .bind(invoice.customer_name, invoice.customer_email, invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, id, invoice.pay_plan, C.normName(invoice.customer_name)).run();
   await saveLines(env.DB, id, lines);
+  // An extra game added (or removed) here is held for (or freed from) the rental's days at once.
+  const rkey = (await env.DB.prepare('SELECT request_key FROM invoices WHERE id = ?1').bind(id).first() || {}).request_key;
+  if (rkey) await syncExtraGames(env.DB, rkey);
   if (form.get('go') === 'send') return afterSend(id, await deliver(env, id, false));
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(afterSaveMessage(form.get('go')))}`);
 }
@@ -408,6 +447,7 @@ async function deliver(env, id, test) {
   await env.DB.prepare("UPDATE invoices SET status=?1, sent_at=datetime('now'), updated_at=datetime('now') WHERE id=?2").bind(status, id).run();
   if (invoice.request_key && invoice.status === 'draft') await setRequestStatus(env.DB, invoice.request_key, 'invoiced', id);
   await syncInvoiceBookings(env, id);
+  if (invoice.request_key) await syncExtraGames(env.DB, invoice.request_key);
   return { ok: true, message: `Sent ✓ to ${invoice.customer_email}` };
 }
 
@@ -450,7 +490,7 @@ async function changeStatus(env, request, id) {
     else await setRequestStatus(env.DB, invoice.request_key, REQUEST_STATUS[next], id);
     if (action === 'done') await env.DB.prepare("UPDATE request_status SET job_done_at = COALESCE(job_done_at, datetime('now')) WHERE request_key = ?1").bind(invoice.request_key).run();
   }
-  if (action === 'texted') await syncInvoiceBookings(env, id);
+  if (action === 'texted') { await syncInvoiceBookings(env, id); if (invoice.request_key) await syncExtraGames(env.DB, invoice.request_key); }
   if ((action === 'deposit_paid' || (action === 'paid' && !['deposit_paid', 'paid', 'done'].includes(invoice.status))) && invoice.request_key) {
     const flash = action === 'deposit_paid' ? `Deposit received ✓${recorded ? ` ($${(recorded / 100).toFixed(2)} recorded)` : ''}` : `Paid in full ✓${recorded ? ` ($${(recorded / 100).toFixed(2)} recorded)` : ''}`;
     return afterDeposit(env, invoice.request_key, flash, back || `/admin/invoices/${id}`);
@@ -462,6 +502,20 @@ async function changeStatus(env, request, id) {
     unpaid: 'Marked as not paid.',
   }[action];
   return go('m', label);
+}
+
+// "Mark picked up" with "They paid the rest now" ticked (step cards): records the rest exactly as
+// Mark paid in full does on the invoice (recordPayment 'full', invoice and request Paid).
+export async function payRest(env, invoiceId, method = '') {
+  const loaded = await loadInvoice(env.DB, invoiceId);
+  if (!loaded || loaded.invoice.status === 'void') return 0;
+  const recorded = await recordPayment(env.DB, loaded.invoice, loaded.lines, 'full', String(method || '').slice(0, 20));
+  await env.DB.prepare("UPDATE invoices SET status = 'paid', updated_at = datetime('now') WHERE id = ?1").bind(invoiceId).run();
+  if (loaded.invoice.request_key) {
+    await setRequestStatus(env.DB, loaded.invoice.request_key, REQUEST_STATUS.paid, invoiceId);
+    await confirmHold(env.DB, loaded.invoice.request_key);
+  }
+  return recorded;
 }
 
 async function saveSettings(env, request) {
@@ -711,7 +765,7 @@ async function routeAdmin(context) {
         ON CONFLICT(request_key) DO UPDATE SET prev_status = CASE WHEN request_status.status = 'job_done' THEN request_status.prev_status ELSE request_status.status END,
           status = 'job_done', job_done_at = COALESCE(request_status.job_done_at, datetime('now')), updated_at = datetime('now')`).bind(key).run();
     }
-    return redirect(`/admin/?m=${encodeURIComponent(undo ? 'Job done undone.' : 'Job done ✓')}`);
+    return redirect(`/admin/?m=${encodeURIComponent(undo ? 'Job done undone.' : 'Job done ✓')}${key ? `#c-${b64urlText(key)}` : ''}`);
   }
   if (segs[0] === 'holds' && method === 'POST' && ['extend', 'keep', 'release'].includes(segs[1])) return holdAction(env, request, segs[1]);
   if (segs[0] === 'msg' && segs[1] === 'email' && method === 'POST') return emailMessage(env, request);
@@ -744,6 +798,11 @@ async function routeAdmin(context) {
     return redirect(key ? `/admin/?tdok=${encodeURIComponent(form.get('r'))}&tdm=${encodeURIComponent(words)}#c-${form.get('r')}` : `/admin/?m=${encodeURIComponent(words)}`);
   }
   if (segs[0] === 'requests' && segs[1] === 'takedown-inline' && method === 'POST') return AC.takedownInlineRoute(env, request);
+  // Step cards (owner-approved 19 Oct 2026): "I've talked to them" -> Yes, book it / Not yet / No;
+  // the undo of Called back; Add a note.
+  if (segs[0] === 'requests' && segs[1] === 'talked' && method === 'POST') return AS.talkedRoute(env, request);
+  if (segs[0] === 'requests' && segs[1] === 'called' && method === 'POST') return AS.calledRoute(env, request);
+  if (segs[0] === 'requests' && segs[1] === 'note' && method === 'POST') return AS.noteRoute(env, request);
   // "Change anything on this request" (owner, 18 Oct 2026): one page, one Save per section, at any stage.
   if (segs[0] === 'requests' && segs[1] === 'edit') {
     if (segs.length === 2 && method === 'GET') { await RN.markOpened(env.DB, decodeKey(url.searchParams.get('r') || ''), 'edit'); return AE.editPage(env, url); }
@@ -803,7 +862,7 @@ async function routeAdmin(context) {
         if (segs[3] === 'move' && method === 'GET') return AC.movePage(env, bid);
         if (segs[3] === 'move' && method === 'POST') return AC.moveRoute(env, request, bid);
         if (segs[3] === 'reminded' && method === 'POST') return AC.remindedRoute(env, request, bid);
-        if (segs[3] === 'takedown-done' && method === 'POST') return AC.takedownDoneRoute(env, request, bid);
+        if ((segs[3] === 'takedown-done' || segs[3] === 'done') && method === 'POST') return AC.takedownDoneRoute(env, request, bid);
         if (segs[3] === 'email-reminder' && method === 'POST') return emailReminder(env, bid);
         if (segs[3] === 'notes' && method === 'POST') return AC.addNoteRoute(env, request, bid);
       }
@@ -834,8 +893,9 @@ async function routeAdmin(context) {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>', { screen: 'notfound', back: { href: '/admin/invoices', label: 'Back to invoices' } }), 404);
         const pay = paymentStatus(await getSettings(env.DB));
+        const quick = await quickAddsFor(env, loaded.invoice.request_key, loaded.lines);
         return htmlResponse(V.invoiceEditorPage({ invoice: { ...loaded.invoice, pay_plan: payPlanOf(loaded.invoice, invoiceTotal(loaded.lines)) }, lines: loaded.lines, request: null,
-          action: `/admin/invoices/${id}`, title: `Change invoice for ${V.firstName(loaded.invoice.customer_name)}`, pay, mode: 'edit' }));
+          action: `/admin/invoices/${id}`, title: `Change invoice for ${V.firstName(loaded.invoice.customer_name)}`, pay, mode: 'edit', quick, backHref: loaded.invoice.request_key ? `/admin/#c-${b64urlText(loaded.invoice.request_key)}` : '/admin/' }));
       }
       if (segs.length === 2 && method === 'POST') return updateInvoice(env, request, id);
       if (segs[2] === 'send' && method === 'POST') return sendInvoice(env, request, id);

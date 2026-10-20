@@ -182,8 +182,8 @@ const pc = card(html, 'Pat Porch');
 must(/border-left-color:#c2410c/.test(pc), 'porch card has no orange left border');
 must(/data-facts>[\s\S]*Event Sat 24 Oct[\s\S]*Germantown[\s\S]*href="tel:9015550100"[^>]*>Call</.test(pc), 'porch card key-facts line lacks date, where and Call');
 must((pc.match(/class="btn primary"/g) || []).length === 1, 'porch card does not have exactly ONE big primary button');
-must(/<details class="disclose" data-details><summary[^>]*>Show details<\/summary>[\s\S]*Location/.test(pc), 'answers are not behind Show details');
-must(!/Show details[\s\S]*class="btn primary"/.test(pc), 'an action is hidden behind Show details');
+must(/<details class="disclose more" data-details><summary[^>]*>More: answers, history, other buttons<\/summary>[\s\S]*Location/.test(pc) && !/Location/.test(pc.slice(0, pc.indexOf('data-details'))), 'answers are not behind More: answers, history, other buttons (or show above it)');
+must(!/More: answers, history, other buttons[\s\S]*class="btn primary"/.test(pc), 'an action is hidden behind More');
 // Calm card render: no invoice -> one quiet line and no money buttons; Void a small link under
 // Show details, never a big button; at most 3 secondary buttons; at most one helper line.
 const beforeDetails = (c) => c.slice(0, c.indexOf('data-details'));
@@ -209,8 +209,10 @@ must((yc.match(/data-help="pay\.paid"/g) || []).length === 1 && !/data-help="pay
 const gc2 = card(html2, 'Gia Graze');
 // Paid in full (owner, 18 Oct 2026): no Payment box at all (the progress line says it); the
 // undo is ONE small link on the progress line.
-must(!/data-payment/.test(gc2) && /<li class="done[^"]*"><span class="pn">✓<\/span> Paid in full/.test(gc2) && !/data-help="pay\.(deposit|paid)"/.test(beforeDetails(gc2))
-  && (gc2.match(/data-help="pay\.unpaid"/g) || []).length === 1 && /data-paid-undo><div class="act small"><details class="confirm"><summary class="linkbtn" data-help="pay\.unpaid"/.test(gc2), 'paid card still has a Payment box, or lacks the one small undo link on the progress line');
+// Step cards (19 Oct 2026): "Paid in full" is a ticked step; its ONE undo (beside the last ✓)
+// never deletes money: it explains, and links to the invoice where "mark as not paid" lives.
+must(!/data-payment/.test(gc2) && /<li class="d" data-step="paid" data-step-done><span class="ck" aria-hidden="true">✓<\/span><span class="t">Paid in full/.test(gc2) && !/data-help="pay\.(deposit|paid)"/.test(beforeDetails(gc2))
+  && (gc2.match(/data-undo=/g) || []).length === 1 && /data-step="paid"[^>]*>(?:(?!<\/li>)[\s\S])*data-undo="paid" data-undo-kind="explain"(?:(?!<\/li>)[\s\S])*href="\/admin\/invoices\/11"/.test(gc2) && !/data-undo-kind="form"[^>]*>[\s\S]*?action="[^"]*(status|payment)/.test(gc2), 'paid card still has a Payment box, or its one undo (beside Paid in full) is not the explain-and-link kind');
 for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].map((n) => [n, card(html, n)]), ['Pia Party (deposit)', yc], ['Gia Graze (paid)', gc2]]) {
   must(!/<summary class="btn danger"/.test(c) && !/<summary class="btn[^"]*"[^>]*data-help="pay\.void"/.test(c), `${nm}: a big danger button on the card (Void must be a small link)`);
   must(!/data-help="pay\.void"/.test(beforeDetails(c)), `${nm}: Void outside Show details`);
@@ -261,7 +263,8 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
           must(bigButtons(c.slice(c.indexOf('data-details'))) === 0, `${tag}: a big button under Show details`);
           if (when === 'before') must(!/>Mark returned<|>Mark job done</.test(c) && !/data-help="(ret\.mark|card\.jobDone)"[^>]*class="btn|class="btn[^"]*"[^>]*data-help="(ret\.mark|card\.jobDone)"/.test(c), `${tag}: Mark returned / Mark job done before the day`);
           must(!/class="btn[^"]*"[^>]*data-msg-tap="confirmation"/.test(c) && !/<button class="btn[^"]*" type="submit" data-help="(conf|msg)\.(email|pickupEmail)"/.test(c), `${tag}: a message button is big`);
-          if (!['void', 'finished', 'archived'].includes(stage) && services.includes('rentals') && !ret) must(/data-messages>[\s\S]*data-msg="pickupTime"/.test(top), `${tag}: no small pickup-time message line`);
+          // Step cards (19 Oct 2026): the small message links live under More, never above it.
+          if (!['void', 'finished', 'archived'].includes(stage) && services.includes('rentals') && !ret) must(/data-messages>[\s\S]*data-msg="pickupTime"/.test(c.slice(c.indexOf('data-details'))) && !/data-messages>/.test(top), `${tag}: no small pickup-time message line under More (or it sits above More)`);
         }
       }
     }
@@ -272,13 +275,20 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
   // buttons (Text about pickup time, Email them, Mark returned). Now one, or none with a time set.
   const wr = { ...mk('wr', 'Wendy Weekend', ['rentals'], [], [{ label: 'Pickup date', value: '2026-10-30' }]) };
   const wrCard = (timeSet, today) => V.requestCard(wr, { st: { status: 'scheduled' }, inv: bal('deposit_paid', 10000), sched: { date: '2026-10-30' }, kinds: ['rental_pickup', 'rental_return'], bookings: [{ kind: 'rental_pickup', date: '2026-10-30', time: timeSet ? '15:00' : null }], today, msgs });
+  // Step cards (19 Oct 2026): the next step is "Picked up". Before pickup day nothing is big:
+  // the quiet "Next:" line, plus the small "Text about pickup time" in the box while no time is
+  // set; the confirmation + pickup pair are small links under More. On the day, "Mark picked up"
+  // is the one big button (Mark returned only after it).
+  const more = (c) => c.slice(c.indexOf('data-details'));
+  const box = (c) => c.slice(c.indexOf('data-next-step'), c.indexOf('data-details'));
   const w1 = wrCard(false, '2026-10-18');
-  must(bigButtons(w1) === 1 && /data-primary>[\s\S]*data-msg-tap="pickupTime"[^>]*>Text about pickup time</.test(w1) && !/Mark returned</.test(w1), 'Weekend Renter (no pickup time): not ONE big Text about pickup time, or Mark returned shows');
-  must(/data-messages><span class="mlabel">Messages<\/span><span class="msgpair" data-msg="confirmation"><a class="msglink"[^>]*>Text them it&#39;s confirmed<\/a>|data-messages><span class="mlabel">Messages<\/span><span class="msgpair" data-msg="confirmation"><a class="msglink"[^>]*>Text them it's confirmed<\/a>/.test(w1) && /data-msg="pickupTime">[^]*?>Email the pickup question</.test(w1), 'Weekend Renter: the confirmation + pickup email are not one small Messages line');
+  must(bigButtons(w1) === 0 && /data-next-step="picked"/.test(w1) && /data-primary-wait data-next-wait="step\.picked"[^>]*>Next: Mark picked up, on pickup day \(Fri 30 Oct\)</.test(w1)
+    && /<a class="btn ghost" href="sms:[^"]*" data-msg-tap="pickupTime"[^>]*>Text about pickup time</.test(box(w1)) && !/Mark returned</.test(w1), 'Weekend Renter (no pickup time): not the quiet Next: Mark picked up line with ONE small Text about pickup time (or something big / Mark returned shows)');
+  must(/data-messages><span class="mlabel">Messages<\/span><span class="msgpair" data-msg="confirmation"><a class="msglink"[^>]*>Text them it(&#39;|')s confirmed<\/a>/.test(more(w1)) && /data-msg="pickupTime">[^]*?>Email it</.test(more(w1)) && !/data-messages>/.test(w1.slice(0, w1.indexOf('data-details'))), 'Weekend Renter: the confirmation + pickup email are not one small Messages line under More');
   const w2 = wrCard(true, '2026-10-18');
-  must(bigButtons(w2) === 0 && /data-primary-wait data-next-wait="ret\.mark"[^>]*>Next: Mark returned, from pickup day \(Fri 30 Oct\)</.test(w2) && /data-msg="pickupTime"><a class="msglink"[^>]*>Text about pickup time<\/a>[^]*?>Email it</.test(w2), 'Weekend Renter (pickup time set): something big before pickup day, or no quiet Next: line / small pickup pair');
+  must(bigButtons(w2) === 0 && /data-primary-wait data-next-wait="step\.picked"[^>]*>Next: Mark picked up, on pickup day \(Fri 30 Oct\)</.test(w2) && !/data-msg-tap="pickupTime"/.test(box(w2)) && /data-msg="pickupTime"><a class="msglink"[^>]*>Text about pickup time<\/a>[^]*?>Email it</.test(more(w2)), 'Weekend Renter (pickup time set): something big before pickup day, or no quiet Next: line / small pickup pair under More');
   const w3 = wrCard(true, '2026-10-30');
-  must(bigButtons(w3) === 1 && /data-primary>[\s\S]*>Mark returned</.test(w3), 'Weekend Renter on pickup day: Mark returned is not the one primary');
+  must(bigButtons(w3) === 1 && /data-primary>[\s\S]*data-help="step\.picked"[^>]*>Mark picked up</.test(box(w3)) && !/>Mark returned</.test(box(w3)), 'Weekend Renter on pickup day: Mark picked up is not the one primary (or Mark returned comes first)');
   // Hold controls and the thank-you box on a card carry no big button of their own.
   const hc = VM.holdControls({ name: 'H', untilMs: Date.now() + 7200000, items: 'Giant Uno', phone: '901-555-0100' }, { rk: 'x', sms: sms('r'), canEmail: true, depositTarget: null, compact: true });
   must(bigButtons(hc) === 0 && /data-msg="holdEnding"><a class="msglink"[^>]*>Text a reminder</.test(hc), 'hold controls on a card carry a big button (or lose Text a reminder)');
@@ -363,10 +373,12 @@ pc2 = await pamCard();
 must(/class="tdrow amber" data-takedown-row="not_sure">[\s\S]*<span class="tdpill">Not decided yet<\/span> <em data-takedown-note>after Halloween maybe<\/em>/.test(pc2) && /name="go" value="save"/.test(pc2), 'not_sure is not shown in amber with its note, on the row that can still Save it');
 // Time-aware: no Mark job done before the event day (only the quiet "Next:" line); on the day
 // it is the one primary, and it prompts (once) about the undecided takedown.
-must(!/data-help="card\.jobDone"[^>]*>Mark job done/.test(pc2) && /data-primary-wait data-next-wait="card\.jobDone"[^>]*>Next: Mark job done, on the event day \(Thu 24 Oct\)</.test(pc2), 'Mark job done shows before the event day (or the quiet Next: line is missing)');
+// Step cards (19 Oct 2026): before the day the next step is the money (no invoice yet: Create
+// invoice); on the day the install itself comes first, even with the invoice still open.
+must(!/data-help="card\.jobDone"/.test(pc2) && !/>Mark (install|job|setup) done</.test(pc2) && /data-next-step="invoiced"/.test(pc2), 'Mark install done shows before the event day (or the next step is not the invoice)');
 await s.db.prepare("UPDATE bookings SET date = ?2 WHERE request_key = ?1 AND kind = 'porch_install'").bind(porchReq.row.request_key, TODAY).run();
 pc2 = await pamCard();
-must(/The takedown is not decided yet for Pam Porch\. Mark the job done anyway\?/.test(pc2) && (bigButtons(pc2) === 1), 'Job done (on the event day) does not prompt (once) about the undecided takedown as the one primary');
+must(/data-next-step="setup"/.test(pc2) && /<summary class="btn primary" data-help="card\.jobDone"[^>]*>Mark install done<\/summary>/.test(pc2) && (pc2.match(/The takedown is not decided yet for Pam Porch\. Mark the job done anyway\?/g) || []).length === 1 && (bigButtons(pc2) === 1), 'Install done (on the event day) does not prompt (once) about the undecided takedown as the one primary');
 const cal = (await s.get('/admin/calendar')).text;
 must(/id="still-to-decide"[\s\S]*Pam Porch[\s\S]*after Halloween maybe[\s\S]*kind=porch_takedown/.test(cal), 'Still to decide on Calendar & Bookings does not list the undecided takedown');
 const jd = await s.post('/admin/requests/jobdone', { r: prk });
@@ -399,7 +411,7 @@ const daySheet = (await s.get(`/admin/day/${pick.date}`)).text;
 must(owe.id && /data-day-not-paid>[\s\S]*Not paid yet in all: \d+ customers? owes? \$/.test(daySheet), 'the Day sheet does not show the Not paid yet count + total when a customer with a balance is booked');
 must(!/data-day-not-paid/.test((await s.get('/admin/day/2030-12-25')).text), 'the Day sheet shows the Not paid yet line on a day with nobody owing');
 
-function cardNames(h) { return [...h.matchAll(/<article class="card" data-card=[\s\S]*?<h3 class="who">([^<]*)<\/h3>/g)].map((m) => m[1]); }
+function cardNames(h) { return [...h.matchAll(/<article class="card[^"]*" data-card=[\s\S]*?<h3 class="who">([^<]*)<\/h3>/g)].map((m) => m[1]); }
 
 if (checks < 150) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) { console.error(`VALIDATION FAIL: admin cards (${errors.length} of ${checks})`); for (const e of [...new Set(errors)].slice(0, 40)) console.error(`- ${e}`); process.exit(1); }

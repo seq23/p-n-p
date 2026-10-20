@@ -13,6 +13,7 @@ import { currentHolds, endingSoon } from './holds.mjs';
 import { chicagoDate, chicagoHour } from './reminders.mjs';
 import { balances } from './ledger.mjs';
 import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
+import { unconfirmedKeys, loadStored } from './steps.mjs';
 import { getSettings, money, esc, FROM_EMAIL } from './util.mjs';
 import { useInventory } from './inventory.mjs';
 import { TRACK_TABLE as PRICE_TABLE } from './prices.mjs';
@@ -100,6 +101,9 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
     return paid && (!r.wantsRentals || Boolean(returns[r.key] && returns[r.key].returned_at));
   });
   const receipts = (await db.prepare("SELECT COUNT(*) AS n FROM expenses WHERE status = 'needs_check'").first()).n;
+  // Unconfirmed requests (owner, 19 Oct 2026): the same list Calendar & Bookings shows.
+  const unconf = unconfirmedKeys({ requests: requests.filter(live), statuses, invoices: bals, returns, stored: await loadStored(db) });
+  const unconfirmed = requests.filter((r) => unconf.has(r.key));
   return {
     week: { start: thisMon, end: thisSun }, upcoming: { start: thisMon, end: lastDay }, lastWeek: { start: lastMon, end: lastSun },
     last: { byService: wk.lastByService, total: wk.lastWeek.length, jobsDone, received, expenses },
@@ -107,7 +111,7 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
     needs: {
       holds: holds.map((h) => shortName(h.name)), overdue: overdue.map((b) => shortName(b.customer_name)), damage: damage.map((r) => shortName(r.name)),
       takedowns: notDecided.map((r) => shortName(r.name)), takedownsToSchedule: toSchedule.map((t) => `${shortName(t.name)}${t.date ? ` ${dayWord(t.date)}` : ''}`), noReply: noReply.map((r) => shortName(r.name)), idsReady: idsReady.map((r) => shortName(r.name)),
-      receipts, notPaid: { count: np.count, total: np.total },
+      receipts, notPaid: { count: np.count, total: np.total }, unconfirmed: unconfirmed.map((r) => shortName(r.name)),
     },
   };
 }
@@ -139,6 +143,7 @@ export function renderSummary(d) {
   list('Damage to decide (refund or keep the deposit)', n.damage, '/admin/');
   list('Takedowns to schedule', n.takedownsToSchedule || [], '/admin/calendar#takedowns-to-schedule');
   list('Takedowns not decided', n.takedowns, '/admin/calendar#still-to-decide');
+  list('Unconfirmed requests', n.unconfirmed || [], '/admin/calendar');
   list('No reply after 2 days', n.noReply, '/admin/');
   list('IDs ready to delete', n.idsReady, '/admin/');
   if (n.receipts) line(`Receipts needing checking: ${n.receipts}`, '/admin/money');

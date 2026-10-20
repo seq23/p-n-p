@@ -187,17 +187,17 @@ await RQ.importStatement(s.db, rentRow).run();
 const cal = (await s.get(`/admin/calendar?month=${askDay.slice(0, 7)}`)).text;
 const cell = (() => { const i = cal.indexOf(`data-day="${askDay}"`); return cal.slice(i, cal.indexOf('</a>', i)); })();
 for (const [svc, name] of [['porch', 'Rhea P.'], ['party', 'Rene P.'], ['grazing', 'Remy G.'], ['rentals', 'Rosa R.']]) {
-  must(new RegExp(`<span class="k req [a-z_]+" style="border-color:#[0-9a-f]{6}" data-requested="${svc}"[^>]*role="link"[^>]*data-open="/admin/#c-[A-Za-z0-9_-]+">Requested · [A-Za-z &]+: ${name.replace('.', '\\.')}</span>`).test(cell), `month: no outlined Requested chip for ${svc} (${name}) that opens the card`);
+  must(new RegExp(`<span class="k req [a-z_]+" style="border-color:#[0-9a-f]{6}" data-requested="${svc}"[^>]*role="link"[^>]*data-open="/admin/#c-[A-Za-z0-9_-]+">Requested · not confirmed · [A-Za-z &]+: ${name.replace('.', '\\.')}</span>`).test(cell), `month: no outlined "Requested · not confirmed" chip for ${svc} (${name}) that opens the card`);
 }
 must(/\.k\.req\{background:transparent!important;border-style:solid/.test(cal), 'Requested chips are not outlined (border only, no fill)');
-must(/data-fill-legend[^>]*>[\s\S]*Filled = booked · Outlined = asked for, not booked yet/.test(cal), 'the legend line is missing');
+must(/data-fill-legend[^>]*>[\s\S]*Filled = booked \(you said yes\) · Outlined = requested, not confirmed yet/.test(cal), 'the legend line is missing');
 must(!/data-games-out/.test(cell) && /data-games-asked[^>]*>2 games asked for</.test(cell), 'a requested rental counts as games out, or "N games asked for" is missing');
 const dayHtml = (await s.get(`/admin/day/${askDay}`)).text;
 must((dayHtml.match(/<a class="k req [^"]*"[^>]*data-requested="(porch|party|grazing|rentals)"[^>]*href="\/admin\/#c-/g) || []).length === 4, 'the day page does not link the four Requested chips to their cards');
 must(/data-day-count>0 of \d+ games out</.test(dayHtml) && /data-games-asked[^>]*>2 games asked for, not booked yet/.test(dayHtml), 'the day page counts requested games as out');
 // Today's list is the day page for today.
 const todayReq = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', event_date: plus(0), location: 'Cordova', name: 'Tess Todayask', phone: '901-555-0974', email: 'tess.today@example.com' });
-must(todayReq.status === 303 && /data-requested="porch"[^>]*>Requested · Porch: Tess T\.</.test((await s.get(`/admin/day/${plus(0)}`)).text), "Today's list lacks the Requested chip");
+must(todayReq.status === 303 && /data-requested="porch"[^>]*>Requested · not confirmed · Porch: Tess T\.</.test((await s.get(`/admin/day/${plus(0)}`)).text), "Today's list lacks the Requested · not confirmed chip");
 // The ICS feed and the Sheet's Bookings rows never carry a requested name.
 const tok = (await s.get('/admin/calendar/link')).text.match(/\/api\/calendar\/([a-f0-9]{64})\.ics/);
 const feed = tok ? await (await handleIcs({ request: new Request(`https://porchandparty901.com/api/calendar/${tok[1]}.ics`), env: s.env, params: { token: `${tok[1]}.ics` } })).text() : '';
@@ -212,10 +212,21 @@ must(!/data-requested="porch"/.test(cell2) && /<span class="k porch_install"[^>]
 // Held rental: filled + "Held"; expired: back to outlined Requested, not games out.
 const held = await s.siteRequest({ service: 'rentals', games: ['cornhole'], duration: 'day', rental_date: plus(22), pickup_when: 'morning', return_when: 'after', name: 'Hope Heldask', phone: '901-555-0975', email: 'hope.held@example.com' });
 let cal3 = (await s.get(`/admin/calendar?month=${plus(22).slice(0, 7)}`)).text;
-must(/data-held-chip[^>]*>Held · Rental pickup: Hope Heldask</.test(cal3), 'a held rental is not a filled chip that says Held');
+// Step cards (19 Oct 2026): a held rental nobody said yes to is OUTLINED ("Requested · not
+// confirmed (games held)"), its games still out; it turns solid "Held" on "Yes, book it" (below).
+must(/<span class="k rental_pickup req tent"[^>]*data-held-chip data-tentative style="border-color:#[0-9a-f]{6}"[^>]*>Requested · not confirmed \(games held\) · Rental pickup: Hope Heldask</.test(cal3), 'a held, unconfirmed rental is not an outlined "Requested · not confirmed (games held)" chip');
 await s.db.prepare("UPDATE holds SET until = '2000-01-01 00:00:00' WHERE request_key = ?1").bind(held.row.request_key).run();
 cal3 = (await s.get(`/admin/calendar?month=${plus(22).slice(0, 7)}`)).text;
-must(!/Held · Rental pickup: Hope/.test(cal3) && /data-requested="rentals"[^>]*>Requested · Rentals: Hope H\.</.test(cal3), 'an expired hold did not revert to an outlined Requested chip');
+must(!/Rental pickup: Hope/.test(cal3) && /data-requested="rentals"[^>]*>Requested · not confirmed · Rentals: Hope H\.</.test(cal3), 'an expired hold did not revert to an outlined Requested chip');
+{
+  // "Yes, book it" on a held rental: solid, filled "Held" chip (games still held, now by hand).
+  const yes = await s.siteRequest({ service: 'rentals', games: ['giant-uno'], duration: 'day', rental_date: plus(23), pickup_when: 'morning', return_when: 'after', name: 'Yara Yesask', phone: '901-555-0976', email: 'yara.yes@example.com' });
+  const pk = await s.one("SELECT date FROM bookings WHERE request_key = ?1 AND kind = 'rental_pickup'", yes.row.request_key);
+  const rt = await s.one("SELECT date FROM bookings WHERE request_key = ?1 AND kind = 'rental_return'", yes.row.request_key);
+  await s.post('/admin/requests/talked', { r: s.rk(yes.row.request_key), go: 'yes', date: pk.date, return_date: rt.date });
+  const cal4 = (await s.get(`/admin/calendar?month=${pk.date.slice(0, 7)}`)).text;
+  must(/<span class="k rental_pickup"[^>]*data-held-chip[^>]*>Held · Rental pickup: Yara Yesask</.test(cal4) && !/data-tentative[^>]*>[^<]*Yara/.test(cal4) && (await s.one('SELECT by_hand FROM holds WHERE request_key = ?1', yes.row.request_key)).by_hand === 1, 'Yes, book it on a held rental did not make a solid Held chip (kept held by hand)');
+}
 // Void, put away and test requests never show.
 const chips = RD.requestedChips([{ ...mk('v', ['porch']), name: 'Vic Void' }, { ...mk('p', ['porch']), name: 'Pia Put' }, { ...mk('t', ['porch']), name: 'Tom Test', isTest: true }, { ...mk('l', ['porch']), name: 'Lia Live' }],
   { v: { status: 'void' }, p: { status: 'new', archived_at: 'x' } }, []);
@@ -229,9 +240,9 @@ must(chips.length === 1 && chips[0].name === 'Lia L.', 'void / put-away / test r
   const html = V.requestCard(r, { st: { status: 'job_done', job_done_at: '2026-10-17 20:00:00', invoice_id: 7 }, inv: paid, sched: { date: '2026-10-17' }, kinds: bk.map((b) => b.kind), bookings: bk, today: '2026-10-18',
     bottom: '<div class="tyline" data-thankyou>Thank-you email goes out tomorrow morning</div>' });
   must(!/chip sched|data-paid-early|Scheduled for/.test(html), 'the card repeats the progress line in pills (Paid in full / Scheduled for …)');
-  must(!/data-payment/.test(html) && /data-paid-undo/.test(html), 'a paid-in-full card still has the Payment box, or lacks the small undo on the progress line');
+  must(!/data-payment/.test(html) && /data-step="paid" data-step-done>[\s\S]*?data-undo="paid" data-undo-kind="explain"/.test(html) && (html.match(/data-undo=/g) || []).length === 1, 'a paid-in-full card still has the Payment box, or lacks its one undo beside Paid in full');
   must(/data-takedown-row="booked"[\s\S]*Booked for Tue 20 Oct[\s\S]*class="btn primary" type="submit" data-takedown-done-tap/.test(html) && !/data-primary>/.test(html) && !/data-next-wait/.test(html), 'Aashish\'s card: the one-tap Mark takedown done is not THE primary (or a Next: line / second primary shows)');
-  must(html.indexOf('data-thankyou') > html.indexOf('data-secondary') && html.indexOf('data-thankyou') < html.indexOf('data-details'), 'the thank-you is not at the bottom, just above Show details');
+  must(html.indexOf('data-thankyou') > html.indexOf('data-details') && html.indexOf('data-thankyou') < html.indexOf('data-more-row'), 'the thank-you is not at the bottom of More, just above Edit / Add a note / Put away');
   must(/\.secrow\{display:flex;flex-wrap:wrap/.test(V.CARD_CSS) && /\.secrow \.btn\{width:auto/.test(V.CARD_CSS), 'the secondary buttons are full-width boxes again');
 }
 

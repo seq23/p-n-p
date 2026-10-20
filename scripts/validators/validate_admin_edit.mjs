@@ -71,7 +71,9 @@ for (const [svc, base] of Object.entries(SVC)) {
     const rk = (html.match(/data-reqcard[^>]*?id="c-([^"]+)"/) || html.match(/id="c-([^"]+)"/) || [])[1];
     must(got === stage, `${svc}/${stage}: the card rendered stage ${got}`);
     must(hasEdit(html, rk), `${svc}/${stage}: no always-visible Edit link with its tooltip`);
-    must(html.indexOf('data-edit-link') < html.indexOf('data-details'), `${svc}/${stage}: the Edit link is hidden under Show details`);
+    // Step cards (owner-approved 19 Oct 2026): Edit is in the card's "More" row, with Add a note
+    // and Put away: exactly one Edit link per card, inside More, at every stage.
+    must(html.indexOf('data-edit-link') > html.indexOf('data-details') && html.indexOf('data-edit-link') > html.indexOf('data-more-row') && html.indexOf('data-more-row') > html.indexOf('data-details') && (html.match(/data-edit-link/g) || []).length === 1, `${svc}/${stage}: the Edit link is not (once) in the card's More row`);
   }
 }
 for (const st of ['new', 'draft', 'invoiced', 'deposit_paid', 'scheduled', 'job_done', 'finished', 'void', 'archived']) must(stagesSeen.has(st), `stage ${st} never rendered`);

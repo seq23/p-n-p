@@ -153,7 +153,10 @@ dash = (await s.get('/admin/')).text;
   const card = dash.slice(dash.lastIndexOf('<article', dash.indexOf('data-thankyou')), dash.indexOf('</article>', dash.indexOf('data-thankyou')));
   const line = (card.match(/<div class="tyline" data-thankyou>[\s\S]*?<\/div>/) || [''])[0];
   must(/Thank-you email goes out tomorrow morning/.test(line) && /Text a thank-you/.test(line) && /Email it now/.test(line) && />Don't send</.test(line) && !/class="btn/.test(line), 'a job marked done does not say, on one small line, the thank-you goes out tomorrow · Text · Email · Don\'t send');
-  must(card.indexOf('data-thankyou') > card.indexOf('data-progress') && card.indexOf('data-thankyou') < card.indexOf('data-details') && !/<section class="paybox" data-thankyou/.test(card), 'the thank-you is not the last line above Show details');
+  // Step cards (19 Oct 2026): it is ONE small line under More, after the other buttons and the
+  // Payment box, just above Edit / Add a note / Put away; never in the next-step box.
+  const moreAt = card.indexOf('data-details');
+  must(moreAt > card.indexOf('data-next-step') && card.indexOf('data-thankyou') > moreAt && card.indexOf('data-thankyou') < card.indexOf('data-more-row') && (card.match(/data-thankyou[\s>]/g) || []).length === 1 && !/<section class="paybox" data-thankyou/.test(card), 'the thank-you is not one small line under More, just above Edit / Add a note / Put away');
 }
 let ty = await CM.sendThankYous(s.env, day0);
 must(!s.env.sent.some((m) => m.to === 'pia@example.com' && /Thank you/.test(m.subject)), 'the thank-you went out the same day the job was marked done');

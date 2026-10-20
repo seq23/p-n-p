@@ -3,12 +3,13 @@
 // private ICS feed token. Auth is enforced before this runs (guard.mjs), except the ICS feed,
 // which lives in functions/api/calendar/ and checks its own token.
 import { redirect, htmlResponse, getSettings, putSetting, fromB64urlText, b64urlText, shortDate, todayISO, FROM_EMAIL } from './util.mjs';
-import { loadRequests, logEvent } from './requests.mjs';
+import { loadRequests, loadRequestsFromDb, logEvent } from './requests.mjs';
+import * as ST from './steps.mjs';
 import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
 import { TRACK_TABLE as PRICE_TABLE } from './prices.mjs';
 import { autoBookTakedown, inlineKindFor } from './takedown.mjs';
-import { servicesOf } from './cards.mjs';
-import { requestedChips, gamesAskedOn } from './requested.mjs';
+import { servicesOf, SCHEDULE_FIRST } from './cards.mjs';
+import { requestedChips, gamesAskedOn, askedDate } from './requested.mjs';
 import * as C from './calendar.mjs';
 import { notPaidYet } from './notpaid.mjs';
 import { balances, balanceWords, depositWords } from './ledger.mjs';
@@ -18,7 +19,7 @@ import * as VC from './views-calendar.mjs';
 import * as VM2 from './views-messages.mjs';
 import { expireHolds, endingSoon, holdSettings, currentHolds } from './holds.mjs';
 import { choiceFrom, createPhoneRequest, NOTE_CHOICE } from './phone-requests.mjs';
-import { serviceOfKind } from './kinds.mjs';
+import { serviceOfKind, serviceInfo } from './kinds.mjs';
 
 const decodeKey = (v) => { try { return fromB64urlText(v); } catch { return ''; } };
 const wantsJson = (request) => request.headers.get('X-Pnp-Fetch') === '1';
@@ -37,10 +38,14 @@ async function requestsSafe(env, opts) {
 
 // Everything a booking row needs to describe itself: balance, notes, check-in.
 export async function contextFor(db, bookings) {
-  const [bals, returns, notes, holdRows] = await Promise.all([balances(db), C.loadReturns(db), C.notesByBooking(db, bookings), db.prepare("SELECT * FROM holds WHERE state = 'held'").all().then((r) => r.results || []).catch(() => [])]);
+  const [bals, returns, notes, holdRows, reqs, statuses, stored] = await Promise.all([balances(db), C.loadReturns(db), C.notesByBooking(db, bookings), db.prepare("SELECT * FROM holds WHERE state = 'held'").all().then((r) => r.results || []).catch(() => []),
+    loadRequestsFromDb(db).catch(() => []), statusMap(db), ST.loadStored(db)]);
   const holds = Object.fromEntries(holdRows.map((h) => [h.request_key, h]));
-  const ctx = (b) => ({ bal: b.invoice_id ? bals[b.invoice_id] : null, notes: notes[b.id] || [], ret: returns[C.returnKeyOf(b)], today: chicagoDate(), hold: b.request_key ? holds[b.request_key] || null : null });
-  return { ctx, bals, returns, notes };
+  // Tentative (outlined "Requested · not confirmed") = its request is not confirmed (steps.mjs).
+  const unconfirmed = ST.unconfirmedKeys({ requests: reqs, statuses, invoices: bals, returns, stored });
+  const ctx = (b) => ({ bal: b.invoice_id ? bals[b.invoice_id] : null, notes: notes[b.id] || [], ret: returns[C.returnKeyOf(b)], today: chicagoDate(), hold: b.request_key ? holds[b.request_key] || null : null,
+    tentative: Boolean(b.request_key && unconfirmed.has(b.request_key)) });
+  return { ctx, bals, returns, notes, unconfirmed };
 }
 
 export async function windowsFor(db, returns) {
@@ -80,12 +85,14 @@ export async function calendarPage(env, url) {
   const today = chicagoDate();
   const month = /^\d{4}-\d{2}$/.test(url.searchParams.get('month') || '') ? url.searchParams.get('month') : today.slice(0, 7);
   const all = await C.listBookings(env.DB);
-  const { ctx, returns } = await contextFor(env.DB, all);
+  const { ctx, returns, unconfirmed: unconfKeys } = await contextFor(env.DB, all);
   const windows = C.rentalWindows(all, returns, PRICE_TABLE);
   const statuses = await statusMap(env.DB);
   const { requests } = await requestsSafe(env);
-  const booked = C.firstBookedKeys(all);
-  const unscheduled = C.unscheduledRequests(requests, statuses, booked).map((r) => ({ ...r, summary: V.wantSummary(r).join(' · ') }));
+  const unconfirmed = C.unconfirmedRequests(requests, statuses, unconfKeys).map((r) => {
+    const svc = servicesOf(r)[0];
+    return { ...r, summary: V.wantSummary(r).join(' · '), asked: svc ? askedDate(r, svc) : '', color: svc ? serviceInfo(SCHEDULE_FIRST[svc][1]).bar : '' };
+  });
   const from = C.addDays(`${month}-01`, -7); const to = C.addDays(`${month}-01`, 45);
   const visible = all.filter((b) => (b.date >= from && b.date <= to) || (b.date >= today && b.date <= C.addDays(today, 14)));
   const { reminders, tomorrowLabel, overdue } = await remindersAndOverdue(env.DB);
@@ -104,7 +111,7 @@ export async function calendarPage(env, url) {
   return htmlResponse(VC.calendarPage({ stillToDecide, toSchedule, requested,
     holdsBox: VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours, back: '/admin/calendar' }), heldPane: VM2.heldPane(holds),
     month, today, bookings: visible, all, ctx, windows, table: PRICE_TABLE, warnings: C.overlapWarnings(windows, PRICE_TABLE, { today }),
-    unscheduled, reminders, tomorrowLabel, overdue, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '',
+    unconfirmed, reminders, tomorrowLabel, overdue, flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '',
   }));
 }
 
@@ -241,6 +248,9 @@ export async function createBookingRoute(env, request) {
     key = await createPhoneRequest(env.DB, { service: choice.service, name: b.customer_name, phone: b.phone, email: b.email, bookings: planned });
   }
   let id;
+  // Booking a request's first job by hand (Book it on Unconfirmed requests, a drag onto a day,
+  // or a card's Book the setup day) is her yes: the request is confirmed (steps.mjs).
+  if (key && !C.SECOND_KINDS.has(b.kind)) await ST.markConfirmed(env.DB, key, 'booked by hand');
   if (key) id = await C.saveRequestBooking(env.DB, key, b);
   else id = await C.createBooking(env.DB, b);
   const retTime = String(form.get('return_time') || '').trim();
@@ -314,6 +324,15 @@ export async function remindedRoute(env, request, id) {
 // day (owner, 18 Oct 2026: "I don't see where I would mark the takedown as done with one click";
 // it used to be refused before the takedown day). With Job done and Paid in full, the request is
 // then Finished. Back to the card it came from (#c-<rk>) or the Day sheet.
+// Step cards (owner-approved 19 Oct 2026) use the same one tap, at /bookings/:id/done, for the
+// rental pickup ("Mark picked up", optionally recording the rest as paid: "They paid the rest
+// now") and the grazing pickup ("Mark pickup done"). Undo takes back only the done mark; a
+// payment recorded with it stays (money is changed on the invoice).
+const DONE_KINDS = /_takedown$|^rental_pickup$|^grazing_pickup$/;
+const DONE_WORDS = (kind, undo) => {
+  const w = kind === 'rental_pickup' ? 'Picked up' : (kind === 'grazing_pickup' ? 'Pickup done' : 'Takedown done');
+  return undo ? `${w} undone` : `${w} ✓`;
+};
 export async function takedownDoneRoute(env, request, id) {
   const form = await request.formData();
   const undo = form.get('undo') === '1';
@@ -324,11 +343,20 @@ export async function takedownDoneRoute(env, request, id) {
     const anchor = to === '/admin/' && b && b.request_key ? `#c-${b64urlText(b.request_key)}` : '';
     return redirect(`${to}?${e ? 'e' : 'm'}=${encodeURIComponent(m)}${anchor}`);
   };
-  if (!b || !/_takedown$/.test(b.kind)) return back('That is not a takedown booking.', true);
+  if (!b || !DONE_KINDS.test(b.kind)) return back('That booking cannot be marked done here.', true);
   if (undo) await env.DB.prepare('UPDATE bookings SET done_at = NULL WHERE id = ?1').bind(id).run();
   else await env.DB.prepare("UPDATE bookings SET done_at = COALESCE(done_at, datetime('now')) WHERE id = ?1").bind(id).run();
-  if (b.request_key) await logEvent(env.DB, b.request_key, undo ? 'Takedown done undone' : 'Takedown done ✓', 'admin');
-  return back(undo ? 'Takedown done undone.' : 'Takedown done ✓');
+  let paidWords = '';
+  if (!undo && b.kind === 'rental_pickup' && form.get('paid_rest') === '1' && b.request_key) {
+    const st = await env.DB.prepare('SELECT invoice_id FROM request_status WHERE request_key = ?1').bind(b.request_key).first();
+    if (st && st.invoice_id) {
+      const { payRest } = await import('./admin.mjs');
+      const cents = await payRest(env, st.invoice_id, String(form.get('method') || ''));
+      if (cents) paidWords = ` The rest ($${(cents / 100).toFixed(2)}) is recorded as paid.`;
+    }
+  }
+  if (b.request_key) await logEvent(env.DB, b.request_key, `${DONE_WORDS(b.kind, undo)}${paidWords}`, 'admin');
+  return back(`${DONE_WORDS(b.kind, undo).replace(' undone', ' undone.')}${paidWords}`);
 }
 
 // The inline takedown row on a card (owner, 18 Oct 2026): Save books / moves the porch or party

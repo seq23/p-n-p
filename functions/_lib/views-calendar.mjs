@@ -1,4 +1,4 @@
-// Calendar screens for the /admin console: month view with the Unscheduled requests list,
+// Calendar screens for the /admin console: month view with the Unconfirmed requests list,
 // a day view that is also the printable Day sheet, the scheduling form, Move, notes, rental
 // check-in ("Mark returned"), tomorrow's reminders, "Find a customer" and the Google
 // Calendar link page. Same rules as views.mjs: words + colour, 48 px targets, every button
@@ -57,6 +57,9 @@ const CAL_CSS = `
 .found h3{margin-bottom:2px}
 /* Requested (asked for, not booked): outlined, never filled. Words always shown. */
 .k.req{background:transparent!important;border-style:solid;border-width:2px 2px 2px 6px;font-weight:600}
+.k.req.tent{border-style:dashed solid dashed solid;color:var(--ink)}
+.tentpill{display:inline-block;padding:1px 8px;border:2px dashed #8a7d73;border-radius:999px;color:#5f5148;font-size:.85rem;font-weight:700;background:#fff;margin:2px 0}
+.askedline{margin:6px 0}.askedline a.k{display:inline-flex;align-items:center;min-height:40px;padding:2px 10px;text-decoration:none;color:var(--ink)}
 a.k.req{text-decoration:none;color:var(--ink)}
 .k.req[role=link]{cursor:pointer}
 .badge.asked{color:#4b3f8f}
@@ -187,7 +190,7 @@ export function toScheduleBox(rows = []) {
 // span with role=link (CAL_JS opens it); elsewhere a real link.
 export function requestedChip(c, tag = 'a') {
   const href = `/admin/#c-${c.rk}`;
-  const words = `Requested · ${c.part === 'out' ? OUT_WORDS : c.part === 'return' ? 'Rental return' : SERVICE_KINDS[c.service].short}: ${c.name}`;
+  const words = `${TENT_WORDS} · ${c.part === 'out' ? OUT_WORDS : c.part === 'return' ? 'Rental return' : SERVICE_KINDS[c.service].short}: ${c.name}`;
   const attrs = `class="k req ${esc(c.kind)}" style="border-color:${esc(c.color)}" data-requested="${esc(c.service)}"${tip('cal.requested')}`;
   return tag === 'a' ? `<a ${attrs} href="${esc(href)}">${esc(words)}</a>` : `<span ${attrs} role="link" tabindex="0" data-open="${esc(href)}">${esc(words)}</span>`;
 }
@@ -195,6 +198,14 @@ export function requestedChip(c, tag = 'a') {
 // "Rental out" on every day between a rental's pickup and its return (owner, 19 Oct 2026): the
 // games are with the customer, so the span reads pickup chip, Rental out, ..., return chip.
 export const OUT_WORDS = 'Rental out';
+// Tentative = asked for, not confirmed (owner, 19 Oct 2026): every request's date shows OUTLINED
+// from the moment it arrives, for all four services, and turns solid only on "Yes, book it" on its
+// card (or a deposit, a phone booking, a done job: steps.mjs isConfirmed). A booking that already
+// exists for an unconfirmed request (a held rental, an invoice sent) is outlined the same way.
+export const TENT_WORDS = 'Requested · not confirmed';
+const tentAttrs = (b, c) => (c && c.tentative ? ` data-tentative style="border-color:${esc(serviceInfo(b.kind).bar)}"` : '');
+const tentClass = (c) => (c && c.tentative ? ' req tent' : '');
+const tentWords = (c, held) => (c && c.tentative ? `${TENT_WORDS}${held ? ' (games held)' : ''} · ` : (held ? 'Held · ' : ''));
 export function outChips(windows, day, today, tag = 'span') {
   return outBetween(windows, day, today).map((w) => {
     const words = `${OUT_WORDS}: ${tag === 'a' ? (w.name || 'No name') : firstLine(w.name, 18)}`;
@@ -207,10 +218,10 @@ export function outChips(windows, day, today, tag = 'span') {
 
 export function fillLegend() {
   const s = SERVICE_KINDS.porch;
-  return `<div class="fill-legend" data-fill-legend${tip('cal.legend')}><span class="k porch_install">Booked</span><span class="k req" style="border-color:${s.bar}">Requested</span> Filled = booked · Outlined = asked for, not booked yet</div>`;
+  return `<div class="fill-legend" data-fill-legend${tip('cal.legend')}><span class="k porch_install">Booked</span><span class="k req" style="border-color:${s.bar}">Requested</span> Filled = booked (you said yes) · Outlined = requested, not confirmed yet</div>`;
 }
 
-export function calendarPage({ stillToDecide = [], toSchedule = [], requested = [], month, today, bookings, all = bookings, ctx, windows, table, warnings, unscheduled, reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
+export function calendarPage({ stillToDecide = [], toSchedule = [], requested = [], month, today, bookings, all = bookings, ctx, windows, table, warnings, unconfirmed = [], reminders, tomorrowLabel, overdue, flash = '', error = '', holdsBox = '', heldPane = '' }) {
   const [y, m] = month.split('-').map(Number);
   const first = `${month}-01`;
   const startPad = new Date(`${first}T12:00:00Z`).getUTCDay();
@@ -235,7 +246,8 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
         const r = ctx(b).ret;
         const mark = b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : '';
         const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
-        return `<span class="k ${esc(b.kind)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(held ? 'cal.heldChip' : 'cal.booking')}>${held ? 'Held · ' : ''}${esc(KIND_LABELS[b.kind])}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
+        const c = ctx(b);
+        return `<span class="k ${esc(b.kind)}${tentClass(c)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''}${tentAttrs(b, c)} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(tentWords(c, held))}${esc(KIND_LABELS[b.kind])}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
       }).join('')}
       ${outChips(windows, day, today, 'span')}
       ${(reqByDay[day] || []).map((c) => requestedChip(c, 'span')).join('')}
@@ -253,23 +265,34 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
     const outs = outChips(windows, day, today, 'a');
     if (!list.length && !asked.length && !outs && day !== today) continue;
     const games = usageOn(windows, day, today, table).count;
-    listDays.push(`<div class="mday${day === today ? ' today' : ''}" data-month-day="${day}"><a class="mdh" href="/admin/day/${day}"${tip('cal.day')}><strong>${esc(shortDate(day))}</strong>${day === today ? ' <span class="muted">today</span>' : ''}${games ? ` <span class="badge" data-games-out>${games} ${games === 1 ? 'game' : 'games'} out</span>` : ''}</a>
+    listDays.push(`<div class="mday${day === today ? ' today' : ''}" id="d-${day}" data-month-day="${day}"><a class="mdh" href="/admin/day/${day}"${tip('cal.day')}><strong>${esc(shortDate(day))}</strong>${day === today ? ' <span class="muted">today</span>' : ''}${games ? ` <span class="badge" data-games-out>${games} ${games === 1 ? 'game' : 'games'} out</span>` : ''}</a>
       ${list.map((b) => {
         const r = ctx(b).ret;
         const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
-        return `<a class="k ${esc(b.kind)}" href="/admin/day/${day}" data-list-booking="${b.id}"${tip(held ? 'cal.heldChip' : 'cal.booking')}>${held ? 'Held · ' : ''}${esc(KIND_LABELS[b.kind])}${b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : ''}${b.time ? ` ${esc(prettyTime(b.time))}` : ''}: ${esc(b.customer_name || 'No name')}${b.items ? ` <span class="ki">· ${esc(firstLine(b.items, 80))}</span>` : ''}</a>`;
+        const c = ctx(b);
+        return `<a class="k ${esc(b.kind)}${tentClass(c)}" href="/admin/day/${day}" data-list-booking="${b.id}"${tentAttrs(b, c)}${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(tentWords(c, held))}${esc(KIND_LABELS[b.kind])}${b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : ''}${b.time ? ` ${esc(prettyTime(b.time))}` : ''}: ${esc(b.customer_name || 'No name')}${b.items ? ` <span class="ki">· ${esc(firstLine(b.items, 80))}</span>` : ''}</a>`;
       }).join('')}
       ${outs}${asked.map((c) => requestedChip(c, 'a')).join('')}
       ${!list.length && !asked.length && !outs ? '<p class="muted" style="margin:0">Nothing booked today.</p>' : ''}</div>`);
   }
   const monthList = `<div class="monthlist" data-month-list>${listDays.length ? listDays.join('') : '<p class="muted">Nothing booked this month.</p>'}</div>`;
   const upcoming = bookings.filter((b) => b.date >= today && b.date <= addDays(today, 14));
-  const upcomingHtml = `<section class="card upcoming" data-upcoming><h2>Upcoming (next 14 days)</h2>${upcoming.length ? upcoming.map((b) => `<a class="item" href="/admin/day/${esc(b.date)}"${tip('cal.day')}>
-      <strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind)} ${esc(b.customer_name || 'No name')}<br><span class="muted">${esc(b.items || '')}</span> ${statusBits(b, ctx(b))}</a>`).join('') : '<p class="muted" style="margin:0">Nothing in the next 14 days.</p>'}</section>`;
+  // Requested dates (outlined, not confirmed) are in Upcoming too, so a request a few days out
+  // is seen without paging the month (owner, 19 Oct 2026: a 3 Nov request looked "unscheduled").
+  const upReq = requested.filter((c) => (!c.part || c.part === 'pickup') && c.date >= today && c.date <= addDays(today, 14));
+  const upRows = [...upcoming.map((b) => ({ date: b.date, time: b.time || '', html: `<a class="item" href="/admin/day/${esc(b.date)}"${tip('cal.day')}>
+      <strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind)}${ctx(b).tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''} ${esc(b.customer_name || 'No name')}<br><span class="muted">${esc(b.items || '')}</span> ${statusBits(b, ctx(b))}</a>` })),
+    ...upReq.map((c) => ({ date: c.date, time: '', html: `<div class="item" data-upcoming-requested><strong>${esc(shortDate(c.date))}</strong> ${requestedChip(c, 'a')}</div>` }))]
+    .sort((x, y) => (x.date + x.time).localeCompare(y.date + y.time));
+  const upcomingHtml = `<section class="card upcoming" data-upcoming><h2>Upcoming (next 14 days)</h2>${upRows.length ? upRows.map((x) => x.html).join('') : '<p class="muted" style="margin:0">Nothing in the next 14 days.</p>'}</section>`;
   const warn = warnings.length ? `<div class="notice err" data-overlap><strong>Double-booked:</strong>${warnings.map((w) => `<div>${esc(w.item)} (you have ${w.stock}) is out with ${esc(w.who.map((x) => `${x.name} (${shortDate(x.start)} to ${shortDate(x.end)})`).join(' and '))}. Starts ${esc(shortDate(w.first))}.</div>`).join('')}</div>` : '';
-  const uns = `<aside class="card unsched" data-unscheduled><h2>Unscheduled requests</h2><p class="muted">On a computer, drag a request onto a day. Or tap Schedule.</p>
-    ${unscheduled.length ? unscheduled.map((r) => `<div class="u" draggable="true" data-drag data-rk="${esc(b64urlText(r.key))}"${tip('cal.unscheduled')}><strong>${esc(r.name || 'No name')}</strong><div class="muted">${esc(r.summary || '')}</div>
-      ${act(`<a class="btn ghost" href="/admin/calendar/new?r=${esc(b64urlText(r.key))}"${tip('cal.schedule')}>Schedule</a>`, 'cal.schedule')}</div>`).join('') : '<p class="muted">Every request is on the calendar.</p>'}</aside>`;
+  // Unconfirmed requests (owner, 19 Oct 2026; was "Unscheduled requests"): every live request
+  // she has not said yes to. Each stays here, outlined on its asked-for day, until "Yes, book it"
+  // on its card (or Book it here); then it leaves the list and its day turns solid.
+  const uns = `<aside class="card unsched" data-unconfirmed><h2>Unconfirmed requests</h2><p class="muted">Not booked for sure yet. Each one is outlined on its day until you tap <strong>Yes, book it</strong> on its card. On a computer you can also drag one onto a day.</p>
+    ${unconfirmed.length ? unconfirmed.map((r) => `<div class="u" draggable="true" data-drag data-rk="${esc(b64urlText(r.key))}" data-unconfirmed-row${tip('cal.unconfirmed')}><strong>${esc(r.name || 'No name')}</strong><div class="muted">${esc(r.summary || '')}</div>
+      ${r.asked ? `<p class="askedline" data-asked="${esc(r.asked)}">Asked for <a class="k req" style="border-color:${esc(r.color || '#999')}" href="/admin/calendar?month=${esc(r.asked.slice(0, 7))}#d-${esc(r.asked)}"${tip('cal.askedDay')}>${esc(shortDate(r.asked))}</a></p>` : '<p class="askedline muted">No date given yet.</p>'}
+      <div class="actions" style="grid-template-columns:1fr 1fr"><a class="btn ghost" href="/admin/#c-${esc(b64urlText(r.key))}"${tip('cal.openCard')}>Open the request</a>${act(`<a class="btn ghost" href="/admin/calendar/new?r=${esc(b64urlText(r.key))}"${tip('cal.schedule')}>Book it</a>`, 'cal.schedule')}</div></div>`).join('') : '<p class="muted">Every request is confirmed.</p>'}</aside>`;
   const panel = stepsPanel('calendar', [
     [`<a class="btn ghost" href="/admin/search"${tip('sub.find')}>Find a customer</a>`],
     [`<a class="btn" href="/admin/calendar/new"${tip('cal.add')}>Add a booking</a>`],
@@ -328,7 +351,7 @@ const VIEW_JS = `
 })();`;
 
 function listEntry(b, ctx) {
-  return `<a class="item" href="/admin/day/${esc(b.date)}"${tip('cal.day')}><strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind)} ${esc(b.customer_name || 'No name')}
+  return `<a class="item" href="/admin/day/${esc(b.date)}"${tip('cal.day')}><strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind)}${ctx(b).tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''} ${esc(b.customer_name || 'No name')}
     <br><span class="muted">${esc([b.items, b.place].filter(Boolean).join(' · '))}</span> ${statusBits(b, ctx(b))}</a>`;
 }
 
@@ -415,7 +438,7 @@ export function dayPage({ outRows = [], tdToday = [], requested = [], gamesAsked
   // when > 0; notes in italics. Timed jobs first, Anytime last (daySort).
   const sheet = `<section class="card"><h2>Day sheet</h2><div class="jobs" data-day-sheet>
     ${rows.map(({ b, c, owe }) => `<div class="job" data-sheet-row="${b.id}"><span class="box" aria-hidden="true"></span><div>
-      <div class="jl">${esc([b.time ? prettyTime(b.time) : 'Anytime', SHEET_WORDS[b.kind] || KIND_LABELS[b.kind] || 'Booking', firstOf(b.customer_name)].join(' · '))}</div>
+      <div class="jl">${esc([b.time ? prettyTime(b.time) : 'Anytime', SHEET_WORDS[b.kind] || KIND_LABELS[b.kind] || 'Booking', firstOf(b.customer_name)].join(' · '))}${c.tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''}</div>
       ${b.items ? `<div class="ji">${esc(b.items)}</div>` : ''}${b.place ? `<div class="muted">${esc(b.place)}</div>` : ''}
       ${owe > 0 ? `<div class="jo" data-still-owed>Still owed ${esc(money(owe))}</div>` : ''}
       ${(c.notes || []).map((n) => `<div class="jn">${esc(n.body)}</div>`).join('')}</div></div>`).join('') || (outRows.length ? '' : '<p>Nothing booked this day.</p>')}
@@ -432,7 +455,7 @@ export function dayPage({ outRows = [], tdToday = [], requested = [], gamesAsked
     const rk = returnKeyOf(b);
     const returned = c.ret && c.ret.returned_at;
     return `<article class="card booking" data-booking-card="${b.id}">
-      <div class="spread"><h3 style="margin:0">${esc(b.customer_name || 'No name')}</h3>${kindTag(b.kind)}</div>
+      <div class="spread"><h3 style="margin:0">${esc(b.customer_name || 'No name')}</h3>${kindTag(b.kind)}</div>${c.tentative ? `<p class="tentpill" data-tentative-pill>${TENT_WORDS}: say yes on <a href="/admin/#c-${esc(b64urlText(b.request_key))}"${tip('cal.openCard')}>their card</a> to confirm.</p>` : ''}
       <div><strong>${esc(b.time ? prettyTime(b.time) : 'Any time this day')}</strong></div>
       ${b.items ? `<div><strong>What:</strong> ${esc(b.items)}</div>` : ''}${b.place ? `<div><strong>Where:</strong> ${esc(b.place)}</div>` : ''}
       <div style="margin:6px 0">${statusBits(b, c)}</div>

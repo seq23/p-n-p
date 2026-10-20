@@ -17,16 +17,38 @@ export function isISODate(s) {
 }
 
 // "10/24/2026" (Google Forms), "2026-10-24" or "October 24, 2026" -> "2026-10-24"; '' if unreadable.
-export function parseFormDate(value) {
+// No year (owner, 19 Oct 2026: a request typed as "11/3" showed as 2001): "11/3", "11-3", "11.3",
+// "Nov 3", "November 3rd", "3 Nov", "Tue 3 Nov", "Tuesday, November 3" -> the NEXT time that day
+// comes round on or after `today` (Memphis). The engine's own Date.parse is only trusted when the
+// text carries a four-digit year: without one it silently picks 2001.
+const MONTHS = ['jan(uary)?', 'feb(ruary)?', 'mar(ch)?', 'apr(il)?', 'may', 'june?', 'july?', 'aug(ust)?', 'sep(t|tember)?', 'oct(ober)?', 'nov(ember)?', 'dec(ember)?'];
+const memphisToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+function ymd(y, mo, d) {
+  const dt = new Date(Date.UTC(y, mo - 1, d, 12));
+  return dt.getUTCMonth() === mo - 1 && dt.getUTCDate() === d ? iso(dt) : '';
+}
+function nextOccurrence(mo, d, today) {
+  const ty = Number(String(today).slice(0, 4));
+  const first = ymd(ty, mo, d);
+  if (first && first >= today) return first;
+  for (let y = ty + 1; y <= ty + 4; y += 1) { const x = ymd(y, mo, d); if (x) return x; }
+  return '';
+}
+export function parseFormDate(value, today = '') {
   const s = String(value || '').trim();
   if (!s) return '';
   if (isISODate(s)) return s;
-  const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})/);
-  if (m) {
-    const y = m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]);
-    const d = new Date(Date.UTC(y, Number(m[1]) - 1, Number(m[2]), 12));
-    return d.getUTCMonth() === Number(m[1]) - 1 ? iso(d) : '';
-  }
+  const now = isISODate(today) ? today : memphisToday();
+  const m = s.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{2,4})\b/);
+  if (m) return ymd(m[3].length === 2 ? 2000 + Number(m[3]) : Number(m[3]), Number(m[1]), Number(m[2]));
+  const md = s.match(/^(\d{1,2})[/.-](\d{1,2})(?![/.\-\d])/);
+  if (md) return nextOccurrence(Number(md[1]), Number(md[2]), now);
+  const low = s.toLowerCase().replace(/,/g, ' ');
+  const year = low.match(/\b(\d{4})\b/);
+  const mon = MONTHS.findIndex((x) => new RegExp(`\\b${x}\\b`).test(low));
+  const day = low.replace(/\b\d{4}\b/, '').match(/\b(\d{1,2})(?:st|nd|rd|th)?\b/);
+  if (mon >= 0 && day) return year ? ymd(Number(year[1]), mon + 1, Number(day[1])) : nextOccurrence(mon + 1, Number(day[1]), now);
+  if (!year) return '';
   const t = Date.parse(`${s} 12:00 UTC`);
   return Number.isNaN(t) ? '' : iso(new Date(t));
 }
@@ -386,17 +408,19 @@ export function bookingFromRequest(request, table) {
   };
 }
 
-// Requests still waiting for a day: not put away, not void, not scheduled, no booking yet.
-// bookedKeys = request keys with a FIRST booking (firstBookedKeys): a takedown booked straight
-// from the form's date does not take a request off this list.
+// Request keys with a FIRST booking (a takedown booked straight from the form's date is not one).
 export function firstBookedKeys(bookings) {
   return new Set((bookings || []).filter((b) => b.request_key && !SECOND_KINDS.has(b.kind)).map((b) => b.request_key));
 }
-export function unscheduledRequests(requests, statuses, bookedKeys) {
+// "Unconfirmed requests" on Calendar & Bookings (owner, 19 Oct 2026; was "Unscheduled
+// requests"): not put away, not void, and not confirmed (steps.mjs unconfirmedKeys: no "Yes,
+// book it", no deposit, not a phone booking, job not done). A held rental, or one whose invoice
+// already put it on the calendar, stays here (outlined) until she says yes.
+export function unconfirmedRequests(requests, statuses, unconfirmedKeySet) {
   return requests.filter((r) => {
     const st = statuses[r.key];
-    if (st && (st.archived_at || st.status === 'void' || st.status === 'scheduled')) return false;
-    return !bookedKeys.has(r.key);
+    if (r.isTest || (st && (st.archived_at || st.status === 'void'))) return false;
+    return unconfirmedKeySet.has(r.key);
   });
 }
 

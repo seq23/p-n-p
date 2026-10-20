@@ -202,6 +202,9 @@ export async function depositOutcome(env, request, id) {
   const { results: lines } = await env.DB.prepare('SELECT * FROM invoice_lines WHERE invoice_id = ?1').bind(id).all();
   const r = await recordDepositOutcome(env.DB, inv, lines || [], kind, toCents(form.get('amount')), String(form.get('method') || '').slice(0, 20));
   const msg = r.amount ? `${kind === 'refund' ? 'Refund' : 'Kept for damage'}: $${(r.amount / 100).toFixed(2)} recorded ✓` : 'Nothing recorded: there is no damage deposit left to refund or keep.';
+  // The step card's "Deposit returned, finish" comes back to the same card.
+  const back = String(form.get('back') || '');
+  if (/^\/admin\/#c-[A-Za-z0-9_-]+$/.test(back)) return redirect(`/admin/?m=${encodeURIComponent(msg)}${back.slice(7)}`);
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(msg)}`);
 }
 

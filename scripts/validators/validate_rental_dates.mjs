@@ -135,9 +135,9 @@ await H.expireHolds(s.db);
 const span6 = C.spanDays(made[6].pick, made[6].ret);
 const cal6 = (await s.get(`/admin/calendar?month=${span6[1].slice(0, 7)}`)).text;
 const cellOf = (html, d) => html.slice(html.indexOf(`data-day="${d}"`), html.indexOf('</a>', html.indexOf(`data-day="${d}"`)));
-must(/class="k req rental_pickup"[^>]*>Requested · Rentals: Rae S\./.test(cellOf(cal6, span6[0])), 'the unpaid rental has no outlined pickup chip');
-must(span6.slice(1, -1).filter((d) => d.slice(0, 7) === span6[1].slice(0, 7)).every((d) => /class="k req rental_out"[^>]*>Requested · Rental out: Rae S\./.test(cellOf(cal6, d))), 'the unpaid rental has no outlined Rental out chips between');
-must(span6[span6.length - 1].slice(0, 7) !== span6[1].slice(0, 7) || /class="k req rental_return"[^>]*>Requested · Rental return: Rae S\./.test(cellOf(cal6, span6[span6.length - 1])), 'the unpaid rental has no outlined return chip');
+must(/class="k req rental_pickup"[^>]*>Requested · not confirmed · Rentals: Rae S\./.test(cellOf(cal6, span6[0])), 'the unpaid rental has no outlined pickup chip');
+must(span6.slice(1, -1).filter((d) => d.slice(0, 7) === span6[1].slice(0, 7)).every((d) => /class="k req rental_out"[^>]*>Requested · not confirmed · Rental out: Rae S\./.test(cellOf(cal6, d))), 'the unpaid rental has no outlined Rental out chips between');
+must(span6[span6.length - 1].slice(0, 7) !== span6[1].slice(0, 7) || /class="k req rental_return"[^>]*>Requested · not confirmed · Rental return: Rae S\./.test(cellOf(cal6, span6[span6.length - 1])), 'the unpaid rental has no outlined return chip');
 must(!/data-rental-out="[^"]*"[^>]*>Rental out: Rae Span7/.test(cal6), 'an unpaid rental is drawn as filled Rental out');
 
 // ---- 5. Edit -> Rental dates -----------------------------------------------------------------
