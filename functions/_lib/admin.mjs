@@ -596,18 +596,23 @@ async function idPhotoView(env, url) {
 // "Delete this ID": permanent, asked first, logged (who and when). Site photos are removed from
 // private storage; for the old Google Form request the Drive file is hers to delete (the site
 // cannot reach her personal Drive), so the card says where it is.
+// From "Everything about <first name>" (from=edit) both come back to its section 3 with the flash.
+const idBackTo = (form, key) => (form.get('from') === 'edit' && key
+  ? (k, m) => redirect(`/admin/requests/edit?r=${encodeURIComponent(b64urlText(key))}&${k}=${encodeURIComponent(m)}&at=id#id`)
+  : null);
 async function deleteId(env, request) {
   const form = await request.formData();
   const key = decodeKey(form.get('r'));
+  const toEdit = idBackTo(form, key);
   const row = key ? await env.DB.prepare('SELECT source, id_object, id_file, id_deleted_at, name FROM requests WHERE request_key = ?1').bind(key).first() : null;
   if (!row) return redirect(`/admin/?e=${encodeURIComponent('That request was not found.')}`);
-  if (row.id_deleted_at) return redirect(`/admin/?m=${encodeURIComponent('That ID was already deleted.')}`);
+  if (row.id_deleted_at) return toEdit ? toEdit('m', 'That ID was already deleted.') : redirect(`/admin/?m=${encodeURIComponent('That ID was already deleted.')}`);
   if (row.id_object && env.IDS) await env.IDS.delete(row.id_object);
   await env.DB.prepare("UPDATE requests SET id_deleted_at = datetime('now'), id_object = NULL WHERE request_key = ?1").bind(key).run();
   const ip = request.headers.get('CF-Connecting-IP') || 'local';
   await logEvent(env.DB, key, row.source !== 'google_form' ? 'ID photo deleted for good from private storage' : 'ID marked deleted (the Drive copy is deleted by hand from the ID folder)', `signed-in admin (${ip})`);
   const msg = row.source !== 'google_form' ? 'ID deleted for good ✓' : 'ID removed from the card ✓ Also delete the photo from the ID folder in Google Drive (Open ID folder at the top).';
-  return redirect(`/admin/?m=${encodeURIComponent(msg)}`);
+  return toEdit ? toEdit('m', msg) : redirect(`/admin/?m=${encodeURIComponent(msg)}`);
 }
 
 // "Add ID photo" on a request with no ID on file (a phone booking: ID-for-everyone still
@@ -617,19 +622,21 @@ async function addId(env, request) {
   const form = await request.formData();
   const key = decodeKey(form.get('r'));
   const back = key ? `#c-${b64urlText(key)}` : '';
+  const toEdit = idBackTo(form, key);
+  const go = (k, m) => (toEdit ? toEdit(k, m) : redirect(`/admin/?${k}=${encodeURIComponent(m)}${back}`));
   const row = key ? await env.DB.prepare('SELECT source, id_object, id_file, id_deleted_at FROM requests WHERE request_key = ?1').bind(key).first() : null;
   if (!row) return redirect(`/admin/?e=${encodeURIComponent('That request was not found.')}`);
-  if (row.id_object || (row.id_file && !row.id_deleted_at)) return redirect(`/admin/?m=${encodeURIComponent('An ID is already on file for this request.')}${back}`);
+  if (row.id_object || (row.id_file && !row.id_deleted_at)) return go('m', 'An ID is already on file for this request.');
   const file = form.get('id_photo');
-  if (!env.IDS || !file || typeof file !== 'object' || !file.size) return redirect(`/admin/?e=${encodeURIComponent('Pick a photo of their ID first.')}${back}`);
-  if (file.size > 10 * 1024 * 1024) return redirect(`/admin/?e=${encodeURIComponent('That photo is too big. Take it again with your phone camera.')}${back}`);
+  if (!env.IDS || !file || typeof file !== 'object' || !file.size) return go('e', 'Pick a photo of their ID first.');
+  if (file.size > 10 * 1024 * 1024) return go('e', 'That photo is too big. Take it again with your phone camera.');
   const image = cleanImage(new Uint8Array(await file.arrayBuffer()), file.type || 'image/jpeg');
-  if (!image) return redirect(`/admin/?e=${encodeURIComponent('That file is not a photo we can use. Use a JPG or PNG.')}${back}`);
+  if (!image) return go('e', 'That file is not a photo we can use. Use a JPG or PNG.');
   const idObject = `ids/${[...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('')}.${image.type === 'image/png' ? 'png' : 'jpg'}`;
   await env.IDS.put(idObject, image.bytes, { httpMetadata: { contentType: image.type } });
   await env.DB.prepare('UPDATE requests SET id_object = ?1, id_type = ?2, id_size = ?3, id_deleted_at = NULL WHERE request_key = ?4').bind(idObject, image.type, image.bytes.length, key).run();
   await logEvent(env.DB, key, 'ID photo added by Valerie (kept in private storage)', 'Valerie');
-  return redirect(`/admin/?m=${encodeURIComponent('ID photo added ✓')}${back}`);
+  return go('m', 'ID photo added ✓');
 }
 
 const BACK_OK = (v) => (/^\/admin\/[A-Za-z0-9/_?=&.%-]*$/.test(String(v || '')) && !String(v).includes('//') ? String(v) : '/admin/');

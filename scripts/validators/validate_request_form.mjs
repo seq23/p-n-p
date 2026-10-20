@@ -51,10 +51,23 @@ const brand = JSON.parse(execFileSync(process.execPath, ['-e', `const b=require(
 // ---- 1. Page 1 and sections ------------------------------------------------------------
 const choices = F.serviceChoices(offers, PRICE_TABLE);
 must(JSON.stringify(choices.map((c) => c.key)) === JSON.stringify(brand.SERVICES.map((s) => s.key)), 'page-1 services are not in the canonical brand order');
-must(choices.every((c, i) => c.label.toLowerCase() === brand.SERVICES[i].label.replace('grazing tables', 'grazing tables')), `page-1 labels drift from brand SERVICES: ${choices.map((c) => c.label).join(' / ')}`);
-must(choices[1].note.includes(F.PARTY_PARENTHETICAL.slice(1, -1)) && F.PARTY_PARENTHETICAL === '(hotel-room surprises, home celebrations, showers, event spaces — big or small)', 'party choice lacks the owner parenthetical');
-must(choices[0].note.includes(`$${brand.PRICES.porch}`) && choices[1].note.includes(`$${brand.PRICES.party}`) && choices[2].note.includes(`$${brand.PRICES.grazing}`) && choices[3].note.includes(`$${brand.PRICES.gameDay}`), 'page-1 prices do not come from the data files');
+// Picture tiles (owner-approved mock-up, 20 Oct 2026): the approved words per tile, in brand order.
+const TILE_WORDS = { porch: ['Porch decorating', 'We decorate the <b>outside</b> of your home.', 'e.g. fall pumpkins, Christmas front door'], party: ['Party & decor', 'We decorate <b>for an event</b>: a room, a hall or a backyard.', 'e.g. birthday balloons, a baby shower, a proposal'],
+  grazing: ['Grazing table', 'A styled table of food for guests.', 'e.g. charcuterie, fruit, sweets'], rentals: ['Game rentals', 'Giant yard games to <b>borrow</b>.', `e.g. ${PRICE_TABLE.items.slice(0, 3).map((i) => i.name.replace(/ Set$/, '')).join(', ')}`] };
+must(choices.every((c) => TILE_WORDS[c.key] && c.label === TILE_WORDS[c.key][0] && c.whatHtml === TILE_WORDS[c.key][1] && c.eg === TILE_WORDS[c.key][2] && c.alt.length > 15 && c.echo), `page-1 tiles drift from the approved words: ${choices.map((c) => c.label).join(' / ')}`);
+must(F.PARTY_PARENTHETICAL === '(hotel-room surprises, home celebrations, showers, event spaces — big or small)', 'the owner party parenthetical changed');
+// The prices left the first question; every section still shows its price, from the data files.
+must(choices[0].price === Number(brand.PRICES.porch) && choices[1].price === Number(brand.PRICES.party) && choices[2].price === Number(brand.PRICES.grazing) && choices[3].price === Number(brand.PRICES.gameDay), `section prices do not come from the data files (${choices.map((c) => c.price).join(',')})`);
 const blank = F.renderForm({ offers, table: PRICE_TABLE });
+{
+  const q1 = blank.slice(blank.indexOf('id="q-service"'), blank.indexOf('</fieldset>', blank.indexOf('id="q-service"')));
+  must(q1.length > 500 && !/\$\d/.test(q1), 'the first question still shows a price');
+  const sec = (k) => blank.slice(blank.indexOf(`data-section="${k}"`), blank.indexOf('</section>', blank.indexOf(`data-section="${k}"`)));
+  must(sec('porch').includes(`$${brand.PRICES.porch}`), 'the porch section does not show its price');
+  must(sec('party').includes(`starts at $${brand.PRICES.party}`) && sec('party').includes('Hotel-room surprises, home celebrations, showers, event spaces — big or small.'), 'the party section does not show its price and the owner parenthetical');
+  must(sec('grazing').includes(`$${brand.PRICES.grazing}`), 'the grazing section does not show its price');
+  must(sec('rentals').includes(`$${brand.PRICES.gameDay} a game for a day`), 'the rentals section does not show its price');
+}
 for (const sec of ['porch', 'party', 'grazing', 'event', 'rentals', 'contact', 'id', 'agree']) must(blank.includes(`data-section="${sec}"`), `form has no ${sec} section`);
 must(blank.includes(F.ID_NOTE) && F.ID_NOTE === 'Your photo ID is for our safety and security. We never share it, and we delete it after your final payment.', 'the owner ID note is missing or reworded');
 must(blank.indexOf(F.ID_NOTE) < blank.indexOf('name="id_photo"'), 'the ID note is not right above the upload');
