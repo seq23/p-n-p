@@ -154,6 +154,8 @@ export function readForm(form) {
     deposit: str(g('deposit')) === '' ? null : int(g('deposit')), blurb: str(g('blurb')), alt: str(g('alt')), size: str(g('size')),
     use: ['both', 'indoor', 'outdoor'].includes(str(g('use'))) ? str(g('use')) : 'both', kind: str(g('kind')) === 'extra' ? 'extra' : 'game',
     onWebsite: form.getAll('on_website').map(String).includes('1'),
+    // Games in one set (optional, default 1): blank or 1 = not a set.
+    perSet: g('per_set') === null ? undefined : str(g('per_set')) === '' ? 1 : int(g('per_set')),
   };
 }
 
@@ -163,6 +165,8 @@ function applyFields(item, f, to, data) {
   const renamed = item.name !== undefined && item.name !== f.name;
   out.name = f.name;
   out.quantity = f.quantity;
+  // A form without the field (an old page left open) keeps what the item had.
+  if (f.perSet === undefined) { /* keep */ } else if (Number.isInteger(f.perSet) && f.perSet > 1) out.perSet = f.perSet; else if (f.perSet === 1) delete out.perSet; else out.perSet = f.perSet;
   // An admin-only item keeps only the public fields it already has or that were typed in, so a
   // save that changes nothing changes nothing (the form's default "Indoor or outdoor" included).
   for (const k of ['size', 'use', 'blurb', 'alt']) if (to !== 'adminItems' || item[k] !== undefined || (f[k] && !(k === 'use' && f[k] === 'both'))) out[k] = f[k];
@@ -523,4 +527,18 @@ export function itemStatuses({ table, data, windows, holds = [], today }) {
 export async function loadStatuses(db, { table, data, today }) {
   const [bookings, returns, holds] = await Promise.all([listBookings(db), loadReturns(db), currentHolds(db)]);
   return itemStatuses({ table, data, windows: rentalWindows(bookings, returns, table), holds, today });
+}
+
+// The Inventory page's "N OUT now" / "N IN" tiles (owner, 20 Oct 2026): units, not rows, from the
+// same statuses (the live inventory the editor writes, with its quantities, and the bookings).
+// Not offered items count in neither. Never hard-coded.
+export function inventoryTotals(statuses) {
+  let out = 0; let inn = 0;
+  for (const st of Object.values(statuses || {})) {
+    if (!st || !st.offered) continue;
+    const stock = st.stock || 1;
+    const used = Math.min(stock, st.used || 0);
+    out += used; inn += stock - used;
+  }
+  return { out, in: inn };
 }

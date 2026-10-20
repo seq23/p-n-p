@@ -77,6 +77,16 @@ table.list a{display:inline-block;min-height:32px}
 
 const EXTRA_CSS = `
 .back{display:inline-flex;align-items:center;min-height:48px;font-weight:600;font-size:1.05rem;text-decoration:none;margin:0 0 4px}
+.adminbar{display:flex;align-items:center;gap:10px;margin:-4px 0 10px;padding:0 0 6px;border-bottom:1px solid var(--line)}.adminbar .back{margin:0;padding:0 8px 0 0;font-size:1.1rem}
+.adminbar .where{margin-left:auto;color:var(--muted);font-size:.98rem;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.idview{position:fixed;inset:0;z-index:60;background:rgba(20,16,12,.94);color:#fff;display:grid;grid-template-rows:auto 1fr auto}.idview[hidden]{display:none}
+.idview .idtop{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:max(12px,env(safe-area-inset-top)) 14px 12px}
+.idview .idx{font:700 1.15rem Inter,Arial,sans-serif;background:#fff;color:#14110f;border:0;border-radius:999px;min-height:52px;padding:0 22px;cursor:pointer}
+.idview .idx:focus-visible{outline:3px solid #f0b08f;outline-offset:3px}
+.idview .idstage{display:flex;align-items:center;justify-content:center;padding:8px;min-height:0;overflow:auto}.idview .idstage img{max-width:100%;max-height:100%;object-fit:contain;border-radius:10px;background:#3a332e}
+.idview .idfoot{margin:0;padding:10px 14px max(14px,env(safe-area-inset-bottom));text-align:center;color:#ddd;font-size:.95rem}
+.idpage img{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line);margin:8px 0 14px;background:#eee}
+
 .topsteps{list-style:none;margin:0 0 16px;padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;display:grid;gap:8px}
 .topsteps li{display:flex;gap:10px;align-items:flex-start;font-size:1.05rem}
 .topsteps .n{flex:none;width:30px;height:30px;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
@@ -128,11 +138,16 @@ ${kindCss()}
 @media print{header.top,.subnav,.noprint,.back,.topsteps{display:none!important}body{background:#fff}.card{border:0;padding:0;margin:0 0 10px}.gloss .g{padding:4px 0}}
 `;
 
-export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false, panelWide = false } = {}) {
+export function layout(title, body, { authed = true, screen = '', back = null, subnav = '', wide = false, panelWide = false, where = '' } = {}) {
   const nav = authed ? `<nav aria-label="Main">
     <a href="/admin/"${tip('nav.requests')}>Requests</a><a href="/admin/calendar"${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${tip('nav.money')}>Money</a><a href="/admin/inventory"${tip('nav.inventory')}>Inventory</a><a href="/admin/settings"${tip('nav.settings')}>Settings</a><a href="/admin/help"${tip('nav.help')}>Help</a>
     <form method="post" action="/admin/logout" style="display:inline"><button type="submit"${tip('nav.signout')}>Sign out</button></form></nav>` : '';
-  const backLink = back ? `<a class="back" href="${esc(back.href)}"${tip('nav.back')}>&larr; ${esc(back.label || 'Back')}</a>` : '';
+  // The same top bar on every screen (owner, 20 Oct 2026): "← Back" on the left (history.back()
+  // when she came from another admin screen, else the screen's parent), where she is on the right.
+  // A Home Screen icon has no browser Back button, so this is it.
+  const parent = back && back.href ? back.href : '/admin/';
+  const backLink = authed ? `<nav class="adminbar noprint" aria-label="Back" data-adminbar><a class="back" href="${esc(parent)}" data-back${tip('nav.back')}>&larr; Back</a><span class="where" data-where>${esc(where || title)}</span></nav>` : '';
+  const viewer = authed && body.includes('data-id-open') ? ID_VIEWER : '';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <meta name="format-detection" content="telephone=no">
@@ -140,7 +155,7 @@ export function layout(title, body, { authed = true, screen = '', back = null, s
 <link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>${CSS}${EXTRA_CSS}</style></head><body>
 <header class="top"><a class="brand" href="/admin/"${tip('nav.brand')}>Porch &amp; Party</a>${nav}</header>${subnav}
-<main class="wrap${wide ? ' wide' : ''}${panelWide ? ' panelwide' : ''}">${backLink}${screen ? stepsBar(screen) : ''}${body}</main></body></html>`;
+<main class="wrap${wide ? ' wide' : ''}${panelWide ? ' panelwide' : ''}">${backLink}${screen ? stepsBar(screen) : ''}${body}</main>${viewer}${authed ? `<script>${ADMIN_JS}</script>` : ''}</body></html>`;
 }
 
 const BACK_REQUESTS = { href: '/admin/', label: 'Back to requests' };
@@ -354,9 +369,38 @@ export function idUploadForm(rk) {
 function idCell(r, rk) {
   if (r.idDeletedAt) return esc(`Deleted ${memphisWhen(r.idDeletedAt)}`);
   if (isPhone(r) && !r.idObject) return `<span data-id-phone>Not collected (phone booking)</span>${idUploadForm(rk)}`;
-  if (r.idObject) return `<a href="/admin/requests/id?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.idPhoto')}>Open ID photo</a>`;
+  if (r.idObject) return idOpenLink(r, rk);
   return r.idFile ? r.idFile.split(/,\s*/).map((u, i) => link(u, i ? `Open ID photo ${i + 1}` : 'Open ID photo', 'card.idPhoto')).join('<br>') : '';
 }
+
+// "Open ID photo" (owner, 20 Oct 2026): opens over the card (ID_VIEWER), never a new tab that
+// strands her. Without JS it is a normal same-tab page with the top bar and a Back to the card.
+// The image itself still comes from the private, no-store route /admin/requests/id.
+export function idOpenLink(r, rk) {
+  return `<a href="/admin/requests/id/view?r=${esc(rk)}" data-id-open data-src="/admin/requests/id?r=${esc(rk)}" data-who="${esc(`${r.name || 'Customer'} · photo ID`)}"${tip('card.idPhoto')}>Open ID photo</a>`;
+}
+
+// The no-JS page for the photo: the admin bar, the photo, Back to the card.
+export function idPhotoPage(r, rk) {
+  const card = `/admin/#c-${rk}`;
+  return layout('Photo ID', `<section class="card idpage" data-id-page><h1>${esc(r.name || 'Customer')}: photo ID</h1>
+    <img src="/admin/requests/id?r=${esc(rk)}" alt="${esc(`${r.name || 'Customer'}'s photo ID`)}">
+    ${act(`<a class="btn ghost" href="${esc(card)}" data-id-back${tip('card.idBack')}>&larr; Back to the card</a>`, 'card.idBack')}</section>`, { screen: 'idPhoto', back: { href: card }, where: `Photo ID · ${r.name || 'Customer'}` });
+}
+
+const ID_VIEWER = `<div class="idview" data-id-viewer hidden role="dialog" aria-modal="true" aria-label="Photo ID"><div class="idtop"><span data-id-who>Photo ID</span><button type="button" class="idx" data-id-close${tip('card.idClose')}>&#10005; Close</button></div><div class="idstage" data-id-stage><img alt="Customer photo ID" data-id-img></div><p class="idfoot">Tap &#10005; Close or swipe down to go back to the card</p></div>`;
+
+// Every admin screen: Back (history when it came from an admin screen) and the ID viewer.
+const ADMIN_JS = `(function(){var b=document.querySelector('[data-back]');if(b)b.addEventListener('click',function(e){try{var r=document.referrer?new URL(document.referrer):null;
+if(r&&r.origin===location.origin&&r.pathname.indexOf('/admin')===0&&history.length>1){e.preventDefault();history.back();}}catch(x){}});
+var v=document.querySelector('[data-id-viewer]');if(!v)return;var img=v.querySelector('[data-id-img]'),who=v.querySelector('[data-id-who]'),x=v.querySelector('[data-id-close]'),opener=null,y0=null;
+function shut(){if(v.hidden)return;v.hidden=true;img.removeAttribute('src');document.documentElement.style.overflow='';if(opener){opener.focus();opener=null;}}
+document.addEventListener('click',function(e){var a=e.target&&e.target.closest?e.target.closest('[data-id-open]'):null;if(!a)return;e.preventDefault();opener=a;img.src=a.getAttribute('data-src');
+who.textContent=a.getAttribute('data-who')||'Photo ID';v.hidden=false;document.documentElement.style.overflow='hidden';x.focus();});
+x.addEventListener('click',shut);v.addEventListener('click',function(e){if(e.target===v||e.target.hasAttribute('data-id-stage'))shut();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')shut();if(e.key==='Tab'&&!v.hidden){e.preventDefault();x.focus();}});
+v.addEventListener('touchstart',function(e){y0=e.touches.length===1?e.touches[0].clientY:null;},{passive:true});
+v.addEventListener('touchend',function(e){if(y0!=null&&e.changedTouches[0].clientY-y0>80)shut();y0=null;});})();`;
 
 function deleteIdStep(r, rk) {
   if (r.idDeletedAt || !(r.idObject || r.idFile)) return '';
@@ -495,6 +539,14 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .paidundo{display:inline-block;margin-left:4px;font-size:.85rem}.paidundo .linkbtn{font-size:.85rem;min-height:32px}
 .tdsub{font-weight:600;color:#92400e}.tdsub.done{color:inherit;font-weight:400}.tdbox{margin:10px 0}.tdbox .secrow{margin-top:8px}.linkbtn{background:none;border:0;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}
 `;
+
+// 📞 Call and 💬 Text in the top right of every request card, at every step (owner, 20 Oct 2026),
+// only when a phone number exists. Text is a free sms: link with a blank body (no paid SMS).
+export function quickContact(r) {
+  const n = String((r && r.phone) || '').replace(/[^\d+]/g, '');
+  if (n.replace(/\D/g, '').length < 7) return '';
+  return `<div class="qa" data-quick-contact><a href="tel:${esc(n)}" data-card-call${tip('card.quickCall')}>&#128222; Call</a><a href="sms:${esc(n)}" data-card-text${tip('card.quickText')}>&#128172; Text</a></div>`;
+}
 
 function factsLine(f) {
   const bits = [];
@@ -635,7 +687,8 @@ const chicagoToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America
 // from steps.mjs (derived from the facts, so doing a thing anywhere ticks its step here).
 export const STEP_CSS = `
 .stepcard{display:grid;gap:12px}
-.stepcard .schead{display:grid;gap:4px}.stepcard .svcs{margin:0}.stepcard .sctags{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.stepcard .schead{display:grid;gap:4px;grid-template-columns:minmax(0,1fr) auto;align-items:start}.stepcard .schead>*{grid-column:1}.stepcard .schead>.qa{grid-column:2;grid-row:1 / span 3}
+.stepcard .qa{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px;max-width:190px}.stepcard .qa a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;min-width:44px;padding:0 12px;border:2px solid var(--accent);border-radius:999px;font-weight:700;font-size:.98rem;text-decoration:none;color:var(--accent);background:#fff;white-space:nowrap}.stepcard .svcs{margin:0}.stepcard .sctags{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .stepcard h3.who{font-size:1.6rem;margin:0}.stepcard .scwhen{color:var(--muted);font-size:1rem;margin:0}.stepcard .scdelivery{margin:2px 0 0;font-size:1rem}
 .scbar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:2px 0 0}.scbar i{display:block;height:100%;background:var(--ok)}
 .scof{font-size:.9rem;color:var(--muted);margin:4px 0 0}
@@ -918,7 +971,7 @@ export function requestCard(r, o) {
   // The rest of the hold controls (text a reminder, release) are under More.
   const extrasHere = quiet ? '' : `${extras}${holdHtml || ''}`;
   return `<article class="card stepcard" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
-      <div class="schead"><div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
+      <div class="schead">${quickContact(r)}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
         <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
         ${deliveryAddress(r) ? `<p class="scdelivery" data-business-delivery><strong>Business delivery</strong>: ${esc([answerOf(r, /^business name$/i), deliveryAddress(r)].filter(Boolean).join(', '))}</p>` : ''}</div>
       ${steps}

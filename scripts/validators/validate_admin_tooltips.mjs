@@ -124,6 +124,8 @@ await s.post('/admin/requests/archive', { r: s.rk(reqB.key) });
   pages.push(['/admin/?f=unpaid', { home: true }, await s.get('/admin/?f=unpaid')]);
 }
 pages.push(['/admin/search?partial=1&q=renter', { partial: true }, await s.get('/admin/search?partial=1&q=renter')]);
+// The no-JS photo ID page (Open ID photo opens over the card with JS; 20 Oct 2026).
+{ const viewsId = await mod('functions/_lib/views.mjs'); pages.push(['idPhotoPage (no-JS photo ID page)', {}, { status: 200, text: viewsId.idPhotoPage({ name: 'Rae Rent' }, s.rk(reqA.key)) }]); }
 // "Change anything on this request" (the Edit link): with bookings, payments and a return, and
 // with nothing booked yet (Put it on the calendar).
 await s.post('/admin/requests/edit/payment-add', { r: s.rk(reqA.key), amount: '10.00', method: 'cash' });

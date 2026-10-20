@@ -45,7 +45,8 @@ export const STEPS = {
   invoice: ['Send the invoice (email or text).', 'When money arrives, use the Payment box.', 'When the job is over, tap Done on the request.'],
   checklist: ['Walk through the event with the customer.', 'Tick boxes and type notes. It saves by itself.', 'Tap Create invoice when you are done.'],
   settings: ['Type your Zelle and Cash App.', 'Add your payment QR code.', 'Tap Save.'],
-  inventoryList: ['See what is In and what is Out today.', 'Tap an item for its bookings, Edit or Remove.', 'Add a game or item at the top: the website updates by itself.'],
+  idPhoto: ['Check the photo matches the customer.', 'Back to the card when you are done.', 'Delete the ID on the card once they have paid and the games are back.'],
+  inventoryList: ['See what is In and what is Out today.', 'Tap an item for its bookings, Edit or Remove.', 'Edit games (folded under the list): add a game or item; the website updates by itself.'],
   inventory: ['Type the name, how many you have and the price.', 'Add a photo and check its description.', 'Tap Save: the website updates by itself in about 5 minutes.'],
   gcal: ['Tap Copy link.', 'On a computer, open Google Calendar and add it From URL.', 'Wait a few hours for Google to show it.'],
   returns: ['Tick every item that came back.', 'Note anything missing or damaged, and add a photo.', 'Tap Save: it is returned.'],
@@ -74,7 +75,7 @@ export const HELP = {
   'nav.settings': H('every', 'Settings', 'Opens your payment details, password and calendar link.', '', 'Your Zelle, Cash App, QR code, password and the Google Calendar link.'),
   'nav.help': H('every', 'Help', 'Opens a one-page guide to every button. You can print it.', '', 'This page. Every button in the console is explained here.'),
   'nav.signout': H('every', 'Sign out', 'Signs this phone or computer out of the console.', '', 'Use it on a shared computer. You will need the password to get back in.'),
-  'nav.back': H('every', 'Back', 'Goes back to the screen you came from.', '', 'Every screen has a Back link at the top. It never changes anything.'),
+  'nav.back': H('every', 'Back', 'Goes back to the screen you came from.', '', 'The bar at the top of every screen: ← Back on the left (the screen you came from, scrolled to the same card), where you are on the right. It never changes anything.'),
   'settings.open': H('every', 'Open Settings', 'Opens Settings so you can add your Zelle, Cash App and QR code.', 'Customers need these to pay you.', 'Shows up in a yellow box when your payment details are missing.'),
 
   // Requests screen
@@ -200,7 +201,11 @@ export const HELP = {
   'req.new': H('requests', 'NEW', 'This request came in and you have not opened it yet. Tap the badge to mark it seen.', '', 'The badge also goes away by itself once you tap anything on the card, open Edit or More, or send an invoice.'),
   'req.weekJump': H('requests', 'A name in this week\'s list', 'Jumps down to that request\'s card on this page.', '', 'NEW beside a name means you have not opened it yet.'),
   'req.weekList': H('requests', "See this week's requests", 'Lists the requests that came in this week, Monday to Sunday.', '', 'The line above it counts every request sent this week by service, with last week next to it for comparison.'),
-  'card.idPhoto': H('card', 'Open ID photo', 'Opens the photo ID this customer uploaded.', '', 'Their photo ID from the form, in Google Drive.'),
+  'card.idPhoto': H('card', 'Open ID photo', 'Shows the photo ID this customer uploaded, on top of their card.', '', 'It opens over the card. Tap ✕ Close, press Escape, tap outside the photo or swipe down, and you are back on the same card.'),
+  'card.idClose': H('card', '✕ Close (photo ID)', 'Closes the photo ID and puts you back on the same card.', '', 'Escape, tapping outside the photo or swiping down closes it too.'),
+  'card.idBack': H('card', 'Back to the card', 'Goes back to this customer\'s card on Requests.', '', 'Only shows on the photo page a phone opens when the photo cannot open over the card.'),
+  'card.quickCall': H('card', '📞 Call', 'Calls this customer from your phone.', '', 'Top right of every request card, at every step, whenever they gave a phone number.'),
+  'card.quickText': H('card', '💬 Text', 'Opens a blank text to this customer on your phone.', '', 'Top right of every request card. It is a normal text from your phone: nothing is paid for and nothing is written for you.'),
 
   // Payment
   'pay.deposit': H('payment', 'Mark deposit received', 'Records that the deposit is in your account. It asks you to be sure first.', 'Only after the deposit is in your account.', 'Tap it, read the question, then tap Yes. The status changes to Deposit paid.', 'Money: only do this after the money is in your account.'),
@@ -375,6 +380,8 @@ export const HELP = {
   'set.categories': H('settings', 'Save categories', 'Saves your list of expense categories.', '', 'One per line. Other is always kept.'),
   'set.newToken': H('settings', 'Make a new private calendar link', 'Replaces your Google Calendar link with a new one. It asks you to be sure first.', '', 'Only if the link was shared by mistake.', 'Google Calendar stops updating until you link the new one.'),
   'nav.inventory': H('every', 'Inventory', 'Shows every rental item and whether it is In or Out today.', '', 'Out means a customer has it (from pickup day to return day). Not offered means you took it off the website.'),
+  'inv.row': H('inventory', 'A game in the list (tap it)', 'Opens this game: who has it, when it comes back, its upcoming bookings.', '', 'Red OUT = a customer has it, with who and the day it comes back. Green IN = in the shed (IN 2 = both sets are in; 1 of 2 IN = one set is out). Grey NOT OFFERED = off the website. The two boxes at the top count every set and game, out now and in.'),
+  'inv.editTools': H('inventory', 'Edit games', 'Opens the tools to add a game, change a photo or description, and switch Offered / Not offered.', '', 'It stays folded so the In / Out list comes first on a phone.'),
   'inv.open': H('inventory', 'An item (tap it)', 'Opens this item: its upcoming bookings, then Edit or Remove.', '', 'In = in the shed today. Out = a customer has it, with the day it comes back. 1 of 2 out = one set is out. Reserved = asked for on the website, deposit not paid yet. Next booked = the next dates it goes out.'),
   'inv.openOff': H('inventory', 'Open (a Not offered item)', 'Opens this item: its bookings and Edit.', '', 'Not offered items are off the website and the booking form. Bring back puts one back.'),
   'inv.bookingDay': H('inventory', 'Open that day', 'Opens the Day sheet for this booking\'s pickup day.', '', 'The Day sheet has the customer, the items and Mark returned.'),
