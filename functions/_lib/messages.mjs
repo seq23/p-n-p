@@ -78,12 +78,13 @@ Object.assign(TEMPLATES, {
   },
 });
 
-// The referral block in the thank-you email (owner, 18 Oct 2026; no reward, no discount).
+// The referral block in the thank-you email (owner, 18 Oct 2026; no reward, no discount). Pictures:
+// 128 px copies of the site's own photos (npm run build:form-pictures), never a placeholder drawing.
 export const REFERRAL_SERVICES = [
-  { key: 'porch', label: 'Porch decorating', line: 'Seasonal and holiday porches, styled and installed.', img: '/assets/img/porch/east-memphis-luxury-porch-installation.jpg', type: 'image/jpeg' },
-  { key: 'party', label: 'Party planning & decor', line: 'Hotel-room surprises, home celebrations, showers and event spaces.', img: '/assets/img/party/memphis-party-decor-hotel-room-birthday-setup.jpg', type: 'image/jpeg' },
-  { key: 'grazing', label: 'Grazing tables', line: 'Styled grazing tables and boards for any size of party.', img: '/assets/img/party/lakeland-small-party-grazing-table-setup.jpg', type: 'image/jpeg' },
-  { key: 'rentals', label: 'Party game rentals', line: 'Giant yard games, a movie screen and a card table.', img: '/assets/rentals/giant-uno.webp', type: 'image/webp' },
+  { key: 'porch', label: 'Porch decorating', line: 'Seasonal and holiday porches, styled and installed.', img: '/assets/img/form/porch-email.jpg', type: 'image/jpeg' },
+  { key: 'party', label: 'Party planning & decor', line: 'Hotel-room surprises, home celebrations, showers and event spaces.', img: '/assets/img/form/party-email.jpg', type: 'image/jpeg' },
+  { key: 'grazing', label: 'Grazing tables', line: 'Styled grazing tables and boards for any size of party.', img: '/assets/img/form/grazing-email.jpg', type: 'image/jpeg' },
+  { key: 'rentals', label: 'Party game rentals', line: 'Giant yard games, a movie screen and a card table.', img: '/assets/img/form/rentals-email.jpg', type: 'image/jpeg' },
 ];
 export function referralText(ctx) {
   return `I used Porch & Party for my ${ctx.occasion || 'party'} and loved it. They do porch decorating, party planning & decor, grazing tables and game rentals in Memphis: ${ctx.referralUrl}`;

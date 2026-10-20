@@ -265,8 +265,8 @@ const SOCIAL = {
     'Collierville Christmas porch decorating with wreaths, garland, and front door holiday styling'],
   faq: ['/assets/img/celebrations/romantic-bedroom-experience.jpg',
     'Celebration setup in a hotel room with balloons and candles'],
-  local: ['/assets/img/party/memphis-party-decor-hotel-room-birthday-setup.jpg',
-    'Memphis hotel room birthday party decor setup'],
+  local: ['/assets/img/celebrations/birthday-entry-celebration.jpg',
+    'Birthday balloon arch with a Happy Birthday sign and wrapped gifts'],
   events: ['/assets/img/grazing/grazing-table-corporate.jpg',
     'Styled grazing table setup for an event in the Memphis area']
 };

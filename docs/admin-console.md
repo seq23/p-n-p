@@ -221,22 +221,41 @@ switch, figures) and `npm run validate:admin-cards` (rules table over every serv
 filters, Put away section, Not paid yet math and the Money list end to end, reminders, contextual
 scheduling links).
 
-## Change anything on this request (owner-approved 18 Oct 2026, migration 0011)
+## Everything about <first name> — the Edit page (owner-approved 18 Oct 2026, migration 0011; regrouped by the owner-approved mock-up of 20 Oct 2026)
 - **Edit link** on every request card at every stage (New to Finished, Void and Put away
   included), in the card's "More" row with Add a note and Put away (step cards, 19 Oct 2026; `card.edit`). It opens ONE page,
-  `/admin/requests/edit?r=…` (`functions/_lib/admin-edit.mjs`), sections in order, one Save each:
-  1 **Bookings** (each booking's day, time, done tick, notes; Remove booking asks first),
-  2 **Done dates** (Job done, Returned, Takedown done; empty = take it back through the same undo
-  paths, so Finished recomputes; never after today), 3 **Invoice** (lines and amounts even after
-  sent or paid; a paid invoice says "Changing this changes what they owe"; nothing is re-sent),
-  4 **Payments** (amount, day, how paid; Add a payment; Remove this payment asks first and only
-  sets `payments.voided_at`, the row stays and shows as removed), 5 **Status** (any of the six
-  steps or Void, plus takedown plan / date / note; the steps follow the facts, so a chosen step
-  writes them: an earlier step clears Job done and soft-removes payments, Paid in full records
-  the rest, a booking keeps it at Scheduled and the page says so), 6 **Customer details** (name,
-  phone, email, address, their notes; stored in `requests.details_edits` and laid over the form
-  by `fromRow`, so the old Google Form raw row is never rewritten; bookings and live invoices
-  follow, nothing is sent).
+  `/admin/requests/edit?r=…` (`functions/_lib/admin-edit.mjs`), titled **"Everything about <first name>"**
+  (was "Change anything on this request"): "← Back to main page", the name line (Customer N · now:
+  step · sent day), a **Jump to:** line (one link per section, History last), then two parts, one
+  Save per section. Laptop (≥ 960 px): the parts side by side; phone: one column.
+  - **What they sent**: 1 **What they want** (four tick boxes Porch · Party & decor · Grazing · Game
+    rentals, "The form said: …", Save what they want; at least one tick, checked on the phone and
+    on the server). It writes `requests.services` (canonical order) and keeps the form's original
+    once in `details_edits.services_sent`. When bookings exist a yellow heads-up shows **before**
+    saving; on save a porch install/takedown becomes a party setup/takedown (and back) at the same
+    day and time when its service is unticked and the other is ticked; any other booking stays and
+    the yellow heads-up after saving says to check it under Bookings. Invoices, payments and the
+    form answers are never touched. History: "Changed Porch → Party & decor (by Valerie)".
+    2 **Contact details** (name, phone, email, address, their notes, business delivery for rentals;
+    stored in `requests.details_edits` and laid over the form by `fromRow`, so the old Google Form
+    raw row is never rewritten; bookings and live invoices follow, nothing is sent).
+    3 **ID and rules** (the rules line from `views.mjs rulesLine`; 🪪 Open ID photo opens the same
+    overlay as the card, ✕ Close; Delete this ID asks first; "ID photo deleted on …" after; a phone
+    booking shows "Phone booking, no ID yet" with Add ID photo. Delete and Add come back to section
+    3 via `from=edit`). 4 **<first name>'s answers on the form** (read-only, exactly as sent, dates in
+    words; "To change the date or the games, use Bookings or the Invoice below."; the takedown plan,
+    date and note moved here from Status with their own **Save takedown**).
+  - **Your side**: 5 **Bookings** (each booking's day, time, done tick, notes; Remove booking asks first),
+    6 **Done dates** (Job done, Returned, Takedown done; empty = take it back through the same undo
+    paths, so Finished recomputes; never after today), 7 **Invoice** (lines and amounts even after
+    sent or paid; a paid invoice says "Changing this changes what they owe"; nothing is re-sent),
+    8 **Payments** (amount, day, how paid; Add a payment; Remove this payment asks first and only
+    sets `payments.voided_at`, the row stays and shows as removed), 9 **Status** (any of the six
+    steps or Void; the steps follow the facts, so a chosen step writes them: an earlier step clears
+    Job done and soft-removes payments, Paid in full records the rest, a booking keeps it at
+    Scheduled and the page says so). **History** last.
+  - After any save she lands back on the same section (`?at=<section>#<section>`) with the green
+    flash (and any yellow heads-up) inside that section.
 - **History**: every change is a `logEvent` line "old → new (by Valerie)", who = Valerie.
 - **Everything follows**: the sheet sync runs after every admin POST (Bookings / Site requests
   tabs); the ICS feed reads the bookings live; a booking that changes day gets its day-before
@@ -245,7 +264,7 @@ scheduling links).
   (cleared before it went out = it never goes; `thankyou_emailed_at` is never cleared, so it is
   never sent twice); `syncMoneyStatus` (`ledger.mjs`) puts the invoice back to owing when a
   payment is removed or the total goes up.
-- Proof: `npm run validate:admin-edit` (in validate:admin).
+- Proof: `npm run validate:admin-edit` and `npm run validate:admin-edit-everything` (in validate:admin).
 
 ## Phone requests (owner-approved 18 Oct 2026, migration 0012)
 Valerie added a phone-call booking with "Add a booking" and it never reached Requests: a
@@ -401,7 +420,13 @@ another tab/retry queue, the cron hook).
 - **Page**: `request.html` (built by `scripts/generators/build_request_pages.js`, public and
   indexable) rendered and answered by the Pages Function `functions/request/index.js`
   (`functions/_lib/request-submit.mjs`); markup and validation in `functions/_lib/request-form.mjs`.
-  Page 1 asks what they are planning in the canonical service order with prices; each service has
+  Page 1 asks what they are planning in the canonical service order as **picture tiles** (owner-approved
+  mock-up, 20 Oct 2026): each tile is the label around the real radio (same names and values, works
+  without JavaScript), a photo (`assets/img/form/<key>-240/480.webp`, `npm run build:form-pictures`),
+  one line of what it is and an "e.g." line, no prices (each section shows its own price); "Tap the
+  picture that looks like what you want.", "I want more than one of these" reveals tick-box tiles
+  ("Go back to one choice"), a green "✓ You picked: …" line (aria-live) and "Not sure? Pick the
+  closest one…". Laptop 4 across, phone list rows (`npm run validate:request-form-pictures`). Each service has
   its own questions; every path needs the government photo ID (owner note above the upload) and
   the rules checkbox (`/rules`, `rules.html`, version `RULES_VERSION`; agreed time, version, name
   and IP are stored and logged). Works without JavaScript (server validation, errors listed at the
@@ -862,3 +887,11 @@ customer bar, Customer 4 card), `phone-menu-open.jpg`, `phone-scrolled-customer-
 `npm run admin:dev` serves the console on localhost:8788 against a local D1 and the fake request
 in `data/admin/fixture-request.json` (password `local-test-pass`). Email sending needs the
 deployed site.
+
+## No placeholder drawings (owner, 20 Oct 2026)
+`assets/img/party/*.jpg` and three porch files were drawings standing in for photos on 35 live pages
+(areas, answers, services, local) and the thank-you email. They were swapped for the site's real
+photos and deleted (old image URLs are not redirected: redirects go to pages only). `scripts/lib/placeholder_images.js`
+holds each drawing's hash; `npm run validate:no-placeholder-images` fails if any page or source names
+one, or any image under `assets/` has those bytes. The frozen pages were refrozen
+(`frozen_outputs.mjs prepare-scope … && freeze && clear-scope`).

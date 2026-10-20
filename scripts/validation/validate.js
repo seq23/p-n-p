@@ -42,7 +42,7 @@ const requiredFiles = [
   'areas/bartlett-tn-porch-decorating.html',
   'answers/how-much-does-porch-decorating-cost-in-memphis.html',
   'answers/porch-decorating-under-500-memphis.html',
-  'assets/img/party/memphis-party-decor-hotel-room-birthday-setup.jpg',
+  'assets/img/celebrations/romantic-bedroom-experience.jpg',
   'services/party-decor-memphis.html',
   'services/hotel-room-decor-memphis.html',
   'services/birthday-party-decor-memphis.html',

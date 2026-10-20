@@ -7,8 +7,9 @@
  *  1. a request card at any stage (new, draft, invoiced, deposit paid, scheduled, job done,
  *     finished, void, put away; every service) lacks the always-visible Edit link with its
  *     tooltip, or the link is not a large tap target;
- *  2. the page lacks a section, or the six sections are out of order (Bookings, Done dates,
- *     Invoice, Payments, Status, Customer details), each with its own Save;
+ *  2. the page lacks a section, or the nine sections are out of order (What they want, Contact
+ *     details, ID and rules, Answers, Bookings, Done dates, Invoice, Payments, Status), each
+ *     with its own Save;
  *  3. a section does not save: booking day/time/done/notes (and the reminder and the ICS feed
  *     follow the new day), Remove booking (asked first), Job done / Returned / Takedown done
  *     dates set and cleared (Finished recomputes; clearing Job done before the thank-you stops
@@ -111,8 +112,8 @@ must(hasEdit((await s.get('/admin/?pa=1')).text, rk), 'a Put away card on Reques
 const page = await s.get(`/admin/requests/edit?r=${rk}`);
 must(page.status === 200, `the edit page answered ${page.status}`);
 const order = [...page.text.matchAll(/data-edit-section="([^"]+)"/g)].map((m) => m[1]);
-must(order.join(',') === 'bookings,dates,invoice,payments,status,customer', `sections out of order or missing: ${order.join(',')}`);
-for (const [sec, saveKey] of [['dates', 'edit.saveDates'], ['invoice', 'edit.saveInvoice'], ['status', 'edit.saveStatus'], ['customer', 'edit.saveCustomer']]) {
+must(order.join(',') === 'want,customer,id,answers,bookings,dates,invoice,payments,status', `sections out of order or missing: ${order.join(',')}`);
+for (const [sec, saveKey] of [['want', 'edit.saveWant'], ['answers', 'edit.saveTakedown'], ['dates', 'edit.saveDates'], ['invoice', 'edit.saveInvoice'], ['status', 'edit.saveStatus'], ['customer', 'edit.saveCustomer']]) {
   const part = page.text.slice(page.text.indexOf(`data-edit-section="${sec}"`), page.text.indexOf('</section>', page.text.indexOf(`data-edit-section="${sec}"`)));
   must((part.match(new RegExp(`data-help="${saveKey}"`, 'g')) || []).length === 1, `section ${sec} does not have exactly one Save`);
 }
@@ -246,7 +247,9 @@ await logged(/Payment removed: \$20\.00 .* → removed, kept in the history/, 'p
   const res = await s.post('/admin/requests/edit/status', { r: rk, step: 'invoiced' });
   must(/still%20reads%20Scheduled/.test(res.location), 'an earlier step on a booked request does not explain it still reads Scheduled');
 }
-await s.post('/admin/requests/edit/status', { r: rk, step: 'paid', takedown_plan: 'customer_handles', takedown_date: plus(4), takedown_note: 'They have a ladder' });
+await s.post('/admin/requests/edit/status', { r: rk, step: 'paid' });
+// The takedown plan moved from Status to section 4 with its own Save takedown (20 Oct 2026).
+must(/[?&]at=answers#answers$/.test((await s.post('/admin/requests/edit/takedown', { r: rk, takedown_plan: 'customer_handles', takedown_date: plus(4), takedown_note: 'They have a ladder' })).location), 'Save takedown does not come back to section 4 (answers)');
 const tdRow = await s.one('SELECT takedown_plan, takedown_date, takedown_note FROM requests WHERE request_key = ?1', key);
 must(tdRow.takedown_plan === 'customer_handles' && tdRow.takedown_date === plus(4) && tdRow.takedown_note === 'They have a ladder', 'the takedown plan / date / note did not save');
 await logged(/Takedown plan: we take it down \(scheduled\) → the customer will handle it/, 'takedown plan');
@@ -312,9 +315,9 @@ const help = (await s.get('/admin/help')).text;
 const editKeys = ['card.edit', ...Object.keys(HELP).filter((k) => k.startsWith('edit.'))];
 must(editKeys.length >= 12, `only ${editKeys.length} edit help entries`);
 for (const k of editKeys) must(help.includes(`data-help-entry="${k}"`), `/admin/help has no entry for ${k}`);
-must(/Change anything on this request/.test(help), '/admin/help has no "Change anything on this request" section');
+must(/Everything about a customer \(the Edit link on a card\)/.test(help), '/admin/help has no "Everything about a customer" section');
 
 if (!cards) errors.push('Rule 0: no cards rendered');
 if (checks < 80) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) { console.error(`VALIDATION FAIL: admin edit (${errors.length})\n${errors.map((e) => `- ${e}`).join('\n')}`); process.exit(1); }
-console.log(`validate_admin_edit: OK (${checks} checks: Edit link on ${cards} cards at every stage incl. finished/void/put away; six sections in order, one Save each; bookings + reminder + ICS follow; done dates set/cleared with Finished and the thank-you; invoice after paid recomputes, nothing re-sent; payments edited/added/soft-removed; every status + Void; customer details incl. raw row kept; history old → new by Valerie; help entries)`);
+console.log(`validate_admin_edit: OK (${checks} checks: Edit link on ${cards} cards at every stage incl. finished/void/put away; nine sections in order, one Save each; bookings + reminder + ICS follow; done dates set/cleared with Finished and the thank-you; invoice after paid recomputes, nothing re-sent; payments edited/added/soft-removed; every status + Void; customer details incl. raw row kept; history old → new by Valerie; help entries)`);

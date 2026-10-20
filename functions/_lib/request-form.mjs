@@ -27,15 +27,31 @@ export const ID_TYPES = ['image/jpeg', 'image/png'];
 
 const dollars = (p) => Number(String(p).replace(/[^0-9.]/g, ''));
 
-// Page-1 choices, canonical order. Prices come from the data files via the arguments.
+// Page-1 choices, canonical order: picture tiles (owner-approved mock-up, 20 Oct 2026). No prices
+// on this question (they made the lines long and hid what each one is); each section below shows
+// its own price, read from the data files (price). The words are the approved wording. Pictures
+// are the site's own photos as small web copies (npm run build:form-pictures); never a
+// placeholder drawing (validate:no-placeholder-images). The rentals "e.g." names the first three
+// games available now, by their site names (the mock-up's "Giant Jenga, Cornhole, Connect 4" named
+// an item that is not offered; validate:admin-inventory and validate:rentals keep anything not
+// available off this form, so the line follows the inventory).
+export const rentalsExample = (table) => `e.g. ${rentalItems(table).slice(0, 3).map((i) => String(i.name).replace(/ Set$/, '')).join(', ')}`;
+export const TILE_IMG = (key) => ({ src: `/assets/img/form/${key}-240.webp`, srcset: `/assets/img/form/${key}-240.webp 240w, /assets/img/form/${key}-480.webp 480w` });
 export function serviceChoices(offers, table) {
   return [
-    { key: 'porch', label: 'Porch decorating', note: `seasonal and holiday porches, from $${dollars(offers.services.porch.price)}` },
-    { key: 'party', label: 'Party planning & decor', note: `${PARTY_PARENTHETICAL.slice(1, -1)}; from $${dollars(offers.services.celebration.price)}` },
-    { key: 'grazing', label: 'Grazing tables', note: `styling from $${dollars(offers.services.grazing.price)}, food extra` },
-    { key: 'rentals', label: 'Party game rentals', note: `giant yard games, $${table.dayCents / 100} a game a day` },
+    { key: 'porch', label: 'Porch decorating', whatHtml: 'We decorate the <b>outside</b> of your home.', eg: 'e.g. fall pumpkins, Christmas front door',
+      alt: 'A front porch decorated for fall with pumpkins, mums and a wreath', echo: "We'll decorate the outside of your home.", price: dollars(offers.services.porch.price) },
+    { key: 'party', label: 'Party & decor', whatHtml: 'We decorate <b>for an event</b>: a room, a hall or a backyard.', eg: 'e.g. birthday balloons, a baby shower, a proposal',
+      alt: 'A birthday balloon arch, and a hotel room decorated with red heart balloons and candles', echo: "We'll decorate for your event.", price: dollars(offers.services.celebration.price) },
+    { key: 'grazing', label: 'Grazing table', whatHtml: 'A styled table of food for guests.', eg: 'e.g. charcuterie, fruit, sweets',
+      alt: 'A styled grazing table of meats, cheese and fruit', echo: "We'll style a table of food for your guests.", price: dollars(offers.services.grazing.price) },
+    { key: 'rentals', label: 'Game rentals', whatHtml: 'Giant yard games to <b>borrow</b>.', eg: rentalsExample(table),
+      alt: 'A giant Connect 4 game set up in a backyard', echo: "You'll borrow giant yard games.", price: table.dayCents / 100 },
   ];
 }
+export const SERVICE_HELP = 'Tap the picture that looks like what you want.';
+export const MULTI_LABEL = 'I want more than one of these';
+export const UNSURE_LINE = "Not sure? Pick the closest one. We'll talk it through with you before anything is booked.";
 export const SERVICE_KEYS = ['porch', 'party', 'grazing', 'rentals'];
 
 const EVENT_TYPES = ['Birthday', 'Anniversary', 'Proposal', 'Baby or bridal shower', 'Graduation', 'Holiday or other'];
@@ -292,18 +308,30 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
   const summary = errList.length ? `<div class="rq-summary" role="alert" tabindex="-1" id="rq-errors"><h2>Please fix ${errList.length === 1 ? 'one thing' : `${errList.length} things`}</h2><ul>${errList.map(([k, m]) => `<li><a href="#q-${esc(k)}">${esc(m)}</a></li>`).join('')}</ul><p>If you added your ID photo, please add it again: we never keep a photo from a form that did not go through.</p></div>` : '';
   const svc = String(values.service || '');
   const multi = Array.isArray(values.multi) ? values.multi : [];
+  // Whole tile = the label around a real radio (or tick box): works without JavaScript, same
+  // field names and values, so submissions, /admin and the emails do not change.
+  const pic = (c, lazy = true) => { const im = TILE_IMG(c.key); return `<img src="${im.src}" srcset="${im.srcset}" sizes="(min-width: 700px) 160px, 96px" width="240" height="180" alt="${esc(c.alt)}"${lazy ? ' loading="lazy"' : ''} decoding="async">`; };
+  const tile = (c, type) => {
+    const on = type === 'radio' ? svc === c.key : multi.includes(c.key);
+    const input = type === 'radio'
+      ? `<input type="radio" name="service" value="${c.key}"${on ? ' checked' : ''} required aria-describedby="help-service">`
+      : `<input type="checkbox" name="multi" value="${c.key}"${on ? ' checked' : ''}>`;
+    return `<label class="rq-tile${type === 'radio' ? ' rq-service' : ' rq-sq'}${on ? ' rq-on' : ''}" data-tile="${c.key}" data-label="${esc(c.label)}" data-says="${esc(c.echo)}">${input}${pic(c, type !== 'radio')}<span class="rq-tile-text"><strong>${esc(c.label)}</strong><span class="rq-what">${c.whatHtml}</span><span class="rq-eg">${esc(c.eg)}</span></span></label>`;
+  };
   const page1 = `<fieldset class="rq-q rq-services${errors.service ? ' rq-bad' : ''}" id="q-service" data-q="service"><legend>What are you planning?${req}</legend>
-    <p class="rq-help">Pick the main one. You can pick more than one with the last choice.</p>${fieldError('service', errors)}
-    ${choices.map((c) => `<label class="rq-choice rq-service"><input type="radio" name="service" value="${c.key}"${svc === c.key ? ' checked' : ''} required> <span><strong>${esc(c.label)}</strong> <span class="rq-note">(${esc(c.note)})</span></span></label>`).join('')}
-    <label class="rq-choice rq-service"><input type="radio" name="service" value="multi"${svc === 'multi' ? ' checked' : ''} required> <span><strong>More than one of these</strong></span></label>
-    <div class="rq-multi" data-multi id="q-multi"><p class="rq-help">Which services?</p>${fieldError('multi', errors)}${choices.map((c) => `<label class="rq-choice"><input type="checkbox" name="multi" value="${c.key}"${multi.includes(c.key) ? ' checked' : ''}> <span>${esc(c.label)}</span></label>`).join('')}</div>
+    <p class="rq-help" id="help-service">${esc(SERVICE_HELP)}</p>${fieldError('service', errors)}
+    <div class="rq-tiles" data-tiles>${choices.map((c) => tile(c, 'radio')).join('')}</div>
+    <label class="rq-more rq-service${svc === 'multi' ? ' rq-on' : ''}"><input type="radio" name="service" value="multi"${svc === 'multi' ? ' checked' : ''} required> <strong>${esc(MULTI_LABEL)}</strong></label>
+    <div class="rq-multi" data-multi id="q-multi"><p class="rq-help">Tick every picture you want.</p>${fieldError('multi', errors)}<div class="rq-tiles">${choices.map((c) => tile(c, 'check')).join('')}</div><button type="button" class="rq-back1" data-one>Go back to one choice</button></div>
+    <p class="rq-echo" data-echo aria-live="polite" hidden></p>
+    <p class="rq-unsure">${esc(UNSURE_LINE)}</p>
   </fieldset>`;
   const sections = [
     section('porch', 'Your porch <span class="rq-for">(if you picked porch decorating)</span>', Q.porch.map((q) => renderQuestion(q, values, errors)).join('')),
-    section('party', 'Your celebration <span class="rq-for">(if you picked party planning &amp; decor)</span>', Q.party.map((q) => renderQuestion(q, values, errors)).join('')),
-    section('grazing', 'Your grazing table <span class="rq-for">(if you picked grazing tables)</span>', Q.grazing.map((q) => renderQuestion(q, values, errors)).join('')),
+    section('party', 'Your celebration <span class="rq-for">(if you picked party &amp; decor)</span>', `<p class="rq-help" data-section-price="party">${esc(PARTY_PARENTHETICAL.slice(1, -1))[0].toUpperCase()}${esc(PARTY_PARENTHETICAL.slice(2, -1))}. Party decor starts at $${choices[1].price}; your quote shows the exact price.</p>${Q.party.map((q) => renderQuestion(q, values, errors)).join('')}`),
+    section('grazing', 'Your grazing table <span class="rq-for">(if you picked grazing table)</span>', Q.grazing.map((q) => renderQuestion(q, values, errors)).join('')),
     section('event', 'Date and place <span class="rq-for">(porch, party &amp; decor, grazing)</span>', Q.event.map((q) => renderQuestion(q, values, errors)).join('')),
-    section('rentals', 'Your games <span class="rq-for">(if you picked party game rentals)</span>', `<p class="rq-help">Booking, not a quote: we hold your games for ${esc(String(offers.rentalHolds.defaultHours))} hours while you pay the deposit.</p>${renderGames(table, values, errors)}${Q.rentals.filter((q) => q.type !== 'games').map((q) => renderQuestion(q, values, errors)).join('')}
+    section('rentals', 'Your games <span class="rq-for">(if you picked game rentals)</span>', `<p class="rq-help">Booking, not a quote: we hold your games for ${esc(String(offers.rentalHolds.defaultHours))} hours while you pay the deposit.</p>${renderGames(table, values, errors)}${Q.rentals.filter((q) => q.type !== 'games').map((q) => renderQuestion(q, values, errors)).join('')}
       <div class="rq-total" data-total aria-live="polite"><noscript><p class="rq-help">Your exact total is shown on the next screen.</p></noscript></div>`),
   ].join('');
   const contact = section('contact', 'About you', Q.contact.map((q) => renderQuestion(q, values, errors)).join(''));
@@ -335,13 +363,25 @@ const FORM_CSS = `.rq-range{font-weight:600;color:#3b302a}.rq-wrap{max-width:680
 .rq-summary{border:2px solid #a8442b;border-radius:14px;padding:14px 16px;background:#fff6f3;margin:12px 0}.rq-summary h2{font-size:1.3rem;margin:0 0 6px}.rq-summary a{color:#a8442b}
 .rq-idnote{background:#faf7f2;border-left:4px solid #b85f40;padding:10px 12px;border-radius:8px;font-weight:600}.rq-hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
 .rq-game.rq-off{opacity:.45}.rq-left{margin-left:auto;font-size:.9rem;color:#6b5c52}.rq-total{background:#faf7f2;border-radius:12px;padding:4px 14px}.rq-total table{width:100%;border-collapse:collapse}.rq-total td{padding:4px 0}.rq-total td+td{text-align:right}
-.rq-submit{width:100%;min-height:52px;font-size:1.1rem;margin-top:8px;border:0;cursor:pointer}.rq-multi{margin:6px 0 0 18px}.rq-js .rq-section[hidden]{display:none}.rq-projector{margin-left:30px}.rq-js .rq-projector.rq-hide{display:none}.rq-js .rq-len{display:none}.rq-js .rq-choice[data-length].rq-hide{display:none}`;
+.rq-submit{width:100%;min-height:52px;font-size:1.1rem;margin-top:8px;border:0;cursor:pointer}.rq-multi{margin:6px 0 0}
+.rq-tiles{display:grid;grid-template-columns:1fr;gap:10px;margin:0 0 10px}.rq-tile{position:relative;display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:center;border:2px solid #e8dfd4;border-radius:12px;background:#fff;padding:8px 44px 8px 8px;cursor:pointer;min-height:44px}
+.rq-tile img{width:96px;height:96px;object-fit:cover;border-radius:8px;display:block}.rq-tile-text{display:grid;gap:2px;line-height:1.3}.rq-tile strong{font-size:1.05rem}.rq-what{font-size:.95rem}.rq-eg{font-size:.88rem;color:#6b5c52}
+.rq-tile input,.rq-more input{position:absolute;top:10px;right:10px;width:26px;height:26px;margin:0;accent-color:#a8442b}.rq-tile:focus-within,.rq-more:focus-within{outline:3px solid #b85f40;outline-offset:2px}
+.rq-tile.rq-on,.rq-tile:has(input:checked){border-color:#a8442b;background:#f6e6dc}.rq-more,.rq-q>.rq-more{position:relative;display:flex;align-items:center;min-height:52px;border:2px dashed #e8dfd4;border-radius:12px;padding:10px 48px 10px 14px;margin:0 0 10px;cursor:pointer;font-weight:400}
+.rq-more.rq-on,.rq-more:has(input:checked){border-style:solid;border-color:#a8442b;background:#f6e6dc}.rq-echo{background:#e3f3e8;border:1px solid #2f7a46;border-radius:10px;padding:10px 12px;margin:0 0 10px}.rq-echo b{color:#2f7a46}.rq-unsure{color:#5f5148;font-size:.95rem;margin:0}
+@media(min-width:700px){.rq-tiles{grid-template-columns:repeat(4,1fr)}.rq-tile{grid-template-columns:1fr;align-items:start;align-content:start;padding:0 0 10px;overflow:hidden}.rq-tile img{width:100%;height:auto;aspect-ratio:4/3;border-radius:0}.rq-tile-text{padding:0 10px}.rq-tile input{background:#fff}.rq-more{max-width:340px}}
+.rq-js .rq-tiles.rq-hide{display:none}.rq-back1{display:none}.rq-js .rq-back1{display:inline-flex;align-items:center;min-height:44px;margin:0 0 6px;padding:0 14px;border:2px solid #c9b8a8;border-radius:10px;background:#fff;font:inherit;color:#3b302a;cursor:pointer}.rq-js .rq-section[hidden]{display:none}.rq-projector{margin-left:30px}.rq-js .rq-projector.rq-hide{display:none}.rq-js .rq-len{display:none}.rq-js .rq-choice[data-length].rq-hide{display:none}`;
 
 // Progressive enhancement only: the form works without any of this.
 const FORM_JS = `(function(){var f=document.querySelector('.rq-form');if(!f)return;document.documentElement.classList.add('rq-js');
 var show={porch:['porch','event'],party:['party','event'],grazing:['grazing','event'],rentals:['rentals']};
 function picked(){var s=f.querySelector('input[name=service]:checked');if(!s)return[];if(s.value!=='multi')return[s.value];return[].slice.call(f.querySelectorAll('input[name=multi]:checked')).map(function(x){return x.value;});}
-function sync(){var p=picked(),on={};p.forEach(function(k){(show[k]||[]).forEach(function(s){on[s]=1;});});var m=f.querySelector('input[name=service][value=multi]');var box=f.querySelector('[data-multi]');if(box)box.hidden=!(m&&m.checked);
+function echo(){var e=f.querySelector('p[data-echo]');[].slice.call(f.querySelectorAll('.rq-tile,.rq-more')).forEach(function(l){var i=l.querySelector('input');l.classList.toggle('rq-on',!!(i&&i.checked));});
+var s=f.querySelector('input[name=service]:checked'),m=s&&s.value==='multi',t=f.querySelector('[data-tiles]');if(t)t.classList.toggle('rq-hide',!!m);if(!e)return;
+var lab=function(k){var l=f.querySelector('.rq-service[data-tile='+k+']');return l?l.getAttribute('data-label'):k;};var p=picked();if(!p.length){e.hidden=true;e.textContent='';return;}
+e.innerHTML='';var b=document.createElement('b');b.textContent='\u2713 You picked: '+p.map(lab).join(' + ')+'.';e.appendChild(b);if(!m){var l=f.querySelector('.rq-service[data-tile='+p[0]+']');e.appendChild(document.createTextNode(' '+(l?l.getAttribute('data-says'):'')+' Not right? Tap a different picture.'));}e.hidden=false;}
+f.addEventListener('click',function(e){if(!e.target.closest||!e.target.closest('[data-one]'))return;var m=f.querySelector('input[name=service][value=multi]');if(m)m.checked=false;sync();var t=f.querySelector('[data-tiles] input');if(t)t.focus();});
+function sync(){echo();var p=picked(),on={};p.forEach(function(k){(show[k]||[]).forEach(function(s){on[s]=1;});});var m=f.querySelector('input[name=service][value=multi]');var box=f.querySelector('[data-multi]');if(box)box.hidden=!(m&&m.checked);
 ['porch','party','grazing','event','rentals'].forEach(function(k){var s=f.querySelector('[data-section='+k+']');if(!s)return;s.hidden=!on[k];[].slice.call(s.querySelectorAll('input,textarea')).forEach(function(i){if(i.hasAttribute('required')||i.dataset.req){i.dataset.req=1;i.required=!!on[k];}});});
 ['contact','id','agree'].forEach(function(k){var s=f.querySelector('[data-section='+k+']');if(s)s.hidden=!p.length;});proj();quote();}
 function proj(){var l=f.querySelector('[data-projector]');if(!l)return;var s=f.querySelector('input[name=games][value=inflatable-movie-screen]'),on=!!(s&&s.checked);l.classList.toggle('rq-hide',!on);if(!on){var i=l.querySelector('input');if(i)i.checked=false;}}

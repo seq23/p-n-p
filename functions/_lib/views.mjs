@@ -179,7 +179,7 @@ export function layout(title, body, { authed = true, home = false, screen = '', 
   const backLink = !authed ? '' : home
     ? `<div class="adminbar mainhead" data-adminbar data-mainpage><h1>${MAIN_PAGE_TITLE}<small>Every request, newest first</small></h1></div>`
     : `<nav class="adminbar noprint" aria-label="Back" data-adminbar><a class="back" href="${esc(parent)}" data-back${tip('nav.back')}>&larr; ${backWords}</a><span class="where" data-where>${esc(where || title)}</span></nav>`;
-  const viewer = authed && body.includes('data-id-open') ? ID_VIEWER : '';
+  const viewer = authed && body.includes('data-id-open') ? (screen === 'edit' ? ID_VIEWER.replace('go back to the card', 'go back to this page') : ID_VIEWER) : '';
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
 <meta name="format-detection" content="telephone=no">
@@ -410,14 +410,15 @@ function memphisWhen(utc) {
 
 // A phone request has no ID on file at first (ID-for-everyone still stands): it says so, and
 // Valerie can add one later with the optional upload (admin.mjs addId).
-export function idUploadForm(rk) {
-  return `<form class="idup" method="post" action="/admin/requests/id/upload" enctype="multipart/form-data" data-id-upload>${hiddenInputs({ r: rk })}
+// from: 'edit' brings her back to section 3 of "Everything about <first name>" (admin.mjs addId).
+export function idUploadForm(rk, { from = '' } = {}) {
+  return `<form class="idup" method="post" action="/admin/requests/id/upload" enctype="multipart/form-data" data-id-upload>${hiddenInputs(from ? { r: rk, from } : { r: rk })}
       <label for="idp-${esc(rk)}">Add their ID photo (optional)</label><input id="idp-${esc(rk)}" type="file" name="id_photo" accept="image/jpeg,image/png" required${tip('card.idUpload')}>
       ${act(`<button class="btn ghost" type="submit"${tip('card.idUpload')}>Add ID photo</button>`, 'card.idUpload')}</form>`;
 }
-function idCell(r, rk) {
+export function idCell(r, rk, { from = '' } = {}) {
   if (r.idDeletedAt) return esc(`Deleted ${memphisWhen(r.idDeletedAt)}`);
-  if (isPhone(r) && !r.idObject) return `<span data-id-phone>Not collected (phone booking)</span>${idUploadForm(rk)}`;
+  if (isPhone(r) && !r.idObject) return `<span data-id-phone>Not collected (phone booking)</span>${idUploadForm(rk, { from })}`;
   if (r.idObject) return idOpenLink(r, rk);
   return r.idFile ? r.idFile.split(/,\s*/).map((u, i) => link(u, i ? `Open ID photo ${i + 1}` : 'Open ID photo', 'card.idPhoto')).join('<br>') : '';
 }
@@ -451,10 +452,19 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')shut();if(e.
 v.addEventListener('touchstart',function(e){y0=e.touches.length===1?e.touches[0].clientY:null;},{passive:true});
 v.addEventListener('touchend',function(e){if(y0!=null&&e.changedTouches[0].clientY-y0>80)shut();y0=null;});})();`;
 
-function deleteIdStep(r, rk) {
+export function deleteIdStep(r, rk, { from = '' } = {}) {
   if (r.idDeletedAt || !(r.idObject || r.idFile)) return '';
-  return confirmStep({ key: 'card.idDelete', yesKey: 'card.idDeleteYes', label: 'Delete this ID', question: `Delete ${r.name || 'this customer'}'s ID photo for good? It cannot be brought back.`, action: '/admin/requests/id/delete', hidden: hiddenInputs({ r: rk }), danger: true });
+  return confirmStep({ key: 'card.idDelete', yesKey: 'card.idDeleteYes', label: 'Delete this ID', question: `Delete ${r.name || 'this customer'}'s ID photo for good? It cannot be brought back.`, action: '/admin/requests/id/delete', hidden: hiddenInputs(from ? { r: rk, from } : { r: rk }), danger: true });
 }
+
+// "✓ Agreed to the rules, Tue 20 Oct" (or "Rules: not asked (phone booking)"): the card's More and
+// the Edit page's section 3 read this one line.
+export function rulesLine(r) {
+  if (r.agreedAt) return `<p class="gl ok" data-rules>✓ Agreed to the rules, ${esc(memphisDay(r.agreedAt) || memphisWhen(r.agreedAt))}${r.rulesVersion ? ` (version ${esc(r.rulesVersion)})` : ''}</p>`;
+  return isPhone(r) ? '<p class="gl muted" data-rules>Rules: not asked (phone booking)</p>' : '';
+}
+// "ID photo deleted on Mon 19 Oct." (Memphis day of requests.id_deleted_at).
+export const idDeletedWords = (r) => (r.idDeletedAt ? `ID photo deleted on ${memphisDay(r.idDeletedAt) || memphisWhen(r.idDeletedAt)}.` : '');
 
 // ---- "More about <first name>" (owner-approved mock-up, 20 Oct 2026, panel 6) -----------------
 // Raw ISO dates in answers read as words ("2026-10-30" -> "Fri 30 Oct"); a date of birth keeps its
@@ -495,8 +505,7 @@ const SHOWN_ELSEWHERE = /^(business delivery|business name|delivery address)$/i;
 // Group 3: their details and ID. used: the answer labels the other groups already show.
 function detailsGroupBody(r, rk, { referrers = {}, used = new Set(), archived = false, st = {} } = {}) {
   const other = [...r.rentals, ...r.decor, ...r.other].filter((x) => !used.has(x.label) && !SHOWN_ELSEWHERE.test(String(x.label || '')));
-  const rules = r.agreedAt ? `<p class="gl ok" data-rules>✓ Agreed to the rules, ${esc(memphisDay(r.agreedAt) || memphisWhen(r.agreedAt))}${r.rulesVersion ? ` (version ${esc(r.rulesVersion)})` : ''}</p>`
-    : (isPhone(r) ? '<p class="gl muted" data-rules>Rules: not asked (phone booking)</p>' : '');
+  const rules = rulesLine(r);
   const robot = r.robotCheck === 'no-js' ? '<p class="gl warnline" data-robot-check>⚠ Sent without the robot check (their phone had JavaScript off). Check it looks real.</p>' : '';
   const asked = `<p class="gl muted" data-asked>${esc(friendlyWhen(r))}${archived && st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</p>`;
   return `<div data-details-body>${kv([

@@ -1,7 +1,13 @@
-// "Change anything on this request" (owner, 18 Oct 2026): Valerie can correct anything after
-// the fact, at any stage, Finished, Void and Put away included. ONE page per request
-// (/admin/requests/edit?r=…), sections in order, one Save each: Bookings, Done dates, Invoice,
-// Payments, Status, Customer details. It reuses the existing paths so every screen agrees:
+// "Everything about <first name>" (owner, 18 Oct 2026; renamed and regrouped from "Change anything
+// on this request" by the owner-approved mock-up of 20 Oct 2026): Valerie can see and correct
+// anything after the fact, at any stage, Finished, Void and Put away included. ONE page per request
+// (/admin/requests/edit?r=…), a "Jump to:" line, then two parts, one Save per section:
+//   What they sent  1 What they want (tick boxes; requests.services), 2 Contact details,
+//                   3 ID and rules, 4 their answers on the form (read-only) + the takedown plan;
+//   Your side       5 Bookings, 6 Done dates, 7 Invoice, 8 Payments, 9 Status; History last.
+// Laptop: the two parts side by side; phone: one column. After a save she lands back on the same
+// section (?at=<section>#<section>) with the green flash inside it.
+// It reuses the existing paths so every screen agrees:
 //   bookings     calendar.mjs editBookingWhen / deleteBooking / notes (the ICS feed, the Bookings
 //                tab and the day-before reminder follow the booking, REMIND_AGAIN);
 //   done dates   the same undo paths as Undo job done / Undo returned / Undo takedown done, so
@@ -9,15 +15,22 @@
 //   invoice      ledger.mjs linesFromForm / saveLines, then syncMoneyStatus (balance recomputes;
 //                nothing is re-sent to the customer);
 //   payments     soft: a removed payment keeps its row with voided_at, never deleted;
-//   customer     requests.details_edits (migration 0011), laid over the form by fromRow.
+//   customer     requests.details_edits (migration 0011), laid over the form by fromRow;
+//   what they want  requests.services (canonical CARD_SERVICES order); the form's original is
+//                kept once in details_edits.services_sent for "The form said:". A porch booking
+//                switches to party (and back) at the same day and time when its service is
+//                unticked and the other is ticked; any other booking stays, with a yellow heads-up.
+//                Invoices, payments and the form answers are never touched.
 // Every change writes a history line "old → new (by Valerie)" through logEvent. The sheet sync
 // runs after every admin POST (admin.mjs handleAdmin). Proof: npm run validate:admin-edit.
 import { esc, money, redirect, htmlResponse, b64urlText, fromB64urlText, shortDate, invoiceTotal, toCents, payPlanOf, amountDueNow } from './util.mjs';
-import { loadRequests, logEvent, eventsFor, DETAIL_FIELDS, ADDRESS_RE, NOTES_RE, detailAnswer, deliveryOf } from './requests.mjs';
+import { loadRequests, logEvent, eventsFor, DETAIL_FIELDS, ADDRESS_RE, NOTES_RE, DELIVERY_LABELS, detailAnswer, deliveryOf } from './requests.mjs';
 import { chicagoDate } from './reminders.mjs';
 import * as C from './calendar.mjs';
 import { balanceOf, paidByInvoice, linesFromForm, saveLines, syncMoneyStatus, recordPayment, dueWords } from './ledger.mjs';
-import { servicesOf, TAKEDOWN_PLANS } from './cards.mjs';
+import { servicesOf, TAKEDOWN_PLANS, CARD_SERVICES } from './cards.mjs';
+import { serviceOfKind } from './kinds.mjs';
+import { isPhone } from './phone-requests.mjs';
 import { deriveProgress, STEP_KEYS } from './progress.mjs';
 import { takedownState, loadTakedownFacts, TAKEDOWN_KINDS } from './takedown.mjs';
 import { tip } from './helptext.mjs';
@@ -25,7 +38,14 @@ import * as V from './views.mjs';
 import { TRACK_TABLE } from './prices.mjs';
 
 export const WHO = 'Valerie';
-export const SECTIONS = ['bookings', 'dates', 'invoice', 'payments', 'status', 'customer'];
+export const SECTIONS = ['want', 'customer', 'id', 'answers', 'bookings', 'dates', 'invoice', 'payments', 'status'];
+// The "Jump to:" line (owner-approved mock-up, 20 Oct 2026): one anchor per section, History last.
+export const JUMP = [['want', 'What they want'], ['customer', 'Contact'], ['id', 'ID'], ['answers', 'Answers'], ['bookings', 'Bookings'], ['dates', 'Done dates'], ['invoice', 'Invoice'], ['payments', 'Payments'], ['status', 'Status'], ['history', 'History']];
+// Section 1 tick boxes, canonical order (cards.mjs CARD_SERVICES).
+export const WANT_WORDS = { porch: 'Porch', party: 'Party & decor', grazing: 'Grazing', rentals: 'Game rentals' };
+export const wantWords = (list) => (list.length ? list.map((k) => WANT_WORDS[k] || k).join(' + ') : '(nothing)');
+// Unticking porch with party ticked (or the other way round) switches the booking in place.
+export const KIND_SWAP = { porch_install: 'party_setup', party_setup: 'porch_install', porch_takedown: 'party_takedown', party_takedown: 'porch_takedown' };
 const STEP_WORDS = { new: '1. New', invoiced: '2. Invoice sent', deposit_paid: '3. Deposit paid', scheduled: '4. Scheduled', job_done: '5. Job done (Returned for rentals)', paid: '6. Paid in full', void: 'Void — cancelled' };
 const PLAN_WORDS = { '': 'not asked yet', scheduled: 'we take it down (scheduled)', not_sure: 'not sure yet', customer_handles: 'the customer will handle it' };
 const METHOD_WORDS = { zelle: 'Zelle', cashapp: 'Cash App', cash: 'Cash', card: 'Card', other: 'Other', '': 'not given' };
@@ -50,7 +70,8 @@ async function setStatusRow(db, key, status, invoiceId = null) {
 // Everything the page shows, from the same tables every other screen reads.
 export async function loadEdit(env, key) {
   const db = env.DB;
-  const r = (await loadRequests(env)).find((x) => x.key === key);
+  const all = await loadRequests(env);
+  const r = all.find((x) => x.key === key);
   if (!r) return null;
   const st = (await db.prepare('SELECT * FROM request_status WHERE request_key = ?1').bind(key).first()) || { status: 'new' };
   const inv = st.invoice_id ? await db.prepare('SELECT * FROM invoices WHERE id = ?1').bind(st.invoice_id).first()
@@ -72,7 +93,10 @@ export async function loadEdit(env, key) {
   const td = takedownState({ services, takedownPlan: r.takedownPlan, takedownDate: r.takedownDate, invoiceTakedown: Boolean(inv && facts.invoiceIds.has(inv.id)), bookings, today });
   const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
   const pr = deriveProgress({ st, inv: inv ? { ...inv, balance } : null, scheduled: bookings.length > 0, ret, rental, takedown: td });
-  return { r, st, inv, lines, payments, balance, bookings, notes, ret, events, services, today, td, pr };
+  // "Customer N", the same plain counter as the main page (over every request not put away).
+  const away = new Set(((await db.prepare('SELECT request_key FROM request_status WHERE archived_at IS NOT NULL').all()).results || []).map((x) => x.request_key));
+  const num = st.archived_at ? null : V.customerNumbers(all.filter((x) => !away.has(x.key))).get(key) || null;
+  return { r, st, inv, lines, payments, balance, bookings, notes, ret, events, services, today, td, pr, num };
 }
 
 // ---- The page --------------------------------------------------------------------------
@@ -87,7 +111,16 @@ const EDIT_CSS = `
 .editpage .removed{opacity:.65;text-decoration:line-through}.editpage .save{margin-top:14px}
 .editpage .choice{display:flex;align-items:center;gap:10px;min-height:48px;font-weight:600}.editpage .choice input{width:28px;min-height:28px}
 .editpage .sumline{display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--line)}
+.editpage .jump{display:flex;flex-wrap:wrap;align-items:center;gap:0 4px;margin:0 0 14px}.editpage .jump a{display:inline-flex;align-items:center;min-height:44px;padding:0 8px;font-weight:600}
+.editpage .editpart{font-weight:700;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--line);padding-bottom:4px;margin:6px 0 12px}
+.editpage section.yours{background:#f3f4f7}.editpage .editcols{display:grid;grid-template-columns:minmax(0,1fr);gap:0 18px}.editpage .editcols>div{min-width:0}@media(min-width:960px){.editpage .editcols{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start}}
+.editpage .opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.editpage .opts .choice{border:2px solid var(--line);border-radius:10px;padding:6px 10px;background:#fff;margin:0}
+.editpage .opts .choice:has(input:checked){border-color:var(--accent);background:#f6e6dc}
+.editpage .idacts{display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:flex-start}.editpage .idacts .confirm{margin:0}
+.editpage .sentlist dt{color:var(--muted);font-weight:400}.editpage .sentlist dd{font-weight:600;margin:0 0 6px}
 `;
+// Section 1 "What they want": at least one tick before it posts (the server checks too).
+const WANT_JS = `(function(){var f=document.getElementById('edit-want');if(!f)return;f.addEventListener('submit',function(e){if(f.querySelector('input[name=services]:checked'))return;e.preventDefault();var m=f.querySelector('[data-want-need]');if(m){m.hidden=false;m.focus();}});})();`;
 const LINES_JS = `(function(){var f=document.getElementById('edit-inv');if(!f)return;var l=f.querySelector('[data-lines]'),t=document.getElementById('line-tpl');
 f.addEventListener('click',function(e){if(e.target.matches('[data-remove]')){e.target.closest('[data-line]').remove();}});
 var a=document.getElementById('add-line');if(a)a.addEventListener('click',function(){l.insertAdjacentHTML('beforeend',t.innerHTML);});})();`;
@@ -136,7 +169,7 @@ function bookingsSection(d, rk) {
         action: '/admin/requests/edit/booking-remove', hidden: V.hiddenInputs({ r: rk, id: b.id }) })}
     </div>`;
   }).join('');
-  return `<section class="card" id="bookings" data-edit-section="bookings"><h2>1. Bookings</h2>
+  return `<section class="card yours" id="bookings" data-edit-section="bookings"><h2>5. Bookings</h2>
     ${rows || `<p>Nothing is on the calendar for this request yet.</p><p><a class="btn ghost" href="/admin/calendar/new?r=${esc(rk)}"${tip('edit.schedule')}>Put it on the calendar</a></p>`}</section>`;
 }
 
@@ -154,18 +187,18 @@ function datesSection(d, rk) {
     else parts.push(`<p data-not-returned>Not returned yet. <a href="/admin/returns?k=${esc(rk)}"${tip('ret.mark')}>Mark returned</a></p>`);
   }
   if (tdB) parts.push(`<input type="hidden" name="td_id" value="${tdB.id}">${field('tdd', 'Takedown done date (empty = not done yet)', `<input id="tdd" name="takedown_done" type="date" value="${esc(tdd)}">`)}`);
-  return `<section class="card" id="dates" data-edit-section="dates"><h2>2. Done dates</h2>
+  return `<section class="card yours" id="dates" data-edit-section="dates"><h2>6. Done dates</h2>
     <p class="muted">Empty a date to take it back. Finished and the thank-you email follow these dates; a thank-you that already went out is never sent again.</p>
     ${form('dates', rk, `${parts.join('')}${save('edit.saveDates', 'Save done dates')}`)}</section>`;
 }
 
 function invoiceSection(d, rk) {
   const { inv, lines, balance } = d;
-  if (!inv) return `<section class="card" id="invoice" data-edit-section="invoice"><h2>3. Invoice</h2><p>No invoice yet.</p><p><a class="btn ghost" href="/admin/invoices/new?r=${esc(rk)}"${tip('card.createInvoice')}>Create invoice</a></p></section>`;
-  if (inv.status === 'void') return `<section class="card" id="invoice" data-edit-section="invoice"><h2>3. Invoice ${esc(inv.number)}</h2><div class="notice warn">This invoice is void. Choose a step under Status to bring it back, then change it here.</div></section>`;
+  if (!inv) return `<section class="card yours" id="invoice" data-edit-section="invoice"><h2>7. Invoice</h2><p>No invoice yet.</p><p><a class="btn ghost" href="/admin/invoices/new?r=${esc(rk)}"${tip('card.createInvoice')}>Create invoice</a></p></section>`;
+  if (inv.status === 'void') return `<section class="card yours" id="invoice" data-edit-section="invoice"><h2>7. Invoice ${esc(inv.number)}</h2><div class="notice warn">This invoice is void. Choose a step under Status to bring it back, then change it here.</div></section>`;
   const paidNote = balance && balance.paid > 0 ? `<div class="notice warn" data-owe-note><strong>Changing this changes what they owe.</strong> Nothing is sent to the customer by itself.</div>` : '<p class="muted">Nothing is sent to the customer by itself.</p>';
   const blank = { description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 };
-  return `<section class="card" id="invoice" data-edit-section="invoice"><h2>3. Invoice ${esc(inv.number)}</h2>${paidNote}
+  return `<section class="card yours" id="invoice" data-edit-section="invoice"><h2>7. Invoice ${esc(inv.number)}</h2>${paidNote}
     ${form('invoice', rk, `<input type="hidden" name="invoice_id" value="${inv.id}"><div data-lines>${lines.map(V.lineEditor).join('')}</div>
       <template id="line-tpl">${V.lineEditor(blank)}</template>
       <div style="margin-top:10px"><button type="button" class="btn ghost" id="add-line"${tip('ed.addLine')}>Add a line</button></div>
@@ -178,7 +211,7 @@ function invoiceSection(d, rk) {
 const methodSelect = (id, value = '') => `<select id="${id}" name="method">${Object.entries(METHOD_WORDS).filter(([k]) => k).map(([v, l]) => `<option value="${v}"${v === value ? ' selected' : ''}>${l}</option>`).join('')}</select>`;
 function paymentsSection(d, rk) {
   const { inv, payments } = d;
-  if (!inv) return `<section class="card" id="payments" data-edit-section="payments"><h2>4. Payments</h2><p>No invoice yet, so no payments are recorded. Use the Status below to mark a job with no invoice paid.</p></section>`;
+  if (!inv) return `<section class="card yours" id="payments" data-edit-section="payments"><h2>8. Payments</h2><p>No invoice yet, so no payments are recorded. Use the Status below to mark a job with no invoice paid.</p></section>`;
   const rows = payments.map((p) => (p.voided_at
     ? `<div class="bk removed" data-payment-removed="${p.id}"><strong>${esc(KIND_PAY[p.kind] || 'Payment')} ${money(p.amount_cents)}</strong> on ${esc(shortDate(p.received_on))} (${esc(METHOD_WORDS[p.method] || p.method || 'not given')}) · removed, kept in the history</div>`
     : `<div class="bk" data-edit-payment="${p.id}"><h3>${esc(KIND_PAY[p.kind] || 'Payment')} · ${money(p.amount_cents)}</h3>
@@ -190,7 +223,7 @@ function paymentsSection(d, rk) {
       ${V.confirmStep({ key: 'edit.removePayment', yesKey: 'edit.removePaymentYes', label: 'Remove this payment', danger: true, helper: false,
         question: `Remove the ${money(p.amount_cents)} payment from ${shortDate(p.received_on)}? Only do this if it was recorded by mistake. It stays in the history, marked removed.`,
         action: '/admin/requests/edit/payment-remove', hidden: V.hiddenInputs({ r: rk, id: p.id }) })}</div>`)).join('');
-  return `<section class="card" id="payments" data-edit-section="payments"><h2>4. Payments</h2>
+  return `<section class="card yours" id="payments" data-edit-section="payments"><h2>8. Payments</h2>
     ${rows || '<p>No payments recorded yet.</p>'}
     <div class="bk"><h3>Add a payment</h3>${form('payment-add', rk, `<div class="two">
       ${field('pan', 'Amount ($)', '<input id="pan" name="amount" type="number" step="0.01" min="0" inputmode="decimal" required>')}
@@ -202,15 +235,65 @@ function paymentsSection(d, rk) {
 export function currentStep(d) { return d.pr.void ? 'void' : d.pr.current; }
 function statusSection(d, rk) {
   const now = currentStep(d);
-  const decorTd = d.services.some((k) => k === 'porch' || k === 'party');
-  return `<section class="card" id="status" data-edit-section="status"><h2>5. Status</h2>
+  return `<section class="card yours" id="status" data-edit-section="status"><h2>9. Status</h2>
     ${form('status', rk, `${field('step', 'Which step is it on?', `<select id="step" name="step">${[...STEP_KEYS, 'void'].map((k) => `<option value="${k}"${k === now ? ' selected' : ''}>${esc(STEP_WORDS[k])}</option>`).join('')}</select>`)}
       <p class="muted">An earlier step takes back the later ones (Job done is cleared; payments recorded by mistake are removed and kept in the history). Paid in full records what is left as a payment. Bookings stay; change them under Bookings.</p>
       ${field('pm-status', 'If this records a payment: how did they pay?', methodSelect('pm-status', 'other'))}
-      ${decorTd ? `${field('tdp', 'Takedown afterwards?', `<select id="tdp" name="takedown_plan">${['', ...TAKEDOWN_PLANS].map((k) => `<option value="${k}"${k === (d.r.takedownPlan || '') ? ' selected' : ''}>${esc(PLAN_WORDS[k][0].toUpperCase() + PLAN_WORDS[k].slice(1))}</option>`).join('')}</select>`)}
-      ${field('tdd2', 'Takedown date (the day they asked for)', `<input id="tdd2" name="takedown_date" type="date" value="${esc(d.r.takedownDate || '')}">`)}
-      ${field('tdn', 'Takedown note (optional)', `<textarea id="tdn" name="takedown_note">${esc(d.r.takedownNote || '')}</textarea>`)}` : ''}
       ${save('edit.saveStatus', 'Save status')}`)}</section>`;
+}
+
+// ---- What they sent (sections 1-4) -----------------------------------------------------
+
+// What the website form (or phone booking) first said, before any change in section 1.
+export function sentServices(d) {
+  const was = d.r.detailsEdits && d.r.detailsEdits.services_sent;
+  return Array.isArray(was) ? CARD_SERVICES.filter((k) => was.includes(k)) : d.services;
+}
+
+function wantSection(d, rk) {
+  const first = V.firstName(d.r.name);
+  const list = d.bookings.map((b) => `${C.KIND_LABELS[b.kind] || b.kind} ${shortDate(b.date)}`).join(', ');
+  const heads = d.bookings.length ? `<div class="notice warn" data-want-heads-up>Heads up: ${esc(first)} already has ${d.bookings.length === 1 ? 'a booking' : 'bookings'} on the calendar (${esc(list)}). If you change what they want, a porch booking becomes a party booking (and the other way round) on the same day and time. Any other booking stays as it is: check it under Bookings.</div>` : '';
+  const boxes = CARD_SERVICES.map((k) => `<label class="choice"><input type="checkbox" name="services" value="${k}"${d.services.includes(k) ? ' checked' : ''}> ${esc(WANT_WORDS[k])}</label>`).join('');
+  return `<section class="card" id="want" data-edit-section="want"><h2>1. What they want</h2>
+    <p class="muted" data-form-said>The form said: ${esc(wantWords(sentServices(d)))}. Tick everything ${esc(first)} wants.</p>${heads}
+    ${form('want', rk, `<fieldset style="border:0;margin:0;padding:0"><legend class="sr-only" style="position:absolute;left:-9999px">What they want</legend><div class="opts">${boxes}</div></fieldset>
+      <p class="notice err" data-want-need tabindex="-1" hidden>Tick at least one: Porch, Party &amp; decor, Grazing or Game rentals.</p>
+      ${save('edit.saveWant', 'Save what they want')}`, ' id="edit-want"')}<script>${WANT_JS}</script></section>`;
+}
+
+function idSection(d, rk) {
+  const r = d.r;
+  const opts = { from: 'edit' };
+  let body;
+  if (r.idDeletedAt) body = `<p data-id-deleted>${esc(V.idDeletedWords(r))}</p>`;
+  else if (r.idObject) body = `<div class="idacts">${V.act(V.idOpenLink(r, rk).replace('<a href=', '<a class="btn ghost" href=').replace('>Open ID photo</a>', '>🪪 Open ID photo</a>'), 'card.idPhoto')}${V.deleteIdStep(r, rk, opts)}</div>`;
+  else if (r.idFile) body = `<div data-id-cell>${V.idCell(r, rk, opts)}</div><div class="idacts">${V.deleteIdStep(r, rk, opts)}</div>`;
+  else body = `<p class="muted" data-id-none><strong>${isPhone(r) ? 'Phone booking, no ID yet' : 'No ID photo on file'}</strong></p>${V.idUploadForm(rk, opts)}`;
+  return `<section class="card" id="id" data-edit-section="id"><h2>3. ID and rules</h2>${V.rulesLine(r) || '<p class="muted" data-rules>Rules: no agreement on file</p>'}${body}</section>`;
+}
+
+// Section 4: the answers exactly as sent (display only; dates read as words), minus what
+// Contact details edits (address, their notes, business delivery).
+export function sentAnswers(r) {
+  const skip = (l) => ADDRESS_RE.test(l) || NOTES_RE.test(l) || DELIVERY_LABELS.test(l);
+  const rows = [...(r.decor || []), ...(r.rentals || []), ...(r.other || [])].filter((x) => x && x.value && !skip(String(x.label || '')));
+  return [...rows.map((x) => [x.label, V.answerWords(x.value)]),
+    ...[['Date of birth', V.dobWords(r.dob)], ['Social media', [r.social1, r.social2].filter(Boolean).join(', ')], ['Found us through', r.heard]].filter(([, v]) => v)];
+}
+
+function answersSection(d, rk) {
+  const first = V.firstName(d.r.name);
+  const rows = sentAnswers(d.r);
+  const decorTd = d.services.some((k) => k === 'porch' || k === 'party');
+  const td = decorTd ? `<div class="bk" data-edit-takedown>${form('takedown', rk, `${field('tdp', 'Takedown afterwards?', `<select id="tdp" name="takedown_plan">${['', ...TAKEDOWN_PLANS].map((k) => `<option value="${k}"${k === (d.r.takedownPlan || '') ? ' selected' : ''}>${esc(PLAN_WORDS[k][0].toUpperCase() + PLAN_WORDS[k].slice(1))}</option>`).join('')}</select>`)}
+      ${field('tdd2', 'Takedown date (the day they asked for)', `<input id="tdd2" name="takedown_date" type="date" value="${esc(d.r.takedownDate || '')}">`)}
+      ${field('tdn', 'Takedown note (optional)', `<textarea id="tdn" name="takedown_note">${esc(d.r.takedownNote || '')}</textarea>`)}
+      ${save('edit.saveTakedown', 'Save takedown')}`)}</div>` : '';
+  return `<section class="card" id="answers" data-edit-section="answers"><h2>4. ${esc(first === 'the customer' ? 'Their' : `${first}'s`)} answers on the form</h2>
+    <p class="muted">Exactly as ${esc(first === 'the customer' ? 'they' : first)} sent them.</p>
+    ${rows.length ? `<dl class="sentlist" data-sent-answers>${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>` : '<p data-sent-answers>No other answers on the form.</p>'}
+    <p class="muted" data-one-place>To change the date or the games, use Bookings or the Invoice below.</p>${td}</section>`;
 }
 
 export function customerValues(r) {
@@ -220,7 +303,7 @@ export function customerValues(r) {
 }
 function customerSection(d, rk) {
   const v = customerValues(d.r);
-  return `<section class="card" id="customer" data-edit-section="customer"><h2>6. Customer details</h2>
+  return `<section class="card" id="customer" data-edit-section="customer"><h2>2. Contact details</h2>
     ${form('customer', rk, `${field('cn', 'Name', `<input id="cn" name="name" value="${esc(v.name)}" autocomplete="off">`)}
       <div class="two">${field('cp', 'Phone', `<input id="cp" name="phone" type="tel" value="${esc(v.phone)}" autocomplete="off">`)}
       ${field('ce', 'Email', `<input id="ce" name="email" type="email" value="${esc(v.email)}" autocomplete="off">`)}</div>
@@ -231,31 +314,46 @@ function customerSection(d, rk) {
       ${field('cda', 'Delivery address (empty = they pick up)', `<input id="cda" name="delivery_address" value="${esc(v.delivery_address)}" autocomplete="off">`)}</div>
       <p class="muted">With an address, the calendar, Day sheet and card say Delivery and Collect at that address. Add "+ Delivery fee" on the invoice for the charge.</p></fieldset>` : ''}
       <p class="muted">Their bookings and any invoice not yet void change to match. Nothing is sent to them.</p>
-      ${save('edit.saveCustomer', 'Save customer details')}`)}</section>`;
+      ${save('edit.saveCustomer', 'Save contact details')}`)}</section>`;
 }
 
-export function editPageHtml(d, { flash = '', error = '', warn = '' } = {}) {
+// The flash, error and heads-up sit inside the section she saved (?at=), so she sees them where she is.
+function placeNotices(html, at, notes) {
+  if (!notes) return html.replace('<!--notices-->', '');
+  const i = at ? html.indexOf(`id="${at}" data-edit-section=`) : -1;
+  const h = i >= 0 ? html.indexOf('</h2>', i) : -1;
+  if (h < 0) return html.replace('<!--notices-->', notes);
+  const out = html.slice(0, h + 5) + notes + html.slice(h + 5);
+  return out.replace('<!--notices-->', '');
+}
+
+export function editPageHtml(d, { flash = '', error = '', warn = '', at = '' } = {}) {
   const rk = b64urlText(d.r.key);
-  const ev = d.events.slice(-30).reverse().map((e) => `<li>${esc(e.what)}</li>`).join('');
-  const body = `<style>${EDIT_CSS}</style><div class="editpage" data-edit-page="${esc(rk)}">
-    ${flash ? `<div class="notice ok" data-flash>${esc(flash)}</div>` : ''}${error ? `<div class="notice err" data-error>${esc(error)}</div>` : ''}${warn ? `<div class="notice warn" data-clash>${esc(warn)}</div>` : ''}
-    <h1>Change anything on this request</h1>
-    <p style="font-size:1.15rem"><strong>${esc(d.r.name || 'No name given')}</strong> · now: ${esc(STEP_WORDS[currentStep(d)])}${d.pr.finished ? ' · Finished' : ''}${d.st.archived_at ? ' · Put away' : ''}</p>
-    ${bookingsSection(d, rk)}${datesSection(d, rk)}${invoiceSection(d, rk)}${paymentsSection(d, rk)}${statusSection(d, rk)}${customerSection(d, rk)}
-    ${ev ? `<section class="card" data-edit-history><h2>History</h2><ul>${ev}</ul></section>` : ''}</div>`;
-  return V.layout('Change anything on this request', body, { screen: 'edit', back: { href: d.st.archived_at ? '/admin/?pa=1#put-away' : `/admin/#c-${rk}`, label: 'Back to main page' } });
+  const first = V.firstName(d.r.name);
+  const ev = d.events.slice(-30).reverse().map((e) => `<li>${esc(V.plainHistory(e.what))}</li>`).join('');
+  const sent = d.r.sortTime ? shortDate(new Date(d.r.sortTime).toISOString().slice(0, 10)) : '';
+  const notes = `${flash ? `<div class="notice ok" data-flash role="status">${esc(flash)}</div>` : ''}${error ? `<div class="notice err" data-error role="alert">${esc(error)}</div>` : ''}${warn ? `<div class="notice warn" data-clash>${esc(warn)}</div>` : ''}`;
+  const jump = `<nav class="jump" aria-label="Jump to" data-jump>Jump to: ${JUMP.filter(([k]) => k !== 'history' || ev).map(([k, l]) => `<a href="#${k}"${tip('edit.jump')}>${esc(l)}</a>`).join('')}</nav>`;
+  const body = `<style>${EDIT_CSS}</style><div class="editpage" data-edit-page="${esc(rk)}"><!--notices-->
+    <h1>Everything about ${esc(first)}</h1>
+    <p style="font-size:1.15rem;margin-bottom:6px"><strong>${esc(d.r.name || 'No name given')}</strong> · ${d.num ? `Customer ${d.num} · ` : ''}now: ${esc(STEP_WORDS[currentStep(d)])}${d.pr.finished ? ' · Finished' : ''}${d.st.archived_at ? ' · Put away' : ''}${sent ? ` · sent ${esc(sent)}` : ''}</p>
+    ${jump}
+    <div class="editcols"><div data-edit-part="sent"><div class="editpart">What they sent</div>${wantSection(d, rk)}${customerSection(d, rk)}${idSection(d, rk)}${answersSection(d, rk)}</div>
+    <div data-edit-part="yours"><div class="editpart">Your side</div>${bookingsSection(d, rk)}${datesSection(d, rk)}${invoiceSection(d, rk)}${paymentsSection(d, rk)}${statusSection(d, rk)}</div></div>
+    ${ev ? `<section class="card" id="history" data-edit-history><h2>History</h2><ul>${ev}</ul></section>` : ''}</div>`;
+  return V.layout(`Everything about ${first}`, placeNotices(body, SECTIONS.includes(at) ? at : '', notes), { screen: 'edit', wide: true, back: { href: d.st.archived_at ? '/admin/?pa=1#put-away' : `/admin/#c-${rk}`, label: 'Back to main page' } });
 }
 
 export async function editPage(env, url) {
   const key = decodeKey(url.searchParams.get('r'));
   const d = key ? await loadEdit(env, key) : null;
   if (!d) return htmlResponse(V.layout('Not found', '<p>That request was not found.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to main page' } }), 404);
-  return htmlResponse(editPageHtml(d, { flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', warn: url.searchParams.get('w') || '' }));
+  return htmlResponse(editPageHtml(d, { flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', warn: url.searchParams.get('w') || '', at: url.searchParams.get('at') || '' }));
 }
 
 // ---- Saves -----------------------------------------------------------------------------
 
-const back = (rk, section, m, e = false, w = '') => redirect(`/admin/requests/edit?r=${encodeURIComponent(rk)}&${e ? 'e' : 'm'}=${encodeURIComponent(m)}${w ? `&w=${encodeURIComponent(w)}` : ''}#${section}`);
+const back = (rk, section, m, e = false, w = '') => redirect(`/admin/requests/edit?r=${encodeURIComponent(rk)}&${e ? 'e' : 'm'}=${encodeURIComponent(m)}${w ? `&w=${encodeURIComponent(w)}` : ''}&at=${section}#${section}`);
 
 export async function editRoute(env, request, what) {
   const f = await request.formData();
@@ -264,8 +362,8 @@ export async function editRoute(env, request, what) {
   const d = key ? await loadEdit(env, key) : null;
   if (!d) return redirect('/admin/?e=That request was not found.');
   const db = env.DB;
-  const H = { 'rental-dates': saveRentalDates, booking: saveBooking, 'booking-remove': removeBooking, dates: saveDates, invoice: saveInvoice, payment: savePayment, 'payment-remove': removePayment, 'payment-add': addPayment, status: saveStatus, customer: saveCustomer }[what];
-  if (!H) return back(rk, 'bookings', 'Nothing to save there.', true);
+  const H = { 'rental-dates': saveRentalDates, booking: saveBooking, 'booking-remove': removeBooking, dates: saveDates, invoice: saveInvoice, payment: savePayment, 'payment-remove': removePayment, 'payment-add': addPayment, status: saveStatus, customer: saveCustomer, want: saveWant, takedown: saveTakedown }[what];
+  if (!H) return back(rk, 'want', 'Nothing to save there.', true);
   return H({ db, f, d, key, rk });
 }
 
@@ -469,15 +567,6 @@ async function saveStatus({ db, f, d, key, rk }) {
     }
     out.unshift(changed('Status', STEP_WORDS[now], STEP_WORDS[target]));
   }
-  if (f.has('takedown_plan')) {
-    const plan = ['', ...TAKEDOWN_PLANS].includes(String(f.get('takedown_plan'))) ? String(f.get('takedown_plan')) : (d.r.takedownPlan || '');
-    const tdDate = dateIn(f.get('takedown_date'));
-    const note = String(f.get('takedown_note') || '').trim().slice(0, 500);
-    if (plan !== (d.r.takedownPlan || '')) out.push(changed('Takedown plan', PLAN_WORDS[d.r.takedownPlan || ''], PLAN_WORDS[plan]));
-    if (tdDate !== (d.r.takedownDate || '')) out.push(changed('Takedown date', day(d.r.takedownDate), day(tdDate)));
-    if (note !== (d.r.takedownNote || '')) out.push(changed('Takedown note', d.r.takedownNote, note));
-    await db.prepare('UPDATE requests SET takedown_plan = ?2, takedown_date = ?3, takedown_note = ?4 WHERE request_key = ?1').bind(key, plan || null, tdDate, note).run();
-  }
   for (const line of out) await log(db, key, line);
   // The steps follow the facts: a booking keeps it at Scheduled, and Scheduled needs a booking.
   const idx = STEP_KEYS.indexOf(target);
@@ -510,5 +599,50 @@ async function saveCustomer({ db, f, d, key, rk }) {
       .bind(key, was.delivery_address || TRACK_TABLE.pickupPlace, next.delivery_address || TRACK_TABLE.pickupPlace, TRACK_TABLE.pickupPlace).run();
   }
   for (const line of out) await log(db, key, line);
-  return back(rk, 'customer', 'Customer details saved ✓ Nothing was sent to them.');
+  return back(rk, 'customer', 'Contact details saved ✓ Nothing was sent to them.');
+}
+
+// Section 4 "Takedown afterwards?" (moved here from Status, owner-approved mock-up 20 Oct 2026).
+async function saveTakedown({ db, f, d, key, rk }) {
+  if (!d.services.some((k) => k === 'porch' || k === 'party')) return back(rk, 'answers', 'A takedown is only for porch or party decor.', true);
+  const out = [];
+  const plan = ['', ...TAKEDOWN_PLANS].includes(String(f.get('takedown_plan') ?? '')) ? String(f.get('takedown_plan') ?? '') : (d.r.takedownPlan || '');
+  const tdDate = dateIn(f.get('takedown_date'));
+  const note = String(f.get('takedown_note') || '').trim().slice(0, 500);
+  if (plan !== (d.r.takedownPlan || '')) out.push(changed('Takedown plan', PLAN_WORDS[d.r.takedownPlan || ''], PLAN_WORDS[plan]));
+  if (tdDate !== (d.r.takedownDate || '')) out.push(changed('Takedown date', day(d.r.takedownDate), day(tdDate)));
+  if (note !== (d.r.takedownNote || '')) out.push(changed('Takedown note', d.r.takedownNote, note));
+  if (!out.length) return back(rk, 'answers', 'Nothing changed.');
+  await db.prepare('UPDATE requests SET takedown_plan = ?2, takedown_date = ?3, takedown_note = ?4 WHERE request_key = ?1').bind(key, plan || null, tdDate, note).run();
+  for (const line of out) await log(db, key, line);
+  return back(rk, 'answers', 'Takedown saved ✓');
+}
+
+// Section 1 "What they want": requests.services only. Never touches invoices, payments or the
+// form answers. A porch booking whose service is unticked switches to party (and back) at the
+// same day and time when the other one is ticked; anything else stays and gets a heads-up.
+async function saveWant({ db, f, d, key, rk }) {
+  const picked = f.getAll('services').map(String);
+  const next = CARD_SERVICES.filter((k) => picked.includes(k));
+  if (!next.length) return back(rk, 'want', 'Tick at least one: Porch, Party & decor, Grazing or Game rentals.', true);
+  const was = d.services;
+  if (next.join(',') === was.join(',')) return back(rk, 'want', 'Nothing changed.');
+  const edits = { ...(d.r.detailsEdits || {}) };
+  if (!Array.isArray(edits.services_sent)) edits.services_sent = was;
+  await db.prepare('UPDATE requests SET services = ?2, details_edits = ?3 WHERE request_key = ?1').bind(key, JSON.stringify(next), JSON.stringify(edits)).run();
+  await log(db, key, `Changed ${wantWords(was)} → ${wantWords(next)}`);
+  const moved = []; const stays = [];
+  for (const b of d.bookings) {
+    const svc = serviceOfKind(b.kind);
+    if (svc === 'other' || next.includes(svc)) continue;
+    const to = KIND_SWAP[b.kind];
+    if (to && next.includes(serviceOfKind(to))) {
+      await db.prepare("UPDATE bookings SET kind = ?2, updated_at = datetime('now') WHERE id = ?1").bind(b.id, to).run();
+      const words = `${C.KIND_LABELS[b.kind]} on ${shortDate(b.date)} → ${C.KIND_LABELS[to]} (same day and time)`;
+      await log(db, key, words);
+      moved.push(`The ${C.KIND_LABELS[b.kind]} on ${shortDate(b.date)} is now a ${C.KIND_LABELS[to]}, same day and time.`);
+    } else stays.push(b);
+  }
+  const warn = stays.length ? `Heads up: ${stays.map((b) => `the ${C.KIND_LABELS[b.kind] || b.kind} on ${shortDate(b.date)}`).join(' and ')} ${stays.length === 1 ? 'is' : 'are'} still on the calendar, but ${wantWords([...new Set(stays.map((b) => serviceOfKind(b.kind)))])} is no longer ticked. Check ${stays.length === 1 ? 'it' : 'them'} under Bookings: change ${stays.length === 1 ? 'it' : 'them'} or remove ${stays.length === 1 ? 'it' : 'them'}.` : '';
+  return back(rk, 'want', `What they want saved ✓ Now: ${wantWords(next)}.${moved.length ? ` ${moved.join(' ')}` : ''}`, false, warn);
 }
