@@ -253,7 +253,7 @@ async function dashboard(env, url) {
   const soon = endingSoon(holds, Date.now(), settings);
   // NEW until opened or acted on (request-new.mjs, migration 0016).
   const opened = await RN.openedSet(env.DB);
-  const newKeys = new Set(open.filter((r) => RN.isNewRequest(r, { st: statuses[r.key], opened: opened.has(r.key), events: events[r.key] || [] })).map((r) => r.key));
+  const newKeys = new Set(open.filter((r) => RN.isNewRequest(r, { st: statuses[r.key], opened: opened.has(r.key) })).map((r) => r.key));
   return htmlResponse(V.dashboardPage({ newKeys, requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
     weekBox: V.weekBox(week, newKeys), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, cardBottom: bottom, tdSaved: tdKey ? { key: tdKey, words: url.searchParams.get('tdm') || 'Saved ✓' } : null, bookings: bookingsBy, takedownInvoices: tdFacts.invoiceIds, today: chicagoDate(),
     archived, filter: url.searchParams.get('f') || 'all', openPutAway: url.searchParams.get('pa') === '1', kinds, events, notes,

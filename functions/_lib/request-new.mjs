@@ -1,15 +1,15 @@
 // The "NEW" badge on Requests (owner, 19 Oct 2026). A request wears NEW until Valerie opens it or
-// acts on it: opened = a request_opened row (migration 0016: the badge tapped, Show details, Edit,
-// any button on the card, or the New-request email's link); acted on = derived from what is
-// already stored (status past New, an invoice, put away, any history line Valerie made). A
-// phone-call request is never NEW: Valerie typed it in herself.
-export const FORM_WHO = ['website form', ''];
-
-export function isNewRequest(r, { st = null, opened = false, events = [] } = {}) {
+// acts on it. Opened = a request_opened row (migration 0016: the badge tapped, Show details, Edit,
+// any button or link on the card, or the New-request email's link); acted on = status past New, or
+// put away. A phone-call request is never NEW: Valerie typed it in herself.
+// What does NOT clear it (19 Oct 2026 repair): the draft invoice the website makes for every rental
+// at submit (request-submit.mjs createDraftInvoice keeps status 'new'), and any history line written
+// by the system (the form, the mailer, a hold placed or expired, an auto-booked takedown). Real
+// actions are clicks on the card, and every click there writes request_opened, so history is not read.
+export function isNewRequest(r, { st = null, opened = false } = {}) {
   if (!r || opened) return false;
   if (r.source === 'phone') return false;
-  if (st && ((st.status && st.status !== 'new') || st.invoice_id || st.archived_at)) return false;
-  if (events.some((e) => !FORM_WHO.includes(String(e.who || '')))) return false;
+  if (st && ((st.status && st.status !== 'new') || st.archived_at)) return false;
   return true;
 }
 
