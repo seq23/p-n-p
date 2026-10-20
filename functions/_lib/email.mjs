@@ -2,7 +2,8 @@
 // (cream #faf7f2, ink #3b302a, accent #c46e4e; Cormorant Garamond / Inter with
 // safe fallbacks) plus a plain-text twin. The QR code rides as an inline CID
 // attachment: Gmail strips data: URIs from <img>, CID images render.
-import { esc, money, lineTotal, invoiceTotal, prettyDate, payPlanOf, FROM_EMAIL } from './util.mjs';
+import { esc, money, lineTotal, invoiceTotal, prettyDate, FROM_EMAIL } from './util.mjs';
+import { payStepsOf, customerSteps } from './pay-steps.mjs';
 
 const C = { cream: '#faf7f2', ink: '#3b302a', accent: '#c46e4e', line: '#e8dfd4', muted: '#7a6b60' };
 const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
@@ -24,13 +25,9 @@ function cashtag(value) {
 // pickup: the rentals pickup line (invoice-note.mjs pickupNote, worded per invoice), '' on a decor-only invoice.
 export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, pickup = '' }) {
   const total = invoiceTotal(lines);
-  const refundable = lines.filter((l) => l.refundable).reduce((s, l) => s + lineTotal(l), 0);
-  const plan = payPlanOf(invoice, total);
-  const now = plan === 'full' ? total : invoice.deposit_due_cents;
-  const rest = total - now;
-  const payBox = plan === 'full'
-    ? { big: `Amount due: ${money(total)}`, small: `Please pay by ${prettyDate(invoice.due_date)}.` }
-    : { big: `Deposit due now: ${money(now)}`, small: `This holds your date. The rest, ${money(rest)}, is due by ${prettyDate(invoice.due_date)}.` };
+  // "How you pay" (owner-approved mock-up, 20 Oct 2026; pay-steps.mjs): ① Deposit now (holds your
+  // date), ② The rest, by Wed 28 Oct, the sum written out. Replaces the one-number "due now" band.
+  const cs = customerSteps(payStepsOf(invoice, lines));
   const pay = paymentStatus(settings);
   const business = settings.business_name || 'Porch & Party';
   const footerLine = settings.business_address || 'Memphis, Tennessee';
@@ -41,7 +38,7 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
       <tr>
         <td style="padding:12px 0;border-bottom:1px solid ${C.line};font-family:${SANS};font-size:15px;color:${C.ink};">
           ${esc(l.description)}${Number(l.qty) !== 1 ? ` <span style="color:${C.muted};">&times; ${esc(l.qty)}</span>` : ''}
-          ${l.refundable ? `<div style="font-size:12px;color:${C.accent};margin-top:2px;">Refundable</div>` : ''}
+          ${l.refundable ? `<div style="font-size:12px;color:${C.accent};margin-top:2px;">Given back after the event</div>` : ''}
           ${l.note && l.note !== 'free' ? `<div style="font-size:12px;color:${C.muted};margin-top:2px;">${esc(l.note)}</div>` : ''}
         </td>
         <td align="right" style="padding:12px 0;border-bottom:1px solid ${C.line};font-family:${SANS};font-size:15px;color:${C.ink};white-space:nowrap;">${lineTotal(l) === 0 ? 'Free' : money(lineTotal(l))}</td>
@@ -75,14 +72,16 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
     <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}
       <tr><td style="padding:14px 0 4px;font-family:${SERIF};font-size:22px;font-weight:600;color:${C.ink};">Total</td>
           <td align="right" style="padding:14px 0 4px;font-family:${SERIF};font-size:22px;font-weight:600;color:${C.ink};">${money(total)}</td></tr>
-      ${refundable ? `<tr><td colspan="2" style="font-family:${SANS};font-size:13px;color:${C.muted};padding-bottom:4px;">Includes ${money(refundable)} refundable deposit.</td></tr>` : ''}
+      ${cs.totalWords ? `<tr><td colspan="2" style="font-family:${SANS};font-size:13px;color:${C.muted};padding-bottom:4px;" data-total-split>${esc(cs.totalWords)}</td></tr>` : ''}
     </table>
   </td></tr>
   <tr><td style="padding:8px 24px;">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${C.cream};border-radius:10px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#eef4fb;border:1px solid #b9cfe8;border-radius:10px;" data-pay-steps>
       <tr><td style="padding:16px;font-family:${SANS};font-size:15px;color:${C.ink};">
-        <div style="font-family:${SERIF};font-size:20px;font-weight:600;margin-bottom:4px;">${esc(payBox.big)}</div>
-        <div style="color:${C.muted};font-size:14px;">${esc(payBox.small)}</div>
+        <div style="font-family:${SERIF};font-size:20px;font-weight:600;margin-bottom:4px;">How you pay</div>
+        ${cs.head ? `<div style="font-size:15px;margin-bottom:4px;" data-no-deposit>${esc(cs.head)}</div>` : ''}
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${cs.rows.map((r) => `<tr data-pay-step="${r.n}"><td style="padding:4px 0;font-family:${SANS};font-size:15px;color:${C.ink};">${r.mark} ${esc(r.words)}</td><td align="right" style="padding:4px 0;font-family:${SANS};font-size:15px;font-weight:600;color:${C.ink};white-space:nowrap;">${money(r.cents)}</td></tr>`).join('')}</table>
+        ${cs.sum ? `<div style="color:${C.muted};font-size:14px;margin-top:4px;" data-pay-sum>${esc(cs.sum)}</div>` : ''}
         ${pickup ? `<div style="color:${C.ink};font-size:14px;margin-top:8px;" data-pickup-line>${esc(pickup)}</div>` : ''}
       </td></tr>
     </table>
@@ -103,11 +102,15 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
     `${business} - Invoice ${invoice.number}`,
     `Issued ${prettyDate(invoice.issue_date)} - Due ${prettyDate(invoice.due_date)}`,
     '',
-    ...lines.map((l) => `${l.description}${Number(l.qty) !== 1 ? ` x ${l.qty}` : ''}${l.refundable ? ' (refundable)' : ''}: ${lineTotal(l) === 0 ? 'Free' : money(lineTotal(l))}`),
+    ...lines.map((l) => `${l.description}${Number(l.qty) !== 1 ? ` x ${l.qty}` : ''}${l.refundable ? ' (given back after the event)' : ''}: ${lineTotal(l) === 0 ? 'Free' : money(lineTotal(l))}`),
     '',
     `Total: ${money(total)}`,
-    payBox.big,
-    payBox.small,
+    ...(cs.totalWords ? [cs.totalWords] : []),
+    '',
+    'How you pay',
+    ...(cs.head ? [cs.head] : []),
+    ...cs.rows.map((r) => `${r.mark} ${r.words}: ${money(r.cents)}`),
+    ...(cs.sum ? [cs.sum] : []),
     ...(pickup ? [pickup] : []),
     '',
     'How to pay:',

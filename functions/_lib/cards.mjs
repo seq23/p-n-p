@@ -5,6 +5,7 @@
 import { SERVICE_KINDS } from './kinds.mjs';
 import { STEP_KEYS } from './progress.mjs';
 import { parseFormDate } from './calendar.mjs';
+import { singlePayment } from './util.mjs';
 
 export const CARD_SERVICES = ['porch', 'party', 'grazing', 'rentals'];
 
@@ -113,7 +114,7 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
   let primary = '';
   if (stage === 'new') primary = 'card.createInvoice';
   else if (stage === 'draft') primary = 'card.openInvoice';
-  else if (stage === 'invoiced') primary = plan === 'full' ? 'pay.paid' : 'pay.deposit';
+  else if (stage === 'invoiced') primary = singlePayment(plan) ? 'pay.paid' : 'pay.deposit';
   else if (stage === 'deposit_paid' || stage === 'scheduled') {
     const jobLeft = decorish.length && !jobDoneAt;
     const backLeft = has('rentals') && !returned;
@@ -196,7 +197,7 @@ export function payState({ inv = null, status = 'new' }) {
 export function cardPayment({ inv = null, status = 'new', plan = 'half', primary = '' }) {
   const state = payState({ inv, status });
   let button = '';
-  if (state === 'sent') button = plan === 'full' ? 'pay.paid' : 'pay.deposit';
+  if (state === 'sent') button = singlePayment(plan) ? 'pay.paid' : 'pay.deposit';
   else if (state === 'deposit') button = 'pay.paid';
   if (button && button === String(primary).split('|')[0]) button = '';
   return { state, button, undo: state === 'deposit' || state === 'paid' };

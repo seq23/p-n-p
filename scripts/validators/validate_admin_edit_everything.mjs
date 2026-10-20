@@ -14,7 +14,8 @@
  *     write requests.services in canonical order, keep "The form said:" at the original, log
  *     "Changed <old> → <new>", switch porch_install/party_setup and porch_takedown/party_takedown
  *     in place at the same day and time, or keep any other booking with a heads-up;
- *     it touches invoices, invoice lines, payments or the form answers;
+ *     it touches a SENT invoice, its lines, payments or the form answers (an unsent auto draft is
+ *     rebuilt: validate:admin-invoice-calm);
  *  5. section 3 lacks the rules line, Open ID photo (with the overlay on this page), Delete this
  *     ID with its confirm step, the deleted-state line, or Add ID photo for a phone booking; the
  *     delete / upload from this page does not come back to section 3;
@@ -64,7 +65,10 @@ const iSent = h0.indexOf('data-edit-part="sent"'); const iYours = h0.indexOf('da
 must(iSent > 0 && iYours > iSent && h0.indexOf('data-edit-section="answers"') < iYours && h0.indexOf('data-edit-section="bookings"') > iYours, 'sections 1-4 are not under What they sent and 5-9 under Your side');
 must(/<div class="editpart">What they sent<\/div>/.test(h0) && /<div class="editpart">Your side<\/div>/.test(h0), 'the part labels are missing');
 const heads = [...h0.matchAll(/data-edit-section="[^"]+"><h2>([^<]+)<\/h2>/g)].map((m) => m[1]);
-must(heads.join('|') === "1. What they want|2. Contact details|3. ID and rules|4. Wren&#39;s answers on the form|5. Bookings|6. Done dates|7. Invoice|8. Payments|9. Status", `section headings: ${heads.join('|')}`);
+// The website request already has its auto draft (auto-draft.mjs, 20 Oct 2026), so section 7 names it.
+const draft0 = await s.one("SELECT id, number, status, auto_draft FROM invoices WHERE request_key = ?1", key);
+must(draft0 && draft0.status === 'draft' && draft0.auto_draft === 1, 'the website request has no auto draft invoice');
+must(heads.join('|') === `1. What they want|2. Contact details|3. ID and rules|4. Wren&#39;s answers on the form|5. Bookings|6. Done dates|7. Invoice ${draft0 ? draft0.number : '?'}|8. Payments|9. Status`, `section headings: ${heads.join('|')}`);
 must(/\.editpage \.editcols\{display:grid;grid-template-columns:minmax\(0,1fr\);/.test(h0) && /\.editpage \.editcols>div\{min-width:0\}/.test(h0) && /@media\(min-width:960px\)\{\.editpage \.editcols\{grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/.test(h0), 'not one column on a phone (no sideways scroll) and two on a laptop');
 must(/wrap wide/.test(h0), 'the page is not wide on a laptop (no room for two columns)');
 
@@ -79,8 +83,12 @@ must((want0.match(/data-help="edit.saveWant"/g) || []).length === 1 && />Save wh
 must(!/data-want-heads-up/.test(want0), 'the booking heads-up shows with nothing booked');
 
 // 4. Saves.
-const inv = await s.invoiceFor((await (await mod('functions/_lib/requests.mjs')).loadRequests(s.env)).find((x) => x.key === key), { go: 'send' });
+// She sends the auto draft and the deposit comes in: a SENT invoice, which a change to what they
+// want never touches (only an unsent auto draft is rebuilt; validate:admin-invoice-calm).
+const inv = { id: draft0 ? draft0.id : 0 };
+await s.post(`/admin/invoices/${inv.id}/send`, {});
 await s.post(`/admin/invoices/${inv.id}/status`, { action: 'deposit_paid', method: 'zelle' });
+must((await s.one('SELECT status FROM invoices WHERE id = ?1', inv.id)).status === 'deposit_paid', 'the auto draft was not sent and paid (deposit)');
 for (const [kind, date, time] of [['porch_install', plus(8), '10:00'], ['porch_takedown', plus(12), ''], ['grazing_setup', plus(8), '15:00']]) {
   await s.post('/admin/calendar/bookings', { r: rk, kind, date, time, customer_name: 'Wren Example', phone: '901-555-0960', email: '', place: 'Germantown', items: 'Porch' });
 }

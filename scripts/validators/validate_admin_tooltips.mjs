@@ -40,6 +40,10 @@ const invB = await s.invoiceFor(reqB, { go: 'save', email: '' });
 const tmr = R.tomorrowChicago();
 await s.post('/admin/calendar/bookings', { kind: 'grazing_setup', date: tmr, time: '14:00', customer_name: 'Gia Graze', phone: '901-555-0123', email: 'gia@example.com', place: '12 Oak St', items: 'Grazing table', note: 'Side gate' });
 await s.post('/admin/calendar/bookings', { kind: 'porch_install', date: tmr, customer_name: 'No Phone', phone: '', email: 'np@example.com', place: '', items: '' });
+// A job booked before the auto draft shipped (20 Oct 2026) has no invoice at all: its draft is
+// taken away here so Money still shows the "no invoice yet" job link.
+{ const np = await s.one("SELECT id FROM invoices WHERE customer_name = 'No Phone'");
+  if (np) { await s.db.prepare('DELETE FROM invoice_lines WHERE invoice_id = ?1').bind(np.id).run(); await s.db.prepare('DELETE FROM invoices WHERE id = ?1').bind(np.id).run(); await s.db.prepare('UPDATE request_status SET invoice_id = NULL WHERE invoice_id = ?1').bind(np.id).run(); } }
 await s.post('/admin/calendar/bookings', { kind: 'rental_pickup', date: '2026-01-05', return_date: '2026-01-06', customer_name: 'Late Larry', phone: '901-555-0999', email: '', place: '', items: 'Giant Uno' });
 // A takedown long past and not done (red: "Is Tina T.'s takedown done?" with ✓ Yes, it's done).
 await s.post('/admin/calendar/bookings', { kind: 'party_takedown', date: '2026-01-07', customer_name: 'Tina Takedown', phone: '901-555-0997', email: '', place: '', items: 'Party decor' });
@@ -293,7 +297,7 @@ for (const [p, o, res] of pages) {
     for (const m of html.matchAll(/<details\b[^>]*\bid="([^"]+)"/g)) if (!DISCLOSURE_WHITELIST.includes(m[1])) errors.push(`${p}: disclosure #${m[1]} is not on the whitelist (only the Put away section may be one)`);
     const lis = steps ? steps.split('<li>').slice(1) : [];
     const PANEL = [['See who&#39;s asking.|See who\'s asking.', ['Check for new requests', 'Find a customer', 'Open responses sheet', 'Open ID folder']],
-      ['Send a quote or invoice.', ['Start a blank invoice', 'Print a blank checklist', 'Porch packages']], ['Plan your day and get paid.', ["Today's list|Today&#39;s list", 'Calendar &amp; Bookings']]];
+      ['Send a quote or invoice.', ['Start a blank invoice', 'Print a blank checklist', 'Quick Pricing Summary']], ['Plan your day and get paid.', ["Today's list|Today&#39;s list", 'Calendar &amp; Bookings']]];
     PANEL.forEach(([title, labels], i) => {
       const li = lis[i] || '';
       if (!new RegExp(title).test(li)) errors.push(`${p}: step ${i + 1} of the panel is not "${title.split('|')[0]}"`);

@@ -65,8 +65,16 @@ const rentDay = pk ? pk.date : plus(7);
 // A confirmed porch install with an invoice: Collect + Paid in full.
 await s.post('/admin/requests/talked', { r: s.rk(porch.row.request_key), go: 'yes', date: plus(2) });
 const porchReq = (await (await mod('functions/_lib/requests.mjs')).loadRequests(s.env)).find((r) => r.key === porch.row.request_key);
-const inv = await s.invoiceFor(porchReq);
-must(inv.id > 0, 'no invoice for the porch');
+// The website request's auto draft (auto-draft.mjs, 20 Oct 2026) is its invoice: unsent, it is owed
+// by nobody, so the job says "Invoice not sent yet"; once sent it says what is left to collect.
+const inv = (await s.one("SELECT id FROM invoices WHERE request_key = ?1 AND auto_draft = 1 AND status = 'draft'", porch.row.request_key)) || await s.invoiceFor(porchReq);
+must(inv.id > 0 && porchReq, 'no invoice for the porch');
+{
+  const html = phoneDayOf(await s.get(`/admin/calendar?month=${plus(2).slice(0, 7)}`).then((r) => r.text), plus(2));
+  const j = (html.match(/<details class="pj"[^>]*data-pjob="\d+">[^]*?<\/details>/) || [])[0] || '';
+  must(/<dt>Collect<\/dt><dd>Invoice not sent yet<\/dd>/.test(j) && !/still to collect/.test(j), `an unsent draft is counted as money to collect (${j.slice(0, 300)})`);
+}
+await s.post(`/admin/invoices/${inv.id}/status`, { action: 'texted' });
 
 // ---- 1. Computer: the month first, steps in the margin ---------------------------------------
 const day0 = plus(6);

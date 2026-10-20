@@ -21,7 +21,7 @@ import { logEvent, fromRow } from './requests.mjs';
 import { autoBookTakedown } from './takedown.mjs';
 import { sendMessage } from './messages.mjs';
 import { sendNewRequestEmail } from './owner-new-request.mjs';
-import { createDraftInvoice } from './admin.mjs';
+import { makeAutoDraft } from './auto-draft.mjs';
 import { syncSafely } from './admin-money.mjs';
 
 const HEADERS = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'X-Content-Type-Options': 'nosniff' };
@@ -220,11 +220,13 @@ async function submit(context) {
     const items = quote.picked.map((i) => i.name).join(', ');
     const base = { request_key: key, invoice_id: null, time: null, customer_name: clean.name, phone: clean.phone, email: clean.email, place: PRICE_TABLE.pickupPlace };
     await C.upsertBookings(env.DB, [{ ...base, kind: 'rental_pickup', date: clean.pickup_date, items }, { ...base, kind: 'rental_return', date: clean.return_date, items }]);
-    const invoiceId = await createDraftInvoice(env, { key, name: clean.name, email: clean.email, phone: clean.phone, lines: quote.lines, depositCents: quote.dueNow, dueDate: clean.pickup_date, notes: '' });
-    await env.DB.prepare('UPDATE bookings SET invoice_id = ?1 WHERE request_key = ?2').bind(invoiceId, key).run();
+    const invoiceId = await autoDraft(env, key, { lines: quote.lines, depositCents: quote.dueNow, dueDate: clean.pickup_date });
+    if (invoiceId) await env.DB.prepare('UPDATE bookings SET invoice_id = ?1 WHERE request_key = ?2').bind(invoiceId, key).run();
     rentals = { items, pickupISO: clean.pickup_date, returnISO: clean.return_date,
       holdEnds: hold.until ? chicagoWords(Date.parse(`${hold.until.replace(' ', 'T')}Z`)) : 'Valerie confirms with you', quote };
   }
+  // Porch, party & decor and grazing requests get their draft invoice too (owner, 20 Oct 2026).
+  if (!quote) await autoDraft(env, key);
   const ctx = {
     name: clean.name, email: clean.email, phone: clean.phone, services,
     rentals: rentals ? { items: rentals.items, pickup: shortDay(rentals.pickupISO), returnDate: shortDay(rentals.returnISO), holdEnds: rentals.holdEnds,
@@ -238,6 +240,16 @@ async function submit(context) {
   later(syncSafely(env));
   await Promise.all(pending);
   return new Response(null, { status: 303, headers: { Location: `/request/received?k=${receipt}`, 'Cache-Control': 'no-store' } });
+}
+
+// The draft invoice made from the request (auto-draft.mjs makeAutoDraft): never sent by itself, one
+// per request. A failure never loses the request: it is logged on the card, which then shows its
+// normal "Create invoice" button.
+async function autoDraft(env, key, quote = null) {
+  try { return await makeAutoDraft(env, key, { who: 'website form', quote }); } catch (e) {
+    await logEvent(env.DB, key, `The invoice draft could not be made by itself (${String((e && e.message) || e).slice(0, 120)}). Tap Create invoice.`, 'website form').catch(() => {});
+    return null;
+  }
 }
 
 export function shortDay(iso) {

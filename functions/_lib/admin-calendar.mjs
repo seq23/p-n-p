@@ -20,6 +20,7 @@ import * as VC from './views-calendar.mjs';
 import * as VM2 from './views-messages.mjs';
 import { expireHolds, endingSoon, holdSettings, currentHolds } from './holds.mjs';
 import { choiceFrom, createPhoneRequest, NOTE_CHOICE } from './phone-requests.mjs';
+import { makeAutoDraft } from './auto-draft.mjs';
 import { serviceOfKind, serviceInfo } from './kinds.mjs';
 import * as MS from './missed.mjs';
 import { shortName } from './requested.mjs';
@@ -283,6 +284,13 @@ export async function createBookingRoute(env, request) {
     const { requests } = await requestsSafe(env);
     const req = requests.find((r) => r.key === key);
     if (req) await autoBookTakedown(env.DB, req);
+  }
+  // A phone booking gets its draft invoice at once, like a website request (auto-draft.mjs; never
+  // sent by itself, one per request). A failure is logged and the card shows Create invoice.
+  if (phone) {
+    try { await makeAutoDraft(env, key, { who: 'Valerie' }); } catch (e) {
+      await logEvent(env.DB, key, `The invoice draft could not be made by itself (${String((e && e.message) || e).slice(0, 120)}). Tap Create invoice.`, 'Valerie').catch(() => {});
+    }
   }
   if (phone) return redirect(`/admin/?m=${encodeURIComponent('Saved ✓ On Requests as a phone booking, and on the calendar.')}#c-${b64urlText(key)}`);
   return redirect(`/admin/day/${b.date}?m=${encodeURIComponent(key ? 'Saved ✓ The request is marked Scheduled.' : 'Saved ✓')}`);

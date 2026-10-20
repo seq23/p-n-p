@@ -216,7 +216,14 @@ const partyKey = made.party.request_key;
   const st = await s.one('SELECT called_at, confirmed_at FROM request_steps WHERE request_key = ?1', partyKey);
   must(st && st.called_at && st.confirmed_at, 'Yes, book it did not store called + confirmed');
   const c = await card(partyKey);
-  must(cur(c) === 'invoiced' && /data-confirmed="1"/.test(c) && /data-next-what>Send the quote or invoice</.test(c) && /href="\/admin\/invoices\/new\?r=[^"]+"[^>]*data-help="card\.createInvoice"[^>]*>Create invoice</.test(c), 'after Yes the party card is not at "Send the quote or invoice" with Create invoice');
+  // The website request already has its auto draft (auto-draft.mjs, owner-approved 20 Oct 2026):
+  // the invoice step is "📄 Invoice draft ready: $X" with ONE "Check and send the invoice", never
+  // a second "Create invoice".
+  const pd = await s.one("SELECT id, auto_draft FROM invoices WHERE request_key = ?1 AND status = 'draft'", partyKey);
+  const pdTotal = pd ? (await s.all('SELECT qty, unit_cents FROM invoice_lines WHERE invoice_id = ?1', pd.id)).reduce((t, l) => t + Math.round(l.qty * l.unit_cents), 0) : 0;
+  must(pd && pd.auto_draft === 1 && pdTotal >= s.PRICE_TABLE.celebrationFromCents && s.PRICE_TABLE.celebrationFromCents > 0, 'the website party request has no auto draft at the starting price');
+  must(cur(c) === 'invoiced' && /data-confirmed="1"/.test(c) && c.includes(`data-next-what>📄 Invoice draft ready: ${s.util.money(pdTotal)}<`) && /Made from Pia&#39;s request\. Nothing has been sent\. Check the price, then send\./.test(c)
+    && new RegExp(`href="/admin/invoices/${pd ? pd.id : 0}/edit"[^>]*data-help="step\\.reviewSend"[^>]*>Check and send the invoice<`).test(c) && !/data-help="card\.createInvoice"/.test(c), 'after Yes the party card is not at "📄 Invoice draft ready" with Check and send the invoice (or still offers Create invoice)');
   const day = (await s.get(`/admin/day/${moved}`)).text;
   const pb = await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind = 'party_setup'", partyKey);
   const row = day.slice(day.indexOf(`data-sheet-row="${pb.id}"`), day.indexOf('</div></div>', day.indexOf(`data-sheet-row="${pb.id}"`)));
@@ -246,7 +253,8 @@ const partyKey = made.party.request_key;
 // 2. The party ticks itself from the invoice, Money and the job (never from this card).
 {
   const req = (await s.get('/admin/')).status === 200 ? (await (await mod('functions/_lib/requests.mjs')).loadRequests(s.env)).find((r) => r.key === partyKey) : null;
-  const inv = await s.invoiceFor(req, { plan: 'half' });
+  // She sends the auto draft (never a second invoice).
+  const inv = { id: (await s.one("SELECT id FROM invoices WHERE request_key = ?1 AND auto_draft = 1", partyKey) || {}).id || (await s.invoiceFor(req, { plan: 'half' })).id };
   await s.post(`/admin/invoices/${inv.id}/status`, { action: 'texted' });
   let c = await card(partyKey);
   must(doneList(c) === 'called,invoiced' && cur(c) === 'deposit', `marking the invoice texted did not tick "Invoice sent" (${doneList(c)})`);
@@ -291,11 +299,11 @@ const rentKey = made.rentals.request_key;
   must(other.status === 303, 'the second rental was refused');
   await s.post('/admin/requests/talked', { r: s.rk(rentKey), go: 'yes', date: pk.date, return_date: rt.date });
   let c = await card(rentKey);
-  must(/data-confirmed="1"/.test(c) && cur(c) === 'invoiced' && /data-help="step\.reviewSend"[^>]*>Review &amp; send invoice</.test(c), 'the confirmed website rental is not at "Review & send invoice" (its draft)');
+  must(/data-confirmed="1"/.test(c) && cur(c) === 'invoiced' && /data-next-what>📄 Invoice draft ready: \$[\d,]+\.\d\d</.test(c) && /Made from Rex&#39;s request\./.test(c) && /data-help="step\.reviewSend"[^>]*>Check and send the invoice</.test(c), 'the confirmed website rental is not at "📄 Invoice draft ready" with Check and send the invoice (its draft)');
   const invId = (await s.one('SELECT invoice_id FROM request_status WHERE request_key = ?1', rentKey)).invoice_id;
   const ed = (await s.get(`/admin/invoices/${invId}/edit`)).text;
   const cents = Math.round(QA.extraGame * 100);
-  must(new RegExp(`data-help="ed\\.qDelivery"[^>]*>\\+ Delivery fee<`).test(ed) && new RegExp(`data-desc="Delivery fee" data-price="${(Math.round(QA.deliveryFee * 100) / 100).toFixed(2)}"`).test(ed), 'no "+ Delivery fee" at the services.json price');
+  must(new RegExp(`data-desc="Delivery fee" data-price="${(Math.round(QA.deliveryFee * 100) / 100).toFixed(2)}" data-help="ed\\.qDelivery"[^>]*><span class="ai"[^>]*>🚚</span><span><b>Delivery fee</b><small>For business delivery</small>`).test(ed), 'no "Delivery fee" (under ＋ Add something) at the services.json price');
   must(/data-desc="Discount" data-discount/.test(ed) && /data-desc="Setup \/ takedown fee"(?! data-price)/.test(ed) && /data-desc="Damage deposit \(refundable\)" data-refundable/.test(ed), 'the Discount / Setup fee / Damage deposit quick-adds are missing or carry a typed price');
   must(new RegExp(`data-q-game data-price="${(cents / 100).toFixed(2)}"`).test(ed), 'the extra game price is not the services.json price');
   must(/<option value="Cornhole Set" disabled>Cornhole Set \(booked those days\)<\/option>/.test(ed) && /<option value="Giant Uno" disabled>Giant Uno \(already in this rental\)<\/option>/.test(ed) && /<option value="Giant Connect Four">Giant Connect Four<\/option>/.test(ed), 'the picker does not grey out the booked game / own game, or hides a free one');

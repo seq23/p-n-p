@@ -181,7 +181,10 @@ must(afterDel.id_deleted_at && afterDel.id_object === null, 'Delete this ID did 
 must((await s.all('SELECT who, what FROM request_events WHERE request_key = ?1', made.porch.request_key)).some((e) => /deleted for good/.test(e.what) && /signed-in admin/.test(e.who)), 'the ID deletion is not logged with who and when');
 must((await s.get(`/admin/requests/id?r=${rkPorch}`)).status === 404, 'a deleted ID can still be opened');
 // IDs ready to delete: a paid-in-full decor request appears; a rental appears only once returned.
-await s.post('/admin/requests/status', { r: s.rk(made.party.request_key), status: 'paid' });
+// The party request has its auto draft (auto-draft.mjs, 20 Oct 2026): sent by text, then paid in full.
+const partyInv = await s.one("SELECT id FROM invoices WHERE request_key = ?1 AND status = 'draft' AND auto_draft = 1", made.party.request_key);
+must(Boolean(partyInv), 'the website party request has no auto draft invoice');
+if (partyInv) { await s.post(`/admin/invoices/${partyInv.id}/status`, { action: 'texted' }); await s.post(`/admin/invoices/${partyInv.id}/status`, { action: 'paid', method: 'zelle' }); }
 dash = await s.get('/admin/');
 const ready = dash.text.slice(dash.text.indexOf('data-ids-ready'), dash.text.indexOf('</section>', dash.text.indexOf('data-ids-ready')));
 must(ready.includes('Casey Path2') && !ready.includes('Casey Path1') && !ready.includes('Casey Path4'), 'IDs ready to delete does not list exactly the paid-in-full requests');

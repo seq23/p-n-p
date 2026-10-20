@@ -265,9 +265,12 @@ export async function removeInvoiceBookings(db, invoiceId) {
 // "Put on the calendar" from a request: her booking, upserted by (request_key, kind) and
 // marked edited_by_hand so a later invoice send keeps her date. Returns the booking id.
 export async function saveRequestBooking(db, key, b) {
-  const row = await db.prepare(`INSERT INTO bookings (request_key, kind, date, time, customer_name, phone, email, place, items, edited_by_hand, name_norm, phone_digits)
-    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 1, ?10, ?11)
+  // A booking made after the request's invoice (the auto draft is made when the request arrives,
+  // auto-draft.mjs) carries that invoice, so the calendar reads its money.
+  const row = await db.prepare(`INSERT INTO bookings (request_key, kind, date, time, customer_name, phone, email, place, items, edited_by_hand, name_norm, phone_digits, invoice_id)
+    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 1, ?10, ?11, (SELECT invoice_id FROM request_status WHERE request_key = ?1))
     ON CONFLICT(request_key, kind) DO UPDATE SET date = excluded.date, time = excluded.time, customer_name = excluded.customer_name, phone = excluded.phone,
+      invoice_id = COALESCE(bookings.invoice_id, excluded.invoice_id),
       email = CASE WHEN excluded.email <> '' THEN excluded.email ELSE bookings.email END,
       place = excluded.place, items = excluded.items, name_norm = excluded.name_norm, phone_digits = excluded.phone_digits,
       edited_by_hand = 1, updated_at = datetime('now') RETURNING id`)

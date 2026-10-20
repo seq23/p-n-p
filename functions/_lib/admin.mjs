@@ -28,13 +28,14 @@ import { pickupNote, businessDelivery } from './invoice-note.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
 import { sendTodoEmail } from './todo-email.mjs';
+import { nextInvoiceNumber } from './auto-draft.mjs';
 import SERVICES_DATA from '../../data/offers/services.json';
 import * as VC from './views-calendar.mjs';
 import * as C from './calendar.mjs';
 import * as AC from './admin-calendar.mjs';
 import * as MS from './missed.mjs';
 import * as AM from './admin-money.mjs';
-import { paidByInvoice, balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice } from './ledger.mjs';
+import { paidByInvoice, balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice, paymentsByInvoice } from './ledger.mjs';
 import * as AE from './admin-edit.mjs';
 import * as APR from './admin-pricing.mjs';
 import * as INVD from './inventory.mjs';
@@ -65,13 +66,6 @@ async function syncInvoiceBookings(env, id) {
 
 function decodeKey(value) {
   try { return fromB64urlText(value); } catch { return ''; }
-}
-
-async function nextInvoiceNumber(db, isoDate) {
-  const year = isoDate.slice(0, 4);
-  const row = await db.prepare("SELECT number FROM invoices WHERE number LIKE ?1 ORDER BY number DESC LIMIT 1").bind(`PNP-${year}-%`).first();
-  const n = row ? Number(row.number.split('-')[2]) + 1 : 1;
-  return `PNP-${year}-${String(n).padStart(4, '0')}`;
 }
 
 async function loadInvoice(db, id) {
@@ -234,7 +228,8 @@ async function dashboard(env, url) {
   const bals = await balances(env.DB);
   const invoices = {};
   const linesBy = await linesByInvoice(env.DB);
-  for (const [id, b] of Object.entries(bals)) invoices[id] = { ...b.invoice, total_cents: b.total, balance: b, lines: linesBy[id] || [] };
+  const paysBy = await paymentsByInvoice(env.DB);
+  for (const [id, b] of Object.entries(bals)) invoices[id] = { ...b.invoice, total_cents: b.total, balance: b, lines: linesBy[id] || [], payments: paysBy[id] || [] };
   const schedule = {};
   const { results: booked } = await env.DB.prepare("SELECT request_key, MIN(date) AS date FROM bookings WHERE request_key IS NOT NULL AND kind NOT IN ('porch_takedown','party_takedown','grazing_pickup','rental_return') GROUP BY request_key").all();
   for (const r of booked || []) schedule[r.request_key] = { date: r.date };
@@ -294,7 +289,11 @@ async function dashboard(env, url) {
 // return span (extra-games.mjs), booked ones shown as not free.
 async function quickAddsFor(env, key, lines) {
   const q = SERVICES_DATA.invoiceQuickAdds || {};
-  const out = { deliveryCents: Math.round(Number(q.deliveryFee || 0) * 100), extraGameCents: Math.round(Number(q.extraGame || 0) * 100), rental: false, games: [], span: '', baseCount: 0 };
+  // "A porch package" in ＋ Add something: every season x tier at its package minimum, the same
+  // line the porch prefill writes (porch_packages.js invoiceLines).
+  const pkg = PRICE_TABLE.porchPackages;
+  const porch = pkg ? pkg.seasons.flatMap((x) => pkg.tierOrder.map((t) => porchPrefill({ porchSeason: x.key, porchDecor: t }, PRICE_TABLE).lines[0]).filter(Boolean)) : [];
+  const out = { deliveryCents: Math.round(Number(q.deliveryFee || 0) * 100), extraGameCents: Math.round(Number(q.extraGame || 0) * 100), rental: false, games: [], span: '', baseCount: 0, porch };
   const request = key ? await findRequest(env, key) : null;
   out.rental = Boolean((request && (request.gamesAnswer || (request.wantsRentals && !request.wantsDecor))) || isRentalInvoice(lines, PRICE_TABLE));
   if (!out.rental) return out;
@@ -380,26 +379,9 @@ async function createInvoice(env, request) {
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(afterSaveMessage(form.get('go')))}`);
 }
 
-// A draft invoice made for her by the site form (a rental booking): pay plan "custom" with the
-// deposit asked for now. Never sent by itself: Valerie taps Send.
-export async function createDraftInvoice(env, { key, name, email, phone, lines, depositCents, dueDate, notes = '' }) {
-  const issue = todayISO();
-  let number = await nextInvoiceNumber(env.DB, issue);
-  let id = null;
-  for (let attempt = 0; attempt < 3 && id === null; attempt += 1) {
-    try {
-      const row = await env.DB.prepare(`INSERT INTO invoices (number, request_key, customer_name, customer_email, customer_phone, issue_date, due_date, deposit_due_cents, notes, status, pay_plan, name_norm)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'draft', 'custom', ?10) RETURNING id`).bind(number, key, name, email, phone, issue, dueDate || issue, depositCents, notes, C.normName(name)).first();
-      id = row.id;
-    } catch (e) {
-      if (!/UNIQUE/i.test(String(e))) throw e;
-      number = await nextInvoiceNumber(env.DB, issue);
-    }
-  }
-  await saveLines(env.DB, id, lines);
-  await setRequestStatus(env.DB, key, 'new', id);
-  return id;
-}
+// The auto draft (website form and phone bookings) lives in auto-draft.mjs: createDraftInvoice,
+// makeAutoDraft, rebuildAutoDraft. Re-exported for older callers.
+export { createDraftInvoice } from './auto-draft.mjs';
 
 // 'preview' = she tapped "See it before sending": the invoice page shows the email itself.
 function afterSaveMessage(go) {
@@ -1006,7 +988,8 @@ async function routeAdmin(context) {
         const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings, pickup });
         const balance = (await balances(env.DB))[id];
         if (balance) Object.assign(balance, await depositHeld(env.DB, id));
-        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pickup, balance, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+        const payments = (await paymentsByInvoice(env.DB))[id] || [];
+        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pickup, balance, payments, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
       }
       if (segs[2] === 'edit' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);

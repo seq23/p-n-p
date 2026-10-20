@@ -4,7 +4,8 @@
 // pdf-lib is pure JavaScript and runs in Pages Functions; standard fonts only, so text
 // is reduced to WinAnsi before drawing.
 import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
-import { money, lineTotal, invoiceTotal, prettyDate, payPlanOf, needsPrice, FROM_EMAIL } from './util.mjs';
+import { money, lineTotal, invoiceTotal, prettyDate, needsPrice, FROM_EMAIL } from './util.mjs';
+import { payStepsOf, customerSteps } from './pay-steps.mjs';
 
 const INK = rgb(0.23, 0.19, 0.16);
 const ACCENT = rgb(0.72, 0.37, 0.25);
@@ -24,12 +25,13 @@ function cashtag(value) {
 }
 
 // pickup: the rentals pickup line (invoice-note.mjs pickupNote, worded per invoice), '' on a decor-only invoice.
+// "How you pay" (owner-approved mock-up, 20 Oct 2026; pay-steps.mjs): the same numbered payments
+// as the email. The circled numbers are drawn as "1." / "2." (standard PDF fonts have no ①).
 export function payLines({ invoice, lines, pickup = '' }) {
-  const total = invoiceTotal(lines);
-  const plan = payPlanOf(invoice, total);
-  const now = plan === 'full' ? total : invoice.deposit_due_cents;
-  if (plan === 'full') return { total, plan, now, pickup, big: `Amount due: ${money(total)}`, small: `Please pay by ${prettyDate(invoice.due_date)}.` };
-  return { total, plan, now, pickup, big: `Deposit due now: ${money(now)}`, small: `This holds your date. The rest, ${money(total - now)}, is due by ${prettyDate(invoice.due_date)}.` };
+  const ps = payStepsOf(invoice, lines);
+  const cs = customerSteps(ps);
+  return { total: ps.total, plan: ps.plan, now: ps.now, pickup, head: cs.head, rows: cs.rows, sum: cs.sum, totalWords: cs.totalWords,
+    words: [cs.head, ...cs.rows.map((r) => `${r.mark} ${r.words}: ${money(r.cents)}`), cs.sum].filter(Boolean).join(' ') };
 }
 
 // The short message that goes with the PDF in a text.
@@ -39,7 +41,7 @@ export function textMessage({ invoice, lines, settings, pickup = '' }) {
   const first = (invoice.customer_name || '').split(' ')[0] || 'there';
   const how = [settings.zelle ? `Zelle ${settings.zelle}` : '', cashtag(settings.cashapp) ? `Cash App ${cashtag(settings.cashapp)}` : ''].filter(Boolean).join(' or ');
   return [`Hi ${first}, here is your ${business} invoice ${invoice.number} (PDF attached). Total ${money(p.total)}.`,
-    p.plan === 'full' ? `Please pay by ${prettyDate(invoice.due_date)}.` : `Deposit of ${money(p.now)} due now holds your date; the rest, ${money(p.total - p.now)}, is due by ${prettyDate(invoice.due_date)}.`,
+    `How you pay: ${p.words}`,
     how ? `Pay by ${how}, with ${invoice.number} in the note.` : '', p.pickup, 'Thank you!'].filter(Boolean).join(' ');
 }
 
@@ -110,16 +112,19 @@ export async function renderInvoicePdf({ invoice, lines, settings, contact, pick
   text('Total', left, y, { font: serifBold, size: 18 });
   text(money(pay.total), right, y, { font: serifBold, size: 18, align: 'right' });
   y -= 16;
-  if (refundable) { text(`Includes ${money(refundable)} refundable deposit.`, left, y, { size: 9.5, color: MUTED }); y -= 14; }
+  if (pay.totalWords) { text(pay.totalWords, left, y, { size: 9.5, color: MUTED }); y -= 14; }
   y -= 10;
 
-  // Pay box
+  // How you pay: the numbered payments (pay-steps.mjs), then the rental pickup line.
   const pickupRows = pay.pickup ? wrap(pay.pickup, sans, 10.5, width - 28) : [];
-  const boxH = 58 + pickupRows.length * 14; ensure(boxH + 10);
-  page.drawRectangle({ x: left, y: y - boxH, width, height: boxH, color: CREAM, borderColor: LINE, borderWidth: 0.8 });
-  text(pay.big, left + 14, y - 24, { font: serifBold, size: 16 });
-  text(pay.small, left + 14, y - 44, { size: 10.5, color: MUTED });
-  pickupRows.forEach((r, i) => text(r, left + 14, y - 58 - i * 14, { size: 10.5 }));
+  const boxH = 34 + (pay.head ? 16 : 0) + pay.rows.length * 18 + (pay.sum ? 16 : 0) + pickupRows.length * 14 + 6; ensure(boxH + 10);
+  page.drawRectangle({ x: left, y: y - boxH, width, height: boxH, color: rgb(0.93, 0.96, 0.98), borderColor: rgb(0.73, 0.81, 0.91), borderWidth: 0.8 });
+  let by = y - 22;
+  text('How you pay', left + 14, by, { font: serifBold, size: 15 }); by -= 18;
+  if (pay.head) { text(pay.head, left + 14, by, { size: 10.5 }); by -= 16; }
+  for (const r of pay.rows) { text(`${r.n}. ${r.words}`, left + 14, by, { size: 11 }); text(money(r.cents), right - 14, by, { font: sansBold, size: 11, align: 'right' }); by -= 18; }
+  if (pay.sum) { text(pay.sum, left + 14, by, { size: 10, color: MUTED }); by -= 16; }
+  pickupRows.forEach((r, i) => text(r, left + 14, by - i * 14, { size: 10.5 }));
   y -= boxH + 22;
 
   // How to pay (with the QR on the right)

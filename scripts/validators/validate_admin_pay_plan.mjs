@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 /**
- * The invoice pay plan: half now (default), full amount, or a typed deposit; a due date;
- * a calculation that shows total, deposit asked for now and the rest; and a preview of
- * the email before sending. This validator renders the editor, the invoice page and the
+ * The invoice pay plan: half now (default), all now, a typed deposit, or no deposit (owner-approved
+ * 20 Oct 2026); a due date; the money said as numbered payments that add up to the total, the SAME
+ * words on the invoice page, the email, the PDF and the text ("How Jane pays": ① Deposit · now ·
+ * holds the date, ② The rest · by Thu 22 Oct, "$85 + $85 = $170 total"; pay-steps.mjs), the old
+ * one-number "due now" band gone; and a preview of the email before sending. This validator renders the editor, the invoice page and the
  * email for each plan and checks the money adds up and the right words appear.
  * Rule 0: zero plans rendered is a failure.
  */
@@ -38,9 +40,15 @@ must(util.payPlanOf({ deposit_due_cents: 17000 }, total) === 'full', 'an old row
 must(util.payPlanOf({ deposit_due_cents: 8500 }, total) === 'half', 'an old half-deposit row is not read as half');
 must(util.payPlanOf({ deposit_due_cents: 3000 }, total) === 'custom', 'an old custom row is not read as custom');
 must(util.payPlanOf({ pay_plan: 'full', deposit_due_cents: 0 }, total) === 'full', 'a stored pay_plan is ignored');
+must(util.PAY_PLANS.join(',') === 'half,full,custom,none', `the plans are ${util.PAY_PLANS.join(',')}, not half,full,custom,none`);
+must(util.amountDueNow('none', total, 3000) === 0, 'No deposit asks for something now');
+must(util.payPlanOf({ pay_plan: 'none', deposit_due_cents: 0 }, total) === 'none', 'a stored No deposit plan is not read back');
+must(util.payPlanOf({ deposit_due_cents: 0 }, total) === 'custom', 'an old row with no plan and $0 now is no longer read as custom (existing invoices must keep their plan)');
+must(util.singlePayment('full') && util.singlePayment('none') && !util.singlePayment('half') && !util.singlePayment('custom'), 'singlePayment is wrong');
 
 const settings = { zelle: 'hello@porchandparty901.com', cashapp: '$porchandparty', business_name: 'Porch & Party', business_address: '', qr_png: QR, qr_type: 'image/png' };
-const plans = { half: 8500, full: 17000, custom: 3000 };
+const plans = { half: 8500, full: 17000, custom: 3000, none: 0 };
+const nq = (h) => h.replace(/&amp;/g, '&').replace(/&#39;/g, "'");
 let rendered = 0;
 for (const [plan, now] of Object.entries(plans)) {
   const invoice = { id: 7, number: 'PNP-2026-0007', customer_name: 'Jane Doe', customer_email: 'jane@example.com', customer_phone: '',
@@ -53,21 +61,36 @@ for (const [plan, now] of Object.entries(plans)) {
   rendered += 1;
   must(mail.text.includes('Total: $170.00'), `${plan}: email text lacks the total`);
   must(mail.text.includes('Due October 22, 2026'), `${plan}: email lacks the due date`);
+  // The one-number "due now" band is gone everywhere.
+  must(!/Deposit due now|Amount due:/.test(mail.text + mail.html) && !/Deposit asked for now|Rest after the deposit|Full amount due by|class="now"/.test(page) && !/Due now|sum-deposit|Rest after that/.test(editor), `${plan}: the old "due now" band is still on the email, the invoice page or the editor`);
+  // The total says what the refundable damage deposit is.
+  for (const [where, h] of [['email html', mail.html], ['email text', mail.text], ['invoice page', page], ['editor', editor]]) must(nq(h).includes('$120 rental + $50 refundable damage deposit'), `${plan}: ${where} lacks "$120 rental + $50 refundable damage deposit"`);
+  must(mail.html.includes('Given back after the event') && !/>Refundable</.test(mail.html), `${plan}: the email does not say the damage deposit is given back after the event`);
+  must(nq(page).includes('How Jane pays') && nq(editor).includes('How Jane pays') && mail.text.includes('How you pay') && mail.html.includes('How you pay'), `${plan}: "How Jane pays" / "How you pay" missing`);
+  const stepsOn = (h) => (nq(h).match(/data-pay-step="\d"/g) || []).length;
   if (plan === 'full') {
-    must(mail.text.includes('Amount due: $170.00') && !/Deposit due now/.test(mail.text), `${plan}: email should ask for the whole total, no deposit`);
-    must(page.includes('Full amount due by') && !page.includes('Mark deposit received'), `${plan}: invoice page still shows deposit rows or the deposit button`);
+    must(mail.text.includes('① All of it, now: $170.00') && !mail.text.includes('②'), `${plan}: email should ask for the whole total now, one payment`);
+    must(nq(page).includes('All of it · now') && stepsOn(page) === 1 && !page.includes('Mark deposit received'), `${plan}: invoice page should show one payment "All of it · now" and no deposit button`);
     must(page.includes('Mark paid in full') && page.includes('Only do this after the money is in your account.'), `${plan}: Payment box lacks Mark paid in full with its confirmation`);
+  } else if (plan === 'none') {
+    must(mail.text.includes('Nothing to pay now.') && mail.text.includes('① All of it, by Thu 22 Oct: $170.00') && !mail.text.includes('②'), `${plan}: email does not say "Nothing to pay now." and "① All of it, by Thu 22 Oct"`);
+    must(nq(page).includes('No deposit. Nothing to pay now.') && nq(page).includes('All of it · by Thu 22 Oct') && stepsOn(page) === 1 && !page.includes('Mark deposit received') && page.includes('Mark paid in full'), `${plan}: invoice page lacks "No deposit. Nothing to pay now." / "All of it · by Thu 22 Oct", or still offers the deposit button`);
+    must(nq(mail.html).includes('Nothing to pay now.') && !/\$0\.00/.test(mail.html), `${plan}: the email shows a $0.00 deposit`);
   } else {
     const rest = total - now;
-    must(mail.text.includes(`Deposit due now: ${util.money(now)}`), `${plan}: email does not ask for the deposit now`);
-    must(mail.text.includes(`The rest, ${util.money(rest)}, is due by October 22, 2026`), `${plan}: email lacks total minus deposit with its due date`);
-    must(page.includes('Rest after the deposit') && page.includes(util.money(rest)) && page.includes('Mark deposit received') && page.includes(`Mark Jane Doe&#39;s deposit as received? Only do this after the money is in your account.`), `${plan}: invoice page lacks the rest-after-deposit row or the deposit button with its confirmation`);
+    const sum = `${util.money(now).replace(/\.00$/, '')} + ${util.money(rest).replace(/\.00$/, '')} = $170 total`;
+    must(mail.text.includes(`① Deposit now (holds your date): ${util.money(now)}`), `${plan}: email does not ask for the deposit now`);
+    must(mail.text.includes(`② The rest, by Thu 22 Oct: ${util.money(rest)}`) && mail.text.includes(sum) && nq(mail.html).includes(sum), `${plan}: email lacks the rest with its due date or "${sum}"`);
+    must(nq(page).includes('Deposit · now · holds the date') && nq(page).includes('The rest · by Thu 22 Oct') && stepsOn(page) === 2 && nq(page).includes(sum) && page.includes(util.money(rest)) && page.includes('Mark deposit received') && page.includes(`Mark Jane Doe&#39;s deposit as received? Only do this after the money is in your account.`), `${plan}: invoice page lacks ① Deposit / ② The rest / the sum, or the deposit button with its confirmation`);
   }
   must(page.includes('srcdoc=') && page.includes('The email the customer gets'), `${plan}: invoice page has no inline email preview`);
-  must(page.includes('What goes into the total') || editor.includes('What goes into the total'), `${plan}: no "what goes into the total" section`);
+  must(nq(editor).includes('What Jane is paying for'), `${plan}: no "What Jane is paying for" section`);
   must(editor.includes(`value="${plan}" checked`), `${plan}: editor does not preselect the stored plan`);
   must(editor.includes('name="due_date"') && editor.includes('value="preview"') && editor.includes('See it before sending'), `${plan}: editor lacks due date or the preview button`);
-  for (const v of ['half', 'full', 'custom']) must(editor.includes(`name="pay_plan" value="${v}"`), `${plan}: editor lacks the ${v} choice`);
+  for (const v of ['half', 'full', 'custom', 'none']) must(editor.includes(`name="pay_plan" value="${v}"`), `${plan}: editor lacks the ${v} choice`);
+  // Grey live amounts under each plan (the editor's JS keeps them current; these are the first paint).
+  for (const [id, words] of [['plan-amt-half', '$85 now · $85 by the due date'], ['plan-amt-full', '$170 now'], ['plan-amt-none', 'Nothing now · all $170 by the due date']]) must(nq(editor).includes(`id="${id}">${words}<`), `${plan}: editor lacks the grey "${words}" under its plan`);
+  must(/<strong>No deposit<\/strong>/.test(editor) && editor.indexOf('value="custom"') < editor.indexOf('value="none"'), `${plan}: "No deposit" is not the fourth choice`);
 
   // The PDF for customers reached by text, and the buttons that share it.
   const bytes = await pdf.renderInvoicePdf({ invoice, lines, settings, contact: { telephoneDisplay: '901-355-1518' } });
@@ -75,12 +98,14 @@ for (const [plan, now] of Object.entries(plans)) {
   const loadedPdf = await PDFDocument.load(bytes);
   must(loadedPdf.getPageCount() === 1 && loadedPdf.getTitle() === 'Invoice PNP-2026-0007 from Porch & Party', `${plan}: PDF is not one titled page`);
   const sms = pdf.textMessage({ invoice, lines, settings });
-  must(sms.includes('PNP-2026-0007') && sms.includes('$170.00') && (plan === 'full' ? sms.includes('pay by October 22, 2026') : sms.includes(`Deposit of ${util.money(now)} due now`)), `${plan}: text message lacks the number, total or what is due now`);
+  must(sms.includes('PNP-2026-0007') && sms.includes('$170.00') && sms.includes('How you pay: ') && (plan === 'full' ? sms.includes('① All of it, now: $170.00') : (plan === 'none' ? sms.includes('Nothing to pay now. ① All of it, by Thu 22 Oct: $170.00') : sms.includes(`① Deposit now (holds your date): ${util.money(now)}`))), `${plan}: text message lacks the number, total or the numbered payments`);
+  const pl = pdf.payLines({ invoice, lines });
+  must(pl.rows.length === (plan === 'full' || plan === 'none' ? 1 : 2) && pl.rows.reduce((t, r) => t + r.cents, 0) === total && pl.totalWords === '$120 rental + $50 refundable damage deposit', `${plan}: the PDF's How you pay rows do not add up to the total`);
   must(page.includes('Text the invoice (PDF)') && page.includes('/invoice.pdf') && page.includes('data-copy="sms"'), `${plan}: invoice page lacks the text/PDF buttons or the copyable message`);
   const noEmail = views.invoiceViewPage({ invoice: { ...invoice, status: 'draft', customer_email: '' }, lines, pay: { complete: true, missing: [] }, flash: '', error: '', emailHtml: mail.html, smsText: sms });
   must(noEmail.includes('btn primary" data-share-pdf') && noEmail.includes('value="texted"') && !noEmail.includes('Send invoice to'), `${plan}: a draft with no email should lead with Text the invoice (PDF) and Mark as sent by text`);
 }
-must(rendered === 3, 'fewer than three plans rendered');
+must(rendered === 4, 'fewer than four plans rendered');
 
 // Rentals v3 (2026-10-15): a rental invoice says where and how the rest is paid, in every
 // surface the customer sees; a decor-only invoice does not. admin.mjs passes the line from
@@ -107,7 +132,7 @@ const PICKUP = 'Pay the rest ($85.00) at pickup. Text or call 901-355-1518 to se
     const has = { 'email html': mail.html.includes(PICKUP), 'email text': mail.text.includes(PICKUP), 'text message': sms.includes(PICKUP),
       'invoice page': page.includes(PICKUP.replace(/\./g, '.')), 'PDF pay box': pay.pickup === PICKUP };
     for (const [where, yes] of Object.entries(has)) must(yes === (kind === 'rental'), `${kind} invoice: ${where} ${yes ? 'carries' : 'lacks'} the pickup line`);
-    must(mail.text.includes('The rest, $85.00, is due by October 22, 2026'), `${kind} invoice: "rest due by" wording changed`);
+    must(mail.text.includes('② The rest, by Thu 22 Oct: $85.00'), `${kind} invoice: "② The rest, by Thu 22 Oct" wording changed`);
   }
   must(/pickupRows/.test(fs.readFileSync(path.join(ROOT, 'functions/_lib/pdf.mjs'), 'utf8')), 'pdf.mjs no longer draws the pickup line in the pay box');
   const adminSrc = fs.readFileSync(path.join(ROOT, 'functions/_lib/admin.mjs'), 'utf8');

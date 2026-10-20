@@ -29,6 +29,7 @@ import { chicagoDate } from './reminders.mjs';
 import * as C from './calendar.mjs';
 import { balanceOf, paidByInvoice, linesFromForm, saveLines, syncMoneyStatus, recordPayment, dueWords } from './ledger.mjs';
 import { servicesOf, TAKEDOWN_PLANS, CARD_SERVICES } from './cards.mjs';
+import { rebuildAutoDraft } from './auto-draft.mjs';
 import { serviceOfKind } from './kinds.mjs';
 import { isPhone } from './phone-requests.mjs';
 import { deriveProgress, STEP_KEYS } from './progress.mjs';
@@ -618,7 +619,8 @@ async function saveTakedown({ db, f, d, key, rk }) {
   return back(rk, 'answers', 'Takedown saved ✓');
 }
 
-// Section 1 "What they want": requests.services only. Never touches invoices, payments or the
+// Section 1 "What they want": requests.services, and the unsent auto draft rebuilt to match (lines
+// changed by hand kept). Never touches a sent invoice, payments or the
 // form answers. A porch booking whose service is unticked switches to party (and back) at the
 // same day and time when the other one is ticked; anything else stays and gets a heads-up.
 async function saveWant({ db, f, d, key, rk }) {
@@ -644,5 +646,10 @@ async function saveWant({ db, f, d, key, rk }) {
     } else stays.push(b);
   }
   const warn = stays.length ? `Heads up: ${stays.map((b) => `the ${C.KIND_LABELS[b.kind] || b.kind} on ${shortDate(b.date)}`).join(' and ')} ${stays.length === 1 ? 'is' : 'are'} still on the calendar, but ${wantWords([...new Set(stays.map((b) => serviceOfKind(b.kind)))])} is no longer ticked. Check ${stays.length === 1 ? 'it' : 'them'} under Bookings: change ${stays.length === 1 ? 'it' : 'them'} or remove ${stays.length === 1 ? 'it' : 'them'}.` : '';
-  return back(rk, 'want', `What they want saved ✓ Now: ${wantWords(next)}.${moved.length ? ` ${moved.join(' ')}` : ''}`, false, warn);
+  // The draft invoice made from the request, never sent, follows (auto-draft.mjs rebuildAutoDraft):
+  // lines she changed by hand stay. A sent or void invoice is never touched.
+  const rb = await rebuildAutoDraft({ DB: db }, key);
+  const invWords = rb ? ` The invoice draft (not sent) was rebuilt to match${rb.kept ? `; ${rb.kept === 1 ? 'the line' : `the ${rb.kept} lines`} you changed by hand ${rb.kept === 1 ? 'was' : 'were'} kept` : ''}. Check the price before you send it.`
+    : (d.inv && d.inv.status !== 'draft' && d.inv.status !== 'void' ? ` Invoice ${d.inv.number} was already sent, so it was not changed.` : '');
+  return back(rk, 'want', `What they want saved ✓ Now: ${wantWords(next)}.${moved.length ? ` ${moved.join(' ')}` : ''}${invWords}`, false, warn);
 }

@@ -113,7 +113,8 @@ export function periodTotals(data, prefix) {
       seenInv.add(b.invoice_id);
       const paid = data.payments.filter((p) => p.invoice_id === b.invoice_id && p.kind === 'payment').reduce((s, p) => s + p.amount_cents, 0);
       const owed = Math.max(0, x.charges - paid);
-      if (owed > 0) { out.owed += owed; out.owedList.push({ booking: b, invoice: x.inv, owed }); }
+      // A draft (never sent) is owed by nobody (owner, 20 Oct 2026; ledger.mjs balances).
+      if (owed > 0 && x.inv.status !== 'draft') { out.owed += owed; out.owedList.push({ booking: b, invoice: x.inv, owed }); }
     }
   }
   for (const e of data.expenses) {
@@ -173,7 +174,7 @@ export function jobRows(data, { requests = [], unconfirmed = new Set() } = {}) {
       name: (x && x.inv.customer_name) || (r && r.name) || (first && first.customer_name) || 'No name',
       services: services.length ? services : ['other'], date, confirmed, hasPrice: Boolean(x),
       charges, refundable: x ? x.refundable : 0, paidCharges, paidDeposit,
-      owed: confirmed ? Math.max(0, charges - paidCharges) : 0,
+      owed: confirmed && !(x && x.inv.status === 'draft') ? Math.max(0, charges - paidCharges) : 0,
       expected: confirmed ? 0 : charges,
       tips: tips.reduce((n, t) => n + t.amount_cents, 0), tipCount: tips.length,
     });

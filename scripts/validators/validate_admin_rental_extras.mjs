@@ -16,7 +16,7 @@
  *  3. hold numbers (48 hours, Hold longer 3 days) are typed outside services.json rentalHolds;
  *  4. "Waiting N days" does not count Memphis calendar days (across midnight), or the un-called
  *     list includes a called, phone or put-away request;
- *  5. the invoice editor is not compact rows + one row of chips + ONE big "Send invoice", or its
+ *  5. the invoice editor is not rows with ✏️ Change + ONE "＋ Add something" list + ONE big "Send invoice", or its
  *     script does not parse.
  * Rule 0: fewer than 60 checks is a failure.
  */
@@ -225,11 +225,16 @@ if (biz.row && home.row) {
   must(/<p class="waitline late" data-waiting="4">Waiting 4 days<\/p>/.test(wc2), 'step 1 does not say "Waiting 4 days" (highlighted) after 4 days');
   // 5. The editor.
   const ed = (await s.get(`/admin/invoices/${bi.invoice_id}/edit`)).text;
-  const rowsN = (ed.match(/<details class="lrow" data-line/g) || []).length;
-  must(rowsN === lines.length + 1 && /<summary class="lsum"[^>]*><span class="ld" data-l-desc>Delivery fee<\/span><span class="lq" data-l-qty><\/span><span class="lt" data-l-total>\$20\.00<\/span><\/summary>/.test(ed), `the editor lines are not compact rows (${rowsN} rows)`);
-  must(/<div class="qchips" data-quick-adds><button type="button" class="chipbtn" id="add-line"/.test(ed) && (ed.match(/class="chipbtn"/g) || []).length >= 5, 'the quick-adds are not one row of chips with + Line');
-  must((ed.match(/class="btn primary"/g) || []).length === 1 && /<button class="btn primary" type="submit" name="go" value="send"[^>]*>Send invoice<\/button>/.test(ed) && /value="save"[^>]*>Save draft</.test(ed) && /value="preview"[^>]*>See it before sending</.test(ed), 'the editor does not have ONE big Send invoice (Save draft + See it before sending small)');
-  must(ed.indexOf('data-ed-summary') > ed.indexOf('data-ed-plan') && /id="sum-total"/.test(ed) && /id="sum-deposit"/.test(ed) && /id="sum-rest"/.test(ed), 'the total / due now / rest summary is not at the bottom');
+  // Owner-approved mock-up (20 Oct 2026): each line at rest = name, note, "how many × price", total
+  // and a visible ✏️ Change; ONE "＋ Add something to this invoice" opens the labelled list (no
+  // bubbles); two primaries only (Add something, Send invoice); "Total so far" under the lines and
+  // the numbered "How <name> pays" summary at the bottom.
+  const rowsN = (ed.match(/<div class="lrow" data-line/g) || []).length;
+  must(rowsN === lines.length + 1 && /<span class="ld" data-l-desc>Delivery fee<\/span>\s*<span class="lnote" data-l-note hidden><\/span><span class="lq" data-l-qty>1 × \$20\.00<\/span>\s*<\/div>\s*<div class="lr"><span class="lt" data-l-total>\$20\.00<\/span>\s*<button type="button" class="chg" data-change data-help="ed\.lineChange"[^>]*>✏️ Change<\/button>/.test(ed), `the editor lines are not rows with "1 × $20.00", the total and ✏️ Change (${rowsN} rows)`);
+  must(/<div class="addwrap" data-quick-adds><div class="act"><button type="button" class="btn primary addbig" id="add-open"[^>]*>＋ Add something to this invoice<\/button>/.test(ed) && /<div class="addmenu" id="add-menu" data-add-menu hidden><p class="addq">What do you want to add\?<\/p>\s*<button type="button" class="addopt" id="add-line"/.test(ed) && (ed.match(/class="addopt"/g) || []).length >= 6 && !/chipbtn|qchips/.test(ed), 'the quick-adds are not ONE "＋ Add something to this invoice" with its labelled list (Something else first)');
+  const prim = [...ed.matchAll(/class="btn primary[^"]*"[^>]*>([^<]*)</g)].map((m) => m[1]);
+  must(prim.join('|') === '＋ Add something to this invoice|Send invoice' && /<button class="btn primary" type="submit" name="go" value="send"[^>]*>Send invoice<\/button>/.test(ed) && /value="save"[^>]*>Save draft</.test(ed) && /value="preview"[^>]*>See it before sending</.test(ed), `the editor's big buttons are ${prim.join('|')}, not Add something + ONE Send invoice (Save draft and See it before sending small)`);
+  must(ed.indexOf('data-ed-summary') > ed.indexOf('data-ed-plan') && /id="sum-total"/.test(ed) && /id="pay-steps-live"/.test(ed) && ed.indexOf('id="sum-sofar"') > ed.indexOf('data-lines') && ed.indexOf('id="sum-sofar"') < ed.indexOf('id="add-open"'), 'the "Total so far" / How they pay summary is not where the mock-up has it');
   must(/name="line_refundable"/.test(ed) && /name="line_note"/.test(ed) && /data-remove/.test(ed) && /name="notes"/.test(ed) && /name="customer_email"/.test(ed), 'the editor lost an ability (refundable / note / remove / message / customer)');
   for (const js of [...ed.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1])) { let ok = true; try { new Function(js); } catch { ok = false; } must(ok, 'the editor script does not parse'); }
 }
