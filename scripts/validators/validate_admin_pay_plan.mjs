@@ -11,7 +11,8 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
-const mod = (p) => import(pathToFileURL(path.join(ROOT, p)).href);
+// Through the admin harness loader: functions/_lib reads data files as JSON modules.
+const { mod } = await import(pathToFileURL(path.join(ROOT, 'scripts/validators/lib/admin_harness.mjs')).href);
 const util = await mod('functions/_lib/util.mjs');
 const views = await mod('functions/_lib/views.mjs');
 const email = await mod('functions/_lib/email.mjs');
@@ -83,8 +84,18 @@ must(rendered === 3, 'fewer than three plans rendered');
 
 // Rentals v3 (2026-10-15): a rental invoice says where and how the rest is paid, in every
 // surface the customer sees; a decor-only invoice does not. admin.mjs passes the line from
-// pricing.mjs pickupNote() to all four.
-const PICKUP = 'Pay the rest at pickup. Text or call 901-355-1518 to set your pickup time at Mt. Moriah Station.';
+// invoice-note.mjs pickupNote() to all four, worded from the invoice's own numbers (owner's final
+// wording, 19 Oct 2026): $170 with the $50 refundable deposit, half now ($85, the deposit first),
+// so the rest is $85, the same rest the pay box states.
+const PICKUP = 'Pay the rest ($85.00) at pickup. Text or call 901-355-1518 to set your pickup time at Mt. Moriah Station unless otherwise agreed upon.';
+{
+  const read = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
+  const { buildPriceTable } = await mod('functions/_lib/pricing.mjs');
+  const NOTE = await mod('functions/_lib/invoice-note.mjs');
+  const table = buildPriceTable(read('data/rentals/games.json'), read('data/offers/services.json'), read('data/offers/porch_packages.json'));
+  const got = NOTE.pickupNote(lines, table, { invoice: { deposit_due_cents: 8500, pay_plan: 'half', notes: '' }, paidCents: 0 });
+  must(got === PICKUP, `the rental note for the fixture reads "${got}"`);
+}
 {
   const invoice = { id: 8, number: 'PNP-2026-0008', customer_name: 'Jane Doe', customer_email: 'jane@example.com', customer_phone: '',
     issue_date: '2026-10-15', due_date: '2026-10-22', deposit_due_cents: 8500, pay_plan: 'half', notes: '', status: 'sent' };
@@ -100,7 +111,7 @@ const PICKUP = 'Pay the rest at pickup. Text or call 901-355-1518 to set your pi
   }
   must(/pickupRows/.test(fs.readFileSync(path.join(ROOT, 'functions/_lib/pdf.mjs'), 'utf8')), 'pdf.mjs no longer draws the pickup line in the pay box');
   const adminSrc = fs.readFileSync(path.join(ROOT, 'functions/_lib/admin.mjs'), 'utf8');
-  must((adminSrc.match(/pickupNote\(/g) || []).length >= 3 && /pickup: pickupNote\(lines, PRICE_TABLE\)/.test(adminSrc) && /textMessage\(\{[^}]*pickup \}\)/.test(adminSrc) && /invoiceViewPage\(\{[^}]*pickup,/.test(adminSrc),
+  must((adminSrc.match(/await noteFor\(env, /g) || []).length >= 3 && /pickup: await noteFor\(env, invoice, lines\)/.test(adminSrc) && /textMessage\(\{[^}]*pickup \}\)/.test(adminSrc) && /invoiceViewPage\(\{[^}]*pickup,/.test(adminSrc) && !/pickupLine/.test(adminSrc),
     'admin.mjs does not pass the pickup line to the email, PDF, text message and invoice page');
 }
 

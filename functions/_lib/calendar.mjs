@@ -154,6 +154,17 @@ export function requestReturnDate(request, pickupISO) {
   return returnDateFor(pickupISO, request && request.durationAnswer);
 }
 
+// Business delivery (owner, 19 Oct 2026): the request's "Delivery address" when it ticked
+// "This is for a business — deliver to us"; '' for a home rental (pickup at the safe zone).
+export function deliveryAddress(request) {
+  if (!request || !/^yes/i.test(String(answer(request, /^business delivery$/i) || ''))) return '';
+  return String(answer(request, /^delivery address$/i) || '').trim();
+}
+// Where a rental's pickup / return booking happens: the business address, else the safe zone.
+export function rentalPlace(request, table) {
+  return deliveryAddress(request) || (table && table.pickupPlace) || '';
+}
+
 function answer(request, re) {
   const all = [...(request.rentals || []), ...(request.decor || []), ...(request.other || [])];
   const hit = all.find((x) => re.test(x.label));
@@ -196,7 +207,7 @@ export function bookingsFromInvoice({ invoice, lines, request, table, isRental }
     if (pickup) {
       const lineText = (lines || []).filter((l) => !l.refundable).map((l) => l.description).join(', ');
       const items = itemsText(expandItems(lineText || request.gamesAnswer, table)) || request.gamesAnswer || '';
-      const place = table.pickupPlace || '';
+      const place = rentalPlace(request, table);
       out.push({ ...base, kind: 'rental_pickup', date: pickup, place, items });
       out.push({ ...base, kind: 'rental_return', date: requestReturnDate(request, pickup), place, items });
     }
@@ -402,7 +413,7 @@ export function bookingFromRequest(request, table) {
   return {
     kind: rental ? 'rental_pickup' : otherKind, date, time: null,
     customer_name: request.name || '', phone: request.phone || '', email: request.email || '',
-    place: rental ? (table.pickupPlace || '') : answer(request, /^location|address|where/i),
+    place: rental ? rentalPlace(request, table) : answer(request, /^location|address|where/i),
     items: rental ? (request.gamesAnswer || 'Game rentals') : (request.eventType ? `Decor: ${request.eventType}` : 'Decor'),
     note: answer(request, /anything else|describe/i),
   };

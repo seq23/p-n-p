@@ -14,7 +14,11 @@ import { balanceWords, depositWords } from './ledger.mjs';
 import { reminderText, smsLink, normalizePhone, hasEmail } from './reminders.mjs';
 
 const RENTAL = new Set(['rental_pickup', 'rental_return']);
-const kindTag = (k) => `<span class="k ${esc(k)}">${esc(KIND_LABELS[k] || k)}</span>`;
+const kindTag = (k, label = '') => `<span class="k ${esc(k)}">${esc(label || KIND_LABELS[k] || k)}</span>`;
+// Business delivery (owner, 19 Oct 2026): a rental going to a business reads "Delivery" and
+// "Collect" (at its address) instead of "Rental pickup" / "Rental return".
+const DELIVERY_WORDS = { rental_pickup: 'Delivery', rental_return: 'Collect' };
+export const bookingLabel = (b, c) => (c && c.delivery && DELIVERY_WORDS[b.kind]) || KIND_LABELS[b.kind] || b.kind;
 const BACK_CAL = { href: '/admin/calendar', label: 'Back to the calendar' };
 
 function tel(phone) {
@@ -318,7 +322,7 @@ function phoneJob(b, c, day, yesFor) {
   const s = serviceInfo(b.kind);
   const held = RENTAL.has(b.kind) && c.hold && c.hold.state === 'held';
   const ret = c.ret;
-  const words = `${KIND_LABELS[b.kind]}${b.kind === 'rental_return' && ret && ret.returned_at ? ' ✓' : ''}: ${b.customer_name || 'No name'}`;
+  const words = `${bookingLabel(b, c)}${b.kind === 'rental_return' && ret && ret.returned_at ? ' ✓' : ''}: ${b.customer_name || 'No name'}`;
   const bal = c.bal && !c.bal.void ? c.bal : null;
   const rows = [['Time', b.time ? prettyTime(b.time) : 'Any time this day']];
   if (b.place) rows.push(['Where', b.place]);
@@ -383,7 +387,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
         const mark = b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : '';
         const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
         const c = ctx(b);
-        return `<span class="k ${esc(b.kind)}${tentClass(c)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''}${tentAttrs(b, c)} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(gridTent(c, held))}${esc(KIND_LABELS[b.kind])}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
+        return `<span class="k ${esc(b.kind)}${tentClass(c)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''}${tentAttrs(b, c)} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(gridTent(c, held))}${esc(bookingLabel(b, c))}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
       }).join('')}
       ${outChips(windows, day, today, 'span')}
       ${(reqByDay[day] || []).map((c) => requestedChip(c, 'span')).join('')}
@@ -418,7 +422,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
   // is seen without paging the month (owner, 19 Oct 2026: a 3 Nov request looked "unscheduled").
   const upReq = requested.filter((c) => (!c.part || c.part === 'pickup') && c.date >= today && c.date <= addDays(today, 14));
   const upRows = [...upcoming.map((b) => ({ date: b.date, time: b.time || '', html: `<a class="item" href="/admin/day/${esc(b.date)}"${tip('cal.day')}>
-      <strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind)}${ctx(b).tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''} ${esc(b.customer_name || 'No name')}<br><span class="muted">${esc(b.items || '')}</span> ${statusBits(b, ctx(b))}</a>` })),
+      <strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind, bookingLabel(b, ctx(b)))}${ctx(b).tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''} ${esc(b.customer_name || 'No name')}<br><span class="muted">${esc([b.items, ctx(b).delivery ? b.place : ''].filter(Boolean).join(' · '))}</span> ${statusBits(b, ctx(b))}</a>` })),
     ...upReq.map((c) => ({ date: c.date, time: '', html: `<div class="item" data-upcoming-requested><strong>${esc(shortDate(c.date))}</strong> ${requestedChip(c, 'a')}</div>` }))]
     .sort((x, y2) => (x.date + x.time).localeCompare(y2.date + y2.time));
   const upcomingHtml = `<section class="upcoming" data-upcoming><h3 class="vh">Upcoming (next 14 days)</h3>${upRows.length ? upRows.map((x) => x.html).join('') : '<p class="muted" style="margin:0">Nothing in the next 14 days.</p>'}</section>`;
@@ -501,7 +505,7 @@ const VIEW_JS = `
 })();`;
 
 function listEntry(b, ctx) {
-  return `<a class="item" href="/admin/day/${esc(b.date)}"${tip('cal.day')}><strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind)}${ctx(b).tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''} ${esc(b.customer_name || 'No name')}
+  return `<a class="item" href="/admin/day/${esc(b.date)}"${tip('cal.day')}><strong>${esc(shortDate(b.date))}${b.time ? `, ${esc(prettyTime(b.time))}` : ''}</strong> ${kindTag(b.kind, bookingLabel(b, ctx(b)))}${ctx(b).tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''} ${esc(b.customer_name || 'No name')}
     <br><span class="muted">${esc([b.items, b.place].filter(Boolean).join(' · '))}</span> ${statusBits(b, ctx(b))}</a>`;
 }
 
@@ -588,7 +592,7 @@ export function dayPage({ outRows = [], tdToday = [], requested = [], gamesAsked
   // when > 0; notes in italics. Timed jobs first, Anytime last (daySort).
   const sheet = `<section class="card"><h2>Day sheet</h2><div class="jobs" data-day-sheet>
     ${rows.map(({ b, c, owe }) => `<div class="job" data-sheet-row="${b.id}"><span class="box" aria-hidden="true"></span><div>
-      <div class="jl">${esc([b.time ? prettyTime(b.time) : 'Anytime', SHEET_WORDS[b.kind] || KIND_LABELS[b.kind] || 'Booking', firstOf(b.customer_name)].join(' · '))}${c.tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''}</div>
+      <div class="jl">${esc([b.time ? prettyTime(b.time) : 'Anytime', (c.delivery && DELIVERY_WORDS[b.kind]) || SHEET_WORDS[b.kind] || KIND_LABELS[b.kind] || 'Booking', firstOf(b.customer_name)].join(' · '))}${c.tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''}</div>
       ${b.items ? `<div class="ji">${esc(b.items)}</div>` : ''}${b.place ? `<div class="muted">${esc(b.place)}</div>` : ''}
       ${owe > 0 ? `<div class="jo" data-still-owed>Still owed ${esc(money(owe))}</div>` : ''}
       ${(c.notes || []).map((n) => `<div class="jn">${esc(n.body)}</div>`).join('')}</div></div>`).join('') || (outRows.length ? '' : '<p>Nothing booked this day.</p>')}
@@ -605,7 +609,7 @@ export function dayPage({ outRows = [], tdToday = [], requested = [], gamesAsked
     const rk = returnKeyOf(b);
     const returned = c.ret && c.ret.returned_at;
     return `<article class="card booking" data-booking-card="${b.id}">
-      <div class="spread"><h3 style="margin:0">${esc(b.customer_name || 'No name')}</h3>${kindTag(b.kind)}</div>${c.tentative ? `<p class="tentpill" data-tentative-pill>${TENT_WORDS}: say yes on <a href="/admin/#c-${esc(b64urlText(b.request_key))}"${tip('cal.openCard')}>their card</a> to confirm.</p>` : ''}
+      <div class="spread"><h3 style="margin:0">${esc(b.customer_name || 'No name')}</h3>${kindTag(b.kind, bookingLabel(b, c))}</div>${c.tentative ? `<p class="tentpill" data-tentative-pill>${TENT_WORDS}: say yes on <a href="/admin/#c-${esc(b64urlText(b.request_key))}"${tip('cal.openCard')}>their card</a> to confirm.</p>` : ''}
       <div><strong>${esc(b.time ? prettyTime(b.time) : 'Any time this day')}</strong></div>
       ${b.items ? `<div><strong>What:</strong> ${esc(b.items)}</div>` : ''}${b.place ? `<div><strong>Where:</strong> ${esc(b.place)}</div>` : ''}
       <div style="margin:6px 0">${statusBits(b, c)}</div>

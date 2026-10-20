@@ -22,6 +22,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const { nav, footer, quoteEventScript } = require(path.join(ROOT, 'templates/page-shell.js'));
 const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
+const BD = require(path.join(ROOT, 'scripts/lib/business_delivery.js'));
+const BDL = BD.businessDeliveryLine(offers); // business delivery, priced from services.json (19 Oct 2026)
 const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js'));
 const siteIcons = require(path.join(ROOT, 'scripts/lib/site_icons.js'));
 const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
@@ -91,7 +93,7 @@ const header = nav('/rentals/');
 const foot = footer();
 
 const PICKUP_RULES = [
-  ['Where', `Pick up and return at ${PICK.place}, ${PICK.address}, a safe exchange zone. We do not bring rentals to you.`],
+  ['Where', `Pick up and return at ${PICK.place}, ${PICK.address}, a safe exchange zone. Home and personal rentals are picked up and returned there. ${BDL}`],
   ['When', `After payment, text or call ${PICK.phone} to set your pickup time. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.`],
   ['Pay', `${money(data.damageDeposit)} refundable damage deposit + ${data.holdPercent}% of the rental holds your date, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App on the spot (never cash). The deposit is refunded at return.`],
   ['Bring', `Your government photo ID (the name must match the invoice) and a car. Every game fits an SUV or a sedan with the seats down${has('inflatable-movie-screen') ? '; the movie screen fits a trunk' : ''}.`]
@@ -99,7 +101,7 @@ const PICKUP_RULES = [
 
 const FAQ = [
   ['Where do I pick up?',
-    `At ${PICK.place}, ${PICK.address}. It is a safe exchange zone, and you return the rentals there too. After payment, text or call ${PICK.phone} to set your pickup time.`],
+    `At ${PICK.place}, ${PICK.address}. It is a safe exchange zone, and you return the rentals there too. After payment, text or call ${PICK.phone} to set your pickup time. ${BDL}`],
   ['How do I pay?',
     `A ${money(data.damageDeposit)} refundable damage deposit plus ${data.holdPercent}% of the rental fee holds your date, paid by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App on the spot; we do not take cash. The damage deposit is refunded when you return everything.`],
   ['What do I need to bring?',
@@ -124,7 +126,7 @@ const FAQ = [
 
 const STEPS = [
   ['Book your games', 'Pick your games, your event date and your pickup and return days on our booking form: it shows what is free and your exact total. Add your photo ID.'],
-  ['Hold your date', `Your games are held for 24 hours. ${money(data.damageDeposit)} damage deposit + ${data.holdPercent}% by Zelle or Cash App from your invoice confirms them.`],
+  ['Hold your date', `Your games are held for ${offers.rentalHolds.defaultHours} hours. ${money(data.damageDeposit)} damage deposit + ${data.holdPercent}% by Zelle or Cash App from your invoice confirms them.`],
   ['Pick up', `Text or call ${PICK.phone} to set a time, then meet us at ${PLACE}. We check your ID and you pay the rest on the spot.`],
   ['Return', 'Bring everything back on the day you picked: the day after or 2 days after your event, or Monday or Tuesday after a weekend. We check every piece and refund the deposit.']
 ];
@@ -132,7 +134,7 @@ const STEPS = [
 const TERMS = [
   `<strong>Rental period:</strong> One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday. The price is the same whichever days you pick.`,
   `<strong>Price:</strong> ${money(RATE.day)} per game per day, ${money(RATE.weekend)} per game for a weekend; no minimum order.`,
-  `<strong>Pickup and return:</strong> ${esc(PICK.place)}, ${esc(PICK.address)}. Pickup time is set by text or call to ${PICK.phone} after payment.`,
+  `<strong>Pickup and return:</strong> ${esc(PICK.place)}, ${esc(PICK.address)}. Pickup time is set by text or call to ${PICK.phone} after payment. ${esc(BDL)}`,
   `<strong>Holding the date:</strong> ${money(data.damageDeposit)} refundable damage deposit + ${data.holdPercent}% of the rental, by Zelle or Cash App from the invoice.`,
   '<strong>The rest:</strong> paid at pickup by Zelle or Cash App on the spot. No cash.',
   `<strong>Damage deposit:</strong> ${money(data.damageDeposit)}, refunded at return.`,
@@ -254,7 +256,7 @@ function render() {
 
     <section class="section section-soft" id="pickup">
       <div class="container">
-        <div class="answer-block"><span class="eyebrow">How Pickup Works</span><h2>Pick up and return at ${esc(PLACE)}</h2><p>${esc(PICK.place)}, ${esc(PICK.address)}: a safe exchange zone.</p></div>
+        <div class="answer-block"><span class="eyebrow">How Pickup Works</span><h2>Pick up and return at ${esc(PLACE)}</h2><p>${esc(PICK.place)}, ${esc(PICK.address)}: a safe exchange zone. ${esc(BDL)}</p></div>
         <div class="steps">${PICKUP_RULES.map(([h, p]) => `<div class="step"><h3>${h}</h3><p>${esc(p)}</p></div>`).join('')}</div>
       </div>
     </section>
@@ -285,7 +287,7 @@ function render() {
       <div class="container">
         <span class="eyebrow">Book Party Games</span>
         <h2>Book party game rentals</h2>
-        <p>Pick your games and pickup date on the Porch &amp; Party booking form: it greys out what is already booked and shows your exact total. Your games are held for 24 hours while you pay the deposit.</p>
+        <p>Pick your games and pickup date on the Porch &amp; Party booking form: it greys out what is already booked and shows your exact total. Your games are held for ${offers.rentalHolds.defaultHours} hours while you pay the deposit.</p>
         <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary" data-quote-cta="rentals-form">Book your games</a><a href="${MAILTO}" class="btn-secondary">Email Us</a></div>
         <p class="muted" style="margin-top: 14px;"><a href="${C.telHref}">Call ${C.telephoneDisplay}</a> or <a href="${C.smsHref}">text ${C.telephoneDisplay}</a> &middot; <a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p>
       </div>

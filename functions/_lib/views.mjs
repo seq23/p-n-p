@@ -6,8 +6,10 @@
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf } from './util.mjs';
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
 import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, keyFacts, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, inlineRowKind, SCHEDULE_FIRST } from './cards.mjs';
-import { deriveSteps, undoFor } from './steps.mjs';
-import { parseFormDate } from './calendar.mjs';
+import { HOLD_DEFAULT_HOURS } from './hold-rules.mjs';
+import { holdLongerRow, heldUntilWords, HOLD_CSS } from './views-messages.mjs';
+import { deriveSteps, undoFor, waitingDays, waitingWords, WAIT_HIGHLIGHT_DAYS } from './steps.mjs';
+import { parseFormDate, deliveryAddress } from './calendar.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 import { takedownState, inlineDefaultDate } from './takedown.mjs';
@@ -634,7 +636,7 @@ const chicagoToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America
 export const STEP_CSS = `
 .stepcard{display:grid;gap:12px}
 .stepcard .schead{display:grid;gap:4px}.stepcard .svcs{margin:0}.stepcard .sctags{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.stepcard h3.who{font-size:1.6rem;margin:0}.stepcard .scwhen{color:var(--muted);font-size:1rem;margin:0}
+.stepcard h3.who{font-size:1.6rem;margin:0}.stepcard .scwhen{color:var(--muted);font-size:1rem;margin:0}.stepcard .scdelivery{margin:2px 0 0;font-size:1rem}
 .scbar{height:10px;border-radius:5px;background:var(--line);overflow:hidden;margin:2px 0 0}.scbar i{display:block;height:100%;background:var(--ok)}
 .scof{font-size:.9rem;color:var(--muted);margin:4px 0 0}
 .sclist{list-style:none;margin:6px 0 0;padding:0;display:grid;gap:2px}
@@ -654,6 +656,7 @@ export const STEP_CSS = `
 .nextbox .why{font-size:.98rem;color:var(--muted);margin:0}
 .nextbox .actions{margin:0}.nextbox .hint{margin:4px 0 0}
 .nextbox .smallrow{display:flex;gap:8px}.nextbox .smallrow>*{flex:1}.nextbox .smallrow .btn{min-height:48px}
+.waitline{margin:0;font-weight:700;color:var(--muted)}.waitline.late{color:#b42318}
 .holdline{background:#fdf3d8;color:#7a4a0c;border-radius:8px;padding:8px 10px;font-weight:600;margin:0}
 .nextbox .tdrow{margin:0}.nextbox .nextslot{margin:0}
 .nextbox .done-msg{color:var(--ok);font-weight:700;font-size:1.1rem;margin:0}
@@ -751,11 +754,7 @@ const holdUntilWords = (h) => {
   if (!h) return '';
   if (h.by_hand) return 'Games held for them (no end time)';
   if (!Number.isFinite(h.untilMs)) return '';
-  const tz = 'America/Chicago';
-  const d = new Date(h.untilMs);
-  const day = d.toLocaleDateString('en-US', { weekday: 'short', timeZone: tz });
-  const t = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: tz }).replace(':00', '');
-  return `Games held until ${day} ${t}`;
+  return `Games held until ${heldUntilWords(h.untilMs)}`;
 };
 
 // The ONE next-step box. -> { html, big } (big = the help key of its one big button, or '').
@@ -779,7 +778,10 @@ function nextBox(r, s, x) {
       const tel = r.phone ? `<a class="btn ghost" href="tel:${esc(String(r.phone).replace(/[^\d+]/g, ''))}"${tip('step.call')}>Call</a>` : '';
       const sms = r.phone ? `<a class="btn ghost" href="sms:${esc(String(r.phone).replace(/[^\d+]/g, ''))}"${tip('step.text')}>Text</a>` : '';
       const why = rentalsOnly ? 'Confirm the games and the date. If you already talked, tap the button.' : 'Talk about what they want and the date. If you already talked, tap the button.';
-      return box(`Call or text ${who} back`, why, `${tel || sms ? `<div class="smallrow">${tel}${sms}</div>` : ''}<details class="talk" data-talk><summary class="btn primary"${tip('step.talked')}>I've talked to them</summary>${talkBox(r, s, x)}</details>${hint('step.talked')}`, '', 'step.talked');
+      // How long they have waited (Memphis days; the daily "Call these people back" email says the same).
+      const wd = waitingDays(r.sortTime, today);
+      const waitLine = `<p class="waitline${wd >= WAIT_HIGHLIGHT_DAYS ? ' late' : ''}" data-waiting="${wd}">${esc(waitingWords(wd))}</p>`;
+      return box(`Call or text ${who} back`, why, `${waitLine}${tel || sms ? `<div class="smallrow">${tel}${sms}</div>` : ''}<details class="talk" data-talk><summary class="btn primary"${tip('step.talked')}>I've talked to them</summary>${talkBox(r, s, x)}</details>${hint('step.talked')}`, '', 'step.talked');
     }
     case 'invoiced': {
       const lines = inv && inv.lines ? inv.lines : null;
@@ -792,7 +794,8 @@ function nextBox(r, s, x) {
     case 'deposit': {
       const full = plan === 'full';
       const amt = inv ? (full ? (bal ? bal.remaining : 0) : inv.deposit_due_cents) : 0;
-      const holdBit = hold ? `<p class="holdline" data-hold-line>${esc(holdUntilWords(hold))}</p>${holdHtml ? `<details class="disclose" data-hold-longer><summary${tip('step.holdLonger')}>Hold longer</summary>${holdHtml}</details>` : ''}` : '';
+      // "Games held until Wed 3 PM" + "Hold longer" (two taps: the button, then Hold for 3 days).
+      const holdBit = hold ? `<p class="holdline" data-hold-line>${esc(holdUntilWords(hold))}</p>${hold.by_hand ? '' : `<style>${HOLD_CSS}</style>${holdLongerRow(rk, { card: true })}`}` : '';
       const key = full ? 'pay.paid' : 'pay.deposit';
       return box(full ? 'Wait for the payment' : 'Wait for the deposit', `Tap the button when the ${amt ? `${money(amt)} ` : ''}${full ? 'payment' : 'deposit'} comes in.`, `${holdBit}<div class="actions" data-primary>${cardButton(key, ctx, true)}</div>`, tent, key);
     }
@@ -825,18 +828,20 @@ function nextBox(r, s, x) {
       const pb = s.pickupBooking;
       if (!pb) return box('Book the pickup and return', 'Pick both days on the calendar.', bigA('card.schedPickup', `/admin/calendar/new?r=${rk}&kind=rental_pickup`, 'Book pickup + return'), tent, 'card.schedPickup');
       const owed = bal ? bal.owed : 0;
-      const why = `At ${pickupPlace || 'Mt. Moriah Station'}. Hand over the games${owed > 0 ? `, collect the rest (${money(owed)})` : ''}.`;
+      const addr = deliveryAddress(r);
+      const why = addr ? `Deliver to ${addr}. Hand over the games${owed > 0 ? `, collect the rest (${money(owed)})` : ''}.` : `At ${pickupPlace || 'Mt. Moriah Station'}. Hand over the games${owed > 0 ? `, collect the rest (${money(owed)})` : ''}.`;
+      const pw = addr ? 'Delivery' : 'Pickup';
       // No pickup time yet: the small "Text about pickup time" sits in the box (never big).
       const m = ctx.msgs && ctx.msgs.pickup && ctx.msgs.pickup.sms;
       const timeText = m && !pb.time ? `<div class="smallrow"><a class="btn ghost" href="${esc(m.href)}" data-msg-tap="pickupTime" data-rk="${esc(rk)}"${tip('msg.pickupText')}>Text about pickup time</a></div>` : '';
-      if (today && today < pb.date) return box(`Pickup: ${shortDate(pb.date)}`, why, `${timeText}${wait('step.picked', 'Mark picked up, on pickup day', pb.date)}`, tent, '');
+      if (today && today < pb.date) return box(`${pw}: ${shortDate(pb.date)}`, why, `${timeText}${wait('step.picked', addr ? 'Mark delivered, on delivery day' : 'Mark picked up, on pickup day', pb.date)}`, tent, '');
       const pay = owed > 0 && inv ? `<label class="choice"><input type="checkbox" name="paid_rest" value="1" checked${tip('step.paidRest')}> They paid the rest (${money(owed)}) now</label>${methodPicker()}` : '';
-      const btn = `<button class="btn primary" type="submit"${tip('step.picked')}>Mark picked up</button>`;
-      return box(`Pickup: ${shortDate(pb.date)}`, why, `<form class="pickform" method="post" action="/admin/calendar/bookings/${pb.id}/done" data-primary>${hiddenInputs({ r: rk })}${pay}${pay ? act(btn, 'step.picked') : `<div class="act">${btn}</div>`}</form>`, '', 'step.picked');
+      const btn = `<button class="btn primary" type="submit"${tip('step.picked')}>${addr ? 'Mark delivered' : 'Mark picked up'}</button>`;
+      return box(`${pw}: ${shortDate(pb.date)}`, why, `<form class="pickform" method="post" action="/admin/calendar/bookings/${pb.id}/done" data-primary>${hiddenInputs({ r: rk })}${pay}${pay ? act(btn, 'step.picked') : `<div class="act">${btn}</div>`}</form>`, '', 'step.picked');
     }
     case 'returned': {
       const { ret } = rentalDates(r, bookings);
-      return box(`Return: ${ret ? shortDate(ret) : 'not set'}`, 'Check every game is back and nothing is damaged.', `<div class="actions" data-primary>${cardButton('ret.mark', ctx, true)}</div>`, '', 'ret.mark');
+      return box(`${deliveryAddress(r) ? 'Collect' : 'Return'}: ${ret ? shortDate(ret) : 'not set'}`, deliveryAddress(r) ? `Collect the games from ${deliveryAddress(r)}. Check every game is back and nothing is damaged.` : 'Check every game is back and nothing is damaged.', `<div class="actions" data-primary>${cardButton('ret.mark', ctx, true)}</div>`, '', 'ret.mark');
     }
     case 'deposit_back': {
       if (!inv || !s.refundable) return box('Make the invoice', 'The damage deposit is on the invoice.', bigA('card.createInvoice', `/admin/invoices/new?r=${rk}`, 'Create invoice'), '', 'card.createInvoice');
@@ -909,11 +914,12 @@ export function requestCard(r, o) {
       ${decorish && !archived ? `<div class="act"><a class="btn ghost" href="/admin/checklist?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.printChecklist')}>Print checklist</a></div>` : ''}
       ${!archived && !quiet ? `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('card.putAway')}>Put away</button></div></form>` : ''}
       ${stage === 'void' ? cardButton('card.archive', ctx, false) : ''}</div>`;
-  // The hold controls sit behind "Hold longer" on the deposit step; at any other step they are under More.
-  const extrasHere = quiet ? '' : `${extras}${holdHtml && s.current !== 'deposit' ? holdHtml : ''}`;
+  // The rest of the hold controls (text a reminder, release) are under More.
+  const extrasHere = quiet ? '' : `${extras}${holdHtml || ''}`;
   return `<article class="card stepcard" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
       <div class="schead"><div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
-        <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}</div>
+        <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
+        ${deliveryAddress(r) ? `<p class="scdelivery" data-business-delivery><strong>Business delivery</strong>: ${esc([answerOf(r, /^business name$/i), deliveryAddress(r)].filter(Boolean).join(', '))}</p>` : ''}</div>
       ${steps}
       ${nb.html}
       <details class="disclose more" data-details><summary${tip('card.details')}>More: answers, history, other buttons</summary>
@@ -1012,6 +1018,12 @@ export function lineEditor(line) {
   </div>`;
 }
 
+// The invoice editor (owner, 19 Oct 2026: "calm and light, especially on a phone"). Each line is
+// ONE compact row (what · how many × price · line total); tap it to change it right there. The
+// quick-adds are one row of chips. One summary at the bottom (total, due now, the rest and by
+// when), ONE big "Send invoice"; Save draft and See it before sending are small. Every ability
+// stays: add / remove / change any line, the refundable flag, the line note, the customer, the
+// pay plan, the due date and the message to the customer.
 const EDITOR_JS = `
 (function(){
   var form=document.getElementById('inv');if(!form)return;
@@ -1019,39 +1031,39 @@ const EDITOR_JS = `
   function plan(){var r=form.querySelector('[name=pay_plan]:checked');return r?r.value:'half';}
   function txt(id,v){var el=document.getElementById(id);if(el)el.textContent=v;}
   function show(id,on){var el=document.getElementById(id);if(el)el.hidden=!on;}
-  function fmt(c){return '$'+(c/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
-  function esc(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML;}
-  function recalc(){var t=0,rows='',missing=[];list.querySelectorAll('[data-line]').forEach(function(el){var d=el.querySelector('[name=line_desc]').value.trim();if(!d)return;var q=parseFloat(el.querySelector('[data-qty]').value)||0,p=Math.round((parseFloat(el.querySelector('[data-price]').value)||0)*100),lt=Math.round(q*p),r=el.querySelector('[name=line_refundable]').value==='1',free=el.querySelector('[name=line_note]').value==='free';t+=lt;if(lt===0&&!free)missing.push(d);
-      rows+='<tr><td>'+esc(d)+(q!==1?' &times; '+q:'')+(r?'<div class="muted">Given back after the event</div>':'')+'</td><td class="amt">'+(lt===0?(free?'Free':'<strong style="color:#8f3427">Price needed</strong>'):fmt(lt))+'</td></tr>';});
+  function fmt(c){return (c<0?'-':'')+'$'+(Math.abs(c)/100).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
+  function recalc(){var t=0,missing=[];list.querySelectorAll('[data-line]').forEach(function(el){var d=el.querySelector('[name=line_desc]').value.trim(),q=parseFloat(el.querySelector('[data-qty]').value)||0,p=Math.round((parseFloat(el.querySelector('[data-price]').value)||0)*100),lt=Math.round(q*p),r=el.querySelector('[name=line_refundable]').value==='1',free=el.querySelector('[name=line_note]').value==='free';
+      var sd=el.querySelector('[data-l-desc]'),sq=el.querySelector('[data-l-qty]'),st=el.querySelector('[data-l-total]');
+      if(sd)sd.textContent=d||'New line: tap to fill in';if(sq)sq.textContent=(q!==1?q+' × '+fmt(p):'')+(r?(q!==1?' · ':'')+'given back':'');
+      if(st){st.textContent=!d?'':(lt===0?(free?'Free':'Price needed'):fmt(lt));st.classList.toggle('need',Boolean(d)&&lt===0&&!free);}
+      if(!d)return;t+=lt;if(lt===0&&!free)missing.push(d);});
     var pn=document.getElementById('price-needed');if(pn){pn.hidden=!missing.length;pn.querySelector('span').textContent=missing.join(', ');}
     var p=plan();show('custom-wrap',p==='custom');
     var dc=p==='full'?t:(p==='custom'?Math.min(t,Math.round((parseFloat(dep&&dep.value)||0)*100)):Math.round(t/2));
     if(p!=='custom'&&dep)dep.value=(dc/100).toFixed(2);
-    document.getElementById('sum-lines').innerHTML=rows||'<tr><td class="muted">Nothing in the total yet. Tap Change what goes into the total.</td><td></td></tr>';
     txt('sum-total',fmt(t));txt('sum-deposit',fmt(dc));txt('sum-rest',fmt(t-dc));
-    show('sum-now-row',p!=='full');show('sum-rest-row',p!=='full');
-    txt('sum-now-label',p==='half'?'Deposit asked for now (half)':'Deposit asked for now');
-    txt('sum-due-label',p==='full'?'Full amount due by':'Rest due by');
+    show('sum-rest-row',p!=='full');txt('sum-now-label',p==='full'?'Due now (all of it)':(p==='half'?'Due now (half)':'Due now (deposit)'));
+    txt('sum-due-label',p==='full'?'Pay by':'The rest by');
     var due=form.querySelector('[name=due_date]').value;txt('sum-due',due?new Date(due+'T12:00:00Z').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric',timeZone:'UTC'}):'');}
   form.addEventListener('input',recalc);
   form.addEventListener('change',recalc);
   form.addEventListener('click',function(e){if(e.target.matches('[data-remove]')){e.target.closest('[data-line]').remove();recalc();}});
-  document.getElementById('add-line').addEventListener('click',function(){list.insertAdjacentHTML('beforeend',tpl.innerHTML);recalc();});
-  function addLine(desc,price,o){o=o||{};list.insertAdjacentHTML('beforeend',tpl.innerHTML);var el=list.lastElementChild;el.querySelector('[name=line_desc]').value=desc;
-    var pr=el.querySelector('[data-price]');if(price!==null&&price!==undefined)pr.value=price;else pr.value='';if(o.discount){el.setAttribute('data-discount','');pr.placeholder='Amount off, e.g. 20';pr.removeAttribute('min');}
-    if(o.refundable)el.querySelector('[name=line_refundable]').value='1';if(o.note)el.querySelector('[name=line_note]').value=o.note;recalc();
-    if(price===null||price===undefined){var dt=form.querySelector('details.more');if(dt)dt.open=true;pr.focus();}return el;}
+  function addLine(desc,price,o){o=o||{};list.insertAdjacentHTML('beforeend',tpl.innerHTML);var el=list.lastElementChild;el.querySelector('[name=line_desc]').value=desc||'';
+    var pr=el.querySelector('[data-price]');pr.value=(price!==null&&price!==undefined)?price:'';if(o.discount){el.setAttribute('data-discount','');pr.placeholder='Amount off, e.g. 20';}
+    if(o.refundable)el.querySelector('[name=line_refundable]').value='1';if(o.note)el.querySelector('[name=line_note]').value=o.note;
+    el.open=(price===null||price===undefined||!desc);recalc();if(el.open)(desc?pr:el.querySelector('[name=line_desc]')).focus();return el;}
+  document.getElementById('add-line').addEventListener('click',function(){addLine('',null);});
   form.addEventListener('click',function(e){var q=e.target.closest('[data-quick]');if(!q)return;
     if(q.hasAttribute('data-q-game')){var sel=form.querySelector('[data-quick-game-pick]'),opt=sel&&sel.options[sel.selectedIndex];if(!opt||opt.disabled)return;var name=opt.value,comp=form.querySelector('[data-quick-comp]').checked;
       var n=Number(q.getAttribute('data-base'))+[].slice.call(list.querySelectorAll('[name=line_desc]')).filter(function(i){return /^Extra game: /.test(i.value);}).length+1;
       addLine('Extra game: '+name,comp?'0.00':q.getAttribute('data-price'),{note:comp?'free':''});
-      if(comp){var nt=form.querySelector('[name=notes]'),ord=['','1st','2nd','3rd'][n]||(n+'th'),line='Complimentary '+ord+' game: '+name;nt.value=nt.value?nt.value.replace(/\\s*$/,'')+'\\n'+line:line;}
-      opt.disabled=true;opt.textContent=name+' (added)';recalc();return;}
+      if(comp){var nt=form.querySelector('[name=notes]'),ord=['','1st','2nd','3rd'][n]||(n+'th'),line='Complimentary '+ord+' game: '+name;nt.value=nt.value?nt.value.replace(/\\s*$/,'')+'\\n'+line:line;var nd=nt.closest('details');if(nd)nd.open=true;}
+      opt.disabled=true;opt.textContent=name+' (added)';q.closest('details').open=false;recalc();return;}
     addLine(q.getAttribute('data-desc'),q.hasAttribute('data-price')?q.getAttribute('data-price'):null,{discount:q.hasAttribute('data-discount'),refundable:q.hasAttribute('data-refundable')});});
   form.addEventListener('change',function(e){var l=e.target.closest('[data-discount]');if(l&&e.target.matches('[data-price]')){var v=parseFloat(e.target.value);if(v>0){e.target.value=(-v).toFixed(2);recalc();}}},true);
   form.addEventListener('submit',function(e){var b=e.submitter||document.activeElement;if(b&&b.name==='go'&&b.value==='send'){
-    var pn=document.getElementById('price-needed');if(pn&&!pn.hidden){e.preventDefault();var dt=form.querySelector('details');dt.open=true;pn.scrollIntoView({behavior:'smooth'});
-      var first=[].slice.call(list.querySelectorAll('[data-line]')).find(function(el){return el.querySelector('[name=line_desc]').value.trim()&&!(parseFloat(el.querySelector('[data-price]').value)>0)&&el.querySelector('[name=line_note]').value!=='free';});if(first)first.querySelector('[data-price]').focus();return;}
+    var pn=document.getElementById('price-needed');if(pn&&!pn.hidden){e.preventDefault();pn.scrollIntoView({behavior:'smooth'});
+      var first=[].slice.call(list.querySelectorAll('[data-line]')).find(function(el){return el.querySelector('[name=line_desc]').value.trim()&&!(parseFloat(el.querySelector('[data-price]').value)>0)&&el.querySelector('[name=line_note]').value!=='free'&&!el.hasAttribute('data-discount');});if(first){first.open=true;first.querySelector('[data-price]').focus();}return;}
     b.disabled=true;b.textContent='Sending…';
     var h=document.createElement('input');h.type='hidden';h.name='go';h.value='send';form.appendChild(h);}});
   recalc();
@@ -1082,79 +1094,100 @@ function paymentWarning(pay) {
 
 // One screen: the prefilled invoice as the customer will see it, and ONE button that sends it.
 // Changing anything is possible (under "Change what goes into the total") but never required.
-// The quick-add buttons (owner-approved 19 Oct 2026): one tap adds a ready line; the prices come
-// from data/offers/services.json invoiceQuickAdds (quickAddsFor in admin.mjs), never typed here.
-// A line with no price opens the lines and puts the cursor in its price. "+ Extra game" (rentals
-// only) lists the games free for the whole pickup -> return span; booked ones cannot be picked.
+// One invoice line as a compact row: tap to open its fields in place.
+export function lineRow(line, { open = false } = {}) {
+  const cents = Math.round(Number(line.qty || 0) * Number(line.unit_cents || 0));
+  const need = line.description && needsPrice(line);
+  // The small second line only says what the total does not: how many, and "given back".
+  const sum = line.description && (Number(line.qty) !== 1 || line.refundable) ? `${Number(line.qty) !== 1 ? `${esc(line.qty)} × ${money(line.unit_cents)}` : ''}${line.refundable ? `${Number(line.qty) !== 1 ? ' · ' : ''}given back` : ''}` : '';
+  return `<details class="lrow" data-line${open || need || !line.description ? ' open' : ''}${/^discount\b/i.test(line.description || '') ? ' data-discount' : ''}>
+    <summary class="lsum"${tip('ed.lineRow')}><span class="ld" data-l-desc>${esc(line.description || 'New line: tap to fill in')}</span><span class="lq" data-l-qty>${sum}</span><span class="lt${need ? ' need' : ''}" data-l-total>${line.description ? (cents === 0 ? (line.note === 'free' ? 'Free' : 'Price needed') : money(cents)) : ''}</span></summary>
+    <div class="lgrid">
+      <div class="full"><label>What it is</label><input name="line_desc" value="${esc(line.description)}"></div>
+      <div><label>How many</label><input name="line_qty" type="number" step="any" min="0" inputmode="decimal" value="${esc(line.qty)}" data-qty></div>
+      <div><label>Price each ($)</label><input name="line_price" type="number" step="0.01" inputmode="decimal" value="${esc((line.unit_cents / 100).toFixed(2))}" data-price></div>
+      <div class="full"><label>Given back after the event?</label><select name="line_refundable"><option value="0"${line.refundable ? '' : ' selected'}>No</option><option value="1"${line.refundable ? ' selected' : ''}>Yes, it is a refundable deposit</option></select></div>
+      <div class="full"><label>Note on this line (optional)</label><input name="line_note" value="${esc(line.note)}"></div>
+      <div class="full"><button type="button" class="linkbtn danger" data-remove${tip('ed.removeLine')}>Remove this line</button></div>
+    </div></details>`;
+}
+
+const EDITOR_CSS = `.ed .card{padding:14px}.ed h2{font-size:1.3rem;margin:0 0 8px}
+.ed .who{display:flex;flex-wrap:wrap;gap:2px 10px;align-items:baseline}.ed .who strong{font-size:1.15rem}.ed .who .muted{word-break:break-all}
+.ed .who details{flex-basis:100%}.ed .who summary,.ed .note summary{color:var(--accent);font-weight:600;cursor:pointer;min-height:40px;display:inline-flex;align-items:center}
+.lrow{border-bottom:1px solid var(--line)}.lrow:last-child{border-bottom:0}
+.lsum{display:grid;grid-template-columns:1fr auto;gap:0 10px;padding:10px 2px;cursor:pointer;list-style:none;min-height:48px}.lsum::-webkit-details-marker{display:none}
+.lsum .ld{font-weight:600;grid-column:1;overflow-wrap:anywhere}.lsum .lq{grid-column:1;color:var(--muted);font-size:.92rem}.lsum .lt{grid-column:2;grid-row:1 / span 2;align-self:center;font-weight:700;white-space:nowrap}
+.lsum .lt.need{color:#8f3427}
+.lrow[open] .lsum{background:var(--cream);border-radius:8px}
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;padding:4px 2px 12px}.lgrid .full{grid-column:1 / -1}.lgrid label{font-size:.9rem;margin:0}.lgrid input,.lgrid select{margin:2px 0 0}
+.qchips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.qchips .chipbtn,.qchips summary{display:inline-flex;align-items:center;min-height:44px;padding:0 14px;border:1.5px solid var(--accent);border-radius:999px;background:#fff;color:var(--accent);font:600 .98rem Inter,Arial,sans-serif;cursor:pointer;list-style:none;width:auto}
+.qchips summary::-webkit-details-marker{display:none}.qchips details[open]{flex-basis:100%}.qchips details[open]>summary{background:var(--cream)}
+.qgamebox{margin-top:8px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}.qgamebox select{min-height:48px;font-size:1.05rem}
+.plans.compact{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.plans.compact .plan{padding:8px;min-height:48px;text-align:center}.plans.compact small{display:none}
+.ed .note textarea{min-height:80px}
+.sumbox .row2{display:flex;justify-content:space-between;gap:10px;padding:4px 0}.sumbox .big{font-size:1.4rem;font-weight:700}.sumbox .now{color:var(--accent);font-weight:700}
+.ed .linkbtn{background:none;border:0;padding:0 4px;color:var(--accent);font:600 1rem Inter,Arial,sans-serif;text-decoration:underline;cursor:pointer;min-height:44px}.ed .linkbtn.danger{color:#8f3427}
+.ed .sendrow{display:grid;gap:8px;margin-top:6px}.ed .sendrow .small{display:flex;flex-wrap:wrap;gap:6px 14px;justify-content:center}`;
+
+// The quick-add chips (owner-approved 19 Oct 2026): one tap adds a ready line; prices from
+// data/offers/services.json invoiceQuickAdds (quickAddsFor in admin.mjs), never typed here.
+// A line with no price opens itself with the cursor in its price. "+ Extra game" (rentals only)
+// lists the games free for the whole pickup -> return span; booked ones cannot be picked.
 function quickAdds(q) {
-  if (!q) return '';
   const d = (c) => (c / 100).toFixed(2);
-  const b = (key, label, attrs) => `<button type="button" class="btn ghost" data-quick ${attrs}${tip(key)}>${esc(label)}</button>`;
-  const games = q.rental ? `<details class="disclose qgame" data-quick-game><summary${tip('ed.qExtraGame')}>+ Extra game</summary>
-      ${q.games.length ? `<p class="muted" style="margin:6px 0">Free for the whole rental${q.span ? ` (${esc(q.span)})` : ''}. Booked ones cannot be picked.</p>
+  const b = (key, label, attrs) => `<button type="button" class="chipbtn" data-quick ${attrs}${tip(key)}>${esc(label)}</button>`;
+  const add = `<button type="button" class="chipbtn" id="add-line"${tip('ed.addLine')}>+ Line</button>`;
+  if (!q) return `<div class="qchips" data-quick-adds>${add}</div>`;
+  const games = q.rental ? `<details class="qgame" data-quick-game><summary${tip('ed.qExtraGame')}>+ Extra game</summary><div class="qgamebox">
+      ${q.games.length ? `<p class="muted" style="margin:0 0 6px">Free for the whole rental${q.span ? ` (${esc(q.span)})` : ''}. Booked ones cannot be picked.</p>
       <label for="qg">Which game</label><select id="qg" data-quick-game-pick${tip('ed.qGamePick')}>${q.games.map((g) => `<option value="${esc(g.name)}"${g.free ? '' : ' disabled'}>${esc(g.name)}${g.mine ? ' (already in this rental)' : (g.free ? '' : ' (booked those days)')}</option>`).join('')}</select>
       <label class="choice" style="display:flex;gap:10px;align-items:center;margin-top:8px"><input type="checkbox" data-quick-comp style="width:24px;height:24px"${tip('ed.qComp')}> Complimentary (no charge)</label>
       <div style="margin-top:8px">${b('ed.qAddGame', 'Add this game', `data-q-game data-price="${d(q.extraGameCents)}" data-base="${Number(q.baseCount) || 0}"`)}</div>`
-    : '<p class="muted" style="margin:6px 0">Book the pickup and return days first: then the free games show here.</p>'}</details>` : '';
-  return `<div class="card quickadds" data-quick-adds><div class="muted">Add a line in one tap</div><div class="qrow">
+    : '<p class="muted" style="margin:0">Book the pickup and return days first: then the free games show here.</p>'}</div></details>` : '';
+  return `<div class="qchips" data-quick-adds>${add}
       ${b('ed.qDelivery', '+ Delivery fee', `data-desc="Delivery fee" data-price="${d(q.deliveryCents)}"`)}
       ${b('ed.qDiscount', '+ Discount', 'data-desc="Discount" data-discount')}
       ${b('ed.qSetupFee', '+ Setup / takedown fee', 'data-desc="Setup / takedown fee"')}
       ${b('ed.qDamage', '+ Damage deposit', 'data-desc="Damage deposit (refundable)" data-refundable')}
-    </div>${games}</div>`;
+      ${games}</div>`;
 }
 
 export function invoiceEditorPage({ invoice, lines, request, action, title, warnings = [], pay, mode = 'new', backHref = '/admin/', quick = null }) {
   const blank = { description: '', qty: 1, unit_cents: 0, note: '', refundable: 0 };
-  const who = firstName(invoice.customer_name);
-  const sendLabel = mode === 'new' ? `Send to ${who}` : `Save and send to ${who}`;
-  return layout(title, `<style>.quickadds .qrow{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.quickadds .qrow .btn{min-height:48px;font-size:1rem;padding:8px 10px}.quickadds .qgame{margin-top:10px}.quickadds select{min-height:48px;font-size:1.05rem}</style><h1>${esc(title)}</h1>
+  const total = invoiceTotal(lines);
+  const plan = invoice.pay_plan || 'half';
+  const priceNeeded = lines.filter((l) => l.description && needsPrice(l));
+  return layout(title, `<style>${EDITOR_CSS}</style><h1>${esc(title)}</h1>
   ${pay ? paymentWarning(pay) : ''}
   ${warnings.map((w) => `<div class="notice warn">${esc(w)}</div>`).join('')}
-  <div class="notice err" id="price-needed"${lines.some((l) => l.description && needsPrice(l)) ? '' : ' hidden'}><strong>Add a price first:</strong> <span>${esc(lines.filter((l) => l.description && needsPrice(l)).map((l) => l.description).join(', '))}</span>. Tap <strong>Change what goes into the total</strong>, type the price, then send.</div>
-  <form id="inv" method="post" action="${esc(action)}">
+  <form id="inv" class="ed" method="post" action="${esc(action)}">
     ${request ? `<input type="hidden" name="r" value="${esc(b64urlText(request.key))}">` : ''}
-    <div class="card">
-      <div class="muted">For</div>
-      <div style="font-size:1.2rem;font-weight:600">${esc(invoice.customer_name || 'No name yet')}</div>
-      <div class="muted" style="word-break:break-all">${esc(invoice.customer_email || 'No email: text them the PDF after saving')}</div>
-      <div class="muted" style="margin-top:14px">What goes into the total</div>
-      <table class="sumlines"><tbody id="sum-lines"></tbody></table>
-      <div class="calc">
-        <div class="spread"><span>Total</span><span class="bigtotal" id="sum-total">${money(invoiceTotal(lines))}</span></div>
-        <div class="spread" id="sum-now-row"><span id="sum-now-label">Deposit asked for now</span><strong class="now" id="sum-deposit">${money(invoice.deposit_due_cents)}</strong></div>
-        <div class="spread" id="sum-rest-row"><span>Rest after the deposit</span><strong id="sum-rest">${money(invoiceTotal(lines) - invoice.deposit_due_cents)}</strong></div>
-        <div class="spread"><span id="sum-due-label">Rest due by</span><strong id="sum-due">${esc(prettyDate(invoice.due_date))}</strong></div>
-      </div>
-    </div>
-    ${quickAdds(quick)}
-    <div class="card">
-      <div class="muted">How they pay</div>
-      <div class="plans">
-        ${[['half', 'Half now', 'A deposit of half holds the date. The rest is due by the due date.'], ['full', 'Full amount', 'No deposit. The whole total is due by the due date.'], ['custom', 'Other deposit', 'You type the deposit. The rest is due by the due date.']]
-          .map(([v, big, small]) => `<label class="plan"><input type="radio" name="pay_plan" value="${v}"${(invoice.pay_plan || 'half') === v ? ' checked' : ''}><span><strong>${big}</strong><small>${small}</small></span></label>`).join('')}
-      </div>
-      <div id="custom-wrap"${(invoice.pay_plan || 'half') === 'custom' ? '' : ' hidden'}>
-        <label for="dep">Deposit to ask for now ($)</label>
-        <input id="dep" name="deposit" type="number" step="0.01" inputmode="decimal" value="${esc((invoice.deposit_due_cents / 100).toFixed(2))}">
-      </div>
+    <section class="card who" data-ed-who><span class="muted">For</span> <strong>${esc(invoice.customer_name || 'No name yet')}</strong> <span class="muted">${esc(invoice.customer_email || 'no email: text them the PDF after saving')}</span>
+      <details><summary${tip('ed.change')}>Change name, email or phone</summary>
+        <label for="cn">Customer name</label><input id="cn" name="customer_name" value="${esc(invoice.customer_name)}">
+        <label for="ce">Customer email (leave blank if you only text them)</label><input id="ce" name="customer_email" type="email" value="${esc(invoice.customer_email)}">
+        <label for="cp">Customer phone</label><input id="cp" name="customer_phone" type="tel" value="${esc(invoice.customer_phone)}"></details></section>
+    <section class="card" data-ed-lines><h2>What goes into the total</h2>
+      <div data-lines>${lines.map((l) => lineRow(l)).join('')}</div>
+      <template id="line-tpl">${lineRow(blank, { open: true })}</template>
+      ${quickAdds(quick)}
+      <p style="margin:10px 0 0;font-size:.95rem"><a href="/admin/packages" target="_blank" rel="noopener"${tip('ed.packages')}>See the porch packages</a></p></section>
+    <section class="card" data-ed-plan><h2>How they pay</h2>
+      <div class="plans compact">${[['half', 'Half now'], ['full', 'All now'], ['custom', 'Other deposit']].map(([v, big]) => `<label class="plan"><input type="radio" name="pay_plan" value="${v}"${plan === v ? ' checked' : ''}><span><strong>${big}</strong></span></label>`).join('')}</div>
+      <div id="custom-wrap"${plan === 'custom' ? '' : ' hidden'}><label for="dep">Deposit to ask for now ($)</label><input id="dep" name="deposit" type="number" step="0.01" inputmode="decimal" value="${esc((invoice.deposit_due_cents / 100).toFixed(2))}"></div>
       <label for="dd">Due date</label><input id="dd" name="due_date" type="date" value="${esc(invoice.due_date)}">
-      <input type="hidden" name="issue_date" value="${esc(invoice.issue_date)}">
-    </div>
-    <details class="more card" style="padding-top:0"${lines.some((l) => l.description && needsPrice(l)) ? ' open' : ''}><summary${tip('ed.change')}>Change what goes into the total</summary>
-      <label for="cn">Customer name</label><input id="cn" name="customer_name" value="${esc(invoice.customer_name)}">
-      <label for="ce">Customer email (leave blank if you only text them)</label><input id="ce" name="customer_email" type="email" value="${esc(invoice.customer_email)}">
-      <label for="cp">Customer phone</label><input id="cp" name="customer_phone" type="tel" value="${esc(invoice.customer_phone)}">
-      <h3 style="margin-top:18px">Lines</h3>
-      <div data-lines>${lines.map(lineEditor).join('')}</div>
-      <template id="line-tpl">${lineEditor(blank)}</template>
-      <button type="button" class="btn ghost" id="add-line"${tip('ed.addLine')}>Add a line</button>
-      <p style="margin:10px 0 0"><a href="/admin/packages" target="_blank" rel="noopener"${tip('ed.packages')}>See the porch packages</a></p>
-      <label for="nt">Message to the customer (optional)</label><textarea id="nt" name="notes">${esc(invoice.notes)}</textarea>
-      <div style="margin-top:12px"><button class="btn ghost" type="submit" name="go" value="save"${tip('ed.saveOnly')}>Save without sending</button></div>
-    </details>
-    ${act(`<button class="btn primary" type="submit" name="go" value="preview"${tip('ed.preview')}>See it before sending</button>`, 'ed.preview')}
-    <div style="margin-top:10px">${act(`<button class="btn ghost" type="submit" name="go" value="send"${tip('ed.sendNow')}>${esc(sendLabel)} now</button>`, 'ed.sendNow')}</div>
+      <input type="hidden" name="issue_date" value="${esc(invoice.issue_date)}"></section>
+    <details class="card note"${invoice.notes ? ' open' : ''}><summary${tip('ed.note')}>Message to the customer (optional)</summary><textarea id="nt" name="notes" aria-label="Message to the customer">${esc(invoice.notes)}</textarea></details>
+    <section class="card sumbox" data-ed-summary>
+      <div class="notice err" id="price-needed"${priceNeeded.length ? '' : ' hidden'}><strong>Add a price first:</strong> <span>${esc(priceNeeded.map((l) => l.description).join(', '))}</span>. Tap the line, type the price, then send.</div>
+      <div class="row2"><span>Total</span><span class="big" id="sum-total">${money(total)}</span></div>
+      <div class="row2" id="sum-now-row"><span id="sum-now-label">Due now</span><span class="now" id="sum-deposit">${money(invoice.deposit_due_cents)}</span></div>
+      <div class="row2" id="sum-rest-row"><span>Rest after that</span><strong id="sum-rest">${money(total - invoice.deposit_due_cents)}</strong></div>
+      <div class="row2"><span id="sum-due-label">The rest by</span><strong id="sum-due">${esc(prettyDate(invoice.due_date))}</strong></div></section>
+    <div class="sendrow">${act(`<button class="btn primary" type="submit" name="go" value="send"${tip('ed.sendNow')}>Send invoice</button>`, 'ed.sendNow')}
+      <div class="small"><button class="linkbtn" type="submit" name="go" value="save"${tip('ed.saveOnly')}>Save draft</button><button class="linkbtn" type="submit" name="go" value="preview"${tip('ed.preview')}>See it before sending</button></div></div>
   </form>
   <script>${EDITOR_JS}</script>`, { screen: 'invoiceEdit', back: { href: backHref, label: 'Back' } });
 }
@@ -1331,7 +1364,7 @@ export function settingsPage({ settings, flash, error, hasQr, categories = [], p
   </div>
   <form method="post" action="/admin/settings/holds" data-hold-settings><h3>Game rental holds and their reminder</h3>
     <p class="muted">A rental booked on the website holds its games while the customer pays the deposit.</p>
-    <label for="hh">How long a hold lasts (hours)</label><input id="hh" name="hold_hours" type="number" min="1" max="336" inputmode="numeric" value="${esc(settings.hold_hours || '24')}">
+    <label for="hh">How long a hold lasts (hours)</label><input id="hh" name="hold_hours" type="number" min="1" max="336" inputmode="numeric" value="${esc(settings.hold_hours || String(HOLD_DEFAULT_HOURS))}">
     <label class="set-row"><input type="checkbox" name="hold_auto_expire" value="1"${settings.hold_auto_expire === '0' ? '' : ' checked'}> Expire unpaid holds automatically (off: every new hold is held by hand until you release it)</label>
     <label class="set-row"><input type="checkbox" name="hold_reminder" value="1"${settings.hold_reminder === '0' ? '' : ' checked'}> Email the customer a reminder before the hold ends</label>
     <label for="hrh">Send that reminder this many hours before the end</label><input id="hrh" name="hold_reminder_hours" type="number" min="1" max="48" inputmode="numeric" value="${esc(settings.hold_reminder_hours || '4')}">

@@ -68,6 +68,8 @@ function allowedPrices() {
   porchPackages.seasons.forEach((x) => Object.values(x.tiers).forEach((t) => add(t.from)));
   add(S.grazing.foodPerHead.low); add(S.grazing.foodPerHead.high);
   add(offers.addOns.takedown.fromPrice); add(offers.travel.extendedFee);
+  // Business delivery of game rentals (19 Oct 2026): the invoice quick-add's delivery fee.
+  add(offers.invoiceQuickAdds.deliveryFee);
   add(games.rates.day); add(games.rates.weekend); add(games.damageDeposit);
   (games.extras || []).forEach((x) => { add(x.dayPrice); add(x.weekendPrice); add(x.rates && x.rates.day); add(x.rates && x.rates.weekend); });
   (games.bundles || []).forEach((b) => { add(b.dayPrice); add(b.weekendPrice); });

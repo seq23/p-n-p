@@ -17,6 +17,8 @@ const fs = require('fs');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
+const BD = require(path.join(ROOT, 'scripts/lib/business_delivery.js'));
+const offers = require(path.join(ROOT, 'data/offers/services.json'));
 
 const FILES = ['llms.txt', 'llms-services.txt', 'llms-full.txt'];
 const data = INV.resolve(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8')));
@@ -36,8 +38,8 @@ function render(text) {
   let out = text.replace(/(Porch & Party rents )[^\n]*?( for backyard parties, birthdays)/, (m, a, b) => `${a}${INV.rentalsPhrase(data)}${b}`);
   out = out.replace(/^Prices \(every game, flat\):[\s\S]*?^Bundles:[^\n]*$/m, () => priceBlock());
   const from = Math.min(...INV.offeredBundles(data).map((b) => b.dayPrice));
-  out = out.replace(/^- Party game rentals \([^\n]*\) are \$\d+ per game per day; bundles from \$\d+\.$/m,
-    () => `- Party game rentals (${INV.rentalsPhrase(data, { short: true })}, pickup and return in Memphis) are ${money(data.rates.day)} per game per day; bundles from ${money(from)}.`);
+  out = out.replace(/^- Party game rentals \([^\n]*\) are \$\d+ per game per day; bundles from \$\d+\.(?: [^\n]*)?$/m,
+    () => `- Party game rentals (${INV.rentalsPhrase(data, { short: true })}, pickup and return in Memphis) are ${money(data.rates.day)} per game per day; bundles from ${money(from)}. ${BD.businessDeliveryLine(offers)}`);
   return out;
 }
 

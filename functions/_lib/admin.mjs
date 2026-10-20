@@ -14,7 +14,7 @@ import { driveFileId, idFolderId } from './sheet.mjs';
 import { loadRequests, weekCounts, monthCount, idOnFile, logEvent } from './requests.mjs';
 import { loadTakedownFacts } from './takedown.mjs';
 import { chicagoDate } from './reminders.mjs';
-import { expireHolds, confirmHold, extendHold, keepHolding, releaseHold, currentHolds, endingSoon, holdSettings, getHold, fromSql } from './holds.mjs';
+import { expireHolds, confirmHold, extendHold, keepHolding, releaseHold, currentHolds, endingSoon, holdSettings, getHold, fromSql, HOLD_DEFAULT_HOURS, HOLD_EXTEND_DAYS, HOLD_EXTEND_MAX_DAYS } from './holds.mjs';
 import { messageCtx, autoConfirm, smsFor } from './customer-messages.mjs';
 import { isPhone, rentalDates, PHONE_SOURCE } from './phone-requests.mjs';
 import { cleanImage } from './image-clean.mjs';
@@ -23,7 +23,8 @@ import * as VM2 from './views-messages.mjs';
 import { hasEmail } from './reminders.mjs';
 import { PRICE_TABLE, TRACK_TABLE, CONTACT } from './prices.mjs';
 import { renderInvoicePdf, textMessage } from './pdf.mjs';
-import { prefillLines, porchPrefill, pickupNote, isRentalInvoice } from './pricing.mjs';
+import { prefillLines, porchPrefill, isRentalInvoice } from './pricing.mjs';
+import { pickupNote, businessDelivery } from './invoice-note.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
 import { sendWeeklySummary } from './weekly.mjs';
@@ -32,7 +33,7 @@ import * as VC from './views-calendar.mjs';
 import * as C from './calendar.mjs';
 import * as AC from './admin-calendar.mjs';
 import * as AM from './admin-money.mjs';
-import { balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice } from './ledger.mjs';
+import { paidByInvoice, balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice } from './ledger.mjs';
 import * as AE from './admin-edit.mjs';
 import * as INVD from './inventory.mjs';
 import * as VI from './views-inventory.mjs';
@@ -406,9 +407,17 @@ async function updateInvoice(env, request, id) {
   return redirect(`/admin/invoices/${id}?m=${encodeURIComponent(afterSaveMessage(form.get('go')))}`);
 }
 
+// The rental note for this invoice as it stands now (invoice-note.mjs): its payments, and the
+// request's business-delivery tick.
+async function noteFor(env, invoice, lines, { view = false } = {}) {
+  const paid = invoice && invoice.id ? ((await paidByInvoice(env.DB, [invoice.id]))[invoice.id] || 0) : 0;
+  const req = invoice && invoice.request_key ? await findRequest(env, invoice.request_key) : null;
+  return pickupNote(lines, PRICE_TABLE, { invoice, paidCents: paid, delivery: businessDelivery(req), view });
+}
+
 async function emailParts(env, invoice, lines, settings, forPreview) {
   const qrSrc = settings.qr_png ? (forPreview ? '/api/admin/qr.png' : 'cid:pnp-payment-qr') : null;
-  const rendered = renderInvoiceEmail({ invoice, lines, settings, contact: CONTACT, qrSrc, pickup: pickupNote(lines, PRICE_TABLE) });
+  const rendered = renderInvoiceEmail({ invoice, lines, settings, contact: CONTACT, qrSrc, pickup: await noteFor(env, invoice, lines) });
   const attachments = settings.qr_png && !forPreview ? [{
     contentBase64: settings.qr_png, filename: settings.qr_type === 'image/jpeg' ? 'payment-qr.jpg' : 'payment-qr.png',
     type: settings.qr_type || 'image/png', disposition: 'inline', contentId: 'pnp-payment-qr',
@@ -605,11 +614,18 @@ async function holdAction(env, request, what) {
   const form = await request.formData();
   const key = decodeKey(form.get('r'));
   const back = BACK_OK(form.get('back'));
-  const go = (k, m) => redirect(`${back}${back.includes('?') ? '&' : '?'}${k}=${encodeURIComponent(m)}`);
+  // From a request card the answer comes back to that card (#c-<rk>).
+  const anchor = form.get('card') === '1' && key ? `#c-${b64urlText(key)}` : '';
+  const go = (k, m) => redirect(`${back}${back.includes('?') ? '&' : '?'}${k}=${encodeURIComponent(m)}${anchor}`);
   if (!key) return go('e', 'Which request?');
   if (what === 'extend') {
+    // "Hold longer" (owner, 19 Oct 2026): N days, prefilled 3 (holds.mjs HOLD_EXTEND_DAYS); the
+    // number she types is honoured exactly. The old hours / picked-time posts still work.
     const until = form.get('until') ? chicagoLocalToMs(String(form.get('until'))) : 0;
-    const r = await extendHold(env.DB, key, until ? { until: new Date(until).toISOString() } : { hours: Number(form.get('hours')) || 24 });
+    const daysRaw = String(form.get('days') || '').trim();
+    const days = daysRaw === '' ? (form.get('hours') ? 0 : HOLD_EXTEND_DAYS) : Number(daysRaw);
+    if (daysRaw !== '' && !(Number.isInteger(days) && days >= 1 && days <= HOLD_EXTEND_MAX_DAYS)) return go('e', `Type a whole number of days, 1 to ${HOLD_EXTEND_MAX_DAYS}.`);
+    const r = await extendHold(env.DB, key, until ? { until: new Date(until).toISOString() } : { hours: days ? days * 24 : (Number(form.get('hours')) || HOLD_EXTEND_DAYS * 24) });
     if (!r.ok) return go('e', r.error);
     if (r.ok) {
       // A hold that had expired comes back: put its games on the calendar again.
@@ -620,11 +636,11 @@ async function holdAction(env, request, what) {
         const ret = (req.rentals.find((x) => /return date/i.test(x.label)) || {}).value;
         const items = C.itemsText(C.expandItems(req.gamesAnswer, PRICE_TABLE)) || req.gamesAnswer;
         const st = await env.DB.prepare('SELECT invoice_id FROM request_status WHERE request_key = ?1').bind(key).first();
-        const base = { request_key: key, invoice_id: st ? st.invoice_id : null, time: null, customer_name: req.name, phone: req.phone, email: req.email, place: PRICE_TABLE.pickupPlace, items };
+        const base = { request_key: key, invoice_id: st ? st.invoice_id : null, time: null, customer_name: req.name, phone: req.phone, email: req.email, place: C.rentalPlace(req, PRICE_TABLE), items };
         if (pickup && ret) await C.upsertBookings(env.DB, [{ ...base, kind: 'rental_pickup', date: pickup }, { ...base, kind: 'rental_return', date: ret }]);
       }
     }
-    return go('m', `Hold extended ✓ ${VM2.endsWords(fromSql(r.until)).text}`);
+    return go('m', `Held until ${VM2.heldUntilWords(fromSql(r.until))} ✓`);
   }
   if (what === 'keep') return go('m', (await keepHolding(env.DB, key)) ? 'Held by hand ✓ It stays held until you release it.' : 'That hold is not active any more.');
   return go('m', (await releaseHold(env.DB, key)) ? 'Games released ✓ They are free for others.' : 'That hold is not active any more.');
@@ -896,7 +912,7 @@ async function routeAdmin(context) {
         if (!loaded) return htmlResponse(V.layout('Not found', '<p>No such invoice.</p>', { screen: 'notfound', back: { href: '/admin/invoices', label: 'Back to invoices' } }), 404);
         const settings = await getSettings(env.DB);
         const emailHtml = (await emailParts(env, loaded.invoice, loaded.lines, settings, true)).html;
-        const pickup = pickupNote(loaded.lines, PRICE_TABLE);
+        const pickup = await noteFor(env, loaded.invoice, loaded.lines, { view: true });
         const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings, pickup });
         const balance = (await balances(env.DB))[id];
         if (balance) Object.assign(balance, await depositHeld(env.DB, id));
@@ -917,7 +933,7 @@ async function routeAdmin(context) {
       if (segs[2] === 'invoice.pdf' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse('Not found', 404);
-        const bytes = await renderInvoicePdf({ invoice: loaded.invoice, lines: loaded.lines, settings: await getSettings(env.DB), contact: CONTACT, pickup: pickupNote(loaded.lines, PRICE_TABLE) });
+        const bytes = await renderInvoicePdf({ invoice: loaded.invoice, lines: loaded.lines, settings: await getSettings(env.DB), contact: CONTACT, pickup: await noteFor(env, loaded.invoice, loaded.lines) });
         const filename = `Porch-and-Party-Invoice-${loaded.invoice.number}.pdf`;
         return new Response(bytes, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `${url.searchParams.get('dl') === '1' ? 'attachment' : 'inline'}; filename="${filename}"`, 'Cache-Control': 'no-store' } });
       }
@@ -960,7 +976,7 @@ async function routeAdmin(context) {
     if (segs[1] === 'holds' && method === 'POST') {
       const form = await request.formData();
       const n = (k, d, lo, hi) => { const v = Number(form.get(k)); return String(Number.isFinite(v) && v >= lo && v <= hi ? Math.round(v) : d); };
-      await putSetting(env.DB, 'hold_hours', n('hold_hours', 24, 1, 336));
+      await putSetting(env.DB, 'hold_hours', n('hold_hours', HOLD_DEFAULT_HOURS, 1, 336));
       await putSetting(env.DB, 'hold_reminder_hours', n('hold_reminder_hours', 4, 1, 48));
       await putSetting(env.DB, 'hold_soon_hours', n('hold_soon_hours', 12, 1, 72));
       await putSetting(env.DB, 'hold_reminder', form.get('hold_reminder') === '1' ? '1' : '0');

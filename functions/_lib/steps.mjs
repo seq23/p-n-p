@@ -222,3 +222,18 @@ export async function markConfirmed(db, key, how = '') { await markCalled(db, ke
 export async function undoCalled(db, key) {
   await db.prepare("UPDATE request_steps SET called_at = NULL, confirmed_at = NULL, how = 'undone', updated_at = datetime('now') WHERE request_key = ?1").bind(key).run();
 }
+
+// "Waiting N days" (owner, 19 Oct 2026): whole Memphis calendar days between the day the request
+// came in and today, so a request sent at 11:50 PM is "since yesterday" ten minutes later.
+const memphisDay = (ms) => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(ms));
+export function waitingDays(sentMs, today) {
+  if (!Number.isFinite(sentMs) || !today) return 0;
+  const a = Date.parse(`${memphisDay(sentMs)}T12:00:00Z`); const b = Date.parse(`${today}T12:00:00Z`);
+  return Math.max(0, Math.round((b - a) / 86400000));
+}
+export function waitingWords(n) {
+  if (n <= 0) return 'Sent today';
+  if (n === 1) return 'Waiting since yesterday';
+  return `Waiting ${n} days`;
+}
+export const WAIT_HIGHLIGHT_DAYS = 3;

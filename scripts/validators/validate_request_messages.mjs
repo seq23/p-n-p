@@ -51,13 +51,34 @@ const rental = async (n, games, extra = {}) => {
 // ---- 1. Hold controls ------------------------------------------------------------------
 const a = await rental(1, ['giant-uno']);
 const h0 = await H.getHold(s.db, a.request_key);
-let r = await s.post('/admin/holds/extend', { r: s.rk(a.request_key), hours: '24', back: '/admin/' });
+// Owner, 19 Oct 2026: the hold is 48 hours from the request by default; "Hold longer" adds 3 days
+// (prefilled) on top of the CURRENT end time, or exactly the days she types; repeatable, no limit
+// on how many times; every press logged. One source: services.json rentalHolds.
+const HR = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8')).rentalHolds;
+must(HR.defaultHours === 48 && HR.extendDays === 3, `services.json rentalHolds is not 48 hours / 3 days (${JSON.stringify(HR)})`);
+must(Math.abs(H.fromSql(h0.until) - H.fromSql(a.submitted_at) - 48 * 3600000) < 5000, `a new hold is not 48 hours from the request (${a.submitted_at} -> ${h0.until})`);
+const DAY = 24 * 3600000;
+let r = await s.post('/admin/holds/extend', { r: s.rk(a.request_key), days: '3', back: '/admin/', card: '1' });
 let h1 = await H.getHold(s.db, a.request_key);
-must(r.status === 303 && /Hold%20extended/.test(r.location) && H.fromSql(h1.until) - H.fromSql(h0.until) === 24 * 3600000, `+24 hours did not add 24 hours (${h0.until} -> ${h1.until})`);
-await s.post('/admin/holds/extend', { r: s.rk(a.request_key), hours: '48' });
+must(r.status === 303 && /Held%20until%20[^&]*%E2%9C%93/.test(r.location) && /#c-/.test(r.location) && H.fromSql(h1.until) - H.fromSql(h0.until) === 3 * DAY, `Hold longer (3 days, prefilled) did not add 3 days to the current end, or did not answer "Held until ... ✓" on the card (${h0.until} -> ${h1.until}, ${r.location})`);
+await s.post('/admin/holds/extend', { r: s.rk(a.request_key), days: '3' });
 const h2 = await H.getHold(s.db, a.request_key);
-must(H.fromSql(h2.until) - H.fromSql(h1.until) === 48 * 3600000, '+48 hours did not add 48 hours');
-must((await ev(a.request_key)).filter((e) => /^Hold extended to .* by Valerie$/.test(e)).length === 2, 'extensions are not logged "Hold extended to ... by Valerie"');
+must(H.fromSql(h2.until) - H.fromSql(h0.until) === 6 * DAY, `two presses are not +6 days from the original end (${h0.until} -> ${h2.until})`);
+await s.post('/admin/holds/extend', { r: s.rk(a.request_key), days: '5' });
+const h3 = await H.getHold(s.db, a.request_key);
+must(H.fromSql(h3.until) - H.fromSql(h2.until) === 5 * DAY, 'a typed 5 days did not add exactly 5 days on top of the current end');
+await s.post('/admin/holds/extend', { r: s.rk(a.request_key) });
+const h4 = await H.getHold(s.db, a.request_key);
+must(H.fromSql(h4.until) - H.fromSql(h3.until) === 3 * DAY, 'Hold with no number did not default to 3 days');
+for (const bad of ['0', '-2', '2.5', 'abc']) {
+  const x = await s.post('/admin/holds/extend', { r: s.rk(a.request_key), days: bad });
+  must(/e=/.test(x.location) && (await H.getHold(s.db, a.request_key)).until === h4.until, `a typed "${bad}" days was accepted`);
+}
+must((await ev(a.request_key)).filter((e) => /^Hold extended to .* by Valerie$/.test(e)).length === 4, 'each extension is not logged "Hold extended to ... by Valerie"');
+{
+  const card = (await s.get('/admin/')).text;
+  must(/<summary class="btn ghost" data-help="hold\.longer"[^>]*>Hold longer<\/summary>[\s\S]*?name="days" value="3"[\s\S]*?>Hold<\/button>/.test(card) && !/\+24 hours|\+48 hours|Give them more time|Hold until then|Keep holding/.test(card), 'Hold longer is not ONE button + a days box (3) + Hold, or an old 24/48 h choice is still shown');
+}
 // Picked Memphis times: daylight (UTC-5) and standard (UTC-6).
 must(A.chicagoLocalToMs('2026-10-26T15:00') === Date.parse('2026-10-26T20:00:00Z') && A.chicagoLocalToMs('2026-12-01T15:00') === Date.parse('2026-12-01T21:00:00Z'), 'a picked day and time is not read as Memphis time');
 const future = `${plus(5)}T15:00`;
@@ -106,7 +127,7 @@ dash = (await s.get('/admin/')).text;
 const box = dash.slice(dash.indexOf('data-holds-soon'), dash.indexOf('</section>', dash.indexOf('data-holds-soon')));
 must(box.includes('Rita Rent4') && box.includes('Rita Rent3') && box.indexOf('Rita Rent4') < box.indexOf('Rita Rent3'), 'Holds ending soon is missing a hold or is not soonest first');
 must(/ends red/.test(box) && /ends amber/.test(box) && /Ends today|Ends tomorrow/.test(box) && /\(in \d+ (minutes|hours?)\)/.test(box), 'ending-soon rows lack the amber/red end time in words');
-must(!box.includes('Rita Rent1') && box.includes('Text a reminder') && box.includes('Give them more time') && box.includes('Mark deposit received') && box.includes('Release now'), 'ending-soon rows lack their buttons, or list a released hold');
+must(!box.includes('Rita Rent1') && box.includes('Text a reminder') && box.includes('Hold longer') && box.includes('Mark deposit received') && box.includes('Release now'), 'ending-soon rows lack their buttons, or list a released hold');
 must(/data-holds-badge> \d+ holds ending soon/.test(dash), 'the Requests tab has no "N holds ending soon" badge');
 const cal = (await s.get('/admin/calendar')).text;
 must(cal.includes('data-holds-soon') && cal.includes('data-held-view') && cal.includes('data-view="held"'), 'Calendar & Bookings lacks the ending-soon box or the Held view');
@@ -226,4 +247,4 @@ must(found.includes('Sent you 1 customer'), 'Find a customer does not say "Sent 
 
 if (checks < 50) errors.push(`only ${checks} checks ran`);
 if (errors.length) { console.error(`VALIDATION FAIL: holds and customer messages (${errors.length} of ${checks} checks)\n- ${errors.join('\n- ')}`); process.exit(1); }
-console.log(`validate_request_messages: OK (${checks} checks: hold +24/+48/pick/keep/release + logs, reminder once per end time, ending-soon box/badge/Held view/Day sheet, confirmation once + text, thank-you next morning once with every skip rule, referral block, no review/discount, no paid SMS, 10 AM Memphis cron, Sent you N)`);
+console.log(`validate_request_messages: OK (${checks} checks: hold 48 h + Hold longer 3 days / typed N days on the current end + keep/release + logs, reminder once per end time, ending-soon box/badge/Held view/Day sheet, confirmation once + text, thank-you next morning once with every skip rule, referral block, no review/discount, no paid SMS, 10 AM Memphis cron, Sent you N)`);

@@ -24,9 +24,9 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   `data/offers/services.json` (items and bundles priced at the cheapest mix of the six bundles,
   The Whole Party at its weekend price on a weekend, refundable damage deposit, takedown add-on;
   never a delivery line: rentals v3 has no delivery). A rental invoice (any line from the rentals
-  price table, `isRentalInvoice` in `functions/_lib/pricing.mjs`) adds "Pay the rest at pickup.
-  Text or call 901-355-1518 to set your pickup time at Mt. Moriah Station." to the email, PDF,
-  text message and invoice page. Numbers are
+  price table, `isRentalInvoice` in `functions/_lib/pricing.mjs`) adds the rental note to the
+  email, PDF, text message and invoice page, worded from the invoice's own numbers
+  (`functions/_lib/invoice-note.mjs`, see "Rental extras" below). Numbers are
   `PNP-YYYY-NNNN`; pay plan (`pay_plan`: half / full / custom, migration 0003) decides what is asked for now;
   half is the default, full asks for the whole total by the due date, custom is a typed deposit.
   "See it before sending" saves the draft and shows the email inline on the invoice page.
@@ -382,7 +382,7 @@ another tab/retry queue, the cron hook).
   and the card says "Referred by <name>". No reward, no discount, no review ask.
 - **Holds (Valerie's controls)**: on a held rental card, in "Holds ending soon" (top of Requests and
   Calendar & Bookings, threshold in Settings, tab badge "N holds ending soon") and in the
-  Calendar's Held view: Give them more time (+24 h, +48 h, a picked Memphis day and time), Keep
+  Calendar's Held view: Hold longer (see "Rental extras": 3 days, or the days she types), Keep
   holding — I'll handle it (no end time), Release now, Mark deposit received, Call, Text a
   reminder / Email them. Settings: hold length, automatic expiry switch, reminder on/off and
   hours before the end. Every change is logged on the request. Holds ending a day are on its Day
@@ -519,6 +519,42 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   steps 1-5 in the owner's words, the search in Step 1, the phone month + day panel + job details,
   Yes, book it = the card's form and lands back solid, dashed vs solid, the takedown buttons, and
   everything the page had before (every-booking list, drag, Add a booking, Day sheet links).
+## Rental extras (owner, 19 Oct 2026)
+- **Rental invoice note** (`functions/_lib/invoice-note.mjs`, one function): money left after the
+  amount due now -> "Pay the rest ($R) at pickup. Text or call 901-355-1518 to set your pickup time
+  at Mt. Moriah Station unless otherwise agreed upon."; nothing left -> "This covers everything.
+  Nothing more to pay at pickup. ..."; paid in full -> "Paid in full. Thank you! ..." on the ONLINE
+  invoice page only (no email or extra invoice is ever sent for it). Business delivery (the
+  request's tick or a Delivery fee line): "at delivery" and "Text or call ... to set your delivery
+  time unless otherwise agreed upon." R = total minus the amount due now (or paid, if more); the
+  amount due now takes the refundable deposit first, so an uncovered deposit is never "owed". Phone
+  and place from games.json `pickup`. A note Valerie typed wins (the automatic one is left out);
+  the website's old draft note does not count as hers. New website drafts carry no note of their
+  own. Nothing stored is rewritten: sent invoices keep their stored notes and lines.
+- **Business delivery** (`scripts/lib/business_delivery.js`): "Renting for a business? We can
+  deliver to your business for $20." on /rentals/ (Where, the pickup FAQ, How pickup works), the
+  FAQ rentals section, /rules, llms.txt and /request; the price is `data/offers/services.json
+  invoiceQuickAdds.deliveryFee` (the invoice quick-add's). /request rentals: a tick box "This is
+  for a business — deliver to us ($20)" revealing Business name + Delivery address (both required
+  when ticked; answers "Business delivery", "Business name", "Delivery address"). Ticked: the draft
+  invoice gets the "Delivery fee" line, the card shows "Business delivery: <business>, <address>",
+  the pickup / return bookings are at that address and read "Delivery" / "Collect" on the
+  calendar, Upcoming, the list and the Day sheet (`calendar.mjs deliveryAddress / rentalPlace`).
+  Home rentals stay pickup and return at the safe exchange zone. Facebook listings are hand-written:
+  add the same sentence there.
+- **Holds**: 48 hours from the request by default, "Hold longer" = one button, then a days box
+  prefilled 3 + Hold: each press adds 3 days (or exactly the days typed) on top of the CURRENT end
+  time, repeatable, each logged; the card says "Games held until Wed 3 PM" and then "Held until
+  <new time> ✓". No 24 / 48 h menus. Numbers: `data/offers/services.json rentalHolds`
+  (`functions/_lib/hold-rules.mjs`); the public pages read the same. Existing holds are untouched.
+- **Waiting N days** on step 1 of a card ("Sent today", "Waiting since yesterday", "Waiting N
+  days", red from 3): Memphis calendar days (`steps.mjs waitingDays / waitingWords`).
+  `functions/_lib/callback-list.mjs callbackRows` lists every request still waiting for a call
+  (not phone, not put away), oldest first, for a later daily email (not sent yet).
+- **Invoice editor**: compact rows (what · qty × price · total; tap to change in place), the
+  quick-adds as one row of chips (+ Line first), the pay plan, an optional message, ONE summary at
+  the bottom and ONE big "Send invoice" (Save draft and See it before sending small).
+- Proof: `npm run validate:admin-rental-extras` (in validate:admin).
 
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 Legacy intake: the site's /request form replaced it and takes its choices from the live inventory.

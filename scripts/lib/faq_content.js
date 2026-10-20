@@ -12,6 +12,8 @@
 const path = require('path');
 const ROOT = path.resolve(__dirname, '../..');
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
+const BD = require(path.join(ROOT, 'scripts/lib/business_delivery.js'));
+const BDL = BD.businessDeliveryLine(offers); // business delivery, priced from services.json (19 Oct 2026)
 const areas = require(path.join(ROOT, 'data/service_areas/areas.json'));
 const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
 const games = INV.resolve(require(path.join(ROOT, 'data/rentals/games.json')));
@@ -132,7 +134,7 @@ const SECTIONS = [
   {
     id: 'rentals', title: 'Party game rentals', eyebrow: 'Rentals',
     lead: `Giant yard games${HAS_SCREEN ? ' and a movie screen' : ''}, ${money(games.rates.day)} a game a day.`,
-    intro: `${INV.rentalsPhrase(games, { games: 'Giant yard games' })}, ${money(games.rates.day)} a game a day, picked up and returned at ${PICK.place}. The same answers are on the rentals page.`,
+    intro: `${INV.rentalsPhrase(games, { games: 'Giant yard games' })}, ${money(games.rates.day)} a game a day, picked up and returned at ${PICK.place}. ${BDL} The same answers are on the rentals page.`,
     qa: [
       ...RENTALS_FAQ,
       ['Is this a sale?',

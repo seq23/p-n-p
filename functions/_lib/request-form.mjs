@@ -13,6 +13,7 @@
 import { esc } from './util.mjs';
 import { prefillLines } from './pricing.mjs';
 import PP from '../../scripts/lib/porch_packages.js';
+import BD from '../../scripts/lib/business_delivery.js';
 import { isISODate, RENTAL_LENGTHS, PICKUP_CHOICES, RETURN_CHOICES, rentalSpan } from './calendar.mjs';
 
 export const RULES_VERSION = '2026-10-19';
@@ -216,6 +217,16 @@ export function validateSubmission(fields, { offers, table, today, file = null }
       clean.projector = true;
       answers.push({ group: 'rentals', label: PROJECTOR_ANSWER, value: 'Yes' });
     }
+    if (String(fields.business_delivery || '') === 'yes') {
+      const bn = String(fields.business_name || '').trim().slice(0, 200);
+      const ad = String(fields.delivery_address || '').trim().slice(0, 300);
+      if (!bn) errors.business_name = 'Type the business name, or untick business delivery.';
+      if (!ad) errors.delivery_address = 'Type the delivery address, or untick business delivery.';
+      if (bn && ad) {
+        clean.business = { name: bn, address: ad };
+        answers.push({ group: 'rentals', label: 'Business delivery', value: 'Yes' }, { group: 'rentals', label: 'Business name', value: bn }, { group: 'rentals', label: 'Delivery address', value: ad });
+      }
+    }
     if (games.length) answers.unshift({ group: 'rentals', label: 'Which games?', value: items.filter((i) => games.includes(i.slug)).map((i) => i.choice).join(', ') });
   }
   for (const q of Q.contact) clean[q.name] = ask(q);
@@ -239,6 +250,17 @@ function fieldError(name, errors) {
 function describedBy(name, q, errors) {
   const ids = [q.help || q.helpHtml ? `help-${name}` : '', errors[name] ? `err-${name}` : ''].filter(Boolean);
   return ids.length ? ` aria-describedby="${ids.join(' ')}"` : '';
+}
+
+// Business delivery (owner, 19 Oct 2026): home rentals are picked up; a business can have the
+// games delivered for the delivery fee (scripts/lib/business_delivery.js, the invoice quick-add's
+// price). The tick box reveals Business name + Delivery address, both required when ticked.
+function businessBlock(offers, table, values, errors) {
+  const on = values.business_delivery === 'yes';
+  const input = (name, label, auto) => `<div class="rq-q${errors[name] ? ' rq-bad' : ''}" id="q-${name}" data-q="${name}"><label for="f-${name}">${esc(label)}</label>${fieldError(name, errors)}<input type="text" id="f-${name}" name="${name}" value="${esc(values[name] || '')}" autocomplete="${auto}"${errors[name] ? ' aria-invalid="true"' : ''}></div>`;
+  return `<div class="rq-q" id="q-business_delivery" data-q="business_delivery"><p class="rq-help" data-business-line>${esc(BD.businessDeliveryLine(offers))} Home and personal rentals are picked up and returned at ${esc(table.pickupPlace)}.</p>
+    <label class="rq-choice"><input type="checkbox" name="business_delivery" value="yes" data-business-tick${on ? ' checked' : ''}> <span>${esc(BD.tickLabel(offers))}</span></label>
+    <div class="rq-business" data-business-fields>${input('business_name', 'Business name', 'organization')}${input('delivery_address', 'Delivery address', 'street-address')}<p class="rq-help">The delivery fee is added to your invoice and paid at delivery.</p></div></div>`;
 }
 
 function renderQuestion(q, values, errors) {
@@ -303,7 +325,7 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
     section('party', 'Your celebration <span class="rq-for">(if you picked party planning &amp; decor)</span>', Q.party.map((q) => renderQuestion(q, values, errors)).join('')),
     section('grazing', 'Your grazing table <span class="rq-for">(if you picked grazing tables)</span>', Q.grazing.map((q) => renderQuestion(q, values, errors)).join('')),
     section('event', 'Date and place <span class="rq-for">(porch, party &amp; decor, grazing)</span>', Q.event.map((q) => renderQuestion(q, values, errors)).join('')),
-    section('rentals', 'Your games <span class="rq-for">(if you picked party game rentals)</span>', `<p class="rq-help">Booking, not a quote: we hold your games for 24 hours while you pay the deposit.</p>${renderGames(table, values, errors)}${Q.rentals.filter((q) => q.type !== 'games').map((q) => renderQuestion(q, values, errors)).join('')}
+    section('rentals', 'Your games <span class="rq-for">(if you picked party game rentals)</span>', `<p class="rq-help">Booking, not a quote: we hold your games for ${esc(String(offers.rentalHolds.defaultHours))} hours while you pay the deposit.</p>${renderGames(table, values, errors)}${Q.rentals.filter((q) => q.type !== 'games').map((q) => renderQuestion(q, values, errors)).join('')}${businessBlock(offers, table, values, errors)}
       <div class="rq-total" data-total aria-live="polite"><noscript><p class="rq-help">Your exact total is shown on the next screen.</p></noscript></div>`),
   ].join('');
   const contact = section('contact', 'About you', Q.contact.map((q) => renderQuestion(q, values, errors)).join(''));
@@ -345,6 +367,7 @@ function sync(){var p=picked(),on={};p.forEach(function(k){(show[k]||[]).forEach
 ['porch','party','grazing','event','rentals'].forEach(function(k){var s=f.querySelector('[data-section='+k+']');if(!s)return;s.hidden=!on[k];[].slice.call(s.querySelectorAll('input,textarea')).forEach(function(i){if(i.hasAttribute('required')||i.dataset.req){i.dataset.req=1;i.required=!!on[k];}});});
 ['contact','id','agree'].forEach(function(k){var s=f.querySelector('[data-section='+k+']');if(s)s.hidden=!p.length;});proj();quote();}
 function proj(){var l=f.querySelector('[data-projector]');if(!l)return;var s=f.querySelector('input[name=games][value=inflatable-movie-screen]'),on=!!(s&&s.checked);l.classList.toggle('rq-hide',!on);if(!on){var i=l.querySelector('input');if(i)i.checked=false;}}
+function biz(){var t=f.querySelector('[data-business-tick]'),b=f.querySelector('[data-business-fields]');if(t&&b)b.hidden=!t.checked;}biz();f.addEventListener('change',function(e){if(e.target.matches&&e.target.matches('[data-business-tick]'))biz();});
 f.addEventListener('change',function(e){if(e.target.name==='service'||e.target.name==='multi')sync();if(e.target.name==='games')proj();if(e.target.name==='duration')lens();if(/^(games|duration|rental_date|pickup_when|return_when)$/.test(e.target.name))quote();});
 f.addEventListener('input',function(e){if(e.target.name==='rental_date')quote();});
 function lens(){var d=f.querySelector('input[name=duration]:checked'),len=d?d.value:'';[].slice.call(f.querySelectorAll('[data-length]')).forEach(function(l){var off=!len||l.getAttribute('data-length')!==len;l.classList.toggle('rq-hide',off);var i=l.querySelector('input');if(off&&i&&i.checked)i.checked=false;});}
