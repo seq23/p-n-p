@@ -32,6 +32,7 @@ import SERVICES_DATA from '../../data/offers/services.json';
 import * as VC from './views-calendar.mjs';
 import * as C from './calendar.mjs';
 import * as AC from './admin-calendar.mjs';
+import * as MS from './missed.mjs';
 import * as AM from './admin-money.mjs';
 import { paidByInvoice, balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice } from './ledger.mjs';
 import * as AE from './admin-edit.mjs';
@@ -252,7 +253,15 @@ async function dashboard(env, url) {
   const notes = {};
   const { results: noteRows } = await env.DB.prepare('SELECT id, request_key, body, created_at FROM booking_notes WHERE request_key IS NOT NULL ORDER BY id').all();
   for (const n of noteRows || []) (notes[n.request_key] = notes[n.request_key] || []).push(n);
-  const { reminders, tomorrowLabel, overdue } = await AC.remindersAndOverdue(env.DB);
+  const { reminders, tomorrowLabel } = await AC.remindersAndOverdue(env.DB);
+  // Missed jobs (missed.mjs, owner-approved mock-up panel 7): the thin red strip on top (late
+  // returns included, so the old Overdue returns box is not shown twice) and the card's MISSED tag.
+  const mToday = chicagoDate();
+  const reqByKey = Object.fromEntries(requests.map((r) => [r.key, r]));
+  const missed = await MS.loadMissed(env.DB, mToday, { delivered: (b) => Boolean(b.request_key && reqByKey[b.request_key] && C.deliveryAddress(reqByKey[b.request_key])) });
+  const missedBy = {};
+  for (const m of missed) if (m.key) (missedBy[m.key] = missedBy[m.key] || []).push(m);
+  const missedTop = MS.stripHidden(missed, settings[MS.DISMISS_KEY], mToday) ? '' : V.missedStrip(missed);
   const referrers = {};
   for (const r of requests) if (r.referralCode) referrers[r.referralCode] = r.name;
   const idsReady = requests.filter((r) => idOnFile(r) && readyToDeleteId(r, statuses[r.key], statuses[r.key] && statuses[r.key].invoice_id ? invoices[statuses[r.key].invoice_id] : null, returns[r.key]));
@@ -274,7 +283,7 @@ async function dashboard(env, url) {
     foodPerHead: SERVICES_DATA.services.grazing.foodPerHead || null, pickupPlace: PRICE_TABLE.pickupPlace,
     holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length || Object.keys(msgs).length || Object.keys(bottom).length ? VM2.TAP_JS : ''}`,
     flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
-    extraTop: VC.overdueBox(overdue), remindersLine: VC.remindersBox(reminders, tomorrowLabel, { line: true }) }));
+    missedBy, missedTop, remindersLine: VC.remindersBox(reminders, tomorrowLabel, { line: true }) }));
 }
 
 // The invoice editor's quick-add buttons (owner-approved 19 Oct 2026): the prices come from
@@ -845,6 +854,13 @@ async function routeAdmin(context) {
     const key = decodeKey(form.get('r'));
     if (key) await env.DB.prepare('UPDATE requests SET thankyou_skip = ?2 WHERE request_key = ?1').bind(key, form.get('skip') === '1' ? 1 : 0).run();
     return redirect(`/admin/?m=${encodeURIComponent(form.get('skip') === '1' ? 'No thank-you email will be sent for this request.' : 'The thank-you email will go out tomorrow morning.')}`);
+  }
+  // ✕ on the missed strip: hidden until tomorrow morning (Memphis), on every device; the ids
+  // shown are kept, so a job missed after this shows the strip again.
+  if (segs[0] === 'missed' && segs[1] === 'dismiss' && method === 'POST') {
+    const form = await request.formData();
+    await MS.dismissStrip(env.DB, chicagoDate(), String(form.get('ids') || '').split(','));
+    return redirect('/admin/?m=' + encodeURIComponent('Hidden until tomorrow morning. The card still shows MISSED.'));
   }
   if (segs[0] === 'requests' && segs[1] === 'takedown' && method === 'POST') {
     // The takedown is never required: Not sure yet / Customer will handle it (+ note), or '' to ask again.

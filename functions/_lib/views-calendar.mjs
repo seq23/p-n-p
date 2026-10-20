@@ -336,7 +336,7 @@ function phoneJob(b, c, day, yesFor) {
   const phone = normalizePhone(b.phone);
   const rk = b.request_key ? b64urlText(b.request_key) : '';
   const yes = c.tentative && b.request_key && yesFor[b.request_key] ? yesBox(yesFor[b.request_key], `p${day.replace(/-/g, '')}${b.id}`) : '';
-  return `<details class="pj${c.tentative ? ' tent' : ''}" style="border-color:${esc(s.bar)}" data-pjob="${b.id}"${c.tentative ? ' data-tentative' : ''}><summary${tip('cal.pjob')}><span class="k ${esc(b.kind)}${tentClass(c)}" data-list-booking="${b.id}"${tentAttrs(b, c)}>${esc(tentWords(c, held))}${esc(words)}</span><span class="pjw">${c.tentative ? 'Not confirmed yet · call them back' : 'Booked'} · tap for more</span></summary>
+  return `<details class="pj${c.tentative ? ' tent' : ''}" style="border-color:${esc(s.bar)}" data-pjob="${b.id}"${c.tentative ? ' data-tentative' : ''}><summary${tip('cal.pjob')}><span class="k ${esc(b.kind)}${tentClass(c)}${c.missed ? ' missed' : ''}"${c.missed ? ' data-missed-chip' : ''} data-list-booking="${b.id}"${tentAttrs(b, c)}>${esc(tentWords(c, held))}${esc(words)}</span><span class="pjw">${c.tentative ? 'Not confirmed yet · call them back' : 'Booked'} · tap for more</span></summary>
     <span class="pjb"><dl class="jd">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl>
     <span class="jb">${phone ? `<a class="btn ghost" href="tel:${phone}"${tip('day.call')}>Call</a><a class="btn ghost" href="sms:${phone}"${tip('cal.jobText')}>Text</a>` : ''}${rk ? `<a class="btn ghost" href="/admin/#c-${esc(rk)}"${tip('cal.openCard')}>Open their card</a>` : `<a class="btn ghost" href="/admin/day/${esc(day)}"${tip('cal.daySheet')}>Open the day sheet</a>`}${yes}</span></span></details>`;
 }
@@ -389,7 +389,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
         const mark = b.kind === 'rental_return' && r && r.returned_at ? ' ✓' : '';
         const held = RENTAL.has(b.kind) && ctx(b).hold && ctx(b).hold.state === 'held';
         const c = ctx(b);
-        return `<span class="k ${esc(b.kind)}${tentClass(c)}" draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''}${tentAttrs(b, c)} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(gridTent(c, held))}${esc(bookingLabel(b, c))}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
+        return `<span class="k ${esc(b.kind)}${tentClass(c)}${c.missed ? ' missed' : ''}"${c.missed ? ' data-missed-chip' : ''} draggable="true" data-drag data-booking="${b.id}" data-date="${esc(b.date)}"${held ? ' data-held-chip' : ''}${tentAttrs(b, c)} data-move-label="${esc(`${b.customer_name || 'this'}'s ${String(KIND_LABELS[b.kind]).toLowerCase()}`)}"${tip(c.tentative ? 'cal.tentative' : (held ? 'cal.heldChip' : 'cal.booking'))}>${esc(gridTent(c, held))}${esc(bookingLabel(b, c))}${mark}: ${esc(firstLine(b.customer_name, 18))}</span>`;
       }).join('')}
       ${outChips(windows, day, today, 'span')}
       ${(reqByDay[day] || []).map((c) => requestedChip(c, 'span')).join('')}
@@ -466,6 +466,7 @@ export function calendarPage({ stillToDecide = [], toSchedule = [], requested = 
     ${flash ? `<div class="notice ok" data-cal-flash>${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
     <h1 class="vh">Calendar &amp; Bookings</h1>
     ${holdsBox}
+    <style>.k.missed{background:#c0392b !important;color:#fff !important;border-color:#c0392b !important}</style>
     ${overdueBox(overdue)}
     ${warn}
     <div class="calm" data-steps="calendar" data-steps-panel data-calm>

@@ -21,6 +21,7 @@ import * as VM2 from './views-messages.mjs';
 import { expireHolds, endingSoon, holdSettings, currentHolds } from './holds.mjs';
 import { choiceFrom, createPhoneRequest, NOTE_CHOICE } from './phone-requests.mjs';
 import { serviceOfKind, serviceInfo } from './kinds.mjs';
+import { loadMissed } from './missed.mjs';
 
 const decodeKey = (v) => { try { return fromB64urlText(v); } catch { return ''; } };
 const wantsJson = (request) => request.headers.get('X-Pnp-Fetch') === '1';
@@ -87,7 +88,10 @@ export async function calendarPage(env, url) {
   const today = chicagoDate();
   const month = /^\d{4}-\d{2}$/.test(url.searchParams.get('month') || '') ? url.searchParams.get('month') : today.slice(0, 7);
   const all = await C.listBookings(env.DB);
-  const { ctx, returns, unconfirmed: unconfKeys } = await contextFor(env.DB, all);
+  const { ctx: ctx0, returns, unconfirmed: unconfKeys } = await contextFor(env.DB, all);
+  // A missed job's chip is red on its day (missed.mjs).
+  const missedIds = new Set((await loadMissed(env.DB, today)).map((m) => m.id));
+  const ctx = (b) => (missedIds.has(b.id) ? { ...ctx0(b), missed: true } : ctx0(b));
   const windows = C.rentalWindows(all, returns, PRICE_TABLE);
   const statuses = await statusMap(env.DB);
   const { requests } = await requestsSafe(env);
@@ -338,9 +342,11 @@ export async function remindedRoute(env, request, id) {
 // rental pickup ("Mark picked up", optionally recording the rest as paid: "They paid the rest
 // now") and the grazing pickup ("Mark pickup done"). Undo takes back only the done mark; a
 // payment recorded with it stays (money is changed on the invoice).
-const DONE_KINDS = /_takedown$|^rental_pickup$|^grazing_pickup$/;
+// A booking of kind other (typed on the calendar) is marked done the same way (Mark done (it
+// happened) on a missed job, missed.mjs).
+const DONE_KINDS = /_takedown$|^rental_pickup$|^grazing_pickup$|^other$/;
 const DONE_WORDS = (kind, undo) => {
-  const w = kind === 'rental_pickup' ? 'Picked up' : (kind === 'grazing_pickup' ? 'Pickup done' : 'Takedown done');
+  const w = kind === 'rental_pickup' ? 'Picked up' : (kind === 'grazing_pickup' ? 'Pickup done' : (kind === 'other' ? 'Job done' : 'Takedown done'));
   return undo ? `${w} undone` : `${w} ✓`;
 };
 export async function takedownDoneRoute(env, request, id) {

@@ -18,15 +18,20 @@
 //                           booking Valerie typed on the calendar with no request is hers, so it counts
 //   4 Book it or decide     called back but nothing on the calendar; takedowns / pickups with no day
 //   5 Money                 balances due today or late (the damage deposit is never owed), every
-//                           unpaid rental hold ("Waiting for deposit · Games reserved until ..."), games not returned
+//                           unpaid rental hold ("Waiting for deposit · Games reserved until ...")
+// Above section 1, a red alarm box "⚠ MISSED · CALL THEM FIRST" (owner-approved mock-up, panel 7,
+// 20 Oct 2026): every missed job (missed.mjs: any open booking before today not done and not Not
+// needed, a late rental return included, which therefore is no longer in Money), oldest first,
+// with Call now (tel:), Text (sms:) and Open card; the subject then starts "⚠ N missed job(s) · ".
 // then "Tomorrow, <day>" and, on Mondays, "Your week" (weekly.mjs figures; the Settings switch
-// weekly_summary = include it). Nothing in 1-5 and nothing tomorrow: the email says only
-// "All clear today". Customers appear as first name + last initial only; a phone number is only
+// weekly_summary = include it). Nothing missed, nothing in 1-5 and nothing tomorrow: the email
+// says only "All clear today" (never while a job is missed). Customers appear as first name + last initial only; a phone number is only
 // ever inside a Call (tel:) / Text (sms:) link, never shown. Every other link goes into /admin.
 import { requestFacts, callbackRows, serviceWords } from './callback-list.mjs';
 import { waitingWords, depositOutcomes } from './steps.mjs';
 import { shortName, askedDate } from './requested.mjs';
-import { listBookings, loadReturns, overdueReturns, addDays, daySort, deliveryAddress } from './calendar.mjs';
+import { listBookings, loadReturns, addDays, daySort, deliveryAddress } from './calendar.mjs';
+import { JOB_WORDS, DELIVERY_JOB_WORDS, missedFrom, isLiveBooking, lateWords, missedCountWords } from './missed.mjs';
 import { serviceOfKind } from './kinds.mjs';
 import { currentHolds } from './holds.mjs';
 import { balances, linesByInvoice, dueWords } from './ledger.mjs';
@@ -50,14 +55,10 @@ export const SECTION_WHY = {
   4: 'You talked to them, but nothing is on the calendar yet.',
   5: '',
 };
-// The job in her words ("party takedown", "games return").
-export const JOB_WORDS = {
-  rental_pickup: 'games pickup', rental_return: 'games return', porch_install: 'porch install', porch_takedown: 'porch takedown',
-  party_setup: 'party setup', party_takedown: 'party takedown', grazing_setup: 'grazing setup', grazing_pickup: 'grazing pickup', other: 'job',
-};
-// A rental going to a business (Valerie set business delivery): Delivery / Collect (owner, 20 Oct 2026),
-// the same words as the calendar chips and the Day sheet (views-calendar.mjs DELIVERY_WORDS).
-export const DELIVERY_JOB_WORDS = { rental_pickup: 'delivery', rental_return: 'collect' };
+// The job in her words ("party takedown", "games return") and the business-delivery Delivery /
+// Collect words live in missed.mjs (one list for the email, the strip and the card).
+export { JOB_WORDS, DELIVERY_JOB_WORDS };
+export const MISSED_TITLE = '⚠ MISSED · CALL THEM FIRST';
 const RENTAL_PLACE = 'Mt. Moriah Station';
 const usd = (c) => money(c).replace(/\.00$/, '');
 
@@ -85,18 +86,11 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   ]);
   const { results: stRows } = await db.prepare('SELECT * FROM request_status').all();
   const statuses = Object.fromEntries((stRows || []).map((s) => [s.request_key, s]));
-  const { results: reqRows } = await db.prepare('SELECT request_key, name, phone, is_test FROM requests').all();
+  const { results: reqRows } = await db.prepare('SELECT request_key, name, phone, is_test, takedown_plan FROM requests').all();
   const reqBy = Object.fromEntries((reqRows || []).map((x) => [x.request_key, x]));
   const invoiceOf = (b) => b.invoice_id || (b.request_key && statuses[b.request_key] && statuses[b.request_key].invoice_id) || null;
-  // A booking counts unless its request is put away / void / a test or its invoice is void.
-  const live = (b) => {
-    const st = b.request_key ? statuses[b.request_key] : null;
-    if (st && (st.archived_at || st.status === 'void')) return false;
-    if (b.request_key && reqBy[b.request_key] && reqBy[b.request_key].is_test) return false;
-    const inv = invoiceOf(b);
-    return !(inv && bals[inv] && bals[inv].void);
-  };
-  const bookings = all.filter(live);
+  // A booking counts unless its request is put away / void / a test or its invoice is void (missed.mjs).
+  const bookings = all.filter((b) => isLiveBooking(b, { statuses, reqBy, bals }));
   const open = bookings.filter((b) => !b.done_at);
   const who = (b) => shortName(b.customer_name || (reqBy[b.request_key] && reqBy[b.request_key].name));
   const phoneOf = (b) => b.phone || (reqBy[b.request_key] && reqBy[b.request_key].phone) || '';
@@ -123,6 +117,14 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   // Delivery / Collect for a business-delivery rental, else the usual job words.
   const delivered = (b) => Boolean(DELIVERY_JOB_WORDS[b.kind] && b.request_key && factsBy[b.request_key] && deliveryAddress(factsBy[b.request_key].r));
   const jobOf = (b) => (delivered(b) ? DELIVERY_JOB_WORDS[b.kind] : (JOB_WORDS[b.kind] || 'job'));
+
+  // ⚠ Missed (above section 1): oldest first; Call now is the solid button.
+  const missed = missedFrom({ bookings, returns, today, statuses, reqBy, delivered }).map((m) => {
+    const tel = telHref(m.phone);
+    const job = m.kind === 'rental_return' ? (m.short === 'collect' ? 'games not collected' : 'games not returned') : m.job;
+    return { ...m, svc: serviceOfKind(m.kind), t: `${m.who} · ${job}`, d: `Was due ${dayWords(m.date)} · ${lateWords(m.days)} · not marked done`,
+      btns: [...(tel ? [{ label: '📞 Call now', href: tel, solid: true }, { label: 'Text', href: `sms:${normalizePhone(m.phone)}` }] : []), { label: 'Open card', href: m.key ? cardHref(m.key) : `/admin/day/${m.date}` }] };
+  });
 
   // 1. Today's jobs.
   const jobs = open.filter((b) => b.date === today).sort(daySort).map((b) => {
@@ -212,9 +214,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const d = bal && !bal.void ? (due > 0 ? `${dueWords(bal, usd)} on the invoice` : 'Deposit not paid yet') : 'Invoice not sent yet';
     moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [{ label: 'Reserve their games longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
   }
-  for (const b of overdueReturns(bookings, returns, today)) {
-    moneyItems.push({ type: 'overdue', svc: 'rentals', key: b.request_key || '', t: `${who(b)} · games not returned yet`, d: `Due back ${dayWords(b.date)}`, btns: [...callText(phoneOf(b)), { label: 'Open card', href: bookingHref(b) }] });
-  }
+  // A late rental return is a missed job (in the alarm box above section 1), never also here.
 
   const tomorrowJobs = open.filter((b) => b.date === tomorrow).sort(daySort).map((b) => ({ svc: serviceOfKind(b.kind), t: `${timeOr(b)} · ${who(b)} · ${jobOf(b)}` }));
   const monday = isMondayIso(today);
@@ -224,20 +224,28 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const w = await weeklyData(db, today, nowMs);
     week = { newRequests: w.last.total, jobsDone: w.last.jobsDone, moneyIn: w.last.received, tips: w.last.tips || 0, expenses: w.last.expenses, next14: w.upcomingJobs };
   }
-  return { today, tomorrow, monday, sections: { 1: jobs, 2: callbacks, 3: setTime, 4: decide, 5: moneyItems }, tomorrowJobs, week };
+  return { today, tomorrow, monday, missed, sections: { 1: jobs, 2: callbacks, 3: setTime, 4: decide, 5: moneyItems }, tomorrowJobs, week };
 }
 
-export const isAllClear = (d) => [1, 2, 3, 4, 5].every((n) => !d.sections[n].length) && !d.tomorrowJobs.length;
+export const isAllClear = (d) => !(d.missed || []).length && [1, 2, 3, 4, 5].every((n) => !d.sections[n].length) && !d.tomorrowJobs.length;
 
 // ---- the email: subject, html, text (the approved mock: one calm 600px column) --------------
-const C = { bg: '#eef0f2', mail: '#ffffff', fg: '#2c2520', muted: '#6f6359', line: '#ece4da', accent: '#b65f3e', soft: '#faf6f0', hi: '#fdf0e6', ok: '#2f7a46' };
+const C = { red: '#b42318', redBg: '#fdecea', bg: '#eef0f2', mail: '#ffffff', fg: '#2c2520', muted: '#6f6359', line: '#ece4da', accent: '#b65f3e', soft: '#faf6f0', hi: '#fdf0e6', ok: '#2f7a46' };
 const BAR = { porch: '#c8641e', party: '#7a3fa8', grazing: '#2f7a46', rentals: '#2456c9', other: '#ece4da' };
 const SANS = "'Source Sans 3', 'Helvetica Neue', Arial, sans-serif";
 const SERIF = "Fraunces, Georgia, 'Times New Roman', serif";
 const abs = (h) => (/^(tel|sms):/.test(h) ? h : `${SITE}${h}`);
-function btnHtml(b) {
-  const fill = b.solid ? `background:${C.accent};color:#ffffff;` : `background:${C.mail};color:${C.accent};`;
-  return `<a href="${esc(abs(b.href))}" style="display:inline-block;margin:0 8px 6px 0;font-size:14px;font-weight:700;${fill}border:1.5px solid ${C.accent};border-radius:8px;padding:4px 12px;text-decoration:none;">${esc(b.label)}</a>`;
+function btnHtml(b, tone = C.accent) {
+  const fill = b.solid ? `background:${tone};color:#ffffff;` : `background:${C.mail};color:${tone};`;
+  return `<a href="${esc(abs(b.href))}" style="display:inline-block;margin:0 8px 6px 0;font-size:14px;font-weight:700;${fill}border:1.5px solid ${tone};border-radius:8px;padding:4px 12px;text-decoration:none;">${esc(b.label)}</a>`;
+}
+// The red alarm box at the very top (panel 7): one block per missed job, oldest first.
+function missedHtml(list) {
+  return `<div data-missed style="background:${C.redBg};border:2px solid ${C.red};border-radius:10px;padding:12px 14px;margin:0 0 20px;">`
+    + `<div style="color:${C.red};font-weight:800;font-size:15px;letter-spacing:.04em;margin:0 0 6px;">${esc(MISSED_TITLE)}</div>`
+    + list.map((m) => `<div data-missed-item="${esc(m.id)}" style="padding:6px 0;border-top:1px solid #f3c4bf;"><div style="font-weight:700;">${esc(m.t)}</div><div style="color:${C.red};font-size:15px;">${esc(m.d)}</div>`
+      + `<div style="margin-top:6px;">${m.btns.map((b) => btnHtml(b, C.red)).join('')}</div></div>`).join('')
+    + '</div>';
 }
 function itemHtml(it) {
   const hi = it.hi ? `background:${C.hi};border-radius:0 8px 8px 0;` : '';
@@ -260,7 +268,8 @@ function weekHtml(w) {
 }
 
 export function renderTodo(d) {
-  const subject = `Your to-do list for ${dayWords(d.today)} · Porch & Party`;
+  const missed = d.missed || [];
+  const subject = `${missed.length ? `⚠ ${missedCountWords(missed.length)} · ` : ''}Your to-do list for ${dayWords(d.today)} · Porch & Party`;
   const footHtml = `<p style="margin:20px 0 0;font-size:14px;color:${C.muted};text-align:center;"><a href="${SITE}/admin/" style="color:${C.accent};">Open the admin</a> · This email comes every day at 7 AM.</p>`;
   const T = [];
   const weekText = (w) => ['', 'YOUR WEEK (MONDAY SUMMARY)', ...WEEK_ROWS(w).map(([k, v]) => `- ${k}: ${v}`)];
@@ -270,6 +279,11 @@ export function renderTodo(d) {
   }
   const H = [`<h1 style="font-family:${SERIF};font-size:26px;line-height:1.2;font-weight:600;margin:0 0 6px;">Good morning, Valerie</h1><p style="margin:0 0 20px;color:${C.muted};">Here is what needs you today, in order.</p>`];
   T.push('Good morning, Valerie', 'Here is what needs you today, in order.');
+  if (missed.length) {
+    H.push(missedHtml(missed));
+    T.push('', MISSED_TITLE);
+    for (const m of missed) T.push(`- ${m.t} (${m.d}): ${SITE}${m.btns[m.btns.length - 1].href}`);
+  }
   // The sections SHOWN are numbered 1, 2, 3 ... in order (owner, 20 Oct 2026): an empty section
   // leaves no gap in the numbers. data-section stays the section's fixed key.
   let first = true;
