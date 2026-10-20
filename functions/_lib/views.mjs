@@ -1350,9 +1350,27 @@ article[data-reqcard]{position:relative;scroll-margin-top:12px}
 @media(min-width:900px){.wrap.panelwide.hasspine{max-width:1270px}.rqgrid{display:grid;grid-template-columns:170px minmax(0,1fr);gap:22px;align-items:start}.rqcol{min-width:0}
 .spine{display:grid;gap:6px;position:sticky;top:12px;max-height:calc(100vh - 24px);overflow:auto;padding:4px 2px}}
 `;
-// The card on screen: the phone bar's name and arrows, the spine's highlight (IntersectionObserver
-// wakes it; the anchors work on their own without JS). Taps scroll in place, no history entries.
-const CUST_JS = `(function(){var cards=[].slice.call(document.querySelectorAll('[data-request-list] article[data-customer]'));if(!cards.length)return;
+// Which card is "current" (the phone bar's name and arrows, the spine's highlight). The reading
+// line sits a quarter of the way down the space left under the sticky bar: the card whose region
+// covers that line is current, so a card becomes current as soon as its top crosses the line, and
+// the previous card's tail peeking in above it no longer wins (the one-card lag, 20 Oct 2026).
+// Between cards (a gap) the last card whose top is above the line holds; above all of them, the
+// first. Scrolled to the very bottom, the last card whose top is on screen wins, so the last short
+// card can still be reached by ‹ / ›. rects: [{top, bottom}] in viewport px, top to bottom. Pure
+// and ES5: its source is inlined into the page script as is.
+export function pickCurrentCard(rects, barBottom, viewH, atBottom) {
+  var line = barBottom + (viewH - barBottom) * 0.25, k = 0, i;
+  if (atBottom) { for (i = 0; i < rects.length; i++) if (rects[i].top < viewH) k = i; return k; }
+  for (i = 0; i < rects.length; i++) {
+    if (rects[i].top <= line && rects[i].bottom > line) return i;
+    if (rects[i].top <= line) k = i;
+  }
+  return k;
+}
+// The anchors work on their own without JS; with JS, scrolling re-picks and taps scroll in place
+// (no history entries), landing the card's top just under the bar.
+const CUST_JS = `${pickCurrentCard.toString()}
+(function(){var cards=[].slice.call(document.querySelectorAll('[data-request-list] article[data-customer]'));if(!cards.length)return;
 var bar=document.querySelector('[data-customer-bar]'),now=bar&&bar.querySelector('[data-customer-now]'),jump=bar&&bar.querySelector('[data-customer-jump]'),spine=[].slice.call(document.querySelectorAll('[data-spine-to]')),cur=-1;
 function barOn(){return bar&&bar.getClientRects().length>0;}
 function off(){return barOn()?bar.getBoundingClientRect().height+8:12;}
@@ -1360,7 +1378,8 @@ function mark(i){if(i===cur)return;cur=i;var c=cards[i],k=c.getAttribute('data-c
  if(now)now.textContent='Customer '+c.getAttribute('data-customer')+' \\u00b7 '+c.getAttribute('data-first')+' \\u25be';
  if(bar){bar.querySelector('[data-cstep="-1"]').setAttribute('href','#'+cards[Math.max(0,i-1)].id);bar.querySelector('[data-cstep="1"]').setAttribute('href','#'+cards[Math.min(cards.length-1,i+1)].id);}
  spine.forEach(function(a){var on=a.getAttribute('data-spine-to')===k;a.classList.toggle('on',on);if(on)a.setAttribute('aria-current','true');else a.removeAttribute('aria-current');});}
-function pick(){var y=off()+(barOn()?0:60),k=0;cards.forEach(function(c,i){if(c.getBoundingClientRect().top<=y)k=i;});mark(k);}
+function pick(){var b=barOn()?Math.max(0,bar.getBoundingClientRect().bottom):0,h=window.innerHeight||document.documentElement.clientHeight,d=document.documentElement,end=window.pageYOffset+h>=Math.max(d.scrollHeight,document.body.scrollHeight)-2;
+ mark(pickCurrentCard(cards.map(function(c){var r=c.getBoundingClientRect();return {top:r.top,bottom:r.bottom};}),b,h,end&&window.pageYOffset>0));}
 function go(i){i=Math.max(0,Math.min(cards.length-1,i));var c=cards[i];window.scrollTo({top:c.getBoundingClientRect().top+window.pageYOffset-off(),behavior:'smooth'});if(jump)jump.open=false;cur=-1;mark(i);}
 document.addEventListener('click',function(e){var t=e.target.closest('[data-cstep],[data-cjump],[data-spine-to]');if(!t)return;e.preventDefault();
  if(t.hasAttribute('data-cstep'))return go(cur+Number(t.getAttribute('data-cstep')));

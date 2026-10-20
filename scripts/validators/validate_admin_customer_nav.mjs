@@ -34,6 +34,31 @@ const n = V.customerNumbers(fake);
 must(n.get('z') === 1 && n.get('a') === 2 && n.get('b') === 3 && n.get('b2') === 4 && n.get('c') === 5, `customerNumbers is not oldest = 1 with ties by key: ${JSON.stringify([...n])}`);
 must(JSON.stringify([...V.customerNumbers([...fake].reverse())].sort()) === JSON.stringify([...n].sort()), 'customerNumbers depends on the input order');
 
+// ---- 1a'. which card is current, as a unit (the one-card lag, 20 Oct 2026) ----------------------
+// Live repro: Customer 3's last "Show more" row peeks in under the bar while Customer 2's card
+// (top ~120 px down) fills the screen; the old picker (last card whose top <= bar + 8) kept 3.
+{
+  const P = V.pickCurrentCard;
+  must(typeof P === 'function', 'pickCurrentCard is not exported');
+  const R = (...xs) => xs.map(([top, bottom]) => ({ top, bottom }));
+  // Laptop, no bar, 900 px tall: the previous card's tail only, the next card's top at 120 px.
+  must(P(R([-1400, 100], [120, 1500], [1520, 2400]), 0, 900, false) === 1, 'laptop: the previous card\'s tail wins over the card filling the screen');
+  // Phone, bar bottom 56, 800 tall: the next card's top just below the bar.
+  must(P(R([-900, 50], [70, 1400], [1420, 2000]), 56, 800, false) === 1, 'phone: a card whose top sits just below the bar is not current');
+  must(P(R([-900, 30], [40, 1400]), 56, 800, false) === 1, 'phone: the previous card\'s tail hidden behind the bar still wins');
+  // Line = 56 + 0.25 * 744 = 242: a top just above it is current, just below it is not yet.
+  must(P(R([-900, 240], [241, 1400]), 56, 800, false) === 1 && P(R([-900, 243], [244, 1400]), 56, 800, false) === 0, 'the switch does not happen when a card\'s top crosses the reading line');
+  // A card covering the whole screen stays current; above every card, the first; a gap holds the last above.
+  must(P(R([-2000, 2000], [2010, 3000]), 56, 800, false) === 0, 'a card covering the screen is not current');
+  must(P(R([300, 900], [920, 1400]), 56, 800, false) === 0, 'above every card the first is not current');
+  must(P(R([-500, 200], [260, 900]), 56, 800, false) === 0, 'in the gap between cards the card above does not hold');
+  // A jump lands the card's top just under the bar (bar + 8): that card is current.
+  must(P(R([-600, 40], [64, 300], [320, 900]), 56, 800, false) === 1, 'after a jump the landed card is not current');
+  // At the very bottom the last short card (top on screen) is reachable by ‹ / ›.
+  must(P(R([-600, 400], [420, 700]), 56, 800, true) === 1, 'at the bottom the last card on screen is not current');
+  must(P(R([-600, 400], [820, 900]), 56, 800, true) === 0, 'at the bottom a card below the screen is current');
+}
+
 // ---- 1b. through the router ---------------------------------------------------------------
 const s = await session();
 // Two more website requests (newest), so the list has several cards and the numbers are not trivial.
@@ -158,6 +183,7 @@ must(/<main class="wrap panelwide hasspine">/.test(H), 'the Requests page is not
 // The spine is its own grid column: at 1280 the main column is 1270-32-170-22 px, never under the cards.
 must(1270 - 32 - 170 - 22 >= 1000, 'Rule 0: the card column is narrower than before the spine');
 must(H.indexOf('data-spine') < H.indexOf('data-request-list') && H.indexOf('<div class="rqgrid">') < H.indexOf('data-spine'), 'the spine is not left of the list');
+must(H.includes(V.pickCurrentCard.toString()) && /mark\(pickCurrentCard\(cards\.map\(/.test(H) && !/getBoundingClientRect\(\)\.top<=y/.test(H), 'the page script does not pick the current card with the tested pickCurrentCard');
 must(/IntersectionObserver/.test(H) && /\[data-filter-pick\]/.test(H) && /location\.href=o\.getAttribute\('data-href'\)/.test(H), 'the scroll highlight or the drop-down change handler is missing');
 must(/@media\(min-width:900px\)\{\.rqpanel\{order:0;margin-top:0\}\}/.test(H) && /\.rqmain\{order:1\}\.rqpanel\{order:2;margin-top:18px\}/.test(H), 'the 1·2·3 panel no longer sits under the list on a phone');
 // Missed / tidy strips stay above the filter.
