@@ -105,7 +105,18 @@ function scenarios(table, g, s) {
     const want = expectedDeposit(lines, g);
     if (dep.length !== 1 || dep[0].unit_cents !== want) errors.push(`${label}: prefill lacks the one refundable $${want / 100} damage deposit`);
     if (!isRentalInvoice(lines, table)) errors.push(`${label}: prefill is not recognised as a rental invoice`);
-    if (!/^(Pay the rest \(\$[\d,]+\.\d\d\) at pickup\.|This covers everything\. Nothing more to pay at pickup\.) Text or call 901-355-1518 to set your pickup time at Mt\. Moriah Station unless otherwise agreed upon\.$/.test(pickupNote(lines, table, { invoice: { deposit_due_cents: 0, pay_plan: 'half', notes: '' } }))) errors.push(`${label}: rental invoice does not carry the pickup note`);
+    // The note's "rest" is exactly the pay box's step ② (total - the deposit asked for), with any
+    // refundable damage deposit that deposit does not cover said in words inside the same sum.
+    const total = lines.reduce((n, l) => n + Math.round(l.qty * l.unit_cents), 0);
+    const half = Math.round(total / 2);
+    const usd = (c) => `$${(c / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    const restWords = (now) => { const rest = total - now; const dep = Math.min(rest, Math.max(0, want - now)); return dep > 0 ? (rest - dep > 0 ? `${usd(rest - dep)} + ${usd(dep)} refundable deposit = ${usd(rest)}` : `${usd(rest)} refundable deposit`) : usd(rest); };
+    const TAIL = ' Text or call 901-355-1518 to set your pickup time at Mt. Moriah Station unless otherwise agreed upon.';
+    for (const now of [half, 0, want]) {
+      const note = pickupNote(lines, table, { invoice: { deposit_due_cents: now, pay_plan: 'custom', notes: '' } });
+      if (note !== `Pay the rest (${restWords(now)}) at pickup.${TAIL}`) errors.push(`${label}: rental invoice does not carry the pickup note (deposit ${now}): "${note}"`);
+    }
+    if (pickupNote(lines, table, { invoice: { deposit_due_cents: total, pay_plan: 'full', notes: '' } }) !== `This covers everything. Nothing more to pay at pickup.${TAIL}`) errors.push(`${label}: All now note is not "This covers everything."`);
     if (lines.some((l) => /^Game rental \(/.test(l.description))) errors.push(`${label}: "${answer}" was not matched (fell back to "Game rental")`);
     return lines;
   };

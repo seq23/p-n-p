@@ -318,8 +318,9 @@ the top of every screen, and a printable guide at `/admin/help`.
   with "Void invoice PNP-… for …? The customer is not told…". A void invoice keeps its number,
   cannot be sent or marked paid, gets a VOID stamp (page and PDF), and the bookings it created
   leave the calendar and the feed (bookings she made by hand stay, unlinked). "More options"
-  on an invoice holds only non-money actions. Balances: charges minus payments; the refundable
-  damage deposit is shown on its own line and never counted as owed (`functions/_lib/ledger.mjs`).
+  on an invoice holds only non-money actions. Balances: `balanceOf` in `functions/_lib/ledger.mjs`
+  is the ONE source of paid / still owed / paid in full for every surface (see "One balance
+  everywhere" below); the refundable damage deposit is shown on its own line.
 - **Put away**: "Done — put away" sets `request_status.archived_at` (nothing deleted, the sheet
   untouched); a 6-second "Put away. Undo" banner; the Put away section at the bottom of Requests
   has "Bring back" on each.
@@ -382,7 +383,8 @@ Node >= 22.13 (`node:sqlite`); CI runs Node 22.
   each invoice's lines through `kinds.mjs`), damage deposits held / refunded / kept, Expenses and
   "Left after expenses" (a simple difference, not profit or tax). Every total opens the rows
   behind it. A 12-month list with a year switcher. Pure sums in `functions/_lib/money.mjs`: a
-  payment covers charges first, the rest is a damage deposit held (never income); refunds and
+  payment takes the refundable damage deposit first, then the charges (`ledger.mjs splitPayment`,
+  the same split the invoice, card and note use); the deposit part is held (never income); refunds and
   deposits kept for damage are their own `payments.kind` rows; void invoices are never counted.
 - **Damage deposit** box on an invoice: "Refund the damage deposit" / "Keep some for damage"
   (confirmations, amount, method). Records only; no money moves.
@@ -607,8 +609,10 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   Nothing more to pay at pickup. ..."; paid in full -> "Paid in full. Thank you! ..." on the ONLINE
   invoice page only (no email or extra invoice is ever sent for it). Business delivery (the
   request's tick or a Delivery fee line): "at delivery" and "Text or call ... to set your delivery
-  time unless otherwise agreed upon." R = total minus the amount due now (or paid, if more); the
-  amount due now takes the refundable deposit first, so an uncovered deposit is never "owed". Phone
+  time unless otherwise agreed upon." R = total minus the amount due now (or paid, if more): step
+  ② of the pay box, or its "Still owed" once more than the deposit is in. The amount due now takes
+  the refundable deposit first; a deposit it does not cover stays in the sum and is said in words
+  (20 Oct 2026): "Pay the rest ($20.00 + $50.00 refundable deposit = $70.00) at pickup." Phone
   and place from games.json `pickup`. A note Valerie typed wins (the automatic one is left out);
   the website's old draft note does not count as hers. New website drafts carry no note of their
   own. Nothing stored is rewritten: sent invoices keep their stored notes and lines.
@@ -694,6 +698,25 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   "① Deposit now (holds your date)", "② The rest, by Wed 28 Oct". The old one-number "$X due now"
   band is gone. The numbers are the ones every invoice always had (`deposit_due_cents`).
 - Proof: `npm run validate:admin-invoice-calm` and `validate:admin-pay-plan` (in validate:admin).
+
+## One balance everywhere (20 Oct 2026)
+- **One source**: `balanceOf` (`functions/_lib/ledger.mjs`) works out paid, still owed
+  (`remaining` = total - paid), charges owed, damage deposit not collected yet and `paidInFull`.
+  `payStepsOf` (pay-steps.mjs) and `rentalNote` (invoice-note.mjs) read it; `dueWords` /
+  `dueCents` / `owes` / `balanceWords` word it. Money (`money.mjs`) splits each payment with the
+  same `splitPayment`.
+- **The split**: money received takes the refundable damage deposit first, then the charges
+  (what the website promises: due now = damage deposit + 50%). So a customer who has paid less
+  than the total always has something due and is never told "Paid in full" (the old
+  charges-first split said "Paid in full" with the damage deposit still to pay).
+- **Every surface says the same number**: invoice page (box, balance line, note), customer email,
+  text, PDF ("✓ paid" steps and "Still owed" now on all three), card, Money job rows (Total - Paid
+  = Still owed with deposits left out or counted), Not paid yet (Total / Paid / due words and the
+  reminder amount), Day sheet, calendar "Collect at pickup", 7 AM email.
+- Proof: `npm run validate:admin-balance-one` (in validate:admin): 12 rental invoices (deposit
+  paid, damage deposit + 50% paid, part paid, paid in full, no damage deposit, deposit smaller than
+  the damage deposit, No deposit, All now, paid more than the deposit) rendered on every surface;
+  fails if any two disagree or anything says "Paid in full" with money left.
 
 ## Quote form contract (rentals v3, owner-approved 15 Oct 2026)
 Legacy intake: the site's /request form replaced it and takes its choices from the live inventory.

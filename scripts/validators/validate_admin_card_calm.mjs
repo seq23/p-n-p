@@ -289,7 +289,9 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
   must(/data-pay-words>Invoice sent · \$130 due</.test(c5) && !/refundable deposit\)/.test(c5), 'D: with no refundable deposit the card does not say "$130 due"');
   const depIn = L.balanceOf({ status: 'deposit_paid' }, lines, 9000);
   const c6 = V.requestCard(den, { ...cardOpts, st: { status: 'deposit_paid', invoice_id: 4 }, inv: { ...sentInv, status: 'deposit_paid', balance: depIn }, hold: null, holdHtml: '' });
-  must(/data-pay-words>Deposit in · \$90 due \(\$40 \+ \$50 refundable deposit\)</.test(c6), `D: deposit-in card words (${(c6.match(/data-pay-words>[^<]*/) || [''])[0]})`);
+  // $90 in of $180: the damage deposit is taken first (ledger.mjs splitPayment), so it is collected
+  // and $90 of the charges is still due; never "Paid in full".
+  must(/data-pay-words>Deposit in · \$90 due · damage deposit \$50\.00, refundable \(collected\)</.test(c6) && !/Paid in full/.test(c6), `D: deposit-in card words (${(c6.match(/data-pay-words>[^<]*/) || [''])[0]})`);
   const VC = await mod('functions/_lib/views-calendar.mjs');
   must(/data-collect>Collect at pickup: \$180 \(\$130 \+ \$50 refundable deposit\)</.test(VC.statusBits({ kind: 'rental_pickup' }, { bal: bal0 })) && /data-collect>Collect at delivery: /.test(VC.statusBits({ kind: 'rental_pickup' }, { bal: bal0, delivery: true })), 'D/C: the calendar booking line does not say "Collect at pickup / delivery: $180 (...)"');
 }

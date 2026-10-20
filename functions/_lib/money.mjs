@@ -5,6 +5,7 @@
 // invoices are left out of every total and listed apart. Dates are Memphis dates
 // (payments.received_on is written with chicagoDate()).
 import { lineTotal } from './util.mjs';
+import { balanceOf, splitPayment } from './ledger.mjs';
 import { SERVICE_KINDS, serviceOfLine, serviceOfKind } from './kinds.mjs';
 import { askedDate } from './requested.mjs';
 
@@ -64,10 +65,11 @@ export function prepare({ invoices, lines, payments, bookings = [], statuses = [
     if (!x || x.inv.status === 'void') continue;
     const kind = p.kind || 'payment';
     if (kind !== 'payment') { allocated.push({ ...p, kind, charge: 0, deposit: 0, cats: {} }); continue; }
+    // The one split (ledger.mjs splitPayment): the damage deposit first, then the charges.
     const before = running[p.invoice_id] || 0;
-    const charge = Math.max(0, Math.min(p.amount_cents, x.charges - before));
+    const { charge, deposit } = splitPayment(before, p.amount_cents, x);
     running[p.invoice_id] = before + p.amount_cents;
-    allocated.push({ ...p, kind, charge, deposit: p.amount_cents - charge, cats: splitByShare(charge, x.cats, x.charges) });
+    allocated.push({ ...p, kind, charge, deposit, cats: splitByShare(charge, x.cats, x.charges) });
   }
   return { byInv, payments: allocated, bookings, statuses, expenses, tips: tips.filter((t) => !t.removed_at) };
 }
@@ -112,7 +114,7 @@ export function periodTotals(data, prefix) {
     if (x && !seenInv.has(b.invoice_id)) {
       seenInv.add(b.invoice_id);
       const paid = data.payments.filter((p) => p.invoice_id === b.invoice_id && p.kind === 'payment').reduce((s, p) => s + p.amount_cents, 0);
-      const owed = Math.max(0, x.charges - paid);
+      const { owed } = balanceOf(x.inv, x.lines, paid);
       // A draft (never sent) is owed by nobody (owner, 20 Oct 2026; ledger.mjs balances).
       if (owed > 0 && x.inv.status !== 'draft') { out.owed += owed; out.owedList.push({ booking: b, invoice: x.inv, owed }); }
     }
@@ -135,9 +137,10 @@ export function periodTotals(data, prefix) {
 // One row per job: its name, services, date, total, paid, still owed and tips. A job is a
 // request (or a booking made without one) with a first booking, an invoice, or (unconfirmed
 // only) just the day it asked for. Void requests and invoices are never jobs. Money per job
-// comes from the payments record via prepare(): a payment covers the charges first, the rest is
-// the refundable damage deposit. Still owed is charges minus paid and never includes a deposit
-// or a tip. confirmed follows steps.mjs (unconfirmed: a Set of request keys from unconfirmedKeys).
+// comes from the payments record via prepare(): a payment takes the refundable damage deposit
+// first, then the charges (ledger.mjs splitPayment, the one split). Still owed is charges minus
+// paid charges (plus the deposit not collected yet only when "Leave out refundable deposits" is
+// off, so Total - Paid = Still owed on every row) and never a tip. confirmed follows steps.mjs (unconfirmed: a Set of request keys from unconfirmedKeys).
 export function jobRows(data, { requests = [], unconfirmed = new Set() } = {}) {
   const st = Object.fromEntries((data.statuses || []).map((s) => [s.request_key, s]));
   const voidKey = (k) => Boolean(k && st[k] && st[k].status === 'void');
@@ -175,6 +178,7 @@ export function jobRows(data, { requests = [], unconfirmed = new Set() } = {}) {
       services: services.length ? services : ['other'], date, confirmed, hasPrice: Boolean(x),
       charges, refundable: x ? x.refundable : 0, paidCharges, paidDeposit,
       owed: confirmed && !(x && x.inv.status === 'draft') ? Math.max(0, charges - paidCharges) : 0,
+      depositOwed: confirmed && x && x.inv.status !== 'draft' ? Math.max(0, x.refundable - paidDeposit) : 0,
       expected: confirmed ? 0 : charges,
       tips: tips.reduce((n, t) => n + t.amount_cents, 0), tipCount: tips.length,
     });

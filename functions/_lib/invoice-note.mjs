@@ -12,11 +12,19 @@
 //                                          invoice reads as "This covers everything.")
 // Business delivery (set by Valerie on the request, or a Delivery fee line): "at delivery"
 // and "Text or call P to set your delivery time unless otherwise agreed upon." (no PLACE).
-// R never counts the refundable damage deposit (it is never owed). The phone and the place come
+// R is the same "rest" the invoice's "How <name> pays" box states (pay-steps.mjs payStepsOf,
+// which reads ledger.mjs balanceOf): the total minus the amount due now (or what was paid, if
+// more), so the note, step ② / "Still owed", the card and every email add up to the same total.
+// The owner's 19 Oct 2026 rule "the refundable damage deposit is never owed" is kept in words,
+// not by dropping it from the sum (20 Oct 2026): money received takes the damage deposit first,
+// so it is only still to pay when the amount due now is smaller than it, and then the note says
+// so: "Pay the rest ($20.00 + $50.00 refundable deposit = $70.00) at pickup."
+// "Paid in full" only when the whole total is in (balance.paidInFull), never with money left.
+// The phone and the place come
 // from data/rentals/games.json pickup (pricing.mjs table.pickupPhone / pickupPlace), never typed.
 // A note Valerie typed herself (invoice.notes) wins: the automatic note is then left out.
-import { balanceOf } from './ledger.mjs';
-import { amountDueNow, payPlanOf, money } from './util.mjs';
+import { money } from './util.mjs';
+import { payStepsOf } from './pay-steps.mjs';
 import { isRentalInvoice } from './pricing.mjs';
 
 // The website's old automatic draft note: not hers, so it never counts as hand-typed.
@@ -38,26 +46,31 @@ export function isDelivery(lines = [], { delivery = false } = {}) {
   return Boolean(delivery) || (lines || []).some((l) => DELIVERY_LINE.test(String(l.description || '')));
 }
 
+// "$70.00" / "$20.00 + $50.00 refundable deposit = $70.00" / "$50.00 refundable deposit".
+export function restWords(rest, restDeposit = 0) {
+  if (!(restDeposit > 0)) return money(rest);
+  if (rest - restDeposit <= 0) return `${money(rest)} refundable deposit`;
+  return `${money(rest - restDeposit)} + ${money(restDeposit)} refundable deposit = ${money(rest)}`;
+}
+
 // -> { state: 'rest' | 'upfront' | 'paid', rest, words } or null (not a rental, or her own note).
 export function rentalNote({ invoice = {}, lines = [], paidCents = 0, table, delivery = false, view = false }) {
   if (!table || !isRentalInvoice(lines, table)) return null;
   if (handTyped(invoice)) return null;
-  const bal = balanceOf(invoice, lines, paidCents);
-  const plan = payPlanOf(invoice, bal.total);
-  const dueNow = amountDueNow(plan, bal.total, invoice.deposit_due_cents || 0);
-  // What is left after the amount due now (or what was paid, if more): the same "rest" the
-  // invoice's pay box states. The amount due now takes the refundable damage deposit first, so a
-  // deposit it does not cover is left out: the deposit is never "owed".
-  const x = Math.max(bal.paid, dueNow);
-  const rest = Math.max(0, bal.total - x - Math.max(0, bal.refundable - x));
-  const paidUp = bal.charges > 0 && bal.owed === 0 && bal.paid > 0;
-  const state = paidUp && view ? 'paid' : (rest > 0 ? 'rest' : 'upfront');
+  const ps = payStepsOf(invoice, lines, { paid: paidCents });
+  // What is left after the amount due now (or what was paid, if more): step ② of the pay box
+  // before anything past the deposit is in, its "Still owed" after.
+  const x = Math.max(ps.paid, ps.now);
+  const rest = Math.max(0, ps.total - x);
+  // The part of it that is the refundable damage deposit (the deposit is taken first).
+  const restDeposit = Math.min(rest, Math.max(0, ps.refundable - x));
+  const state = ps.paidInFull && view ? 'paid' : (rest > 0 ? 'rest' : 'upfront');
   const del = isDelivery(lines, { delivery });
   const where = del ? 'at delivery' : 'at pickup';
   const tail = del ? `Text or call ${table.pickupPhone} to set your delivery time unless otherwise agreed upon.`
     : `Text or call ${table.pickupPhone} to set your pickup time at ${table.pickupPlace} unless otherwise agreed upon.`;
-  const head = state === 'paid' ? 'Paid in full. Thank you!' : (state === 'upfront' ? `This covers everything. Nothing more to pay ${where}.` : `Pay the rest (${money(rest)}) ${where}.`);
-  return { state, rest, delivery: del, words: `${head} ${tail}` };
+  const head = state === 'paid' ? 'Paid in full. Thank you!' : (state === 'upfront' ? `This covers everything. Nothing more to pay ${where}.` : `Pay the rest (${restWords(rest, restDeposit)}) ${where}.`);
+  return { state, rest, restDeposit, delivery: del, words: `${head} ${tail}` };
 }
 
 // The words under the pay box, or '' (decor-only invoice, or her own note).

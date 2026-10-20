@@ -25,6 +25,7 @@ const M = await mod('functions/_lib/money.mjs');
 const AM = await mod('functions/_lib/admin-money.mjs');
 const L = await mod('functions/_lib/ledger.mjs');
 const W = await mod('functions/_lib/weekly.mjs');
+const VM = await mod('functions/_lib/views-money.mjs');
 const errors = [];
 let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
@@ -113,7 +114,17 @@ const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
   // A deposit is never owed: half-paid invoice with a deposit line.
   const half = M.prepare({ invoices: [{ id: 9, number: 'N', customer_name: 'Hal', status: 'deposit_paid' }], lines: [{ invoice_id: 9, description: 'Pick 3 bundle', qty: 1, unit_cents: 11000, refundable: 0 }, { invoice_id: 9, description: 'Damage deposit', qty: 1, unit_cents: 5000, refundable: 1 }], payments: [{ id: 1, invoice_id: 9, amount_cents: 11000, received_on: '2026-10-02', kind: 'payment' }], bookings: [{ id: 1, request_key: 'h', kind: 'rental_pickup', date: '2026-10-05', invoice_id: 9 }], statuses: [{ request_key: 'h', invoice_id: 9 }] });
   const hr = M.jobRows(half, { requests: [{ key: 'h', name: 'Hal', services: ['rentals'] }] })[0];
-  must(hr.owed === 0 && M.moneySummary(half, [hr], { view: 'month', month: '2026-10', includeDeposits: true }).owed === 0, 'an uncollected damage deposit is counted as owed');
+  // $110 in of $160: the damage deposit is taken first (ledger.mjs splitPayment), so $50 of the
+  // charges is still owed (never "paid in full"), and the deposit is held, not owed.
+  must(hr.owed === 5000 && hr.depositOwed === 0 && hr.paidDeposit === 5000 && hr.paidCharges === 6000 && M.moneySummary(half, [hr], { view: 'month', month: '2026-10', includeDeposits: true }).owed === 5000, `a part-paid rental reads the wrong still owed (${hr.owed}/${hr.depositOwed})`);
+  // Every job row adds up: Total - Paid = Still owed, with deposits left out and counted.
+  const little = M.prepare({ invoices: [{ id: 9, number: 'N', customer_name: 'Hal', status: 'deposit_paid' }], lines: [{ invoice_id: 9, description: 'Pick 3 bundle', qty: 1, unit_cents: 11000, refundable: 0 }, { invoice_id: 9, description: 'Damage deposit', qty: 1, unit_cents: 5000, refundable: 1 }], payments: [{ id: 1, invoice_id: 9, amount_cents: 3000, received_on: '2026-10-02', kind: 'payment' }], bookings: [{ id: 1, request_key: 'h', kind: 'rental_pickup', date: '2026-10-05', invoice_id: 9 }], statuses: [{ request_key: 'h', invoice_id: 9 }] });
+  const lr = M.jobRows(little, { requests: [{ key: 'h', name: 'Hal', services: ['rentals'] }] })[0];
+  const nums = (html) => ['data-job-total', 'Paid', 'Still owed'].map((k) => { const m = html.match(k === 'data-job-total' ? /data-job-total>\$([\d,.]+)/ : new RegExp(`<dt>${k}</dt><dd[^>]*>\\$([\\d,.]+)`)); return m ? Math.round(Number(m[1].replace(/,/g, '')) * 100) : NaN; });
+  for (const [r, dep, want] of [[hr, false, [11000, 6000, 5000]], [hr, true, [16000, 11000, 5000]], [lr, false, [11000, 0, 11000]], [lr, true, [16000, 3000, 13000]]]) {
+    const got = nums(VM.jobRow(r, { includeDeposits: dep }));
+    must(JSON.stringify(got) === JSON.stringify(want) && got[0] - got[1] === got[2], `job row with deposits ${dep ? 'counted' : 'left out'} does not add up: ${JSON.stringify(got)} (want ${JSON.stringify(want)})`);
+  }
 }
 
 // ---- 4-7. End to end through the real guard + router -----------------------------------------

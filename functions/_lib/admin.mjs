@@ -405,6 +405,12 @@ async function updateInvoice(env, request, id) {
 
 // The rental note for this invoice as it stands now (invoice-note.mjs): its payments, and the
 // request's business-delivery tick.
+// What has come in on this invoice (ledger.mjs): the email, PDF and text say the same "✓ paid" /
+// "Still owed" as the invoice page and the card.
+async function paidFor(env, invoice) {
+  if (!(invoice && invoice.id)) return { paid: 0, payments: [] };
+  return { paid: (await paidByInvoice(env.DB, [invoice.id]))[invoice.id] || 0, payments: (await paymentsByInvoice(env.DB))[invoice.id] || [] };
+}
 async function noteFor(env, invoice, lines, { view = false } = {}) {
   const paid = invoice && invoice.id ? ((await paidByInvoice(env.DB, [invoice.id]))[invoice.id] || 0) : 0;
   const req = invoice && invoice.request_key ? await findRequest(env, invoice.request_key) : null;
@@ -413,7 +419,7 @@ async function noteFor(env, invoice, lines, { view = false } = {}) {
 
 async function emailParts(env, invoice, lines, settings, forPreview) {
   const qrSrc = settings.qr_png ? (forPreview ? '/api/admin/qr.png' : 'cid:pnp-payment-qr') : null;
-  const rendered = renderInvoiceEmail({ invoice, lines, settings, contact: CONTACT, qrSrc, pickup: await noteFor(env, invoice, lines) });
+  const rendered = renderInvoiceEmail({ invoice, lines, settings, contact: CONTACT, qrSrc, pickup: await noteFor(env, invoice, lines), ...(await paidFor(env, invoice)) });
   const attachments = settings.qr_png && !forPreview ? [{
     contentBase64: settings.qr_png, filename: settings.qr_type === 'image/jpeg' ? 'payment-qr.jpg' : 'payment-qr.png',
     type: settings.qr_type || 'image/png', disposition: 'inline', contentId: 'pnp-payment-qr',
@@ -985,7 +991,7 @@ async function routeAdmin(context) {
         const settings = await getSettings(env.DB);
         const emailHtml = (await emailParts(env, loaded.invoice, loaded.lines, settings, true)).html;
         const pickup = await noteFor(env, loaded.invoice, loaded.lines, { view: true });
-        const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings, pickup });
+        const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings, pickup, ...(await paidFor(env, loaded.invoice)) });
         const balance = (await balances(env.DB))[id];
         if (balance) Object.assign(balance, await depositHeld(env.DB, id));
         const payments = (await paymentsByInvoice(env.DB))[id] || [];
@@ -1006,7 +1012,7 @@ async function routeAdmin(context) {
       if (segs[2] === 'invoice.pdf' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse('Not found', 404);
-        const bytes = await renderInvoicePdf({ invoice: loaded.invoice, lines: loaded.lines, settings: await getSettings(env.DB), contact: CONTACT, pickup: await noteFor(env, loaded.invoice, loaded.lines) });
+        const bytes = await renderInvoicePdf({ invoice: loaded.invoice, lines: loaded.lines, settings: await getSettings(env.DB), contact: CONTACT, pickup: await noteFor(env, loaded.invoice, loaded.lines), ...(await paidFor(env, loaded.invoice)) });
         const filename = `Porch-and-Party-Invoice-${loaded.invoice.number}.pdf`;
         return new Response(bytes, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `${url.searchParams.get('dl') === '1' ? 'attachment' : 'inline'}; filename="${filename}"`, 'Cache-Control': 'no-store' } });
       }

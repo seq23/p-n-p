@@ -1,6 +1,15 @@
 // Money per invoice from recorded payments (table `payments`, migration 0004), never from a
-// status chip. The refundable damage deposit is kept apart from what is owed: a payment
-// covers the charges first, then the damage deposit.
+// status chip. balanceOf is THE one source of truth for "paid / still owed / the rest" on every
+// surface (invoice page, card, rental note, email, PDF, Money, calendar, 7 AM email and the
+// "How <name> pays" box in pay-steps.mjs): nothing else works these numbers out.
+//
+// How money received is split (one rule, splitPayment, used here and by Money in money.mjs):
+// a payment takes the refundable damage deposit FIRST, then the charges. That is what the
+// website tells customers (due now = damage deposit + 50%) and what the owner's 19 Oct 2026
+// rental note rule says ("the amount due now takes the refundable damage deposit first"). So
+// the deposit is only ever still to pay while less than it has come in, and a customer who has
+// paid less than the total always has charges owed: never "Paid in full" (20 Oct 2026 fix; the
+// old charges-first split read "Paid in full" with the damage deposit still to pay).
 import { invoiceTotal, lineTotal, money, toCents, lineSig, AUTO_KINDS } from './util.mjs';
 import { chicagoDate } from './reminders.mjs';
 
@@ -9,16 +18,35 @@ export function splitTotals(lines) {
   return { total: invoiceTotal(lines || []), refundable, charges: invoiceTotal(lines || []) - refundable };
 }
 
+// One payment of amountCents after paidBefore cents already came in: { deposit, charge }.
+// Deposit first, then charges; anything past the total counts as deposit (given back).
+export function splitPayment(paidBefore, amountCents, { charges = 0, refundable = 0 } = {}) {
+  const before = Math.max(0, paidBefore || 0);
+  const amount = Math.max(0, amountCents || 0);
+  const deposit0 = Math.min(amount, Math.max(0, refundable - before));
+  const chargesBefore = Math.max(0, before - refundable);
+  const charge = Math.min(amount - deposit0, Math.max(0, charges - chargesBefore));
+  return { deposit: amount - charge, charge };
+}
+
 // paidCents: sum of non-voided payments.
+//   owed         charges still to pay (never the damage deposit)
+//   depositOwed  the refundable damage deposit not collected yet
+//   remaining    everything still to pay (owed + depositOwed): THE "still owed" number
+//   paidInFull   the whole total is in; the only thing that may ever say "Paid in full"
 export function balanceOf(invoice, lines, paidCents) {
   const { total, refundable, charges } = splitTotals(lines);
   const paid = Math.max(0, paidCents || 0);
-  const isVoid = invoice && invoice.status === 'void';
+  const isVoid = Boolean(invoice && invoice.status === 'void');
+  const { deposit, charge } = splitPayment(0, paid, { charges, refundable });
+  const remaining = isVoid ? 0 : Math.max(0, total - paid);
   return {
     void: isVoid, total, charges, refundable, paid,
-    owed: isVoid ? 0 : Math.max(0, charges - paid),
-    depositOwed: isVoid ? 0 : Math.max(0, refundable - Math.max(0, paid - charges)),
-    remaining: isVoid ? 0 : Math.max(0, total - paid),
+    paidCharges: charge, paidDeposit: Math.min(deposit, refundable),
+    owed: isVoid ? 0 : Math.max(0, charges - charge),
+    depositOwed: isVoid ? 0 : Math.max(0, refundable - deposit),
+    remaining,
+    paidInFull: !isVoid && total > 0 && remaining === 0,
   };
 }
 
@@ -36,10 +64,15 @@ export function dueWords(bal, fmt = dollars) {
 }
 export const dueCents = (bal) => (!bal || bal.void || bal.draft ? 0 : Math.max(0, bal.owed || 0) + (bal.refundable > 0 ? Math.max(0, bal.depositOwed || 0) : 0));
 
+// Still to pay on a sent invoice, in cents (0 for a draft or void). Every "owes / Collect /
+// Paid in full" decision reads this, never balance.owed alone.
+export const owes = (bal) => dueCents(bal) > 0;
+
 export function balanceWords(bal) {
   if (!bal || bal.void) return '';
   if (bal.draft) return 'Invoice not sent yet';
-  return bal.owed > 0 ? dueWords(bal) : 'Paid in full ✓';
+  if (owes(bal)) return dueWords(bal);
+  return bal.paidInFull ? 'Paid in full ✓' : '';
 }
 
 export function depositWords(bal) {

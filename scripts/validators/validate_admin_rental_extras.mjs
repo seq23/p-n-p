@@ -62,7 +62,12 @@ for (const [label, opts, want] of [
   ['delivery, paid, online page', { invoice: inv(), lines: LD, paidCents: 19000, view: true }, `Paid in full. Thank you! ${DELI}`],
   ['request ticked business delivery (no fee line yet)', { invoice: inv(), lines: L, delivery: true }, `Pay the rest ($85.00) at delivery. ${DELI}`],
   ['the website\'s old draft note is not hers', { invoice: inv({ notes: NOTE.LEGACY_DRAFT_NOTE }), lines: L }, `Pay the rest ($85.00) at pickup. ${PICK}`],
-  ['a deposit the amount due now does not cover is never owed', { invoice: inv({ pay_plan: 'custom', deposit_due_cents: 3000 }), lines: L }, `Pay the rest ($120.00) at pickup. ${PICK}`],
+  // The owner's 19 Oct rule (the deposit is never "owed") is kept in words, never by dropping it
+  // from the sum (20 Oct 2026): the rest is step ② of the pay box, $170 - $30.
+  ['a deposit the amount due now does not cover is said in words, inside the sum', { invoice: inv({ pay_plan: 'custom', deposit_due_cents: 3000 }), lines: L }, `Pay the rest ($120.00 + $20.00 refundable deposit = $140.00) at pickup. ${PICK}`],
+  ['that deposit paid, online page: still the same rest, never "Paid in full"', { invoice: inv({ pay_plan: 'custom', deposit_due_cents: 3000 }), lines: L, paidCents: 3000, view: true }, `Pay the rest ($120.00 + $20.00 refundable deposit = $140.00) at pickup. ${PICK}`],
+  ['charges paid, damage deposit not: online page is never "Paid in full"', { invoice: inv({ pay_plan: 'custom', deposit_due_cents: 12000 }), lines: L, paidCents: 12000, view: true }, `Pay the rest ($50.00) at pickup. ${PICK}`],
+  ['no deposit, nothing paid', { invoice: inv({ pay_plan: 'none', deposit_due_cents: 0 }), lines: L }, `Pay the rest ($120.00 + $50.00 refundable deposit = $170.00) at pickup. ${PICK}`],
 ]) {
   const got = NOTE.pickupNote(opts.lines, table, opts);
   must(got === want, `note / ${label}: "${got}"\n    want "${want}"`);

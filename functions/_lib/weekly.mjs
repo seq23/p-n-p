@@ -100,7 +100,7 @@ export async function weeklyData(db, today, nowMs = Date.now()) {
     // Jobs in the next 14 days (the "Your week" box): every live booking in the window.
     upcomingJobs: week.length,
     last: { byService: wk.lastByService, total: wk.lastWeek.length, jobsDone, received, tips, expenses },
-    this: { days, toCollect: toCollect.reduce((s, r) => s + r.owed, 0), toCollectCount: toCollect.length },
+    this: { days, toCollect: toCollect.reduce((s, r) => s + r.remaining, 0), toCollectCount: toCollect.length },
     needs: {
       holds: holds.map((h) => shortName(h.name)), overdue: overdue.map((b) => shortName(b.customer_name)), damage: damage.map((r) => shortName(r.name)),
       takedowns: notDecided.map((r) => shortName(r.name)), takedownsToSchedule: toSchedule.map((t) => `${shortName(t.name)}${t.date ? ` ${dayWord(t.date)}` : ''}`), noReply: noReply.map((r) => shortName(r.name)), idsReady: idsReady.map((r) => shortName(r.name)),
