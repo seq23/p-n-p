@@ -21,7 +21,7 @@ import { session } from './lib/admin_scenario.mjs';
 const T = await mod('functions/_lib/todo-email.mjs');
 const mailer = await mod('workers/pnp-mailer/src/index.js');
 const { b64urlText } = await mod('functions/_lib/util.mjs');
-const { markCalled } = await mod('functions/_lib/steps.mjs');
+const { markCalled, undoCalled } = await mod('functions/_lib/steps.mjs');
 const errors = [];
 let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
@@ -63,6 +63,7 @@ await db.prepare(`INSERT INTO invoice_lines (invoice_id, description, qty, unit_
 await run("INSERT INTO payments (invoice_id, amount_cents, received_on, method, note, kind) VALUES (?1, 16000, '2026-10-12', 'zelle', '', 'payment'), (?2, 11000, '2026-10-05', 'zelle', '', 'payment')", inv['PNP-T-2'], inv['PNP-T-3']);
 await db.prepare(`INSERT INTO bookings (kind, date, time, customer_name, phone, place, items, invoice_id) VALUES
   ('party_takedown', ?1, '10:00', 'Alex Smithfield', '901-555-0201', 'Germantown', 'the ladder and 2 bins', ?2),
+  ('porch_install', ?1, '13:00', 'Ivy Installer', '901-555-0213', 'Bartlett', 'fall urns', NULL),
   ('rental_return', ?1, '17:00', 'Sam Returnson', '901-555-0202', '', 'Giant Uno, Grab the Mic', ?3),
   ('porch_install', ?1, NULL, 'Una Untimed', '901-555-0206', 'Cordova', '', NULL),
   ('party_setup', ?1, '08:30', 'Don Donealready', '901-555-0207', '', '', NULL),
@@ -78,9 +79,10 @@ await run("INSERT INTO holds (request_key, state, until, by_hand) VALUES (?1, 'h
 let d = await T.todoData(db, TODAY, NOW);
 const S = d.sections;
 // 1. Today's jobs: by time, open only, place / bring / collect / deposit back, card or day link.
-must(JSON.stringify(titles(S[1])) === JSON.stringify(['10 AM · Alex S. · party takedown', '5 PM · Sam R. · games return', 'time not set · Una U. · porch install']), `Today's jobs are ${JSON.stringify(titles(S[1]))}`);
-must(S[1][0].d === 'Germantown · bring the ladder and 2 bins · collect $180', `the takedown line is "${S[1][0].d}" (place, what to bring, what to collect)`);
-must(S[1][1].d === 'Mt. Moriah Station · Giant Uno, Grab the Mic · give back $50 deposit', `the return line is "${S[1][1].d}" (place, games, deposit to give back)`);
+must((S[1].find((x) => /Ivy I/.test(x.t)) || {}).d === 'Bartlett · bring fall urns', 'an install does not say what to bring');
+must(JSON.stringify(titles(S[1])) === JSON.stringify(['10 AM · Alex S. · party takedown', '1 PM · Ivy I. · porch install', '5 PM · Sam R. · games return', 'time not set · Una U. · porch install']), `Today's jobs are ${JSON.stringify(titles(S[1]))}`);
+must(S[1][0].d === 'Germantown · load the ladder and 2 bins · collect $180', `the takedown line is "${S[1][0].d}" (place, what to bring, what to collect)`);
+must((S[1].find((x) => /Sam R/.test(x.t)) || {}).d === 'Mt. Moriah Station · Giant Uno, Grab the Mic · give back $50 deposit', `the return line is "${(S[1].find((x) => /Sam R/.test(x.t)) || {}).d}" (place, games, deposit to give back)`);
 must(!titles(S[1]).some((t) => /Don D/.test(t)), 'a job already marked done is in Today\'s jobs');
 must(S[1].every((x) => x.btns.some((b) => b.label === 'Open card' && b.href.startsWith('/admin/'))), 'a job has no Open card link into /admin');
 // 2. Call these people back: oldest first, words, highlight.
@@ -131,12 +133,15 @@ await run("DELETE FROM bookings WHERE request_key = ?1", reqB.key);
 // A takedown with no day: Schedule takedown / Not needed.
 await run("DELETE FROM bookings WHERE request_key = ?1 AND kind = 'party_takedown'", reqA.key);
 await run("UPDATE requests SET takedown_plan = 'not_sure' WHERE request_key = ?1", reqA.key);
+must(!(await T.todoData(db, TODAY, NOW)).sections[4].some((x) => x.key === reqA.key), 'a takedown to decide shows before she has called them back (it belongs to the call)');
+await markCalled(db, reqA.key, { how: 'test' });
 d = await T.todoData(db, TODAY, NOW);
 const td = d.sections[4].find((x) => x.type === 'takedown' && x.key === reqA.key);
 must(td && td.t === 'Test R. · party takedown' && td.d === 'Not decided yet' && td.btns.map((b) => b.label).join() === 'Schedule takedown,Not needed' && td.btns.every((b) => b.href === card(reqA.key)), `Book it or decide lacks the undecided takedown: ${JSON.stringify(td)}`);
 await run("UPDATE requests SET takedown_plan = 'scheduled', takedown_date = '' WHERE request_key = ?1", reqA.key);
 const td2 = (await T.todoData(db, TODAY, NOW)).sections[4].find((x) => x.type === 'takedown' && x.key === reqA.key);
 must(td2 && td2.d === 'No takedown day yet', `a wanted takedown with no day reads "${td2 && td2.d}"`);
+await undoCalled(db, reqA.key);
 // Phone requests and put-away requests are never in Call these people back.
 await run("UPDATE requests SET source = 'phone' WHERE request_key = ?1", reqA.key);
 must(!(await T.todoData(db, TODAY, NOW)).sections[2].some((x) => x.key === reqA.key), 'a phone-call request is in Call these people back');

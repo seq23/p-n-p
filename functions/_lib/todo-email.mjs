@@ -94,7 +94,8 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const bal = invoiceOf(b) ? bals[invoiceOf(b)] : null;
     const bits = [b.place || (svc === 'rentals' ? RENTAL_PLACE : '')];
     const items = String(b.items || '').trim().replace(/\s+/g, ' ').slice(0, 160);
-    if (items) bits.push(svc === 'rentals' ? items : `bring ${items}`);
+    // What to bring to a setup / install, what to load at a takedown / pickup; rentals: the games.
+    if (items) bits.push(svc === 'rentals' ? items : `${/takedown|pickup/.test(b.kind) ? 'load' : 'bring'} ${items}`);
     if (bal && bal.owed > 0 && b.kind !== 'rental_return') bits.push(`collect ${usd(bal.owed)}`);
     if (bal && b.kind === 'rental_return') {
       const out = outcomes[invoiceOf(b)] || { refunded: 0, kept: 0 };
@@ -129,7 +130,10 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const asked = f.services[0] ? askedDate(f.r, f.services[0]) : '';
     decide.push({ type: 'book', svc: f.services[0] || 'other', key: f.r.key, t: `${shortName(f.r.name)} · ${serviceWords(f.services)}${asked ? ` · asked for ${dayWords(asked)}` : ''}`, d: 'Not booked yet', btns: [{ label: 'Yes, book it', href: cardHref(f.r.key), solid: true }, { label: 'Open card', href: cardHref(f.r.key) }] });
   }
+  // Takedowns / pickups with no day: only once she has talked to them (before that the request is
+  // in "Call these people back", and the takedown is part of that call).
   for (const f of byAge) {
+    if (!f.s.called) continue;
     const td = f.tdS || {};
     const name = shortName(f.r.name);
     if (td.status === 'to_schedule' || td.status === 'not_sure') {
