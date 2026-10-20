@@ -36,8 +36,20 @@ const parse = (s, fallback) => { try { return JSON.parse(s); } catch { return fa
 // Customer details Valerie corrected on "Change anything on this request" (migration 0011,
 // requests.details_edits). Laid over what the form sent, for both sources, so every screen,
 // invoice prefill and booking reads the corrected value; raw_row is never rewritten.
-export const DETAIL_FIELDS = ['name', 'phone', 'email', 'address', 'notes'];
-export const ADDRESS_RE = /^location|address/i;
+export const DETAIL_FIELDS = ['name', 'phone', 'email', 'address', 'notes', 'delivery_name', 'delivery_address'];
+// "Delivery address" is the business delivery answer below, never the customer's own address.
+export const ADDRESS_RE = /^(?!delivery address$)(?:location|.*address)/i;
+// Business delivery (owner, 19 Oct 2026): the public /request form no longer offers it (owner,
+// 19 Oct 2026: "people lying or getting ideas"); Valerie sets it herself on "Change anything on
+// this request" → Customer details. These answers are what calendar.mjs deliveryAddress,
+// invoice-note.mjs businessDelivery and the card read, so Delivery / Collect follow at once.
+export const DELIVERY_LABELS = /^(business delivery|business name|delivery address)$/i;
+export function deliveryOf(r) {
+  const all = [...(r.rentals || []), ...(r.decor || []), ...(r.other || [])];
+  const get = (re) => { const hit = all.find((x) => re.test(String(x.label || ''))); return hit ? String(hit.value || '') : ''; };
+  if (!/^yes/i.test(get(/^business delivery$/i))) return { name: '', address: '' };
+  return { name: get(/^business name$/i), address: get(/^delivery address$/i) };
+}
 export const NOTES_RE = /^anything else|^notes/i;
 export function detailAnswer(r, re) {
   for (const g of ['rentals', 'decor', 'other']) { const hit = (r[g] || []).find((x) => re.test(x.label)); if (hit) return { group: g, item: hit }; }
@@ -52,6 +64,12 @@ function applyEdits(out, row) {
     const hit = detailAnswer(out, re);
     if (hit) out[hit.group] = out[hit.group].map((x) => (x === hit.item ? { ...x, value: edits[f] } : x));
     else if (edits[f]) out.other = [...(out.other || []), { label, value: edits[f] }];
+  }
+  if (typeof edits.delivery_address === 'string') {
+    const strip = (g) => (out[g] || []).filter((x) => !DELIVERY_LABELS.test(String(x.label || '')));
+    for (const g of ['rentals', 'decor', 'other']) if (out[g]) out[g] = strip(g);
+    const address = edits.delivery_address.trim(); const name = String(edits.delivery_name || '').trim();
+    if (address) out.rentals = [...(out.rentals || []), { label: 'Business delivery', value: 'Yes' }, ...(name ? [{ label: 'Business name', value: name }] : []), { label: 'Delivery address', value: address }];
   }
   return out;
 }

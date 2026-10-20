@@ -5,10 +5,14 @@
  *     everything / paid in full on the online page only; pickup or business delivery), the rest
  *     counts the refundable deposit, a hand-typed note is overwritten, or the phone / place are
  *     typed anywhere but games.json;
- *  2. business delivery: the line is not on the public pages at the services.json price, the
- *     /request tick box does not require Business name + Delivery address, or a ticked request
- *     does not get the Delivery fee line on its draft invoice, "Business delivery" with the address
- *     on its card, and Delivery / Collect bookings at that address on the calendar and Day sheet;
+ *  2. business delivery: the line is not on the website pages (rentals, FAQ, rules, llms) at the
+ *     services.json price; the /request form (file or served) carries ANY business delivery tick,
+ *     field or line (owner, 19 Oct 2026: removed from the form, "people lying or getting ideas");
+ *     the server honours a forged business_delivery / business_name / delivery_address POST (an
+ *     answer, a Delivery fee line or a booking anywhere but the safe zone); or Valerie setting it
+ *     on Change anything → Customer details does not give "Business delivery" with the address on
+ *     the card, Delivery / Collect at that address on the calendar and Day sheet, the delivery
+ *     invoice wording, and the "+ Delivery fee" quick-add at the services.json price;
  *  3. hold numbers (48 hours, Hold longer 3 days) are typed outside services.json rentalHolds;
  *  4. "Waiting N days" does not count Memphis calendar days (across midnight), or the un-called
  *     list includes a called, phone or put-away request;
@@ -108,36 +112,59 @@ must(FEE === Math.round(SERVICES.invoiceQuickAdds.deliveryFee * 100) && BD.busin
   const perturbed = BD.businessDeliveryLine({ invoiceQuickAdds: { deliveryFee: 37 } });
   must(perturbed.includes('$37'), 'the business delivery line does not follow the data');
 }
-// The public pages carry the line; the form page shows the tick box.
+// The website pages carry the line; the /request form carries nothing about business delivery.
 const BDL = BD.businessDeliveryLine(SERVICES);
-for (const [f, min] of [['rentals/index.html', 3], ['faq/index.html', 2], ['rules.html', 1], ['request.html', 1], ['llms.txt', 1]]) {
+for (const [f, min] of [['rentals/index.html', 3], ['faq/index.html', 2], ['rules.html', 1], ['llms.txt', 1]]) {
   const t = read(f).replace(/&#39;/g, "'").replace(/&amp;/g, '&');
   must(t.split(BDL).length - 1 >= min, `${f} lacks the business delivery line`);
 }
-const formHtml = (await s.get('/request')).text || read('request.html');
-must(/name="business_delivery" value="yes" data-business-tick/.test(read('request.html')) && read('request.html').includes(BD.tickLabel(SERVICES).replace('—', '—')) && /name="business_name"/.test(read('request.html')) && /name="delivery_address"/.test(read('request.html')), 'request.html lacks the business delivery tick box with Business name + Delivery address');
-void formHtml;
-// Ticked without the details: refused, both named.
+// Every "business" on the form page is the LocalBusiness schema / its #business @id, nothing else.
+const formWords = (html) => html.replace(/"LocalBusiness"/g, '').replace(/\/#business\b/g, '').replace(/BUSINESS_ID/g, '');
+const formFile = read('request.html');
+// The form the server renders (a GET, and a re-shown form after an error, even one posted with
+// business_delivery=yes: no tick, no field, nothing sticky).
+const formServed = F.renderForm({ offers: SERVICES, table, today });
+const formReshown = F.renderForm({ offers: SERVICES, table, today, values: { service: ['rentals'], business_delivery: 'yes', business_name: 'Acme Offices', delivery_address: '100 Main St' }, errors: { phone: 'x' } });
+for (const [where, html] of [['request.html', formFile], ['the served form', formServed], ['the re-shown form', formReshown]]) {
+  must(html.length > 5000 && /name="games"/.test(html), `${where} is not the request form (${html.length} bytes)`);
+  must(!/business/i.test(formWords(html)), `${where} still mentions business delivery: ${(formWords(html).match(/.{0,60}business.{0,60}/i) || [''])[0]}`);
+  must(!/name="(business_delivery|business_name|delivery_address)"/.test(html) && !/data-business/.test(html) && !html.includes('Acme Offices') && !html.includes('100 Main St'), `${where} still has a business delivery field`);
+  must(!html.includes(BDL) && !/This is for a business/i.test(html) && !/deliver to (us|your business)/i.test(html), `${where} still carries the business delivery line or tick label`);
+}
+// A forged POST with every business field: accepted as a plain pickup rental, the fields ignored.
 const base = { service: 'rentals', games: ['giant-uno'], duration: 'day', rental_date: plus(14), pickup_when: 'morning', return_when: 'after', phone: '901-555-0401' };
 {
-  const r = await s.siteRequest({ ...base, name: 'Nia Nodetails', email: 'nia.nodetails@example.com', business_delivery: 'yes' });
-  must(r.status === 400 && /Type the business name/.test(r.text) && /Type the delivery address/.test(r.text), 'business delivery ticked without name / address was accepted');
+  const r = await s.siteRequest({ ...base, rental_date: plus(30), name: 'Nia Nodetails', email: 'nia.nodetails@example.com', phone: '901-555-0405', business_delivery: 'yes' });
+  must(r.status === 303 && !/Type the business name|Type the delivery address/.test(r.text), `a stray business_delivery tick changed the form's answer (${r.status})`);
 }
 const biz = await s.siteRequest({ ...base, name: 'Bo Business', email: 'bo.business@example.com', business_delivery: 'yes', business_name: 'Acme Offices', delivery_address: '100 Main St, Memphis' });
-must(biz.status === 303, `the business delivery request was refused: ${biz.text.slice(0, 200)}`);
+must(biz.status === 303, `the request with forged business fields was refused: ${biz.text.slice(0, 200)}`);
 const home = await s.siteRequest({ ...base, rental_date: plus(20), name: 'Hal Homeparty', email: 'hal.home@example.com', phone: '901-555-0402' });
+must(Boolean(biz.row && home.row), 'the website requests were not stored');
 if (biz.row && home.row) {
+  const stored = JSON.parse((await s.one('SELECT answers FROM requests WHERE request_key = ?1', biz.row.request_key)).answers || '[]');
+  must(stored.length > 0 && !stored.some((x) => /business|delivery/i.test(`${x.label} ${x.value}`)) && !JSON.stringify(stored).includes('Acme Offices') && !JSON.stringify(stored).includes('100 Main St'), `the server stored forged business delivery answers (${JSON.stringify(stored)})`);
   const bi = await s.one('SELECT invoice_id FROM request_status WHERE request_key = ?1', biz.row.request_key);
-  const lines = await s.all('SELECT description, unit_cents, refundable FROM invoice_lines WHERE invoice_id = ?1 ORDER BY position', bi.invoice_id);
-  const fee = lines.find((l) => l.description === 'Delivery fee');
-  must(fee && fee.unit_cents === FEE && fee.refundable === 0, `the business draft invoice has no ${FEE / 100} Delivery fee line (${JSON.stringify(lines.map((l) => l.description))})`);
-  const hi = await s.one('SELECT invoice_id FROM request_status WHERE request_key = ?1', home.row.request_key);
-  must(!(await s.all('SELECT description FROM invoice_lines WHERE invoice_id = ?1', hi.invoice_id)).some((l) => /deliver/i.test(l.description)), 'a home rental got a delivery line');
-  const bks = await s.all("SELECT kind, place, date FROM bookings WHERE request_key = ?1 AND kind IN ('rental_pickup','rental_return') ORDER BY kind", biz.row.request_key);
-  must(bks.length === 2 && bks.every((b) => b.place === '100 Main St, Memphis'), `the business bookings are not at the delivery address (${JSON.stringify(bks)})`);
+  let lines = await s.all('SELECT description, unit_cents, refundable FROM invoice_lines WHERE invoice_id = ?1 ORDER BY position', bi.invoice_id);
+  must(lines.length > 0 && !lines.some((l) => /deliver/i.test(l.description)), `a forged business POST got a delivery line (${JSON.stringify(lines.map((l) => l.description))})`);
+  let bks = await s.all("SELECT kind, place, date FROM bookings WHERE request_key = ?1 AND kind IN ('rental_pickup','rental_return') ORDER BY kind", biz.row.request_key);
+  must(bks.length === 2 && bks.every((b) => b.place === table.pickupPlace), `a forged business POST booked away from the safe exchange zone (${JSON.stringify(bks)})`);
   const hb = await s.one("SELECT place FROM bookings WHERE request_key = ?1 AND kind = 'rental_pickup'", home.row.request_key);
   must(hb && hb.place === table.pickupPlace, 'the home rental is not at the safe exchange zone');
-  const dash = (await s.get('/admin/')).text;
+  let dash = (await s.get('/admin/')).text;
+  must(!/data-business-delivery/.test(cardOf(dash, biz.row.request_key)), 'a forged business POST shows Business delivery on its card');
+  // Valerie sets business delivery herself: Change anything → Customer details.
+  const brk = s.rk(biz.row.request_key);
+  const editPage = (await s.get(`/admin/requests/edit?r=${brk}`)).text;
+  must(/data-edit-delivery/.test(editPage) && /name="delivery_name"/.test(editPage) && /name="delivery_address"/.test(editPage), 'Customer details has no Business delivery name / address for Valerie');
+  const homeEdit = (await s.get(`/admin/requests/edit?r=${s.rk(home.row.request_key)}`)).text;
+  must(/name="delivery_address" value=""/.test(homeEdit), 'a pickup rental does not show an empty delivery address');
+  await s.post('/admin/requests/edit/customer', { r: brk, name: 'Bo Business', phone: '901-555-0401', email: 'bo.business@example.com', delivery_name: 'Acme Offices', delivery_address: '100 Main St, Memphis' });
+  bks = await s.all("SELECT kind, place, date FROM bookings WHERE request_key = ?1 AND kind IN ('rental_pickup','rental_return') ORDER BY kind", biz.row.request_key);
+  must(bks.length === 2 && bks.every((b) => b.place === '100 Main St, Memphis'), `the business bookings did not move to the delivery address (${JSON.stringify(bks)})`);
+  const hist = await s.all('SELECT what FROM request_events WHERE request_key = ?1', biz.row.request_key).catch(() => []);
+  void hist;
+  dash = (await s.get('/admin/')).text;
   const c = cardOf(dash, biz.row.request_key);
   must(/data-business-delivery><strong>Business delivery<\/strong>: Acme Offices, 100 Main St, Memphis</.test(c), 'the card does not show "Business delivery" with the business and address');
   must(!/data-business-delivery/.test(cardOf(dash, home.row.request_key)), 'a home rental card says Business delivery');
@@ -152,6 +179,23 @@ if (biz.row && home.row) {
   // The draft's online invoice page words the note for delivery.
   const page = (await s.get(`/admin/invoices/${bi.invoice_id}`)).text;
   must(/Pay the rest \(\$[\d.]+\) at delivery\. Text or call 901-355-1518 to set your delivery time unless otherwise agreed upon\./.test(page), `the business invoice page note is not the delivery wording (${(page.match(/(Pay the rest|This covers|Paid in full)[^<]{0,160}/) || ['none'])[0]})`);
+  // Valerie adds the delivery fee herself (the quick-add's price, services.json).
+  const full = await s.all('SELECT description, qty, unit_cents, note, refundable FROM invoice_lines WHERE invoice_id = ?1 ORDER BY position', bi.invoice_id);
+  const withFee = [...full.filter((l) => !l.refundable), { description: 'Delivery fee', qty: 1, unit_cents: FEE, note: '', refundable: 0 }, ...full.filter((l) => l.refundable)];
+  await s.post('/admin/requests/edit/invoice', { r: brk, invoice_id: String(bi.invoice_id), line_desc: withFee.map((l) => l.description), line_qty: withFee.map((l) => String(l.qty)), line_price: withFee.map((l) => (l.unit_cents / 100).toFixed(2)), line_note: withFee.map((l) => l.note || ''), line_refundable: withFee.map((l) => String(l.refundable)) });
+  lines = await s.all('SELECT description, unit_cents, refundable FROM invoice_lines WHERE invoice_id = ?1 ORDER BY position', bi.invoice_id);
+  const fee = lines.find((l) => l.description === 'Delivery fee');
+  must(fee && fee.unit_cents === FEE && fee.refundable === 0, `Valerie's Delivery fee line did not save at ${FEE / 100} (${JSON.stringify(lines.map((l) => l.description))})`);
+  // Taking the delivery address away puts the bookings back at the safe exchange zone.
+  {
+    const r2 = await s.siteRequest({ ...base, rental_date: plus(40), name: 'Una Undo', email: 'una.undo@example.com', phone: '901-555-0406' });
+    const rk2 = s.rk(r2.row.request_key);
+    await s.post('/admin/requests/edit/customer', { r: rk2, delivery_name: 'Undo Co', delivery_address: '5 Side St, Memphis' });
+    await s.post('/admin/requests/edit/customer', { r: rk2, delivery_name: '', delivery_address: '' });
+    const back2 = await s.all("SELECT place FROM bookings WHERE request_key = ?1 AND kind IN ('rental_pickup','rental_return')", r2.row.request_key);
+    must(back2.length === 2 && back2.every((b) => b.place === table.pickupPlace), `clearing the delivery address left the bookings away from the safe zone (${JSON.stringify(back2)})`);
+    must(!/data-business-delivery/.test(cardOf((await s.get('/admin/')).text, r2.row.request_key)), 'a cleared business delivery still shows on the card');
+  }
   // 4. Un-called list: both website requests are waiting; a called one, a phone one and a put-away one are not.
   let rows = await CB.callbackRows(s.db, today);
   const names = () => rows.map((r) => r.name);
@@ -192,4 +236,4 @@ if (errors.length) {
   for (const e of errors) console.error(`- ${e}`);
   process.exit(1);
 }
-console.log(`rental extras: OK (${checks} checks: six note wordings from the numbers + hand note wins + phone from games.json, business delivery line/price/form/invoice/card/calendar/Day sheet, 48 h / 3 day holds from services.json, waiting days in Memphis + the un-called list, compact invoice editor)`);
+console.log(`rental extras: OK (${checks} checks: six note wordings from the numbers + hand note wins + phone from games.json, business delivery line on the website, none on the form, forged POST ignored, set by Valerie → card/calendar/Day sheet/invoice/fee, 48 h / 3 day holds from services.json, waiting days in Memphis + the un-called list, compact invoice editor)`);

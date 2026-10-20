@@ -182,10 +182,16 @@ if (onDisk) {
   pricesOnlyFromData(main, 'rentals/index.html');
   if (DELIVERY.test(onDisk)) errors.push('rentals/index.html mentions delivery beyond the business delivery line');
   if ((main.split(BDL).length - 1) < 3) errors.push(`rentals/index.html does not carry the business delivery line ("${BDL}") in Where, the pickup FAQ and How pickup works`);
-  for (const [f, min] of [['faq/index.html', 2], ['rules.html', 1], ['request.html', 1], ['llms.txt', 1]]) {
+  for (const [f, min] of [['faq/index.html', 2], ['rules.html', 1], ['llms.txt', 1]]) {
     const t = fs.readFileSync(path.join(ROOT, f), 'utf8').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
     if ((t.split(BDL).length - 1) < min) errors.push(`${f} lacks the business delivery line ("${BDL}")`);
     if (/We do not bring rentals to you/.test(t)) errors.push(`${f} still says "We do not bring rentals to you"`);
+  }
+  // The /request form offers no business delivery (owner, 19 Oct 2026): no line, no tick, no field.
+  {
+    const t = fs.readFileSync(path.join(ROOT, 'request.html'), 'utf8').replace(/&#39;/g, "'").replace(/&amp;/g, '&');
+    if (t.includes(BDL) || /deliver/i.test(t.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, ''))) errors.push('request.html mentions delivery (the form offers no business delivery)');
+    if (/name="(business_delivery|business_name|delivery_address)"|data-business/.test(t)) errors.push('request.html has a business delivery field');
   }
   // A bundle photo's description names what is in the photo (the alt text), not what is on offer.
   hiddenIn(main.replace(/ alt="[^"]*"/g, ''), 'rentals/index.html');
