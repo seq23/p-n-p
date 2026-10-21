@@ -970,9 +970,9 @@
       "route": "/local/index",
       "rendered_file": "local/index.html",
       "state": "FROZEN",
-      "accepted_sha256": "21252dcb0e59bfd88a252905495693ac9334482ccb9d4c29d772b75b46eaf113",
-      "cache_file": "data/release/frozen_accepted_outputs/21252dcb0e59bfd88a252905495693ac9334482ccb9d4c29d772b75b46eaf113.html.gz",
-      "cache_sha256": "476c9a9fe957ff531eaa14594a758e50303c246d88fcb1dc00a4fa57a89c82c9",
+      "accepted_sha256": "6ed0c8dad97fa96ef531430f3d7e3dc2c623900107b2b5db6c8fe6436a3a72bf",
+      "cache_file": "data/release/frozen_accepted_outputs/6ed0c8dad97fa96ef531430f3d7e3dc2c623900107b2b5db6c8fe6436a3a72bf.html.gz",
+      "cache_sha256": "aabfdc022321ca4fa29e9ad55073c328e578444b3dfb58292935f0d717b6a156",
       "accepted_at": "2026-07-24"
     },
     {
