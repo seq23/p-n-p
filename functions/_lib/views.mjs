@@ -20,7 +20,8 @@ import PP from '../../scripts/lib/porch_packages.js';
 import SERVICES_DATA from '../../data/offers/services.json';
 import { isPhone, rentalDates, rentalSpanWords, rentalLength } from './phone-requests.mjs';
 import { lateWords, tiers, stepWords } from './missed.mjs';
-import { dayWords } from './reminders.mjs';
+import { dayWords, chicagoDate } from './reminders.mjs';
+import { idRowState, KEEP_CHOICES, ID_AUTO_DAYS } from './id-auto.mjs';
 import { quickMenu, QT_CSS, QT_JS } from './views-quick-texts.mjs';
 import { shortName } from './requested.mjs';
 
@@ -417,7 +418,10 @@ export function idUploadForm(rk, { from = '' } = {}) {
       <label for="idp-${esc(rk)}">Add their ID photo (optional)</label><input id="idp-${esc(rk)}" type="file" name="id_photo" accept="image/jpeg,image/png" required${tip('card.idUpload')}>
       ${act(`<button class="btn ghost" type="submit"${tip('card.idUpload')}>Add ID photo</button>`, 'card.idUpload')}</form>`;
 }
+// "deleted automatically on Mon 26 Oct" (the hourly cron, id-auto.mjs): Memphis day of id_deleted_at.
+export const autoDeletedDay = (r) => (r.idDeletedAt ? dayWords(chicagoDate(new Date(`${String(r.idDeletedAt).replace(' ', 'T')}Z`))) : '');
 export function idCell(r, rk, { from = '' } = {}) {
+  if (r.idDeletedAt && r.idDeletedAuto) return `<span data-id-auto-deleted>deleted automatically on ${esc(autoDeletedDay(r))}</span>`;
   if (r.idDeletedAt) return esc(`Deleted ${memphisWhen(r.idDeletedAt)}`);
   if (isPhone(r) && !r.idObject) return `<span data-id-phone>Not collected (phone booking)</span>${idUploadForm(rk, { from })}`;
   if (r.idObject) return idOpenLink(r, rk);
@@ -465,7 +469,7 @@ export function rulesLine(r) {
   return isPhone(r) ? '<p class="gl muted" data-rules>Rules: not asked (phone booking)</p>' : '';
 }
 // "ID photo deleted on Mon 19 Oct." (Memphis day of requests.id_deleted_at).
-export const idDeletedWords = (r) => (r.idDeletedAt ? `ID photo deleted on ${memphisDay(r.idDeletedAt) || memphisWhen(r.idDeletedAt)}.` : '');
+export const idDeletedWords = (r) => (r.idDeletedAt && r.idDeletedAuto ? `ID: deleted automatically on ${autoDeletedDay(r)}.` : r.idDeletedAt ? `ID photo deleted on ${memphisDay(r.idDeletedAt) || memphisWhen(r.idDeletedAt)}.` : '');
 
 // ---- "More about <first name>" (owner-approved mock-up, 20 Oct 2026, panel 6) -----------------
 // Raw ISO dates in answers read as words ("2026-10-30" -> "Fri 30 Oct"); a date of birth keeps its
@@ -517,7 +521,7 @@ function detailsGroupBody(r, rk, { referrers = {}, used = new Set(), archived = 
       ['Found us through', r.heard],
       ['Referred by', r.referredBy ? (referrers[r.referredBy] || 'a past customer') : ''],
     ])}${asked}${rules}${robot}
-    ${(() => { const id = idCell(r, rk); return id ? `<div class="gl" data-id-cell><b>Photo ID:</b> ${id}</div>` : ''; })()}
+    ${(() => { const id = idCell(r, rk); return id ? `<div class="gl" data-id-cell><b>${r.idDeletedAuto && r.idDeletedAt ? 'ID' : 'Photo ID'}:</b> ${id}</div>` : ''; })()}
     ${deleteIdStep(r, rk)}
     ${other.length ? `<div data-other-answers><h4>Other answers</h4>${kv(other.map((x) => [x.label, answerWords(x.value)]))}</div>` : ''}</div>`;
 }
@@ -540,12 +544,60 @@ export function weekBox(w, newKeys = new Set()) {
   return `<section class="card weekcard" data-week-counts><p class="wkline"><span class="wkhead">This week: ${n} new</span> ${last}<span class="wkbar" aria-hidden="true">|</span><span class="wknames" data-week-list>${shown.join('<span class="wkdot" aria-hidden="true">·</span>')}</span></p></section>`;
 }
 
-// A gentle list: requests paid in full (and for rentals, returned) that still hold an ID photo.
-export function idsReadyBox(rows) {
+// "IDs ready to delete" (owner-approved mock-up "ID Auto Delete", 20 Oct 2026; id-auto.mjs): every
+// ID paid in full (rentals: games back) or cancelled. A website-form row says the day it deletes
+// itself in words ("Deletes itself on Sat 17 Jan (in 89 days)"; ⏳ yellow within 7 days; "🔒 Kept
+// until <day>, then deletes itself" when kept), with "Delete now" (asks first) and "Keep this ID
+// longer" / "Change how long" (Keep 30 more days / Keep 90 more days / Keep until I delete it
+// myself / ✕ Close, change nothing). A Google-form row (Drive) cannot delete itself: it says so,
+// with "Open ID folder" and "I deleted it" (asks first). Every button lands back on this box.
+const IDS_CSS = `<style>.idrow{border-top:1px solid var(--line);padding:10px 0 4px;display:grid;gap:6px}.idrow:first-of-type{border-top:0}
+.idwhen{margin:0;font-size:.98rem}.idwhen.soon{background:#fff4d1;border:1px solid var(--warn);border-radius:8px;padding:5px 8px}
+.idwhen.kept{background:#e3f3e8;border:1px solid var(--ok);border-radius:8px;padding:5px 8px}.idbtns{display:flex;flex-wrap:wrap;gap:8px}
+.idbtns>details,.idbtns>a{flex:1 1 140px}.idbtns summary.btn,.idbtns>a.btn{display:block;text-align:center}.keepforms{display:grid;gap:8px;margin:0 0 8px}.keepforms form{margin:0}.keepforms .btn{width:100%}</style>`;
+const closeBtn = (words, key) => `<button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip(key)}>${esc(words)}</button>`;
+export function keepForms(rk, { from = 'ids' } = {}) {
+  return `<div class="keepforms" data-keep-forms>${KEEP_CHOICES.map(([how, words]) => `<form method="post" action="/admin/requests/id/keep">${hiddenInputs({ r: rk, how, from })}<button class="btn ghost" type="submit" data-keep="${how}"${tip(`ids.keep${how === 'forever' ? 'Forever' : how}`)}>${esc(words)}</button></form>`).join('')}</div>`;
+}
+function idWhenHtml(st) {
+  const cls = st.kind === 'kept' || st.kind === 'forever' ? ' kept' : (st.soon || st.kind === 'drive' ? ' soon' : '');
+  const words = st.day ? esc(st.words).replace(esc(dayWords(st.day)), `<b>${esc(dayWords(st.day))}</b>`) : esc(st.words);
+  return `<p class="idwhen${cls}" data-id-when="${esc(st.kind)}"${st.soon ? ' data-id-soon' : ''}>${words}</p>`;
+}
+function idReadyRow(r, today, folderUrl) {
+  const rk = b64urlText(r.key);
+  const who = firstName(r.name) || 'this customer';
+  const st = idRowState(r, today);
+  const del = (label, question, sub, yes, key) => `<details class="confirm" data-id-delete><summary class="btn ghost"${tip(key)}>${esc(label)}</summary>
+      <div class="confirmbox"><p><strong>${esc(question)}</strong></p>${sub ? `<p>${esc(sub)}</p>` : ''}<div class="actions">
+        <form method="post" action="/admin/requests/id/delete">${hiddenInputs({ r: rk, from: 'ids' })}<button class="btn danger" type="submit"${tip(`${key}Yes`)}>${esc(yes)}</button></form>
+        ${closeBtn('✕ No, go back', 'pay.no')}</div></div></details>`;
+  if (st.kind === 'drive') {
+    return `<div class="booking idrow" data-id-ready data-id-kind="drive"><strong>${esc(r.name || 'No name given')}</strong>${idWhenHtml(st)}
+      <div class="idbtns"><a class="btn ghost" href="${esc(folderUrl || '')}" target="_blank" rel="noopener noreferrer" data-id-folder${tip('ids.folder')}>Open ID folder</a>
+      ${del('I deleted it', `Did you delete ${who}'s ID from the Google Drive ID folder?`, 'Do this after the photo is gone from Drive. The card then says the ID is deleted.', "Yes, I deleted it", 'ids.driveDone')}</div></div>`;
+  }
+  const keepLabel = st.kind === 'kept' || st.kind === 'forever' ? 'Change how long' : 'Keep this ID longer';
+  return `<div class="booking idrow" data-id-ready data-id-kind="${esc(st.kind)}"><strong>${esc(r.name || 'No name given')}</strong>${idWhenHtml(st)}
+    <div class="idbtns">${del('Delete now', `Delete ${who}'s ID for good?`, "The photo is gone forever. This can't be undone.", 'Yes, delete it for good', 'ids.deleteNow')}
+      <details class="confirm" data-id-keep><summary class="btn ghost"${tip('ids.keep')}>${esc(keepLabel)}</summary>
+      <div class="confirmbox"><p><strong>${esc(`Keep ${who}'s ID longer?`)}</strong></p><p class="muted">For example, if there is a damage question still open.</p>
+        ${keepForms(rk)}${closeBtn('✕ Close, change nothing', 'ids.keepClose')}</div></details></div></div>`;
+}
+export function idsReadyBox(rows, { today = chicagoDate(), folderUrl = '' } = {}) {
   if (!rows.length) return '';
-  return `<section class="card" data-ids-ready><h2>IDs ready to delete <small class="muted">${rows.length}</small></h2>
-    <p class="muted" style="margin:0 0 8px">These are paid in full${rows.some((r) => r.wantsRentals) ? ' (rentals: returned)' : ''}. Nothing is ever deleted by itself: tap Delete this ID when you are ready.</p>
-    ${rows.map((r) => `<div class="booking" data-id-ready><strong>${esc(r.name || 'No name given')}</strong>${deleteIdStep(r, b64urlText(r.key))}</div>`).join('')}</section>`;
+  return `<section class="card" data-ids-ready id="ids-ready">${IDS_CSS}<h2>IDs ready to delete <small class="muted">${rows.length}</small></h2>
+    <p class="muted" style="margin:0 0 8px" data-ids-why>Each one deletes itself ${ID_AUTO_DAYS} days after it lands here. You can delete sooner or keep one longer.</p>
+    ${rows.map((r) => idReadyRow(r, today, folderUrl)).join('')}</section>`;
+}
+
+// "Keep it longer" from the 7 AM email: the confirm screen (GET never changes anything).
+export function idKeepPage(r, rk, st) {
+  const who = firstName(r.name) || 'this customer';
+  return layout('Keep this ID longer', `<section class="card" data-id-keep-page>${IDS_CSS}<h1>${esc(`Keep ${who}'s ID longer?`)}</h1>
+    ${idWhenHtml(st)}<p class="muted">For example, if there is a damage question still open.</p>
+    ${keepForms(rk)}<a class="btn ghost" href="/admin/#ids-ready" data-keep-close${tip('ids.keepClose')}>✕ Close, change nothing</a></section>`,
+  { screen: 'idKeep', back: { href: '/admin/#ids-ready', label: 'Back to main page' }, where: `Keep ID · ${r.name || 'Customer'}` });
 }
 
 // The Payment box on a request card: stage-aware, from the rules table (cards.mjs cardPayment).
@@ -1212,6 +1264,7 @@ function endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, se
         <h3 class="who">${esc(r.name || 'No name given')}</h3></div>
       <p class="endlbl ${done ? 'ok' : 'grey'}" data-ended-label>${done ? '✓ DONE' : '✕ CANCELLED'}${day ? ` · ${esc(day)}` : ''}</p>
       <p class="endmoney" data-ended-money>${esc(words)}</p>
+      ${r.idDeletedAt && r.idDeletedAuto ? `<p class="endmoney" data-id-auto-deleted>ID: <b>deleted automatically on ${esc(autoDeletedDay(r))}</b></p>` : ''}
       <div class="secrow endbtns" data-ended-buttons>${cardButton('card.archive', ectx, false)}${cardButton(done ? 'card.undone' : 'card.uncancel', ectx, false)}</div>
       <details class="disclose more" data-details><summary${tip('card.details')}><span class="mshow" data-more-show>Show more about ${esc(name)}</span><span class="mhide" data-more-hide>Hide more about ${esc(name)}</span><span class="mchev" aria-hidden="true">▾</span></summary>
         <p class="mhint" data-more-hint>Tap any line below to see more.</p>

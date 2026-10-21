@@ -32,7 +32,8 @@ binding = "AI"
 
 # ID photos from the site request form (porchandparty901.com/request): private R2 bucket, no
 # public URL (r2.dev off, no custom domain). The only reader is the signed-in
-# /admin/requests/id route; "Delete this ID" removes an object; nothing deletes one by itself.
+# /admin/requests/id route; "Delete this ID" removes an object, and the pnp-mailer hourly cron
+# deletes a website-form ID 90 days after it is ready (functions/_lib/id-auto.mjs).
 [[r2_buckets]]
 binding = "IDS"
 bucket_name = "pnp-ids"

@@ -90,7 +90,8 @@ export function fromRow(row) {
   const common = {
     source: row.source, services: parse(row.services, []), agreedAt: row.agreed_at || '', rulesVersion: row.rules_version || '',
     agreedName: row.agreed_name || '', referredBy: row.referred_by || '', referralCode: row.referral_code || '', robotCheck: row.robot_check || '',
-    idObject: row.id_object || '', idDeletedAt: row.id_deleted_at || '', isTest: Boolean(row.is_test), submittedAt: row.submitted_at,
+    idObject: row.id_object || '', idDeletedAt: row.id_deleted_at || '', idDeletedAuto: Boolean(row.id_deleted_auto),
+    idReadySince: row.id_ready_since || '', idKeepUntil: row.id_keep_until || '', idKeepForever: Boolean(row.id_keep_forever), isTest: Boolean(row.is_test), submittedAt: row.submitted_at,
     takedownPlan: row.takedown_plan || '', takedownNote: row.takedown_note || '', takedownDate: row.takedown_date || '',
     confirmEmailedAt: row.confirm_emailed_at || '', confirmedTextedAt: row.confirmed_texted_at || '', thankyouEmailedAt: row.thankyou_emailed_at || '',
     thankyouTextedAt: row.thankyou_texted_at || '', thankyouSkip: Boolean(row.thankyou_skip), holdTextedAt: row.hold_texted_at || '',
@@ -226,8 +227,9 @@ export function monthCount(requests, month) {
   return requests.filter((r) => !r.isTest && r.sortTime && memphisDay(r).slice(0, 7) === month).length;
 }
 
-// "IDs ready to delete": an ID still on file, the request paid in full, and for a rental,
-// the games back. Nothing ever deletes an ID by itself; this is a list for her to act on.
+// "IDs ready to delete": an ID still on file, the request paid in full (for a rental, the games
+// back) or cancelled. A website-form ID then deletes itself 90 days later (id-auto.mjs); a
+// Google-form ID (Drive) never does.
 export function idOnFile(r) {
   return !r.idDeletedAt && Boolean(r.idObject || r.idFile);
 }

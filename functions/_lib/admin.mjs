@@ -37,6 +37,7 @@ import * as MS from './missed.mjs';
 import * as AM from './admin-money.mjs';
 import { voidTagged, CANCEL_TAG } from './ledger.mjs';
 import * as AEN from './admin-endings.mjs';
+import * as IA from './id-auto.mjs';
 import { paidByInvoice, balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice, paymentsByInvoice } from './ledger.mjs';
 import * as AE from './admin-edit.mjs';
 import * as APR from './admin-pricing.mjs';
@@ -145,13 +146,10 @@ async function folderUrl(env, settings, requests) {
   return 'https://drive.google.com/drive/search?q=%22File%20responses%22%20type%3Afolder';
 }
 
-// "IDs ready to delete": paid in full and, for a rental, the games back. A list, never automatic.
-export function readyToDeleteId(r, st, inv, ret) {
-  const bal = inv && inv.balance;
-  const paidFull = bal ? (!bal.void && bal.total > 0 && bal.remaining === 0) : Boolean(st && st.status === 'paid');
-  if (!paidFull) return false;
-  return r.wantsRentals ? Boolean(ret && ret.returned_at) : true;
-}
+// "IDs ready to delete": paid in full and, for a rental, the games back; or cancelled. A
+// website-form ID then deletes itself 90 days later (id-auto.mjs: the one test, the clock and the
+// hourly delete); a Google-form ID (Drive) never does.
+export const readyToDeleteId = IA.readyToDeleteId;
 
 // "2026-10-26T15:00" typed on her phone = Memphis wall clock -> UTC ms.
 export function chicagoLocalToMs(local) {
@@ -267,6 +265,9 @@ async function dashboard(env, url) {
   const referrers = {};
   for (const r of requests) if (r.referralCode) referrers[r.referralCode] = r.name;
   const idsReady = requests.filter((r) => idOnFile(r) && readyToDeleteId(r, statuses[r.key], statuses[r.key] && statuses[r.key].invoice_id ? invoices[statuses[r.key].invoice_id] : null, returns[r.key]));
+  // Start the 90-day clock on any ready ID that has none (start only: the hourly cron also stops it).
+  try { await IA.syncClock(env.DB, { all: requests, ready: idsReady }); } catch (e) { console.log(`id clock: ${e && e.message ? e.message : e}`); }
+  const fUrl = await folderUrl(env, settings, requests);
   const week = weekCounts(requests, chicagoDate());
   const holds = await holdsWithButtons(env);
   const { extras, msgs, bottom, holdHtml } = await cardExtras(env, open, statuses, holds);
@@ -278,9 +279,9 @@ async function dashboard(env, url) {
   // NEW until opened or acted on (request-new.mjs, migration 0016).
   const opened = await RN.openedSet(env.DB);
   const newKeys = new Set(open.filter((r) => RN.isNewRequest(r, { st: statuses[r.key], opened: opened.has(r.key) })).map((r) => r.key));
-  return htmlResponse(V.dashboardPage({ newKeys, requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: await folderUrl(env, settings, requests), sheetError, referrers,
+  return htmlResponse(V.dashboardPage({ newKeys, requests: open, statuses, checklists, invoices, schedule, returns, folderUrl: fUrl, sheetError, referrers,
     stored, depositOut, holds: holdsBy, holdHtml,
-    weekBox: V.weekBox(week, newKeys), idsBox: V.idsReadyBox(idsReady), cardExtras: extras, cardMsgs: msgs, cardBottom: bottom, tdSaved: tdKey ? { key: tdKey, words: url.searchParams.get('tdm') || 'Saved ✓' } : null, bookings: bookingsBy, takedownInvoices: tdFacts.invoiceIds, today: chicagoDate(),
+    weekBox: V.weekBox(week, newKeys), idsBox: V.idsReadyBox(idsReady, { today: chicagoDate(), folderUrl: fUrl }), cardExtras: extras, cardMsgs: msgs, cardBottom: bottom, tdSaved: tdKey ? { key: tdKey, words: url.searchParams.get('tdm') || 'Saved ✓' } : null, bookings: bookingsBy, takedownInvoices: tdFacts.invoiceIds, today: chicagoDate(),
     archived, filter: url.searchParams.get('f') || 'all', openPutAway: url.searchParams.get('pa') === '1', kinds, events, notes,
     foodPerHead: SERVICES_DATA.services.grazing.foodPerHead || null, pickupPlace: PRICE_TABLE.pickupPlace,
     holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length || Object.keys(msgs).length || Object.keys(bottom).length ? VM2.TAP_JS : ''}`,
@@ -594,9 +595,12 @@ async function idPhotoView(env, url) {
 // private storage; for the old Google Form request the Drive file is hers to delete (the site
 // cannot reach her personal Drive), so the card says where it is.
 // From "Everything about <first name>" (from=edit) both come back to its section 3 with the flash.
-const idBackTo = (form, key) => (form.get('from') === 'edit' && key
-  ? (k, m) => redirect(`/admin/requests/edit?r=${encodeURIComponent(b64urlText(key))}&${k}=${encodeURIComponent(m)}&at=id#id`)
-  : null);
+// From the "IDs ready to delete" box (from=ids) they come back to that box.
+const idBackTo = (form, key) => {
+  if (form.get('from') === 'edit' && key) return (k, m) => redirect(`/admin/requests/edit?r=${encodeURIComponent(b64urlText(key))}&${k}=${encodeURIComponent(m)}&at=id#id`);
+  if (form.get('from') === 'ids') return (k, m) => redirect(`/admin/?${k}=${encodeURIComponent(m)}#ids-ready`);
+  return null;
+};
 async function deleteId(env, request) {
   const form = await request.formData();
   const key = decodeKey(form.get('r'));
@@ -604,12 +608,36 @@ async function deleteId(env, request) {
   const row = key ? await env.DB.prepare('SELECT source, id_object, id_file, id_deleted_at, name FROM requests WHERE request_key = ?1').bind(key).first() : null;
   if (!row) return redirect(`/admin/?e=${encodeURIComponent('That request was not found.')}`);
   if (row.id_deleted_at) return toEdit ? toEdit('m', 'That ID was already deleted.') : redirect(`/admin/?m=${encodeURIComponent('That ID was already deleted.')}`);
-  if (row.id_object && env.IDS) await env.IDS.delete(row.id_object);
-  await env.DB.prepare("UPDATE requests SET id_deleted_at = datetime('now'), id_object = NULL WHERE request_key = ?1").bind(key).run();
   const ip = request.headers.get('CF-Connecting-IP') || 'local';
-  await logEvent(env.DB, key, row.source !== 'google_form' ? 'ID photo deleted for good from private storage' : 'ID marked deleted (the Drive copy is deleted by hand from the ID folder)', `signed-in admin (${ip})`);
+  // The same code path the hourly cron uses (id-auto.mjs deleteIdNow).
+  await IA.deleteIdNow(env, key, row, { who: `signed-in admin (${ip})` });
   const msg = row.source !== 'google_form' ? 'ID deleted for good ✓' : 'ID removed from the card ✓ Also delete the photo from the ID folder in Google Drive (Open ID folder at the top).';
   return toEdit ? toEdit('m', msg) : redirect(`/admin/?m=${encodeURIComponent(msg)}`);
+}
+
+// "Keep this ID longer" (approved mock-up "ID Auto Delete", frame 2). GET is the confirm screen
+// the 7 AM email links to (it never changes anything); POST how=30|90|forever saves it and lands
+// back on the "IDs ready to delete" box.
+async function idKeepTarget(env, key) {
+  if (!key) return null;
+  const r = (await findRequest(env, key));
+  return r && IA.canAutoDelete(r) && idOnFile(r) ? r : null;
+}
+async function idKeepPage(env, url) {
+  const key = decodeKey(url.searchParams.get('r') || '');
+  const r = await idKeepTarget(env, key);
+  if (!r) return htmlResponse(V.layout('No ID', '<p>No ID photo is on file for this request, or it cannot delete itself.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to main page' } }), 404, { 'Cache-Control': 'private, no-store' });
+  return htmlResponse(V.idKeepPage(r, b64urlText(key), IA.idRowState(r, chicagoDate())), 200, { 'Cache-Control': 'private, no-store' });
+}
+async function idKeep(env, request) {
+  const form = await request.formData();
+  const key = decodeKey(form.get('r'));
+  const how = String(form.get('how') || '');
+  const r = await idKeepTarget(env, key);
+  if (!r) return redirect(`/admin/?e=${encodeURIComponent('No ID photo is on file for that request.')}#ids-ready`);
+  if (!IA.KEEP_CHOICES.some(([k]) => k === how)) return redirect(`/admin/?e=${encodeURIComponent('Pick how long to keep it.')}#ids-ready`);
+  const msg = await IA.keepLonger(env.DB, r, how);
+  return redirect(`/admin/?m=${encodeURIComponent(msg)}#ids-ready`);
 }
 
 // "Add ID photo" on a request with no ID on file (a phone booking: ID-for-everyone still
@@ -631,7 +659,8 @@ async function addId(env, request) {
   if (!image) return go('e', 'That file is not a photo we can use. Use a JPG or PNG.');
   const idObject = `ids/${[...crypto.getRandomValues(new Uint8Array(16))].map((b) => b.toString(16).padStart(2, '0')).join('')}.${image.type === 'image/png' ? 'png' : 'jpg'}`;
   await env.IDS.put(idObject, image.bytes, { httpMetadata: { contentType: image.type } });
-  await env.DB.prepare('UPDATE requests SET id_object = ?1, id_type = ?2, id_size = ?3, id_deleted_at = NULL WHERE request_key = ?4').bind(idObject, image.type, image.bytes.length, key).run();
+  // A new photo starts fresh: no clock, no keep, not "deleted automatically" (id-auto.mjs).
+  await env.DB.prepare('UPDATE requests SET id_object = ?1, id_type = ?2, id_size = ?3, id_deleted_at = NULL, id_deleted_auto = 0, id_ready_since = NULL, id_keep_until = NULL, id_keep_forever = 0 WHERE request_key = ?4').bind(idObject, image.type, image.bytes.length, key).run();
   await logEvent(env.DB, key, 'ID photo added by Valerie (kept in private storage)', 'Valerie');
   return go('m', 'ID photo added ✓');
 }
@@ -917,6 +946,8 @@ async function routeAdmin(context) {
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'view' && method === 'GET') return idPhotoView(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'upload' && method === 'POST') return addId(env, request);
+  if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'keep' && method === 'GET') return idKeepPage(env, url);
+  if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'keep' && method === 'POST') return idKeep(env, request);
   // Three ways a job ends (admin-endings.mjs): Done, its undo, Cancel (with money) and its undo.
   if (segs[0] === 'requests' && segs[1] === 'done' && method === 'POST') return AEN.markDone(env, request);
   if (segs[0] === 'requests' && segs[1] === 'undone' && method === 'POST') return AEN.markUndone(env, request);
