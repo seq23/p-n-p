@@ -628,27 +628,37 @@ function cardPaymentBox(r, st, inv, primary, ctx) {
   return `<section class="paybox calm" data-payment data-pay-state="${p.state}"><p class="words" data-pay-words>${esc(words + dmg)}</p>${steps ? `<style>${PAY_STEPS_CSS}</style>${steps}` : ''}${out.length ? `<div class="payacts">${out.join('')}</div>` : ''}</section>`;
 }
 
-// "Cancel this job…" (was "Void this request…", owner, 20 Oct 2026): the same Void action with
-// its confirm step, as a small danger link in the quiet bottom row of More (never a big button).
-// Three endings (owner-approved "Done Cards", 20 Oct 2026): it posts to /admin/requests/cancel
-// (admin-endings.mjs), the same Void underneath. With money in (ledger.mjs cancelHeldCents) it asks
-// first what happened to it: refunded all, keeping all, refunded part (an amount), or Not yet.
-function voidLink(r, inv, ctx) {
+// "✕ Cancel this job" (owner, 21 Oct 2026: "all jobs should be able to be cancelled with 2 taps -
+// one tap then a confirmation tap"; mock-up "Cancel In Two Taps"). Its own row at the very bottom
+// of EVERY card face that is not cancelled (new, active, finished, done, put away), never behind
+// Show more: a grey outlined button (never red). Tap 1 opens the confirm on the card; tap 2 is
+// "Yes, cancel <First>'s job", or, with money in (ledger.mjs cancelHeldCents), one of refunded /
+// keeping / part. It posts to /admin/requests/cancel (admin-endings.mjs), the same Void underneath.
+// A cancelled card shows "↩ Not cancelled after all" in the same spot (posts /admin/requests/uncancel).
+export function cancelRow(r, inv, ctx, cancelled = false) {
   const who = firstName(r.name) || 'them';
-  const held = ctx.cancelHeld || 0;
   const base = { r: ctx.rk };
-  if (!held) {
-    const q = inv && inv.number ? `Cancel ${who}'s job? The job is not happening. Invoice ${inv.number} is voided, so nothing is owed. The customer is not told. You can undo this.`
-      : `Cancel ${who}'s job? The job is not happening, so nothing is owed. The customer is not told. You can undo this.`;
-    return `<div class="voidlink" data-void-link>${confirmStep({ key: 'card.cancelJob', yesKey: 'card.cancelYes', label: 'Cancel this job…', question: q, action: '/admin/requests/cancel', hidden: hiddenInputs(base), danger: true, link: true })}</div>`;
+  if (cancelled) {
+    return `<div class="cxrow" data-cancel-row="undo"><form method="post" action="/admin/requests/uncancel">${hiddenInputs(base)}<button class="cxbtn" type="submit" data-uncancel${tip('card.uncancel')}>↩ Not cancelled after all</button></form></div>`;
   }
-  const amt = dollars(held);
-  const f = (how, label, key, cls = 'btn ghost') => `<form method="post" action="/admin/requests/cancel">${hiddenInputs({ ...base, how })}<button class="${cls}" type="submit"${tip(key)}>${esc(label)}</button></form>`;
-  const part = `<details class="cxpart" data-cancel-part><summary class="btn ghost"${tip('card.cancelPart')}>I refunded part of it…</summary><form method="post" action="/admin/requests/cancel">${hiddenInputs({ ...base, how: 'part' })}<label for="cxa-${esc(ctx.rk)}">How much did you refund? ($, the rest is kept)</label><input id="cxa-${esc(ctx.rk)}" name="amount" type="number" step="0.01" min="0.01" max="${esc((held / 100).toFixed(2))}" inputmode="decimal" required><button class="btn" type="submit"${tip('card.cancelPartSave')}>Record it and cancel</button></form></details>`;
-  return `<div class="voidlink" data-void-link><div class="act small"><details class="confirm" data-cancel-money><summary class="linkbtn danger"${tip('card.cancelJob')}>Cancel this job…</summary>
-    <div class="confirmbox"><p><strong>${esc(who)} paid ${esc(amt)}. What happens to it?</strong></p><p class="muted">Pick one, so your Money page stays right. The customer is not told.</p><div class="actions cxacts">
+  const held = ctx.cancelHeld || 0;
+  const no = (label) => `<button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('card.cancelNotYet')}>${esc(label)}</button>`;
+  let box;
+  if (!held) {
+    const what = inv && inv.number ? `Invoice ${inv.number} is voided, so nothing is owed.` : 'Nothing is owed.';
+    box = `<p><strong>Cancel ${esc(who)}'s job?</strong></p><p class="muted">${esc(`${what} ${who} is not told. You can undo this.`)}</p><div class="actions cxacts">
+      <form method="post" action="/admin/requests/cancel">${hiddenInputs(base)}<button class="btn danger" type="submit"${tip('card.cancelYes')}>Yes, cancel ${esc(who)}'s job</button></form>
+      ${no('No, keep it')}</div>`;
+  } else {
+    const amt = dollars(held);
+    const f = (how, label, key, cls = 'btn ghost') => `<form method="post" action="/admin/requests/cancel">${hiddenInputs({ ...base, how })}<button class="${cls}" type="submit"${tip(key)}>${esc(label)}</button></form>`;
+    const part = `<details class="cxpart" data-cancel-part><summary class="btn ghost"${tip('card.cancelPart')}>I refunded part of it…</summary><form method="post" action="/admin/requests/cancel">${hiddenInputs({ ...base, how: 'part' })}<label for="cxa-${esc(ctx.rk)}">How much did you refund? ($, the rest is kept)</label><input id="cxa-${esc(ctx.rk)}" name="amount" type="number" step="0.01" min="0.01" max="${esc((held / 100).toFixed(2))}" inputmode="decimal" required><button class="btn" type="submit"${tip('card.cancelPartSave')}>Record it and cancel</button></form></details>`;
+    box = `<p><strong>They paid ${esc(amt)}. What happens to it?</strong></p><p class="muted">${esc(`Pick one and the job is cancelled. Your Money page stays right. ${who} is not told.`)}</p><div class="actions cxacts" data-cancel-money>
       ${f('refund', `I refunded the ${amt} (record it and cancel)`, 'card.cancelRefund', 'btn')}${f('keep', `I'm keeping the ${amt} (record it and cancel)`, 'card.cancelKeep')}${part}
-      <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('card.cancelNotYet')}>✕ Not yet, go back</button></div></div></details></div></div>`;
+      ${no('No, keep the job')}</div>`;
+  }
+  return `<div class="cxrow" data-cancel-row="cancel"><details class="confirm cxconfirm" data-cancel-job><summary class="cxbtn"${tip('card.cancelJob')}>✕ Cancel this job</summary>
+    <div class="confirmbox cxbox">${box}</div></details></div>`;
 }
 
 // ---- Request cards (JOB B, owner-approved 18 Oct 2026) -----------------------------------
@@ -681,7 +691,10 @@ article[data-reqcard] h3.who{font-size:1.75rem;margin:0}
 .paybox.calm{padding:10px 14px}.paybox.calm .words{margin:0 0 6px}
 .payacts{display:flex;flex-wrap:wrap;gap:4px 14px;align-items:center}.payacts .act{margin:0}
 .act.small{margin:0}.linkbtn.danger{color:#8f3427}
-.voidlink{margin-top:12px;border-top:1px solid var(--line);padding-top:4px}
+.cxrow{margin:14px 0 0;padding-top:10px;border-top:1px solid var(--line)}.cxrow form{margin:0}
+.cxbtn{display:inline-flex;align-items:center;min-height:48px;padding:6px 16px;border:2px solid #7b7169;border-radius:12px;background:#fff;color:#5f5650;font:700 1.02rem Inter,Arial,sans-serif;cursor:pointer;list-style:none}
+.cxbtn::-webkit-details-marker{display:none}.cxconfirm[open]>.cxbtn{margin-bottom:8px}
+.cxbox .cxacts{display:grid;gap:8px}.cxbox .cxacts .btn{width:100%;min-height:48px}.cxbox .cxacts form{margin:0}
 .msgline{display:flex;flex-wrap:wrap;align-items:center;gap:0 14px;margin:10px 0 0;padding:4px 0;border-top:1px solid var(--line)}
 .msgline .msgsep{color:var(--line)}.msgline .mlabel{font-weight:700;color:var(--muted);margin-right:2px}
 .msgpair{display:inline-flex;flex-wrap:wrap;align-items:center;gap:0 6px}.msgpair form{display:inline;margin:0}
@@ -930,7 +943,7 @@ details.disclose>summary:focus-visible,details.grp>summary:focus-visible{outline
 .gin{display:grid;gap:6px;padding:0 0 10px}.gin .gl{margin:0;overflow-wrap:anywhere}.gin .gl.ok{color:#2f5a2b}.gin .warnline{color:#8f3427;font-weight:600}
 .gin .glink{display:inline-flex;align-items:center;min-height:44px;color:var(--accent);font-weight:700}
 .gin ul{margin:0;padding-left:18px}.gin h4{margin:6px 0 2px}
-.morerow.quiet{border-top:1px solid var(--line);padding-top:8px;align-items:center}.morerow .voidlink{margin:0;border:0;padding:0}
+.morerow.quiet{border-top:1px solid var(--line);padding-top:8px;align-items:center}
 .dlform{display:grid;gap:8px;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff}.dlform .dlq{margin:0}
 .dlform .choice{display:flex;gap:10px;align-items:center;min-height:44px}.dlform .choice input{width:24px;height:24px;flex:none}
 .dlform .dlfields{display:grid;gap:4px}.dlform:has(input[data-how=pickup]:checked) .dlfields{display:none}
@@ -1265,12 +1278,13 @@ function endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, se
       <p class="endlbl ${done ? 'ok' : 'grey'}" data-ended-label>${done ? '✓ DONE' : '✕ CANCELLED'}${day ? ` · ${esc(day)}` : ''}</p>
       <p class="endmoney" data-ended-money>${esc(words)}</p>
       ${r.idDeletedAt && r.idDeletedAuto ? `<p class="endmoney" data-id-auto-deleted>ID: <b>deleted automatically on ${esc(autoDeletedDay(r))}</b></p>` : ''}
-      <div class="secrow endbtns" data-ended-buttons>${cardButton('card.archive', ectx, false)}${cardButton(done ? 'card.undone' : 'card.uncancel', ectx, false)}</div>
+      <div class="secrow endbtns" data-ended-buttons>${cardButton('card.archive', ectx, false)}${done ? cardButton('card.undone', ectx, false) : ''}</div>
       <details class="disclose more" data-details><summary${tip('card.details')}><span class="mshow" data-more-show>Show more about ${esc(name)}</span><span class="mhide" data-more-hide>Hide more about ${esc(name)}</span><span class="mchev" aria-hidden="true">▾</span></summary>
         <p class="mhint" data-more-hint>Tap any line below to see more.</p>
         ${groups}
         <div class="morerow quiet" data-more-row><a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a></div>
       </details>
+      ${cancelRow(r, inv, ctx, !done)}
       ${quickMenu({ r, bookings: bk, inv, hold, dates: services.includes('rentals') ? rentalDates(r, bk) : {}, services, current: 'finished', rk })}
     </article>`;
 }
@@ -1373,8 +1387,7 @@ export function requestCard(r, o) {
   const moreRow = `<div class="morerow quiet" data-more-row><a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a>
       ${decorish && !archived ? `<div class="act"><a class="btn ghost" href="/admin/checklist?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.printChecklist')}>Print checklist</a></div>` : ''}
       ${!archived && !quiet ? `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('card.putAway')}>Put away</button></div></form>` : ''}
-      ${stage === 'void' && !bottomBtns.some((k) => k.startsWith('card.archive')) ? cardButton('card.archive', ctx, false) : ''}${bottomBtns.map((k) => cardButton(k, ctx, false)).join('')}
-      ${quiet ? '' : voidLink(r, inv, ctx)}</div>`;
+      ${stage === 'void' && !bottomBtns.some((k) => k.startsWith('card.archive')) ? cardButton('card.archive', ctx, false) : ''}${bottomBtns.map((k) => cardButton(k, ctx, false)).join('')}</div>`;
   if (!archived && (stage === 'done' || stage === 'void')) return endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, services, bk, hold, groups: `${booked}${moneyG}${detailsG}${historyG}` });
   return `<article class="card stepcard${red ? ' miss' : (miss ? ' tidy' : '')}" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''}${red ? ` data-missed="${esc(miss.id)}"` : (miss ? ` data-tidy="${esc(miss.id)}"` : '')} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${num ? ` data-customer="${num}" data-first="${esc(firstName(r.name) || 'No name')}"` : ''}${first ? ` style="border-left-color:${first.bar}${num ? `;--cc:${first.bar}` : ''}"` : ''}>
       ${num ? `<span class="cnum" data-customer-num aria-hidden="true">${num}</span>` : ''}${red ? `<span class="mchip" data-missed-tag>⚠ ${esc(miss.tag)}</span>` : (miss ? `<span class="ychip" data-tidy-tag>${esc(miss.tag)}</span>` : '')}<div class="schead">${quickContact(r)}${num ? `<p class="custno" data-customer-label>Customer ${num}</p>` : ''}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
@@ -1389,6 +1402,7 @@ export function requestCard(r, o) {
         ${booked}${moneyG}${detailsG}${historyG}
         ${moreRow}
       </details>
+      ${cancelRow(r, inv, ctx, pr.void)}
       ${quickMenu({ r, bookings: bk, inv, hold, dates: services.includes('rentals') ? rentalDates(r, bk) : {}, services, current: archived ? 'finished' : s.current, rk })}
     </article>`;
 }
