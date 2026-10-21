@@ -12,7 +12,7 @@
  *  4. the Requests screen has any "More" disclosure other than each step card's ONE "More:
  *     answers, history, other buttons" (owner-approved step cards, 19 Oct 2026: exactly one per
  *     card, inside the card, after its next-step box), or any disclosure with an id outside the
- *     whitelist (only #put-away, the collapsed Put away section), or lacks the steps panel with
+ *     whitelist (only #put-away, #done-list, #cancelled-list: the three groups under the cards), or lacks the steps panel with
  *     each button in its owner-approved step (JOB B, 18 Oct 2026); Calendar & Bookings and Money
  *     carry the same panel; /admin/archive redirects to the opened Put away section.
  * Rule 0: fewer than 20 screens or 150 controls checked is a failure.
@@ -244,6 +244,23 @@ pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/req
   else errors.push('the held rental has no draft invoice, so + Extra game goes untested');
 }
 
+// Three ways a job ends (owner-approved "Done Cards", 20 Oct 2026): a Finished card with its
+// deposit still held (✓ Mark as done asks first), a Done card (Not done after all) and the green
+// "is done" banner with Show me ↓ and ✕ Close.
+{
+  const views = await mod('functions/_lib/views.mjs');
+  const lines = [{ description: 'Porch package', qty: 1, unit_cents: 11000, refundable: 0 }, { description: 'Damage deposit', qty: 1, unit_cents: 5000, refundable: 1 }];
+  const bal = { total: 16000, charges: 11000, refundable: 5000, paid: 16000, paidCharges: 11000, paidDeposit: 5000, owed: 0, depositOwed: 0, remaining: 0, void: false, paidInFull: true };
+  const inv = (id) => ({ id, status: 'paid', number: `PNP-E-${id}`, total_cents: 16000, deposit_due_cents: 5000, pay_plan: 'full', lines, balance: bal, payments: [{ cents: 16000, on: '2026-10-18' }] });
+  const mk = (key, name) => ({ ...reqA, key, name, services: ['porch'], gamesAnswer: '', wantsRentals: false, wantsDecor: true, rentals: [], decor: [{ label: 'Event date', value: '2026-10-18' }], other: [], takedownPlan: 'customer_handles' });
+  const fin = mk('end|fin', 'Fay Finished'); const dn = mk('end|done', 'Dot Done');
+  const bk = (k) => ({ [k]: [{ id: 1, kind: 'porch_install', date: '2026-10-18', done_at: '2026-10-18 12:00:00' }] });
+  pages.push(['dashboardPage(Finished with deposit held, a Done card, the done banner)', { home: true, direct: true }, { status: 200, text: views.dashboardPage({ requests: [fin, dn], invoices: { 2: inv(2), 3: inv(3) }, checklists: {}, returns: {}, folderUrl: 'https://drive.google.com/x', sheetError: '', flash: '', missingPayment: [],
+    statuses: { [fin.key]: { status: 'paid', invoice_id: 2, job_done_at: '2026-10-18 12:00:00' }, [dn.key]: { status: 'paid', invoice_id: 3, job_done_at: '2026-10-18 12:00:00', done_at: '2026-10-20 15:00:00' } },
+    depositOut: { 3: { refunded: 5000, kept: 0 } }, bookings: { ...bk(fin.key), ...bk(dn.key) }, kinds: { [fin.key]: ['porch_install'], [dn.key]: ['porch_install'] }, schedule: { [fin.key]: { date: '2026-10-18' } },
+    stored: { [fin.key]: { called_at: 'x', confirmed_at: 'x' }, [dn.key]: { called_at: 'x', confirmed_at: 'x' } }, today: '2026-10-20', doneOk: s.util.b64urlText(dn.key) }) }]);
+}
+
 const used = new Set();
 let controls = 0;
 let helpHtml = '';
@@ -291,9 +308,15 @@ for (const [p, o, res] of pages) {
       if (!/data-reqcard/.test(card)) continue;
       const n = (card.match(/<summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>Show more about ([^<]+)<\/span><span class="mhide" data-more-hide>Hide more about \1<\/span>/g) || []).length;
       if (n !== 1) errors.push(`${p}: a request card has ${n} "More" toggles (must be exactly one)`);
-      if (card.indexOf('data-next-step') < 0 || card.indexOf('data-next-step') > card.indexOf('data-details')) errors.push(`${p}: a request card's "More" comes before (or without) its next-step box`);
+      // A Done / Cancelled card (owner-approved "Done Cards", 20 Oct 2026) has no next step: its
+      // "✓ DONE / ✕ CANCELLED · <date>" label, money words and its two small buttons come first.
+      if (/data-ended="(done|cancelled)"/.test(card)) {
+        const at = (k) => card.indexOf(k);
+        if (!(at('data-ended-label') > 0 && at('data-ended-label') < at('data-ended-money') && at('data-ended-money') < at('data-ended-buttons') && at('data-ended-buttons') < at('data-details')) || at('data-next-step') >= 0) errors.push(`${p}: a Done / Cancelled card is not label, money, buttons, then More (or still has a next-step box)`);
+      } else if (card.indexOf('data-next-step') < 0 || card.indexOf('data-next-step') > card.indexOf('data-details')) errors.push(`${p}: a request card's "More" comes before (or without) its next-step box`);
     }
-    const DISCLOSURE_WHITELIST = ['put-away'];
+    // The Done and Cancelled groups (owner-approved "Done Cards", 20 Oct 2026) and Put away.
+    const DISCLOSURE_WHITELIST = ['put-away', 'done-list', 'cancelled-list'];
     for (const m of html.matchAll(/<details\b[^>]*\bid="([^"]+)"/g)) if (!DISCLOSURE_WHITELIST.includes(m[1])) errors.push(`${p}: disclosure #${m[1]} is not on the whitelist (only the Put away section may be one)`);
     const lis = steps ? steps.split('<li>').slice(1) : [];
     const PANEL = [['See who&#39;s asking.|See who\'s asking.', ['Check for new requests', 'Find a customer', 'Open responses sheet', 'Open ID folder']],

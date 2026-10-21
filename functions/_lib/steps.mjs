@@ -21,6 +21,7 @@
 // requests list): she answered "Yes, book it", or it came by phone, or money came in, or the job
 // is done. Everything else on the calendar is a tentative, outlined "Requested · not confirmed".
 
+import { isEnded } from './util.mjs';
 import { pastFirstCall, bookedByHand } from './progress.mjs';
 
 export const STEP_LABELS = {
@@ -205,7 +206,7 @@ export function unconfirmedKeys({ requests = [], statuses = {}, invoices = {}, r
   const out = new Set();
   for (const r of requests) {
     const st = statuses[r.key] || {};
-    if (r.isTest || st.archived_at || st.status === 'void') continue;
+    if (r.isTest || isEnded(st)) continue;
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
     const bal = inv && (inv.balance || inv);
     const depositIn = Boolean(bal && bal.paid > 0) || ['deposit_paid', 'paid', 'done'].includes(st.status);

@@ -35,6 +35,8 @@ import * as C from './calendar.mjs';
 import * as AC from './admin-calendar.mjs';
 import * as MS from './missed.mjs';
 import * as AM from './admin-money.mjs';
+import { voidTagged, CANCEL_TAG } from './ledger.mjs';
+import * as AEN from './admin-endings.mjs';
 import { paidByInvoice, balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice, paymentsByInvoice } from './ledger.mjs';
 import * as AE from './admin-edit.mjs';
 import * as APR from './admin-pricing.mjs';
@@ -96,8 +98,10 @@ function parseInvoiceForm(form) {
 
 async function setRequestStatus(db, key, status, invoiceId) {
   if (!key) return;
-  await db.prepare(`INSERT INTO request_status (request_key, status, invoice_id, updated_at) VALUES (?1, ?2, ?3, datetime('now'))
-    ON CONFLICT(request_key) DO UPDATE SET status = excluded.status, invoice_id = COALESCE(excluded.invoice_id, request_status.invoice_id), updated_at = excluded.updated_at`)
+  // cancelled_at (migration 0021): the "✕ CANCELLED · <date>" day, set by Void, cleared by Bring back.
+  await db.prepare(`INSERT INTO request_status (request_key, status, invoice_id, cancelled_at, updated_at) VALUES (?1, ?2, ?3, CASE WHEN ?2 = 'void' THEN datetime('now') END, datetime('now'))
+    ON CONFLICT(request_key) DO UPDATE SET status = excluded.status, invoice_id = COALESCE(excluded.invoice_id, request_status.invoice_id), updated_at = excluded.updated_at,
+      cancelled_at = CASE WHEN excluded.status = 'void' THEN COALESCE(request_status.cancelled_at, datetime('now')) ELSE NULL END`)
     .bind(key, status, invoiceId ?? null).run();
 }
 
@@ -281,6 +285,7 @@ async function dashboard(env, url) {
     foodPerHead: SERVICES_DATA.services.grazing.foodPerHead || null, pickupPlace: PRICE_TABLE.pickupPlace,
     holdsBox: `${VM2.holdsSoonBox(soon, { soonHours: holdSettings(settings).soonHours })}${Object.keys(extras).length || Object.keys(msgs).length || Object.keys(bottom).length ? VM2.TAP_JS : ''}`,
     flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', missingPayment: paymentStatus(settings).missing, putAway: url.searchParams.get('put') || '',
+    doneOk: url.searchParams.get('doneok') || '', doneAt: url.searchParams.get('at') || '', openCancelled: Boolean(url.searchParams.get('cx')),
     missedBy, missedTop, remindersLine: VC.remindersBox(reminders, tomorrowLabel, { line: true }) }));
 }
 
@@ -494,6 +499,7 @@ async function changeStatus(env, request, id) {
   if (action === 'deposit_paid') recorded = await recordPayment(env.DB, invoice, lines, 'deposit', method);
   if (action === 'paid') recorded = await recordPayment(env.DB, invoice, lines, 'full', method);
   if (action === 'unpaid') await voidPayments(env.DB, id);
+  if (action === 'unvoid') await voidTagged(env.DB, id, CANCEL_TAG);
   if (action === 'texted') await env.DB.prepare("UPDATE invoices SET status='sent', sent_at=datetime('now'), updated_at=datetime('now') WHERE id=?1").bind(id).run();
   else await env.DB.prepare("UPDATE invoices SET status=?1, updated_at=datetime('now') WHERE id=?2").bind(next, id).run();
   if (action === 'void') await C.removeInvoiceBookings(env.DB, id);
@@ -911,6 +917,11 @@ async function routeAdmin(context) {
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'view' && method === 'GET') return idPhotoView(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'upload' && method === 'POST') return addId(env, request);
+  // Three ways a job ends (admin-endings.mjs): Done, its undo, Cancel (with money) and its undo.
+  if (segs[0] === 'requests' && segs[1] === 'done' && method === 'POST') return AEN.markDone(env, request);
+  if (segs[0] === 'requests' && segs[1] === 'undone' && method === 'POST') return AEN.markUndone(env, request);
+  if (segs[0] === 'requests' && segs[1] === 'cancel' && method === 'POST') return AEN.cancelJob(env, request);
+  if (segs[0] === 'requests' && segs[1] === 'uncancel' && method === 'POST') return AEN.uncancelJob(env, request);
   if (segs[0] === 'requests' && segs[1] === 'archive' && method === 'POST') return AC.archiveRequest(env, request, true);
   if (segs[0] === 'requests' && segs[1] === 'unarchive' && method === 'POST') return AC.archiveRequest(env, request, false);
   // Put away left the main nav (JOB B): it is the collapsed section at the bottom of Requests.

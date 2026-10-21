@@ -6,6 +6,7 @@
 //
 // "Asked for a takedown" = takedown_plan is scheduled or not_sure (the form answer, mapped at
 // source), the invoice carries the takedown add-on, or a takedown booking exists.
+import { isEnded } from './util.mjs';
 import { parseFormDate, isISODate as isISO, addDays, normName, digitsOf } from './calendar.mjs';
 
 export const TAKEDOWN_KINDS = ['porch_takedown', 'party_takedown'];
@@ -111,7 +112,7 @@ export function stateFor(r, st, facts, today) {
 
 // "Takedowns to schedule": asked for, not booked, request still live (not put away, not void).
 export function takedownsToSchedule(requests, statuses, facts, today) {
-  return requests.filter((r) => { const st = statuses[r.key]; return !(st && (st.archived_at || st.status === 'void')) && !r.isTest; })
+  return requests.filter((r) => !isEnded(statuses[r.key]) && !r.isTest)
     .map((r) => ({ r, td: stateFor(r, statuses[r.key], facts, today) }))
     .filter((x) => x.td.status === 'to_schedule')
     .map(({ r, td }) => ({ key: r.key, name: r.name, kind: td.kind, date: td.date, note: r.takedownNote || '' }))
@@ -172,7 +173,7 @@ export function inlineDefaultDate({ kind, bookings = [], takedownDate = '', even
 export const AUTO_EVENT = 'Takedown booked from the date on the form';
 export function autoTakedownRow(r, { bookings = [], status = null } = {}) {
   if (!r || r.isTest) return null;
-  if (status && (status.archived_at || status.status === 'void')) return null;
+  if (isEnded(status)) return null;
   const kind = takedownKindFor(r.services || []);
   if (!kind || r.takedownPlan !== 'scheduled' || !isISO(r.takedownDate)) return null;
   if ((bookings || []).some((b) => TAKEDOWN_KINDS.includes(b.kind))) return null;
@@ -192,7 +193,7 @@ export function autoBookPlan(rows, bookingsBy = {}, statuses = {}) {
 export async function autoBookTakedown(db, r, { who = 'automatic' } = {}) {
   if (!r || !r.key) return false;
   const { results } = await db.prepare('SELECT kind FROM bookings WHERE request_key = ?1').bind(r.key).all();
-  const status = await db.prepare('SELECT status, archived_at FROM request_status WHERE request_key = ?1').bind(r.key).first();
+  const status = await db.prepare('SELECT * FROM request_status WHERE request_key = ?1').bind(r.key).first();
   const row = autoTakedownRow(r, { bookings: results || [], status });
   if (!row) return false;
   const res = await db.prepare(`INSERT INTO bookings (request_key, kind, date, time, customer_name, phone, email, place, items, edited_by_hand, name_norm, phone_digits)

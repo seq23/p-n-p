@@ -129,7 +129,7 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
   for (const [what, attr] of Object.entries(ITEMS)) if (attr) must(m.includes(attr), `B: "${what}" is no longer under More (${attr})`);
   must(/data-more-group="money"[\s\S]*data-hold=[\s\S]*data-more-group="details"/.test(m) && /data-more-group="money"[\s\S]*data-messages[\s\S]*data-more-group="details"/.test(m), 'B: the hold controls / messages are not under Money');
   must(/data-more-group="details"[\s\S]*data-id-open[\s\S]*data-more-group="history"/.test(m), 'B: the ID is not under Their details and ID');
-  must(/data-more-row>[\s\S]*data-edit-link[\s\S]*data-archive[\s\S]*data-void-link>[\s\S]*data-help="card\.cancelJob"[^>]*>Cancel this job…<\/summary>[\s\S]*action="\/admin\/invoices\/4\/status"[\s\S]*name="action" value="void"[\s\S]*Yes, void it/.test(m) && !/Void this request/.test(c1), 'B: the quiet row is not Edit · Put away · "Cancel this job…" (the same Void action, still with its confirm)');
+  must(/data-more-row>[\s\S]*data-edit-link[\s\S]*data-archive[\s\S]*data-void-link>[\s\S]*data-help="card\.cancelJob"[^>]*>Cancel this job…<\/summary>[\s\S]*action="\/admin\/requests\/cancel"[\s\S]*Yes, cancel the job/.test(m) && !/Void this request/.test(c1), 'B: the quiet row is not Edit · Put away · "Cancel this job…" (posting the cancel, still with its confirm)');
   // A decor card: the takedown row, checklist state, Print checklist, porch line, where, grazing facts.
   const porch = { ...base, key: 'site|pp', name: 'Pat Porch', services: ['porch', 'grazing'], wantsDecor: true, wantsRentals: false, gamesAnswer: '', porchLine: 'Fall · picturing a full porch', porchAddOns: 'Pumpkins',
     decor: [{ label: 'Event date', value: '2026-10-24' }, { label: 'Location (hotel name, address or neighborhood)', value: 'Germantown' }, { label: 'How many guests?', value: '15–40' }, { label: 'Should we source the food?', value: 'Yes' }, { label: 'Budget', value: '$500–$1,000' }] };
@@ -145,7 +145,9 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
   must(/data-id-phone>Not collected \(phone booking\)/.test(more(ph)) && /data-id-upload/.test(more(ph)) && /data-rules>Rules: not asked \(phone booking\)/.test(more(ph)), 'B: a phone booking lost the ID upload / "not asked" rules line');
   // A void card: Bring back stays the one action; put away from the quiet row.
   const vc = V.requestCard(den, { ...cardOpts, st: { status: 'void' }, inv: { ...sentInv, status: 'void', balance: { ...bal0, void: true } }, hold: null, holdHtml: '' });
-  must(/data-more-row>[\s\S]*data-help="card\.archive"/.test(more(vc)) && !/data-void-link/.test(vc), 'B: a void card lost Done — put away in the quiet row (or still offers Cancel this job)');
+  // Three endings (20 Oct 2026): a void (Cancelled) card has two small buttons, Put away and Not
+  // cancelled after all, never Cancel again and never a big button.
+  must(/data-ended-buttons>[\s\S]*data-help="card\.archive"[^>]*>Put away<[\s\S]*data-help="card\.uncancel"[^>]*>Not cancelled after all \(undo\)</.test(vc) && !/data-void-link/.test(vc) && !/class="btn primary"/.test(vc), 'B: a void card lost Put away + Not cancelled after all (or still offers Cancel this job, or a big button)');
   // Duplicates gone.
   must(!/data-facts|What they picked/.test(c1), 'B: the old facts line / "What they picked" row is back');
   must(!/>(?:&#128222; )?Call</.test(m), 'B: a second Call is under More');

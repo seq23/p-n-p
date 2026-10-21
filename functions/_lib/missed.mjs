@@ -22,6 +22,7 @@
 // The strip's ✕ (settings.missed_strip_dismissed = {"day": <Memphis day>, "ids": [booking ids]})
 // hides the strip on every device until the next Memphis day; a missed job that was not in the
 // dismissed list shows it again at once. It never hides the card tag, the calendar chip or the email.
+import { isEnded } from './util.mjs';
 import { listBookings, loadReturns, overdueReturns, addDays, isISODate, returnKeyOf } from './calendar.mjs';
 import { balances } from './ledger.mjs';
 import { shortName } from './requested.mjs';
@@ -51,7 +52,7 @@ const firstNameOf = (s) => String(s || '').trim().split(/\s+/)[0] || 'them';
 // A booking counts unless its request is put away / void / a test, or its invoice is void.
 export function isLiveBooking(b, { statuses = {}, reqBy = {}, bals = {} } = {}) {
   const st = b.request_key ? statuses[b.request_key] : null;
-  if (st && (st.archived_at || st.status === 'void')) return false;
+  if (isEnded(st)) return false;
   if (b.request_key && reqBy[b.request_key] && reqBy[b.request_key].is_test) return false;
   const inv = b.invoice_id || (st && st.invoice_id) || null;
   return !(inv && bals[inv] && bals[inv].void);

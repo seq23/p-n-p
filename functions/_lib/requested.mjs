@@ -5,6 +5,7 @@
 // feed, the Sheet's Bookings tab, games out or availability. A rental's asked-for games are
 // counted apart ("N games asked for"). A held rental already has its bookings (filled, "Held");
 // when the hold expires its bookings come off and the request shows here again, outlined.
+import { isEnded } from './util.mjs';
 import { servicesOf, SCHEDULE_FIRST } from './cards.mjs';
 import { parseFormDate, requestReturnDate, expandItems, addDays, spanDays } from './calendar.mjs';
 import { serviceInfo } from './kinds.mjs';
@@ -35,7 +36,7 @@ export function requestedChips(requests, statuses = {}, bookings = [], table = n
   const out = [];
   for (const r of requests || []) {
     const st = statuses[r.key];
-    if (r.isTest || (st && (st.archived_at || st.status === 'void'))) continue;
+    if (r.isTest || isEnded(st)) continue;
     for (const service of servicesOf(r)) {
       const kind = SCHEDULE_FIRST[service][1];
       if (kindsBy[r.key] && kindsBy[r.key].has(kind)) continue;

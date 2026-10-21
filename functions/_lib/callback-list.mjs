@@ -3,6 +3,7 @@
 // with "Waiting N days" in Memphis calendar days (steps.mjs waitingDays / waitingWords). Never a
 // phone-call request (she typed it in herself), never put away / void / test. Section 2 of
 // Valerie's daily 7 AM to-do email (todo-email.mjs).
+import { isEnded } from './util.mjs';
 import { loadRequestsFromDb } from './requests.mjs';
 import { servicesOf } from './cards.mjs';
 import { askedDate, shortName } from './requested.mjs';
@@ -30,7 +31,7 @@ export async function requestFacts(db, today) {
   const out = [];
   for (const r of requests) {
     const s0 = statuses[r.key] || { status: 'new' };
-    if (r.isTest || s0.archived_at || s0.status === 'void') continue;
+    if (r.isTest || isEnded(s0)) continue;
     const services = servicesOf(r);
     const inv = s0.invoice_id && bals[s0.invoice_id] ? { ...bals[s0.invoice_id].invoice, balance: bals[s0.invoice_id] } : null;
     const bookings = bookingsBy[r.key] || [];
