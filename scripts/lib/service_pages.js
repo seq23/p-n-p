@@ -130,7 +130,9 @@ const PAGES = [
 ];
 
 /** The registered AI pictures for one page (data/offers/service_ai_images.json). */
-const imagesFor = (key) => AI.images.filter((i) => i.page === key);
+/** An entry shows on its `page`, or on every page in `pages` (owner photos appear on several). */
+const onPage = (i, key) => (i.pages || [i.page]).includes(key);
+const imagesFor = (key) => AI.images.filter((i) => onPage(i, key));
 
 /** "Book online" (owner ruling 21 Oct 2026) - the big primary button, preselecting the service. */
 const bookHref = (svc) => (svc ? `${QUOTE}?service=${svc}` : QUOTE);
@@ -140,7 +142,7 @@ function bookButton(svc, where) {
 
 function gallery(key) {
   const imgs = imagesFor(key);
-  return `<div class="service-gallery" data-service-gallery="${key}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:20px;">${imgs.map((i) => `<div class="card-media" style="border-radius:16px;overflow:hidden;"><img src="/${i.file}" alt="${esc(i.alt)}" width="1024" height="768" loading="lazy" decoding="async" style="width:100%;height:auto;display:block;"/></div>`).join('')}</div>`;
+  return `<div class="service-gallery" data-service-gallery="${key}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:20px;">${imgs.map((i) => `<div class="card-media" style="border-radius:16px;overflow:hidden;"><img src="/${i.file}" alt="${esc(i.alt)}" width="${i.width || 1024}" height="${i.height || 768}" loading="lazy" decoding="async" style="width:100%;height:auto;display:block;"/></div>`).join('')}</div>`;
 }
 
 /** The body block every service page carries: subsections, pictures, FAQ, Book online again. */
@@ -164,4 +166,4 @@ function faqJsonLd(p) {
   return { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) };
 }
 
-module.exports = { FOCUS, PAGES, imagesFor, bookButton, bookHref, gallery, bodyBlock, heroBlock, faqJsonLd, lawnGames, porchFrom, partyFrom, grazeFrom, money, esc, AI };
+module.exports = { FOCUS, PAGES, onPage, imagesFor, bookButton, bookHref, gallery, bodyBlock, heroBlock, faqJsonLd, lawnGames, porchFrom, partyFrom, grazeFrom, money, esc, AI };

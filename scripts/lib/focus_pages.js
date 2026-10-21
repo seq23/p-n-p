@@ -18,7 +18,7 @@
  * Every price, game and bundle comes from data/offers/services.json and data/rentals/games.json
  * (availableNow items only); FAQ answers are the owner-approved /faq/ answers
  * (scripts/lib/faq_content.js) wherever one exists. Pictures are the registered AI pictures in
- * data/offers/service_ai_images.json (page "hotel" / "lawn"): no captions, never presented as
+ * data/offers/service_ai_images.json ("hotel": the owner's bedroom, hallway and anniversary photos; "lawn": AI): no captions, never presented as
  * past customer jobs; lawn pictures map only to availableNow items.
  *
  * Rendered by scripts/generators/build_focus_pages.js; checked by
@@ -108,7 +108,7 @@ const PAGES = [
   },
 ];
 
-const imagesFor = (key) => SP.AI.images.filter((i) => i.page === key);
+const imagesFor = (key) => SP.imagesFor(key);
 
 function faqJsonLd(p) {
   return { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: p.faq().map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) };

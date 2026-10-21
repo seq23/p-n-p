@@ -242,6 +242,26 @@ for (const p of FP.PAGES) {
 ok(focusPages === 2, `${focusPages} focused pages checked, want 2`);
 ok(FG.plan().every(([, b, a]) => b === a), 'focused pages or llms files differ from a fresh scripts/generators/build_focus_pages.js run');
 
+// ---- owner photos (owner ruling 21 Oct 2026): the party page shows exactly the five owner photos
+// (its AI pictures were "not good enough"), the hotel page the bedroom, hallway and anniversary
+// ones, and every baby shower page the shower + teddy pair.
+const OP = require(path.join(ROOT, 'scripts/install_owner_photos.js'));
+const ownerOf = (key) => SP.imagesFor(key).filter((i) => i.source === 'owner').map((i) => i.file);
+ok(SP.imagesFor('party').length === 5 && SP.imagesFor('party').every((i) => i.source === 'owner'), `party page pictures are [${SP.imagesFor('party').map((i) => i.file).join(', ')}], ruled exactly the five owner photos`);
+ok(SP.imagesFor('hotel').length === 3 && ownerOf('hotel').length === 3, `hotel room setups pictures are [${SP.imagesFor('hotel').map((i) => i.file).join(', ')}], ruled the owner's bedroom, hallway and anniversary photos`);
+ok(ownerOf(OP.KEY).length === 2, `${ownerOf(OP.KEY).length} owner photos registered for the baby shower pages (want the shower + teddy pair)`);
+for (const i of SP.AI.images.filter((x) => x.source === 'owner')) ok(Number.isInteger(i.width) && Number.isInteger(i.height) && i.alt.length >= 30, `${i.file}: owner photo lacks width/height or descriptive alt`);
+for (const rel of OP.PAGES) {
+  const html = read(rel);
+  ok(OP.apply(html, rel) === html, `${rel}: differs from a fresh scripts/install_owner_photos.js pass`);
+  for (const f of ownerOf(OP.KEY)) ok(new RegExp(`<img src="/${f.replace(/[.]/g, '\\.')}" alt="[^"]{30,}"`).test(html), `${rel}: does not show the owner photo ${f}`);
+  ok(!/<figcaption|Example styling/i.test(mainOf(html)), `${rel}: photos carry a caption`);
+}
+// Retired pictures stay off every page.
+for (const gone of ['ai-anniversary-dinner', 'ai-baby-shower-setup', 'ai-birthday-balloon-arch', 'ai-hotel-room-rose-petals', 'ai-brunch-grazing', 'ai-charcuterie-table', 'ai-hotel-anniversary-suite', 'ai-hotel-proposal-candles', 'ai-hotel-birthday-balloons', 'ai-hotel-rose-heart-bed']) {
+  for (const rel of ['services/celebration-setups.html', 'services/grazing-and-event-styling.html', 'services/hotel-room-decor-memphis.html', ...OP.PAGES]) ok(!read(rel).includes(`${gone}.webp`), `${rel}: still shows the retired picture ${gone}`);
+}
+
 // ---- self-test: each broken copy must fail.
 const party = SP.PAGES.find((p) => p.key === 'party');
 const rentalsPage = SP.PAGES.find((p) => p.key === 'rentals');
@@ -250,7 +270,7 @@ const rh = read(rentalsPage.file);
 const probes = {
   'no Book online above the fold': [party, ph.replace('data-book-online="hero">Book online</a>', 'data-book-online="hero">Request a Quote</a>')],
   'no Book online after the FAQ': [party, ph.replace('data-book-online="after-faq">Book online', 'data-book-online="after-faq">Get started')],
-  'a missing AI picture': [party, ph.replace(/<img src="\/assets\/img\/celebrations\/ai-hotel-room-rose-petals\.webp"[^>]*>/, '')],
+  'a missing owner photo': [party, ph.replace(/<img src="\/assets\/img\/celebrations\/owner-birthday-bedroom\.webp"[^>]*>/, '')],
   'an AI picture with a caption': [party, ph.replace('</main>', '<p>Example styling</p></main>')],
   'no Hotel Room Setups section': [party, ph.replace('<h2>Hotel Room Setups</h2>', '<h2>Hotel rooms</h2>')],
   'FAQ JSON-LD out of step': [party, ph.replace('"name":"How do I pay?"', '"name":"How do I settle up?"')],
@@ -310,4 +330,4 @@ if (errors.length) {
   console.error(`SERVICE PAGES FAILED (${errors.length}):\n${errors.slice(0, 40).map((x) => `  - ${x}`).join('\n')}`);
   process.exit(1);
 }
-console.log(`service-pages: OK - ${checks} checks: exactly ${pages} service pages (${KEYS.join(' · ')}), each priced from data, Book online above the fold and after the FAQ, 5+ FAQ = FAQPage JSON-LD, Service JSON-LD, ${SP.AI.images.length} registered AI pictures (rentals only availableNow items, no captions), #hotel-room-setups + #giant-lawn-games; home + ${areaPages} city pages carry Book online and link all four; ${Object.keys(probes).length + 1 + probeCount} self-test probes fail as they should; ${focusPages} focused pages (${FP.PAGES.map((p) => p.url).join(', ')}) out of the nav, priced from data, linked from their parent sub-section, all 32 city pages, the sitemap and the llms files`);
+console.log(`service-pages: OK - ${checks} checks: exactly ${pages} service pages (${KEYS.join(' · ')}), each priced from data, Book online above the fold and after the FAQ, 5+ FAQ = FAQPage JSON-LD, Service JSON-LD, ${SP.AI.images.length} registered pictures (AI + owner photos; rentals only availableNow items, no captions), #hotel-room-setups + #giant-lawn-games; home + ${areaPages} city pages carry Book online and link all four; ${Object.keys(probes).length + 1 + probeCount} self-test probes fail as they should; ${focusPages} focused pages (${FP.PAGES.map((p) => p.url).join(', ')}) out of the nav, priced from data, linked from their parent sub-section, all 32 city pages, the sitemap and the llms files`);
