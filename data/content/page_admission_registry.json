@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-07-24T00:00:00.000Z",
-  "count": 111,
+  "count": 129,
   "admissions": [
     {
       "route": "/authority/event-decorator-memphis",
@@ -391,13 +391,31 @@
       "content_sha256": "f0160347092b62a0451ef99c02d0d8dbe874838c51ea7da8c3955ec3a6836d12"
     },
     {
+      "route": "/areas/arlington-tn-grazing-tables",
+      "rendered_file": "areas/arlington-tn-grazing-tables.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "ce4f3224cec116120085be5c1f3d58f0c1405f89b8f4f591da3677ddafa7110e"
+    },
+    {
       "route": "/areas/arlington-tn-party-decor",
       "rendered_file": "areas/arlington-tn-party-decor.html",
       "status": "admitted",
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "ff6c8d3d7cccd17b6a3f225d9a3bf74df46b442a542c2fc671dbf57664e6084c"
+      "content_sha256": "c19277043c2eaf76ffd4d248fa86fccd08f9ec60b992d20e5be425fdba015e1f"
+    },
+    {
+      "route": "/areas/arlington-tn-party-game-rentals",
+      "rendered_file": "areas/arlington-tn-party-game-rentals.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "821feb4ab57d7e940b5353b631860059d588c6487d783891f7999ba92f86e4ba"
     },
     {
       "route": "/areas/arlington-tn-porch-decorating",
@@ -406,7 +424,16 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "0e458c035ac664d9e3285057ae1f0732b4565d81978db872ae7fa4e1866608d3"
+      "content_sha256": "a4813c98ecb85c21b5789d708205f458b46baaa3c43ac18f63ced50a8c88ecea"
+    },
+    {
+      "route": "/areas/bartlett-tn-grazing-tables",
+      "rendered_file": "areas/bartlett-tn-grazing-tables.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "f253a3694c48e8a10dd07c5704953c5c039d95cdb73d7391cd2ef2d546355f14"
     },
     {
       "route": "/areas/bartlett-tn-party-decor",
@@ -415,7 +442,16 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "6b6d52825954659de18c65ed6bce297856512f1b2f01c264e8ce39cf58bf467c"
+      "content_sha256": "ed5d21540cc446a5488d792c7cc4a6229d34702c79b3d8f969402670eff215cc"
+    },
+    {
+      "route": "/areas/bartlett-tn-party-game-rentals",
+      "rendered_file": "areas/bartlett-tn-party-game-rentals.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "98d7e950b129949360041ce226ab3f3cd9ef2d03b3b3fa909a6b8f9225821d28"
     },
     {
       "route": "/areas/bartlett-tn-porch-decorating",
@@ -424,7 +460,16 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "ec5085f9dafca6a51c9da388bf3b7548ccecc19e8523945b9a59f0698dd887fc"
+      "content_sha256": "d0fa9e02fd4f455ba9aea0e8bc8742c5a0584946c5cb6c86c2a7e538ad36b650"
+    },
+    {
+      "route": "/areas/collierville-tn-grazing-tables",
+      "rendered_file": "areas/collierville-tn-grazing-tables.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "e2c1764b822aab26dd5d03c24fe254c6c0505e8f09b0db8f7828b61401ca301f"
     },
     {
       "route": "/areas/collierville-tn-party-decor",
@@ -433,7 +478,16 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "b17e70352cbadb5d6263d070c299e9e83dfe0bf677f598d7cfeece2fa8f15f90"
+      "content_sha256": "fdbcd70ecbd3470a6430c21c08784db6641ac30a2b016d18375604c721947cca"
+    },
+    {
+      "route": "/areas/collierville-tn-party-game-rentals",
+      "rendered_file": "areas/collierville-tn-party-game-rentals.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "5b2106ef1eec08a03594f05626b8b3ee5b0176878e9c32d429ed319130d96369"
     },
     {
       "route": "/areas/collierville-tn-porch-decorating",
@@ -442,7 +496,7 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "0c2adcb927b4f842473345b67cdd95393bdb8f8aad3c76522751e134b9617f14"
+      "content_sha256": "ba876b32db8fe3522f95f3c1e8f165b839c13afaf4018993fd773ba91dbd2270"
     },
     {
       "route": "/areas/east-memphis-tn-porch-styling",
@@ -454,13 +508,31 @@
       "content_sha256": "e79d0ba4267f655d11604cb1bd07268ad6ba5708d6167ad7696052ca7fed7ffb"
     },
     {
+      "route": "/areas/germantown-tn-grazing-tables",
+      "rendered_file": "areas/germantown-tn-grazing-tables.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "b0b43e248be8dd16554f83eb31cfc16c7eb8b1c34309a34ab0c2f6d6b7c99cd9"
+    },
+    {
       "route": "/areas/germantown-tn-party-decor",
       "rendered_file": "areas/germantown-tn-party-decor.html",
       "status": "admitted",
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "3b1eef83a97deb66ad61598a2d089c635cdb03e3ce50c930e6e9a0e5695279f3"
+      "content_sha256": "33c5f4ce56730a030e70a3f12b552ce45755e53d94c5cd7363b6794e066783cf"
+    },
+    {
+      "route": "/areas/germantown-tn-party-game-rentals",
+      "rendered_file": "areas/germantown-tn-party-game-rentals.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "fcac9f2114fe75903ba363589b5c7263bf4de28aea917d56fbc654b22c708ea9"
     },
     {
       "route": "/areas/germantown-tn-porch-decorating",
@@ -469,7 +541,7 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "7a42b772901d2c2ec858aadf65f45e5652c8972087641669e07c9ab8129a023a"
+      "content_sha256": "0f8130c254361d9983a04c6fcca5cafadf8dedef9ebbeedb2905c385a8280808"
     },
     {
       "route": "/areas/index",
@@ -478,7 +550,16 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "9af366d980d46d5d289be2ad84a9da9984bcfcb93763fb301d4b7088969d7067"
+      "content_sha256": "e61f1be62950aca8c0c29ef315da18112a96e018f3efc935aa4762b4f266a962"
+    },
+    {
+      "route": "/areas/lakeland-tn-grazing-tables",
+      "rendered_file": "areas/lakeland-tn-grazing-tables.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "eb5ac57c328cc72bcbc724180704c636fa1d250b12bfe1b534985ff8e29cbb1e"
     },
     {
       "route": "/areas/lakeland-tn-party-decor",
@@ -487,7 +568,16 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "cb16ab05b5200b2ebc92c517d61480cbc794600d8757c03a88d8836f332a828a"
+      "content_sha256": "aefe0fb8f788503cc58a2a97f1584d2475fee5ea1edd0f4428bb04c0b071b275"
+    },
+    {
+      "route": "/areas/lakeland-tn-party-game-rentals",
+      "rendered_file": "areas/lakeland-tn-party-game-rentals.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "0b5a3c77f32bd93cf11733f00984d14e220ababe1f57eee0a4dd1724d5ec357c"
     },
     {
       "route": "/areas/lakeland-tn-porch-decorating",
@@ -496,7 +586,16 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "f217c20a5739ad80e2c2a2e70ce88ab9d318a4207bcd8a7cb439336252af7095"
+      "content_sha256": "c83cd2c382e1bfbf04ce639109642776d480a054b9139657a8a1d93ad6a695a7"
+    },
+    {
+      "route": "/areas/memphis-tn-grazing-tables",
+      "rendered_file": "areas/memphis-tn-grazing-tables.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "490d55c369a269ffc7e7f8f09adc52ea40225090f0e007f9664895e5cc53a440"
     },
     {
       "route": "/areas/memphis-tn-party-decor",
@@ -505,7 +604,16 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "f51a920e075c2f9fef72f12aa42f5381b445f3998f2b607fb68a9fd08ac0c698"
+      "content_sha256": "70e0e68bbf54a5cc0a8d58bbd7a3c0c49dd77623bbad39466c6d6bf3fe51f396"
+    },
+    {
+      "route": "/areas/memphis-tn-party-game-rentals",
+      "rendered_file": "areas/memphis-tn-party-game-rentals.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "453f7b266f791511adca7282a4beed0508637500e5ab0f4290b1f6314d365b6a"
     },
     {
       "route": "/areas/memphis-tn-porch-decorating",
@@ -514,7 +622,16 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "e4ce3926fb776156e4e430f701540e233e8f1b55455a4943a4b7fc42598b9b17"
+      "content_sha256": "7f6f0a477c017f734bc9ff828f496b6bc3d4e38cd0986727010598cd05ca3a43"
+    },
+    {
+      "route": "/areas/olive-branch-ms-grazing-tables",
+      "rendered_file": "areas/olive-branch-ms-grazing-tables.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "20dc8fa2280448ff80b620cd97d4403281cf6d0d31b61ad7528548b300045502"
     },
     {
       "route": "/areas/olive-branch-ms-party-decor",
@@ -523,7 +640,34 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "19cdfdcec2ca9ee1e22435f23b4352e0a77b269b0d69be9547922ef9073bfa07"
+      "content_sha256": "4681b27dad58c0bae3bf63166f3be852277402035233b0667e82e0462396dd88"
+    },
+    {
+      "route": "/areas/olive-branch-ms-party-game-rentals",
+      "rendered_file": "areas/olive-branch-ms-party-game-rentals.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "c09590b75fdb5412df67b221c462306a3fff25c756d29e382b7c9345792d4841"
+    },
+    {
+      "route": "/areas/olive-branch-ms-porch-decorating",
+      "rendered_file": "areas/olive-branch-ms-porch-decorating.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "b3d867d502cd2c3fffe28b82e998755c67fa8b69505141f5b85040cafa401ef9"
+    },
+    {
+      "route": "/areas/southaven-ms-grazing-tables",
+      "rendered_file": "areas/southaven-ms-grazing-tables.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "1142d040ec3d8ec18244120b990a8d97469f413cbee4a092bc1e1351639ee72d"
     },
     {
       "route": "/areas/southaven-ms-party-decor",
@@ -532,7 +676,25 @@
       "family": "areas",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "ba6db1ad6276b41baf710bd03411d7af4a4ac1c44d98dc3975fb8214a1a8162b"
+      "content_sha256": "f68779e1b833dc08cf5a6dadcc1ad0536a8fcaf84e39d128880e3b3a987088b5"
+    },
+    {
+      "route": "/areas/southaven-ms-party-game-rentals",
+      "rendered_file": "areas/southaven-ms-party-game-rentals.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "5445d56be802ad650fb4e771994ea398af042f28d7a22a66370f88116b1883ee"
+    },
+    {
+      "route": "/areas/southaven-ms-porch-decorating",
+      "rendered_file": "areas/southaven-ms-porch-decorating.html",
+      "status": "admitted",
+      "family": "areas",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "6f8626c7f82ec3bc4e987609f0af09e2626240b349db3f6282669cbaa9141950"
     },
     {
       "route": "/comparisons/balloon-garland-vs-full-birthday-setup",
