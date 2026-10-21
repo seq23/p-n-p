@@ -38,7 +38,9 @@
 
 const fs = require('fs');
 const path = require('path');
-const { normalizeHtmlUrls } = require('./lib/site_url');
+const { normalizeHtmlUrls, normalizeTextUrls } = require('./lib/site_url');
+// Public plain-text files at the site root that name site URLs (see normalizeTextUrls).
+const TEXT_FILES = ['llms.txt', 'llms-full.txt', 'llms-entities.txt', 'llms-answers.txt', 'llms-services.txt', 'robots.txt'];
 
 const ROOT = path.resolve(__dirname, '..');
 const SKIP = new Set(['node_modules', '.git', '.pages-output', '.build', 'dist', '.clarity']);
@@ -60,10 +62,16 @@ if (!files.length) {
   process.exit(1);
 }
 
+const textFiles = TEXT_FILES.map((f) => path.join(ROOT, f)).filter((f) => fs.existsSync(f));
+if (textFiles.length !== TEXT_FILES.length) {
+  console.error(`NORMALIZE PUBLIC URLS FAILED: expected ${TEXT_FILES.length} public text files, found ${textFiles.length}.`);
+  process.exit(1);
+}
+
 const changed = [];
-for (const file of files) {
+for (const file of [...files, ...textFiles]) {
   const before = fs.readFileSync(file, 'utf8');
-  const after = normalizeHtmlUrls(before);
+  const after = file.endsWith('.txt') ? normalizeTextUrls(before) : normalizeHtmlUrls(before);
   if (after === before) continue;
   changed.push(path.relative(ROOT, file));
   if (!CHECK_ONLY) fs.writeFileSync(file, after);
