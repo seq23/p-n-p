@@ -38,6 +38,7 @@ const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const brand = require(path.join(ROOT, 'scripts/lib/brand.js'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
 const faqContent = require(path.join(ROOT, 'scripts/lib/faq_content.js'));
+const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js'));
 const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
 const RENTALS_DATA = INV.resolve(require(path.join(ROOT, 'data/rentals/games.json')));
 const rentalRates = RENTALS_DATA.rates;
@@ -518,6 +519,7 @@ ${section.groups ? '' : `
 
 // --- run --------------------------------------------------------------------
 
+const RELATED_RE = /<section[^>]+data-nav="related-pages"[\s\S]*?<\/section>/i;
 const written = [];
 const skipped = [];
 const routes = [];
@@ -525,9 +527,17 @@ for (const section of SECTIONS) {
   const pages = pagesIn(section.dir);
   if (pages.length < MIN_PAGES) { skipped.push(`${section.dir} (${pages.length} pages)`); continue; }
   routes.push(`/${section.dir}/index.html`);
-  const html = render(section, section.group(pages));
   const out = path.join(ROOT, section.dir, 'index.html');
   const before = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : null;
+  // The related-pages block belongs to scripts/build_related_navigation.js, which build:all does
+  // not run, so a fresh render carries it over from disk exactly as build_area_pages.js and
+  // build_rentals_page.js do. Until 21 Oct 2026 this dropped it from every section index on each
+  // rebuild (#124 restored four by hand); validate:section-indexes-idempotent holds it.
+  // normalize_public_urls.js runs last in build:all, after site-chrome's frozen-output check, so a
+  // render in its pre-normalized form reads as drift on a frozen index; emit the final URLs here.
+  let html = normalizeHtmlUrls(render(section, section.group(pages)));
+  const related = before && before.match(RELATED_RE);
+  if (related) html = html.replace('</main>', () => `${related[0]}</main>`);
   if (before === html) { written.push(`${section.dir}/index.html (unchanged, ${pages.length} pages)`); continue; }
   if (CHECK) { console.error(`would rewrite ${section.dir}/index.html`); process.exitCode = 1; continue; }
   fs.writeFileSync(out, html);
