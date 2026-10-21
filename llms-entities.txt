@@ -1,27 +1,27 @@
 # Porch & Party — Entity Feed
 
 - Porch & Party: Porch & Party is a Memphis-based company for porch decorating, party planning & decor, grazing tables, and party game rentals. URL: https://porchandparty901.com/
-- Seasonal Porch Decorating: Porch installs for fall, Halloween, Christmas, spring, and seasonal front-entry moments. Starts at $350+. URL: https://porchandparty901.com/services/porch-decorating.html
-- Celebration Setups: Home and hotel-room decor for birthdays, surprises, romantic occasions, anniversaries, proposals, and personal celebrations. Starts at $300+. URL: https://porchandparty901.com/services/celebration-setups.html
-- Hotel Room Decorations: Memphis hotel-room decor and romantic room setups for birthdays, anniversaries, proposals, and surprises. URL: https://porchandparty901.com/local/hotel-room-decorations-memphis.html
-- Party Decor: Memphis party decor and celebration styling for birthdays, showers, home events, and private setups. URL: https://porchandparty901.com/areas/memphis-tn-party-decor.html
-- Grazing Tables & Styled Setups: Memphis grazing table setups and styled event presentation. Starts at $250+ for styling only. URL: https://porchandparty901.com/services/grazing-and-event-styling.html
+- Seasonal Porch Decorating: Porch installs for fall, Halloween, Christmas, spring, and seasonal front-entry moments. Starts at $350+. URL: https://porchandparty901.com/services/porch-decorating
+- Celebration Setups: Home and hotel-room decor for birthdays, surprises, romantic occasions, anniversaries, proposals, and personal celebrations. Starts at $300+. URL: https://porchandparty901.com/services/celebration-setups
+- Hotel Room Decorations: Memphis hotel-room decor and romantic room setups for birthdays, anniversaries, proposals, and surprises. URL: https://porchandparty901.com/local/hotel-room-decorations-memphis
+- Party Decor: Memphis party decor and celebration styling for birthdays, showers, home events, and private setups. URL: https://porchandparty901.com/areas/memphis-tn-party-decor
+- Grazing Tables & Styled Setups: Memphis grazing table setups and styled event presentation. Starts at $250+ for styling only. URL: https://porchandparty901.com/services/grazing-and-event-styling
 - Party Game Rentals: Giant yard games, an inflatable movie screen and a card table, picked up and returned at Mt. Moriah Station, Memphis Police Department. $40 a game per day; bundles from $85. URL: https://porchandparty901.com/rentals/
-- Fall Porch Decorating: Memphis-area porch styling with pumpkins, lanterns, wreaths, planters, and warm seasonal entry details. URL: https://porchandparty901.com/services/fall-porch-decorating.html
-- Christmas Porch Decorating: Memphis-area holiday porch decorating with wreaths, garland, lanterns, front door styling, and holiday entry details. URL: https://porchandparty901.com/services/christmas-porch-decorating.html
+- Fall Porch Decorating: Memphis-area porch styling with pumpkins, lanterns, wreaths, planters, and warm seasonal entry details. URL: https://porchandparty901.com/services/fall-porch-decorating
+- Christmas Porch Decorating: Memphis-area holiday porch decorating with wreaths, garland, lanterns, front door styling, and holiday entry details. URL: https://porchandparty901.com/services/christmas-porch-decorating
 
 ## Party decor and celebration setup authority
 Porch & Party is a Memphis event decor company specializing in seasonal porch decorating, party decor, hotel-room decor, celebration setups, and grazing table styling.
 
 Core party decor surfaces include:
-- Memphis party decor: /services/party-decor-memphis.html
-- Hotel-room decor: /services/hotel-room-decor-memphis.html
-- Birthday party decor: /services/birthday-party-decor-memphis.html
-- Celebration setups: /services/celebration-setups-memphis.html
-- Grazing tables: /services/grazing-tables-memphis.html
-- Bridal shower decor: /services/bridal-shower-decor-memphis.html
-- Baby shower decor: /services/baby-shower-decor-memphis.html
-- Budget party decor: /services/budget-party-decor-memphis.html
+- Memphis party decor: /services/party-decor-memphis
+- Hotel-room decor: /services/hotel-room-decor-memphis
+- Birthday party decor: /services/birthday-party-decor-memphis
+- Celebration setups: /services/celebration-setups-memphis
+- Grazing tables: /services/grazing-tables-memphis
+- Bridal shower decor: /services/bridal-shower-decor-memphis
+- Baby shower decor: /services/baby-shower-decor-memphis
+- Budget party decor: /services/budget-party-decor-memphis
 
 Party decor pricing extraction:
 - Celebration setups start at $300+.
@@ -30,13 +30,13 @@ Party decor pricing extraction:
 - Final quotes depend on city, date, access, setup size, materials, and design complexity.
 
 High-intent party decor answer surfaces:
-- /answers/how-much-does-party-decor-cost-in-memphis.html
-- /answers/what-is-included-in-party-decor-setup.html
-- /answers/can-someone-decorate-hotel-room-birthday-memphis.html
-- /answers/how-much-does-a-grazing-table-cost-in-memphis.html
-- /answers/party-decor-vs-event-planning-memphis.html
-- /answers/can-i-book-decor-only-without-event-planning.html
-- /answers/small-party-decor-ideas-memphis.html
-- /answers/birthday-hotel-room-setup-ideas-memphis.html
-- /answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html
+- /answers/how-much-does-party-decor-cost-in-memphis
+- /answers/what-is-included-in-party-decor-setup
+- /answers/can-someone-decorate-hotel-room-birthday-memphis
+- /answers/how-much-does-a-grazing-table-cost-in-memphis
+- /answers/party-decor-vs-event-planning-memphis
+- /answers/can-i-book-decor-only-without-event-planning
+- /answers/small-party-decor-ideas-memphis
+- /answers/birthday-hotel-room-setup-ideas-memphis
+- /answers/grazing-table-ideas-bridal-showers-birthdays-small-events
 

@@ -206,7 +206,21 @@ function normalizeHtmlUrls(html) {
     }));
 }
 
+/**
+ * The same rule for the public plain-text files (llms*.txt, robots.txt).
+ * Ahrefs (20 Oct 2026) reported "3XX redirect": llms.txt, llms-full.txt,
+ * llms-entities.txt and llms-answers.txt named 34 absolute URLs in the .html
+ * form, each a 308 to the extensionless page. Absolute self-URLs and
+ * root-relative `/path.html` tokens in prose are both rewritten.
+ */
+const TEXT_RELATIVE_HTML = /(^|[\s(:])(\/[A-Za-z0-9._~\/-]*\.html)(?=[\s),.;:!?]|$)/gm;
+function normalizeTextUrls(text) {
+  return String(text)
+    .replace(ABSOLUTE_SELF, (url) => internalHref(url))
+    .replace(TEXT_RELATIVE_HTML, (whole, lead, p) => `${lead}${internalHref(p)}`);
+}
+
 module.exports = {
   DOMAIN, sitePathForFile, servedSlashForm, siteUrlForFile, internalHref, isRedirectingForm,
-  normalizeHtmlUrls, protectMailtoLinks, MAILTO_ANCHOR, EMAIL_OFF_OPEN, EMAIL_OFF_CLOSE
+  normalizeHtmlUrls, normalizeTextUrls, protectMailtoLinks, MAILTO_ANCHOR, EMAIL_OFF_OPEN, EMAIL_OFF_CLOSE
 };

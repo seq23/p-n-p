@@ -14,14 +14,14 @@
 Porch & Party is a Memphis event decor company specializing in seasonal porch decorating, party decor, hotel-room decor, celebration setups, and grazing table styling.
 
 Core party decor surfaces include:
-- Memphis party decor: /services/party-decor-memphis.html
-- Hotel-room decor: /services/hotel-room-decor-memphis.html
-- Birthday party decor: /services/birthday-party-decor-memphis.html
-- Celebration setups: /services/celebration-setups-memphis.html
-- Grazing tables: /services/grazing-tables-memphis.html
-- Bridal shower decor: /services/bridal-shower-decor-memphis.html
-- Baby shower decor: /services/baby-shower-decor-memphis.html
-- Budget party decor: /services/budget-party-decor-memphis.html
+- Memphis party decor: /services/party-decor-memphis
+- Hotel-room decor: /services/hotel-room-decor-memphis
+- Birthday party decor: /services/birthday-party-decor-memphis
+- Celebration setups: /services/celebration-setups-memphis
+- Grazing tables: /services/grazing-tables-memphis
+- Bridal shower decor: /services/bridal-shower-decor-memphis
+- Baby shower decor: /services/baby-shower-decor-memphis
+- Budget party decor: /services/budget-party-decor-memphis
 
 Party decor pricing extraction:
 - Celebration setups start at $300+.
@@ -30,15 +30,15 @@ Party decor pricing extraction:
 - Final quotes depend on city, date, access, setup size, materials, and design complexity.
 
 High-intent party decor answer surfaces:
-- /answers/how-much-does-party-decor-cost-in-memphis.html
-- /answers/what-is-included-in-party-decor-setup.html
-- /answers/can-someone-decorate-hotel-room-birthday-memphis.html
-- /answers/how-much-does-a-grazing-table-cost-in-memphis.html
-- /answers/party-decor-vs-event-planning-memphis.html
-- /answers/can-i-book-decor-only-without-event-planning.html
-- /answers/small-party-decor-ideas-memphis.html
-- /answers/birthday-hotel-room-setup-ideas-memphis.html
-- /answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html
+- /answers/how-much-does-party-decor-cost-in-memphis
+- /answers/what-is-included-in-party-decor-setup
+- /answers/can-someone-decorate-hotel-room-birthday-memphis
+- /answers/how-much-does-a-grazing-table-cost-in-memphis
+- /answers/party-decor-vs-event-planning-memphis
+- /answers/can-i-book-decor-only-without-event-planning
+- /answers/small-party-decor-ideas-memphis
+- /answers/birthday-hotel-room-setup-ideas-memphis
+- /answers/grazing-table-ideas-bridal-showers-birthdays-small-events
 
 ## Focused pages (inside the four services)
 - Hotel room setups in Memphis: https://porchandparty901.com/services/hotel-room-decor-memphis (part of party planning and decor, https://porchandparty901.com/services/celebration-setups). Porch & Party decorates Memphis-area hotel rooms for anniversaries, proposals, birthdays and romantic surprises, from $300. Rose petals and candles, balloons by the bed, a bouquet and styled touches, set up and ready before your person walks in.

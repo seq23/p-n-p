@@ -97,7 +97,7 @@ if (credentials.length) {
 // two 5 MB celebration PNGs as "Image too large"; they were re-encoded as JPEG
 // at 1600px. Fail the build rather than publish a multi-megabyte image again.
 const IMAGE_EXT = /\.(png|jpe?g|webp|avif|gif|svg|ico|bmp|tiff?)$/i;
-const IMAGE_MAX_BYTES = 500 * 1024;
+const IMAGE_MAX_BYTES = 350 * 1024; // lowered from 500 KB on 2026-10-21 after re-encoding the nine 300-480 KB JPEGs (Ahrefs "Slow page")
 const heavy = [];
 let imagesChecked = 0;
 (function scanImages(dir) {
@@ -173,6 +173,44 @@ if (stampedRefs === 0 || !/\/assets\/css\/styles\.css\?v=[0-9a-f]{10}/.test(home
   process.exit(1);
 }
 
+// Below-the-fold images load lazily. Ahrefs (20 Oct 2026) flagged "Slow page"
+// on four pages; the homepage shipped seven eager images (2.2 MB) and every
+// page's later images competed with the first paint. The published copy gets
+// loading="lazy" decoding="async" on every <img> after the first one in the
+// page that does not already choose a loading mode; the first image (the hero)
+// stays eager. Source HTML is untouched, like the asset versioning above.
+const IMG_TAG = /<img\b[^>]*>/gi;
+let lazyImgs = 0;
+let imgsSeen = 0;
+const eagerLeft = [];
+(function lazy(dir) {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) { lazy(full); continue; }
+    if (!entry.name.endsWith('.html')) continue;
+    const html = fs.readFileSync(full, 'utf8');
+    let n = 0;
+    const out = html.replace(IMG_TAG, (tag) => {
+      imgsSeen += 1;
+      if (n++ === 0 || /\bloading=/i.test(tag)) return tag;
+      lazyImgs += 1;
+      const add = ' loading="lazy"' + (/\bdecoding=/i.test(tag) ? '' : ' decoding="async"');
+      return tag.replace(/\s*\/?>$/, (end) => add + end);
+    });
+    if (out !== html) fs.writeFileSync(full, out);
+    let k = 0;
+    for (const tag of out.match(IMG_TAG) || []) if (k++ > 0 && !/\bloading=/i.test(tag)) eagerLeft.push(path.relative(dist, full));
+  }
+})(dist);
+if (imgsSeen === 0) {
+  console.error('assemble: no <img> found in dist pages; the lazy-loading step reached nothing');
+  process.exit(1);
+}
+if (eagerLeft.length) {
+  console.error(`assemble: ${eagerLeft.length} below-the-fold image(s) still load eagerly, e.g. ${eagerLeft.slice(0, 5).join(', ')}`);
+  process.exit(1);
+}
+
 const leaked = ['README.md', 'package.json', 'AGENTS.md', 'package-lock.json']
   .filter((f) => fs.existsSync(path.join(dist, f)));
 if (leaked.length) {
@@ -180,4 +218,4 @@ if (leaked.length) {
   process.exit(1);
 }
 
-console.log(`assemble: ${copied} files into .pages-output/ (sitemap URLs verified; ${stampedRefs} asset URLs versioned in ${stampedFiles} pages)`);
+console.log(`assemble: ${copied} files into .pages-output/ (sitemap URLs verified; ${stampedRefs} asset URLs versioned in ${stampedFiles} pages; ${lazyImgs} below-the-fold images set to lazy)`);
