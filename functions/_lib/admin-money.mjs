@@ -81,7 +81,13 @@ export async function moneyDetail(env, url) {
   const all = url.searchParams.get('view') === 'all';
   const what = String(url.searchParams.get('what') || 'received');
   const data = await moneyData(env.DB);
-  return htmlResponse(VM.detailPage({ month, all, what, t: M.periodTotals(data, all ? '' : month), byInv: data.byInv, back: String(url.searchParams.get('back') || '') }));
+  const includeDeposits = url.searchParams.get('deposits') === 'in';
+  let owedRows = null;
+  if (what === 'owed') {
+    const rows = await moneyJobs(env, data, await loadRequests(env).catch(() => []));
+    owedRows = M.moneySummary(data, rows, { view: all ? 'all' : 'month', month, includeDeposits, today: chicagoDate() }).owedRows;
+  }
+  return htmlResponse(VM.detailPage({ month, all, what, t: M.periodTotals(data, all ? '' : month), byInv: data.byInv, back: String(url.searchParams.get('back') || ''), owedRows, includeDeposits }));
 }
 
 export async function yearPage(env, url) {

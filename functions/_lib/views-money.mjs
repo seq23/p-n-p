@@ -6,7 +6,7 @@ import { serviceBadge } from './cards.mjs';
 import { smsLink } from './reminders.mjs';
 import { render } from './messages.mjs';
 import { layout, act, confirmStep, hiddenInputs, BACK_REQUESTS, CARD_CSS } from './views.mjs';
-import { CATEGORY_KEYS, CATEGORY_LABELS, METHOD_LABELS, FOOTER, TIP_METHODS } from './money.mjs';
+import { CATEGORY_KEYS, CATEGORY_LABELS, METHOD_LABELS, FOOTER, TIP_METHODS, counted, rowOwed } from './money.mjs';
 import { KIND_LABELS } from './kinds.mjs';
 import { LOW_CONFIDENCE } from './expenses.mjs';
 
@@ -141,18 +141,21 @@ const chips = (services) => services.map((k) => { const b = serviceBadge(k); ret
 
 // One job: name, service chip, date, total, paid, still owed, tips. Unconfirmed: dashed and
 // grey, "Not confirmed", and what it would bring in ("Expected if confirmed"), never "paid".
+// A sent invoice is owed money whether or not the job is confirmed (money.mjs counted): its row
+// always shows Total / Paid / Still owed, with "Not confirmed" beside the name if it is not.
 export function jobRow(r, { includeDeposits = false } = {}) {
   const total = r.charges + (includeDeposits ? r.refundable : 0);
   const paid = r.paidCharges + (includeDeposits ? r.paidDeposit : 0);
   // Total - Paid = Still owed on every row (ledger.mjs balanceOf numbers, via money.mjs jobRows).
-  const owed = r.owed + (includeDeposits ? (r.depositOwed || 0) : 0);
+  const owed = rowOwed(r, includeDeposits);
+  const shows = counted(r);
   const amt = (v, cls = '') => `<dd class="${v ? cls : 'zero'}">${esc(money(v))}</dd>`;
   const name = r.invoiceId ? `<a href="/admin/invoices/${r.invoiceId}"${tip('mon.jobOpen')}>${esc(r.name)}</a>` : (r.date ? `<a href="/admin/day/${esc(r.date)}"${tip('mon.jobDay')}>${esc(r.name)}</a>` : `<strong>${esc(r.name)}</strong>`);
-  const nums = r.confirmed
+  const nums = shows
     ? `<dl class="jn"><div><dt>Total</dt><dd data-job-total>${esc(money(total))}</dd></div><div><dt>Paid</dt>${amt(paid)}</div><div><dt>Still owed</dt>${amt(owed, 'owe')}</div><div><dt>Tips</dt>${amt(r.tips)}</div></dl>`
     : `<dl class="jn"><div style="grid-column:span 2"><dt>Expected if confirmed</dt><dd data-job-expected>${r.hasPrice ? esc(money(r.expected)) : 'No price yet'}</dd></div><div><dt>Tips</dt>${amt(r.tips)}</div></dl>`;
   const dep = includeDeposits && r.refundable ? `<div class="dep" data-job-deposit>Total includes ${esc(money(r.refundable))} deposit (given back later)</div>` : '';
-  return `<li class="job${r.confirmed ? '' : ' unconf'}" data-job data-confirmed="${r.confirmed ? 1 : 0}" data-job-key="${esc(r.key)}">
+  return `<li class="job${shows ? '' : ' unconf'}" data-job data-confirmed="${r.confirmed ? 1 : 0}" data-billed="${r.billed ? 1 : 0}" data-job-key="${esc(r.key)}">
     <div class="jt">${name}${chips(r.services)}${r.confirmed ? '' : '<span class="nc" data-not-confirmed>Not confirmed</span>'}</div>
     <div class="jd">${esc(dayWords(r.date))}${r.number ? ` · ${esc(r.number)}` : ''}</div>${nums}${dep}</li>`;
 }
@@ -161,7 +164,7 @@ export function moneyPage({ month, year, state, today = '', requestsThisMonth = 
   const here = moneyHref(state);
   const back = encodeURIComponent(here);
   const all = state.view === 'all';
-  const detail = (what) => `/admin/money/detail?${all ? 'view=all&amp;' : ''}month=${month}&amp;what=${encodeURIComponent(what)}&amp;back=${back}`;
+  const detail = (what) => `/admin/money/detail?${all ? 'view=all&amp;' : ''}month=${month}&amp;what=${encodeURIComponent(what)}${state.includeDeposits ? '&amp;deposits=in' : ''}&amp;back=${back}`;
   const fig = (what, label, value, sub = '', cls = '') => `<a class="fig${cls ? ` ${cls}` : ''}" href="${detail(what)}"${tip('mon.total')}><span class="fl">${esc(label)}</span><span class="fv" data-total="${esc(what)}">${esc(value)}</span>${sub ? `<span class="fs">${esc(sub)}</span>` : ''}</a>`;
   const depSub = sum.includeDeposits ? (sum.depositsIn ? `includes ${money(sum.depositsIn)} deposit (given back later)` : '') : (sum.depositsIn ? `leaves out ${money(sum.depositsIn)} of damage deposits` : '');
   const thisMonth = today.slice(0, 7);
@@ -191,7 +194,7 @@ export function moneyPage({ month, year, state, today = '', requestsThisMonth = 
     </section>
     <section class="figs" data-money-summary>
       ${fig('received', all ? 'Money in (all time)' : 'Money in', money(sum.moneyIn), depSub, 'main')}
-      ${fig('owed', 'Still owed', money(sum.owed), all ? 'on booked jobs' : 'on this month\'s booked jobs', 'owe')}
+      ${fig('owed', 'Still owed', money(sum.owed), `${all ? 'on sent invoices' : 'on this month\'s sent invoices'}${sum.depositOwed ? ` · includes ${money(sum.depositOwed)} refundable deposit` : ''}`, 'owe')}
       ${fig('tips', 'Tips', money(sum.tips), 'on top of invoices')}
       ${fig('expenses', 'Expenses', money(sum.expenses), '', 'exp')}
       <div class="fig" data-left><span class="fl">Left after expenses</span><span class="fv">${esc(money(sum.left))}</span><span class="fs">money in + tips − expenses (not profit or tax)</span></div>
@@ -254,11 +257,14 @@ export function tipForm({ tip: x, jobs = [], picked = '', jobValue, back = '/adm
   { screen: 'tip', back: { href: back, label: 'Back to Money' } });
 }
 
-export function detailPage({ month, what, t, byInv, all = false, back = '' }) {
+export function detailPage({ month, what, t, byInv, all = false, back = '', owedRows = null, includeDeposits = false }) {
   let title = ''; let rows = '';
   const payRow = (p) => { const x = byInv[p.invoice_id]; return `<tr><td>${esc(shortDate(p.received_on))} · ${esc(x ? x.inv.customer_name : '')} <span class="muted">${esc(x ? x.inv.number : '')}</span><div class="muted">${esc(p.kind === 'payment' ? (METHOD_LABELS[p.method] || p.method || 'Not recorded') : p.note)}</div></td><td class="amt">${esc(money(p.amount_cents))}</td></tr>`; };
   if (what === 'received') { title = 'Money received'; rows = t.payments.filter((p) => p.kind === 'payment').map(payRow).join(''); }
   else if (what === 'deposits') { title = 'Damage deposits'; rows = t.payments.filter((p) => p.deposit > 0 || p.kind !== 'payment').map(payRow).join(''); }
+  // The same rows the Still owed figure adds up (money.mjs moneySummary owedRows): every sent
+  // invoice still owing, confirmed or not.
+  else if (what === 'owed' && owedRows) { title = all ? 'Still owed on sent invoices' : "Still owed for this month's jobs"; rows = owedRows.map((r) => `<tr data-owed-row><td>${r.invoiceId ? `<a href="/admin/invoices/${r.invoiceId}"${tip('card.openInvoice')}>${esc(r.name)}</a>` : esc(r.name)}${r.date ? ` · ${esc(shortDate(r.date))}` : ''}${r.number ? ` <span class="muted">${esc(r.number)}</span>` : ''}</td><td class="amt">${esc(money(rowOwed(r, includeDeposits)))}</td></tr>`).join(''); }
   else if (what === 'owed') { title = "Still owed for this month's jobs"; rows = t.owedList.map((o) => `<tr><td><a href="/admin/invoices/${o.invoice.id}"${tip('card.openInvoice')}>${esc(o.invoice.customer_name)}</a> · ${esc(KIND_LABELS[o.booking.kind])} ${esc(shortDate(o.booking.date))}</td><td class="amt">${esc(money(o.owed))}</td></tr>`).join(''); }
   else if (what === 'jobs') { title = 'Jobs this month'; rows = t.jobList.map((b) => `<tr><td><a href="/admin/day/${esc(b.date)}"${tip('cal.day')}>${esc(shortDate(b.date))}</a> · ${esc(KIND_LABELS[b.kind])} · ${esc(b.customer_name)}</td><td></td></tr>`).join(''); }
   else if (what === 'tips') { title = 'Tips'; rows = t.tipList.map((x) => `<tr><td><a href="/admin/money/tips/${x.id}"${tip('tip.open')}>${esc(shortDate(x.date))} · ${esc(TIP_METHODS[x.method] || 'Other')}</a>${x.job_label ? `<div class="muted">${esc(x.job_label)}</div>` : ''}</td><td class="amt">${esc(money(x.amount_cents))}</td></tr>`).join(''); }
