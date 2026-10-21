@@ -24,7 +24,8 @@
  *     data-config, and the food line says it is a separate rough estimate;
  *   - the travel answer names every city in areas.json and the $75 fee;
  *   - rentals/index.html links /faq/#rentals above its questions and has
- *     the hero and under-the-bundles buttons read "Book your games" and open
+ *     the hero button reads "Book online" (owner ruling 2026-10-21) and the under-the-bundles
+ *     button "Book your games", and both open
  *     the booking form's rentals path (owner, 2026-10-18; were "Check My Date");
  *   - the homepage links /faq/ from its FAQ block.
  * Navigation pass (owner-approved 2026-10-17):
@@ -206,9 +207,9 @@ function checkFaqPage(html) {
 function checkOtherPages() {
   const r = read('rentals/index.html');
   if (!/<a href="\/faq\/#rentals">FAQ page<\/a>/.test(r)) fail('rentals/index.html: no link to /faq/#rentals above its questions');
-  for (const where of ['rentals-top', 'rentals-bundles']) {
-    if (!r.includes(`<a href="/request?service=rentals" class="btn-primary" data-quote-cta="${where}">Book your games</a>`)) fail(`rentals/index.html: the ${where === 'rentals-top' ? 'hero' : 'under-the-bundles'} button is not "Book your games" opening /request?service=rentals`);
-  }
+  // Owner ruling 2026-10-21: the hero button reads "Book online"; under the bundles it stays "Book your games".
+  if (!r.includes('<a href="/request?service=rentals" class="btn-primary btn-book" data-quote-cta="rentals-top" data-book-online="hero">Book online</a>')) fail('rentals/index.html: the hero button is not "Book online" opening /request?service=rentals');
+  if (!r.includes('<a href="/request?service=rentals" class="btn-primary" data-quote-cta="rentals-bundles">Book your games</a>')) fail('rentals/index.html: the under-the-bundles button is not "Book your games" opening /request?service=rentals');
   if (/Check My Date/.test(r)) fail('rentals/index.html still says "Check My Date"');
   const home = read('index.html');
   if (!/<a href="\/faq\/">FAQ page<\/a>/.test(home)) fail('index.html: FAQ block does not link the FAQ page');

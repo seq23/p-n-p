@@ -40,7 +40,7 @@ const ROOT = path.resolve(__dirname, '../..');
 const RULED = [
   ['/services/porch-decorating', 'Porch'],
   ['/services/celebration-setups', 'Celebrations'],
-  ['/services/grazing-and-event-styling', 'Grazing & Events'],
+  ['/services/grazing-and-event-styling', 'Grazing Tables'],
   ['/rentals/', 'Rentals'],
   ['/pricing', 'Pricing'],
   ['/how-it-works', 'How It Works'],
@@ -83,13 +83,19 @@ function checkPage(html, rel) {
   }
   const actions = (h.match(/<div class="pnp-actions">([\s\S]*?)<\/div>/) || [])[1] || '';
   const act = links(actions);
-  if (!(act.length === 2 && act[0].href === FORM && !newTab(act[0].attrs) && act[0].label === 'Request a Quote' && act[1].href === TEL && act[1].label === 'Call or text 901-355-1518')) errs.push(`${rel}: header actions are not [Request a Quote (${FORM}, same tab), Call or text 901-355-1518 (tel:)]`);
+  if (!(act.length === 2 && act[0].href === FORM && !newTab(act[0].attrs) && act[0].label === 'Book online' && act[1].href === TEL && act[1].label === 'Call or text 901-355-1518')) errs.push(`${rel}: header actions are not [Book online (${FORM}, same tab), Call or text 901-355-1518 (tel:)]`);
   const panel = (h.match(/<div class="pnp-panel" id="site-menu">([\s\S]*?)<\/div>/) || [])[1];
   if (!panel) errs.push(`${rel}: no mobile panel #site-menu`);
   else {
     const after = links(panel.replace(/<nav[\s\S]*?<\/nav>/, ''));
-    if (!after.some((l) => l.href === FORM && !newTab(l.attrs) && l.label === 'Request a Quote')) errs.push(`${rel}: mobile panel lacks Request a Quote opening ${FORM}`);
+    if (!after.some((l) => l.href === FORM && !newTab(l.attrs) && l.label === 'Book online')) errs.push(`${rel}: mobile panel lacks Book online opening ${FORM}`);
     if (!after.some((l) => l.href === TEL && l.label === 'Call or text 901-355-1518')) errs.push(`${rel}: mobile panel lacks the phone line`);
+  }
+  // Owner ruling 2026-10-21: Book online is visible on phones too, in the header row itself.
+  {
+    const row = (h.match(/<div class="pnp-header-inner">([\s\S]*?)<div class="pnp-panel"/) || [])[1] || '';
+    const phone = links(row.replace(/<nav[\s\S]*?<\/nav>/, '').replace(/<div class="pnp-actions">[\s\S]*?<\/div>/, '')).filter((l) => l.href === FORM && l.label === 'Book online' && /class="pnp-book-m"/.test(l.attrs));
+    if (phone.length !== 1) errs.push(`${rel}: header row has ${phone.length} phone-width Book online button(s), want exactly 1`);
   }
   if (!/<button type="button" class="pnp-toggle" aria-expanded="false" aria-controls="site-menu"/.test(h)) errs.push(`${rel}: hamburger <button> lacks aria-expanded/aria-controls`);
   if (!/<a href="#site-menu" class="pnp-toggle"/.test(h)) errs.push(`${rel}: no no-JS :target fallback for the menu`);
@@ -128,6 +134,7 @@ const broken = {
   'header quote back on /contact': sample.replace(`<a href="${FORM}" class="btn-primary pnp-quote">`, '<a href="/contact" class="btn-primary pnp-quote">'),
   'an in-body quote CTA on /contact': sample.replace('</main>', '<a href="/contact.html" class="btn-primary">Request a Quote</a></main>'),
   'a link to the retired Google Form': sample.replace('</main>', '<a href="https://forms.gle/vHjfKtRRAnGV3HxFA" class="btn-primary">Check My Date</a></main>'),
+  'no phone-width Book online': sample.replace(`<a href="${FORM}" class="pnp-book-m">Book online</a>`, ''),
   'the request form opening a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary" target="_blank" rel="noopener">Request a Quote</a></main>`)
 };
 for (const [what, html] of Object.entries(broken)) {
@@ -137,6 +144,13 @@ for (const [what, html] of Object.entries(broken)) {
 
 // ---- every published page
 if (!fs.existsSync(path.join(ROOT, chrome.CSS_HREF.replace(/^\//, '')))) errors.push(`${chrome.CSS_HREF} does not exist`);
+else {
+  // The phone-width Book online button is shown below 1024px and hidden only from 1024px up.
+  const css = fs.readFileSync(path.join(ROOT, chrome.CSS_HREF.replace(/^\//, '')), 'utf8');
+  const base = css.replace(/@media[^{]*\{(?:[^{}]*\{[^}]*\})*[^{}]*\}/g, '');
+  if (!/\.pnp-header \.pnp-book-m \{[^}]*display: inline-flex/.test(base)) errors.push(`${chrome.CSS_HREF}: .pnp-book-m is not displayed at phone width (owner ruling 2026-10-21)`);
+  if (/\.pnp-book-m[^{]*\{[^}]*display: none/.test(base)) errors.push(`${chrome.CSS_HREF}: .pnp-book-m is hidden outside a desktop media query`);
+}
 const pages = publishedPages();
 if (!pages.length) errors.push('found 0 published pages');
 for (const rel of pages) errors.push(...checkPage(fs.readFileSync(path.join(ROOT, rel), 'utf8'), rel));
@@ -147,4 +161,4 @@ if (errors.length) {
   console.error('  repair: npm run chrome:install');
   process.exit(1);
 }
-console.log(`site-chrome: OK - ${pages.length} pages carry the identical header (${RULED.map((r) => r[1]).join(' · ')} + Request a Quote -> ${FORM} + Call or text), the mobile menu, ${chrome.CSS_HREF}, and the footer Rentals link; no quote CTA links /contact, every form link opens in a new tab; self-test rejected ${Object.keys(broken).length} broken fixtures`);
+console.log(`site-chrome: OK - ${pages.length} pages carry the identical header (${RULED.map((r) => r[1]).join(' · ')} + Book online -> ${FORM} (phone width too) + Call or text), the mobile menu, ${chrome.CSS_HREF}, and the footer Rentals link; no quote CTA links /contact, every form link opens in a new tab; self-test rejected ${Object.keys(broken).length} broken fixtures`);

@@ -23,7 +23,7 @@
  *     keeps the unpriced "available for an additional fee" wording, and the
  *     rentals page never offers it (rentals have no takedown; the renter returns them).
  *
- *   - owner rulings 2026-10-15 / 2026-10-18: every page's header Request a Quote links
+ *   - owner rulings 2026-10-15 / 2026-10-18 / 2026-10-21: every page's header Book online (was Request a Quote) links
  *     services.json quoteUrl (/request, the site's own form, same tab), never /contact;
  *     no quote CTA on any page links /contact (it is linked only as "Contact");
  *     contact.html keeps its own form button.
@@ -84,9 +84,9 @@ for (const rel of pages) {
   if (!(footer.includes(MARK.footerRoute) && footer.includes(routeHref))) fail(`${rel}: footer lacks the ${PRIMARY_ROUTE.footerLabel} link`);
   // Quote CTAs open the form directly (owner ruling 2026-10-15).
   if (header) {
-    const q = [...header.matchAll(/<a\b([^>]*)>Request a Quote<\/a>/g)].map((m) => m[1]);
+    const q = [...header.matchAll(/<a\b([^>]*)>Book online<\/a>/g)].map((m) => m[1]);
     if (QUOTE_URL !== '/request') fail(`services.json quoteUrl is ${QUOTE_URL}, expected /request (owner ruling 2026-10-18)`);
-    if (q.length !== 2 || !q.every((a) => a.includes(`href="${QUOTE_URL}"`) && !a.includes('target="_blank"'))) fail(`${rel}: header Request a Quote (desktop + mobile, ${q.length} found) does not open ${QUOTE_URL} in the same tab`);
+    if (q.length !== 3 || !q.every((a) => a.includes(`href="${QUOTE_URL}"`) && !a.includes('target="_blank"'))) fail(`${rel}: header Book online (desktop + phone row + menu, ${q.length} found) does not open ${QUOTE_URL} in the same tab`);
   }
   for (const m of html.matchAll(/<a\b[^>]*href="\/contact(?:\.html)?"[^>]*>([\s\S]*?)<\/a>/g)) {
     if (m[1].replace(/<[^>]+>/g, '').trim() !== 'Contact') fail(`${rel}: quote CTA "${m[1].replace(/<[^>]+>/g, '').trim()}" links /contact instead of ${QUOTE_URL}`);

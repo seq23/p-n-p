@@ -86,7 +86,8 @@ must(!/forms\.gle/.test(page) && !/forms\.gle/.test(rules), 'request.html or rul
   const left = files.filter((f) => /forms\.gle|docs\.google\.com\/forms/.test(fs.readFileSync(f, 'utf8')));
   must(files.length > 100 && !left.length, `published files still link the Google Form: ${left.slice(0, 5).map((f) => path.relative(ROOT, f)).join(', ')}`);
   const rentalsPage = fs.readFileSync(path.join(ROOT, 'rentals/index.html'), 'utf8');
-  must((rentalsPage.match(/href="\/request\?service=rentals"[^>]*>Book your games<\/a>/g) || []).length >= 4, 'the rentals page buttons do not read "Book your games" and open the rentals path');
+  // Owner ruling 2026-10-21: the hero and after-FAQ buttons read "Book online"; the bundle, steps and form buttons keep "Book your games". All open the rentals path.
+  must((rentalsPage.match(/href="\/request\?service=rentals"[^>]*>Book your games<\/a>/g) || []).length >= 3 && (rentalsPage.match(/href="\/request\?service=rentals"[^>]*data-book-online="(?:hero|after-faq)">Book online<\/a>/g) || []).length === 2, 'the rentals page buttons do not read "Book online" (hero + after FAQ) and "Book your games" (3+), all opening the rentals path');
   must(/<a href="\/rules">Rules &amp; Responsibilities<\/a>/.test(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8')), 'the footer legal links lack Rules & Responsibilities');
 }
 for (const id of ['everyone', 'rentals', 'porch', 'party', 'grazing', 'photo-id']) must(rules.includes(`<h2 id="${id}">`), `rules.html lacks the ${id} section`);

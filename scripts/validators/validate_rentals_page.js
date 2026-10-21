@@ -348,7 +348,7 @@ for (const f of ['llms.txt', 'llms-full.txt', 'llms-services.txt']) {
   for (const n of [`${money(R.day)} per game per day`, `${money(R.weekend)} per game for a weekend`, ...BUNDLES.map((b) => money(b.dayPrice)), `${money(data.damageDeposit)} damage deposit`, V3.address])
     if (!sec.includes(n)) errors.push(`${f} rentals section does not quote ${n}`);
 }
-if (onDisk && (/forms\.gle/.test(onDisk) || (onDisk.match(/>Book your games<\/a>/g) || []).length < 4 || /Check My Date/.test(onDisk))) errors.push('rentals/index.html still links the Google Form, or its buttons do not read "Book your games"');
+if (onDisk && (/forms\.gle/.test(onDisk) || (onDisk.match(/>Book your games<\/a>/g) || []).length < 3 || (onDisk.match(/data-book-online="(?:hero|after-faq)">Book online<\/a>/g) || []).length !== 2 || /Check My Date/.test(onDisk))) errors.push('rentals/index.html still links the Google Form, or its buttons do not read "Book online" (hero + after FAQ, owner ruling 2026-10-21) and "Book your games" (3+)');
 // ---- The projector, on request (owner, 18 Oct 2026) ------------------------------------
 const PROJ_LINE = 'Need a projector? We can include one, just ask when you book. Bring your own speaker; it needs a plug within 50 ft.';
 const PROJ_Q = 'Do you have a projector?';
