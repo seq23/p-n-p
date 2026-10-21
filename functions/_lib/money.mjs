@@ -141,6 +141,12 @@ export function periodTotals(data, prefix) {
 // first, then the charges (ledger.mjs splitPayment, the one split). Still owed is charges minus
 // paid charges (plus the deposit not collected yet only when "Leave out refundable deposits" is
 // off, so Total - Paid = Still owed on every row) and never a tip. confirmed follows steps.mjs (unconfirmed: a Set of request keys from unconfirmedKeys).
+// billed: the job's invoice has been SENT (not a draft, not void). Still owed is every billed
+// invoice's balance whether or not the job is confirmed (owner, 21 Oct 2026: a sent invoice is
+// owed money, the same number Not paid yet and the 7 AM email show), so a billed row always
+// shows and counts. Put away (request_status.archived_at) with nothing sent and nothing in
+// (no payment, no tip) is not a job on Money: no row, no totals. Put away and billed, or put
+// away with money in, still shows.
 export function jobRows(data, { requests = [], unconfirmed = new Set() } = {}) {
   const st = Object.fromEntries((data.statuses || []).map((s) => [s.request_key, s]));
   const voidKey = (k) => Boolean(k && st[k] && st[k].status === 'void');
@@ -162,6 +168,7 @@ export function jobRows(data, { requests = [], unconfirmed = new Set() } = {}) {
   for (const g of groups.values()) {
     const x = g.invoiceId ? data.byInv[g.invoiceId] : null;
     if (x && x.inv.status === 'void') continue;
+    const billed = Boolean(x && x.inv.status !== 'draft');
     const r = g.requestKey ? reqBy[g.requestKey] : null;
     const first = g.bookings.slice().sort((a, b) => String(a.date).localeCompare(String(b.date)))[0] || null;
     const services = [...new Set([...g.bookings.map((b) => serviceOfKind(b.kind)), ...((r && r.services) || []), ...(x ? Object.keys(x.cats) : [])])].filter((k) => k && k !== 'other');
@@ -171,25 +178,33 @@ export function jobRows(data, { requests = [], unconfirmed = new Set() } = {}) {
     const paidDeposit = pays.reduce((n, p) => n + p.deposit, 0);
     const tips = (data.tips || []).filter((t) => (g.requestKey && t.request_key === g.requestKey) || (x && t.invoice_id === x.inv.id));
     const confirmed = !(g.requestKey && unconfirmed.has(g.requestKey));
+    const putAway = Boolean(g.requestKey && st[g.requestKey] && st[g.requestKey].archived_at);
+    if (putAway && !billed && !pays.length && !tips.length) continue;
     const charges = x ? x.charges : 0;
     rows.push({
       key: g.id, requestKey: g.requestKey, invoiceId: x ? x.inv.id : null, number: x ? x.inv.number : '',
       name: (x && x.inv.customer_name) || (r && r.name) || (first && first.customer_name) || 'No name',
-      services: services.length ? services : ['other'], date, confirmed, hasPrice: Boolean(x),
+      services: services.length ? services : ['other'], date, confirmed, billed, putAway, hasPrice: Boolean(x),
       charges, refundable: x ? x.refundable : 0, paidCharges, paidDeposit,
-      owed: confirmed && !(x && x.inv.status === 'draft') ? Math.max(0, charges - paidCharges) : 0,
-      depositOwed: confirmed && x && x.inv.status !== 'draft' ? Math.max(0, x.refundable - paidDeposit) : 0,
-      expected: confirmed ? 0 : charges,
+      owed: billed ? Math.max(0, charges - paidCharges) : 0,
+      depositOwed: billed ? Math.max(0, x.refundable - paidDeposit) : 0,
+      expected: confirmed || billed || putAway ? 0 : charges,
       tips: tips.reduce((n, t) => n + t.amount_cents, 0), tipCount: tips.length,
     });
   }
   return rows;
 }
 
-// The rows a view shows. view 'month' (with month 'YYYY-MM') or 'all'. Unconfirmed rows only
-// when includeUnconfirmed. 'all' is grouped: upcoming (nearest first) then past (newest first).
+// A row that counts in Money's numbers: confirmed, or billed (a sent invoice is owed money).
+export const counted = (r) => Boolean(r.confirmed || r.billed);
+// What a row says is still owed: charges, plus the damage deposit not collected yet only when
+// deposits are counted (so Total - Paid = Still owed on the row, and the summary is their sum).
+export const rowOwed = (r, includeDeposits = false) => (counted(r) ? r.owed + (includeDeposits ? (r.depositOwed || 0) : 0) : 0);
+
+// The rows a view shows. view 'month' (with month 'YYYY-MM') or 'all'. Unconfirmed rows (not
+// billed) only when includeUnconfirmed. 'all' is grouped: upcoming (nearest first) then past (newest first).
 export function viewRows(rows, { view = 'month', month = '', today = '', includeUnconfirmed = false } = {}) {
-  const shown = rows.filter((r) => (includeUnconfirmed || r.confirmed) && (view === 'all' || String(r.date).startsWith(month)));
+  const shown = rows.filter((r) => (includeUnconfirmed || counted(r)) && (view === 'all' || String(r.date).startsWith(month)));
   const by = (a, b) => String(a.date).localeCompare(String(b.date)) || a.name.localeCompare(b.name);
   if (view !== 'all') return { list: shown.sort(by), upcoming: [], past: [] };
   const upcoming = shown.filter((r) => r.date && r.date >= today).sort(by);
@@ -201,22 +216,28 @@ export function viewRows(rows, { view = 'month', month = '', today = '', include
 //   moneyIn   payments received in the period. includeDeposits false (the default): the
 //             refundable damage deposits are left out (charges received + deposits kept for
 //             damage, which are income). true: everything received, deposits included.
-//   owed      still owed on the CONFIRMED jobs shown (charges only; never a deposit or a tip).
+//   owed      still owed on the jobs shown: the sum of the rows' Still owed (rowOwed), so the
+//             figure and the rows always agree. Every sent invoice counts, confirmed or not;
+//             charges only unless deposits are counted; never a tip.
+//   owedRows  the rows that make it up (the "Still owed" detail page lists them).
 //   tips      tips dated in the period, their own line.
 //   expected  unconfirmed jobs' invoice charges, only when includeUnconfirmed: never added to
 //             money in or owed.
 export function moneySummary(data, rows, { view = 'month', month = '', includeDeposits = false, includeUnconfirmed = false, today = '' } = {}) {
   const t = periodTotals(data, view === 'all' ? '' : month);
   const { list } = viewRows(rows, { view, month, today, includeUnconfirmed });
-  const confirmed = list.filter((r) => r.confirmed);
+  const confirmed = list.filter(counted);
+  const owing = confirmed.filter((r) => rowOwed(r, includeDeposits) > 0);
   const moneyIn = includeDeposits ? t.received : t.revenue + t.kept;
   return {
     t, moneyIn, depositsIn: t.depositsIn, includeDeposits,
-    owed: confirmed.reduce((n, r) => n + r.owed, 0),
+    owed: owing.reduce((n, r) => n + rowOwed(r, includeDeposits), 0),
+    depositOwed: includeDeposits ? owing.reduce((n, r) => n + (r.depositOwed || 0), 0) : 0,
+    owedRows: owing,
     tips: t.tips, expenses: t.expenses,
     left: t.revenue + t.kept + t.tips - t.expenses,
-    expected: includeUnconfirmed ? list.filter((r) => !r.confirmed).reduce((n, r) => n + r.expected, 0) : 0,
-    unconfirmedCount: list.filter((r) => !r.confirmed).length,
+    expected: includeUnconfirmed ? list.filter((r) => !counted(r)).reduce((n, r) => n + r.expected, 0) : 0,
+    unconfirmedCount: list.filter((r) => !counted(r)).length,
     jobs: confirmed.length,
   };
 }

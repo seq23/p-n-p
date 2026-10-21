@@ -4,7 +4,7 @@
  * moneySummary, views-money.mjs, admin-money.mjs tips + history, weekly.mjs).
  *  1. By month vs All jobs: a month shows only its jobs; All jobs shows every job, Upcoming
  *     (nearest first) then Past (newest first). Void jobs never show.
- *  2. Include unconfirmed jobs (default off): unconfirmed rows only when ticked, dashed and
+ *  2. Also show jobs not confirmed yet (no invoice sent; default off): unconfirmed, unbilled rows only when ticked, dashed and
  *     labelled "Not confirmed"; their price only in "Expected if confirmed", never in Money in or
  *     Still owed.
  *  3. Leave out refundable deposits (default on): Money in and job totals leave the damage
@@ -16,7 +16,11 @@
  *     "Check N receipts" when receipts wait.
  *  6. The Monday summary's last-week money line carries tips as a separate figure.
  *  7. The view lives in the URL; nothing that was on Money before is missing.
- * Rule 0: fewer than 80 checks is a failure.
+ *  8. Still owed (owner, 21 Oct 2026): every SENT invoice's balance counts, confirmed or not;
+ *     the figure is the sum of the rows; a put-away job with nothing sent and nothing in is not
+ *     on Money; void never; put away but billed (or paid) still shows. Same number as Not paid
+ *     yet / the 7 AM email (notpaid.mjs, ledger.mjs balanceOf).
+ * Rule 0: fewer than 100 checks is a failure.
  */
 import { mod } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
@@ -77,7 +81,9 @@ const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
   must(a.date === '2026-10-03' && a.charges === 11000 && a.refundable === 5000 && a.paidCharges === 11000 && a.paidDeposit === 5000 && a.owed === 0 && a.tips === 2000 && a.confirmed, `Ann's row wrong: ${JSON.stringify(a)}`);
   must(a.services.includes('rentals'), 'a job row lacks its service');
   const b = by('r:b');
-  must(!b.confirmed && b.owed === 0 && b.expected === 30000 && b.date === '2026-10-24', `unconfirmed Bo is counted as owed or lacks expected: ${JSON.stringify(b)}`);
+  // Bo's invoice is SENT: owed whether or not the job is confirmed (owner, 21 Oct 2026), so it is
+  // never "expected" as well.
+  must(!b.confirmed && b.billed && b.owed === 30000 && b.depositOwed === 0 && b.expected === 0 && b.date === '2026-10-24', `sent-but-unconfirmed Bo is not counted as owed: ${JSON.stringify(b)}`);
   const e = by('r:e');
   must(!e.confirmed && e.date === '2026-10-28' && !e.hasPrice && e.expected === 0, `an unconfirmed request with no booking has no asked-for date: ${JSON.stringify(e)}`);
   must(by('r:d').tips === 1500 && by('r:d').confirmed, 'a tip for a job with no invoice is not on its row');
@@ -85,16 +91,16 @@ const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
 
   // 1. Month vs all.
   const oct = M.viewRows(rows, { view: 'month', month: '2026-10', today: '2026-10-19' });
-  must(oct.list.map((r) => r.key).join() === 'r:a', `October (unconfirmed off) should be Ann only: ${oct.list.map((r) => r.key)}`);
+  must(oct.list.map((r) => r.key).join() === 'r:a,r:b', `October (unconfirmed off) should be Ann + billed Bo: ${oct.list.map((r) => r.key)}`);
   const octU = M.viewRows(rows, { view: 'month', month: '2026-10', today: '2026-10-19', includeUnconfirmed: true });
   must(octU.list.map((r) => r.key).join() === 'r:a,r:b,r:e', `October with unconfirmed: ${octU.list.map((r) => r.key)}`);
   const nov = M.viewRows(rows, { view: 'month', month: '2026-11', today: '2026-10-19', includeUnconfirmed: true });
   must(nov.list.map((r) => r.key).join() === 'r:d', 'November shows a job from another month');
   const allV = M.viewRows(rows, { view: 'all', today: '2026-10-19' });
-  must(allV.upcoming.map((r) => r.key).join() === 'r:d' && allV.past.map((r) => r.name).join() === 'Ann Able,Dee Phone', `All jobs grouping wrong: up ${allV.upcoming.map((r) => r.key)} past ${allV.past.map((r) => r.name)}`);
+  must(allV.upcoming.map((r) => r.key).join() === 'r:b,r:d' && allV.past.map((r) => r.name).join() === 'Ann Able,Dee Phone', `All jobs grouping wrong: up ${allV.upcoming.map((r) => r.key)} past ${allV.past.map((r) => r.name)}`);
   const allU = M.viewRows(rows, { view: 'all', today: '2026-10-19', includeUnconfirmed: true });
   must(allU.upcoming.map((r) => r.key).join() === 'r:b,r:e,r:d', `Upcoming is not nearest first: ${allU.upcoming.map((r) => r.key)}`);
-  must(allU.list.length === 5 && allV.list.length === 3, 'All jobs does not show every job');
+  must(allU.list.length === 5 && allV.list.length === 4, 'All jobs does not show every job');
 
   // 2-3. The summary.
   const s0 = M.moneySummary(data, rows, { view: 'month', month: '2026-10', today: '2026-10-19' });
@@ -104,13 +110,14 @@ const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
   must(s0.moneyIn === 11000, `Money in with deposits left out should be 110.00 (void excluded), got ${s0.moneyIn}`);
   must(sD.moneyIn === 16000 && sD.depositsIn === 5000, `Money in with deposits counted should be 160.00, got ${sD.moneyIn}`);
   must(sU.moneyIn === s0.moneyIn && sDU.moneyIn === sD.moneyIn, 'ticking unconfirmed changed Money in (mixed into received)');
-  must(sU.owed === s0.owed && s0.owed === 0, 'an unconfirmed job is counted in Still owed');
-  must(sU.expected === 30000 && s0.expected === 0, `Expected if confirmed should be 300.00 only when ticked (${sU.expected}/${s0.expected})`);
+  must(sU.owed === s0.owed && s0.owed === 30000 && s0.owed === oct.list.reduce((n, r) => n + M.rowOwed(r), 0), `Still owed is not every sent invoice (Bo's 300.00) or disagrees with the rows: ${s0.owed}`);
+  must(s0.owedRows.map((r) => r.key).join() === 'r:b', 'the Still owed rows are not the billed ones owing');
+  must(sU.expected === 0 && s0.expected === 0, `a sent invoice is also counted as Expected if confirmed (${sU.expected}/${s0.expected})`);
   must(s0.tips === 2000 && sD.tips === 2000 && s0.moneyIn + s0.tips !== s0.moneyIn, 'tips are not their own October line');
   must(s0.expenses === 4000 && s0.left === 11000 + 2000 - 4000, `left after expenses (money in + tips - expenses) wrong: ${s0.left}`);
   must(s0.t.received === 16000 && s0.t.tips === 2000 && !s0.t.payments.some((p) => p.amount_cents === 2000), 'a tip leaked into payments received');
   const sAll = M.moneySummary(data, rows, { view: 'all', today: '2026-10-19', includeUnconfirmed: true });
-  must(sAll.tips === 3500 && sAll.expenses === 4700 && sAll.expected === 30000 && sAll.moneyIn === 11000, `All jobs summary wrong: ${JSON.stringify({ t: sAll.tips, e: sAll.expenses, x: sAll.expected, m: sAll.moneyIn })}`);
+  must(sAll.tips === 3500 && sAll.expenses === 4700 && sAll.expected === 0 && sAll.owed === 30000 && sAll.moneyIn === 11000, `All jobs summary wrong: ${JSON.stringify({ t: sAll.tips, e: sAll.expenses, x: sAll.expected, m: sAll.moneyIn })}`);
   // A deposit is never owed: half-paid invoice with a deposit line.
   const half = M.prepare({ invoices: [{ id: 9, number: 'N', customer_name: 'Hal', status: 'deposit_paid' }], lines: [{ invoice_id: 9, description: 'Pick 3 bundle', qty: 1, unit_cents: 11000, refundable: 0 }, { invoice_id: 9, description: 'Damage deposit', qty: 1, unit_cents: 5000, refundable: 1 }], payments: [{ id: 1, invoice_id: 9, amount_cents: 11000, received_on: '2026-10-02', kind: 'payment' }], bookings: [{ id: 1, request_key: 'h', kind: 'rental_pickup', date: '2026-10-05', invoice_id: 9 }], statuses: [{ request_key: 'h', invoice_id: 9 }] });
   const hr = M.jobRows(half, { requests: [{ key: 'h', name: 'Hal', services: ['rentals'] }] })[0];
@@ -127,6 +134,71 @@ const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
   }
 }
 
+// ---- 8. Still owed = every sent invoice; put away with nothing sent or in is not on Money ----
+{
+  const NP = await mod('functions/_lib/notpaid.mjs');
+  const invoices = [
+    { id: 21, number: 'PNP-T-21', customer_name: 'Dana Sent', status: 'sent', request_key: 's1', due_date: '2026-10-28' }, // sent, NOT confirmed
+    { id: 22, number: 'PNP-T-22', customer_name: 'Cara Draft', status: 'draft', request_key: 's2' }, // draft + put away, nothing in
+    { id: 23, number: 'PNP-T-23', customer_name: 'Val Void', status: 'void', request_key: 's3' },
+    { id: 24, number: 'PNP-T-24', customer_name: 'Pam Away', status: 'sent', request_key: 's4' }, // put away, still owes
+    { id: 25, number: 'PNP-T-25', customer_name: 'Ida Draft', status: 'draft', request_key: 's5' }, // draft, open, unconfirmed
+    { id: 26, number: 'PNP-T-26', customer_name: 'Pia Paid', status: 'draft', request_key: 's6' }, // put away, draft, money in
+  ];
+  const ln = (id, c, refundable = 0, description = 'Porch decorating') => ({ invoice_id: id, description, qty: 1, unit_cents: c, refundable });
+  const lines = [ln(21, 11000, 0, 'Pick 3 bundle, 1 day'), ln(21, 5000, 1, 'Damage deposit (refundable)'), ln(21, 2000, 0, 'Delivery'), ln(22, 30000), ln(22, -10000), ln(23, 9900), ln(24, 20000), ln(25, 40000), ln(26, 15000)];
+  const payments = [{ id: 1, invoice_id: 24, amount_cents: 5000, received_on: '2026-10-05', kind: 'payment' }, { id: 2, invoice_id: 26, amount_cents: 3000, received_on: '2026-10-06', kind: 'payment' }];
+  const bookings = [{ id: 1, request_key: 's1', kind: 'rental_pickup', date: '2026-10-30', invoice_id: 21 }, { id: 2, request_key: 's1', kind: 'rental_return', date: '2026-10-31', invoice_id: 21 }];
+  const statuses = [
+    { request_key: 's1', status: 'invoiced', invoice_id: 21 }, { request_key: 's2', status: 'new', invoice_id: 22, archived_at: '2026-10-20 20:50:27' },
+    { request_key: 's3', status: 'void', invoice_id: 23, archived_at: '2026-10-20 10:00:00' }, { request_key: 's4', status: 'invoiced', invoice_id: 24, archived_at: '2026-10-19 10:00:00' },
+    { request_key: 's5', status: 'new', invoice_id: 25 }, { request_key: 's6', status: 'new', invoice_id: 26, archived_at: '2026-10-19 10:00:00' },
+  ];
+  const ask = (d) => ({ rentals: [], decor: [{ label: 'Event date', value: d }], other: [] });
+  const requests = [
+    { key: 's1', name: 'Dana Sent', services: ['rentals'] }, { key: 's2', name: 'Cara Draft', services: ['porch'], ...ask('2026-10-25') },
+    { key: 's3', name: 'Val Void', services: ['porch'], ...ask('2026-10-26') }, { key: 's4', name: 'Pam Away', services: ['porch'], ...ask('2026-10-12') },
+    { key: 's5', name: 'Ida Draft', services: ['porch'], ...ask('2026-10-27') }, { key: 's6', name: 'Pia Paid', services: ['porch'], ...ask('2026-10-14') },
+  ];
+  const data = M.prepare({ invoices, lines, payments, bookings, statuses });
+  const unconfirmed = new Set(['s1', 's2', 's3', 's4', 's5', 's6']); // none confirmed: sent still counts
+  const rows = M.jobRows(data, { requests, unconfirmed });
+  const by = (k) => rows.find((r) => r.requestKey === k);
+  const d = by('s1');
+  const bal = L.balanceOf(invoices[0], lines.filter((l) => l.invoice_id === 21), 0);
+  must(bal.owed === 13000 && d && d.billed && d.owed === bal.owed && d.depositOwed === bal.depositOwed && d.expected === 0, `a sent, unconfirmed invoice is not owed its ledger balance (row ${JSON.stringify(d)}, balanceOf owed ${bal.owed})`);
+  must(L.dueWords(bal) === '$180 due ($130 + $50 refundable deposit)', `the due words for a sent rental changed: ${L.dueWords(bal)}`);
+  must(!by('s2') && !rows.some((r) => r.invoiceId === 22), 'a put-away draft with nothing paid is on Money');
+  must(!by('s3') && !rows.some((r) => r.invoiceId === 23), 'a void job is on Money');
+  must(by('s4') && by('s4').putAway && by('s4').billed && by('s4').owed === 15000, `a put-away job still owing on a sent invoice is missing: ${JSON.stringify(by('s4'))}`);
+  must(by('s6') && by('s6').putAway && !by('s6').billed && by('s6').owed === 0 && by('s6').paidCharges === 3000, 'a put-away job with money in is missing (or its draft is owed)');
+  must(by('s5') && !by('s5').billed && by('s5').owed === 0 && by('s5').expected === 40000, 'an open draft is owed or not expected');
+  const sum = M.moneySummary(data, rows, { view: 'month', month: '2026-10', today: '2026-10-21' });
+  const sumD = M.moneySummary(data, rows, { view: 'month', month: '2026-10', today: '2026-10-21', includeDeposits: true });
+  const sumU = M.moneySummary(data, rows, { view: 'month', month: '2026-10', today: '2026-10-21', includeUnconfirmed: true });
+  must(sum.owed === 13000 + 15000 && sumU.owed === sum.owed, `Still owed is not every sent invoice's charges, confirmed or not (${sum.owed}/${sumU.owed})`);
+  must(sumD.owed === 13000 + 5000 + 15000 && sumD.depositOwed === 5000, `Still owed with deposits counted is not the rows' sum (${sumD.owed})`);
+  must(sumU.expected === 40000 && !sumU.owedRows.some((r) => !r.billed), `Expected if confirmed is not the open draft only (${sumU.expected})`);
+  const shown = M.viewRows(rows, { view: 'month', month: '2026-10', today: '2026-10-21' }).list;
+  must(shown.map((r) => r.requestKey).sort().join() === 's1,s4', `unticked, Money shows ${shown.map((r) => r.requestKey)} (want the two sent invoices)`);
+  for (const dep of [false, true]) {
+    const rowsSum = shown.reduce((n, r) => n + M.rowOwed(r, dep), 0);
+    must(rowsSum === (dep ? sumD : sum).owed, `the Still owed figure and the rows disagree (deposits ${dep ? 'counted' : 'left out'})`);
+    for (const r of shown) {
+      const html = VM.jobRow(r, { includeDeposits: dep });
+      const nums = ['data-job-total>\\$', '<dt>Paid</dt><dd[^>]*>\\$', '<dt>Still owed</dt><dd[^>]*>\\$'].map((k) => Math.round(Number(((html.match(new RegExp(`${k}([\\d,.]+)`)) || [])[1] || 'NaN').replace(/,/g, '')) * 100));
+      must(nums[0] - nums[1] === nums[2] && nums[2] === M.rowOwed(r, dep), `row ${r.number} Total - Paid != Still owed: ${nums}`);
+    }
+  }
+  // The 7 AM email / Not paid yet read the same number (notpaid.mjs over ledger balances).
+  const bals = {};
+  for (const inv of invoices) { const b = L.balanceOf(inv, lines.filter((l) => l.invoice_id === inv.id), payments.filter((p) => p.invoice_id === inv.id).reduce((n, p) => n + p.amount_cents, 0)); bals[inv.id] = { invoice: inv, ...b, ...(inv.status === 'draft' ? { draft: true, owed: 0 } : {}) }; }
+  const np = NP.notPaidRows(bals, {}, Object.fromEntries(requests.map((r) => [r.key, r])), '2026-10-21');
+  must(np.owed.map((r) => r.id).sort().join() === '21,24' && np.owed.reduce((n, r) => n + r.owed, 0) === sum.owed, `Not paid yet / the 7 AM email disagree with Money's Still owed (${np.owed.map((r) => `${r.id}:${r.owed}`)} vs ${sum.owed})`);
+  const det = VM.detailPage({ month: '2026-10', what: 'owed', t: M.periodTotals(data, '2026-10'), byInv: data.byInv, owedRows: sum.owedRows });
+  must((det.match(/data-owed-row/g) || []).length === 2 && det.includes('PNP-T-24') && det.includes('$150.00') && !det.includes('PNP-T-22'), 'the Still owed detail does not list the rows behind the figure');
+}
+
 // ---- 4-7. End to end through the real guard + router -----------------------------------------
 const s = await session();
 const db = s.db;
@@ -140,19 +212,26 @@ const rows0 = await AM.moneyJobs(s.env, data0, s.requests);
 const rowA = rows0.find((r) => r.requestKey === reqA.key);
 const rowB = rows0.find((r) => r.requestKey === reqB.key);
 must(rowA && rowA.confirmed && rowA.refundable > 0 && rowA.paidDeposit === rowA.refundable, `the paid-in-full rental is not a confirmed job with its deposit collected: ${JSON.stringify(rowA)}`);
-must(rowB && !rowB.confirmed && rowB.expected > 0, 'a sent-but-not-confirmed invoice is not an unconfirmed job (steps.mjs rule)');
+must(rowB && !rowB.confirmed && rowB.billed && rowB.expected === 0 && rowB.owed > 0 && rowB.owed === (await L.balances(db))[invB.id].owed, `a sent-but-not-confirmed invoice is not unconfirmed (steps.mjs) yet owed its ledger balance: ${JSON.stringify(rowB)}`);
 const monthA = String(rowA.date).slice(0, 7);
 const today = (await mod('functions/_lib/reminders.mjs')).chicagoDate();
 const jobsOf = (html) => html.slice(html.indexOf('data-jobs>'), html.indexOf('id="tips"'));
 const fig = (html, what) => ((html.match(new RegExp(`data-total="${what}">([^<]+)<`)) || [])[1] || '');
+const cents = (v) => Math.round(Number(String(v).replace(/[$,]/g, '')) * 100);
 const usd = (c) => `$${(c / 100).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}`;
 
 const allOff = (await s.get('/admin/money?view=all')).text;
 const allOn = (await s.get('/admin/money?view=all&unconf=1')).text;
-must(jobsOf(allOff).includes(reqA.name) && !jobsOf(allOff).includes(reqB.name), 'All jobs (unconfirmed off) does not show the confirmed job only');
-must(jobsOf(allOn).includes(reqB.name) && /data-confirmed="0"[\s\S]{0,600}data-not-confirmed>Not confirmed/.test(jobsOf(allOn)) && /class="job unconf"/.test(allOn), 'ticked, the unconfirmed job is not shown dashed with "Not confirmed"');
-must(fig(allOn, 'expected') === usd(rowB.expected) && !allOff.includes('data-expected'), `"Expected if confirmed" is wrong or shows unticked (${fig(allOn, 'expected')} vs ${usd(rowB.expected)})`);
+must(jobsOf(allOff).includes(reqA.name) && jobsOf(allOff).includes(reqB.name) && /data-confirmed="0" data-billed="1"[\s\S]{0,600}data-not-confirmed>Not confirmed[\s\S]{0,400}<dt>Still owed<\/dt>/.test(jobsOf(allOff)) && !/class="job unconf"/.test(allOff), 'All jobs (unconfirmed off) does not show the confirmed job and the billed unconfirmed one with its Still owed');
+must(jobsOf(allOn).includes(reqB.name) && /data-confirmed="0"[\s\S]{0,600}data-not-confirmed>Not confirmed/.test(jobsOf(allOn)) && !/class="job unconf"/.test(allOn), 'ticked, the unconfirmed job is not shown dashed with "Not confirmed"');
+must(fig(allOn, 'expected') === usd(0) && !allOff.includes('data-expected'), `"Expected if confirmed" counts a sent invoice or shows unticked (${fig(allOn, 'expected')})`);
+must(cents(fig(allOff, 'owed')) === rows0.filter(M.counted).reduce((n, r) => n + M.rowOwed(r), 0) && cents(fig(allOff, 'owed')) >= rowB.owed && rowB.owed > 0, `Still owed (all) is not the sum of the sent invoices' rows (${fig(allOff, 'owed')})`);
+{
+  const det = (await s.get(`/admin/money/detail?view=all&what=owed`)).text;
+  must(/data-owed-row>[\s\S]{0,300}/.test(det) && rowB.number && det.includes(rowB.number) && det.includes(usd(rowB.owed)), 'the Still owed detail does not list the sent unconfirmed invoice with its amount');
+}
 must(fig(allOn, 'received') === fig(allOff, 'received') && fig(allOn, 'owed') === fig(allOff, 'owed'), 'ticking unconfirmed changed Money in or Still owed');
+must(/Also show jobs not confirmed yet \(no invoice sent\)<small>[^<]*A sent invoice always shows and counts in Still owed, ticked or not\./.test(allOff), 'the unconfirmed tick box does not say it only covers jobs with no invoice sent');
 must(/<input type="checkbox" name="unconf" value="1" checked/.test(allOn) && !/name="unconf" value="1" checked/.test(allOff), 'the unconfirmed tick box does not reflect the URL');
 must(/data-group="upcoming"|data-group="past"/.test(allOff), 'All jobs is not grouped Upcoming / Past');
 // Month filter on the page.
@@ -164,12 +243,17 @@ const depOut = (await s.get(`/admin/money?month=${today.slice(0, 7)}`)).text;
 const depIn = (await s.get(`/admin/money?month=${today.slice(0, 7)}&deposits=in`)).text;
 const depInForm = (await s.get(`/admin/money?month=${today.slice(0, 7)}&f=1`)).text; // the tick box unticked
 const depOutForm = (await s.get(`/admin/money?month=${today.slice(0, 7)}&f=1&deposits=out`)).text;
-const cents = (v) => Math.round(Number(String(v).replace(/[$,]/g, '')) * 100);
 must(cents(fig(depIn, 'received')) - cents(fig(depOut, 'received')) === rowA.paidDeposit, `deposits toggle math: in ${fig(depIn, 'received')} out ${fig(depOut, 'received')} deposit ${rowA.paidDeposit}`);
 must(fig(depInForm, 'received') === fig(depIn, 'received') && fig(depOutForm, 'received') === fig(depOut, 'received'), 'the unticked deposits box (form submit) does not read as "include"');
 must(/name="deposits" value="out" checked/.test(depOut) && !/name="deposits" value="out" checked/.test(depIn), 'the deposits tick box is not on by default / does not follow the URL');
 must(depIn.includes('deposit (given back later)') && /Damage deposits \(\$50\) are given back, so they are not your money/.test(depOut), 'deposits are not labelled "given back later" when counted, or the box lacks its explanation');
-must(fig(depIn, 'owed') === fig(depOut, 'owed'), 'counting deposits changed Still owed (a deposit is never owed)');
+{
+  // Left out (the default) Still owed is charges only; counted, it adds exactly the damage
+  // deposits not collected yet on the shown sent invoices, so it equals the rows' Still owed.
+  const shownNow = M.viewRows(rows0, { view: 'month', month: today.slice(0, 7), today }).list.filter(M.counted);
+  const charges = shownNow.reduce((n, r) => n + r.owed, 0); const dep = shownNow.reduce((n, r) => n + (r.depositOwed || 0), 0);
+  must(cents(fig(depOut, 'owed')) === charges && cents(fig(depIn, 'owed')) === charges + dep && (dep === 0 || depIn.includes(`includes ${usd(dep)} refundable deposit`)), `Still owed does not follow the deposits box like the rows do (out ${fig(depOut, 'owed')} in ${fig(depIn, 'owed')}, charges ${charges} deposit ${dep})`);
+}
 // The view stays in the URL: links carry it.
 const kept = (await s.get(`/admin/money?month=${today.slice(0, 7)}&unconf=1&deposits=in`)).text;
 must(/href="\/admin\/money\?view=all&amp;unconf=1&amp;deposits=in"/.test(kept) && /aria-label="Next month"/.test(kept) && new RegExp(`href="/admin/money\\?month=[0-9-]+&amp;unconf=1&amp;deposits=in" aria-label="Previous month"`).test(kept), 'the view switch or month arrows lose the tick boxes');
@@ -258,10 +342,10 @@ for (const w of ['received', 'owed', 'jobs', 'expenses', 'deposits', 'tips', 'ca
 must(/class="back" href="\/admin\/money\?view=all&amp;unconf=1"/.test((await s.get(`/admin/money/detail?view=all&what=owed&back=${encodeURIComponent('/admin/money?view=all&unconf=1')}`)).text), 'a detail page does not go back to the same view');
 must(!/class="back" href="https:/.test((await s.get(`/admin/money/detail?what=owed&back=${encodeURIComponent('https://evil.example')}`)).text), 'a detail Back link can leave the console');
 
-if (checks < 80) errors.push(`Rule 0: only ${checks} checks ran`);
+if (checks < 100) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) {
   console.error(`VALIDATION FAIL: calm Money (${errors.length} of ${checks} checks)`);
   for (const e of errors) console.error(`- ${e}`);
   process.exit(1);
 }
-console.log(`validate_admin_money_calm: OK (${checks} checks: month vs all jobs, unconfirmed apart from received, deposits toggle math, tips apart/totalled/never owed or on the invoice + history, expenses by hand + history + view, weekly tips line, URL state, nothing lost)`);
+console.log(`validate_admin_money_calm: OK (${checks} checks: month vs all jobs, unconfirmed apart from received, deposits toggle math, tips apart/totalled/never owed or on the invoice + history, expenses by hand + history + view, weekly tips line, URL state, nothing lost, still owed = every sent invoice, put away + nothing sent left off)`);
