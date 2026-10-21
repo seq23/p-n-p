@@ -43,9 +43,9 @@
       "route": "/answers/birthday-hotel-room-setup-ideas-memphis",
       "rendered_file": "answers/birthday-hotel-room-setup-ideas-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "a2ff8cd462bc34056902a02d3af06f5d1f6258fcfef8e3650e843cbc26596485",
-      "cache_file": "data/release/frozen_accepted_outputs/a2ff8cd462bc34056902a02d3af06f5d1f6258fcfef8e3650e843cbc26596485.html.gz",
-      "cache_sha256": "654f856ec56a4b1d497bbcb1d67717d150ae2df0107a2c46449b5fa9f566b821",
+      "accepted_sha256": "315ce1470c5a2fd35f941000a021211f758a0c0a2e6f3c135621464e95fb75ec",
+      "cache_file": "data/release/frozen_accepted_outputs/315ce1470c5a2fd35f941000a021211f758a0c0a2e6f3c135621464e95fb75ec.html.gz",
+      "cache_sha256": "bbcdfb57b7d218a7656d7305a538c81861110b4f9f137612c0c8587ef46ce7c6",
       "accepted_at": "2026-07-24"
     },
     {
@@ -61,18 +61,18 @@
       "route": "/answers/can-i-book-decor-only-without-event-planning",
       "rendered_file": "answers/can-i-book-decor-only-without-event-planning.html",
       "state": "FROZEN",
-      "accepted_sha256": "821464d3a4c7a64b1704ea5d695533dff7e6e036664cad325675fc8279cd0bf7",
-      "cache_file": "data/release/frozen_accepted_outputs/821464d3a4c7a64b1704ea5d695533dff7e6e036664cad325675fc8279cd0bf7.html.gz",
-      "cache_sha256": "43f9899c2001dbea71aafdabfd1ba5fb7aa5483de8bc4b48a0612558e46aa312",
+      "accepted_sha256": "65f872a199a3e472dfe830546a97218aeb6500ec3155d2962bee5bb703e0cdf8",
+      "cache_file": "data/release/frozen_accepted_outputs/65f872a199a3e472dfe830546a97218aeb6500ec3155d2962bee5bb703e0cdf8.html.gz",
+      "cache_sha256": "eb65e334d58ae327a0abf275e3983b46a287da6d1b55cf759315d7c2be2bb3a0",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/can-someone-decorate-hotel-room-birthday-memphis",
       "rendered_file": "answers/can-someone-decorate-hotel-room-birthday-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "131c0dabed7fb02d61e6428d4e7ee83a18dccc32f8b4e48a57dbd2c7918b1df5",
-      "cache_file": "data/release/frozen_accepted_outputs/131c0dabed7fb02d61e6428d4e7ee83a18dccc32f8b4e48a57dbd2c7918b1df5.html.gz",
-      "cache_sha256": "65fdc615caf822432d0ac5678bf5424ef403036edc63ab10feac456d2d587a5e",
+      "accepted_sha256": "3de99ee2d5c99055a38324b39d101fc2fb226b8d33deb1679bc10e1248d75995",
+      "cache_file": "data/release/frozen_accepted_outputs/3de99ee2d5c99055a38324b39d101fc2fb226b8d33deb1679bc10e1248d75995.html.gz",
+      "cache_sha256": "696b5251e675616aa3e2cf65181ef336b099d5c37ef187fca2c6332f3e687db2",
       "accepted_at": "2026-07-24"
     },
     {
@@ -88,18 +88,18 @@
       "route": "/answers/corporate-event-decor-memphis",
       "rendered_file": "answers/corporate-event-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "c4a17ff722d06de00302a38c4dfc47be623520c09c944c2a282c7760fc93335b",
-      "cache_file": "data/release/frozen_accepted_outputs/c4a17ff722d06de00302a38c4dfc47be623520c09c944c2a282c7760fc93335b.html.gz",
-      "cache_sha256": "9e4003b42dc10db68bdd5d3fab681077554cfb41bbfd868437f321849d33006d",
+      "accepted_sha256": "c07d2fda172240357c838eff61a41b9e93aa5b617fb51c3b68696445bee27af3",
+      "cache_file": "data/release/frozen_accepted_outputs/c07d2fda172240357c838eff61a41b9e93aa5b617fb51c3b68696445bee27af3.html.gz",
+      "cache_sha256": "49bc41b976ff607173e3a859b8433f0ecee4f645c03bc55a013a3292b6642ad0",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/corporate-grazing-tables-memphis",
       "rendered_file": "answers/corporate-grazing-tables-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "41e6d130bf494bd1c7f663510e9b0d8f1b40b0f671eada81b8ab496cc454cc8c",
-      "cache_file": "data/release/frozen_accepted_outputs/41e6d130bf494bd1c7f663510e9b0d8f1b40b0f671eada81b8ab496cc454cc8c.html.gz",
-      "cache_sha256": "cd6475630200c4167f9931df49539a1d4d2136509be52d529a45c1b1f5b10bf5",
+      "accepted_sha256": "cdd0eddc6251d55825f52c96d90eb7624ad16510efd65861b69ab3272eb27da4",
+      "cache_file": "data/release/frozen_accepted_outputs/cdd0eddc6251d55825f52c96d90eb7624ad16510efd65861b69ab3272eb27da4.html.gz",
+      "cache_sha256": "f761d06a243a5600fe837b79b7c01e61fea23828b8e03514291051679ad193c3",
       "accepted_at": "2026-07-24"
     },
     {
@@ -115,9 +115,9 @@
       "route": "/answers/do-grazing-tables-include-food",
       "rendered_file": "answers/do-grazing-tables-include-food.html",
       "state": "FROZEN",
-      "accepted_sha256": "e4f2c391a68e251cd0ed9a1d36fbc078e0a5a21511501b829f7813e2fe90cfc5",
-      "cache_file": "data/release/frozen_accepted_outputs/e4f2c391a68e251cd0ed9a1d36fbc078e0a5a21511501b829f7813e2fe90cfc5.html.gz",
-      "cache_sha256": "fc81f4a9247ffeda69690092c73e5e65d19272fc792bbc0e8a0a39382dffe38e",
+      "accepted_sha256": "b8426b9665bf728feb244567bfe816debbdd616480b13d9470569fa31615e093",
+      "cache_file": "data/release/frozen_accepted_outputs/b8426b9665bf728feb244567bfe816debbdd616480b13d9470569fa31615e093.html.gz",
+      "cache_sha256": "a974134f05f860b7135c147dfe4def18134d797d85c6f4b663336ff8b83d7b27",
       "accepted_at": "2026-07-24"
     },
     {
@@ -187,9 +187,9 @@
       "route": "/answers/hotel-room-decorations-memphis",
       "rendered_file": "answers/hotel-room-decorations-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "ddf1f9ed46ffbd95ec7c8364d1edd78870e6a581c54c94344fe168cb9e8cc2cc",
-      "cache_file": "data/release/frozen_accepted_outputs/ddf1f9ed46ffbd95ec7c8364d1edd78870e6a581c54c94344fe168cb9e8cc2cc.html.gz",
-      "cache_sha256": "5e75bd64752c8779e6fe4d2c8ea3c7b1124784bad96f3d0efc09e01fcfa16ed6",
+      "accepted_sha256": "317c8ea920787e60955e537f87d3f044e02a5fd45a849c2e89f3054c02ba2bd9",
+      "cache_file": "data/release/frozen_accepted_outputs/317c8ea920787e60955e537f87d3f044e02a5fd45a849c2e89f3054c02ba2bd9.html.gz",
+      "cache_sha256": "4155e51bc5f42d9f7bcd4726cfe18d06ac3a4bf159dd3393824799dc5abf2612",
       "accepted_at": "2026-07-24"
     },
     {
@@ -214,9 +214,9 @@
       "route": "/answers/how-much-does-a-grazing-table-cost-in-memphis",
       "rendered_file": "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "eeda379ecc762e5fbbc8d67df8694ca5bb3047a47433518a871a4bd8259f3b02",
-      "cache_file": "data/release/frozen_accepted_outputs/eeda379ecc762e5fbbc8d67df8694ca5bb3047a47433518a871a4bd8259f3b02.html.gz",
-      "cache_sha256": "03bd93c1b45e217cecf236bc6bc6e31f47ec8ddd94b40aeb926c22982f06b352",
+      "accepted_sha256": "13fcc3ea7d3f0dffdc6debe95276ff56cfef59f998676598a4dc4f23a04a88d5",
+      "cache_file": "data/release/frozen_accepted_outputs/13fcc3ea7d3f0dffdc6debe95276ff56cfef59f998676598a4dc4f23a04a88d5.html.gz",
+      "cache_sha256": "9d0932046d9d231ea17bb500044a2bb741852211c6b36ebe7fb3568cd60bb606",
       "accepted_at": "2026-07-24"
     },
     {
@@ -232,18 +232,18 @@
       "route": "/answers/how-much-does-grazing-tables-cost",
       "rendered_file": "answers/how-much-does-grazing-tables-cost.html",
       "state": "FROZEN",
-      "accepted_sha256": "5b1d1efa5de078233bb6765104cdb02a339e049210017d53543ea7670e76405d",
-      "cache_file": "data/release/frozen_accepted_outputs/5b1d1efa5de078233bb6765104cdb02a339e049210017d53543ea7670e76405d.html.gz",
-      "cache_sha256": "feb3e9c54f6501a708a5521f8e5ed68b22788cefa6df018599b248770f60eb0e",
+      "accepted_sha256": "9b72da62ca98d0d744b526ce87e180fde3a9e27dd243836fbecc2055f7b5ff6b",
+      "cache_file": "data/release/frozen_accepted_outputs/9b72da62ca98d0d744b526ce87e180fde3a9e27dd243836fbecc2055f7b5ff6b.html.gz",
+      "cache_sha256": "8199fdffa789334ccc0564bbc25c75ce01b18f14e05cd386e5a3bde1e6cc0258",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/answers/how-much-does-hotel-room-decor-cost-in-memphis",
       "rendered_file": "answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "dccc92b311c44eb80a790416efe07bbdb8d1b3997676ed0b9f28b681ebb85e1b",
-      "cache_file": "data/release/frozen_accepted_outputs/dccc92b311c44eb80a790416efe07bbdb8d1b3997676ed0b9f28b681ebb85e1b.html.gz",
-      "cache_sha256": "227d8c98a1e015c1597516c845c2ce17ec89edd08544fc7f10f3c4c98f3ad086",
+      "accepted_sha256": "d682bf4021568024db9450dc84e4de4800d53e82c10cf9db693ee6584f77d7bb",
+      "cache_file": "data/release/frozen_accepted_outputs/d682bf4021568024db9450dc84e4de4800d53e82c10cf9db693ee6584f77d7bb.html.gz",
+      "cache_sha256": "0577d74657b5f21cf2e9711dd077491c7c83f0c862e10e88e7751d6c6631b2fe",
       "accepted_at": "2026-07-24"
     },
     {
@@ -295,9 +295,9 @@
       "route": "/answers/memphis-celebration-setups",
       "rendered_file": "answers/memphis-celebration-setups.html",
       "state": "FROZEN",
-      "accepted_sha256": "2380065938488f2e115ae107e64093c52d0e5d79679808295a70c44513f8b18e",
-      "cache_file": "data/release/frozen_accepted_outputs/2380065938488f2e115ae107e64093c52d0e5d79679808295a70c44513f8b18e.html.gz",
-      "cache_sha256": "aad1a5263904bf87d0207cfb455c8558f6717977d11aa76d6c9ab20af17ac659",
+      "accepted_sha256": "671124da36e0cc5e63358749f3957cdd3fd155340586f9a10c9cb10bd69a6ef1",
+      "cache_file": "data/release/frozen_accepted_outputs/671124da36e0cc5e63358749f3957cdd3fd155340586f9a10c9cb10bd69a6ef1.html.gz",
+      "cache_sha256": "6eafa8393ab43258e4630602357971fe4dbc614ffea3a67b89dbaf98afed39e4",
       "accepted_at": "2026-07-24"
     },
     {
@@ -367,9 +367,9 @@
       "route": "/answers/what-is-included-in-party-decor-setup",
       "rendered_file": "answers/what-is-included-in-party-decor-setup.html",
       "state": "FROZEN",
-      "accepted_sha256": "b23cf2ad21fa08b0a9a52432e0ebc9ccd73555869e343ef83b8084964ddec3c9",
-      "cache_file": "data/release/frozen_accepted_outputs/b23cf2ad21fa08b0a9a52432e0ebc9ccd73555869e343ef83b8084964ddec3c9.html.gz",
-      "cache_sha256": "4d328c7c51e91a488e36acbd850eded509de273ea0facd9c67ed1d908c41058d",
+      "accepted_sha256": "5d2b4d75404e49ce3fa8cd9947422cd3d5f6d12c035ededcf3f1404ef3cb5f2d",
+      "cache_file": "data/release/frozen_accepted_outputs/5d2b4d75404e49ce3fa8cd9947422cd3d5f6d12c035ededcf3f1404ef3cb5f2d.html.gz",
+      "cache_sha256": "b71a51e97a09884572822fbbec483bf60d9393f8245093dfb6a480dbeb9183b4",
       "accepted_at": "2026-07-24"
     },
     {
