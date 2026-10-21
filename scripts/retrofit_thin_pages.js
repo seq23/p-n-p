@@ -50,7 +50,7 @@ const SERVICE_BY_PAGE = {
   'services/celebration-setups-memphis.html': 'celebration',
   'services/luxury-party-decor-memphis.html': 'celebration',
   'services/birthday-party-decor-memphis.html': 'celebration',
-  'services/hotel-room-decor-memphis.html': 'celebration',
+  // services/hotel-room-decor-memphis.html is rendered by scripts/generators/build_focus_pages.js (21 Oct 2026).
   'services/budget-party-decor-memphis.html': 'celebration',
   'services/grazing-tables-memphis.html': 'grazing'
 };

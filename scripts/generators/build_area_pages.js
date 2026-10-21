@@ -87,9 +87,9 @@ const REQUEST_KEY = { 'porch-decorating': 'porch', 'party-decor': 'party', 'graz
 /** The one service page per service (scripts/lib/service_pages.js), plus its named sub-section. */
 const SERVICE_PAGE = {
   'porch-decorating': { href: '/services/porch-decorating', label: 'Porch decorating' },
-  'party-decor': { href: '/services/celebration-setups', label: 'Party planning and decor', sub: { href: '/services/celebration-setups#hotel-room-setups', label: 'Hotel Room Setups' } },
+  'party-decor': { href: '/services/celebration-setups', label: 'Party planning and decor', sub: { href: '/services/hotel-room-decor-memphis', label: 'Hotel Room Setups' } },
   'grazing-tables': { href: '/services/grazing-and-event-styling', label: 'Grazing tables' },
-  'party-game-rentals': { href: '/rentals/', label: 'Party game rentals', sub: { href: '/rentals/#giant-lawn-games', label: 'Giant Lawn Games' } },
+  'party-game-rentals': { href: '/rentals/', label: 'Party game rentals', sub: { href: '/rentals/giant-lawn-games-memphis', label: 'Giant Lawn Games' } },
 };
 
 /** "From" price per service, as the sibling block and validate:area-pages state it. */
