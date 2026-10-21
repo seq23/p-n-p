@@ -42,6 +42,8 @@ const grazeFrom = Math.min(...S.grazing.tiers.map((t) => t.from));
 const games = INV.publicGames(RENTALS);
 const extras = INV.publicExtras(RENTALS);
 /** The yard games: every available game except tabletop ones (Grab the Mic is played at a table). */
+/** The two focused landing pages inside the four services, out of the nav (scripts/lib/focus_pages.js). */
+const FOCUS = { hotel: '/services/hotel-room-decor-memphis', lawn: '/rentals/giant-lawn-games-memphis' };
 const lawnGames = games.filter((g) => g.use !== 'indoor' && !/tabletop/i.test(`${g.size} ${g.blurb}`));
 
 /** The /faq/ answer to `q` in section `id`, verbatim (throws if the FAQ no longer has it). */
@@ -82,7 +84,7 @@ const PAGES = [
     answer: `Porch &amp; Party plans and sets up party decorations in Memphis homes, hotel rooms and venues, from ${money(partyFrom)}: birthdays, anniversaries, proposals, showers and surprises. Balloon arches and garlands, backdrops, rose petals and candles and table styling, set up before your guests arrive.`,
     sections: () => [
       { id: 'hotel-room-setups', h2: 'Hotel Room Setups',
-        body: `<p>Romantic rose-petal rooms, anniversaries, proposals and birthday surprises in Memphis-area hotel rooms, from ${money(partyFrom)}. Rose petals and candles, balloons by the bed, a bouquet and styled touches, ready before your person walks in.</p><p>For a hotel we coordinate access with the front desk or with you. ${esc(faq('party', 'How long does setup take?')[1])}</p>` },
+        body: `<p>Romantic, anniversary, proposal and birthday hotel room setups in Memphis, from ${money(partyFrom)}: rose petals and candles, balloons by the bed and a bouquet, ready before your person walks in.</p><p><a href="${FOCUS.hotel}" data-focus-link="hotel">See hotel room setups &rarr;</a></p>` },
       { id: 'party-decorations', h2: 'Birthday, shower and balloon arch decorations',
         body: `<p>Birthdays for every age, baby and bridal showers, welcome-home surprises and anniversaries at home or at a venue: balloon arches and garlands, backdrops, florals and table styling. To match a theme or colors, send a photo or a Pinterest link with your request. Setups start at ${money(partyFrom)}; the total depends on the size of the room, the pieces (balloons, backdrop, florals) and how many tables, so tell us your budget range on the form and we design to it.</p>` },
     ],
@@ -122,7 +124,7 @@ const PAGES = [
     targets: ['lawn game rentals memphis', 'giant yard games memphis', 'giant connect four rental memphis'],
     sections: () => [
       { id: 'giant-lawn-games', h2: 'Giant Lawn Games',
-        body: `<p>Giant yard games for Memphis backyard parties, ${money(RENTALS.rates.day)} a game per day or ${money(RENTALS.rates.weekend)} for the weekend: ${esc(INV.joinAnd(lawnGames.map((g) => g.name)))}. Pick up and return at ${esc(RENTALS.pickup.place)}.</p><ul>${lawnGames.map((g) => `<li><a href="#${g.slug}">${esc(g.name)}</a>: ${esc(g.size)}</li>`).join('')}</ul>` },
+        body: `<p>Giant yard games for Memphis backyard parties, ${money(RENTALS.rates.day)} a game per day or ${money(RENTALS.rates.weekend)} for the weekend: ${esc(INV.joinAnd(lawnGames.map((g) => g.name)))}. Pick up and return at ${esc(RENTALS.pickup.place)}.</p><p><a href="${FOCUS.lawn}" data-focus-link="lawn">See giant lawn games &rarr;</a></p>` },
     ],
   },
 ];
@@ -162,4 +164,4 @@ function faqJsonLd(p) {
   return { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: faqs.map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) };
 }
 
-module.exports = { PAGES, imagesFor, bookButton, bookHref, gallery, bodyBlock, heroBlock, faqJsonLd, lawnGames, porchFrom, partyFrom, grazeFrom, money, esc, AI };
+module.exports = { FOCUS, PAGES, imagesFor, bookButton, bookHref, gallery, bodyBlock, heroBlock, faqJsonLd, lawnGames, porchFrom, partyFrom, grazeFrom, money, esc, AI };

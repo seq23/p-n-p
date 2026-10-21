@@ -20,7 +20,7 @@
     "authority:yield:build": "node scripts/authority_scale/build_citation_yield_feedback.mjs && node scripts/authority_scale/evaluate_velocity.mjs",
     "baseline": "node scripts/baseline.mjs",
     "build:404": "PAGES_OUT_DIR=. node scripts/build_404.js",
-    "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/build_rentals_page.js && node scripts/generators/build_request_pages.js && node scripts/generators/build_area_pages.js && node scripts/generators/build_section_indexes.js && node scripts/install_brand_surfaces.js && node scripts/install_porch_packages.js && node scripts/install_service_pages.js && node scripts/generators/update_sitemap.js && node scripts/install_clarity.js && node scripts/install_site_icons.js && node scripts/install_contact_surface.js && node scripts/install_site_chrome.js && node scripts/normalize_public_urls.js",
+    "build:all": "node scripts/generators/build_pages.js authority && node scripts/generators/build_pages.js faq && node scripts/generators/build_pages.js local && node scripts/generators/build_pages.js seasonal && node scripts/generators/build_pages.js guides && node scripts/generators/build_pages.js comparisons && node scripts/generators/build_pages.js events && node scripts/generators/build_pages.js corporate && node scripts/generators/build_pages.js hubs && node scripts/generators/build_rentals_page.js && node scripts/generators/build_focus_pages.js && node scripts/generators/build_request_pages.js && node scripts/generators/build_area_pages.js && node scripts/generators/build_section_indexes.js && node scripts/install_brand_surfaces.js && node scripts/install_porch_packages.js && node scripts/install_service_pages.js && node scripts/generators/update_sitemap.js && node scripts/install_clarity.js && node scripts/install_site_icons.js && node scripts/install_contact_surface.js && node scripts/install_site_chrome.js && node scripts/normalize_public_urls.js",
     "build:answers": "node scripts/generators/build_pages.js faq",
     "build:authority": "node scripts/generators/build_pages.js authority",
     "build:comparisons": "node scripts/generators/build_pages.js comparisons",
@@ -195,6 +195,7 @@
     "validate:area-pages": "node scripts/validators/validate_area_pages.js",
     "build:service-ai-images": "node scripts/generators/build_service_ai_images.mjs",
     "service-pages:install": "node scripts/install_service_pages.js",
+    "build:focus-pages": "node scripts/generators/build_focus_pages.js",
     "validate:service-pages": "node scripts/validators/validate_service_pages.js"
   },
   "dependencies": {

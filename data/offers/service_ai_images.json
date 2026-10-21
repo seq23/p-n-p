@@ -119,6 +119,65 @@
         "giant-connect-four",
         "cornhole"
       ]
+    },
+    {
+      "file": "assets/img/celebrations/ai-hotel-anniversary-suite.webp",
+      "page": "hotel",
+      "alt": "Hotel suite bed scattered with red rose petals, white and gold balloons by the headboard, red roses and glowing candles for an anniversary",
+      "sha1": "54f5c12355db48e217b6abbc369edca02ea362eb",
+      "prompt": "Photorealistic photo of a hotel suite decorated for an anniversary: king bed with crisp white linens, red rose petals scattered across the bed, clusters of plain round white and gold balloons beside the headboard, a vase of red roses on the nightstand, glowing LED candles, warm evening light, empty room with no people, no signs, no lettering, no numbers, no text"
+    },
+    {
+      "file": "assets/img/celebrations/ai-hotel-proposal-candles.webp",
+      "page": "hotel",
+      "alt": "Path of red rose petals and candles in glass holders leading to a hotel bed with a bouquet of red roses, city lights in the window, for a proposal",
+      "sha1": "c84ed0d54a9761bf75fd9bfbaae8ebc274c59aa1",
+      "prompt": "Photorealistic photo of a hotel room set up for a marriage proposal: a path of red rose petals and glowing candles in glass holders leading across the carpet to the bed, a large bouquet of red roses on the bed, soft dim romantic light, city lights through the window, empty room with no people, no signs, no lettering, no text"
+    },
+    {
+      "file": "assets/img/celebrations/ai-hotel-birthday-balloons.webp",
+      "page": "hotel",
+      "alt": "Blush pink, rose gold and white balloon garland arching over a hotel headboard with a wrapped gift and small bouquet on the bed for a birthday",
+      "sha1": "085c99f48a5df2a2c7d33116c16fb6cd215a7cc0",
+      "prompt": "Photorealistic photo of a hotel room decorated for a birthday surprise: a blush pink, rose gold and white balloon garland arching over the headboard, plain round balloons with no print, wrapped gift boxes and a small flower bouquet on the bed, fairy lights, bright cheerful light, empty room with no people, no signs, no lettering, no numbers, no text"
+    },
+    {
+      "file": "assets/img/celebrations/ai-hotel-rose-heart-bed.webp",
+      "page": "hotel",
+      "alt": "Heart of red rose petals on a white hotel bed with rolled towels, a rose bouquet, red balloons and candles on both nightstands",
+      "sha1": "77d1820aa872bf90936fc9e81636230df00d8089",
+      "prompt": "Photorealistic photo of a hotel bed seen from the foot of the bed: a heart shape made of deep red rose petals on white sheets, two rolled white towels, a bouquet of red and white roses, candles glowing on both nightstands, plain red balloons with ribbons floating near the ceiling, empty room with no people, no lettering, no text"
+    },
+    {
+      "file": "assets/img/rentals/ai-lawn-connect-four-close.webp",
+      "page": "lawn",
+      "alt": "Four-foot Giant Connect Four with a blue frame and red and yellow discs standing on a sunny backyard lawn by a wooden fence",
+      "sha1": "39d273672cbc651a3bd2c69016bdf07342d0beb4",
+      "items": [
+        "giant-connect-four"
+      ],
+      "prompt": "Photorealistic photo of a four-foot tall giant connect four game with a blue frame and red and yellow discs standing on a green backyard lawn, wooden privacy fence and trees behind, sunny afternoon, no people, no hands, no other games, no text, no logos"
+    },
+    {
+      "file": "assets/img/rentals/ai-lawn-cornhole-bags.webp",
+      "page": "lawn",
+      "alt": "Natural wood cornhole board on green grass with a red and a blue bean bag beside the hole and the second board behind it",
+      "sha1": "ff56edcfeb2bcc623ce73bf663dedbefbbae5e95",
+      "items": [
+        "cornhole"
+      ],
+      "prompt": "Photorealistic close photo of a plain natural wood cornhole board on green grass with red and blue bean bags resting on the board and one bag near the hole, a second board in the soft background, sunny backyard, no people, no other games, no printing, no logos, no text"
+    },
+    {
+      "file": "assets/img/rentals/ai-lawn-cornhole-string-lights.webp",
+      "page": "lawn",
+      "alt": "Two wooden cornhole boards on a backyard lawn at dusk under string lights, with a Giant Connect Four in red and yellow behind them",
+      "sha1": "92c32e3d1557534c5ccf22f2d05e691725fd572e",
+      "items": [
+        "cornhole",
+        "giant-connect-four"
+      ],
+      "prompt": "Photorealistic photo of two plain wooden cornhole boards set up on a backyard lawn at dusk under glowing string lights, bean bags on the grass, a giant connect four game with red and yellow discs in the background, no people, no other games, no printing, no logos, no text"
     }
   ]
 }
