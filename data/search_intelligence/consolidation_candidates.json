@@ -2,21 +2,21 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-09-20..2026-10-17",
-  "coverage_collected_at": "2026-10-20T19:03:39.028261+00:00",
-  "url_count": 122,
+  "gsc_window": "2026-09-21..2026-10-18",
+  "coverage_collected_at": "2026-10-21T19:11:45.727092+00:00",
+  "url_count": 141,
   "roles": {
-    "candidate": 92,
+    "candidate": 111,
     "section_index": 7,
     "root": 6,
     "hub": 17
   },
   "candidates_with_impressions": 0,
   "candidates_by_hub": {
-    "/services/celebration-setups-memphis": 25,
+    "/services/celebration-setups-memphis": 34,
+    "/services/grazing-tables-memphis": 20,
     "/services/hotel-room-decor-memphis": 14,
-    "/services/grazing-tables-memphis": 12,
-    "/services/porch-decorating": 11,
+    "/services/porch-decorating": 13,
     "/services/birthday-party-decor-memphis": 9,
     "/services/birthday-party-planner-memphis": 6,
     "/services/baby-shower-decor-memphis": 3,
@@ -364,7 +364,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 507,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
@@ -490,12 +490,34 @@
       "fold_rule": "/./"
     },
     {
+      "url": "https://porchandparty901.com/areas/arlington-tn-grazing-tables",
+      "file": "areas/arlington-tn-grazing-tables.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 501,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
+      "fold_rule": "/grazing|charcuterie|corporate/"
+    },
+    {
       "url": "https://porchandparty901.com/areas/arlington-tn-party-decor",
       "file": "areas/arlington-tn-party-decor.html",
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 345,
+      "word_count": 438,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/arlington-tn-party-game-rentals",
+      "file": "areas/arlington-tn-party-game-rentals.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 715,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -506,10 +528,21 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 396,
+      "word_count": 489,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/bartlett-tn-grazing-tables",
+      "file": "areas/bartlett-tn-grazing-tables.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 508,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
+      "fold_rule": "/grazing|charcuterie|corporate/"
     },
     {
       "url": "https://porchandparty901.com/areas/bartlett-tn-party-decor",
@@ -517,7 +550,18 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 348,
+      "word_count": 441,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/bartlett-tn-party-game-rentals",
+      "file": "areas/bartlett-tn-party-game-rentals.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 722,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -528,10 +572,21 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 396,
+      "word_count": 489,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/collierville-tn-grazing-tables",
+      "file": "areas/collierville-tn-grazing-tables.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 501,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
+      "fold_rule": "/grazing|charcuterie|corporate/"
     },
     {
       "url": "https://porchandparty901.com/areas/collierville-tn-party-decor",
@@ -539,7 +594,18 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 348,
+      "word_count": 441,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/collierville-tn-party-game-rentals",
+      "file": "areas/collierville-tn-party-game-rentals.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 723,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -550,7 +616,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 396,
+      "word_count": 489,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
@@ -567,12 +633,34 @@
       "fold_rule": "/porch/"
     },
     {
+      "url": "https://porchandparty901.com/areas/germantown-tn-grazing-tables",
+      "file": "areas/germantown-tn-grazing-tables.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 503,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
+      "fold_rule": "/grazing|charcuterie|corporate/"
+    },
+    {
       "url": "https://porchandparty901.com/areas/germantown-tn-party-decor",
       "file": "areas/germantown-tn-party-decor.html",
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 344,
+      "word_count": 437,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/germantown-tn-party-game-rentals",
+      "file": "areas/germantown-tn-party-game-rentals.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 719,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -583,7 +671,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 396,
+      "word_count": 489,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
@@ -594,10 +682,21 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 779,
+      "word_count": 1485,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
+    },
+    {
+      "url": "https://porchandparty901.com/areas/lakeland-tn-grazing-tables",
+      "file": "areas/lakeland-tn-grazing-tables.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 503,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
+      "fold_rule": "/grazing|charcuterie|corporate/"
     },
     {
       "url": "https://porchandparty901.com/areas/lakeland-tn-party-decor",
@@ -605,7 +704,18 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 349,
+      "word_count": 442,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/lakeland-tn-party-game-rentals",
+      "file": "areas/lakeland-tn-party-game-rentals.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 717,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -616,10 +726,21 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 396,
+      "word_count": 489,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/memphis-tn-grazing-tables",
+      "file": "areas/memphis-tn-grazing-tables.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 519,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
+      "fold_rule": "/grazing|charcuterie|corporate/"
     },
     {
       "url": "https://porchandparty901.com/areas/memphis-tn-party-decor",
@@ -627,7 +748,18 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 359,
+      "word_count": 452,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/memphis-tn-party-game-rentals",
+      "file": "areas/memphis-tn-party-game-rentals.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 736,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -638,10 +770,21 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 404,
+      "word_count": 497,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
       "fold_rule": "/porch/"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/olive-branch-ms-grazing-tables",
+      "file": "areas/olive-branch-ms-grazing-tables.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 518,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
+      "fold_rule": "/grazing|charcuterie|corporate/"
     },
     {
       "url": "https://porchandparty901.com/areas/olive-branch-ms-party-decor",
@@ -649,10 +792,43 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 348,
+      "word_count": 447,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/olive-branch-ms-party-game-rentals",
+      "file": "areas/olive-branch-ms-party-game-rentals.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 742,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/olive-branch-ms-porch-decorating",
+      "file": "areas/olive-branch-ms-porch-decorating.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 683,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
+      "fold_rule": "/porch/"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/southaven-ms-grazing-tables",
+      "file": "areas/southaven-ms-grazing-tables.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 514,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/grazing-tables-memphis",
+      "fold_rule": "/grazing|charcuterie|corporate/"
     },
     {
       "url": "https://porchandparty901.com/areas/southaven-ms-party-decor",
@@ -660,10 +836,32 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 341,
+      "word_count": 434,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/southaven-ms-party-game-rentals",
+      "file": "areas/southaven-ms-party-game-rentals.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 735,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/areas/southaven-ms-porch-decorating",
+      "file": "areas/southaven-ms-porch-decorating.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 671,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/porch-decorating",
+      "fold_rule": "/porch/"
     },
     {
       "url": "https://porchandparty901.com/authority/event-decorator-memphis",
@@ -870,7 +1068,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 443,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
     },
@@ -1010,9 +1208,9 @@
       "url": "https://porchandparty901.com/",
       "file": "index.html",
       "role": "root",
-      "impressions_28d": 47,
+      "impressions_28d": 46,
       "clicks_28d": 0,
-      "word_count": 1461,
+      "word_count": 1477,
       "coverage_state": "Submitted and indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1095,12 +1293,23 @@
       "fold_rule": null
     },
     {
+      "url": "https://porchandparty901.com/rentals/giant-lawn-games-memphis",
+      "file": "rentals/giant-lawn-games-memphis.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 647,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
       "url": "https://porchandparty901.com/rentals/",
       "file": "rentals/index.html",
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1865,
+      "word_count": 1939,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1111,7 +1320,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 874,
+      "word_count": 995,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -1221,7 +1430,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 422,
+      "word_count": 821,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1265,7 +1474,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 366,
+      "word_count": 836,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1287,7 +1496,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 451,
+      "word_count": 551,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1298,7 +1507,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1143,
+      "word_count": 1207,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1331,7 +1540,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 768,
+      "word_count": 1097,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
