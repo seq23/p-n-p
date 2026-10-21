@@ -187,6 +187,18 @@
       "height": 900,
       "sha1": "5d22ce7fb51535bd4dcd225771dc4776beb44911",
       "original": "owner-provided teddy-jpeg.png (21 Oct 2026)"
+    },
+    {
+      "file": "assets/img/celebrations/owner-romantic-bedroom-homepage.webp",
+      "source": "owner",
+      "pages": [
+        "home"
+      ],
+      "alt": "Bedroom set up for a romantic surprise with a rose-petal heart on the bed, red, white and gold balloons, candles and a night city view through the window",
+      "width": 1122,
+      "height": 1402,
+      "sha1": "4e62206b913ab6a1c63fe1b2eca694a716b53c04",
+      "original": "owner-provided homepage-bed.jpeg (21 Oct 2026)"
     }
   ]
 }
