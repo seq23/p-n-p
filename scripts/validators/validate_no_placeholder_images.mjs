@@ -11,7 +11,11 @@
  *  3. a published page points at an /assets/img image that does not exist;
  *  4. a drawing's replacement photo is missing or is itself a drawing (old image URLs are not
  *     redirected: validate:link-reachability allows redirects to pages only);
- *  5. the thank-you email's service pictures are missing or a placeholder.
+ *  5. the thank-you email's service pictures are missing or a placeholder;
+ *  6. an AI picture (assets/img/<service>/ai-*.webp, owner-approved 21 Oct 2026) is not registered
+ *     in data/offers/service_ai_images.json with its exact sha1, or a registered one is missing,
+ *     outside assets/img/<service>/ai-*.webp, or a placeholder drawing. Approved pictures pass by
+ *     their hash, one by one; anything else stays banned.
  * Rule 0: fewer than 100 pages scanned, 20 images hashed or 9 placeholders known is a failure.
  */
 import fs from 'node:fs';
@@ -79,7 +83,20 @@ const refImgs = [...msgs.slice(msgs.indexOf('REFERRAL_SERVICES = ['), msgs.index
 must(refImgs.length === 4, `the thank-you email has ${refImgs.length} service pictures, not 4`);
 for (const p of refImgs) must(fs.existsSync(path.join(ROOT, p)) && fs.statSync(path.join(ROOT, p)).size < 40000, `thank-you email picture ${p} is missing or too heavy for an email`);
 
+// 6. AI pictures: approved one by one, by hash.
+const AI = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/service_ai_images.json'), 'utf8'));
+const reg = new Map(AI.images.map((i) => [i.file, i.sha1]));
+const sha = (f) => crypto.createHash('sha1').update(fs.readFileSync(path.join(ROOT, f))).digest('hex');
+const aiFiles = images.filter((f) => /^assets\/img\/[a-z]+\/ai-[a-z0-9-]+\.webp$/.test(f) || /(^|\/)ai-[^/]*$/.test(f));
+must(reg.size >= 12, `only ${reg.size} AI pictures registered (3+ per service page)`);
+for (const f of aiFiles) must(reg.has(f) && reg.get(f) === sha(f), `${f} is an AI picture that is not registered with its sha1 in data/offers/service_ai_images.json`);
+for (const [f, h] of reg) {
+  must(/^assets\/img\/[a-z]+\/ai-[a-z0-9-]+\.webp$/.test(f), `${f}: registered AI pictures live at assets/img/<service>/ai-*.webp`);
+  must(/^[0-9a-f]{40}$/.test(h) && !bad.has(h), `${f}: registered hash is malformed or a placeholder drawing`);
+  must(fs.existsSync(path.join(ROOT, f)), `${f}: registered but missing`);
+}
+
 if (pages < 100) errors.push(`Rule 0: only ${pages} pages scanned`);
 if (images.length < 20) errors.push(`Rule 0: only ${images.length} images hashed`);
 if (errors.length) { console.error(`VALIDATION FAIL: placeholder images (${errors.length})\n${errors.map((e) => `- ${e}`).join('\n')}`); process.exit(1); }
-console.log(`validate_no_placeholder_images: OK (${checks} checks: ${pages} pages and every source file free of the ${olds.length} placeholder drawings, ${images.length} images hashed, no missing page images, drawings deleted, replacements real, thank-you email pictures real and light)`);
+console.log(`validate_no_placeholder_images: OK (${checks} checks: ${pages} pages and every source file free of the ${olds.length} placeholder drawings, ${images.length} images hashed, no missing page images, drawings deleted, replacements real, thank-you email pictures real and light, ${aiFiles.length} AI pictures each registered by hash)`);

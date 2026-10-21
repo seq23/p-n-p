@@ -1,0 +1,124 @@
+{
+  "_why": "Owner ruling 21 Oct 2026: AI-generated photorealistic pictures on the four service pages, no captions (owner ruling 21 Oct 2026: no \"Example styling\" caption), descriptive alt text, never presented as a past customer job. Generated at $0 with Workers AI @cf/black-forest-labs/flux-1-schnell (free allowance, the same model as assets/rentals) by scripts/generators/build_service_ai_images.mjs, center-cropped to 1024x768 WebP. Each picture was checked by eye: no faces, no text, no logos; rental pictures show only availableNow items (owner ruling 21 Oct 2026), listed in items. sha1 pins the approved bytes: scripts/validators/validate_no_placeholder_images.mjs and validate_service_pages.js fail on any ai-*.webp that is not registered here with its hash.",
+  "model": "@cf/black-forest-labs/flux-1-schnell",
+  "images": [
+    {
+      "file": "assets/img/porch/ai-christmas-porch.webp",
+      "page": "porch",
+      "alt": "Front door framed in lit evergreen garland with a red-bow wreath, lanterns, small potted trees and wrapped gifts for Christmas",
+      "sha1": "d857aab7ababc79d3d80e5996f354f23fdf1fd0c",
+      "prompt": "Photorealistic photo of a front porch decorated for Christmas: lush evergreen garland with warm white lights framing the front door, a large wreath with a red velvet bow, lit lanterns, small potted evergreen trees, wrapped gift boxes, evening blue hour, no people, no text"
+    },
+    {
+      "file": "assets/img/porch/ai-fall-porch.webp",
+      "page": "porch",
+      "alt": "Brick front porch styled for fall with stacked orange and white pumpkins, mums, cornstalks, lanterns and an autumn wreath",
+      "sha1": "7019508f97acf0f85e81ccb67c5497423bb6b13d",
+      "prompt": "Photorealistic photo of a southern brick home front porch decorated for fall: stacked orange and white pumpkins of varied sizes on the steps, mums in planters, a eucalyptus and autumn leaf wreath on the front door, lanterns, cornstalks, warm late afternoon light, no people, no text"
+    },
+    {
+      "file": "assets/img/porch/ai-halloween-porch.webp",
+      "page": "porch",
+      "alt": "Black front door with a black wreath, white pumpkins and candle lanterns styled for Halloween",
+      "sha1": "911cd3ebd54751eaf27d130c470312f55edf3f89",
+      "prompt": "Photorealistic photo of a front porch decorated for Halloween in an elegant way: black and white pumpkins, lanterns with candles, black wreath on the door, autumn branches, dusk lighting, no people, no text"
+    },
+    {
+      "file": "assets/img/porch/ai-spring-porch.webp",
+      "page": "porch",
+      "alt": "White front door with a greenery wreath, hanging ferns, potted tulips and a white rocking chair styled for spring",
+      "sha1": "f57b49b6ae762016d2c39b5a14bb57b8e622bbd1",
+      "prompt": "Photorealistic photo of a front porch styled for spring: white painted door, hanging ferns, terracotta pots of tulips and hydrangeas, a fresh greenery wreath, a white rocking chair, painted wood porch floor, soft morning light, no doormat, no people, no text"
+    },
+    {
+      "file": "assets/img/celebrations/ai-anniversary-dinner.webp",
+      "page": "party",
+      "alt": "Candlelit table for two with a red rose centerpiece and gold balloons for an anniversary at home",
+      "sha1": "863b94b3f3ee2608f114e9cbf0c2dcc567d9e48a",
+      "prompt": "Photorealistic photo of a romantic anniversary setup in a home dining room: table for two with white linen, taper candles, red rose centerpiece, plain round gold and white balloons floating in the corner, warm evening light, empty room with no people, no signs, no lettering, no text"
+    },
+    {
+      "file": "assets/img/celebrations/ai-baby-shower-setup.webp",
+      "page": "party",
+      "alt": "Sage green and cream balloon arch over a draped backdrop with a dessert table and rattan chair for a baby shower",
+      "sha1": "f8e2062871d549330293e67911ec9720987fd5ef",
+      "prompt": "Photorealistic photo of a baby shower decor setup: sage green and cream balloon garland around a round arch backdrop, a styled dessert table with flowers, a woven chair, soft natural light, no people, no text, no letters"
+    },
+    {
+      "file": "assets/img/celebrations/ai-birthday-balloon-arch.webp",
+      "page": "party",
+      "alt": "Blush, gold and white balloon garland arch over a white backdrop with a flower-topped cake and gift boxes for a birthday",
+      "sha1": "fcafb1a8d2cb12a5b6d6fae3b9ed98235325be99",
+      "prompt": "Photorealistic photo of an indoor birthday party setup in a living room: organic balloon garland arch in blush pink, gold and white over a plain white draped backdrop, a plain white frosted cake with fresh flowers on a gold stand, gift boxes, empty room, no people, no cake topper, no signs, no lettering, no text"
+    },
+    {
+      "file": "assets/img/celebrations/ai-hotel-room-rose-petals.webp",
+      "page": "party",
+      "alt": "Hotel room bed with red rose petals in a heart, red balloons by the headboard and candles on the nightstands",
+      "sha1": "de98f008657d8520d0daf94acc4f8aebfc224743",
+      "prompt": "Photorealistic photo of a romantic hotel room surprise setup: king bed with white linens covered in red rose petals arranged in a heart, red and white balloons floating by the headboard, candles on the nightstands, bouquet of red roses, warm dim lighting, no people, no text"
+    },
+    {
+      "file": "assets/img/grazing/ai-brunch-grazing.webp",
+      "page": "grazing",
+      "alt": "Brunch grazing table with croissants, berries, fruit, pastries and pastel flowers for a bridal shower",
+      "sha1": "ba2ebec2ea707d4d0a4212a68395395885c8f6d5",
+      "prompt": "Photorealistic photo of a brunch grazing table for a bridal shower: croissants, fresh fruit, berries, mini pastries, cheeses, flowers in pastel colors, bright daylight, no people, no text"
+    },
+    {
+      "file": "assets/img/grazing/ai-charcuterie-table.webp",
+      "page": "grazing",
+      "alt": "Long event table lined with wooden charcuterie boards of cheese, salami, olives, grapes and greenery with candles",
+      "sha1": "384f78bdb0572f26540365237d0a344a38768225",
+      "prompt": "Photorealistic photo of an elegant charcuterie table set up in an empty event room before guests arrive: wooden boards with cheeses, salami roses, olives, grapes, breads, candles and eucalyptus greenery on a long white table, warm light, no people, no hands, no text"
+    },
+    {
+      "file": "assets/img/grazing/ai-grazing-table.webp",
+      "page": "grazing",
+      "alt": "Grazing table spread of cheeses, cured meats, crackers, grapes, figs, berries, nuts and edible flowers on parchment",
+      "sha1": "20492ea91da8e3ae6e4094a426b05130e4bfebe4",
+      "prompt": "Photorealistic close-up photo of an abundant grazing table spread: cheeses, cured meat folds, crackers, grapes, strawberries, figs, nuts and edible flowers arranged on brown parchment over a wooden table, natural window light, food only filling the whole frame, no people, no hands, no utensils, no text"
+    },
+    {
+      "file": "assets/img/rentals/ai-connect-four-backyard.webp",
+      "page": "rentals",
+      "alt": "Giant Connect Four with red and yellow discs standing on a backyard lawn by a wooden fence",
+      "sha1": "917619b641c912af83ee987a2c57fb45b8da9245",
+      "prompt": "Photorealistic photo of a giant connect four game, a large blue plastic vertical grid frame about four feet tall with red and yellow discs, standing on a green lawn in a suburban Memphis backyard with a wooden fence and string lights, sunny afternoon, no people, no text",
+      "items": [
+        "giant-connect-four"
+      ]
+    },
+    {
+      "file": "assets/img/rentals/ai-cornhole-backyard.webp",
+      "page": "rentals",
+      "alt": "Two wooden cornhole boards facing each other on a backyard lawn with bean bags and string lights",
+      "sha1": "13fde7e770f931a258e33e340987044a5c4ef548",
+      "prompt": "Photorealistic photo of two wooden cornhole boards with round holes facing each other on a green lawn in a suburban backyard, red and blue bean bags on the grass, string lights and shade trees, golden hour, no people, no text, no logos",
+      "items": [
+        "cornhole"
+      ]
+    },
+    {
+      "file": "assets/img/rentals/ai-movie-screen-backyard.webp",
+      "page": "rentals",
+      "alt": "Inflatable outdoor movie screen set up in a backyard at dusk with blankets and pillows on the lawn",
+      "sha1": "53e8852b280101bcd0e497f3d184ba82a143e447",
+      "prompt": "Photorealistic photo of a white inflatable outdoor movie screen set up in a suburban backyard at dusk, blank glowing screen, blankets and pillows on the lawn, string lights, no people, no text",
+      "items": [
+        "inflatable-movie-screen"
+      ]
+    },
+    {
+      "file": "assets/img/rentals/ai-yard-games-party.webp",
+      "page": "rentals",
+      "alt": "Backyard set up for a party with a Giant Connect Four and two cornhole boards on the lawn at golden hour",
+      "sha1": "93973d9329e325543dae9c0872fdf1e6d0b68775",
+      "prompt": "Photorealistic photo of a suburban Memphis backyard set up for a party with a giant blue connect four frame with red and yellow discs on the left and two wooden cornhole boards on the right lawn, string lights, picnic tables in the background, golden hour, no people, no text, no logos",
+      "items": [
+        "giant-connect-four",
+        "cornhole"
+      ]
+    }
+  ]
+}

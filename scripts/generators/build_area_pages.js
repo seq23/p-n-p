@@ -47,6 +47,7 @@ const siteChrome = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
 const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js'));
 const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js'));
 const { nav, footer } = require(path.join(ROOT, 'templates/page-shell.js'));
+const BO = require(path.join(ROOT, 'scripts/lib/book_online.js'));
 
 const DOMAIN = offers.domain;
 const RENTALS = INV.resolve(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8')));
@@ -81,6 +82,16 @@ const porchFrom = Math.min(...PK.seasons.flatMap((s) => Object.values(s.tiers).m
 const grazeFrom = Math.min(...GRAZE.tiers.map((t) => t.from));
 const bundleFrom = Math.min(...bundles.map((b) => b.dayPrice));
 
+/** The /request ?service= key per area service (Book online preselects it; owner ruling 21 Oct 2026). */
+const REQUEST_KEY = { 'porch-decorating': 'porch', 'party-decor': 'party', 'grazing-tables': 'grazing', 'party-game-rentals': 'rentals' };
+/** The one service page per service (scripts/lib/service_pages.js), plus its named sub-section. */
+const SERVICE_PAGE = {
+  'porch-decorating': { href: '/services/porch-decorating', label: 'Porch decorating' },
+  'party-decor': { href: '/services/celebration-setups', label: 'Party planning and decor', sub: { href: '/services/celebration-setups#hotel-room-setups', label: 'Hotel Room Setups' } },
+  'grazing-tables': { href: '/services/grazing-and-event-styling', label: 'Grazing tables' },
+  'party-game-rentals': { href: '/rentals/', label: 'Party game rentals', sub: { href: '/rentals/#giant-lawn-games', label: 'Giant Lawn Games' } },
+};
+
 /** "From" price per service, as the sibling block and validate:area-pages state it. */
 const FROM = {
   'porch-decorating': `from ${money(porchFrom)}`,
@@ -113,7 +124,8 @@ function siblingsBlock(city, current) {
       ? `<li aria-current="page"><strong>${label}</strong> <span class="muted">(${price}, this page)</span></li>`
       : `<li><a href="${urlOf(city, svc)}">${label}</a> <span class="muted">(${price})</span></li>`;
   }).join('');
-  return `<!--area-siblings--><section class="section" data-area-siblings="${city.slug}"><div class="container"><div class="answer-block"><span class="eyebrow">More in ${esc(city.name)}</span><h2>Every Porch &amp; Party service in ${esc(city.name)}, ${city.state}</h2></div><ul class="area-siblings">${items}</ul><p><a href="/areas/">All service areas</a> &middot; <a href="${QUOTE}"${QA}>Request a Quote</a> &middot; <a href="/pricing">Pricing</a></p></div></section><!--/area-siblings-->`;
+  const pages = SERVICE_KEYS.map((svc) => { const sp = SERVICE_PAGE[svc]; return `<a href="${sp.href}" data-service-page-link="${svc}">${sp.label}</a>${sp.sub ? ` (<a href="${sp.sub.href}">${sp.sub.label}</a>)` : ''}`; }).join(' &middot; ');
+  return `<!--area-siblings--><section class="section" data-area-siblings="${city.slug}"><div class="container"><div class="answer-block"><span class="eyebrow">More in ${esc(city.name)}</span><h2>Every Porch &amp; Party service in ${esc(city.name)}, ${city.state}</h2></div><ul class="area-siblings">${items}</ul><p class="area-service-pages">Our four services: ${pages}</p><p><a href="/areas/">All service areas</a> &middot; <a href="${QUOTE}"${QA}>Request a Quote</a> &middot; <a href="/pricing">Pricing</a></p></div></section><!--/area-siblings-->`;
 }
 
 const SIBLINGS_RE = /<!--area-siblings-->[\s\S]*?<!--\/area-siblings-->/;
@@ -349,7 +361,7 @@ ${footer()}
 </body>
 </html>
 `;
-  return normalizeHtmlUrls(html);
+  return BO.applyBookOnline(normalizeHtmlUrls(html), REQUEST_KEY[svc], pathUrl);
 }
 
 // --- llms section -------------------------------------------------------------------
@@ -378,7 +390,7 @@ function plan() {
       let html;
       if (LEGACY.has(slugOf(city, svc))) {
         if (onDisk == null) throw new Error(`${rel} is a baseline page and is missing`);
-        html = stampSiblings(onDisk, city, svc, rel);
+        html = BO.applyBookOnline(stampSiblings(onDisk, city, svc, rel), REQUEST_KEY[svc], rel);
       } else {
         if (!CONTENT[svc]) throw new Error(`${rel}: no generator for service ${svc}`);
         html = renderPage(city, svc, i);
@@ -405,4 +417,4 @@ if (require.main === module) {
   console.log(`area pages: ${work.length - LLMS_FILES.length} city x service pages (${LEGACY.size} baseline, ${work.length - LLMS_FILES.length - LEGACY.size} generated), ${changed.length} file(s) written`);
 }
 
-module.exports = { SERVICE_KEYS, LEGACY, FROM, cities, slugOf, relOf, urlOf, siblingsBlock, plan, games, bundles, RATE, GRAZE, porchFrom, grazeFrom, PICK, SAFETY };
+module.exports = { SERVICE_KEYS, REQUEST_KEY, SERVICE_PAGE, LEGACY, FROM, cities, slugOf, relOf, urlOf, siblingsBlock, plan, games, bundles, RATE, GRAZE, porchFrom, grazeFrom, PICK, SAFETY };

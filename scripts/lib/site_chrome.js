@@ -3,8 +3,10 @@
  * The one definition of the site header (desktop row + mobile menu panel), the
  * footer Rentals link and the nav stylesheet link, for every published page.
  *
- * Owner ruling 2026-10-13: the nav is Porch · Celebrations · Grazing & Events ·
- * Rentals · Pricing · How It Works · FAQ (FAQ added by owner ruling 2026-10-17), then "Request a Quote" and
+ * Owner ruling 2026-10-13: the nav is Porch · Celebrations · Grazing Tables (was Grazing & Events until
+ * the four-services ruling of 2026-10-21) ·
+ * Rentals · Pricing · How It Works · FAQ (FAQ added by owner ruling 2026-10-17), then "Book online" (was
+ * "Request a Quote" until 2026-10-21; also visible beside the menu button on phones) and
  * "Call or text 901-355-1518", identical on EVERY page, frozen ones included.
  *
  * Owner ruling 2026-10-15, retargeted 2026-10-18: every quote call-to-action opens the quote form
@@ -41,14 +43,16 @@ const C = offers.contact;
 const NAV_ITEMS = Object.freeze([
   { href: '/services/porch-decorating', label: 'Porch' },
   { href: '/services/celebration-setups', label: 'Celebrations' },
-  { href: '/services/grazing-and-event-styling', label: 'Grazing &amp; Events' },
+  { href: '/services/grazing-and-event-styling', label: 'Grazing Tables' },
   { href: '/rentals/', label: 'Rentals' },
   { href: '/pricing', label: 'Pricing' },
   { href: '/how-it-works', label: 'How It Works' },
   { href: '/faq/', label: 'FAQ' }
 ]);
 // /request is the site's own page, so it opens in the same tab (no target/rel).
-const QUOTE = Object.freeze({ href: offers.quoteUrl, label: 'Request a Quote', attrs: '' });
+// Owner ruling 2026-10-21: the header button reads "Book online" (the /request form books every
+// service) and shows at every width, phone included, never only inside the menu.
+const QUOTE = Object.freeze({ href: offers.quoteUrl, label: 'Book online', attrs: '' });
 /** QUOTE.attrs with its leading space ('' when none), for `<a href="..." class="x"${QUOTE_ATTRS}>`. */
 const QUOTE_ATTRS = QUOTE.attrs ? ` ${QUOTE.attrs}` : '';
 // The retired Google Form (owner, 2026-10-18): kept as the owner's fallback, linked nowhere.
@@ -137,6 +141,7 @@ function header(currentPath) {
     + `<nav class="site-nav pnp-nav" aria-label="Primary navigation">${items}</nav>`
     + `<div class="pnp-actions">${quote('btn-primary pnp-quote')}`
     + `<a href="${C.telHref}" class="header-call pnp-call" data-contact="header-call">${PHONE_SVG}<span class="pnp-call-lead">Call or text </span><span class="pnp-call-num">${C.telephoneDisplay}</span></a></div>`
+    + `${quote('pnp-book-m')}`
     + `<a href="${C.telHref}" class="pnp-icon-call" aria-label="${CALL_LABEL}">${PHONE_SVG}</a>`
     + `<a href="#site-menu" class="pnp-toggle" aria-controls="site-menu" aria-label="Open menu">${BURGER_SVG}</a>`
     + `<button type="button" class="pnp-toggle" aria-expanded="false" aria-controls="site-menu" aria-label="Open menu" hidden>${BURGER_SVG}</button>`

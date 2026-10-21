@@ -27,6 +27,8 @@ const BDL = BD.businessDeliveryLine(offers); // business delivery, priced from s
 const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js'));
 const siteIcons = require(path.join(ROOT, 'scripts/lib/site_icons.js'));
 const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
+const SP = require(path.join(ROOT, 'scripts/lib/service_pages.js'));
+const LAWN = SP.PAGES.find((p) => p.key === 'rentals').sections().find((x) => x.id === 'giant-lawn-games');
 // Resolved (scripts/lib/inventory.js): the all-games bundles carry every available public game at
 // its quantity and say "All games (available now: N)"; a bundle whose items are removed is off.
 const RAW_TEXT = fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8');
@@ -231,7 +233,8 @@ function render() {
           <span class="eyebrow">Party Game Rentals in Memphis</span>
           <h1>${H1}</h1>
           <p id="what-are-porch-and-party-rentals">Porch &amp; Party rents ${esc(INV.rentalsPhrase(data))} for backyard parties, birthdays, family reunions, church and school events in Memphis, Olive Branch and Southaven. You pick up and return at ${esc(PICK.place)}, a safe exchange zone. Every game is ${money(RATE.day)} a day${PICK3 ? `, or pick 3 for ${money(PICK3.dayPrice)}` : ''}, with no minimum order.</p>
-          <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary" data-quote-cta="rentals-top">Book your games</a><a href="#games" class="btn-secondary">See the Rentals</a></div>
+          <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary btn-book" data-quote-cta="rentals-top" data-book-online="hero">Book online</a><a href="#games" class="btn-secondary">See the Rentals</a></div>
+          <p class="muted book-online-line" data-book-online-line>Book your games: pick your games and dates on the booking form; it shows what is free and your exact total.</p>
           <p class="muted" style="margin-top: 14px;"><a href="${C.telHref}">Call or text ${C.telephoneDisplay}</a></p>
         </div>
         <div class="card-media" style="margin-top: 28px; border-radius: 22px; overflow: hidden;"><img src="${data.hero.file}" alt="${esc(data.hero.alt)}" width="1600" height="900" fetchpriority="high" decoding="async" style="width: 100%; height: auto; display: block;"/></div>
@@ -244,6 +247,13 @@ function render() {
         <div class="cards-grid">${ITEMS.map(itemCard).join('')}</div>
       </div>
     </section>
+
+    <!--service-page--><section class="section" id="giant-lawn-games" data-service-page="rentals">
+      <div class="container">
+        <div class="answer-block"><span class="eyebrow">Giant Yard Games</span><h2>${LAWN.h2}</h2>${LAWN.body}</div>
+        ${SP.gallery('rentals')}
+      </div>
+    </section><!--/service-page-->
 
     <section class="section" id="bundles">
       <div class="container">
@@ -280,6 +290,7 @@ function render() {
       <div class="container">
         <div class="answer-block"><span class="eyebrow">FAQ</span><h2>Party game rental questions</h2><p>Every question for every service, with the grazing and porch estimators, is on the <a href="/faq/#rentals">FAQ page</a>.</p></div>
         <div class="faq-list">${FAQ.map(([q, a]) => `<div class="faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></div>`).join('')}</div>
+        <div class="btn-row centered-cta-row"><a href="${FORM_URL}" class="btn-primary btn-book" data-quote-cta="rentals-faq" data-book-online="after-faq">Book online</a><a href="/pricing" class="btn-secondary">See Pricing</a></div>
       </div>
     </section>
 
