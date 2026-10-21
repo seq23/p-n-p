@@ -32,6 +32,11 @@
 //   YELLOW  hand-overs not ticked (pickup, delivery, setup, install, grazing drop-off): ONE quiet
 //           line at the very bottom, "Tidy up: N step(s) to tick off (<who>'s <step>, ...). Open
 //           admin". Never in the subject, never in the red box.
+// LAST of all (owner decision, 20 Oct 2026; id-auto.mjs): a calm box, never red and never in the
+// subject, "🪪 IDs that delete themselves this week": every website-form ID whose day is within 7
+// days ("Riley M. — Mon 26 Oct", Keep it longer -> the /admin/requests/id/keep confirm screen,
+// Open card) and "Nothing to do if that's fine. It happens by itself." It shows on an All clear day
+// too, under the All clear.
 // then "Tomorrow, <day>" and, on Mondays, "Your week" (weekly.mjs figures; the Settings switch
 // weekly_summary = include it). Nothing red, nothing yellow, nothing in 1-5 and nothing tomorrow:
 // the email says only "All clear today" (never while a red item exists). Only yellow: the email
@@ -52,6 +57,7 @@ import { render as renderMessage } from './messages.mjs';
 import { weeklyData } from './weekly.mjs';
 import { getSettings, money, esc, b64urlText, FROM_EMAIL, isEnded } from './util.mjs';
 import { useInventory } from './inventory.mjs';
+import { idsDueSoon, EMAIL_TITLE as IDS_TITLE, EMAIL_FOOT as IDS_FOOT } from './id-auto.mjs';
 
 const SITE = 'https://porchandparty901.com';
 export const TODO_HOUR = 7;
@@ -242,7 +248,10 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const w = await weeklyData(db, today, nowMs);
     week = { newRequests: w.last.total, jobsDone: w.last.jobsDone, moneyIn: w.last.received, tips: w.last.tips || 0, expenses: w.last.expenses, next14: w.upcomingJobs };
   }
-  return { today, tomorrow, monday, missed, tidy, sections: { 1: jobs, 2: callbacks, 3: setTime, 4: decide, 5: moneyItems }, tomorrowJobs, week };
+  // Last box: IDs that delete themselves within 7 days (id-auto.mjs idsDueSoon).
+  const ids = (await idsDueSoon(db, today)).map(({ r, day }) => ({ key: r.key, day, t: `${shortName(r.name)} — ${dayWords(day)}`,
+    btns: [{ label: 'Keep it longer', href: `/admin/requests/id/keep?r=${b64urlText(r.key)}` }, { label: 'Open card', href: cardHref(r.key) }] }));
+  return { today, tomorrow, monday, missed, tidy, ids, sections: { 1: jobs, 2: callbacks, 3: setTime, 4: decide, 5: moneyItems }, tomorrowJobs, week };
 }
 
 const nothingElse = (d) => !(d.missed || []).length && [1, 2, 3, 4, 5].every((n) => !d.sections[n].length) && !d.tomorrowJobs.length;
@@ -289,8 +298,19 @@ function weekHtml(w) {
   return `<div data-week>${headHtml('★', 'Your week (Monday summary)', C.muted)}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-left:38px;width:calc(100% - 38px);font-size:15px;">${rows}</table></div>`;
 }
 
+// The IDs box (calm: the soft panel, never red), html + plain text.
+function idsHtml(list) {
+  if (!list || !list.length) return '';
+  return `<div data-ids-week style="background:${C.soft};border:1px solid ${C.line};border-radius:10px;padding:12px 14px;margin:20px 0 0;">`
+    + `<div style="font-weight:700;font-size:16px;margin:0 0 6px;">${esc(IDS_TITLE)}</div>`
+    + list.map((x) => `<div data-ids-item style="padding:6px 0;border-top:1px solid ${C.line};"><div style="font-weight:700;">${esc(x.t)}</div><div style="margin-top:6px;">${x.btns.map((b) => btnHtml(b)).join('')}</div></div>`).join('')
+    + `<p style="margin:8px 0 0;color:${C.muted};font-size:15px;">${esc(IDS_FOOT)}</p></div>`;
+}
+const idsText = (list) => (list && list.length ? ['', IDS_TITLE.replace(/^(\S+) (.*)$/, (m, a, b) => `${a} ${b.toUpperCase()}`), ...list.flatMap((x) => [`- ${x.t}`, ...x.btns.map((b) => `  ${b.label}: ${abs(b.href)}`)]), IDS_FOOT] : []);
+
 export function renderTodo(d) {
   const missed = d.missed || [];
+  const ids = d.ids || [];
   const tidy = d.tidy || [];
   const subject = `${subjectWarning(missed)}Your to-do list for ${dayWords(d.today)} · Porch & Party`;
   const tidyHtml = tidy.length ? `<div data-tidy style="border-top:1px solid ${C.line};margin:20px 0 0;padding-top:10px;color:${C.muted};font-size:15px;">${esc(tidyLine(tidy))} <a href="${SITE}/admin/" style="color:${C.accent};font-weight:700;">Open admin</a></div>` : '';
@@ -299,14 +319,14 @@ export function renderTodo(d) {
   const T = [];
   const weekText = (w) => ['', 'YOUR WEEK (MONDAY SUMMARY)', ...WEEK_ROWS(w).map(([k, v]) => `- ${k}: ${v}`)];
   if (isAllClear(d)) {
-    const html = page(`<div data-all-clear style="text-align:center;padding:30px 0;font-family:${SERIF};font-size:28px;font-weight:600;color:${C.ok};">All clear today</div>${d.week ? `${HR}${weekHtml(d.week)}` : ''}`);
-    return { subject, html, text: ['All clear today', ...(d.week ? weekText(d.week) : [])].join('\n') };
+    const html = page(`<div data-all-clear style="text-align:center;padding:30px 0;font-family:${SERIF};font-size:28px;font-weight:600;color:${C.ok};">All clear today</div>${d.week ? `${HR}${weekHtml(d.week)}` : ''}${idsHtml(ids)}`);
+    return { subject, html, text: ['All clear today', ...(d.week ? weekText(d.week) : []), ...idsText(ids)].join('\n') };
   }
   const H = [`<h1 style="font-family:${SERIF};font-size:26px;line-height:1.2;font-weight:600;margin:0 0 6px;">Good morning, Valerie</h1><p style="margin:0 0 20px;color:${C.muted};">Here is what needs you today, in order.</p>`];
   T.push('Good morning, Valerie', 'Here is what needs you today, in order.');
   if (isTidyOnly(d)) {
-    H.push(tidyHtml, d.week ? `${HR}${weekHtml(d.week)}` : '', footHtml);
-    T.push(...tidyText, ...(d.week ? weekText(d.week) : []), '', `Open the admin: ${SITE}/admin/ · This email comes every day at 7 AM.`);
+    H.push(tidyHtml, d.week ? `${HR}${weekHtml(d.week)}` : '', idsHtml(ids), footHtml);
+    T.push(...tidyText, ...(d.week ? weekText(d.week) : []), ...idsText(ids), '', `Open the admin: ${SITE}/admin/ · This email comes every day at 7 AM.`);
     return { subject, html: page(H.join('')), text: T.join('\n') };
   }
   if (missed.length) {
@@ -340,8 +360,8 @@ export function renderTodo(d) {
   H.push(`<div data-tomorrow style="background:${C.soft};border-radius:10px;padding:12px 14px;margin:20px 0 0;font-size:15px;"><div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:${C.muted};font-weight:700;">Tomorrow, ${esc(dayWords(d.tomorrow))}</div>${tom}</div>`);
   T.push('', `TOMORROW, ${dayWords(d.tomorrow).toUpperCase()}`, ...(d.tomorrowJobs.length ? d.tomorrowJobs.map((j) => `- ${j.t}`) : ['Nothing booked.']));
   if (d.week) { H.push(`${HR}${weekHtml(d.week)}`); T.push(...weekText(d.week)); }
-  H.push(tidyHtml, footHtml);
-  T.push(...tidyText);
+  H.push(tidyHtml, idsHtml(ids), footHtml);
+  T.push(...tidyText, ...idsText(ids));
   T.push('', `Open the admin: ${SITE}/admin/ · This email comes every day at 7 AM.`);
   return { subject, html: page(H.join('')), text: T.join('\n') };
 }

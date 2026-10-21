@@ -188,8 +188,16 @@ if (partyInv) { await s.post(`/admin/invoices/${partyInv.id}/status`, { action: 
 dash = await s.get('/admin/');
 const ready = dash.text.slice(dash.text.indexOf('data-ids-ready'), dash.text.indexOf('</section>', dash.text.indexOf('data-ids-ready')));
 must(ready.includes('Casey Path2') && !ready.includes('Casey Path1') && !ready.includes('Casey Path4'), 'IDs ready to delete does not list exactly the paid-in-full requests');
-// Nothing deletes an ID by itself: no code path deletes from IDS except the button.
-must(libSrc.filter(([, t]) => /IDS\.delete\(/.test(t)).map(([f]) => f).join() === 'admin.mjs' && !fs.readFileSync(path.join(ROOT, 'workers/pnp-mailer/src/index.js'), 'utf8').includes('IDS'), 'an ID can be deleted by something other than the Delete this ID button');
+// ONE code path deletes an ID (owner decision, 20 Oct 2026: IDs delete themselves 90 days after
+// they are ready): only id-auto.mjs deleteIdNow calls IDS.delete; the button (admin.mjs deleteId)
+// and the pnp-mailer cron (autoDeleteIds) both go through it, and nothing else in the mailer does.
+const mailerSrc = fs.readFileSync(path.join(ROOT, 'workers/pnp-mailer/src/index.js'), 'utf8');
+const iaSrc = (libSrc.find(([f]) => f === 'id-auto.mjs') || [, ''])[1];
+const adminSrc = (libSrc.find(([f]) => f === 'admin.mjs') || [, ''])[1];
+must(libSrc.filter(([, t]) => /IDS\.delete\(/.test(t)).map(([f]) => f).join() === 'id-auto.mjs' && (iaSrc.match(/IDS\.delete\(/g) || []).length === 1
+  && /export async function deleteIdNow[\s\S]{0,200}IDS\.delete\(/.test(iaSrc) && /autoDeleteIds[\s\S]*deleteIdNow\(env, r\.key/.test(iaSrc)
+  && /async function deleteId\(env, request\)[\s\S]{0,900}IA\.deleteIdNow\(/.test(adminSrc)
+  && !/IDS\.delete/.test(mailerSrc) && /autoDeleteIds\(env/.test(mailerSrc), 'an ID can be deleted by something other than the one deleteIdNow path (the button and the hourly cron)');
 
 // ---- 4. Holds, availability, draft invoice ----------------------------------------------
 const rent = made.rentals;

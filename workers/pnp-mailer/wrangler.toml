@@ -25,3 +25,10 @@ crons = ["0 * * * *"]
 binding = "DB"
 database_name = "pnp-admin"
 database_id = "a78e157d-177d-44a0-9418-dcfa6e735bd0"
+
+# The private ID-photo bucket (same as the Pages project's IDS): the hourly run deletes each
+# website-form ID 90 days after it is ready (functions/_lib/id-auto.mjs, migration 0022).
+# Google-form IDs live in Drive and are never touched.
+[[r2_buckets]]
+binding = "IDS"
+bucket_name = "pnp-ids"

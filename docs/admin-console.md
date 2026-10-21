@@ -11,9 +11,11 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   rows were tests: they stay in the sheet only. The Google Sheet is the archive and sync target
   (new tab `Site requests`); `Form Responses 1` is never written. Each card shows contact, DOB,
   the ID (site: a private photo, signed-in view; old form: the Drive link), "Agreed to rules on
-  ...", "Referred by ...", every answer and the progress line. "Delete this ID" (asked first,
-  permanent, logged) is the only way an ID is ever deleted; "IDs ready to delete" lists requests
-  paid in full (rentals: returned). The top shows the week banner ("This week: N new · last week M",
+  ...", "Referred by ...", every answer and the progress line. "IDs ready to delete" lists requests
+  paid in full (rentals: returned) or cancelled; a website-form ID deletes itself 90 days after it
+  lands there (see "IDs delete themselves after 90 days" below); "Delete this ID" / "Delete now"
+  (asked first, permanent, logged) deletes one sooner; a Google-form ID (Drive) is never deleted
+  by itself. The top shows the week banner ("This week: N new · last week M",
   Mon-Sun America/Chicago; see "Main page top" below); Money shows "Requests this month".
 - **Walk-through checklist**: `/admin/checklist` prints the four-page checklist (blank, or
   `?r=` pre-filled from a request). `/admin/checklist/online?r=` is the same checklist as a form,
@@ -438,7 +440,8 @@ another tab/retry queue, the cron hook).
   top with links); with JavaScript the other sections hide and the phone shrinks the ID photo.
 - **ID photos**: private R2 bucket `pnp-ids` (binding `IDS`), JPEG/PNG only, 10 MB max, EXIF and
   other metadata stripped (`functions/_lib/image-clean.mjs`), random object names. Read only by
-  the signed-in `/admin/requests/id` route; nothing deletes one except "Delete this ID".
+  the signed-in `/admin/requests/id` route; deleted by "Delete this ID" / "Delete now", or by the
+  pnp-mailer hourly cron 90 days after the ID is ready (`functions/_lib/id-auto.mjs`).
 - **Spam ($0)**: honeypot, a server-signed render time (under 3 s is refused), Cloudflare Turnstile
   when `TURNSTILE_SITEKEY` / `TURNSTILE_SECRET` are set, 5 requests per IP per hour (3 without the
   robot check). A request sent with JavaScript off is taken and marked on its card.
@@ -988,6 +991,38 @@ customer bar, Customer 4 card), `phone-menu-open.jpg`, `phone-scrolled-customer-
   order, the real routes with their undos on an in-memory database, the quiet lists, the owner's
   words, migration additive only).
 
+## IDs delete themselves after 90 days (owner decision and approved mock-up "ID Auto Delete", 20 Oct 2026, migration 0022)
+
+Code: `functions/_lib/id-auto.mjs` (the one ready test, the clock, the delete), `views.mjs
+idsReadyBox` / `idKeepPage`, the pnp-mailer cron (`workers/pnp-mailer`, R2 binding `IDS`), the 7 AM
+email's last box (`todo-email.mjs`). Proof: `npm run validate:admin-id-auto-delete`.
+
+- **Ready** (`readyToDeleteId`, the ONE test the list, the clock and the cron read): an ID still on
+  file and the job paid in full (for a rental, the games back), or the job cancelled (void).
+- **The clock**: `requests.id_ready_since` is set the first time an ID is seen ready (the hourly
+  cron, or the main page). If it stops being ready (a payment undone, a job un-cancelled) the cron
+  clears it and the row leaves the list. IDs already ready on go-live started their 90 days that
+  day, so nothing was deleted the moment it switched on.
+- **The delete**: on the Memphis day 90 days after `id_ready_since` (or the kept-until day, if
+  later) the hourly cron deletes each website-form ID through `deleteIdNow`, the same code path as
+  the manual delete: the R2 object is deleted, `id_deleted_at` set, `id_object` NULL,
+  `id_deleted_auto` = 1, and the history says "ID photo deleted for good automatically (90 days
+  after it was ready)". The card then says "ID: deleted automatically on <date>".
+- **Google-form IDs** (source `google_form`, a copy in her Drive) are never deleted by the cron:
+  the row says "📁 This one is in your Google Drive ID folder. It can't delete itself." with
+  Open ID folder and "I deleted it" (asks first).
+- **The list rows**: "Deletes itself on <Sat 17 Jan> (in N days)"; within 7 days the line is yellow
+  with ⏳; a kept row says "🔒 Kept until <date>, then deletes itself" (or "🔒 Kept until you delete
+  it yourself"). Buttons: **Delete now** (asks first: "Delete <first>'s ID for good? The photo is
+  gone forever. This can't be undone." Yes, delete it for good / ✕ No, go back) and **Keep this ID
+  longer** ("Change how long" on a kept row): Keep 30 more days / Keep 90 more days / Keep until I
+  delete it myself / ✕ Close, change nothing (`POST /admin/requests/id/keep`, how=30|90|forever;
+  `requests.id_keep_until`, `id_keep_forever`). Every button lands back on the box (`#ids-ready`).
+- **The 7 AM email**: a box at the END, after the real jobs, not red: "🪪 IDs that delete themselves
+  this week" (name, date, Keep it longer · Open card) and "Nothing to do if that's fine. It happens
+  by itself." In the plain text too. Keep it longer opens `GET /admin/requests/id/keep`, a confirm
+  screen that changes nothing until a choice is tapped.
+
 ## Where things live
 | Piece | Place |
 |---|---|
@@ -995,7 +1030,7 @@ customer bar, Customer 4 card), `phone-menu-open.jpg`, `phone-scrolled-customer-
 | Guard (auth, noindex, same-origin POST) | `functions/_lib/guard.mjs`, run by both `_middleware.js` |
 | D1 | `pnp-admin`, binding `DB`, schema in `migrations/`. Pages deploys do NOT apply migrations: after a merge that adds one, run `npm run admin:migrate` (additive migrations only) |
 | Receipts | R2 bucket `pnp-receipts` (binding `RECEIPTS`, private), Workers AI binding `AI` (wrangler.toml) |
-| Mailer cron | `workers/pnp-mailer` `scheduled` handler, hourly `0 * * * *`; each job gates on the Memphis hour (`chicagoHour`): the 7 AM to-do email, 10 AM reminders, hold expiry. D1 binding `DB`. Redeploy with `npm run mailer:deploy` after any change to code it imports |
+| Mailer cron | `workers/pnp-mailer` `scheduled` handler, hourly `0 * * * *`; each job gates on the Memphis hour (`chicagoHour`): the 7 AM to-do email, 10 AM reminders, hold expiry; every hour the ID clock and the 90-day ID delete (`id-auto.mjs`). D1 binding `DB`, R2 binding `IDS` (`pnp-ids`). Redeploy with `npm run mailer:deploy` after any change to code it imports |
 | Email | Cloudflare Email Service. Pages cannot hold `send_email`, so the private Worker `workers/pnp-mailer` holds it and Pages calls it through the `MAILER` service binding (`npm run mailer:deploy`) |
 | Secrets (Pages, production) | `PNP_ADMIN_PASSWORD` (bootstrap password), `PNP_ADMIN_SESSION_KEY` (cookie signing), `GOOGLE_SA_JSON` (service-account key), `PNP_GITHUB_TOKEN` (optional: starts the inventory publish workflow at once) |
 

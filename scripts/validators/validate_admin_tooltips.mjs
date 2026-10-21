@@ -261,6 +261,20 @@ pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/req
     stored: { [fin.key]: { called_at: 'x', confirmed_at: 'x' }, [dn.key]: { called_at: 'x', confirmed_at: 'x' } }, today: '2026-10-20', doneOk: s.util.b64urlText(dn.key) }) }]);
 }
 
+// IDs delete themselves after 90 days (owner-approved "ID Auto Delete", 20 Oct 2026): a website-form
+// row due soon, a kept row (Delete now, Keep this ID longer / Change how long and its choices), and
+// the email's "Keep it longer" confirm screen.
+{
+  const views = await mod('functions/_lib/views.mjs');
+  const IA = await mod('functions/_lib/id-auto.mjs');
+  const mkId = (key, name, o) => ({ ...reqA, key, name, source: 'site', idObject: 'ids/x.jpg', idDeletedAt: '', idFile: '', ...o });
+  const due = mkId('ida|due', 'Jordan Due', { idReadySince: '2026-07-25 12:00:00' });
+  const kept = mkId('ida|kept', 'Sam Kept', { idReadySince: '2026-10-19 12:00:00', idKeepUntil: '2027-03-01' });
+  pages.push(['dashboardPage(IDs ready to delete: due soon + kept)', { home: true, direct: true }, { status: 200, text: views.dashboardPage({ requests: [due, kept], invoices: {}, checklists: {}, returns: {}, folderUrl: 'https://drive.google.com/x', sheetError: '', flash: '', missingPayment: [], statuses: { [due.key]: { status: 'paid' }, [kept.key]: { status: 'paid' } }, today: '2026-10-20',
+    idsBox: views.idsReadyBox([due, kept], { today: '2026-10-20', folderUrl: 'https://drive.google.com/x' }) }) }]);
+  pages.push(['idKeepPage (the 7 AM email\'s Keep it longer)', { direct: true }, { status: 200, text: views.idKeepPage(due, s.util.b64urlText(due.key), IA.idRowState(due, '2026-10-20')) }]);
+}
+
 const used = new Set();
 let controls = 0;
 let helpHtml = '';
