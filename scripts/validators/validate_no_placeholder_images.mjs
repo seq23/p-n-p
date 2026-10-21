@@ -88,10 +88,17 @@ const AI = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/service_ai_im
 const reg = new Map(AI.images.map((i) => [i.file, i.sha1]));
 const sha = (f) => crypto.createHash('sha1').update(fs.readFileSync(path.join(ROOT, f))).digest('hex');
 const aiFiles = images.filter((f) => /^assets\/img\/[a-z]+\/ai-[a-z0-9-]+\.webp$/.test(f) || /(^|\/)ai-[^/]*$/.test(f));
-must(reg.size >= 12, `only ${reg.size} AI pictures registered (3+ per service page)`);
-for (const f of aiFiles) must(reg.has(f) && reg.get(f) === sha(f), `${f} is an AI picture that is not registered with its sha1 in data/offers/service_ai_images.json`);
+// Owner-provided photos (owner ruling 21 Oct 2026) are registered the same way, by sha1, with source "owner".
+const ownerFiles = images.filter((f) => /(^|\/)owner-[^/]*$/.test(f));
+const src = new Map(AI.images.map((i) => [i.file, i.source || 'ai']));
+must(AI.images.filter((i) => src.get(i.file) === 'ai').length >= 12, `only ${AI.images.filter((i) => src.get(i.file) === 'ai').length} AI pictures registered (3+ per service page)`);
+for (const f of aiFiles) must(reg.has(f) && reg.get(f) === sha(f) && src.get(f) === 'ai', `${f} is an AI picture that is not registered with its sha1 in data/offers/service_ai_images.json`);
+for (const f of ownerFiles) must(reg.has(f) && reg.get(f) === sha(f) && src.get(f) === 'owner', `${f} is an owner photo that is not registered (source "owner") with its sha1 in data/offers/service_ai_images.json`);
 for (const [f, h] of reg) {
-  must(/^assets\/img\/[a-z]+\/ai-[a-z0-9-]+\.webp$/.test(f), `${f}: registered AI pictures live at assets/img/<service>/ai-*.webp`);
+  const kind = src.get(f);
+  must(kind === 'ai' || kind === 'owner', `${f}: registry source is "${kind}", not "ai" or "owner"`);
+  if (kind === 'ai') must(/^assets\/img\/[a-z]+\/ai-[a-z0-9-]+\.webp$/.test(f), `${f}: registered AI pictures live at assets/img/<service>/ai-*.webp`);
+  else must(/^assets\/img\/[a-z]+\/owner-[a-z0-9-]+\.webp$/.test(f), `${f}: registered owner photos live at assets/img/<service>/owner-*.webp`);
   must(/^[0-9a-f]{40}$/.test(h) && !bad.has(h), `${f}: registered hash is malformed or a placeholder drawing`);
   must(fs.existsSync(path.join(ROOT, f)), `${f}: registered but missing`);
 }
@@ -99,4 +106,4 @@ for (const [f, h] of reg) {
 if (pages < 100) errors.push(`Rule 0: only ${pages} pages scanned`);
 if (images.length < 20) errors.push(`Rule 0: only ${images.length} images hashed`);
 if (errors.length) { console.error(`VALIDATION FAIL: placeholder images (${errors.length})\n${errors.map((e) => `- ${e}`).join('\n')}`); process.exit(1); }
-console.log(`validate_no_placeholder_images: OK (${checks} checks: ${pages} pages and every source file free of the ${olds.length} placeholder drawings, ${images.length} images hashed, no missing page images, drawings deleted, replacements real, thank-you email pictures real and light, ${aiFiles.length} AI pictures each registered by hash)`);
+console.log(`validate_no_placeholder_images: OK (${checks} checks: ${pages} pages and every source file free of the ${olds.length} placeholder drawings, ${images.length} images hashed, no missing page images, drawings deleted, replacements real, thank-you email pictures real and light, ${aiFiles.length} AI pictures and ${ownerFiles.length} owner photos each registered by hash)`);

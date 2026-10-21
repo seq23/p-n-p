@@ -1,5 +1,5 @@
 {
-  "_why": "Owner ruling 21 Oct 2026: AI-generated photorealistic pictures on the four service pages, no captions (owner ruling 21 Oct 2026: no \"Example styling\" caption), descriptive alt text, never presented as a past customer job. Generated at $0 with Workers AI @cf/black-forest-labs/flux-1-schnell (free allowance, the same model as assets/rentals) by scripts/generators/build_service_ai_images.mjs, center-cropped to 1024x768 WebP. Each picture was checked by eye: no faces, no text, no logos; rental pictures show only availableNow items (owner ruling 21 Oct 2026), listed in items. sha1 pins the approved bytes: scripts/validators/validate_no_placeholder_images.mjs and validate_service_pages.js fail on any ai-*.webp that is not registered here with its hash.",
+  "_why": "Owner ruling 21 Oct 2026: AI-generated photorealistic pictures on the four service pages, no captions (owner ruling 21 Oct 2026: no \"Example styling\" caption), descriptive alt text, never presented as a past customer job. Generated at $0 with Workers AI @cf/black-forest-labs/flux-1-schnell (free allowance, the same model as assets/rentals) by scripts/generators/build_service_ai_images.mjs, center-cropped to 1024x768 WebP. Each picture was checked by eye: no faces, no text, no logos; rental pictures show only availableNow items (owner ruling 21 Oct 2026), listed in items. sha1 pins the approved bytes: scripts/validators/validate_no_placeholder_images.mjs and validate_service_pages.js fail on any ai-*.webp that is not registered here with its hash. Owner ruling 21 Oct 2026: the party page's AI pictures \"are not good enough\" and were replaced by five owner-provided photos (source \"owner\", assets/img/<service>/owner-*.webp, registered by sha1 like the AI ones; \"pages\" lists every page that shows one); the hotel room setups page shows the bedroom, hallway and anniversary photos and the baby shower pages the shower + teddy pair. The grazing page's first two AI pictures were regenerated the same day (owner: \"not good\").",
   "model": "@cf/black-forest-labs/flux-1-schnell",
   "images": [
     {
@@ -31,46 +31,18 @@
       "prompt": "Photorealistic photo of a front porch styled for spring: white painted door, hanging ferns, terracotta pots of tulips and hydrangeas, a fresh greenery wreath, a white rocking chair, painted wood porch floor, soft morning light, no doormat, no people, no text"
     },
     {
-      "file": "assets/img/celebrations/ai-anniversary-dinner.webp",
-      "page": "party",
-      "alt": "Candlelit table for two with a red rose centerpiece and gold balloons for an anniversary at home",
-      "sha1": "863b94b3f3ee2608f114e9cbf0c2dcc567d9e48a",
-      "prompt": "Photorealistic photo of a romantic anniversary setup in a home dining room: table for two with white linen, taper candles, red rose centerpiece, plain round gold and white balloons floating in the corner, warm evening light, empty room with no people, no signs, no lettering, no text"
-    },
-    {
-      "file": "assets/img/celebrations/ai-baby-shower-setup.webp",
-      "page": "party",
-      "alt": "Sage green and cream balloon arch over a draped backdrop with a dessert table and rattan chair for a baby shower",
-      "sha1": "f8e2062871d549330293e67911ec9720987fd5ef",
-      "prompt": "Photorealistic photo of a baby shower decor setup: sage green and cream balloon garland around a round arch backdrop, a styled dessert table with flowers, a woven chair, soft natural light, no people, no text, no letters"
-    },
-    {
-      "file": "assets/img/celebrations/ai-birthday-balloon-arch.webp",
-      "page": "party",
-      "alt": "Blush, gold and white balloon garland arch over a white backdrop with a flower-topped cake and gift boxes for a birthday",
-      "sha1": "fcafb1a8d2cb12a5b6d6fae3b9ed98235325be99",
-      "prompt": "Photorealistic photo of an indoor birthday party setup in a living room: organic balloon garland arch in blush pink, gold and white over a plain white draped backdrop, a plain white frosted cake with fresh flowers on a gold stand, gift boxes, empty room, no people, no cake topper, no signs, no lettering, no text"
-    },
-    {
-      "file": "assets/img/celebrations/ai-hotel-room-rose-petals.webp",
-      "page": "party",
-      "alt": "Hotel room bed with red rose petals in a heart, red balloons by the headboard and candles on the nightstands",
-      "sha1": "de98f008657d8520d0daf94acc4f8aebfc224743",
-      "prompt": "Photorealistic photo of a romantic hotel room surprise setup: king bed with white linens covered in red rose petals arranged in a heart, red and white balloons floating by the headboard, candles on the nightstands, bouquet of red roses, warm dim lighting, no people, no text"
-    },
-    {
-      "file": "assets/img/grazing/ai-brunch-grazing.webp",
+      "file": "assets/img/grazing/ai-grazing-shower-table.webp",
       "page": "grazing",
-      "alt": "Brunch grazing table with croissants, berries, fruit, pastries and pastel flowers for a bridal shower",
-      "sha1": "ba2ebec2ea707d4d0a4212a68395395885c8f6d5",
-      "prompt": "Photorealistic photo of a brunch grazing table for a bridal shower: croissants, fresh fruit, berries, mini pastries, cheeses, flowers in pastel colors, bright daylight, no people, no text"
+      "alt": "Long wooden grazing table for a home shower with cheeses, folded charcuterie, grapes, figs, strawberries and crackers along a eucalyptus and flower runner",
+      "sha1": "348ff20af08e047ca275f2ffb4ecce1e6c53c506",
+      "prompt": "Professional catering photograph of an abundant styled grazing table at an elegant home baby shower: long wooden table covered with wooden boards of artisan cheeses, folded charcuterie, fresh grapes, strawberries, figs, crackers and sliced baguette, a eucalyptus greenery runner down the center, white and blush florals, small candles, soft natural window light, shallow depth of field, editorial food photography, high-end caterer, no people, no hands, no text, no signs, no logos"
     },
     {
-      "file": "assets/img/grazing/ai-charcuterie-table.webp",
+      "file": "assets/img/grazing/ai-grazing-candlelit-event.webp",
       "page": "grazing",
-      "alt": "Long event table lined with wooden charcuterie boards of cheese, salami, olives, grapes and greenery with candles",
-      "sha1": "384f78bdb0572f26540365237d0a344a38768225",
-      "prompt": "Photorealistic photo of an elegant charcuterie table set up in an empty event room before guests arrive: wooden boards with cheeses, salami roses, olives, grapes, breads, candles and eucalyptus greenery on a long white table, warm light, no people, no hands, no text"
+      "alt": "Candlelit grazing table for a small evening event with brie, aged cheeses, charcuterie roses, olives, berries, orange slices and bread on wooden boards",
+      "sha1": "1bc84ba4425b0cc3ecea5e1ba3edf225d6a8e9bf",
+      "prompt": "Professional catering photograph of a luxurious grazing table for a small evening event at home: rustic wooden boards overflowing with brie and aged cheeses, charcuterie rosettes, honeycomb, berries, citrus, olives, breads and crackers, greenery and roses woven along the table, glowing taper candles, warm natural light, shallow depth of field, editorial food photography from a high-end caterer, realistic food, no people, no hands, no text, no logos"
     },
     {
       "file": "assets/img/grazing/ai-grazing-table.webp",
@@ -121,34 +93,6 @@
       ]
     },
     {
-      "file": "assets/img/celebrations/ai-hotel-anniversary-suite.webp",
-      "page": "hotel",
-      "alt": "Hotel suite bed scattered with red rose petals, white and gold balloons by the headboard, red roses and glowing candles for an anniversary",
-      "sha1": "54f5c12355db48e217b6abbc369edca02ea362eb",
-      "prompt": "Photorealistic photo of a hotel suite decorated for an anniversary: king bed with crisp white linens, red rose petals scattered across the bed, clusters of plain round white and gold balloons beside the headboard, a vase of red roses on the nightstand, glowing LED candles, warm evening light, empty room with no people, no signs, no lettering, no numbers, no text"
-    },
-    {
-      "file": "assets/img/celebrations/ai-hotel-proposal-candles.webp",
-      "page": "hotel",
-      "alt": "Path of red rose petals and candles in glass holders leading to a hotel bed with a bouquet of red roses, city lights in the window, for a proposal",
-      "sha1": "c84ed0d54a9761bf75fd9bfbaae8ebc274c59aa1",
-      "prompt": "Photorealistic photo of a hotel room set up for a marriage proposal: a path of red rose petals and glowing candles in glass holders leading across the carpet to the bed, a large bouquet of red roses on the bed, soft dim romantic light, city lights through the window, empty room with no people, no signs, no lettering, no text"
-    },
-    {
-      "file": "assets/img/celebrations/ai-hotel-birthday-balloons.webp",
-      "page": "hotel",
-      "alt": "Blush pink, rose gold and white balloon garland arching over a hotel headboard with a wrapped gift and small bouquet on the bed for a birthday",
-      "sha1": "085c99f48a5df2a2c7d33116c16fb6cd215a7cc0",
-      "prompt": "Photorealistic photo of a hotel room decorated for a birthday surprise: a blush pink, rose gold and white balloon garland arching over the headboard, plain round balloons with no print, wrapped gift boxes and a small flower bouquet on the bed, fairy lights, bright cheerful light, empty room with no people, no signs, no lettering, no numbers, no text"
-    },
-    {
-      "file": "assets/img/celebrations/ai-hotel-rose-heart-bed.webp",
-      "page": "hotel",
-      "alt": "Heart of red rose petals on a white hotel bed with rolled towels, a rose bouquet, red balloons and candles on both nightstands",
-      "sha1": "77d1820aa872bf90936fc9e81636230df00d8089",
-      "prompt": "Photorealistic photo of a hotel bed seen from the foot of the bed: a heart shape made of deep red rose petals on white sheets, two rolled white towels, a bouquet of red and white roses, candles glowing on both nightstands, plain red balloons with ribbons floating near the ceiling, empty room with no people, no lettering, no text"
-    },
-    {
       "file": "assets/img/rentals/ai-lawn-connect-four-close.webp",
       "page": "lawn",
       "alt": "Four-foot Giant Connect Four with a blue frame and red and yellow discs standing on a sunny backyard lawn by a wooden fence",
@@ -178,6 +122,71 @@
         "giant-connect-four"
       ],
       "prompt": "Photorealistic photo of two plain wooden cornhole boards set up on a backyard lawn at dusk under glowing string lights, bean bags on the grass, a giant connect four game with red and yellow discs in the background, no people, no other games, no printing, no logos, no text"
+    },
+    {
+      "file": "assets/img/celebrations/owner-birthday-bedroom.webp",
+      "source": "owner",
+      "pages": [
+        "party",
+        "hotel"
+      ],
+      "alt": "Hotel bedroom decorated for a 32nd birthday with red and black balloons, gold Happy Birthday letters, rose petals and a candlelit heart on the bed",
+      "width": 720,
+      "height": 900,
+      "sha1": "3413beb8075e4d3c1d9695be971cca3502c42511",
+      "original": "owner-provided new-bedroom.jpeg (21 Oct 2026)"
+    },
+    {
+      "file": "assets/img/celebrations/owner-baby-shower-boxes.webp",
+      "source": "owner",
+      "pages": [
+        "party",
+        "baby-shower"
+      ],
+      "alt": "Baby shower window setup with white BABY letter boxes, a blue, white and gold balloon garland and a teddy bear banner",
+      "width": 720,
+      "height": 900,
+      "sha1": "da21c9e968df1208dcd123899db4b5f2f2550b91",
+      "original": "owner-provided cargill-shower-enhanced.jpeg (21 Oct 2026)"
+    },
+    {
+      "file": "assets/img/celebrations/owner-rose-petal-hallway.webp",
+      "source": "owner",
+      "pages": [
+        "party",
+        "hotel"
+      ],
+      "alt": "Hallway with a path of red rose petals lined by glowing tea lights leading to the room",
+      "width": 720,
+      "height": 900,
+      "sha1": "0f21b08e7b003cdd2815a8270e76b363a8ba756b",
+      "original": "owner-provided new-hallway.jpeg (21 Oct 2026)"
+    },
+    {
+      "file": "assets/img/celebrations/owner-anniversary-fireplace.webp",
+      "source": "owner",
+      "pages": [
+        "party",
+        "hotel"
+      ],
+      "alt": "Fireplace decorated for an anniversary with lit Happy Anniversary lanterns, red, black and gold balloons, candles and rose petals",
+      "width": 720,
+      "height": 900,
+      "sha1": "b110d71a818aabb4c5d36ec56547ae0123be796d",
+      "original": "owner-provided new-anniv.jpeg (21 Oct 2026)"
+    },
+    {
+      "file": "assets/img/celebrations/owner-teddy-centerpiece.webp",
+      "source": "owner",
+      "pages": [
+        "party",
+        "baby-shower"
+      ],
+      "alt": "Teddy bear centerpiece holding blue, white and gold balloons on a table scattered with confetti",
+      "width": 720,
+      "height": 900,
+      "sha1": "5d22ce7fb51535bd4dcd225771dc4776beb44911",
+      "original": "owner-provided teddy-jpeg.png (21 Oct 2026)"
     }
   ]
 }
