@@ -380,6 +380,18 @@ for (const page of pages) {
 const unclassified = pages.filter((p) => p.slug !== 'index' && !p.territories.length)
   .map((p) => p.rel);
 
+// --check is the currency gate (npm run validate:related-nav-current). A page
+// whose related-pages block differs from a fresh build is out of date: a page it
+// should link to was renamed, added or removed after the block was written. The
+// marker-presence check in validate_retrofit_integrity.js cannot see that - on
+// 21 Oct 2026 main carried 18 stale blocks (6 since #125, 12 more from #126)
+// pointing at retired service URLs, with every validator green.
+const stale = CHECK && !WRITE ? changed : [];
+if (stale.length) {
+  problems.push(`${stale.length} page(s) carry an out-of-date related-pages block; repair: node scripts/build_related_navigation.js --write`);
+}
+if (!pages.length) problems.push('no published pages found - nothing was checked');
+
 const receipt = {
   status: problems.length ? 'FAIL' : 'PASS',
   written: WRITE,
@@ -392,6 +404,7 @@ const receipt = {
   pages_out_of_date_outside_write_scope: heldBack.length,
   new_link_targets: linksAdded,
   pages_without_a_topic_territory: unclassified,
+  out_of_date_pages: stale,
   problems
 };
 console.log(JSON.stringify(receipt, null, 2));
