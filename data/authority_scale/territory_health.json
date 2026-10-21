@@ -3,7 +3,7 @@
   "generated_at": "2026-07-24T00:00:00.000Z",
   "territories": {
     "seasonal_porch_decorating": {
-      "public_surface_count": 24,
+      "public_surface_count": 26,
       "sample_routes": [
         "/answers/christmas-porch-decorating-memphis.html",
         "/answers/fall-porch-decorating-ideas-southern-homes.html",
@@ -20,11 +20,11 @@
         "/areas/index.html",
         "/areas/lakeland-tn-porch-decorating.html",
         "/areas/memphis-tn-porch-decorating.html",
+        "/areas/olive-branch-ms-porch-decorating.html",
+        "/areas/southaven-ms-porch-decorating.html",
         "/guides/porch-decorating-packages-memphis.html",
         "/seasonal/christmas-porch-decorating-memphis.html",
-        "/seasonal/halloween-porch-decorating-memphis.html",
-        "/services/christmas-porch-decorating.html",
-        "/services/fall-porch-decorating.html"
+        "/seasonal/halloween-porch-decorating-memphis.html"
       ],
       "status": "STRONG_BASELINE"
     },
@@ -55,7 +55,7 @@
       "status": "STRONG_BASELINE"
     },
     "hotel_room_decor": {
-      "public_surface_count": 37,
+      "public_surface_count": 36,
       "sample_routes": [
         "/answers/anniversary-room-decorations-memphis.html",
         "/answers/birthday-hotel-room-setup-ideas-memphis.html",
@@ -72,16 +72,16 @@
         "/areas/bartlett-tn-party-decor.html",
         "/areas/collierville-tn-party-decor.html",
         "/areas/germantown-tn-party-decor.html",
-        "/areas/index.html",
         "/areas/lakeland-tn-party-decor.html",
         "/areas/memphis-tn-party-decor.html",
         "/areas/olive-branch-ms-party-decor.html",
-        "/areas/southaven-ms-party-decor.html"
+        "/areas/southaven-ms-party-decor.html",
+        "/events/anniversary-room-decorations-memphis.html"
       ],
       "status": "STRONG_BASELINE"
     },
     "grazing_table_styling": {
-      "public_surface_count": 25,
+      "public_surface_count": 33,
       "sample_routes": [
         "/answers/corporate-grazing-tables-memphis.html",
         "/answers/do-grazing-tables-include-food.html",
@@ -89,20 +89,20 @@
         "/answers/grazing-tables-memphis.html",
         "/answers/how-much-does-a-grazing-table-cost-in-memphis.html",
         "/answers/how-much-does-grazing-tables-cost.html",
+        "/areas/arlington-tn-grazing-tables.html",
         "/areas/arlington-tn-party-decor.html",
+        "/areas/bartlett-tn-grazing-tables.html",
         "/areas/bartlett-tn-party-decor.html",
+        "/areas/collierville-tn-grazing-tables.html",
         "/areas/collierville-tn-party-decor.html",
+        "/areas/germantown-tn-grazing-tables.html",
         "/areas/germantown-tn-party-decor.html",
         "/areas/index.html",
+        "/areas/lakeland-tn-grazing-tables.html",
         "/areas/lakeland-tn-party-decor.html",
+        "/areas/memphis-tn-grazing-tables.html",
         "/areas/memphis-tn-party-decor.html",
-        "/areas/olive-branch-ms-party-decor.html",
-        "/areas/southaven-ms-party-decor.html",
-        "/comparisons/grazing-table-vs-charcuterie-board.html",
-        "/corporate/corporate-grazing-tables-memphis.html",
-        "/faq/do-grazing-tables-include-food.html",
-        "/faq/how-much-does-grazing-tables-cost.html",
-        "/local/grazing-tables-memphis.html"
+        "/areas/olive-branch-ms-grazing-tables.html"
       ],
       "status": "STRONG_BASELINE"
     }

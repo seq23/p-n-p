@@ -176,15 +176,17 @@ const SECTIONS = [
     crumb: 'Service Areas',
     h1: 'Porch &amp; Party service areas across the Memphis metro',
     title: 'Porch &amp; Party Service Areas | Memphis Metro Party &amp; Porch Decor',
-    description: 'Porch & Party service areas: party decor, hotel-room decor, grazing tables, and porch decorating in Memphis, Germantown, Collierville, and nearby cities.',
-    lead: `Porch &amp; Party serves ${CITY_LIST} and the greater Memphis metro area. Each city below has its own page: a party decor page covering hotel-room decor and grazing tables, a porch decorating page covering seasonal front-entry installs, or both where both are published.`,
-    summary: `Open the page for your city. Party decor and celebration setups start at ${offers.services.celebration.price}, grazing-table styling at ${offers.services.grazing.price}, and seasonal porch decorating at ${offers.services.porch.price}, with travel and access affecting the final quote.`,
+    // Owner-approved 21 Oct 2026: every served city has a page for each of the four services
+    // (scripts/generators/build_area_pages.js); validate:area-pages holds the index to it.
+    description: 'Porch & Party service areas: porch decorating, party decor, grazing tables and party game rentals, with a page for each service in every Memphis-metro city.',
+    lead: `Porch &amp; Party serves ${CITY_LIST}. Every city below has four pages, one for each service: porch decorating, party decor, grazing tables and party game rentals.`,
+    summary: `Open your city, then the service. Seasonal porch decorating starts at ${offers.services.porch.price}, party decor and celebration setups at ${offers.services.celebration.price}, grazing-table styling at ${offers.services.grazing.price}, and party game rentals at $${rentalRates.day} a game per day (pickup at Mt. Moriah Station). ${offers.travel.line}`,
     group: groupAreas,
     faq: [
       ['Which cities does Porch &amp; Party serve?',
         `${CITY_LIST} and the greater Memphis metro area.`],
-      ['Why do some cities have two pages?',
-        'Party decor and porch decorating are separate services with separate scope and separate starting prices, so each city page covers one of them. Cities where both are published have both listed above.']
+      ['Why does each city have four pages?',
+        'Porch decorating, party decor, grazing tables and party game rentals are separate services with separate scope and separate starting prices, so each city has one page per service, and every city page links to the other three.']
     ],
     related: ['/services/index.html', '/local/index.html', '/faq/index.html', '/contact.html']
   },

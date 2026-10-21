@@ -58,3 +58,18 @@ Holding the date: $50 damage deposit + 50% of the rental fee by Zelle or Cash Ap
 We ask every renter for a government photo ID. It keeps our games and your party safe. The request form takes about three minutes, with no account or sign-in.
 Terms: full refund if cancelled 48 hours before pickup; rain or storms reschedule free within 30 days; renter 18+.
 Book: https://porchandparty901.com/contact or call/text 901-355-1518.
+
+<!-- area-pages -->
+## Service area pages
+
+Every service has a page for each served city (Memphis, TN; Germantown, TN; Collierville, TN; Bartlett, TN; Lakeland, TN; Arlington, TN; Southaven, MS; Olive Branch, MS). Index: https://porchandparty901.com/areas/
+
+- Memphis, TN: Porch decorating https://porchandparty901.com/areas/memphis-tn-porch-decorating; Party decor https://porchandparty901.com/areas/memphis-tn-party-decor; Grazing tables https://porchandparty901.com/areas/memphis-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/memphis-tn-party-game-rentals
+- Germantown, TN: Porch decorating https://porchandparty901.com/areas/germantown-tn-porch-decorating; Party decor https://porchandparty901.com/areas/germantown-tn-party-decor; Grazing tables https://porchandparty901.com/areas/germantown-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/germantown-tn-party-game-rentals
+- Collierville, TN: Porch decorating https://porchandparty901.com/areas/collierville-tn-porch-decorating; Party decor https://porchandparty901.com/areas/collierville-tn-party-decor; Grazing tables https://porchandparty901.com/areas/collierville-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/collierville-tn-party-game-rentals
+- Bartlett, TN: Porch decorating https://porchandparty901.com/areas/bartlett-tn-porch-decorating; Party decor https://porchandparty901.com/areas/bartlett-tn-party-decor; Grazing tables https://porchandparty901.com/areas/bartlett-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/bartlett-tn-party-game-rentals
+- Lakeland, TN: Porch decorating https://porchandparty901.com/areas/lakeland-tn-porch-decorating; Party decor https://porchandparty901.com/areas/lakeland-tn-party-decor; Grazing tables https://porchandparty901.com/areas/lakeland-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/lakeland-tn-party-game-rentals
+- Arlington, TN: Porch decorating https://porchandparty901.com/areas/arlington-tn-porch-decorating; Party decor https://porchandparty901.com/areas/arlington-tn-party-decor; Grazing tables https://porchandparty901.com/areas/arlington-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/arlington-tn-party-game-rentals
+- Southaven, MS: Porch decorating https://porchandparty901.com/areas/southaven-ms-porch-decorating; Party decor https://porchandparty901.com/areas/southaven-ms-party-decor; Grazing tables https://porchandparty901.com/areas/southaven-ms-grazing-tables; Party game rentals https://porchandparty901.com/areas/southaven-ms-party-game-rentals
+- Olive Branch, MS: Porch decorating https://porchandparty901.com/areas/olive-branch-ms-porch-decorating; Party decor https://porchandparty901.com/areas/olive-branch-ms-party-decor; Grazing tables https://porchandparty901.com/areas/olive-branch-ms-grazing-tables; Party game rentals https://porchandparty901.com/areas/olive-branch-ms-party-game-rentals
+<!-- /area-pages -->

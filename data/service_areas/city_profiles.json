@@ -1,0 +1,127 @@
+{
+  "_why": "Per-city facts for the city x service pages under areas/ (scripts/generators/build_area_pages.js). One entry per city in data/service_areas/areas.json, same order; validate:area-pages fails if the two lists differ. Only public-record geography (county, state, which side of Memphis) and facts this repo already holds (travel included per services.json travel; rentals pickup at Mt. Moriah Station per games.json pickup; the area and local pages already published). No neighborhoods, venues, reviews, counts or claims that are not on record here. Added 21 Oct 2026 (owner-approved build: a page for each suburb for every service).",
+  "services": {
+    "porch-decorating": {
+      "label": "Porch decorating",
+      "short": "porch decorating"
+    },
+    "party-decor": {
+      "label": "Party decor",
+      "short": "party decor and celebration setups"
+    },
+    "grazing-tables": {
+      "label": "Grazing tables",
+      "short": "grazing tables"
+    },
+    "party-game-rentals": {
+      "label": "Party game rentals",
+      "short": "party game rentals"
+    }
+  },
+  "cities": [
+    {
+      "area": "Memphis, TN",
+      "slug": "memphis-tn",
+      "name": "Memphis",
+      "state": "TN",
+      "stateName": "Tennessee",
+      "county": "Shelby County",
+      "where": "the city itself, where Porch & Party is based",
+      "pickupNote": "Mt. Moriah Station is inside Memphis, so the pickup is a crosstown drive at most.",
+      "localPages": [
+        {
+          "href": "/areas/east-memphis-tn-porch-styling",
+          "label": "East Memphis porch styling",
+          "for": "porch-decorating"
+        },
+        {
+          "href": "/local/grazing-tables-memphis",
+          "label": "Grazing tables in Memphis",
+          "for": "grazing-tables"
+        },
+        {
+          "href": "/local/hotel-room-decorations-memphis",
+          "label": "Hotel room decorations in Memphis",
+          "for": "party-decor"
+        }
+      ]
+    },
+    {
+      "area": "Germantown, TN",
+      "slug": "germantown-tn",
+      "name": "Germantown",
+      "state": "TN",
+      "stateName": "Tennessee",
+      "county": "Shelby County",
+      "where": "the Shelby County suburb on the east side of Memphis",
+      "pickupNote": "Mt. Moriah Station is west of Germantown, back toward Memphis.",
+      "localPages": []
+    },
+    {
+      "area": "Collierville, TN",
+      "slug": "collierville-tn",
+      "name": "Collierville",
+      "state": "TN",
+      "stateName": "Tennessee",
+      "county": "Shelby County",
+      "where": "the town in southeast Shelby County, past Germantown",
+      "pickupNote": "Mt. Moriah Station is west of Collierville, on the Memphis side of Germantown.",
+      "localPages": []
+    },
+    {
+      "area": "Bartlett, TN",
+      "slug": "bartlett-tn",
+      "name": "Bartlett",
+      "state": "TN",
+      "stateName": "Tennessee",
+      "county": "Shelby County",
+      "where": "the Shelby County city northeast of Memphis",
+      "pickupNote": "Mt. Moriah Station is south of Bartlett, in Memphis.",
+      "localPages": []
+    },
+    {
+      "area": "Lakeland, TN",
+      "slug": "lakeland-tn",
+      "name": "Lakeland",
+      "state": "TN",
+      "stateName": "Tennessee",
+      "county": "Shelby County",
+      "where": "the Shelby County city east of Bartlett",
+      "pickupNote": "Mt. Moriah Station is southwest of Lakeland, in Memphis.",
+      "localPages": []
+    },
+    {
+      "area": "Arlington, TN",
+      "slug": "arlington-tn",
+      "name": "Arlington",
+      "state": "TN",
+      "stateName": "Tennessee",
+      "county": "Shelby County",
+      "where": "the town in northeast Shelby County, past Lakeland",
+      "pickupNote": "Mt. Moriah Station is southwest of Arlington, in Memphis.",
+      "localPages": []
+    },
+    {
+      "area": "Southaven, MS",
+      "slug": "southaven-ms",
+      "name": "Southaven",
+      "state": "MS",
+      "stateName": "Mississippi",
+      "county": "DeSoto County",
+      "where": "the DeSoto County city just south of Memphis, across the Mississippi state line",
+      "pickupNote": "Mt. Moriah Station is northeast of Southaven, across the state line in Memphis.",
+      "localPages": []
+    },
+    {
+      "area": "Olive Branch, MS",
+      "slug": "olive-branch-ms",
+      "name": "Olive Branch",
+      "state": "MS",
+      "stateName": "Mississippi",
+      "county": "DeSoto County",
+      "where": "the DeSoto County city southeast of Memphis, across the Mississippi state line",
+      "pickupNote": "Mt. Moriah Station is north of Olive Branch, across the state line in Memphis.",
+      "localPages": []
+    }
+  ]
+}
