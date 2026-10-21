@@ -40,6 +40,7 @@ const V = await mod('functions/_lib/views.mjs');
 const U = await mod('functions/_lib/util.mjs');
 const H = await mod('functions/_lib/helptext.mjs');
 const MS = await mod('functions/_lib/missed.mjs');
+const E = await mod('functions/_lib/admin-endings.mjs');
 const OWNER_PUT_AWAY = 'Put Away (these are cards we want to move out of the way and can be put back at any time)';
 
 // ---- 1. rules table, groups, filters -----------------------------------------------------------
@@ -95,7 +96,7 @@ const statuses = {
 const invoices = { 2: inv(2, 'paid'), 3: inv(3, 'paid'), 4: inv(4, 'paid'), 5: inv(5, 'void', bal({ void: true, paid: 0, paidCharges: 0, paidDeposit: 0 })), 6: inv(6, 'paid') };
 const depositOut = { 3: { refunded: 5000, kept: 0 }, 4: { refunded: 0, kept: 5000 }, 6: { refunded: 5000, kept: 0 } };
 const doneBookings = (k) => ({ [k]: [{ id: 1, kind: 'porch_install', date: '2026-10-18', done_at: '2026-10-18 12:00:00' }] });
-const page = (o = {}) => V.dashboardPage({ requests: reqs.filter((r) => !statuses[r.key].archived_at), archived: reqs.filter((r) => statuses[r.key].archived_at), statuses, invoices, depositOut, folderUrl: 'x', today: '2026-10-20',
+const page = (o = {}) => V.dashboardPage({ requests: reqs.filter((r) => !(o.statuses || statuses)[r.key].archived_at), archived: reqs.filter((r) => (o.statuses || statuses)[r.key].archived_at), statuses, invoices, depositOut, folderUrl: 'x', today: '2026-10-20',
   bookings: { ...doneBookings('f|1'), ...doneBookings('d|1'), ...doneBookings('d|2') }, kinds: { 'f|1': ['porch_install'], 'd|1': ['porch_install'], 'd|2': ['porch_install'] }, schedule: { 'a|1': { date: '2026-10-24' }, 'f|1': { date: '2026-10-18' } },
   stored: Object.fromEntries(reqs.map((r) => [r.key, { called_at: 'x', confirmed_at: 'x' }])), ...o });
 const rk = (k) => U.b64urlText(k);
@@ -119,11 +120,11 @@ must(dc.includes('<p class="endmoney" data-ended-money>Paid $110 · $50 deposit 
 must(cardOf(home, 'd|2').includes('data-ended-money>Paid $110 · $50 deposit kept<') && cardOf(home, 'd|2').includes('✓ DONE · 19 Oct'), 'the kept-deposit Done card reads wrong');
 must(/data-quick-contact><a href="tel:9015550100"[^>]*>&#128222; Call<\/a><a href="sms:9015550100"[^>]*>&#128172; Text ▾<\/a>/.test(dc) && pos(dc, 'data-quick-contact') < pos(dc, 'data-ended-label'), 'a Done card lost Call / Text top right');
 must(!/data-step=|data-next-step|class="btn primary"|data-steps/.test(dc), 'a Done card still shows step dots, a next step or a big button');
-must(/data-ended-buttons>[\s\S]*?data-help="card\.archive"[^>]*>Put away<\/button>[\s\S]*?action="\/admin\/requests\/undone"[\s\S]*?data-help="card\.undone"[^>]*>Not done after all \(undo\)<\/button>/.test(dc), 'a Done card lacks its small Put away + Not done after all (undo)');
+must(/data-ended-buttons>[\s\S]*?data-help="card\.archive"[^>]*>Put away<\/button>[\s\S]*?action="\/admin\/requests\/undone"[\s\S]*?data-help="card\.undone"[^>]*>Not done after all \(undo\)<\/button><\/div><\/form><\/div>/.test(dc), 'a Done card lacks its small Put away + Not done after all (undo), or they are not the only two');
 const cc = cardOf(home, 'c|1');
 must(cc.includes('<span class="wm" aria-hidden="true">✕</span>') && cc.includes('<p class="endlbl grey" data-ended-label>✕ CANCELLED · 20 Oct</p>') && /\.endlbl\.grey\{color:#6b6460\}/.test(home), 'a Cancelled card lacks the grey ✕ and "✕ CANCELLED · 20 Oct"');
 must(cc.includes('data-ended-money>Nothing owed · invoice voided<'), 'a Cancelled card does not say "Nothing owed · invoice voided"');
-must(/action="\/admin\/requests\/uncancel"[\s\S]*?>Not cancelled after all \(undo\)<\/button>/.test(cc) && !/data-void-link|class="btn primary"|class="btn danger"|linkbtn danger|\bmiss\b|#8f3427|#b91c1c|red/i.test(cc.replace(/data-help="[^"]*"|title="[^"]*"/g, '')), 'a Cancelled card is red somewhere, offers Cancel again, or lacks Not cancelled after all (undo)');
+must(/data-ended-buttons>[\s\S]*?data-help="card\.archive"[^>]*>Put away<\/button><\/div><\/form><\/div>\s*<details class="disclose more"/.test(cc) && /data-uncancel[^>]*>↩ Not cancelled after all<\/button>/.test(cc) && !/data-void-link|class="btn primary"|class="btn danger"|linkbtn danger|\bmiss\b|#8f3427|#b91c1c|red/i.test(cc.replace(/data-help="[^"]*"|title="[^"]*"/g, '')), 'a Cancelled card is red somewhere, offers Cancel again, or lacks Put away + ↩ Not cancelled after all');
 must(!/\.(iscancelled|cxgrp|endlbl\.grey)[^{]*\{[^}]*(#8f3427|#b91c1c|#dc2626|red)/i.test(V.ENDED_CSS), 'the Cancelled styles use red');
 must(/<h2>Put away \(1\) <small class="panote" data-put-away-note>\(these are cards we want to move out of the way and can be put back at any time\)<\/small><\/h2>/.test(home), 'Put away lacks the owner\'s words under its heading');
 const pa = cardOf(home, 'r|1');
@@ -142,11 +143,64 @@ must(/<form method="post" action="\/admin\/requests\/done" data-done-form><input
   && /data-finished-facts>Paid, job done, deposit returned\.</.test(fc2), 'with the deposit back, ✓ Mark as done does not go straight to Done (or the facts line is wrong)');
 // Cancel with money in asks first; without, the plain confirm.
 const ac = cardOf(page({ statuses: { ...statuses, 'a|1': { status: 'deposit_paid', invoice_id: 7 } }, invoices: { ...invoices, 7: inv(7, 'deposit_paid', bal({ paid: 15000, paidCharges: 10000, owed: 1000, remaining: 1000, paidInFull: false })) } }), 'a|1');
-must(/<summary class="linkbtn danger" data-help="card\.cancelJob"[^>]*>Cancel this job…<\/summary>[\s\S]*Ada paid \$150\. What happens to it\?/.test(ac)
+must(/<summary class="cxbtn" data-help="card\.cancelJob"[^>]*>✕ Cancel this job<\/summary>[\s\S]*They paid \$150\. What happens to it\?<\/strong><\/p><p class="muted">Pick one and the job is cancelled\. Your Money page stays right\. Ada is not told\.<\/p>/.test(ac)
   && /value="refund"><button class="btn" type="submit" data-help="card\.cancelRefund"[^>]*>I refunded the \$150 \(record it and cancel\)/.test(ac)
   && /value="keep"><button class="btn ghost" type="submit" data-help="card\.cancelKeep"[^>]*>I&#39;m keeping the \$150 \(record it and cancel\)/.test(ac)
-  && /data-help="card\.cancelPart"[^>]*>I refunded part of it…<\/summary>[\s\S]*name="amount" type="number"[^>]*max="150\.00"/.test(ac) && /data-help="card\.cancelNotYet"[^>]*>✕ Not yet, go back</.test(ac), 'Cancel with $150 in does not ask refunded / keeping / part / Not yet');
-must(pos(ac, 'data-void-link') > pos(ac, 'data-details') && pos(ac, 'data-more-row') < pos(ac, 'data-void-link'), 'Cancel this job… left the quiet row under More');
+  && /data-help="card\.cancelPart"[^>]*>I refunded part of it…<\/summary>[\s\S]*name="amount" type="number"[^>]*max="150\.00"/.test(ac) && /data-help="card\.cancelNotYet"[^>]*>No, keep the job</.test(ac), 'Cancel with $150 in does not ask refunded / keeping / part / No, keep the job');
+// "✕ Cancel this job" on EVERY card face that is not cancelled (owner, 21 Oct 2026: "all jobs should be
+// able to be cancelled with 2 taps"; Carmen's put-away card had none): its own row right under Show
+// more, never inside it, once; a cancelled card has "↩ Not cancelled after all" there instead.
+const moreSplit = (c) => {
+  const s0 = c.indexOf('<details class="disclose more"'); if (s0 < 0) return { more: '', after: '' };
+  const re = /<details\b|<\/details>/g; re.lastIndex = s0; let d = 0; let m;
+  while ((m = re.exec(c))) { d += m[0] === '</details>' ? -1 : 1; if (d === 0) return { more: c.slice(s0, m.index), after: c.slice(m.index) }; }
+  return { more: '', after: '' };
+};
+const CANCEL_WORDS = /data-cancel-job|✕ Cancel this job|Cancel this job…|data-void-link|action="\/admin\/requests\/cancel"/;
+const cancelFace = (c0, label, undo = false) => {
+  const c = c0.replace(/ title="[^"]*"/g, ''); // tooltips may name the button; the markup may not
+  const { more, after } = moreSplit(c);
+  must(c.length > 0 && more.length > 0 && after.length > 0, `Rule 0: ${label}: no card / no Show more group to look past`);
+  must((c.match(/data-cancel-row=/g) || []).length === 1, `${label}: the cancel / undo row is not on the card exactly once`);
+  must(!/data-cancel-row|data-uncancel|↩ Not cancelled/.test(more) && !CANCEL_WORDS.test(more), `${label}: Cancel (or its undo) sits inside Show more (it belongs on the card face)`);
+  must(!/data-more-row[\s\S]*(data-cancel|Cancel this job)/.test(c.replace(after, '')), `${label}: Cancel is in the quiet More row`);
+  if (undo) {
+    must(/^<\/details>\s*<div class="cxrow" data-cancel-row="undo"><form method="post" action="\/admin\/requests\/uncancel"><input type="hidden" name="r" value="[^"]+"><button class="cxbtn" type="submit" data-uncancel data-help="card\.uncancel"[^>]*>↩ Not cancelled after all<\/button><\/form><\/div>/.test(after), `${label}: a cancelled card lacks "↩ Not cancelled after all" in the bottom spot`);
+    must(!CANCEL_WORDS.test(c), `${label}: a cancelled card still offers ✕ Cancel this job`);
+  } else {
+    must(/^<\/details>\s*<div class="cxrow" data-cancel-row="cancel"><details class="confirm cxconfirm" data-cancel-job><summary class="cxbtn" data-help="card\.cancelJob"[^>]*>✕ Cancel this job<\/summary>\s*<div class="confirmbox cxbox">/.test(after), `${label}: "✕ Cancel this job" is not the grey button in its own row at the bottom of the card face`);
+    must((c.match(/data-cancel-job/g) || []).length === 1 && !/data-uncancel/.test(c), `${label}: Cancel shows twice, or the undo shows on a card that is not cancelled`);
+    must((after.match(/class="btn danger" type="submit" data-help="card\.cancelYes"|data-help="card\.cancel(Refund|Keep|PartSave)"/g) || []).length >= 1 && /data-help="card\.cancelNotYet"[^>]*>No, keep (it|the job)</.test(after), `${label}: tap 2 (Yes / the money answers) or "No, keep…" is missing from the confirm`);
+  }
+};
+const nothingPaid = (c, who, num) => /<p><strong>Cancel (\w+)'s job\?<\/strong><\/p><p class="muted">([^<]*)<\/p>[\s\S]*?<button class="btn danger" type="submit" data-help="card\.cancelYes"[^>]*>Yes, cancel (\w+)'s job<\/button><\/form>\s*<button type="button" class="btn ghost" onclick="this\.closest\('details'\)\.open=false" data-help="card\.cancelNotYet"[^>]*>No, keep it<\/button>/.exec(c);
+cancelFace(ac, 'active card with $150 in');
+const st2 = (o) => ({ ...statuses, ...o });
+const NEW = page({ statuses: st2({ 'a|1': { status: 'new' } }), schedule: {} });
+const nc = cardOf(NEW, 'a|1');
+must(/data-stage="new"/.test(nc), `Rule 0: the New fixture is not a New card (${(nc.match(/data-stage="[^"]*"/) || [''])[0]})`);
+cancelFace(nc, 'New card');
+const np = nothingPaid(nc);
+must(np && np[1] === 'Ada' && np[3] === 'Ada' && np[2] === 'Nothing is owed. Ada is not told. You can undo this.', `the nothing-paid confirm is not "Cancel Ada's job?" / "Nothing is owed. Ada is not told. You can undo this." / "Yes, cancel Ada's job" / "No, keep it" (${np && np.slice(1).join(' | ')})`);
+const DR = page({ statuses: st2({ 'a|1': { status: 'new', invoice_id: 8 } }), invoices: { ...invoices, 8: inv(8, 'draft', bal({ paid: 0, paidCharges: 0, paidDeposit: 0, owed: 16000, remaining: 16000, paidInFull: false })) }, schedule: {} });
+const dp = nothingPaid(cardOf(DR, 'a|1'));
+must(dp && dp[2] === 'Invoice PNP-T-8 is voided, so nothing is owed. Ada is not told. You can undo this.', `the nothing-paid confirm with an invoice does not name it (${dp && dp[2]})`);
+cancelFace(cardOf(home, 'a|1'), 'active (on the calendar) card');
+cancelFace(fc, 'Finished card');
+cancelFace(dc, 'Done card');
+must(/They paid \$110\. What happens to it\?/.test(dc), 'a Done card ($160 in, $50 returned) does not ask what happens to the $110');
+cancelFace(pa, 'put-away Done card');
+const PUT = page({ statuses: st2({ 'a|1': { status: 'scheduled', archived_at: '2026-10-20 09:00:00' } }), openPutAway: true });
+const pac = cardOf(PUT, 'a|1');
+must(/data-archived=/.test(pac) && pos(PUT, `id="c-${rk('a|1')}"`) > pos(PUT, 'id="put-away-section"'), 'Rule 0: the put-away active fixture is not under Put away');
+cancelFace(pac, 'put-away active card (Carmen\'s case)');
+cancelFace(cc, 'Cancelled card', true);
+const PCX = page({ statuses: st2({ 'c|1': { status: 'void', invoice_id: 5, cancelled_at: '2026-10-20 15:00:00', archived_at: '2026-10-20 16:00:00' } }), openPutAway: true });
+cancelFace(cardOf(PCX, 'c|1'), 'put-away Cancelled card', true);
+// Grey, never red; phone-sized (48px tall).
+const cxCss = (V.CARD_CSS.match(/\.cxbtn\{[^}]*\}/) || [''])[0];
+must(/border:2px solid #7b7169/.test(cxCss) && /color:#5f5650/.test(cxCss) && /min-height:48px/.test(cxCss) && !/#8f3427|#b91c1c|#dc2626|\bred\b|danger/i.test(cxCss) && home.includes(cxCss), `the Cancel button is not the grey outlined 48px button on the page (${cxCss})`);
+must(!/class="cxbtn[^"]*(danger|primary)/.test(home + PUT + PCX), 'the Cancel button carries a red / primary class');
 // Filters.
 const only = (f) => { const h = page({ filter: f }); return { h, done: /data-done-group/.test(h), cx: /data-cancelled-group/.test(h), act: h.slice(pos(h, 'data-request-list'), pos(h, 'data-request-list') + 400).includes(`id="c-${rk('a|1')}"`) }; };
 const fa = only('active'); must(fa.act && !fa.done && !fa.cx, 'Active only still shows the Done or Cancelled group');
@@ -246,6 +300,48 @@ await s.post(`/admin/invoices/${C1.id}/status`, { action: 'void', back: '/admin/
 must(Boolean((await s.one('SELECT cancelled_at FROM request_status WHERE request_key = ?1', C1.key)).cancelled_at), 'the invoice page Void does not stamp the cancelled day');
 await s.post(`/admin/invoices/${C1.id}/status`, { action: 'unvoid', back: '/admin/' });
 must(!(await s.one('SELECT cancelled_at FROM request_status WHERE request_key = ?1', C1.key)).cancelled_at, 'Bring back (undo Void) does not clear the cancelled day');
+// Cancel a put-away card (Carmen's case): it stays put away, lands on the same card with Put away
+// open, and "↩ Not cancelled after all" puts the status back exactly as it was.
+{
+  const P = await fixture('Pia Putaway', 'pia.putaway@example.com', { paid: 0, jobDone: false, booking: addDays(today, 6) });
+  await s.db.prepare("UPDATE request_status SET status = 'invoiced' WHERE request_key = ?1").bind(P.key).run();
+  await s.post('/admin/requests/archive', { r: P.rk });
+  must(Boolean((await s.one('SELECT archived_at FROM request_status WHERE request_key = ?1', P.key)).archived_at), 'Rule 0: the put-away fixture is not put away');
+  res = await s.post('/admin/requests/cancel', { r: P.rk });
+  const pSt = await s.one('SELECT status, prev_status, archived_at, cancelled_at FROM request_status WHERE request_key = ?1', P.key);
+  must(pSt.status === 'void' && pSt.prev_status === 'invoiced' && Boolean(pSt.archived_at) && Boolean(pSt.cancelled_at) && (await s.one('SELECT status FROM invoices WHERE id = ?1', P.id)).status === 'void', `Cancel on a put-away card was refused or lost where it was (${JSON.stringify(pSt)})`);
+  must(/[?&]pa=1/.test(res.location) && !/[?&]cx=/.test(res.location) && res.location.endsWith(`#c-${P.rk}`), `Cancel on a put-away card does not land on it with Put away open (${res.location})`);
+  pg = await s.get(res.location.split('#')[0]);
+  const pc2 = cardOf(pg.text, P.key);
+  must(/id="put-away" open/.test(pg.text) && pos(pg.text, `id="c-${P.rk}"`) > pos(pg.text, 'id="put-away-section"'), 'a cancelled put-away card left Put away (or Put away is not open)');
+  cancelFace(pc2, 'put-away card after Cancel (real route)', true);
+  res = await s.post('/admin/requests/uncancel', { r: P.rk });
+  const pU = await s.one('SELECT status, prev_status, archived_at, cancelled_at FROM request_status WHERE request_key = ?1', P.key);
+  must(pU.status === 'invoiced' && !pU.prev_status && Boolean(pU.archived_at) && !pU.cancelled_at && /[?&]pa=1/.test(res.location) && res.location.endsWith(`#c-${P.rk}`), `Not cancelled after all did not put the put-away card back exactly (${JSON.stringify(pU)}, ${res.location})`);
+  pg = await s.get(res.location.split('#')[0]);
+  cancelFace(cardOf(pg.text, P.key), 'put-away card after the undo (real route)');
+}
+// Cancel a Done card (Ann: $160 in, $50 returned on Done): asks about the $110, stays Done
+// underneath, and the undo puts it back in Done.
+{
+  pg = await s.get('/admin/');
+  must(/data-ended="done"/.test(cardOf(pg.text, A.key)), 'Rule 0: Ann is not a Done card before the cancel');
+  cancelFace(cardOf(pg.text, A.key), 'Done card (real route)');
+  res = await s.post('/admin/requests/cancel', { r: A.rk });
+  must(/[?&]e=/.test(res.location) && res.location.endsWith(`#c-${A.rk}`), `Cancel on a Done card with money in did not ask first, on the card (${res.location})`);
+  res = await s.post('/admin/requests/cancel', { r: A.rk, how: 'keep' });
+  const aC = await s.one('SELECT status, prev_status, done_at FROM request_status WHERE request_key = ?1', A.key);
+  must(aC.status === 'void' && aC.prev_status === 'paid' && Boolean(aC.done_at) && /[?&]cx=/.test(res.location) && res.location.endsWith(`#c-${A.rk}`), `Cancel on a Done card was refused or lands wrong (${JSON.stringify(aC)}, ${res.location})`);
+  must((await s.all("SELECT 1 FROM payments WHERE invoice_id = ?1 AND kind = 'deposit_kept' AND amount_cents = 11000 AND voided_at IS NULL", A.id)).length === 1, 'Cancel on a Done card did not record the $110 kept');
+  pg = await s.get('/admin/');
+  must(/data-ended="cancelled"/.test(cardOf(pg.text, A.key)) && pos(pg.text, `id="c-${A.rk}"`) > pos(pg.text, 'data-cancelled-group'), 'a cancelled Done card is not in the Cancelled group');
+  await s.post('/admin/requests/uncancel', { r: A.rk });
+  const aU = await s.one('SELECT status, prev_status, done_at FROM request_status WHERE request_key = ?1', A.key);
+  pg = await s.get('/admin/');
+  must(aU.status === 'paid' && !aU.prev_status && Boolean(aU.done_at) && /data-ended="done"/.test(cardOf(pg.text, A.key)) && pos(pg.text, `id="c-${A.rk}"`) < pos(pg.text, 'data-cancelled-group'), `Not cancelled after all did not put the Done card back in Done (${JSON.stringify(aU)})`);
+  must((await s.all("SELECT 1 FROM payments WHERE invoice_id = ?1 AND kind = 'deposit_kept' AND voided_at IS NULL", A.id)).length === 0, 'Not cancelled after all left the $110 kept row on the Done card');
+}
+must(E.restoredStatus('scheduled', true) === 'new' && E.restoredStatus('scheduled', false) === 'scheduled' && E.restoredStatus('paid', true) === 'paid' && E.restoredStatus(null, true) === 'new' && E.restoredStatus('void', false) === 'new', 'restoredStatus does not put the status back (scheduled with an invoice -> new)');
 // No existing payment row was touched by any ending.
 must(JSON.stringify(await s.all("SELECT id, invoice_id, amount_cents, received_on, method, note, kind, voided_at FROM payments WHERE kind = 'payment' AND invoice_id IN (?1, ?2) ORDER BY id", A.id, B.id)) === before, 'an ending changed an existing payment row');
 
@@ -302,6 +398,6 @@ for (const k of ['card.markDone', 'card.doneReturned', 'card.doneKept', 'card.do
 const MIG = fs.readFileSync(path.join(ROOT, 'migrations/0021_request_done.sql'), 'utf8').replace(/--.*$/gm, '');
 must(/ALTER TABLE request_status ADD COLUMN done_at TEXT;/.test(MIG) && /ALTER TABLE request_status ADD COLUMN cancelled_at TEXT;/.test(MIG) && !/\b(UPDATE|DELETE|DROP|INSERT)\b/i.test(MIG), 'migration 0021 is not additive only (done_at, cancelled_at)');
 
-if (checks < 120) errors.push(`Rule 0: only ${checks} checks ran`);
+if (checks < 200) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) { console.error(`admin endings: FAIL (${errors.length} of ${checks})`); for (const e of errors) console.error(`- ${e}`); process.exit(1); }
 console.log(`admin endings: OK (${checks} checks: Finished -> ✓ Mark as done with the deposit question, Done / Cancelled groups in order, greyed cards with ✓ / ✕, money in words, filters, banner, real routes with exact undo, quiet lists, owner words)`);

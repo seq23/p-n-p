@@ -25,7 +25,7 @@ let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
 // Big buttons a viewer sees on a card: filled .btn / .btn primary, not counting the "Yes, …"
 // buttons inside a closed confirm box.
-const bigButtons = (h) => (String(h).replace(/<div class="confirmbox">[\s\S]*?<\/details>/g, '').match(/class="btn( primary)?"/g) || []).length;
+const bigButtons = (h) => (String(h).replace(/<div class="confirmbox[^"]*">[\s\S]*?<\/details>/g, '').match(/class="btn( primary)?"/g) || []).length;
 const TODAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 
 // ---- 1. the rules table --------------------------------------------------------------
@@ -206,7 +206,16 @@ must(!/More about Pat<\/summary>[\s\S]*class="btn primary"/.test(pc), 'an action
 const beforeDetails = (c) => c.slice(0, c.indexOf('data-details'));
 must(/<p class="payline muted" data-payment data-pay-state="none" data-pay-words>No invoice yet\.<\/p>/.test(pc), 'no-invoice card lacks the single quiet "No invoice yet." line');
 must(!/data-help="pay\.(deposit|paid|unpaid|void)"/.test(beforeDetails(pc)), 'no-invoice card shows a payment button');
-must(/data-more-row>[\s\S]*data-void-link>[\s\S]*<summary class="linkbtn danger" data-help="card\.cancelJob"[^>]*>Cancel this job…<\/summary>[\s\S]*Cancel Pat's job\? The job is not happening[\s\S]*action="\/admin\/requests\/cancel"><input type="hidden" name="r" value="[^"]+"><button class="btn danger" type="submit" data-help="card\.cancelYes"[^>]*>Yes, cancel the job/.test(pc.slice(pc.indexOf('data-details')).replace(/&#39;/g, "'")) && !/Void this request/.test(pc), '"Cancel this job…" is not the small danger link (with its confirm, posting the cancel) in the quiet row of More');
+{
+  // "✕ Cancel this job" (owner, 21 Oct 2026): the grey button in its own row at the bottom of the card
+  // FACE (never inside More, never in the quiet row), tap 1 opens the confirm, tap 2 posts the cancel.
+  const pcU = pc.replace(/&#39;/g, "'");
+  const moreAt = pcU.indexOf('<details class="disclose more"');
+  const rowAt = pcU.indexOf('data-cancel-row="cancel"');
+  must(moreAt > 0 && rowAt > moreAt && !/data-cancel-job|Cancel this job/.test(pcU.slice(pcU.indexOf('data-more-row'), pcU.lastIndexOf('</details>', rowAt)))
+    && /<\/details>\s*<div class="cxrow" data-cancel-row="cancel"><details class="confirm cxconfirm" data-cancel-job><summary class="cxbtn" data-help="card\.cancelJob"[^>]*>✕ Cancel this job<\/summary>[\s\S]*<p><strong>Cancel Pat's job\?<\/strong><\/p><p class="muted">Nothing is owed\. Pat is not told\. You can undo this\.<\/p>[\s\S]*action="\/admin\/requests\/cancel"><input type="hidden" name="r" value="[^"]+"><button class="btn danger" type="submit" data-help="card\.cancelYes"[^>]*>Yes, cancel Pat's job<\/button><\/form>[\s\S]*>No, keep it<\/button>/.test(pcU)
+    && !/Void this request|data-void-link/.test(pc), '"✕ Cancel this job" is not the grey button at the bottom of the card face (outside More, with its two-tap confirm posting the cancel)');
+}
 must(!/data-help="card\.(markDone|undone|uncancel)"/.test(pc), 'an ending button (Mark as done / an undo) shows on a New card');
 must(!/Done — put away/.test(pc), 'Done — put away shows on a New card');
 const gc = card(html, 'Gia Graze');
@@ -279,9 +288,14 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
           const wait = /data-next-wait=/.test(top);
           const big = bigButtons(top);
           // A Done / Cancelled card (20 Oct 2026): no big button, its two small ones in data-ended-buttons.
-          if (stage === 'done' || stage === 'void') must(big === 0 && (top.match(/data-ended-buttons>(?:<form[^>]*>(?:<input[^>]*>)+<div class="act"><button class="btn ghost" type="submit"[^>]*>[^<]+<\/button><\/div><\/form>){2}<\/div>/g) || []).length === 1, `${tag}: a Done / Cancelled card has ${big} big buttons, or not exactly its two small ones`);
+          // Done: Put away + Not done after all, and ✕ Cancel this job at the bottom; Cancelled: Put away,
+          // and ↩ Not cancelled after all in that bottom spot (owner, 21 Oct 2026).
+          if (stage === 'done' || stage === 'void') must(big === 0 && (top.match(new RegExp(`data-ended-buttons>(?:<form[^>]*>(?:<input[^>]*>)+<div class="act"><button class="btn ghost" type="submit"[^>]*>[^<]+<\\/button><\\/div><\\/form>){${stage === 'done' ? 2 : 1}}<\\/div>`, 'g')) || []).length === 1
+            && (c.match(/data-cancel-row="(cancel|undo)"/g) || []).join() === `data-cancel-row="${stage === 'done' ? 'cancel' : 'undo'}"`, `${tag}: a Done / Cancelled card has ${big} big buttons, or not exactly its two small ones`);
           else must(wait ? big === 0 : big === 1, `${tag}: ${big} big buttons${wait ? ' while waiting for the day' : ''} (want exactly one)`);
           must(bigButtons(c.slice(c.indexOf('data-details'))) === 0, `${tag}: a big button under Show details`);
+          // ✕ Cancel this job (or, cancelled, ↩ Not cancelled after all) once, at the bottom of the face.
+          must((c.match(/data-cancel-row="(cancel|undo)"/g) || []).join() === `data-cancel-row="${stage === 'void' ? 'undo' : 'cancel'}"` && c.indexOf('data-cancel-row') > c.lastIndexOf('data-more-row'), `${tag}: the cancel / undo row is missing, doubled or not at the bottom of the card`);
           if (when === 'before') must(!/>Mark returned<|>Mark job done</.test(c) && !/data-help="(ret\.mark|card\.jobDone)"[^>]*class="btn|class="btn[^"]*"[^>]*data-help="(ret\.mark|card\.jobDone)"/.test(c), `${tag}: Mark returned / Mark job done before the day`);
           must(!/class="btn[^"]*"[^>]*data-msg-tap="confirmation"/.test(c) && !/<button class="btn[^"]*" type="submit" data-help="(conf|msg)\.(email|pickupEmail)"/.test(c), `${tag}: a message button is big`);
           // Step cards (19 Oct 2026): the small message links live under More, never above it.

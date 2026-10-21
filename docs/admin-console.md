@@ -488,15 +488,15 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   name, one date line; a green bar, "N of M done" and the named steps (done = green ✓, current
   bold, later grey) with ONE "undo" beside the last ✓; then ONE "Next step · step N" box (one
   sentence, one big button, small Call / Text where useful). Everything else (answers, phone and
-  email, ID, notes, history, Edit, Print checklist, Put away, the Payment box, the other buttons,
-  Cancel this job) is under "More about <first name>".
+  email, ID, notes, history, Edit, Print checklist, Put away, the Payment box, the other buttons)
+  is under "More about <first name>". "✕ Cancel this job" is NOT under More: it is the grey button
+  at the very bottom of every card (see "Cancel any job in two taps" below).
   - **Calm card** (owner-approved mock-up, 20 Oct 2026; `validate:admin-card-calm`): always
     visible: name, Call / Text, the when-line, the "🚚 Business delivery" tag, the **Latest note**
     (newest note in full + its day) with "+ Add a note", then the next step. "More about <first
     name>" holds four groups, only the first open: What they booked · Money · Their details and
     ID · Notes and history (all notes, then history newest first, 5 shown + "Show all (N)"), then
-    a quiet row Edit · Print checklist · Put away · "Cancel this job…" (the old "Void this
-    request…", same action and confirm). Raw ISO dates and UTC history stamps read as Memphis
+    a quiet row Edit · Print checklist · Put away. Raw ISO dates and UTC history stamps read as Memphis
     words on screen only; stored rows never change.
   - **One money wording** (`ledger.mjs dueWords`): "$180 due ($130 + $50 refundable deposit)"
     when a refundable deposit is not collected yet, else "$130 due": card, to-do email, invoice
@@ -971,16 +971,29 @@ customer bar, Customer 4 card), `phone-menu-open.jpg`, `phone-scrolled-customer-
   in words ("Paid $110 · $50 deposit returned", `cards.mjs endedMoneyWords`), Call / Text top right,
   and two small buttons: Put away and "Not done after all (undo)" (clears `done_at` and voids the
   rows Done recorded, so the card is back exactly as it was). Show more about <name> keeps the
-  groups and Edit.
-- **Cancel this job…** stays the small danger link in the quiet row of More with its confirm. It
-  posts `/admin/requests/cancel` (`functions/_lib/admin-endings.mjs`), the same Void underneath
-  (invoice void, its bookings off the calendar). With money in (`ledger.mjs cancelHeldCents`) it
-  asks first: refunded all / keeping all / refunded part of it… (an amount; the rest is kept) /
-  Not yet, go back, recorded as `refund` / `deposit_kept` rows ending " (on Cancel)".
+  groups and Edit; "✕ Cancel this job" sits at the very bottom, as on every card.
+- **Cancel any job in two taps** (owner, 21 Oct 2026: "all jobs should be able to be cancelled
+  with 2 taps - one tap then a confirmation tap"; mock-up "Cancel In Two Taps"; a put-away card had
+  no cancel at all). Every card that is not cancelled (new, active, finished, Done and put away)
+  has a grey outlined (never red) **"✕ Cancel this job"** button in its own row at the very bottom
+  of the card face, visible without opening Show more (`views.mjs cancelRow`; never in the quiet
+  More row). Tap 1 opens the confirm on that card (details/summary, no pop-up). Nothing paid:
+  "Cancel <First>'s job?" · "Invoice <num> is voided, so nothing is owed. <First> is not told. You
+  can undo this." · tap 2 **"Yes, cancel <First>'s job"** · "No, keep it". With money in
+  (`ledger.mjs cancelHeldCents`): "They paid $X. What happens to it?" and tap 2 is one of I refunded
+  the $X / I'm keeping the $X / I refunded part of it… (an amount; the rest is kept) · "No, keep the
+  job", recorded as `refund` / `deposit_kept` rows ending " (on Cancel)". It posts
+  `/admin/requests/cancel` (`functions/_lib/admin-endings.mjs`), the same Void underneath (invoice
+  void, its bookings off the calendar); the status the request had is kept in `prev_status`, and
+  `archived_at` / `done_at` are left alone, so a put-away card stays in Put away and a Done card
+  is Cancelled until undone. It lands on the same card (`#c-<rk>`; Put away opened with `pa=1`).
   `request_status.cancelled_at` is the "✕ CANCELLED · <date>" day (requests voided before 0021
   read their `updated_at`). A Cancelled card reads "Nothing owed · invoice voided" (plus what was
-  refunded or kept) and has Put away and "Not cancelled after all (undo)" (the invoice comes back
-  as a draft, the card back to its step, the Cancel rows voided).
+  refunded or kept), has Put away, and **"↩ Not cancelled after all"** in the same bottom spot (the
+  invoice comes back as a draft, the status back to `prev_status` (`admin-endings.mjs
+  restoredStatus`; "scheduled" with an invoice reads as new, since Cancel took its bookings off),
+  the Cancel rows voided; a Done card goes back to Done, a put-away card stays put away). Guarded
+  by `validate:admin-endings` (every stage, real routes for put-away and Done).
 - **Quiet**: Done and Cancelled requests are left out of the 7 AM to-do email, the callback list,
   the reminders and the missed-job alarms: ONE test, `util.mjs isEnded` (put away, void or done),
   read by `callback-list.mjs`, `missed.mjs isLiveBooking`, `todo-email.mjs`, `reminders.mjs`,

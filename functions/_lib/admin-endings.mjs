@@ -9,9 +9,14 @@
 //   POST /admin/requests/cancel    "Cancel this job…" (the existing Void): with money in, how=
 //        refund|keep|part (+ amount) records it first (tagged CANCEL_TAG), then the invoice is
 //        voided and its bookings come off the calendar, exactly as Void always did.
-//   POST /admin/requests/uncancel  "Not cancelled after all (undo)": the existing Bring back (undo
-//        Void): the invoice comes back as a draft, the request back to its step, and the rows
-//        Cancel recorded are voided.
+//        Any card that is not cancelled can be cancelled (owner, 21 Oct 2026: "all jobs should be able
+//        to be cancelled with 2 taps"), put away and Done ones too: archived_at and done_at are left
+//        as they are, and the status it had is kept in prev_status.
+//   POST /admin/requests/uncancel  "↩ Not cancelled after all": the existing Bring back (undo
+//        Void): the invoice comes back as a draft, the request back to the status it had
+//        (prev_status), and the rows Cancel recorded are voided. A put-away card stays put away, a
+//        Done card goes back to Done. Both land on the same card (#c-<rk>), with Put away opened
+//        (pa=1) when the card is put away.
 // Nothing here deletes a row, and nothing changes an invoice's lines or an earlier payment.
 import { redirect, b64urlText, fromB64urlText, toCents } from './util.mjs';
 import { logEvent } from './requests.mjs';
@@ -20,6 +25,18 @@ import { removeInvoiceBookings } from './calendar.mjs';
 
 const decodeKey = (v) => { try { return fromB64urlText(String(v || '')); } catch { return ''; } };
 const anchorOf = (v) => (/^c-[A-Za-z0-9_-]{1,400}$/.test(String(v || '')) ? `#${v}` : '');
+// Where a cancel / uncancel lands: the same card; a put-away card sits in the folded Put away
+// panel, so that opens (pa=1) instead of the Cancelled group (cx).
+const cardPage = (st, rk, params) => toPage(st && st.archived_at ? { ...params, pa: '1' } : params, `#c-${rk}`);
+// The status a request goes back to on "Not cancelled after all". 'scheduled' with an invoice is
+// read as 'new': Cancel took the invoice's bookings off the calendar (her hand-made ones stay and
+// still count as on the calendar, progress.mjs).
+export const restoredStatus = (prev, hasInvoice) => {
+  const p = String(prev || '');
+  if (!p || p === 'void') return 'new';
+  if (p === 'scheduled' && hasInvoice) return 'new';
+  return p;
+};
 const toPage = (params, hash) => redirect(`/admin/?${Object.entries(params).map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')}${hash}`);
 
 async function load(db, key) {
@@ -73,14 +90,14 @@ export async function cancelJob(env, request) {
   if (!key) return redirect('/admin/');
   const rk = b64urlText(key);
   const { st, inv, bal, out } = await load(env.DB, key);
-  if ((st && st.status === 'void') || (inv && inv.status === 'void')) return toPage({ m: 'Already cancelled.', cx: rk }, `#c-${rk}`);
+  if ((st && st.status === 'void') || (inv && inv.status === 'void')) return cardPage(st, rk, st && st.archived_at ? { m: 'Already cancelled.' } : { m: 'Already cancelled.', cx: rk });
   const held = inv ? cancelHeldCents(bal, out) : 0;
   const how = String(form.get('how') || '');
-  if (held > 0 && !['refund', 'keep', 'part'].includes(how)) return toPage({ e: `They paid ${dollars(held)}. Tap Cancel this job… and say what happens to it.` }, `#c-${rk}`);
+  if (held > 0 && !['refund', 'keep', 'part'].includes(how)) return cardPage(st, rk, { e: `They paid ${dollars(held)}. Tap ✕ Cancel this job and say what happens to it.` });
   let moneyWords = '';
   if (held > 0) {
     const part = how === 'part' ? toCents(form.get('amount')) : 0;
-    if (how === 'part' && !(part > 0 && part <= held)) return toPage({ e: `Type how much you refunded (up to ${dollars(held)}).` }, `#c-${rk}`);
+    if (how === 'part' && !(part > 0 && part <= held)) return cardPage(st, rk, { e: `Type how much you refunded (up to ${dollars(held)}).` });
     const rec = await recordCancelMoney(env.DB, inv.id, how, part);
     moneyWords = [rec.refunded ? `${dollars(rec.refunded)} refunded` : '', rec.kept ? `${dollars(rec.kept)} kept` : ''].filter(Boolean).join(', ');
   }
@@ -89,11 +106,15 @@ export async function cancelJob(env, request) {
     await env.DB.prepare("UPDATE invoices SET status = 'void', updated_at = datetime('now') WHERE id = ?1").bind(inv.id).run();
     await removeInvoiceBookings(env.DB, inv.id);
   }
-  await env.DB.prepare(`INSERT INTO request_status (request_key, status, invoice_id, cancelled_at, updated_at) VALUES (?1, 'void', ?2, datetime('now'), datetime('now'))
-    ON CONFLICT(request_key) DO UPDATE SET status = 'void', invoice_id = COALESCE(excluded.invoice_id, request_status.invoice_id), cancelled_at = datetime('now'), updated_at = datetime('now')`)
+  // The status it had goes to prev_status, so "↩ Not cancelled after all" puts it back there.
+  await env.DB.prepare(`INSERT INTO request_status (request_key, status, invoice_id, prev_status, cancelled_at, updated_at) VALUES (?1, 'void', ?2, 'new', datetime('now'), datetime('now'))
+    ON CONFLICT(request_key) DO UPDATE SET prev_status = CASE WHEN request_status.status = 'void' THEN request_status.prev_status ELSE request_status.status END,
+      status = 'void', invoice_id = COALESCE(excluded.invoice_id, request_status.invoice_id), cancelled_at = datetime('now'), updated_at = datetime('now')`)
     .bind(key, inv ? inv.id : null).run();
-  await logEvent(env.DB, key, `Job cancelled${inv ? ` (invoice ${inv.number} voided)` : ''}${moneyWords ? `: ${moneyWords}` : ''}. Moved to the Cancelled group.`, 'Valerie');
-  return toPage({ m: `Cancelled. Nothing is owed${moneyWords ? ` (${moneyWords})` : ''}. It is in the Cancelled group.`, cx: rk }, `#c-${rk}`);
+  const away = Boolean(st && st.archived_at);
+  await logEvent(env.DB, key, `Job cancelled${inv ? ` (invoice ${inv.number} voided)` : ''}${moneyWords ? `: ${moneyWords}` : ''}. ${away ? 'It stays put away.' : 'Moved to the Cancelled group.'}`, 'Valerie');
+  const m = `Cancelled. Nothing is owed${moneyWords ? ` (${moneyWords})` : ''}. ${away ? 'It stays in Put away.' : 'It is in the Cancelled group.'}`;
+  return cardPage(st, rk, away ? { m } : { m, cx: rk });
 }
 
 export async function uncancelJob(env, request) {
@@ -106,8 +127,8 @@ export async function uncancelJob(env, request) {
     await voidTagged(env.DB, inv.id, CANCEL_TAG);
   }
   if (st && st.status === 'void') {
-    await env.DB.prepare("UPDATE request_status SET status = 'new', cancelled_at = NULL, updated_at = datetime('now') WHERE request_key = ?1").bind(key).run();
+    await env.DB.prepare("UPDATE request_status SET status = ?2, prev_status = NULL, cancelled_at = NULL, updated_at = datetime('now') WHERE request_key = ?1").bind(key, restoredStatus(st.prev_status, Boolean(inv))).run();
     await logEvent(env.DB, key, `Not cancelled after all${inv ? ` (invoice ${inv.number} is a draft again)` : ''}.`, 'Valerie');
   }
-  return toPage({ m: inv ? 'Not cancelled ✓ The invoice is back as a draft. Send it again to put it back on the calendar.' : 'Not cancelled ✓' }, `#c-${b64urlText(key)}`);
+  return cardPage(st, b64urlText(key), { m: inv ? 'Not cancelled ✓ The invoice is back as a draft. Send it again to put it back on the calendar.' : 'Not cancelled ✓' });
 }
