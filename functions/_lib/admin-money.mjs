@@ -26,7 +26,7 @@ const okYear = (y) => (/^\d{4}$/.test(String(y || '')) ? String(y) : chicagoDate
 
 // The view on Money, remembered in the URL so a refresh keeps it (owner, 19 Oct 2026):
 //   view=all            All jobs (default: By month, month=YYYY-MM, this month by default)
-//   unconf=1            Include unconfirmed jobs (default off)
+//   unconf=1            Also show jobs not confirmed yet, no invoice sent (default off)
 //   deposits=in         count refundable damage deposits (default: left out). The tick-box form
 //                       sends f=1 and deposits=out while ticked, so an unticked box reads as "in".
 export function moneyState(url) {

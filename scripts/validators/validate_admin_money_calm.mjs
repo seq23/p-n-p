@@ -4,7 +4,7 @@
  * moneySummary, views-money.mjs, admin-money.mjs tips + history, weekly.mjs).
  *  1. By month vs All jobs: a month shows only its jobs; All jobs shows every job, Upcoming
  *     (nearest first) then Past (newest first). Void jobs never show.
- *  2. Include unconfirmed jobs (default off): unconfirmed rows only when ticked, dashed and
+ *  2. Also show jobs not confirmed yet (no invoice sent; default off): unconfirmed, unbilled rows only when ticked, dashed and
  *     labelled "Not confirmed"; their price only in "Expected if confirmed", never in Money in or
  *     Still owed.
  *  3. Leave out refundable deposits (default on): Money in and job totals leave the damage
@@ -231,6 +231,7 @@ must(cents(fig(allOff, 'owed')) === rows0.filter(M.counted).reduce((n, r) => n +
   must(/data-owed-row>[\s\S]{0,300}/.test(det) && rowB.number && det.includes(rowB.number) && det.includes(usd(rowB.owed)), 'the Still owed detail does not list the sent unconfirmed invoice with its amount');
 }
 must(fig(allOn, 'received') === fig(allOff, 'received') && fig(allOn, 'owed') === fig(allOff, 'owed'), 'ticking unconfirmed changed Money in or Still owed');
+must(/Also show jobs not confirmed yet \(no invoice sent\)<small>[^<]*A sent invoice always shows and counts in Still owed, ticked or not\./.test(allOff), 'the unconfirmed tick box does not say it only covers jobs with no invoice sent');
 must(/<input type="checkbox" name="unconf" value="1" checked/.test(allOn) && !/name="unconf" value="1" checked/.test(allOff), 'the unconfirmed tick box does not reflect the URL');
 must(/data-group="upcoming"|data-group="past"/.test(allOff), 'All jobs is not grouped Upcoming / Past');
 // Month filter on the page.

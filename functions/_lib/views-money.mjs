@@ -187,7 +187,7 @@ export function moneyPage({ month, year, state, today = '', requestsThisMonth = 
       ${month !== thisMonth ? `<p class="thism"><a href="${esc(moneyHref(state, { month: thisMonth }))}"${tip('mon.this')}>Back to this month</a></p>` : ''}`}
       <form class="ticks" method="get" action="/admin/money" data-ticks>
         ${all ? '<input type="hidden" name="view" value="all">' : `<input type="hidden" name="month" value="${esc(month)}">`}<input type="hidden" name="f" value="1">
-        <label class="tick"><input type="checkbox" name="unconf" value="1"${state.includeUnconfirmed ? ' checked' : ''} onchange="this.form.submit()" data-tick="unconf"${tip('mon.unconf')}><span>Include unconfirmed jobs<small>Requests you have not said yes to yet. They show grey, and their price is counted apart.</small></span></label>
+        <label class="tick"><input type="checkbox" name="unconf" value="1"${state.includeUnconfirmed ? ' checked' : ''} onchange="this.form.submit()" data-tick="unconf"${tip('mon.unconf')}><span>Also show jobs not confirmed yet (no invoice sent)<small>Requests with no invoice sent yet. They show grey, and their price is counted apart. A sent invoice always shows and counts in Still owed, ticked or not.</small></span></label>
         <label class="tick"><input type="checkbox" name="deposits" value="out"${state.includeDeposits ? '' : ' checked'} onchange="this.form.submit()" data-tick="deposits"${tip('mon.refundables')}><span>Leave out refundable deposits<small>Damage deposits ($50) are given back, so they are not your money</small></span></label>
         <noscript><button class="btn ghost" type="submit"${tip('mon.apply')}>Show</button></noscript>
       </form>
