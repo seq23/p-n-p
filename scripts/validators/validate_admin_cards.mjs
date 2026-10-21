@@ -47,20 +47,25 @@ for (const services of SINGLE) {
       must(!all.some((k) => DETOUR.test(k)), `${tag}: a "Schedule takedown / pickup" detour button is back`);
       {
         const row = K.inlineRowKind({ services, stage });
-        const want = ['void', 'finished', 'archived'].includes(stage) ? '' : (services.includes('porch') ? 'porch_takedown' : services.includes('party') ? 'party_takedown' : services.includes('grazing') ? 'grazing_pickup' : '');
+        const want = ['void', 'finished', 'done', 'archived'].includes(stage) ? '' : (services.includes('porch') ? 'porch_takedown' : services.includes('party') ? 'party_takedown' : services.includes('grazing') ? 'grazing_pickup' : '');
         must(row === want, `${tag}: inline row "${row}", expected "${want}" (porch/party takedown, grazing pickup, never a rental)`);
         if (!services.includes('porch') && !services.includes('party')) must(!/_takedown$/.test(row), `${tag}: takedown row without porch or party`);
         if (!services.includes('grazing') || services.includes('porch') || services.includes('party')) must(row !== 'grazing_pickup', `${tag}: grazing pickup row without grazing (or over a takedown)`);
       }
-      if (stage === 'void') must(out.primary === 'pay.unvoid' && out.secondary.join() === 'card.archive', `${tag}: void must show only Bring back + Put away (got ${all})`);
-      else if (stage === 'finished') must(out.primary === 'card.archive' && !out.secondary.length, `${tag}: finished must show only Put away (got ${all})`);
+      // Three endings (owner-approved "Done Cards", 20 Oct 2026): Finished = ONE big "✓ Mark as done"
+      // + a small Put away; Done = only Put away + "Not done after all (undo)"; Cancelled (void) =
+      // only Put away + "Not cancelled after all (undo)", no big button on either.
+      if (stage === 'void') must(out.primary === '' && out.secondary.join() === 'card.archive,card.uncancel' && !out.more.length, `${tag}: void must show only Put away + Not cancelled after all (got ${all})`);
+      else if (stage === 'done') must(out.primary === '' && out.secondary.join() === 'card.archive,card.undone' && !out.more.length, `${tag}: done must show only Put away + Not done after all (got ${all})`);
+      else if (stage === 'finished') must(out.primary === 'card.markDone' && out.secondary.join() === 'card.archive' && !out.more.length, `${tag}: finished must show ✓ Mark as done + Put away only (got ${all})`);
       else if (stage === 'archived') must(out.primary === 'pa.bringBack' && !out.secondary.length, `${tag}: put away must show only Bring back (got ${all})`);
       else {
         // job_done with a takedown open: the inline row's Save is the next step (tested in validate:admin-takedown-inline).
         must(Boolean(out.primary), `${tag}: no primary button`);
         // Calm cards (owner, 18 Oct 2026): Put away only on Finished/Void, at most 3 secondary
         // buttons visible (the rest under Show details), never a money button in the row.
-        must(!all.includes('card.archive'), `${tag}: Done — put away shows on a card that is not Finished or Void`);
+        must(!all.includes('card.archive'), `${tag}: Put away shows as a button on a card that is not Finished, Done or Cancelled (it lives in the quiet row of More)`);
+        must(!all.some((k) => ['card.markDone', 'card.undone', 'card.uncancel'].includes(k)), `${tag}: an ending button (Mark as done / an undo) on an active card`);
         must(out.secondary.length <= K.MAX_SECONDARY && K.MAX_SECONDARY === 3, `${tag}: ${out.secondary.length} secondary buttons visible (max 3)`);
         must(!out.secondary.length || !out.more.length || out.secondary.length === 3, `${tag}: buttons moved under Show details while the row has room`);
         must(![...out.secondary, ...out.more].some((k) => k.startsWith('pay.')), `${tag}: a money button in the secondary row`);
@@ -92,7 +97,7 @@ must(P(['porch'], 'job_done', { jobDoneAt: true }) === 'pay.paid', 'job done: pr
 // whenever there is a step to take, and never more than one.
 const WHEN = { before: '2026-10-20', on: '2026-10-24', after: '2026-10-27' };
 const ALL_SETS = [['porch'], ['party'], ['grazing'], ['rentals'], ['porch', 'rentals'], ['party', 'rentals'], ['party', 'grazing', 'rentals'], ['porch', 'party', 'grazing', 'rentals']];
-const LIVE = K.STAGES.filter((x) => !['void', 'finished', 'archived'].includes(x));
+const LIVE = K.STAGES.filter((x) => !['void', 'finished', 'done', 'archived'].includes(x));
 let matrix = 0;
 for (const services of ALL_SETS) {
   for (const stage of K.STAGES) {
@@ -113,7 +118,8 @@ for (const services of ALL_SETS) {
             must(!all.includes('ret.mark'), `${tag}: Mark returned before the pickup date`);
             must(!all.includes('card.jobDone'), `${tag}: Mark job done before the event date`);
           }
-          if (!LIVE.includes(stage)) { must(Boolean(out.primary), `${tag}: no primary on a closed card`); continue; }
+          // Finished / Put away keep ONE big button; a Done or Cancelled card has none (two small ones).
+          if (!LIVE.includes(stage)) { must(['done', 'void'].includes(stage) ? !out.primary && out.secondary.length === 2 : Boolean(out.primary), `${tag}: ${['done', 'void'].includes(stage) ? 'a big button on a Done / Cancelled card' : 'no primary on a closed card'}`); continue; }
           const waiting = K.cardWaiting({ services, stage, primary: out.primary, jobDoneAt: stage === 'job_done', dates });
           // Exactly one: a primary, or (only before the day, waiting on it) the quiet Next: line.
           must(Boolean(out.primary) !== Boolean(waiting), `${tag}: ${out.primary ? 'a primary AND a waiting line' : 'no primary and no waiting line'}`);
@@ -200,7 +206,8 @@ must(!/More about Pat<\/summary>[\s\S]*class="btn primary"/.test(pc), 'an action
 const beforeDetails = (c) => c.slice(0, c.indexOf('data-details'));
 must(/<p class="payline muted" data-payment data-pay-state="none" data-pay-words>No invoice yet\.<\/p>/.test(pc), 'no-invoice card lacks the single quiet "No invoice yet." line');
 must(!/data-help="pay\.(deposit|paid|unpaid|void)"/.test(beforeDetails(pc)), 'no-invoice card shows a payment button');
-must(/data-more-row>[\s\S]*data-void-link>[\s\S]*<summary class="linkbtn danger" data-help="card\.cancelJob"[^>]*>Cancel this job…<\/summary>[\s\S]*Cancel this job for Pat Porch\?[\s\S]*name="status" value="void"[\s\S]*Yes, void it/.test(pc.slice(pc.indexOf('data-details'))) && !/Void this request/.test(pc), '"Cancel this job…" is not the small danger link (with its confirm, the same Void action) in the quiet row of More');
+must(/data-more-row>[\s\S]*data-void-link>[\s\S]*<summary class="linkbtn danger" data-help="card\.cancelJob"[^>]*>Cancel this job…<\/summary>[\s\S]*Cancel Pat's job\? The job is not happening[\s\S]*action="\/admin\/requests\/cancel"><input type="hidden" name="r" value="[^"]+"><button class="btn danger" type="submit" data-help="card\.cancelYes"[^>]*>Yes, cancel the job/.test(pc.slice(pc.indexOf('data-details')).replace(/&#39;/g, "'")) && !/Void this request/.test(pc), '"Cancel this job…" is not the small danger link (with its confirm, posting the cancel) in the quiet row of More');
+must(!/data-help="card\.(markDone|undone|uncancel)"/.test(pc), 'an ending button (Mark as done / an undo) shows on a New card');
 must(!/Done — put away/.test(pc), 'Done — put away shows on a New card');
 const gc = card(html, 'Gia Graze');
 must(/data-grazing-facts>Guests: 15–40 · Food estimate: \$180–\$720</.test(gc), `grazing card lacks guest count + food estimate (${(gc.match(/data-grazing-facts>[^<]*/) || [''])[0]})`);
@@ -251,6 +258,7 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
     ['job done', { status: 'job_done', job_done_at: '2026-10-24 12:00:00' }, bal('deposit_paid', 10000), true, { returned_at: '2026-10-25 12:00:00' }, false],
     ['paid', { status: 'paid', job_done_at: '2026-10-24 12:00:00' }, bal('paid', 20000), true, { returned_at: '2026-10-25 12:00:00' }, false],
     ['void', { status: 'void', void: 1 }, null, false, null, false],
+    ['done', { status: 'paid', job_done_at: '2026-10-24 12:00:00', done_at: '2026-10-26 15:00:00' }, bal('paid', 20000), true, { returned_at: '2026-10-25 12:00:00' }, false],
     ['put away', { status: 'paid', archived_at: '2026-10-26 00:00:00' }, bal('paid', 20000), true, { returned_at: '2026-10-25 12:00:00' }, true],
   ];
   const seen = new Set();
@@ -270,12 +278,14 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
           const top = c.slice(0, c.indexOf('data-details'));
           const wait = /data-next-wait=/.test(top);
           const big = bigButtons(top);
-          must(wait ? big === 0 : big === 1, `${tag}: ${big} big buttons${wait ? ' while waiting for the day' : ''} (want exactly one)`);
+          // A Done / Cancelled card (20 Oct 2026): no big button, its two small ones in data-ended-buttons.
+          if (stage === 'done' || stage === 'void') must(big === 0 && (top.match(/data-ended-buttons>(?:<form[^>]*>(?:<input[^>]*>)+<div class="act"><button class="btn ghost" type="submit"[^>]*>[^<]+<\/button><\/div><\/form>){2}<\/div>/g) || []).length === 1, `${tag}: a Done / Cancelled card has ${big} big buttons, or not exactly its two small ones`);
+          else must(wait ? big === 0 : big === 1, `${tag}: ${big} big buttons${wait ? ' while waiting for the day' : ''} (want exactly one)`);
           must(bigButtons(c.slice(c.indexOf('data-details'))) === 0, `${tag}: a big button under Show details`);
           if (when === 'before') must(!/>Mark returned<|>Mark job done</.test(c) && !/data-help="(ret\.mark|card\.jobDone)"[^>]*class="btn|class="btn[^"]*"[^>]*data-help="(ret\.mark|card\.jobDone)"/.test(c), `${tag}: Mark returned / Mark job done before the day`);
           must(!/class="btn[^"]*"[^>]*data-msg-tap="confirmation"/.test(c) && !/<button class="btn[^"]*" type="submit" data-help="(conf|msg)\.(email|pickupEmail)"/.test(c), `${tag}: a message button is big`);
           // Step cards (19 Oct 2026): the small message links live under More, never above it.
-          if (!['void', 'finished', 'archived'].includes(stage) && services.includes('rentals') && !ret) must(/data-messages>[\s\S]*data-msg="pickupTime"/.test(c.slice(c.indexOf('data-details'))) && !/data-messages>/.test(top), `${tag}: no small pickup-time message line under More (or it sits above More)`);
+          if (!['void', 'finished', 'done', 'archived'].includes(stage) && services.includes('rentals') && !ret) must(/data-messages>[\s\S]*data-msg="pickupTime"/.test(c.slice(c.indexOf('data-details'))) && !/data-messages>/.test(top), `${tag}: no small pickup-time message line under More (or it sits above More)`);
         }
       }
     }
@@ -326,7 +336,8 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
   }
   must(bigButtons(VM.thankYouBox({ thankyouEmailedAt: '' }, { rk: 'x', sms: sms('t'), canEmail: true })) === 0, 'the thank-you box carries a big button');
 }
-must(/data-week-counts|data-filters/.test(html) && (html.match(/data-filter="/g) || []).length === 6, 'the six filter chips are missing');
+// Nine chips since the three endings (20 Oct 2026): Everything, Active only, Done only, Cancelled only, the four services, Not paid yet.
+must(/data-week-counts|data-filters/.test(html) && (html.match(/data-filter="/g) || []).length === 9 && ['all', 'active', 'done', 'cancelled', 'porch', 'party', 'grazing', 'rentals', 'unpaid'].every((k) => html.includes(`data-filter="${k}"`)), 'the nine filter chips are missing');
 for (const [k, label] of K.FILTERS) must(html.includes(`data-filter="${k}"`) && html.includes(`>${label.replace('&', '&amp;')}</a>`), `filter chip ${label} missing`);
 
 // ---- 3. filters and the Put away section ------------------------------------------------

@@ -50,7 +50,7 @@ import { notPaidRows } from './notpaid.mjs';
 import { chicagoDate, chicagoHour, dayWords, timeWords, smsLink, normalizePhone } from './reminders.mjs';
 import { render as renderMessage } from './messages.mjs';
 import { weeklyData } from './weekly.mjs';
-import { getSettings, money, esc, b64urlText, FROM_EMAIL } from './util.mjs';
+import { getSettings, money, esc, b64urlText, FROM_EMAIL, isEnded } from './util.mjs';
 import { useInventory } from './inventory.mjs';
 
 const SITE = 'https://porchandparty901.com';
@@ -209,7 +209,9 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   const moneyItems = [];
   const requestsByKey = Object.fromEntries(facts.map((f) => [f.r.key, { ...f.r, services: f.services }]));
   const np = notPaidRows(bals, linesBy, requestsByKey, today);
-  for (const row of np.owed.filter((x) => Number.isFinite(x.days) && x.days <= 0)) {
+  // A request marked Done is left out of the 7 AM email (owner, 20 Oct 2026); void never owes.
+  const doneKey = (k) => Boolean(k && statuses[k] && statuses[k].done_at);
+  for (const row of np.owed.filter((x) => Number.isFinite(x.days) && x.days <= 0 && !doneKey(x.requestKey))) {
     const job = jobs.find((j) => j.invoice === row.id || (j.key && j.key === row.requestKey));
     const body = renderMessage('paymentReminder', { name: row.name, amount: usd(row.remaining), due: row.due ? dayWords(row.due) : '', late: row.tone === 'late', number: row.number }).text;
     const sms = smsLink(row.phone, body);
@@ -219,7 +221,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   // Every unpaid rental hold (owner, 20 Oct 2026): waiting for its deposit, with the invoice's
   // amount due, unless Money already lists that request.
   for (const h of holds) {
-    if (statuses[h.request_key] && (statuses[h.request_key].archived_at || statuses[h.request_key].status === 'void')) continue;
+    if (isEnded(statuses[h.request_key])) continue;
     if (reqBy[h.request_key] && reqBy[h.request_key].is_test) continue;
     if (moneyItems.some((x) => x.key && x.key === h.request_key)) continue;
     const timed = !h.by_hand && Number.isFinite(h.untilMs);

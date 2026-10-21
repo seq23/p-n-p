@@ -4,7 +4,7 @@
 // Every reminder is transactional, about one booking, as the Text messages clause in
 // terms-and-conditions.html allows: no offers, no marketing. The wording lives ONLY here.
 
-import { ownerCopy } from './util.mjs';
+import { ownerCopy, isEnded } from './util.mjs';
 
 export const BUSINESS_PHONE = '901-355-1518';
 export const TZ = 'America/Chicago';
@@ -88,7 +88,13 @@ export async function tomorrowsBookings(db, now = new Date()) {
       AND (rs.status IS NULL OR rs.status <> 'void') AND rs.archived_at IS NULL
       AND (i.status IS NULL OR i.status <> 'void')
     ORDER BY COALESCE(b.time, ''), b.id`).bind(tomorrowChicago(now)).all();
-  return results || [];
+  // A request marked Done (request_status.done_at) is ended too: read through SELECT * so this
+  // never names a column the database might not have yet.
+  const keys = [...new Set((results || []).map((b) => b.request_key).filter(Boolean))];
+  if (!keys.length) return results || [];
+  const { results: sts } = await db.prepare(`SELECT * FROM request_status WHERE request_key IN (${keys.map((_, i) => `?${i + 1}`).join(',')})`).bind(...keys).all();
+  const ended = new Set((sts || []).filter((st) => isEnded(st)).map((st) => st.request_key));
+  return (results || []).filter((b) => !b.request_key || !ended.has(b.request_key));
 }
 
 export function reminderEmail(b) {

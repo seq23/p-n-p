@@ -67,7 +67,7 @@ for (const svc of ['porch', 'party']) {
     const rules = K.cardButtons({ services: [svc], stage, inv: paid, sched: true, kinds: bookings.map((b) => b.kind), jobDoneAt: true, takedownPlan: plan, takedown: td, paidFull: true });
     // The inline row (owner, 18 Oct 2026): not booked -> its Save is the next step (no separate
     // primary); booked -> its one-tap Mark takedown done IS the primary, before the day too.
-    const wantPrimary = finished ? 'card.archive' : ({ to_schedule: '', not_sure: '', due: 'td.markDone', booked: 'td.markDone' })[status];
+    const wantPrimary = finished ? 'card.markDone' : ({ to_schedule: '', not_sure: '', due: 'td.markDone', booked: 'td.markDone' })[status];
     must(rules.primary === wantPrimary, `${tag}: primary "${rules.primary}", expected "${wantPrimary}"`);
     if (status === 'booked') {
       const w = K.cardWaiting({ services: [svc], stage, primary: rules.primary, jobDoneAt: true, dates: { eventReached: true }, takedown: td });

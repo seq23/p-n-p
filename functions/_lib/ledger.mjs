@@ -147,7 +147,7 @@ export async function depositHeld(db, invoiceId) {
   return { refunded: row ? row.refunded : 0, kept: row ? row.kept : 0 };
 }
 
-export async function recordDepositOutcome(db, invoice, lines, kind, amountCents, method = '') {
+export async function recordDepositOutcome(db, invoice, lines, kind, amountCents, method = '', tag = '') {
   const paid = (await paidByInvoice(db, [invoice.id]))[invoice.id] || 0;
   const bal = balanceOf(invoice, lines, paid);
   const collected = bal.refundable - bal.depositOwed;
@@ -156,9 +156,39 @@ export async function recordDepositOutcome(db, invoice, lines, kind, amountCents
   const amount = Math.max(0, Math.min(held, Math.round(amountCents) || 0));
   if (amount > 0) {
     await db.prepare('INSERT INTO payments (invoice_id, amount_cents, received_on, method, note, kind) VALUES (?1, ?2, ?3, ?4, ?5, ?6)')
-      .bind(invoice.id, amount, chicagoDate(), method, kind === 'refund' ? 'damage deposit refunded' : 'damage deposit kept for damage', kind).run();
+      .bind(invoice.id, amount, chicagoDate(), method, `${kind === 'refund' ? 'damage deposit refunded' : 'damage deposit kept for damage'}${tag}`, kind).run();
   }
   return { amount, held: held - amount };
+}
+
+// ---- Three endings (owner, 20 Oct 2026; admin-endings.mjs) ------------------------------------
+// The refundable damage deposit still held: collected (balanceOf paidDeposit) less what was
+// already refunded or kept (depositOutcomes / depositHeld). The ONE number "✓ Mark as done" asks
+// about. out: { refunded, kept }.
+export const depositHeldCents = (bal, out = null) => (!bal || bal.void ? 0 : Math.max(0, (bal.paidDeposit || 0) - ((out && out.refunded) || 0) - ((out && out.kept) || 0)));
+// Money still held on a job being cancelled: every payment in, less refunds and kept money.
+export const cancelHeldCents = (bal, out = null) => (!bal ? 0 : Math.max(0, (bal.paid || 0) - ((out && out.refunded) || 0) - ((out && out.kept) || 0)));
+// The rows an ending records carry this tag at the end of their note, so its undo ("Not done
+// after all", "Not cancelled after all") takes exactly those rows off again (voided, never deleted).
+export const DONE_TAG = ' (on Done)';
+export const CANCEL_TAG = ' (on Cancel)';
+// Cancel with money in: record what happened to it. how: 'refund' (all back), 'keep' (all kept),
+// 'part' (refunded partCents, the rest kept). -> { refunded, kept } in cents.
+export async function recordCancelMoney(db, invoiceId, how, partCents = 0) {
+  const paid = (await paidByInvoice(db, [invoiceId]))[invoiceId] || 0;
+  const { refunded, kept } = await depositHeld(db, invoiceId);
+  const held = Math.max(0, paid - refunded - kept);
+  const back = how === 'refund' ? held : (how === 'part' ? Math.max(0, Math.min(held, Math.round(partCents) || 0)) : 0);
+  const keep = how === 'keep' ? held : (how === 'part' ? held - back : 0);
+  const ins = (amount, kind, note) => db.prepare('INSERT INTO payments (invoice_id, amount_cents, received_on, method, note, kind) VALUES (?1, ?2, ?3, ?4, ?5, ?6)')
+    .bind(invoiceId, amount, chicagoDate(), '', `${note}${CANCEL_TAG}`, kind).run();
+  if (back > 0) await ins(back, 'refund', 'job cancelled: money refunded');
+  if (keep > 0) await ins(keep, 'deposit_kept', 'job cancelled: money kept');
+  return { refunded: back, kept: keep };
+}
+export async function voidTagged(db, invoiceId, tag) {
+  await db.prepare("UPDATE payments SET voided_at = datetime('now') WHERE invoice_id = ?1 AND voided_at IS NULL AND kind IN ('refund','deposit_kept') AND note LIKE ?2")
+    .bind(invoiceId, `%${tag}`).run();
 }
 
 // The invoice lines as the editor posts them (line_desc / line_qty / line_price / line_note /

@@ -321,9 +321,9 @@ the top of every screen, and a printable guide at `/admin/help`.
   on an invoice holds only non-money actions. Balances: `balanceOf` in `functions/_lib/ledger.mjs`
   is the ONE source of paid / still owed / paid in full for every surface (see "One balance
   everywhere" below); the refundable damage deposit is shown on its own line.
-- **Put away**: "Done — put away" sets `request_status.archived_at` (nothing deleted, the sheet
-  untouched); a 6-second "Put away. Undo" banner; the Put away section at the bottom of Requests
-  has "Bring back" on each.
+- **Put away**: "Put away" (any card) sets `request_status.archived_at` (nothing deleted, the sheet
+  untouched); a 6-second "Put away. Undo" banner; the Put away section at the bottom of the main
+  page has "Bring back" on each. See "Three ways a job ends" below for Done and Cancelled.
 - **Bookings** (table `bookings`, kinds per service in `functions/_lib/kinds.mjs`, one colour per
   service: porch orange, party purple, grazing green, rentals blue, always with words). An invoice
   created, sent or marked texted from a request upserts its bookings by (request_key, kind):
@@ -941,6 +941,52 @@ Screenshots of the live page, 20 Oct 2026 (customer names and notes blurred; the
 in `docs/admin-screenshots/2026-10-20/`: `phone-requests-top.jpg` (menu button, filter pull-down,
 customer bar, Customer 4 card), `phone-menu-open.jpg`, `phone-scrolled-customer-bar.jpg`,
 `laptop-requests-top-spine.jpg`, `laptop-scrolled-spine.jpg`.
+
+## Three ways a job ends: Done, Cancelled, Put away (owner-approved mock-up "Done Cards", 20 Oct 2026, migration 0021)
+
+| | What it means | Where the card goes | Money and calendar |
+|---|---|---|---|
+| **✓ Done** | The job happened and everything is settled | The "✓ Done (N)" group under the active cards, greyed with a large faint green ✓ | Kept as it is. It counts in Money. |
+| **✕ Cancelled** | The job is not happening (the existing Void) | The "✕ Cancelled (N)" group under Done, folded, grey ✕ (never red) | Invoice voided, nothing owed, off the calendar. Money already in is recorded as refunded or kept, as she chooses. |
+| **Put away** | Put Away (these are cards we want to move out of the way and can be put back at any time) | The Put away section at the bottom | Nothing changes. Works on any card. Bring back returns it to its group. |
+
+- **Order on the main page**: Active, then ✓ Done (newest finished first, open, "Hide done ▴ /
+  Show done ▾"), then ✕ Cancelled (folded, "Show cancelled ▾"), then Put away. The open/closed state
+  of Done and Cancelled is remembered per viewer in `localStorage` (wrapped in try/catch; the page
+  works without it). The filter pull-down adds Everything (active + done), Active only, Done only and
+  Cancelled only (`functions/_lib/cards.mjs` FILTERS, `groupOf`).
+- **✓ Mark as done** replaces the old put-away button as the ONE big button on a Finished card (job done,
+  paid in full, takedown resolved), with a small "Put away" under it. If a refundable damage
+  deposit is still held (`ledger.mjs depositHeldCents`: balanceOf `paidDeposit` less refunds and
+  kept), it asks first: "Yes, I returned $X (record it and mark done)" / "I kept it (record that,
+  and mark done)" / "✕ Not yet, go back", recorded as a `payments` row of kind `refund` /
+  `deposit_kept` (note ending " (on Done)"). Then `request_status.done_at` is set.
+- **After Done** the page lands on the card she was looking at (the next one down, posted as `at`)
+  with a thin green "✓ <First> is done. <First> moved to the Done group. Show me ↓" right above
+  it; Show me scrolls to the Done card with a short glow. Nothing jumps.
+- **A Done card**: greyed, the ✓ watermark, "✓ DONE · <date>" in place of the step dots, the money
+  in words ("Paid $110 · $50 deposit returned", `cards.mjs endedMoneyWords`), Call / Text top right,
+  and two small buttons: Put away and "Not done after all (undo)" (clears `done_at` and voids the
+  rows Done recorded, so the card is back exactly as it was). Show more about <name> keeps the
+  groups and Edit.
+- **Cancel this job…** stays the small danger link in the quiet row of More with its confirm. It
+  posts `/admin/requests/cancel` (`functions/_lib/admin-endings.mjs`), the same Void underneath
+  (invoice void, its bookings off the calendar). With money in (`ledger.mjs cancelHeldCents`) it
+  asks first: refunded all / keeping all / refunded part of it… (an amount; the rest is kept) /
+  Not yet, go back, recorded as `refund` / `deposit_kept` rows ending " (on Cancel)".
+  `request_status.cancelled_at` is the "✕ CANCELLED · <date>" day (requests voided before 0021
+  read their `updated_at`). A Cancelled card reads "Nothing owed · invoice voided" (plus what was
+  refunded or kept) and has Put away and "Not cancelled after all (undo)" (the invoice comes back
+  as a draft, the card back to its step, the Cancel rows voided).
+- **Quiet**: Done and Cancelled requests are left out of the 7 AM to-do email, the callback list,
+  the reminders and the missed-job alarms: ONE test, `util.mjs isEnded` (put away, void or done),
+  read by `callback-list.mjs`, `missed.mjs isLiveBooking`, `todo-email.mjs`, `reminders.mjs`,
+  `steps.mjs`, `requested.mjs`, `calendar.mjs`, `takedown.mjs` and `admin-calendar.mjs`.
+- **Nothing existing changes**: migration 0021 only adds `done_at` and `cancelled_at`; no invoice,
+  line, payment, booking or hold is altered by it. Done is a new mark on the card only.
+- Guard: `npm run validate:admin-endings` (rules table, money words, the rendered page and its
+  order, the real routes with their undos on an in-memory database, the quiet lists, the owner's
+  words, migration additive only).
 
 ## Where things live
 | Piece | Place |

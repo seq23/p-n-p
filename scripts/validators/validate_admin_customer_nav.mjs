@@ -12,7 +12,7 @@
  *  3. any admin screen's nav lacks the labelled "☰ Menu ▾" button (a #admin-menu link), the
  *     "✕ Close menu" link, the panel around the full nav, the :target no-JS fallback, or the
  *     current screen marked aria-current="page";
- *  4. Requests lacks the labelled native <select> ("Filter: tap to choose ▾", "All requests (N)"
+ *  4. Requests lacks the labelled native <select> ("Filter: tap to choose ▾", "Everything (active + done) (N)"
  *     then the five filters with counts, data-href = the bubbles' hrefs, a no-JS Show button), or
  *     the dark customer bar directly below it (‹ name ▾ ›, sticky, a <details> jump list of the
  *     visible cards "N Name · Service"), or the phone/laptop CSS split at 900 px, or the scripts
@@ -119,12 +119,14 @@ for (const [k] of C.FILTERS) {
   const sel = (res.text.match(/<form class="ffl" method="get" action="\/admin\/" data-filter-select><label for="ffsel">Filter: tap to choose &#9662;<\/label><select id="ffsel" name="f" data-filter-pick[^>]*>([\s\S]*?)<\/select><noscript><button class="btn ghost" type="submit"[^>]*>Show<\/button><\/noscript><\/form>/) || [])[1];
   must(Boolean(sel), `filter ${k}: no labelled filter drop-down with a no-JS Show button`);
   const opts = [...(sel || '').matchAll(/<option value="([a-z]+)" data-href="([^"]+)"( selected)?>([^<]+) \((\d+)\)<\/option>/g)];
-  must(opts.length === 6 && opts[0][1] === 'all' && opts[0][4] === 'All requests' && Number(opts[0][5]) === cards.length, `filter ${k}: the first option is not "All requests (${cards.length})"`);
+  // Three endings (owner-approved "Done Cards", 20 Oct 2026): Everything (active + done), Active
+  // only, Done only, Cancelled only, then the services and Not paid yet.
+  must(opts.length === C.FILTERS.length && C.FILTERS.length === 9 && opts.map((o) => o[1]).join() === 'all,active,done,cancelled,porch,party,grazing,rentals,unpaid' && opts[0][4] === 'Everything (active + done)' && Number(opts[0][5]) === cards.length, `filter ${k}: the options are not Everything (active + done) (${cards.length}), Active only, Done only, Cancelled only, the services, Not paid yet`);
   for (const o of opts) {
     const bubble = (res.text.match(new RegExp(`<a href="([^"]+)"[^>]*data-filter="${o[1]}"`)) || [])[1];
     must(o[2] === bubble, `filter ${k}: option ${o[1]} goes to ${o[2]}, the bubble goes to ${bubble}`);
     const label = (C.FILTERS.find(([x]) => x === o[1]) || [])[1];
-    must(o[1] === 'all' || o[4] === label.replace(/&/g, '&amp;'), `filter ${k}: option ${o[1]} reads "${o[4]}"`);
+    must(o[4] === label.replace(/&/g, '&amp;'), `filter ${k}: option ${o[1]} reads "${o[4]}"`);
     must(Boolean(o[3]) === (o[1] === k), `filter ${k}: option ${o[1]} selected wrongly`);
   }
   if (opts.find((o) => o[1] === k)) must(Number(opts.find((o) => o[1] === k)[5]) === fc.length, `filter ${k}: the count ${opts.find((o) => o[1] === k)[5]} is not the ${fc.length} cards it shows`);
@@ -193,7 +195,7 @@ const V2 = V.dashboardPage({ requests: active.slice(0, 2), statuses: {}, folderU
 must(V2.indexOf('data-missed-strip') > 0 && V2.indexOf('data-missed-strip') < V2.indexOf('data-filter-select') && V2.indexOf('data-filter-select') < V2.indexOf('<div class="cbar" data-customer-bar>'), 'the missed strip is not above the filter, or the bar is not below it');
 // The empty list: no bar, an empty spine note.
 const V3 = V.dashboardPage({ requests: [], statuses: {}, folderUrl: 'https://x' });
-must(!V3.includes('<div class="cbar" data-customer-bar>') && /<option value="all" data-href="\/admin\/" selected>All requests \(0\)<\/option>/.test(V3), 'the empty list shows a customer bar or a wrong count');
+must(!V3.includes('<div class="cbar" data-customer-bar>') && /<option value="all" data-href="\/admin\/" selected>Everything \(active \+ done\) \(0\)<\/option>/.test(V3), 'the empty list shows a customer bar or a wrong count');
 
 if (checks < 60) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) { console.error(`customer nav: FAIL (${errors.length})\n- ${errors.slice(0, 40).join('\n- ')}`); process.exit(1); }

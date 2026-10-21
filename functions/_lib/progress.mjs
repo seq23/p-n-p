@@ -15,7 +15,8 @@ export const STATUS_MEANINGS = [
   ['Job done (Returned for rentals)', 'The job is over. For a game rental this is set when you tap Mark returned.'],
   ['Paid in full', 'All the money is in. With Job done (and the takedown done, when they asked for one) this means Finished.'],
   ['Void — cancelled', 'Cancelled. The customer was not told. It is off the calendar and nothing is owed.'],
-  ['Put away', 'Not a status: a finished request you moved off the main list. Tap Bring back to see it again.'],
+  ['✓ Done', 'Not a step: you tapped ✓ Mark as done on a finished card. It waits in the Done group under the active cards.'],
+  ['Put away', 'Not a status: Put Away (these are cards we want to move out of the way and can be put back at any time). Tap Bring back to see it again.'],
 ];
 
 // st: request_status row ({status, job_done_at, invoice_id}); inv: invoice row with .balance;

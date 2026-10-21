@@ -131,6 +131,12 @@ export function shortDate(iso) {
 
 export const REQUEST_STATUSES = ['new', 'invoiced', 'deposit_paid', 'scheduled', 'job_done', 'paid', 'void'];
 
+// A request that has ended (owner, 20 Oct 2026: "Three ways a job ends"): put away, cancelled
+// (void) or marked Done (request_status.done_at, migration 0021). Ended requests stay out of the
+// 7 AM to-do email, the callback list, the reminders and the missed-job alarms. ONE test, read by
+// every one of those lists (validate:admin-endings).
+export const isEnded = (st) => Boolean(st && (st.archived_at || st.status === 'void' || st.done_at));
+
 export function todayISO(offsetDays = 0) {
   const d = new Date(Date.now() + offsetDays * 86400000);
   return d.toISOString().slice(0, 10);

@@ -6,14 +6,48 @@ import { SERVICE_KINDS } from './kinds.mjs';
 import { STEP_KEYS } from './progress.mjs';
 import { parseFormDate } from './calendar.mjs';
 import { singlePayment } from './util.mjs';
-import { owes } from './ledger.mjs';
+import { owes, dollars, depositHeldCents } from './ledger.mjs';
 
 export const CARD_SERVICES = ['porch', 'party', 'grazing', 'rentals'];
 
-// The filter chips on Requests (and on the Put away section): All, one per service, Not paid yet.
+// The filter chips on Requests (and on the Put away section): Everything (active + done), the
+// three groups (owner-approved "Done Cards" mock-up, 20 Oct 2026), one per service, Not paid yet.
 export const FILTERS = [
-  ['all', 'All'], ['porch', 'Porch'], ['party', 'Party & decor'], ['grazing', 'Grazing'], ['rentals', 'Rentals'], ['unpaid', 'Not paid yet'],
+  ['all', 'Everything (active + done)'], ['active', 'Active only'], ['done', 'Done only'], ['cancelled', 'Cancelled only'],
+  ['porch', 'Porch'], ['party', 'Party & decor'], ['grazing', 'Grazing'], ['rentals', 'Rentals'], ['unpaid', 'Not paid yet'],
 ];
+export const GROUP_FILTERS = ['active', 'done', 'cancelled'];
+
+// Three ways a job ends (owner-approved mock-up, 20 Oct 2026). Which group a request that is NOT
+// put away sits in on the main page: Cancelled (void), Done (done_at, "✓ Mark as done"), else
+// Active. Put away (archived_at) is separate and keeps the group for Bring back.
+export function groupOf(st = {}, inv = null) {
+  if ((st && st.status === 'void') || (inv && inv.status === 'void')) return 'cancelled';
+  if (st && st.done_at) return 'done';
+  return 'active';
+}
+export const GROUP_ORDER = ['active', 'done', 'cancelled'];
+
+// The money line on a Done / Cancelled card, in words (owner: "Paid $110 · $50 deposit returned",
+// "Nothing owed · invoice voided"). bal: ledger balanceOf; out: { refunded, kept } (depositOutcomes).
+export function endedMoneyWords(group, { bal = null, out = null, status = '' } = {}) {
+  const refunded = (out && out.refunded) || 0; const kept = (out && out.kept) || 0;
+  if (group === 'cancelled') {
+    const parts = [bal ? 'Nothing owed · invoice voided' : 'Nothing owed'];
+    if (refunded) parts.push(`${dollars(refunded)} refunded`);
+    if (kept) parts.push(`${dollars(kept)} kept`);
+    return parts.join(' · ');
+  }
+  if (!bal) return status === 'paid' ? 'Paid in full (no invoice)' : 'No invoice';
+  const parts = [`Paid ${dollars(bal.paidCharges || 0)}`];
+  if (bal.refundable > 0) {
+    const held = depositHeldCents(bal, out);
+    if (refunded) parts.push(`${dollars(refunded)} deposit returned`);
+    if (kept) parts.push(`${dollars(kept)} deposit kept`);
+    if (held) parts.push(`${dollars(held)} deposit still held`);
+  }
+  return parts.join(' · ');
+}
 
 const answerOf = (r, re) => {
   const hit = [...(r.rentals || []), ...(r.decor || []), ...(r.other || [])].find((x) => re.test(x.label));
@@ -36,9 +70,10 @@ export function servicesOf(r) {
 
 // Stage = the last step done before the first step not done yet (so the primary button is
 // always the NEXT step), plus the states off the line.
-export function cardStage({ pr, inv = null, archived = false }) {
+export function cardStage({ pr, inv = null, archived = false, done = false }) {
   if (archived) return 'archived';
   if (pr.void) return 'void';
+  if (done) return 'done';
   if (pr.finished) return 'finished';
   // With no invoice at all (a job she handles by hand), the money steps never block the job steps.
   let stage = 'new';
@@ -52,7 +87,7 @@ export function cardStage({ pr, inv = null, archived = false }) {
   if (stage === 'paid') return 'job_done';
   return stage;
 }
-export const STAGES = ['new', 'draft', ...STEP_KEYS.slice(1, -1), 'finished', 'void', 'archived']; // 'paid' as the last step done is always Finished
+export const STAGES = ['new', 'draft', ...STEP_KEYS.slice(1, -1), 'finished', 'done', 'void', 'archived']; // 'paid' as the last step done is always Finished
 
 // The scheduling button per service: [help key, booking kind].
 export const SCHEDULE_FIRST = {
@@ -91,8 +126,11 @@ const rank = (k) => { const i = SECONDARY_ORDER.indexOf(k.split('|')[0]); return
 // The rules table. facts: { services, stage, inv, plan, sched, kinds (booked kinds),
 // returned, jobDoneAt }. Returns { primary: key|'', secondary: [key, ...] (at most
 // MAX_SECONDARY, shown on the card), more: [key, ...] (under Show details) } where a key
-// may carry a booking kind as "key|kind". "Done — put away" is only ever on a Finished or
-// Void card; money buttons live in the Payment box (cardPayment), never in the secondary row.
+// may carry a booking kind as "key|kind". The endings (owner-approved "Done Cards", 20 Oct 2026):
+// a Finished card's ONE big button is "✓ Mark as done" with a small "Put away" beside it; a Done
+// card has no big button, only "Put away" and "Not done after all (undo)"; a Cancelled (void) card
+// only "Put away" and "Not cancelled after all (undo)". Money buttons live in the Payment box
+// (cardPayment), never in the secondary row.
 //
 // Time-aware (owner, 18 Oct 2026): "Mark returned" only on/after the pickup date and "Mark job
 // done" only on/after the event date (America/Chicago; cardDates). Before that the primary is
@@ -109,8 +147,9 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
   const has = (k) => services.includes(k);
   const decorish = services.filter((k) => k !== 'rentals');
   if (stage === 'archived') return { primary: 'pa.bringBack', secondary: [], more: [] };
-  if (stage === 'void') return { primary: 'pay.unvoid', secondary: ['card.archive'], more: [] };
-  if (stage === 'finished') return { primary: 'card.archive', secondary: [], more: [] };
+  if (stage === 'void') return { primary: '', secondary: ['card.archive', 'card.uncancel'], more: [] };
+  if (stage === 'done') return { primary: '', secondary: ['card.archive', 'card.undone'], more: [] };
+  if (stage === 'finished') return { primary: 'card.markDone', secondary: ['card.archive'], more: [] };
   const firstSched = services.filter((k) => SCHEDULE_FIRST[k] && !kinds.includes(SCHEDULE_FIRST[k][1])).map((k) => `${SCHEDULE_FIRST[k][0]}|${SCHEDULE_FIRST[k][1]}`);
   let primary = '';
   if (stage === 'new') primary = 'card.createInvoice';
@@ -213,7 +252,7 @@ export function cardPayment({ inv = null, status = 'new', plan = 'half', primary
 // party & decor: the takedown; grazing: its optional pickup; rentals never. Never on a Void,
 // Finished or Put away card.
 export function inlineRowKind({ services, stage }) {
-  if (['void', 'finished', 'archived'].includes(stage)) return '';
+  if (['void', 'finished', 'done', 'archived'].includes(stage)) return '';
   if (services.includes('porch')) return 'porch_takedown';
   if (services.includes('party')) return 'party_takedown';
   if (services.includes('grazing')) return 'grazing_pickup';
@@ -255,8 +294,10 @@ export function notPaidYet(inv) {
   return inv.balance.owed > 0;
 }
 
-export function matchesFilter(f, { services, inv }) {
+// group: groupOf() (active / done / cancelled). Everything shows every group (Cancelled folded).
+export function matchesFilter(f, { services, inv, group = 'active' }) {
   if (!f || f === 'all') return true;
+  if (GROUP_FILTERS.includes(f)) return group === f;
   if (f === 'unpaid') return notPaidYet(inv);
   return services.includes(f);
 }

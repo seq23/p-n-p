@@ -3,6 +3,7 @@
 // invoice is created or sent from a request, or typed in by hand. Pure helpers plus the few
 // D1 statements that touch the table. No JSON imports here, so the validators can load it.
 
+import { isEnded } from './util.mjs';
 import { KINDS, KIND_LABELS, serviceInfo } from './kinds.mjs';
 import INV from '../../scripts/lib/inventory.js';
 
@@ -435,7 +436,7 @@ export function firstBookedKeys(bookings) {
 export function unconfirmedRequests(requests, statuses, unconfirmedKeySet) {
   return requests.filter((r) => {
     const st = statuses[r.key];
-    if (r.isTest || (st && (st.archived_at || st.status === 'void'))) return false;
+    if (r.isTest || isEnded(st)) return false;
     return unconfirmedKeySet.has(r.key);
   });
 }

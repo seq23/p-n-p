@@ -6,12 +6,12 @@
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf, singlePayment, autoTag } from './util.mjs';
 import { payStepsOf, payStepsHtml, payStepsLine, PAY_STEPS_CSS, dollars } from './pay-steps.mjs';
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
-import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, inlineRowKind, SCHEDULE_FIRST } from './cards.mjs';
+import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, GROUP_FILTERS, inlineRowKind, SCHEDULE_FIRST, groupOf, endedMoneyWords } from './cards.mjs';
 import { HOLD_DEFAULT_HOURS } from './hold-rules.mjs';
 import { reserveLongerControl, reservedWords, RESERVED_BY_HAND, HOLD_CSS } from './views-messages.mjs';
 import { deriveSteps, undoFor, waitingDays, waitingWords, sentMs, WAIT_HIGHLIGHT_DAYS } from './steps.mjs';
 import { parseFormDate, deliveryAddress, PICKUP_CHOICES, RETURN_CHOICES } from './calendar.mjs';
-import { dueWords, dueCents, balanceWords } from './ledger.mjs';
+import { dueWords, dueCents, balanceWords, depositHeldCents, cancelHeldCents } from './ledger.mjs';
 import { DELIVERY_LINE } from './invoice-note.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
@@ -308,7 +308,7 @@ function confirmStep({ key, yesKey, label, question, action, hidden, danger = fa
 }
 const LABEL = { 'dep.refundYes': 'Yes, record the refund', 'dep.keepYes': 'Yes, keep it for damage', 'exp.deleteYes': 'Yes, delete the expense', 'pay.depositYes': 'Yes, mark deposit received', 'pay.paidYes': 'Yes, mark paid in full', 'pay.unpaidYes': 'Yes, mark as not paid', 'pay.voidYes': 'Yes, void it',
   'day.deleteYes': 'Yes, delete it', 'card.idDeleteYes': 'Yes, delete the ID for good', 'hold.releaseYes': 'Yes, release the games', 'hold.depositYes': 'Yes, mark deposit received', 'set.newTokenYes': 'Yes, make a new link', 'td.jobDoneYes': 'Yes, mark job done', 'note.deleteYes': 'Yes, delete the note', 'ret.undoYes': 'Yes, undo returned',
-  'edit.removeBookingYes': 'Yes, remove the booking', 'edit.removePaymentYes': 'Yes, remove this payment', 'tip.deleteYes': 'Yes, remove the tip' };
+  'edit.removeBookingYes': 'Yes, remove the booking', 'edit.removePaymentYes': 'Yes, remove this payment', 'tip.deleteYes': 'Yes, remove the tip', 'card.cancelYes': 'Yes, cancel the job' };
 
 const hiddenInputs = (obj) => Object.entries(obj).map(([k, v]) => `<input type="hidden" name="${esc(k)}" value="${esc(v)}">`).join('');
 
@@ -578,11 +578,25 @@ function cardPaymentBox(r, st, inv, primary, ctx) {
 
 // "Cancel this job…" (was "Void this request…", owner, 20 Oct 2026): the same Void action with
 // its confirm step, as a small danger link in the quiet bottom row of More (never a big button).
+// Three endings (owner-approved "Done Cards", 20 Oct 2026): it posts to /admin/requests/cancel
+// (admin-endings.mjs), the same Void underneath. With money in (ledger.mjs cancelHeldCents) it asks
+// first what happened to it: refunded all, keeping all, refunded part (an amount), or Not yet.
 function voidLink(r, inv, ctx) {
-  const t = ctx.payTarget;
-  const q = inv && inv.number ? `Cancel this job for ${ctx.who}? Invoice ${inv.number} is voided. The customer is not told. Use this when the job is cancelled or the invoice was a mistake.`
-    : `Cancel this job for ${ctx.who}? The request is voided. The customer is not told. Use this when the job is cancelled or the request was a mistake.`;
-  return `<div class="voidlink" data-void-link>${confirmStep({ key: 'card.cancelJob', yesKey: 'pay.voidYes', label: 'Cancel this job…', question: q, action: t.action, hidden: hiddenInputs({ ...t.extra, [t.field]: 'void' }), danger: true, link: true })}</div>`;
+  const who = firstName(r.name) || 'them';
+  const held = ctx.cancelHeld || 0;
+  const base = { r: ctx.rk };
+  if (!held) {
+    const q = inv && inv.number ? `Cancel ${who}'s job? The job is not happening. Invoice ${inv.number} is voided, so nothing is owed. The customer is not told. You can undo this.`
+      : `Cancel ${who}'s job? The job is not happening, so nothing is owed. The customer is not told. You can undo this.`;
+    return `<div class="voidlink" data-void-link>${confirmStep({ key: 'card.cancelJob', yesKey: 'card.cancelYes', label: 'Cancel this job…', question: q, action: '/admin/requests/cancel', hidden: hiddenInputs(base), danger: true, link: true })}</div>`;
+  }
+  const amt = dollars(held);
+  const f = (how, label, key, cls = 'btn ghost') => `<form method="post" action="/admin/requests/cancel">${hiddenInputs({ ...base, how })}<button class="${cls}" type="submit"${tip(key)}>${esc(label)}</button></form>`;
+  const part = `<details class="cxpart" data-cancel-part><summary class="btn ghost"${tip('card.cancelPart')}>I refunded part of it…</summary><form method="post" action="/admin/requests/cancel">${hiddenInputs({ ...base, how: 'part' })}<label for="cxa-${esc(ctx.rk)}">How much did you refund? ($, the rest is kept)</label><input id="cxa-${esc(ctx.rk)}" name="amount" type="number" step="0.01" min="0.01" max="${esc((held / 100).toFixed(2))}" inputmode="decimal" required><button class="btn" type="submit"${tip('card.cancelPartSave')}>Record it and cancel</button></form></details>`;
+  return `<div class="voidlink" data-void-link><div class="act small"><details class="confirm" data-cancel-money><summary class="linkbtn danger"${tip('card.cancelJob')}>Cancel this job…</summary>
+    <div class="confirmbox"><p><strong>${esc(who)} paid ${esc(amt)}. What happens to it?</strong></p><p class="muted">Pick one, so your Money page stays right. The customer is not told.</p><div class="actions cxacts">
+      ${f('refund', `I refunded the ${amt} (record it and cancel)`, 'card.cancelRefund', 'btn')}${f('keep', `I'm keeping the ${amt} (record it and cancel)`, 'card.cancelKeep')}${part}
+      <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('card.cancelNotYet')}>✕ Not yet, go back</button></div></div></details></div></div>`;
 }
 
 // ---- Request cards (JOB B, owner-approved 18 Oct 2026) -----------------------------------
@@ -683,7 +697,19 @@ function cardButton(keyKind, ctx, primary, { helper = true } = {}) {
       if (ctx.tdNotSure) return confirmStep({ key, yesKey: 'td.jobDoneYes', label: ctx.jobWord || 'Mark job done', cls: primary ? 'primary' : 'ghost', question: `The takedown is not decided yet for ${ctx.who}. Mark the job done anyway? You can still schedule the takedown later.`, action: '/admin/requests/jobdone', hidden: hiddenInputs({ r: rk }), helper: primary });
       return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>${esc(ctx.jobWord || 'Mark job done')}</button>`)}</form>`;
     case 'card.undoJobDone': return `<form method="post" action="/admin/requests/jobdone">${hiddenInputs({ r: rk, undo: '1' })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Undo job done</button>`)}</form>`;
-    case 'card.archive': return `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}${wrap(`<button class="${primary ? 'btn primary' : 'btn ghost'}" type="submit"${tip(key)}>Done — put away</button>`)}</form>`;
+    case 'card.archive': return `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}${wrap(`<button class="${primary ? 'btn primary' : 'btn ghost'}" type="submit"${tip(key)}>Put away</button>`)}</form>`;
+    case 'card.markDone': {
+      // "✓ Mark as done" (owner-approved "Done Cards", 20 Oct 2026). A refundable deposit still
+      // held (ledger.mjs depositHeldCents) asks first: returned, kept, or Not yet.
+      if (!ctx.held) return `<form method="post" action="/admin/requests/done" data-done-form>${hiddenInputs({ r: rk, at: '' })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>✓ Mark as done</button>`)}</form>`;
+      const amt = dollars(ctx.held); const nm = ctx.first || 'their';
+      const f = (dep, label, k, c) => `<form method="post" action="/admin/requests/done" data-done-form>${hiddenInputs({ r: rk, at: '', deposit: dep })}<button class="${c}" type="submit"${tip(k)}>${esc(label)}</button></form>`;
+      return wrap(`<details class="confirm donecheck" data-deposit-check><summary class="${cls}"${tip(key)}>✓ Mark as done</summary><div class="confirmbox"><p><strong>Did you return ${esc(ctx.first ? `${nm}'s` : 'their')} ${esc(amt)} deposit?</strong></p><p class="muted">The card still shows the ${esc(amt)} refundable deposit as held.</p><div class="actions">
+        ${f('returned', `Yes, I returned ${amt} (record it and mark done)`, 'card.doneReturned', 'btn primary')}${f('kept', 'I kept it (record that, and mark done)', 'card.doneKept', 'btn ghost')}
+        <button type="button" class="btn ghost" onclick="this.closest('details').open=false"${tip('card.doneNotYet')}>✕ Not yet, go back</button></div></div></details>`);
+    }
+    case 'card.undone': return `<form method="post" action="/admin/requests/undone">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Not done after all (undo)</button>`)}</form>`;
+    case 'card.uncancel': return `<form method="post" action="/admin/requests/uncancel">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Not cancelled after all (undo)</button>`)}</form>`;
     case 'pa.bringBack': return `<form method="post" action="/admin/requests/unarchive">${hiddenInputs({ r: rk })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Bring back</button>`)}</form>`;
     case 'pay.unvoid': { const t = ctx.payTarget; return `<form method="post" action="${esc(t.action)}">${hiddenInputs({ ...t.extra, [t.field]: 'unvoid' })}${wrap(`<button class="${cls}" type="submit"${tip(key)}>Bring back (undo Void)</button>`)}</form>`; }
     case 'pay.deposit': case 'pay.paid': {
@@ -973,7 +999,14 @@ function nextBox(r, s, x) {
   const firstB = firstKind ? (bookings || []).find((b) => b.kind === firstKind) : null;
   switch (s.current) {
     case 'void': return { big: 'pay.unvoid', html: `<section class="nextbox" data-next-step="void"><p class="what">Void — cancelled</p><p class="why">The customer was not told. Tap Bring back if it was a mistake.</p><div class="actions" data-primary>${cardButton('pay.unvoid', ctx, true)}</div></section>` };
-    case 'finished': return { big: 'card.archive', html: `<section class="nextbox" data-next-step="finished"><p class="done-msg" data-put-away-prompt>✓ All done. This request moves to Finished.</p><div class="actions" data-primary>${cardButton('card.archive', ctx, true)}</div></section>` };
+    case 'finished': {
+      // Everything is finished: ONE big "✓ Mark as done", a small "Put away" under it.
+      const out = inv ? (x.depositOut || null) : null;
+      const held = depositHeldCents(bal, out);
+      const facts = [bal ? 'Paid' : 'Paid in full', services.includes('rentals') ? (x.ret && x.ret.returned_at ? 'games back' : '') : 'job done',
+        bal && bal.refundable > 0 ? (held ? `${money(held)} deposit still held` : (out && out.kept && !out.refunded ? 'deposit kept' : 'deposit returned')) : ''].filter(Boolean);
+      return { big: 'card.markDone', html: `<section class="nextbox" data-next-step="finished"><p class="done-msg" data-put-away-prompt>Everything is finished</p><p class="why" data-finished-facts>${esc(facts.join(', '))}.</p><div class="actions" data-primary>${cardButton('card.markDone', ctx, true)}</div><div class="secrow" data-finished-putaway>${cardButton('card.archive', ctx, false)}</div></section>` };
+    }
     case 'called': {
       const tel = r.phone ? `<a class="btn ghost" href="tel:${esc(String(r.phone).replace(/[^\d+]/g, ''))}"${tip('step.call')}>Call</a>` : '';
       const sms = r.phone ? `<a class="btn ghost" href="sms:${esc(String(r.phone).replace(/[^\d+]/g, ''))}"${tip('step.text')}>Text</a>` : '';
@@ -1152,6 +1185,43 @@ export function missedStrip(missed = [], { hidden = false } = {}) {
   return out;
 }
 
+// "20 Oct" in Memphis time, from a stored UTC "YYYY-MM-DD HH:MM:SS".
+export function endedDay(utc) {
+  const d = new Date(`${String(utc || '').replace(' ', 'T').replace(/Z?$/, 'Z')}`);
+  if (Number.isNaN(d.getTime())) return '';
+  const iso = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(d);
+  const n = new Date(`${iso}T12:00:00Z`);
+  return `${n.getUTCDate()} ${n.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })}`;
+}
+
+// A Done or Cancelled card (owner-approved "Done Cards", 20 Oct 2026): greyed, a large faint ✓
+// (green) or ✕ (grey, never red) watermark, "✓ DONE · <date>" / "✕ CANCELLED · <date>" in place of
+// the steps, the money in words, Call / Text top right, and two small buttons: Put away and the undo.
+// Everything else stays under "Show more about <name>".
+function endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, services, bk, hold, groups }) {
+  const done = stage === 'done';
+  const group = done ? 'done' : 'cancelled';
+  const day = endedDay(done ? st.done_at : (st.cancelled_at || st.updated_at));
+  const words = endedMoneyWords(group, { bal: inv && inv.balance ? inv.balance : null, out: outs, status: st.status });
+  const ectx = { ...ctx, ended: true };
+  const who = firstName(r.name);
+  const name = r.name ? who : 'this request';
+  return `<article class="card stepcard ended ${done ? 'isdone' : 'iscancelled'}" data-card="${esc(rk)}" id="c-${esc(rk)}" data-reqcard data-ended="${group}" data-stage="${esc(stage)}" data-services="${esc(services.join(' '))}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
+      <span class="wm" aria-hidden="true">${done ? '✓' : '✕'}</span>
+      <div class="schead">${quickContact(r)}${num ? `<p class="custno" data-customer-label>Customer ${num}</p>` : ''}<div class="sctags"><span class="svcs" data-badges>${svcBadges}</span></div>
+        <h3 class="who">${esc(r.name || 'No name given')}</h3></div>
+      <p class="endlbl ${done ? 'ok' : 'grey'}" data-ended-label>${done ? '✓ DONE' : '✕ CANCELLED'}${day ? ` · ${esc(day)}` : ''}</p>
+      <p class="endmoney" data-ended-money>${esc(words)}</p>
+      <div class="secrow endbtns" data-ended-buttons>${cardButton('card.archive', ectx, false)}${cardButton(done ? 'card.undone' : 'card.uncancel', ectx, false)}</div>
+      <details class="disclose more" data-details><summary${tip('card.details')}><span class="mshow" data-more-show>Show more about ${esc(name)}</span><span class="mhide" data-more-hide>Hide more about ${esc(name)}</span><span class="mchev" aria-hidden="true">▾</span></summary>
+        <p class="mhint" data-more-hint>Tap any line below to see more.</p>
+        ${groups}
+        <div class="morerow quiet" data-more-row><a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a></div>
+      </details>
+      ${quickMenu({ r, bookings: bk, inv, hold, dates: services.includes('rentals') ? rentalDates(r, bk) : {}, services, current: 'finished', rk })}
+    </article>`;
+}
+
 // One request card. o: everything dashboardPage knows about this request.
 export function requestCard(r, o) {
   const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace,
@@ -1166,16 +1236,18 @@ export function requestCard(r, o) {
   const bk = bookings.length ? bookings : (sched ? (kinds.length ? kinds : firstK).map((kind) => ({ kind, date: sched.date })) : []);
   const s = deriveSteps({ r, services, pr, inv, st, bookings: bk, ret, tdS, stored, depositOut, today });
   // Finished means every step on the card is done (cards.mjs cardStage reads the same facts).
-  const stage = cardStage({ pr: { ...pr, finished: pr.finished && s.finished }, inv, archived });
+  const stage = cardStage({ pr: { ...pr, finished: pr.finished && s.finished }, inv, archived, done: Boolean(st.done_at) });
   const returned = Boolean(ret && ret.returned_at);
   const plan = inv ? payPlanOf(inv, inv.total_cents || 0) : 'half';
   const dates = cardDates({ r, services, bookings: bookings.length ? bookings : (sched ? kinds.map((kind) => ({ kind, date: sched.date })) : []), today });
   const rules = cardButtons({ services, stage, inv, plan, sched: Boolean(sched), kinds, returned, jobDoneAt: Boolean(st.job_done_at), takedownPlan: r.takedownPlan,
     eventReached: dates.eventReached, pickupReached: dates.pickupReached, pickupTimeSet: dates.pickupTimeSet, canText: Boolean(msgs && msgs.pickup && msgs.pickup.sms),
     takedown: tdS, paidFull: s.paidFull });
-  const quiet = ['void', 'finished', 'archived'].includes(stage);
+  const quiet = ['void', 'finished', 'done', 'archived'].includes(stage);
   const rowKind = inlineRowKind({ services, stage });
-  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: tdS.status === 'not_sure', msgs, td: tdS };
+  const outs = inv ? depositOut : null;
+  const ctx = { rk, inv, st, sched, who: r.name || 'this customer', payTarget: payTargetFor(r, inv), tdNotSure: tdS.status === 'not_sure', msgs, td: tdS,
+    first: firstName(r.name), held: depositHeldCents(inv && inv.balance, outs), cancelHeld: inv && inv.balance ? cancelHeldCents(inv.balance, outs) : 0 };
   const first = serviceBadge(services[0]);
   const deposit = inv && inv.balance && inv.balance.refundable ? inv.balance : null;
   const chips = [
@@ -1186,7 +1258,7 @@ export function requestCard(r, o) {
     returned && ret.damaged ? '<span class="chip deposit_paid" data-returned-damage>Returned — check damage</span>' : '',
   ].join('');
   const svcBadges = services.map((k) => { const b = serviceBadge(k); return b ? `<span class="svc" data-service="${k}" style="border-color:${b.bar};background:${b.tint}">${esc(b.label)}</span>` : ''; }).join('');
-  const x = { rk, services, inv, ctx, dates, bookings: bk, tdS, hold, holdHtml, pickupPlace, today, ret, tdSaved };
+  const x = { rk, services, inv, ctx, dates, bookings: bk, tdS, hold, holdHtml, pickupPlace, today, ret, tdSaved, depositOut: outs };
   // A past step not ticked (missed.mjs classify: red first, then yellow, oldest first) takes over
   // the next step; the card stays in its place. Red: red border + tag; yellow: a yellow tag only.
   const T = !archived && !pr.void ? tiers(missed) : { red: [], yellow: [] };
@@ -1206,7 +1278,8 @@ export function requestCard(r, o) {
   const damage = returned && ret.damaged && stage !== 'archived' && stage !== 'void' ? `<div class="notice warn" data-deposit-reminder><strong>Something came back damaged or missing.</strong> ${deposit ? `Damage deposit ${esc(money(deposit.refundable))}, refundable. ` : ''}Decide whether to refund the deposit in full or keep part of it. Nothing is sent to the customer by itself.</div>` : '';
   const payment = quiet ? '' : cardPaymentBox(r, st, inv, big, ctx);
   const bigBase = String(big).split('|')[0];
-  const others = [...rules.secondary, ...rules.more].filter((k) => k.split('|')[0] !== bigBase && k !== 'card.printChecklist' && k.split('|')[0] !== 'card.seeCal');
+  // A Finished card's small "Put away" sits under its "✓ Mark as done" (nextBox), never twice.
+  const others = [...rules.secondary, ...rules.more].filter((k) => k.split('|')[0] !== bigBase && k !== 'card.printChecklist' && k.split('|')[0] !== 'card.seeCal' && !(stage === 'finished' && k === 'card.archive'));
   // The other buttons, each in the group it belongs to: money ones under Money, the put-away /
   // bring-back ones in the quiet bottom row, the rest (calendar, checklist, returns, job done)
   // under What they booked.
@@ -1249,6 +1322,7 @@ export function requestCard(r, o) {
       ${!archived && !quiet ? `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('card.putAway')}>Put away</button></div></form>` : ''}
       ${stage === 'void' && !bottomBtns.some((k) => k.startsWith('card.archive')) ? cardButton('card.archive', ctx, false) : ''}${bottomBtns.map((k) => cardButton(k, ctx, false)).join('')}
       ${quiet ? '' : voidLink(r, inv, ctx)}</div>`;
+  if (!archived && (stage === 'done' || stage === 'void')) return endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, services, bk, hold, groups: `${booked}${moneyG}${detailsG}${historyG}` });
   return `<article class="card stepcard${red ? ' miss' : (miss ? ' tidy' : '')}" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''}${red ? ` data-missed="${esc(miss.id)}"` : (miss ? ` data-tidy="${esc(miss.id)}"` : '')} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${num ? ` data-customer="${num}" data-first="${esc(firstName(r.name) || 'No name')}"` : ''}${first ? ` style="border-left-color:${first.bar}${num ? `;--cc:${first.bar}` : ''}"` : ''}>
       ${num ? `<span class="cnum" data-customer-num aria-hidden="true">${num}</span>` : ''}${red ? `<span class="mchip" data-missed-tag>⚠ ${esc(miss.tag)}</span>` : (miss ? `<span class="ychip" data-tidy-tag>${esc(miss.tag)}</span>` : '')}<div class="schead">${quickContact(r)}${num ? `<p class="custno" data-customer-label>Customer ${num}</p>` : ''}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
         <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
@@ -1351,11 +1425,12 @@ const custColor = (services) => (serviceBadge(services[0]) || { bar: '#57534e' }
 
 // Phone: the filter as one labelled native drop-down (same filters and URLs as the bubbles). It
 // goes on change; without JS the form's Show button submits ?f=<filter>.
+// Everything counts active + done (Cancelled is folded under them); each group filter counts its own.
 export function filterSelect(filter, active = [], base = '/admin/') {
   const opts = FILTERS.map(([k, label]) => {
-    const n = active.filter((x) => matchesFilter(k, x)).length;
+    const n = active.filter((x) => (k === 'all' ? x.group !== 'cancelled' : matchesFilter(k, x))).length;
     const href = `${base}${k === 'all' ? '' : `?f=${k}`}`;
-    return `<option value="${k}" data-href="${esc(href)}"${k === filter ? ' selected' : ''}>${esc(k === 'all' ? 'All requests' : label)} (${n})</option>`;
+    return `<option value="${k}" data-href="${esc(href)}"${k === filter ? ' selected' : ''}>${esc(label)} (${n})</option>`;
   }).join('');
   return `<form class="ffl" method="get" action="${esc(base)}" data-filter-select><label for="ffsel">Filter: tap to choose &#9662;</label><select id="ffsel" name="f" data-filter-pick${tip('req.filterPick')}>${opts}</select><noscript><button class="btn ghost" type="submit"${tip('req.filterGo')}>Show</button></noscript></form>`;
 }
@@ -1455,10 +1530,57 @@ export function requestsPanel(folderUrl) {
   ]);
 }
 
+// The Done / Cancelled groups and cards (owner-approved "Done Cards", 20 Oct 2026). Green means
+// done; Cancelled is grey, never red (a cancelled job is not an alarm).
+export const ENDED_CSS = `
+.endgrp{margin:22px 0 0}
+.endd>summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 14px;min-height:52px;padding:6px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-weight:700;font-size:1.1rem}
+.endd>summary::-webkit-details-marker{display:none}
+.okgrp .endd>summary .eh{color:#2f6b35}.cxgrp .endd>summary .eh{color:#57534e}
+.endd>summary .tog{color:var(--accent);text-decoration:underline;font-size:1rem}
+.endd .t-open{display:none}.endd[open] .t-open{display:inline}.endd[open] .t-shut{display:none}
+.endd[open]>summary{margin-bottom:10px}
+article.ended{position:relative;overflow:hidden;background:#f6f5f2;color:#57534e;border-left-color:#c9c3bb!important}
+article.ended h3.who{color:#57534e;font-size:1.5rem}
+article.ended .wm{position:absolute;right:10px;bottom:-14px;font:900 8rem/1 Inter,Arial,sans-serif;pointer-events:none;user-select:none}
+article.isdone .wm{color:rgba(47,107,53,.13)}article.iscancelled .wm{color:rgba(87,83,78,.13)}
+.endlbl{margin:8px 0 2px;font:800 .95rem Inter,Arial,sans-serif;letter-spacing:.08em}
+.endlbl.ok{color:#2f6b35}.endlbl.grey{color:#6b6460}
+.endmoney{margin:0 0 4px;font-size:1.05rem;color:#3f3a36}
+.endbtns .btn{background:#fff}
+article.ended .disclose.more{position:relative}
+.donebanner{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin:0 0 12px;padding:8px 12px;border:1px solid #b2d3ab;border-left:6px solid #2f6b35;border-radius:10px;background:#f3faf1;color:#24452a;font-size:1.05rem;scroll-margin-top:84px}
+.donebanner a{display:inline-flex;align-items:center;min-height:44px;font-weight:700;color:#2f6b35}
+.donebanner .dbx{margin-left:auto;min-height:44px;background:none;border:0;color:var(--muted);font:600 1rem Inter,Arial,sans-serif;cursor:pointer}
+article.glow{animation:doneglow 2.2s ease-out}
+@keyframes doneglow{0%,40%{box-shadow:0 0 0 4px #7fc28a}100%{box-shadow:0 0 0 0 rgba(127,194,138,0)}}
+.cxacts{display:grid;gap:8px}.cxacts form{margin:0}.cxacts .btn{width:100%}
+.cxpart>summary{list-style:none;width:100%}.cxpart>summary::-webkit-details-marker{display:none}
+.cxpart form{display:grid;gap:6px;margin-top:8px}
+.donecheck .confirmbox .actions{display:grid;gap:8px}.donecheck .confirmbox form{margin:0}
+.panote{display:block;font-size:.95rem;font-weight:400;color:var(--muted)}
+`;
+// Remember Hide done / Show cancelled per viewer (storage may be blocked: try/catch, the page works
+// without it); "Show me ↓" opens Done and glows the card; Done posts the card she was looking at
+// next (at=), so she lands on it.
+export const ENDED_JS = `(function(){
+  function key(d){return 'pnp-admin-open-'+d.getAttribute('data-remember');}
+  [].forEach.call(document.querySelectorAll('details[data-remember]'),function(d){
+    if(!d.hasAttribute('data-forced')){try{var v=localStorage.getItem(key(d));if(v==='1')d.open=true;else if(v==='0')d.open=false;}catch(e){}}
+    d.addEventListener('toggle',function(){try{localStorage.setItem(key(d),d.open?'1':'0');}catch(e){}});});
+  var s=document.querySelector('[data-show-me]');
+  if(s)s.addEventListener('click',function(e){var c=document.getElementById(s.getAttribute('href').slice(1));if(!c)return;e.preventDefault();var d=document.getElementById('done-list');if(d)d.open=true;
+    c.scrollIntoView({behavior:'smooth',block:'center'});c.classList.add('glow');setTimeout(function(){c.classList.remove('glow');},2300);});
+  var x=document.querySelector('[data-done-close]');if(x)x.addEventListener('click',function(){var b=x.closest('[data-done-banner]');if(b)b.remove();});
+  function near(c,dir){var n=c;while(n&&(n=n[dir]))if(n.matches&&n.matches('article[data-reqcard]'))return n;return null;}
+  document.addEventListener('submit',function(e){var f=e.target;if(!f.matches||!f.matches('[data-done-form]'))return;var c=f.closest('article');if(!c)return;
+    var n=near(c,'nextElementSibling')||near(c,'previousElementSibling'),a=f.querySelector('[name=at]');if(a&&n)a.value=n.id;},true);
+})();`;
+
 // schedule: { [request_key]: { date } } earliest booking per request; kinds: { [request_key]: [kind] }.
 export function dashboardPage({ newKeys = new Set(), remindersLine = '', requests, statuses, checklists = {}, invoices = {}, schedule = {}, returns = {}, folderUrl, sheetError, flash, error = '', missingPayment = [], putAway = '', extraTop = '', referrers = {}, weekBox: week = '', idsBox = '', cardExtras = {}, holdsBox = '',
   cardMsgs = {}, cardBottom = {}, tdSaved = null, bookings = {}, takedownInvoices = new Set(), today = chicagoToday(), archived = [], filter = 'all', openPutAway = false, kinds = {}, events = {}, notes = {}, foodPerHead = null, pickupPlace = 'Mt. Moriah Station',
-  stored = {}, depositOut = {}, holds = {}, holdHtml = {}, missedBy = {}, missedTop = '' }) {
+  stored = {}, depositOut = {}, holds = {}, holdHtml = {}, missedBy = {}, missedTop = '', doneOk = '', doneAt = '', openCancelled = false }) {
   const err = sheetError ? `<div class="notice err"><strong>The requests could not be loaded right now.</strong> ${/not shared/i.test(sheetError)
     ? `The responses sheet needs to be shared with the site. In Google Sheets tap Share and add <code>${esc(SA_EMAIL)}</code> as a Viewer.`
     : 'Please try again in a minute.'}<div class="muted" style="margin-top:6px;font-size:.95rem">Details: ${esc(sheetError)}</div></div>` : '';
@@ -1466,38 +1588,66 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
   const one = (r, isArchived) => {
     const st = statuses[r.key] || { status: 'new' };
     const inv = st.invoice_id ? invoices[st.invoice_id] : null;
-    return { r, inv, services: servicesOf(r), html: (num = null) => requestCard(r, { num, st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '', isNew: !isArchived && newKeys.has(r.key),
+    return { r, inv, services: servicesOf(r), group: groupOf(st, inv), st, html: (num = null) => requestCard(r, { num, st, inv, sched: schedule[r.key], ret: returns[r.key], cl: checklists[r.key], kinds: kinds[r.key] || [], extras: cardExtras[r.key] || '', referrers, events: events[r.key] || [], notes: notes[r.key] || [], archived: isArchived, foodPerHead, pickupPlace, bookings: bookings[r.key] || [], today, msgs: cardMsgs[r.key] || null, invoiceTakedown: Boolean(st.invoice_id && takedownInvoices.has(st.invoice_id)), bottom: cardBottom[r.key] || '', tdSaved: tdSaved && tdSaved.key === r.key ? tdSaved.words : '', isNew: !isArchived && newKeys.has(r.key),
       stored: stored[r.key] || null, depositOut: inv ? depositOut[inv.id] || null : null, hold: holds[r.key] || null, holdHtml: holdHtml[r.key] || '', missed: isArchived ? [] : (missedBy[r.key] || []) }) };
   };
   // Customer numbers (owner-approved mock-up, 20 Oct 2026): over ALL active requests, oldest = 1,
   // newest = highest, so the list counts down from the top and a filter never renumbers. Put-away
   // requests carry no number.
   const nums = customerNumbers(requests);
-  const active = requests.map((r) => one(r, false));
+  // Three ways a job ends (owner-approved "Done Cards", 20 Oct 2026): the page reads Active, then
+  // ✓ Done (newest finished first), then ✕ Cancelled (folded), then Put away. cards.mjs groupOf.
+  const rows = requests.map((r) => one(r, false));
+  const active = rows.filter((x) => x.group === 'active');
   const shown = active.filter((x) => matchesFilter(f, x)).map((x) => ({ ...x, num: nums.get(x.r.key), html: () => x.html(nums.get(x.r.key)) }));
+  const newest = (field) => (a, b) => String(b.st[field] || b.st.updated_at || '').localeCompare(String(a.st[field] || a.st.updated_at || ''));
+  const doneRows = rows.filter((x) => x.group === 'done' && matchesFilter(f, x)).sort(newest('done_at'));
+  const cancRows = rows.filter((x) => x.group === 'cancelled' && matchesFilter(f, x)).sort(newest('cancelled_at'));
   const putRows = archived.map((r) => one(r, true)).filter((x) => matchesFilter(f, x));
   const empty = f === 'all'
-    ? '<div class="card"><p style="margin:0">No requests waiting. New ones from the website form show up here within a minute. Finished ones are in Put away at the bottom.</p></div>'
-    : '<div class="card"><p style="margin:0">Nothing here for this filter. Tap All to see every request.</p></div>';
-  const putSection = `<section class="putaway" id="put-away-section" data-put-away><h2>Put away (${putRows.length})</h2>
+    ? '<div class="card"><p style="margin:0">No requests waiting. New ones from the website form show up here within a minute. Finished ones are in the Done group below.</p></div>'
+    : '<div class="card"><p style="margin:0">Nothing here for this filter. Pick Everything to see every request.</p></div>';
+  const groupOnly = f === 'done' || f === 'cancelled';
+  const listHtml = shown.length ? shown.map((x) => x.html()).join('') : (sheetError || groupOnly ? '' : empty);
+  // "✓ <First> is done" (after ✓ Mark as done): a thin green banner right above the card she was
+  // looking at (at=), so the page does not jump; Show me scrolls down to the Done card with a glow.
+  const doneR = doneOk ? requests.find((r) => b64urlText(r.key) === doneOk) : null;
+  const doneFirst = doneR ? (firstName(doneR.name) || 'This customer') : '';
+  const banner = doneR ? `<div class="donebanner" id="done-banner" data-done-banner role="status"><span>✓ <b>${esc(doneFirst)} is done.</b> ${esc(doneFirst)} moved to the Done group.</span> <a href="#c-${esc(doneOk)}" data-show-me${tip('req.showMe')}>Show me ↓</a><button type="button" class="dbx" data-done-close${tip('req.doneClose')}>✕ Close</button></div>` : '';
+  const at = doneR ? String(doneAt || '') : '';
+  const atIdx = at ? shown.findIndex((x) => `c-${b64urlText(x.r.key)}` === at) : -1;
+  const listWithBanner = !banner ? listHtml : (atIdx >= 0 ? shown.map((x, i) => `${i === atIdx ? banner : ''}${x.html()}`).join('') : `${banner}${listHtml}`);
+  const endSection = (group, list) => {
+    const isDone = group === 'done';
+    const forced = f === group || (!isDone && openCancelled);
+    const open = isDone ? (f !== 'cancelled') : forced;
+    const word = isDone ? 'done' : 'cancelled';
+    return `<section class="endgrp ${isDone ? 'okgrp' : 'cxgrp'}" id="${word}-section" data-${word}-group>
+      <details class="endd" id="${word}-list" data-remember="${word}"${open ? ' open' : ''}${forced ? ' data-forced' : ''}><summary${tip(isDone ? 'req.doneToggle' : 'req.cancelledToggle')}><span class="eh">${isDone ? '✓ Done' : '✕ Cancelled'} (${list.length})</span><span class="tog"><span class="t-open">Hide ${word} ▴</span><span class="t-shut">Show ${word} ▾</span></span></summary>
+        ${list.length ? list.map((x) => x.html(nums.get(x.r.key))).join('') : `<p class="muted" data-${word}-empty>${isDone ? 'Nothing done yet. A finished card gets a ✓ Mark as done button; done cards wait here.' : 'Nothing cancelled. Cancel this job… (under Show more on a card) moves a card here.'}</p>`}
+      </details></section>`;
+  };
+  const endSections = `${f === 'active' || f === 'cancelled' ? '' : endSection('done', doneRows)}${f === 'active' || f === 'done' ? '' : endSection('cancelled', cancRows)}`;
+  const putSection = `<section class="putaway" id="put-away-section" data-put-away><h2>Put away (${putRows.length}) <small class="panote" data-put-away-note>(these are cards we want to move out of the way and can be put back at any time)</small></h2>
     <details class="disclose" id="put-away"${openPutAway ? ' open' : ''}><summary${tip('pa.show')}>Show put-away requests</summary>
-      ${putRows.length ? putRows.map((x) => x.html()).join('') : '<p class="muted">Nothing put away yet. Tap <strong>Done — put away</strong> on a finished request to move it here.</p>'}
+      ${putRows.length ? putRows.map((x) => x.html()).join('') : '<p class="muted">Nothing put away yet. Tap <strong>Put away</strong> on any card to move it here.</p>'}
     </details></section>`;
   // Phone first (owner, 19 Oct 2026): the request list comes straight after the heading and the
   // one-line week card; tomorrow's reminders are one tappable line at the bottom; the three-step
   // panel sits under the list on a phone and stays on top on a wide screen (CSS order, .rqflow).
-  return layout(MAIN_PAGE_NAV, `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}${CUST_CSS}${QT_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
+  return layout(MAIN_PAGE_NAV, `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}${CUST_CSS}${QT_CSS}${ENDED_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
 ${setupBanner(missingPayment)}
     <div class="rqgrid">${customerSpine(shown)}<div class="rqcol"><div class="rqflow"><div class="rqpanel">${requestsPanel(folderUrl)}</div>
     <div class="rqmain">${extraTop}${week}${holdsBox}${err}
-    ${filterChips(f)}${filterSelect(f, active)}${customerBar(shown)}
-    <div data-request-list>${shown.length ? shown.map((x) => x.html()).join('') : (sheetError ? '' : empty)}</div>
+    ${filterChips(f)}${filterSelect(f, rows)}${customerBar(shown)}
+    <div data-request-list>${listWithBanner}</div>
+    ${endSections}
     ${remindersLine}</div></div>
     ${putSection}
     ${idsBox}</div></div>
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
-    <script>${DASH_JS}${NEW_JS}${CUST_JS}${QT_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { home: true, screen: '', panelWide: true, spine: true });
+    <script>${DASH_JS}${NEW_JS}${CUST_JS}${QT_JS}${ENDED_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { home: true, screen: '', panelWide: true, spine: true });
 }
 
 export function invoicesPage({ invoices }) {
@@ -1832,7 +1982,7 @@ export function helpPage() {
   const tab = (name, screen, extra = '') => `<section class="card"><h2>${esc(name)}</h2><ol class="steps">${STEPS[screen].map((s) => `<li>${esc(s)}</li>`).join('')}</ol>${extra}</section>`;
   return layout('How to use this', `<h1>How to use this</h1>
   <p class="noprint">${act(`<button type="button" class="btn ghost inline" onclick="window.print()"${tip('help.print')}>Print this page</button>`, 'help.print')}</p>
-  ${tab('Requests', 'requests', '<p>Each request has a <strong>Payment</strong> box. Money buttons always ask "Are you sure?" first. When a job is over, tap <strong>Done — put away</strong>.</p>')}
+  ${tab('Requests', 'requests', '<p>Each request has a <strong>Payment</strong> box. Money buttons always ask "Are you sure?" first. When a job is finished, tap <strong>✓ Mark as done</strong>: the card moves to the Done group. <strong>Put away</strong> moves any card out of the way; Bring back puts it back.</p>')}
   ${tab('Calendar', 'calendar', '<p>Bookings from invoices appear by themselves. A booking you make or change by hand keeps your date, even if the invoice is sent again.</p><p data-help-chips><strong>Filled = booked · Outlined = asked for, not booked yet.</strong> An outlined chip says <strong>Requested</strong> with the first name; tap it to open the request card. A held rental is filled and says <strong>Held</strong>.</p>')}
   <section class="card" data-help-takedown><h2>The takedown, on the card</h2><ol class="steps">
     <li>Every porch and party card has one line: <strong>Takedown:</strong> with a day, a time (optional) and <strong>Save</strong>. The day starts on the one the customer asked for.</li>

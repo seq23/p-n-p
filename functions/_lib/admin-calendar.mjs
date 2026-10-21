@@ -2,7 +2,7 @@
 // sheet, scheduling, Move, notes, rental check-in, Put away, Find a customer, reminders and the
 // private ICS feed token. Auth is enforced before this runs (guard.mjs), except the ICS feed,
 // which lives in functions/api/calendar/ and checks its own token.
-import { redirect, htmlResponse, getSettings, putSetting, fromB64urlText, b64urlText, shortDate, todayISO, FROM_EMAIL } from './util.mjs';
+import { redirect, htmlResponse, getSettings, putSetting, fromB64urlText, b64urlText, shortDate, todayISO, FROM_EMAIL, isEnded } from './util.mjs';
 import { loadRequests, loadRequestsFromDb, logEvent } from './requests.mjs';
 import * as ST from './steps.mjs';
 import { loadTakedownFacts, takedownsToSchedule } from './takedown.mjs';
@@ -115,7 +115,7 @@ export async function calendarPage(env, url) {
   const holds = await holdsWithButtons(env, '/admin/calendar');
   const soon = endingSoon(holds, Date.now(), settings);
   // "Still to decide": porch/party takedowns marked Not sure yet (not put away, not void).
-  const stillToDecide = requests.filter((r) => r.takedownPlan === 'not_sure' && !(statuses[r.key] && (statuses[r.key].archived_at || statuses[r.key].status === 'void')))
+  const stillToDecide = requests.filter((r) => r.takedownPlan === 'not_sure' && !isEnded(statuses[r.key]))
     .map((r) => ({ name: r.name, note: r.takedownNote, rk: b64urlText(r.key), kind: (r.services || []).includes('porch') ? 'porch_takedown' : 'party_takedown' }));
   // "Takedowns to schedule": the customer asked for a takedown that is not booked yet; the day
   // they named prefills the booking screen, nothing is booked until she saves it.
