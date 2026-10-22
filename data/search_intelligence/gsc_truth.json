@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "provider_truth",
-  "generated_at": "2026-10-21T19:09:50.233Z",
+  "generated_at": "2026-10-22T19:05:18.617Z",
   "own_site_google_performance_authority": "google_search_console",
   "provider_state": "OK",
   "provider_states": [
@@ -11,7 +11,7 @@
       "provider_id": "google_search_console",
       "state": "OK",
       "reason": "REAL_EXPORT_INGESTED",
-      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-10-21T19:09:50.233216+00:00 rows={\"by_query\":21,\"by_page\":2,\"by_query_page\":23}"
+      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-10-22T19:05:18.617892+00:00 rows={\"by_query\":16,\"by_page\":2,\"by_query_page\":18}"
     }
   ],
   "overall_status": "OK",
@@ -19,92 +19,92 @@
   "export_path": "data/search_intelligence/gsc_search_analytics_export.json",
   "export_problem": null,
   "export_window": {
-    "start_date": "2026-09-21",
-    "end_date": "2026-10-18"
+    "start_date": "2026-09-22",
+    "end_date": "2026-10-19"
   },
-  "export_collected_at": "2026-10-21T19:09:50.233216+00:00",
+  "export_collected_at": "2026-10-22T19:05:18.617892+00:00",
   "export_counts": {
-    "by_query": 21,
+    "by_query": 16,
     "by_page": 2,
-    "by_query_page": 23
+    "by_query_page": 18
   },
-  "requested_for_date": "2026-10-21",
-  "target_count": 23,
-  "targets_with_gsc_rows": 21,
-  "total_impressions": 51,
+  "requested_for_date": "2026-10-22",
+  "target_count": 18,
+  "targets_with_gsc_rows": 16,
+  "total_impressions": 33,
   "total_clicks": 0,
   "site_totals": {
     "basis": "by_page rows of the Search Console export (complete; by_query omits anonymised queries)",
     "clicks": 0,
-    "impressions": 51,
+    "impressions": 33,
     "pages_with_impressions": 2,
-    "queries_with_impressions": 21,
-    "query_row_impressions": 48,
+    "queries_with_impressions": 16,
+    "query_row_impressions": 30,
     "query_row_clicks": 0,
     "top_queries": [
       {
         "query": "birthday party planner",
-        "impressions": 5,
+        "impressions": 4,
         "clicks": 0,
-        "gsc_average_position": 23
+        "gsc_average_position": 23.5
       },
       {
         "query": "event planning for parties",
-        "impressions": 5,
+        "impressions": 4,
         "clicks": 0,
         "gsc_average_position": 1
       },
       {
         "query": "event planning for parties near me",
-        "impressions": 5,
+        "impressions": 4,
         "clicks": 0,
-        "gsc_average_position": 7
+        "gsc_average_position": 3.5
       },
       {
         "query": "party planners near me",
-        "impressions": 5,
+        "impressions": 4,
         "clicks": 0,
-        "gsc_average_position": 33
+        "gsc_average_position": 31
       },
       {
         "query": "birthday party planner near me",
-        "impressions": 4,
+        "impressions": 3,
         "clicks": 0,
-        "gsc_average_position": 26
+        "gsc_average_position": 21
       },
       {
-        "query": "corporate party",
-        "impressions": 2,
+        "query": "bachelorette party ideas",
+        "impressions": 1,
         "clicks": 0,
-        "gsc_average_position": 41
+        "gsc_average_position": 1
+      },
+      {
+        "query": "balloon business",
+        "impressions": 1,
+        "clicks": 0,
+        "gsc_average_position": 36
+      },
+      {
+        "query": "balloon party",
+        "impressions": 1,
+        "clicks": 0,
+        "gsc_average_position": 19
+      },
+      {
+        "query": "birthday party",
+        "impressions": 1,
+        "clicks": 0,
+        "gsc_average_position": 44
       },
       {
         "query": "event management services",
-        "impressions": 2,
-        "clicks": 0,
-        "gsc_average_position": 41
-      },
-      {
-        "query": "event management services near me",
-        "impressions": 2,
-        "clicks": 0,
-        "gsc_average_position": 41
-      },
-      {
-        "query": "event planner near me",
-        "impressions": 2,
-        "clicks": 0,
-        "gsc_average_position": 41
-      },
-      {
-        "query": "event planning services",
-        "impressions": 2,
+        "impressions": 1,
         "clicks": 0,
         "gsc_average_position": 41
       }
     ]
   },
-  "target_impressions": 48,
+  "target_impressions": 30,
   "target_clicks": 0,
   "unavailable_note": null,
   "truth_boundary": "Google Search Console is the only authority for own-site Google impressions, clicks, CTR, average position, and indexation in this repo.",
@@ -135,9 +135,9 @@
       "query_metrics": {
         "gsc_query": "birthday party planner near me",
         "clicks": 0,
-        "impressions": 4,
+        "impressions": 3,
         "ctr": 0,
-        "gsc_average_position": 26
+        "gsc_average_position": 21
       },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",
@@ -154,7 +154,7 @@
         "clicks": 0,
         "impressions": 1,
         "ctr": 0,
-        "gsc_average_position": 56
+        "gsc_average_position": 44
       },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",
@@ -169,7 +169,7 @@
       "query_metrics": {
         "gsc_query": "party planners",
         "clicks": 0,
-        "impressions": 2,
+        "impressions": 1,
         "ctr": 0,
         "gsc_average_position": 41
       },
@@ -186,7 +186,7 @@
       "query_metrics": {
         "gsc_query": "event planning for parties",
         "clicks": 0,
-        "impressions": 5,
+        "impressions": 4,
         "ctr": 0,
         "gsc_average_position": 1
       },
@@ -203,9 +203,9 @@
       "query_metrics": {
         "gsc_query": "party planners near me",
         "clicks": 0,
-        "impressions": 5,
+        "impressions": 4,
         "ctr": 0,
-        "gsc_average_position": 33
+        "gsc_average_position": 31
       },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",
@@ -220,7 +220,7 @@
       "query_metrics": {
         "gsc_query": "event management services",
         "clicks": 0,
-        "impressions": 2,
+        "impressions": 1,
         "ctr": 0,
         "gsc_average_position": 41
       },
@@ -237,26 +237,9 @@
       "query_metrics": {
         "gsc_query": "event planning services near me",
         "clicks": 0,
-        "impressions": 2,
-        "ctr": 0,
-        "gsc_average_position": 41
-      },
-      "page_metrics": null,
-      "own_site_performance_basis": "google_search_console",
-      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
-    },
-    {
-      "target_id": "pnp_sq_536897b30e3e",
-      "query": "bachelorette party planner",
-      "expected_owned_url": "https://porchandparty901.com/services/party-decor-memphis",
-      "truth_source": "google_search_console",
-      "truth_state": "GSC_ROW_PRESENT",
-      "query_metrics": {
-        "gsc_query": "bachelorette party planner",
-        "clicks": 0,
         "impressions": 1,
         "ctr": 0,
-        "gsc_average_position": 14
+        "gsc_average_position": 41
       },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",
@@ -269,23 +252,6 @@
       "truth_source": "google_search_console",
       "truth_state": "GSC_NO_ROW_FOR_TARGET",
       "query_metrics": null,
-      "page_metrics": null,
-      "own_site_performance_basis": "google_search_console",
-      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
-    },
-    {
-      "target_id": "pnp_sq_610234d10e21",
-      "query": "corporate party",
-      "expected_owned_url": "https://porchandparty901.com/corporate/corporate-event-decor-memphis",
-      "truth_source": "google_search_console",
-      "truth_state": "GSC_ROW_PRESENT",
-      "query_metrics": {
-        "gsc_query": "corporate party",
-        "clicks": 0,
-        "impressions": 2,
-        "ctr": 0,
-        "gsc_average_position": 41
-      },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -333,9 +299,9 @@
       "query_metrics": {
         "gsc_query": "event planning for parties near me",
         "clicks": 0,
-        "impressions": 5,
+        "impressions": 4,
         "ctr": 0,
-        "gsc_average_position": 7
+        "gsc_average_position": 3.5
       },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",
@@ -367,7 +333,7 @@
       "query_metrics": {
         "gsc_query": "event management services near me",
         "clicks": 0,
-        "impressions": 2,
+        "impressions": 1,
         "ctr": 0,
         "gsc_average_position": 41
       },
@@ -384,7 +350,7 @@
       "query_metrics": {
         "gsc_query": "event planning services",
         "clicks": 0,
-        "impressions": 2,
+        "impressions": 1,
         "ctr": 0,
         "gsc_average_position": 41
       },
@@ -401,26 +367,9 @@
       "query_metrics": {
         "gsc_query": "birthday party planner",
         "clicks": 0,
-        "impressions": 5,
+        "impressions": 4,
         "ctr": 0,
-        "gsc_average_position": 23
-      },
-      "page_metrics": null,
-      "own_site_performance_basis": "google_search_console",
-      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
-    },
-    {
-      "target_id": "pnp_sq_a9b02f5fcc37",
-      "query": "party planner",
-      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "truth_source": "google_search_console",
-      "truth_state": "GSC_ROW_PRESENT",
-      "query_metrics": {
-        "gsc_query": "party planner",
-        "clicks": 0,
-        "impressions": 2,
-        "ctr": 0,
-        "gsc_average_position": 21
+        "gsc_average_position": 23.5
       },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",
@@ -435,26 +384,9 @@
       "query_metrics": {
         "gsc_query": "event planner near me",
         "clicks": 0,
-        "impressions": 2,
-        "ctr": 0,
-        "gsc_average_position": 41
-      },
-      "page_metrics": null,
-      "own_site_performance_basis": "google_search_console",
-      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
-    },
-    {
-      "target_id": "pnp_sq_cd5ba7741796",
-      "query": "party planner near me",
-      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "truth_source": "google_search_console",
-      "truth_state": "GSC_ROW_PRESENT",
-      "query_metrics": {
-        "gsc_query": "party planner near me",
-        "clicks": 0,
         "impressions": 1,
         "ctr": 0,
-        "gsc_average_position": 21
+        "gsc_average_position": 41
       },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",
@@ -467,23 +399,6 @@
       "truth_source": "google_search_console",
       "truth_state": "GSC_NO_ROW_FOR_TARGET",
       "query_metrics": null,
-      "page_metrics": null,
-      "own_site_performance_basis": "google_search_console",
-      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
-    },
-    {
-      "target_id": "pnp_sq_d66f3fec6c9e",
-      "query": "event management near me",
-      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "truth_source": "google_search_console",
-      "truth_state": "GSC_ROW_PRESENT",
-      "query_metrics": {
-        "gsc_query": "event management near me",
-        "clicks": 0,
-        "impressions": 1,
-        "ctr": 0,
-        "gsc_average_position": 41
-      },
       "page_metrics": null,
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."

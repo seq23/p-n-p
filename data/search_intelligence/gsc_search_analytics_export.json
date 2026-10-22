@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-09-21",
-  "end_date": "2026-10-18",
-  "collected_at": "2026-10-21T19:09:50.233216+00:00",
+  "start_date": "2026-09-22",
+  "end_date": "2026-10-19",
+  "collected_at": "2026-10-22T19:05:18.617892+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -22,15 +22,6 @@
       "impressions": 1,
       "ctr": 0,
       "position": 1
-    },
-    {
-      "keys": [
-        "bachelorette party planner"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 14
     },
     {
       "keys": [
@@ -57,38 +48,29 @@
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 56
+      "position": 44
     },
     {
       "keys": [
         "birthday party planner"
       ],
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 4,
       "ctr": 0,
-      "position": 23
+      "position": 23.5
     },
     {
       "keys": [
         "birthday party planner near me"
       ],
       "clicks": 0,
-      "impressions": 4,
+      "impressions": 3,
       "ctr": 0,
-      "position": 26
+      "position": 21
     },
     {
       "keys": [
-        "corporate party"
-      ],
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 41
-    },
-    {
-      "keys": [
-        "event management near me"
+        "event management services"
       ],
       "clicks": 0,
       "impressions": 1,
@@ -97,19 +79,10 @@
     },
     {
       "keys": [
-        "event management services"
-      ],
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 41
-    },
-    {
-      "keys": [
         "event management services near me"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
     },
@@ -118,7 +91,7 @@
         "event planner near me"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
     },
@@ -127,7 +100,7 @@
         "event planning for parties"
       ],
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 4,
       "ctr": 0,
       "position": 1
     },
@@ -136,16 +109,16 @@
         "event planning for parties near me"
       ],
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 4,
       "ctr": 0,
-      "position": 7
+      "position": 3.5
     },
     {
       "keys": [
         "event planning services"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
     },
@@ -154,18 +127,9 @@
         "event planning services near me"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
-    },
-    {
-      "keys": [
-        "party planner"
-      ],
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 21
     },
     {
       "keys": [
@@ -178,19 +142,10 @@
     },
     {
       "keys": [
-        "party planner near me"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 21
-    },
-    {
-      "keys": [
         "party planners"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
     },
@@ -199,9 +154,9 @@
         "party planners near me"
       ],
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 4,
       "ctr": 0,
-      "position": 33
+      "position": 31
     }
   ],
   "by_page": [
@@ -210,18 +165,18 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 6,
       "ctr": 0,
-      "position": 14
+      "position": 19
     },
     {
       "keys": [
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 46,
+      "impressions": 27,
       "ctr": 0,
-      "position": 27.108695652173914
+      "position": 22.962962962962962
     }
   ],
   "by_query_page": [
@@ -234,16 +189,6 @@
       "impressions": 1,
       "ctr": 0,
       "position": 1
-    },
-    {
-      "keys": [
-        "bachelorette party planner",
-        "https://www.porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 14
     },
     {
       "keys": [
@@ -268,12 +213,12 @@
     {
       "keys": [
         "birthday party",
-        "https://www.porchandparty901.com/"
+        "https://porchandparty901.com/"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 56
+      "position": 44
     },
     {
       "keys": [
@@ -281,9 +226,9 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 4,
       "ctr": 0,
-      "position": 23
+      "position": 23.5
     },
     {
       "keys": [
@@ -291,29 +236,9 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 4,
+      "impressions": 3,
       "ctr": 0,
-      "position": 26
-    },
-    {
-      "keys": [
-        "corporate party",
-        "https://www.porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 41
-    },
-    {
-      "keys": [
-        "event management near me",
-        "https://www.porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 41
+      "position": 21
     },
     {
       "keys": [
@@ -321,7 +246,7 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
     },
@@ -331,7 +256,7 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
     },
@@ -341,7 +266,7 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
     },
@@ -361,7 +286,7 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 4,
+      "impressions": 3,
       "ctr": 0,
       "position": 1
     },
@@ -381,9 +306,9 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 4,
+      "impressions": 3,
       "ctr": 0,
-      "position": 8.5
+      "position": 4.333333333333334
     },
     {
       "keys": [
@@ -391,7 +316,7 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
     },
@@ -401,19 +326,9 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
-    },
-    {
-      "keys": [
-        "party planner",
-        "https://www.porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 2,
-      "ctr": 0,
-      "position": 21
     },
     {
       "keys": [
@@ -427,21 +342,11 @@
     },
     {
       "keys": [
-        "party planner near me",
-        "https://www.porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 21
-    },
-    {
-      "keys": [
         "party planners",
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 41
     },
@@ -451,15 +356,15 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 4,
       "ctr": 0,
-      "position": 33
+      "position": 31
     }
   ],
   "counts": {
-    "by_query": 21,
+    "by_query": 16,
     "by_page": 2,
-    "by_query_page": 23
+    "by_query_page": 18
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
