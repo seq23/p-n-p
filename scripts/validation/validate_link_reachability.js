@@ -21,6 +21,17 @@
  *      Guarded here by asserting the shape the edge leaves alone: every mailto:
  *      anchor inside Cloudflare's `<!--email_off-->` opt-out.
  *
+ *   1b. THE SAME BREAK FROM A BARE ADDRESS - 1 URL, /privacy-policy, reported
+ *      by Ahrefs on 2026-10-21 and crawled again here. A mailto: anchor is not
+ *      the only shape the rewriter touches: an address written as plain prose
+ *      ("email hello@porchandparty901.com.") is wrapped by the edge in a NEW
+ *      `<a href="/cdn-cgi/l/email-protection">` anchor, so a page whose every
+ *      mailto: anchor was correctly opted out still shipped one 404 link. The
+ *      check above could not see it, because there was no anchor in the source
+ *      to look at. Every rendered-text occurrence of the address must therefore
+ *      sit inside `<!--email_off-->` too - in practice, be written as the same
+ *      opted-out mailto: anchor the rest of the site uses.
+ *
  *   2. ORPHAN PAGES - 3 URLs.
  *      A page with no inbound internal link is advertised by the sitemap and
  *      reachable by nobody. That is a property of the link graph, so no
@@ -133,8 +144,10 @@ function targetOf(fromRel, href) {
 const inbound = new Map([...pages.keys()].map((k) => [k, 0]));
 let hrefsChecked = 0;
 let mailtoAnchors = 0;
+let protectedAddresses = 0;
 const unresolved = [];
 const unprotected = [];
+const bareAddresses = [];
 // (4) An internal link that the origin answers with a 3xx. Bing's crawl on
 // 2026-09-25 found 136 of them - /answers, /services, /areas, /local, /events
 // and /faq, each 308ing to its trailing-slash URL - on pages that passed every
@@ -149,6 +162,21 @@ let internalHrefs = 0;
 
 const ANCHOR_HREF = /href=["']([^"']+)["']/g;
 const MAILTO_ANCHOR = /<a\b[^>]*\bhref=(["'])mailto:[^"']*\1[^>]*>[\s\S]*?<\/a>/gi;
+const EMAIL_OFF_BLOCK = /<!--email_off-->[\s\S]*?<!--\/email_off-->/g;
+const SCRIPT_OR_STYLE = /<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi;
+const ANY_TAG = /<[^>]*>/g;
+const ANY_ADDRESS = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g;
+
+// The rendered text a crawler reads, with everything Cloudflare's rewriter
+// leaves alone taken out first: the <!--email_off--> opt-outs, <script> and
+// <style> bodies (JSON-LD carries the address and is never rewritten), and
+// then every tag, so attribute values cannot be mistaken for prose.
+function renderedTextOutsideEmailOff(html) {
+  return html
+    .replace(EMAIL_OFF_BLOCK, ' ')
+    .replace(SCRIPT_OR_STYLE, ' ')
+    .replace(ANY_TAG, ' ');
+}
 
 for (const [selfUrl, rel] of pages) {
   const html = fs.readFileSync(path.join(ROOT, rel), 'utf8');
@@ -162,7 +190,20 @@ for (const [selfUrl, rel] of pages) {
     const after = html.slice(a.index + a[0].length, a.index + a[0].length + EMAIL_OFF_CLOSE.length);
     if (before !== EMAIL_OFF_OPEN || after !== EMAIL_OFF_CLOSE) {
       unprotected.push(`${rel}: ${a[0].slice(0, 80)}`);
+    } else {
+      protectedAddresses += 1;
     }
+  }
+
+  // (1b) no address may survive in rendered text outside <!--email_off-->:
+  // the edge turns a bare one into its own /cdn-cgi/l/email-protection 404.
+  const bareText = renderedTextOutsideEmailOff(html);
+  ANY_ADDRESS.lastIndex = 0;
+  let addr;
+  while ((addr = ANY_ADDRESS.exec(bareText))) {
+    const at = addr.index;
+    const context = bareText.slice(Math.max(0, at - 40), at + addr[0].length + 10).replace(/\s+/g, ' ').trim();
+    bareAddresses.push(`${rel}: ...${context}...`);
   }
 
   // (2) every internal href must have a target, and (3) feeds the link graph
@@ -198,6 +239,12 @@ for (const [selfUrl, rel] of pages) {
 if (!hrefsChecked) {
   console.error(`LINK REACHABILITY FAILED: ${pages.size} published page(s) carried zero href attributes between them. `
     + 'The scan is broken, not the site.');
+  process.exit(1);
+}
+// Rule 0: this check must have had addresses to look at, or it proved nothing.
+if (!protectedAddresses) {
+  console.error('LINK REACHABILITY FAILED: found zero <!--email_off-->-protected mailto: anchors across the '
+    + 'published set, so the bare-address check below had nothing to contrast against and cannot be trusted.');
   process.exit(1);
 }
 if (!mailtoAnchors) {
@@ -249,6 +296,7 @@ const orphans = [...inbound].filter(([, n]) => n === 0).map(([url]) => url);
 
 for (const u of unresolved) fail(`internal link with no target: ${u}`);
 for (const u of redirecting) fail(`internal link that redirects: ${u}`);
+for (const u of bareAddresses) fail(`email address in rendered text outside <!--email_off-->, so Cloudflare will wrap it in its own 404 /cdn-cgi/l/email-protection anchor; write it as an opted-out mailto: anchor: ${u}`);
 for (const u of unprotected) fail(`mailto: anchor outside <!--email_off-->, so Cloudflare will rewrite it into a 404 /cdn-cgi/l/email-protection link: ${u}`);
 for (const o of orphans) fail(`orphan page, published in sitemap.xml with zero inbound internal links: ${o} (${pages.get(o)})`);
 
@@ -260,5 +308,6 @@ if (failures.length) {
 }
 
 console.log(`Link reachability OK: ${pages.size} published page(s), ${hrefsChecked} href(s) checked, `
-  + `${mailtoAnchors} mailto: anchor(s) all inside <!--email_off-->, 0 internal links without a target, `
+  + `${mailtoAnchors} mailto: anchor(s) all inside <!--email_off-->, 0 email addresses in rendered text outside it, `
+  + '0 internal links without a target, '
   + `${internalHrefs} internal href(s) with 0 redirecting, ${redirectRules} _redirects rule(s) all landing on a published page, 0 orphan pages.`);
