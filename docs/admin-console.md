@@ -1036,6 +1036,22 @@ email's last box (`todo-email.mjs`). Proof: `npm run validate:admin-id-auto-dele
   by itself." In the plain text too. Keep it longer opens `GET /admin/requests/id/keep`, a confirm
   screen that changes nothing until a choice is tapped.
 
+## Owner feed for Boss OS and channel source tags (owner-approved 22 Oct 2026, migration 0023)
+
+- **Owner feed:** `GET /api/owner-feed?range=day|week` with `Authorization: Bearer <token>` (Pages
+  secret `OWNER_FEED_TOKEN`; vault name `pnp-owner-feed-token`). Read-only JSON for Boss OS
+  (Simone's "Porch & Party — To do for Valerie"): `{"generated_at","range","items":[{"kind","title",
+  "detail","due","link"}]}`, kinds deadline / money / renewal / id_delete / mark_done / post / other.
+  The items are the 7 AM to-do email's own list (`functions/_lib/owner-feed.mjs` maps `todoData()`
+  from `todo-email.mjs`, never a second copy); `week` adds the "Your week" figures, the jobs of the
+  next 7 days and any Marketplace renewal day. 401 without the right token (constant-time compare),
+  no CORS, never cached. Validator: `validate:owner-feed` (proves the feed and the email match for
+  one fixture).
+- **Source tags:** `/request?src=<tag>` (mailer-38117, hotel, hoa, school, facebook, instagram,
+  tiktok, pinterest, google ...) rides a hidden field into `requests.source_tag`, cleaned to a-z 0-9
+  "-", at most 40 characters (`request-form.mjs cleanSrc`). Stored only; /admin does not show it yet
+  (that waits for an approved mock-up). Checked in `validate:request-form`.
+
 ## Where things live
 | Piece | Place |
 |---|---|

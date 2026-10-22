@@ -221,7 +221,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const job = jobs.find((j) => j.invoice === row.id || (j.key && j.key === row.requestKey));
     const body = renderMessage('paymentReminder', { name: row.name, amount: usd(row.remaining), due: row.due ? dayWords(row.due) : '', late: row.tone === 'late', number: row.number }).text;
     const sms = smsLink(row.phone, body);
-    moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, t: `${shortName(row.name)} · ${dueWords(bals[row.id], usd) || `${usd(row.remaining)} due`}`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}${(() => { const b = bals[row.id]; const w = b ? payStepsLine(payStepsOf(b.invoice, linesBy[row.id] || [], { paid: b.paid, payments: paysBy[row.id] || [] }), usd) : ''; return w ? ` · ${w}` : ''; })()}`,
+    moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, dueDate: row.due || '', t: `${shortName(row.name)} · ${dueWords(bals[row.id], usd) || `${usd(row.remaining)} due`}`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}${(() => { const b = bals[row.id]; const w = b ? payStepsLine(payStepsOf(b.invoice, linesBy[row.id] || [], { paid: b.paid, payments: paysBy[row.id] || [] }), usd) : ''; return w ? ` · ${w}` : ''; })()}`,
       btns: [...(sms ? [{ label: 'Text a reminder', href: sms }] : []), { label: 'Mark paid', href: `/admin/invoices/${row.id}` }] });
   }
   // Every unpaid rental hold (owner, 20 Oct 2026): waiting for its deposit, with the invoice's
@@ -236,11 +236,11 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const bal = h.invoice_id ? bals[h.invoice_id] : null;
     const due = bal && !bal.void && !bal.draft ? bal.owed + bal.depositOwed : 0;
     const d = bal && !bal.void && !bal.draft ? (due > 0 ? `${dueWords(bal, usd)} on the invoice` : 'Deposit not paid yet') : 'Invoice not sent yet';
-    moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [{ label: 'Reserve their games longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
+    moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, untilMs: timed ? h.untilMs : null, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [{ label: 'Reserve their games longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
   }
   // A late rental return is a missed job (in the alarm box above section 1), never also here.
 
-  const tomorrowJobs = open.filter((b) => b.date === tomorrow).sort(daySort).map((b) => ({ svc: serviceOfKind(b.kind), t: `${timeOr(b)} · ${who(b)} · ${jobOf(b)}` }));
+  const tomorrowJobs = open.filter((b) => b.date === tomorrow).sort(daySort).map((b) => ({ svc: serviceOfKind(b.kind), t: `${timeOr(b)} · ${who(b)} · ${jobOf(b)}`, key: b.request_key || '', date: b.date, href: bookingHref(b) }));
   const monday = isMondayIso(today);
   const withWeek = includeWeek === null ? monday && settings.weekly_summary !== '0' : includeWeek;
   let week = null;
@@ -292,7 +292,7 @@ const HR = `<hr style="border:0;border-top:1px solid ${C.line};margin:20px 0;">`
 const page = (inner) => `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your to-do list</title></head>
 <body style="margin:0;padding:0;background:${C.bg};"><div style="max-width:600px;margin:0 auto;padding:20px 12px;">
 <div style="background:${C.mail};border:1px solid ${C.line};border-radius:12px;padding:24px 20px;font-family:${SANS};font-size:17px;line-height:1.5;color:${C.fg};">${inner}</div></div></body></html>`;
-const WEEK_ROWS = (w) => [['New requests last week', String(w.newRequests)], ['Jobs done last week', String(w.jobsDone)], ['Money in last week', usd(w.moneyIn)], ['Tips', usd(w.tips)], ['Expenses', usd(w.expenses)], ['Jobs in the next 14 days', String(w.next14)]];
+export const WEEK_ROWS = (w) => [['New requests last week', String(w.newRequests)], ['Jobs done last week', String(w.jobsDone)], ['Money in last week', usd(w.moneyIn)], ['Tips', usd(w.tips)], ['Expenses', usd(w.expenses)], ['Jobs in the next 14 days', String(w.next14)]];
 function weekHtml(w) {
   const rows = WEEK_ROWS(w).map(([k, v]) => `<tr><td style="padding:4px 0;border-bottom:1px solid ${C.line};">${esc(k)}</td><td style="padding:4px 0;border-bottom:1px solid ${C.line};text-align:right;font-weight:700;">${esc(v)}</td></tr>`).join('');
   return `<div data-week>${headHtml('★', 'Your week (Monday summary)', C.muted)}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-left:38px;width:calc(100% - 38px);font-size:15px;">${rows}</table></div>`;

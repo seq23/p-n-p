@@ -142,8 +142,17 @@ for (const [f, re] of Object.entries(PHOTO_ROUTES)) {
 }
 if (!/const PUBLIC_HEADERS = \{ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' \}/.test(read(path.join('functions', '_lib', 'inventory.mjs')))) errors.push('inventory.mjs pending/report routes must answer no-store + noindex');
 if (!/X-Robots-Tag': 'noindex'[\s\S]*SELECT content_type, bytes FROM inventory_photos WHERE sha = \?1/.test(read(path.join('functions', '_lib', 'inventory.mjs')))) errors.push('inventory.mjs handlePhoto must answer noindex and read only inventory_photos by sha');
+// The owner feed for Boss OS (22 Oct 2026): token-guarded (Bearer OWNER_FEED_TOKEN, 401 otherwise),
+// read-only, no-store + noindex; validate:owner-feed holds its behaviour.
+const FEED_ROUTES = { [path.join('functions', 'api', 'owner-feed.js')]: /export const onRequest = \(context\) => handleOwnerFeed\(context\);/ };
+for (const [f, re] of Object.entries(FEED_ROUTES)) {
+  if (!fs.existsSync(path.join(ROOT, f))) { errors.push(`${f} is missing (the owner feed route)`); continue; }
+  const src = read(f).split('\n').filter((l) => l.trim() && !l.trim().startsWith('//')).join('\n');
+  if (!re.test(src) || !/from '\.\.\/_lib\/owner-feed\.mjs'/.test(src) || src.split('\n').length !== 2) errors.push(`${f} must be the one-line call into owner-feed.mjs`);
+}
+if (!/'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'/.test(read(path.join('functions', '_lib', 'owner-feed.mjs'))) || !/return deny\(401, 'unauthorized'\)/.test(read(path.join('functions', '_lib', 'owner-feed.mjs')))) errors.push('owner-feed.mjs must answer no-store + noindex and 401 without the token');
 const outside = routeFiles.filter((f) => !guardedDirs.some((d) => f.startsWith(d + path.sep)));
-for (const f of outside) if (![...icsFiles, ...syncFiles, ...Object.keys(FORM_ROUTES), ...Object.keys(PHOTO_ROUTES)].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed, the sync hook nor a request-form route`);
+for (const f of outside) if (![...icsFiles, ...syncFiles, ...Object.keys(FORM_ROUTES), ...Object.keys(PHOTO_ROUTES), ...Object.keys(FEED_ROUTES)].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed, the sync hook, the owner feed nor a request-form route`);
 
 if (errors.length) {
   console.error('VALIDATION FAIL: admin console noindex / guard');
