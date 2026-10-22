@@ -132,6 +132,8 @@ export async function handleRequestPage(context) {
     if (season) { values.service = values.service || 'porch'; values.porch_season = season.formChoice; }
     const decor = url.searchParams.get('decor');
     if (pk && (pk.tierOrder.includes(decor) || decor === 'not_sure')) { values.service = values.service || 'porch'; values.porch_decor = decor; }
+    const src = F.cleanSrc(url.searchParams.get('src'));
+    if (src) values.src = src;
     return formPage(env, url, { values, referral: ref });
   }
   if (method !== 'POST') return new Response('method not allowed', { status: 405, headers: { Allow: 'GET, POST' } });
@@ -203,11 +205,11 @@ async function submit(context) {
   const extra = [];
   // The pickup and return days are answers of their own (request-form.mjs, from the event date).
   await env.DB.prepare(`INSERT INTO requests (request_key, source, submitted_at, services, name, email, phone, dob, social, heard, answers, id_object, id_type, id_size,
-      agreed_at, rules_version, agreed_name, agreed_ip, takedown_plan, referral_code, referred_by, receipt_id, robot_check, name_norm, phone_digits)
-    VALUES (?1, 'site', ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?2, ?14, ?4, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22)`)
+      agreed_at, rules_version, agreed_name, agreed_ip, takedown_plan, referral_code, referred_by, receipt_id, robot_check, name_norm, phone_digits, source_tag)
+    VALUES (?1, 'site', ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?2, ?14, ?4, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23)`)
     .bind(key, submitted, JSON.stringify(services), clean.name, clean.email, clean.phone, clean.dob, clean.social || '', clean.heard || '',
       JSON.stringify([...answers, ...extra]), idObject, image.type, image.bytes.length, F.RULES_VERSION, ip, clean.takedown_plan || null, code, referredBy, receipt,
-      robot.used ? 'turnstile' : 'no-js', C.normName(clean.name), C.digitsOf(clean.phone)).run();
+      robot.used ? 'turnstile' : 'no-js', C.normName(clean.name), C.digitsOf(clean.phone), F.cleanSrc(fields.src)).run();
   await logEvent(env.DB, key, `Agreed to the Rules & Responsibilities (version ${F.RULES_VERSION}) and the Terms & Conditions, as "${clean.name}"`, 'website form');
   // A takedown date on the request books the takedown at once (takedown.mjs autoTakedownRow:
   // porch/party, "yes", a real date, never a duplicate). "Not sure" / "No" book nothing.
