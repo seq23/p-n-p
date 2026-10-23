@@ -157,14 +157,14 @@ must(archivedCard && !/data-customer|class="cnum"|data-customer-label/.test(arch
 must(!new RegExp(`data-spine-to="${away.rk}"|data-cjump="${away.rk}"`).test(after.text), 'the put-away card is in the spine or the jump list');
 
 // ---- 3. the phone menu on every admin screen ----------------------------------------------
-const SCREENS = [['/admin/', '/admin/'], ['/admin/calendar', '/admin/calendar'], ['/admin/money', '/admin/money'], ['/admin/inventory', '/admin/inventory'], ['/admin/settings', '/admin/settings'], ['/admin/help', '/admin/help'], ['/admin/pricing', '/admin/pricing'], ['/admin/search', '']];
+const SCREENS = [['/admin/', '/admin/'], ['/admin/calendar', '/admin/calendar'], ['/admin/money', '/admin/money'], ['/admin/inventory', '/admin/inventory'], ['/admin/library', '/admin/library'], ['/admin/settings', '/admin/settings'], ['/admin/help', '/admin/help'], ['/admin/pricing', '/admin/pricing'], ['/admin/search', '']];
 for (const [p, current] of SCREENS) {
   const res = await s.get(p);
   const t = res.text;
   must(res.status === 200, `${p} answered ${res.status}`);
   must(/<header class="top" id="admin-menu" data-topbar><a class="brand" href="\/admin\/"[^>]*>Porch &amp; Party<\/a><a class="menubtn mopen" href="#admin-menu" role="button" aria-controls="admin-nav" aria-expanded="false" data-menu-btn[^>]*>&#9776; Menu &#9662;<\/a><a class="menubtn mclose" href="#" role="button" aria-controls="admin-nav" data-menu-close[^>]*>&#10005; Close menu<\/a><div class="navpanel" id="admin-nav" data-menu-panel><nav aria-label="Main">/.test(t), `${p}: no "Porch & Party" + "☰ Menu ▾" / "✕ Close menu" line with the panel around the nav`);
   const nav = (t.match(/<nav aria-label="Main">([\s\S]*?)<\/nav><\/div><\/header>/) || [])[1] || '';
-  must((nav.match(/<a href="\/admin\//g) || []).length === 7 && /Sign out<\/button>/.test(nav), `${p}: the panel does not hold every nav item`);
+  must((nav.match(/<a href="\/admin\//g) || []).length === 8 && /Sign out<\/button>/.test(nav), `${p}: the panel does not hold every nav item`);
   const marked = [...nav.matchAll(/<a href="([^"]+)" aria-current="page"/g)].map((m) => m[1]);
   must(JSON.stringify(marked) === JSON.stringify(current ? [current] : []), `${p}: the current screen marked is ${JSON.stringify(marked)}`);
   // The main page has no ← Back, it says it is the main page; every other screen keeps the ← Back bar.

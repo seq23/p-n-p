@@ -83,7 +83,7 @@ const settingsPage0 = await get('/admin/settings');
 must(settingsPage0.status === 200 && /<details class="set-sec" id="inventory"[\s\S]*?href="\/admin\/inventory"[^>]*data-help="set.inventoryLink"/.test(settingsPage0.text), 'Settings has no Inventory section linking to /admin/inventory');
 must(settingsPage0.text.includes("if(location.hash==='#inventory')location.replace('/admin/inventory')"), 'an old /admin/settings#inventory link does not land on the Inventory page');
 must(/data-inv-status/.test(settingsPage0.text), 'Settings lost the website-update box');
-must(/<nav aria-label="Main">[\s\S]*?>Money<\/a><a href="\/admin\/inventory"[^>]*>Inventory<\/a><a href="\/admin\/settings"/.test(settingsPage0.text), 'the main nav lacks Inventory between Money and Settings');
+must(/<nav aria-label="Main">[\s\S]*?>Money<\/a><a href="\/admin\/inventory"[^>]*>Inventory<\/a><a href="\/admin\/library"[^>]*>Design Library<\/a><a href="\/admin\/settings"/.test(settingsPage0.text), 'the main nav lacks Inventory between Money and Design Library (then Settings)');
 const settings0 = await get('/admin/inventory');
 must(settings0.status === 200 && /id="inventory"/.test(settings0.text), 'the Inventory page does not answer');
 const seedRows = await all('SELECT slug, section, position, data FROM inventory_items ORDER BY section, position');

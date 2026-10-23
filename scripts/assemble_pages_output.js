@@ -55,6 +55,25 @@ fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(dist, { recursive: true });
 copyInto(root, dist, 0);
 
+// The Design Library's AI fallback pictures (/admin/library, docs/admin-console.md). data/ is
+// never published, so they are copied here on purpose, under admin/: every /admin/* request runs
+// the Functions guard first (sign-in), and only functions/_lib/admin-library.mjs reads them,
+// through env.ASSETS. Zero copied means the library would show "Picture coming" everywhere.
+const LIBRARY_ASSETS = require('./lib/library_assets.js');
+const LIBRARY_IMAGES = path.join(root, LIBRARY_ASSETS.SOURCE);
+const libraryOut = path.join(dist, LIBRARY_ASSETS.OUTPUT);
+let libraryImages = 0;
+fs.mkdirSync(libraryOut, { recursive: true });
+for (const name of fs.existsSync(LIBRARY_IMAGES) ? fs.readdirSync(LIBRARY_IMAGES) : []) {
+  if (!LIBRARY_ASSETS.NAME.test(name)) continue;
+  fs.copyFileSync(path.join(LIBRARY_IMAGES, name), path.join(libraryOut, name));
+  libraryImages += 1;
+}
+if (!libraryImages) {
+  console.error('assemble: no Design Library pictures in data/admin/design-library/images; /admin/library would have no fallback pictures');
+  process.exit(1);
+}
+
 // A URL listed in the sitemap that is missing from dist means an exclusion was
 // wrong. Fail here rather than deploy a site with holes in it.
 const sitemapPath = path.join(dist, 'sitemap.xml');
