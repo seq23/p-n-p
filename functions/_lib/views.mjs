@@ -164,7 +164,7 @@ export function layout(title, body, { authed = true, home = false, screen = '', 
   const on = NAV_CURRENT[title] || '';
   const cur = (href) => (href === on ? ' aria-current="page"' : '');
   const nav = authed ? `<nav aria-label="Main">
-    <a href="/admin/"${cur('/admin/')}${tip('nav.requests')}>Customers (main page)</a><a href="/admin/calendar"${cur('/admin/calendar')}${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${cur('/admin/money')}${tip('nav.money')}>Money</a><a href="/admin/inventory"${cur('/admin/inventory')}${tip('nav.inventory')}>Inventory</a><a href="/admin/settings"${cur('/admin/settings')}${tip('nav.settings')}>Settings</a><a href="/admin/help"${cur('/admin/help')}${tip('nav.help')}>Help</a><a href="/admin/pricing"${cur('/admin/pricing')}${tip('nav.pricing')}>Quick Pricing Summary</a>
+    <a href="/admin/"${cur('/admin/')}${tip('nav.requests')}>Customers (main page)</a><a href="/admin/calendar"${cur('/admin/calendar')}${tip('nav.calendar')}>Calendar &amp; Bookings</a><a href="/admin/money"${cur('/admin/money')}${tip('nav.money')}>Money</a><a href="/admin/inventory"${cur('/admin/inventory')}${tip('nav.inventory')}>Inventory</a><a href="/admin/library"${cur('/admin/library')}${tip('nav.library')}>Design Library</a><a href="/admin/settings"${cur('/admin/settings')}${tip('nav.settings')}>Settings</a><a href="/admin/help"${cur('/admin/help')}${tip('nav.help')}>Help</a><a href="/admin/pricing"${cur('/admin/pricing')}${tip('nav.pricing')}>Quick Pricing Summary</a>
     <form method="post" action="/admin/logout" style="display:inline"><button type="submit"${tip('nav.signout')}>Sign out</button></form></nav>` : '';
   // Phone (< 900 px): one short line, "Porch & Party" + a labelled "☰ Menu ▾" button; the panel
   // opens below as big rows and the button reads "✕ Close menu". Without JS the button is a
@@ -201,7 +201,7 @@ export function backLabel(href) {
   return /^\/admin\/(?:[?#]|$)/.test(String(href || '')) ? 'Back to main page' : 'Back';
 }
 // Which menu row is "you are here", by the screen's title (the seven top-level screens).
-export const NAV_CURRENT = { [MAIN_PAGE_NAV]: '/admin/', Calendar: '/admin/calendar', Money: '/admin/money', Inventory: '/admin/inventory', Settings: '/admin/settings', 'How to use this': '/admin/help', 'Quick Pricing Summary': '/admin/pricing' };
+export const NAV_CURRENT = { [MAIN_PAGE_NAV]: '/admin/', Calendar: '/admin/calendar', Money: '/admin/money', Inventory: '/admin/inventory', Settings: '/admin/settings', 'How to use this': '/admin/help', 'Quick Pricing Summary': '/admin/pricing', 'Design Library': '/admin/library' };
 // The phone menu: the button opens/closes the panel without touching the address bar; a screen
 // under one of the seven (e.g. /admin/money/...) marks its parent row.
 const MENU_JS = `(function(){var h=document.querySelector('[data-topbar]');if(!h)return;var o=h.querySelector('[data-menu-btn]');if(!o)return;

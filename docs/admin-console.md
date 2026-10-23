@@ -90,7 +90,7 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   moves every number, private facts never in text / email / print, the send path end to end.
 
 ## Request cards + admin homepage (JOB B, owner-approved 18 Oct 2026, migration 0008)
-- **Main nav**: Customers (main page) (was "Requests" until 20 Oct 2026) · Calendar & Bookings · Money · Inventory · Settings · Help · Quick Pricing Summary (Inventory added 19 Oct 2026; Quick Pricing Summary, the last button, 20 Oct 2026). Put away and Invoices
+- **Main nav**: Customers (main page) (was "Requests" until 20 Oct 2026) · Calendar & Bookings · Money · Inventory · Design Library · Settings · Help · Quick Pricing Summary (Inventory added 19 Oct 2026; Quick Pricing Summary, the last button, 20 Oct 2026; Design Library 22 Oct 2026). Put away and Invoices
   left the nav: Put away is the collapsed "Put away (N)" section at the bottom of Requests ("Show
   put-away requests", `#put-away`, the only whitelisted disclosure in `validate:admin-tooltips`);
   `/admin/archive` redirects to `/admin/?pa=1#put-away` with it open. All invoices are linked from
@@ -1088,3 +1088,34 @@ photos and deleted (old image URLs are not redirected: redirects go to pages onl
 holds each drawing's hash; `npm run validate:no-placeholder-images` fails if any page or source names
 one, or any image under `assets/` has those bytes. The frozen pages were refrozen
 (`frozen_outputs.mjs prepare-scope … && freeze && clear-scope`).
+
+## Design Library (owner-approved 22 Oct 2026)
+- **Where**: `/admin/library` (menu button "Design Library", after Inventory). Every section, design,
+  color set, tips group and collection has its own page: `/admin/library/<porches|rooms|balloons|grazing>/<slug>`,
+  `/admin/library/colors/<slug>`, `/admin/library/tips/<slug>`, `/admin/library/collections/<key>`,
+  `/admin/library/shopping`. Server: `functions/_lib/admin-library.mjs` (shell pages through `layout()`);
+  page code: `functions/_lib/assets/design-library.{js,css}.txt`, served as `/admin/library/app.{js,css}`.
+- **Data**: `data/admin/design-library/library.json`, bundled into the Functions and served only as
+  `/admin/library/data.json` behind the guard (`data/` is never published). Refresh from the research
+  build with `npm run library:sync` (reads `~/claude-work/design-library/build/index.html`, or
+  `LIBRARY_SRC=<dir>`), then `npm run validate:admin-design-library` and a PR.
+- **Pictures = real Pinterest pins** (owner, 22 Oct 2026). `data/admin/design-library/pins.json` holds
+  3–6 pins per design group (65 groups), found by web search and checked through Pinterest's public
+  oEmbed (`npm run library:pins:check` re-checks, drops dead pins, refreshes credits). Cards show the
+  pin's oEmbed picture hotlinked from `i.pinimg.com` (never copied) with "Picture: <maker> on
+  Pinterest ↗"; design pages lead with Pinterest's official embed widget (`pinit.js`, loaded on design
+  pages only) and keep "See more on Pinterest". Nothing is scraped or rehosted.
+- **Fallback**: the 51 AI idea pictures (`data/admin/design-library/images/`, published by
+  `scripts/assemble_pages_output.js` to `admin/library/img/`, read only through `env.ASSETS` behind the
+  guard; one mapping in `scripts/lib/library_assets.js`) show, labelled "Idea picture (AI)", only when a
+  design has no pin or its pin picture stops loading; with neither, "Picture coming".
+- **Behaviour** (from the approved preview): porch tabs (Fall / Halloween · Winter / Christmas · Other)
+  + size pull-down, price / kind / collection pull-downs (kept in the address, so ← Back returns to the
+  same filter), collections, Rules to remember (sticky column on a computer, pill + bottom sheet with
+  ✕ Close on a phone), balloon map with counts by colour and size, numbered clusters and a recolour
+  picker, dot strips on balloon cards, the supply calculator, per-design shopping lists and the trip
+  list combined by store (this phone's localStorage; Clear sits apart and confirms).
+- **Guard**: `npm run validate:admin-design-library` (in validate:admin): data and pins in step, every
+  group ≥ 3 pins, every route signed out → sign-in, pinit.js on design pages only, and the page code
+  run in a stand-in DOM for every view.
+

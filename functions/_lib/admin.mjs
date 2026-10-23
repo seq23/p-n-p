@@ -41,6 +41,7 @@ import * as IA from './id-auto.mjs';
 import { paidByInvoice, balances, recordPayment, voidPayments, balanceWords, depositWords, depositHeld, linesFromForm, saveLines, linesByInvoice, paymentsByInvoice } from './ledger.mjs';
 import * as AE from './admin-edit.mjs';
 import * as APR from './admin-pricing.mjs';
+import { libraryRoute } from './admin-library.mjs';
 import * as INVD from './inventory.mjs';
 import * as VI from './views-inventory.mjs';
 import { categoriesFrom } from './expenses.mjs';
@@ -1070,6 +1071,8 @@ async function routeAdmin(context) {
     }
   }
   if (segs[0] === 'help' && method === 'GET') return htmlResponse(V.helpPage());
+  // Design Library (owner-approved 22 Oct 2026): its own pages, data and pictures (admin-library.mjs).
+  if (segs[0] === 'library' && (method === 'GET' || method === 'HEAD')) return libraryRoute(env, request, url, segs);
   // Quick Pricing Summary (owner, 20 Oct 2026): the last button in the menu.
   if (segs[0] === 'pricing' && segs.length === 1 && method === 'GET') return APR.pricingRoute(env, url);
   if (segs[0] === 'pricing' && segs[1] === 'email' && segs.length === 2 && method === 'POST') return APR.emailRoute(env, request);

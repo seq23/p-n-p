@@ -104,6 +104,7 @@ const screens = [
   // Quick Pricing Summary (20 Oct 2026): plain, after a send, and after a refused send.
   ['/admin/pricing'], ['/admin/pricing?s=rentals&sent=hana%40example.com'], ['/admin/pricing?s=all&to=x&err=That%20email%20address%20does%20not%20look%20right.'],
   // Settings -> Inventory (18 Oct 2026): the Add and Edit forms.
+  ['/admin/library'], ['/admin/library/balloons'], ['/admin/library/porches/p01'], ['/admin/library/shopping'], ['/admin/library/colors/c01'], ['/admin/library/tips/short-on-time'],
   ['/admin/inventory'], ['/admin/inventory/new'], ['/admin/inventory/giant-uno'], ['/admin/inventory/giant-uno/edit'], ['/admin/inventory/giant-tumble-tower'], ['/admin/inventory/projector'],
   [`/admin/confirmed?r=${s.rk(heldReq.row.request_key)}&m=Deposit%20received&back=/admin/`],
   [`/admin/checklist/online?r=${s.rk(reqA.key)}`], ['/admin/checklist', { print: true }], [`/admin/checklist?r=${s.rk(reqA.key)}`, { print: true }],

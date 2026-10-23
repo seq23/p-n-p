@@ -26,6 +26,7 @@ export const SCREENS = [
   ['inventory', 'Inventory (your rental items, In and Out)'],
   ['gcal', 'Link my Google Calendar'],
   ['pricing', 'Quick Pricing Summary'],
+  ['library', 'Design Library'],
   ['help', 'This help page'],
   ['signin', 'Sign in'],
 ];
@@ -63,6 +64,10 @@ export const STEPS = {
   confirmed: ['Their deposit is in: the booking is confirmed.', 'Tap Text them it\'s confirmed (or Email them).', 'Tap Done.'],
   edit: ['Find the part you want to change.', 'Change it, then tap that part\'s Save.', 'Every change is written in the history. Nothing is sent to the customer.'],
   pricing: ['Tap a service at the top to jump to it.', 'Read the prices: the same ones customers see on the website.', 'Text it, email it or print it for a customer.'],
+  // Design Library (owner-approved 22 Oct 2026)
+  library: ['Pick a section: porches, rooms, balloons, grazing, colors or tips.', 'Tap a picture to open that design.', 'Tap Add to my trip list on a design, then open My trip list before you shop.'],
+  libraryDesign: ['Look at the real examples from Pinterest.', 'Read the costs, the steps and the shopping list.', 'Tap Add to my trip list before you shop.'],
+  libraryTrip: ['Add designs from their pages (Add to my trip list).', 'Shop store by store: tick each thing as you buy it.', 'Tick "I own this already" and reusable pieces drop off the total.'],
   help: ['Find the screen you are on.', 'Read what each button does.', 'Tap Print this page to keep a paper copy.'],
   packages: ['Find the season (fall or Christmas).', 'Read what each package includes and where its price starts.', 'Use it as the starting price on the invoice, then adjust after the walk-through.'],
 };
@@ -76,6 +81,7 @@ export const HELP = {
   'nav.calendar': H('every', 'Calendar & Bookings', 'Shows every booking for all four services, as a month or as a list.', '', 'Porch decorating, party decor, grazing tables and game rentals, all in one place.'),
   'nav.money': H('every', 'Money', 'Shows money received, what is still owed, expenses and the year-end summary for taxes.', '', 'Month by month, in plain numbers.'),
   'nav.settings': H('every', 'Settings', 'Opens your payment details, password and calendar link.', '', 'Your Zelle, Cash App, QR code, password and the Google Calendar link.'),
+  'nav.library': H('every', 'Design Library', 'Opens the Design Library: ideas for porches, rooms, balloons and grazing tables, with real Pinterest examples, costs, steps and shopping lists.', '', 'Each section, design, color set and tips group has its own page. The trip list on it stays on this phone.'),
   'nav.pricing': H('every', 'Quick Pricing Summary', 'Opens every price on one page, ready to text, email or print for a customer.', '', 'The last button in the menu: rentals, porch, party & decor and grazing, read from the same files as the website.'),
   'nav.help': H('every', 'Help', 'Opens a one-page guide to every button. You can print it.', '', 'This page. Every button in the console is explained here.'),
   'nav.menu': H('every', 'Menu (on a phone)', 'Opens or closes the list of screens: Customers (main page), Calendar & Bookings, Money and the rest.', '', 'On a phone the screens sit behind the ☰ Menu button at the top. Tap it, then tap a screen; the one you are on is highlighted. ✕ Close menu folds it away.'),
@@ -488,6 +494,8 @@ export const HELP = {
   'gl.copy': H('gcal', 'Copy link', 'Copies your private calendar link so you can paste it into Google Calendar.', 'Then paste it into Google Calendar.', 'Copies the link. Keep it private: anyone with it can see your bookings.'),
   'gl.open': H('gcal', 'Open Google Calendar (From URL)', 'Opens Google Calendar on the page where you paste the link.', 'Best on a computer.', 'Goes straight to Other calendars, From URL.'),
 
+  // Design Library (owner-approved 22 Oct 2026)
+  'lib.trip': H('library', 'My trip list', 'Opens your trip list: every design you added, combined into one shopping list by store.', '', 'Tap Add to my trip list on any design to put it here. It stays on this phone.'),
   // Quick Pricing Summary (owner, 20 Oct 2026)
   'pr.jump': H('pricing', 'Rentals · Porch · Party & decor · Grazing', 'Jumps down to that service on this page.', '', 'The chips at the top. Each service has its own block in its own colour.'),
   'pr.text': H('pricing', 'Text it', 'Opens a text on your phone with a short price list and the website link already typed. You pick who it goes to.', '', 'Free: it goes from your own phone. The "Only you see this" box is never in the text.'),
