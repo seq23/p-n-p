@@ -50,6 +50,10 @@ export function buildPriceTable(source, services, porchPackages = null) {
     // The rental invoice note's phone (invoice-note.mjs rentalNote words it per invoice).
     pickupPhone: String(pickup.phone || ''),
     pickupPlace: String(pickup.place || '').split(',')[0],
+    // The invoice text message names the police station in full (owner, 24 Oct 2026), from the
+    // same games.json pickup the site and FAQ read: "Mt. Moriah Station, Memphis Police
+    // Department, 2602 Mt. Moriah Rd, Memphis, TN 38115".
+    pickupWhere: [pickup.place, pickup.address].filter(Boolean).join(', '),
     gameNames: items.filter((i) => i.kind === 'game').map((i) => i.name),
     // The games an all-games bundle counts (owner, 18 Oct 2026: "the 6 games" are both Giant
     // Color Stack sets + four others), so a game with bundleSets 2 fills two of its slots.

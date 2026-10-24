@@ -418,6 +418,12 @@ async function paidFor(env, invoice) {
   if (!(invoice && invoice.id)) return { paid: 0, payments: [] };
   return { paid: (await paidByInvoice(env.DB, [invoice.id]))[invoice.id] || 0, payments: (await paymentsByInvoice(env.DB))[invoice.id] || [] };
 }
+// The job's first booked day for the invoice text message ("for your game rental on Sat 24 Oct").
+async function jobDateOf(env, invoice) {
+  const row = await env.DB.prepare('SELECT MIN(date) AS d FROM bookings WHERE invoice_id = ?1 OR (?2 <> \'\' AND request_key = ?2)').bind(invoice.id, invoice.request_key || '').first();
+  return (row && row.d) || '';
+}
+
 async function noteFor(env, invoice, lines, { view = false } = {}) {
   const paid = invoice && invoice.id ? ((await paidByInvoice(env.DB, [invoice.id]))[invoice.id] || 0) : 0;
   const req = invoice && invoice.request_key ? await findRequest(env, invoice.request_key) : null;
@@ -1037,7 +1043,7 @@ async function routeAdmin(context) {
         const settings = await getSettings(env.DB);
         const emailHtml = (await emailParts(env, loaded.invoice, loaded.lines, settings, true)).html;
         const pickup = await noteFor(env, loaded.invoice, loaded.lines, { view: true });
-        const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings, pickup, ...(await paidFor(env, loaded.invoice)) });
+        const smsText = textMessage({ invoice: loaded.invoice, lines: loaded.lines, settings, meet: PRICE_TABLE.pickupWhere, jobDate: await jobDateOf(env, loaded.invoice), pickup, ...(await paidFor(env, loaded.invoice)) });
         const balance = (await balances(env.DB))[id];
         if (balance) Object.assign(balance, await depositHeld(env.DB, id));
         const payments = (await paymentsByInvoice(env.DB))[id] || [];
