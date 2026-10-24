@@ -359,6 +359,14 @@ button.newb.big{min-height:44px;padding:0 16px;font-size:1rem;cursor:pointer}
 article[data-new]{box-shadow:0 0 0 3px #f3b493}
 .rqflow{display:flex;flex-direction:column}.rqmain{order:1}.rqpanel{order:2;margin-top:18px}
 @media(min-width:900px){.rqpanel{order:0;margin-top:0}}
+.fold>summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:4px 12px;min-height:48px;padding:6px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-weight:700;font-size:1.05rem}
+.fold>summary::-webkit-details-marker{display:none}
+.fold>summary .tog{color:var(--accent);text-decoration:underline;font-size:.98rem;font-weight:600}
+.fold .t-open{display:none}.fold[open] .t-open{display:inline}.fold[open] .t-shut{display:none}
+.fold[open]>summary{margin-bottom:10px}
+.rqsteps .stepspanel{margin:0}
+@media(max-width:899px){.rqsteps .stepspanel .spb{grid-template-columns:1fr 1fr}.rqsteps .stepspanel .spb .btn{min-height:44px;font-size:.95rem;padding:6px 8px}}
+@media(min-width:900px){.rqsteps[open]>summary{display:none}}
 .weekcard{padding:8px 12px;margin-bottom:10px}.weekcard .wkline{margin:0;line-height:1.7}.weekcard .wkhead{font-weight:700}
 .weekcard .wknames{display:block}.weekcard .wkbar{display:none;color:var(--muted);padding:0 10px}.weekcard .wkdot{color:var(--muted);padding:0 8px}
 .weekcard .wknames a{color:inherit;font-weight:600;text-decoration:underline;text-underline-offset:3px;padding:3px 0}.weekcard .wki{white-space:nowrap}.weekcard .wki .newb{margin-right:5px}
@@ -551,7 +559,7 @@ export function weekBox(w, newKeys = new Set()) {
 // longer" / "Change how long" (Keep 30 more days / Keep 90 more days / Keep until I delete it
 // myself / ✕ Close, change nothing). A Google-form row (Drive) cannot delete itself: it says so,
 // with "Open ID folder" and "I deleted it" (asks first). Every button lands back on this box.
-const IDS_CSS = `<style>.idrow{border-top:1px solid var(--line);padding:10px 0 4px;display:grid;gap:6px}.idrow:first-of-type{border-top:0}
+const IDS_CSS = `<style>.idscard{margin-top:28px;padding:10px}.idsfold>summary{border:0;padding:4px 6px}.idsoon{display:inline-block;background:#fff4d1;border:1px solid var(--warn);border-radius:8px;padding:1px 6px;color:var(--ink);font-weight:600}.idrow{border-top:1px solid var(--line);padding:10px 0 4px;display:grid;gap:6px}.idrow:first-of-type{border-top:0}
 .idwhen{margin:0;font-size:.98rem}.idwhen.soon{background:#fff4d1;border:1px solid var(--warn);border-radius:8px;padding:5px 8px}
 .idwhen.kept{background:#e3f3e8;border:1px solid var(--ok);border-radius:8px;padding:5px 8px}.idbtns{display:flex;flex-wrap:wrap;gap:8px}
 .idbtns>details,.idbtns>a{flex:1 1 140px}.idbtns summary.btn,.idbtns>a.btn{display:block;text-align:center}.keepforms{display:grid;gap:8px;margin:0 0 8px}.keepforms form{margin:0}.keepforms .btn{width:100%}</style>`;
@@ -586,9 +594,14 @@ function idReadyRow(r, today, folderUrl) {
 }
 export function idsReadyBox(rows, { today = chicagoDate(), folderUrl = '' } = {}) {
   if (!rows.length) return '';
-  return `<section class="card" data-ids-ready id="ids-ready">${IDS_CSS}<h2>IDs ready to delete <small class="muted">${rows.length}</small></h2>
+  // Closed by default (owner, 24 Oct 2026: "less in the way"); the summary still says how many
+  // and how many delete themselves within the week, and #ids-ready (every button here lands
+  // back on it) opens it again.
+  const soon = rows.filter((r) => idRowState(r, today).soon).length;
+  return `<section class="card idscard" data-ids-ready id="ids-ready">${IDS_CSS}<details class="fold idsfold" id="ids-fold" data-ids-fold><summary${tip('ids.fold')}><span>Delete customer ID photos <small class="muted">(${rows.length} ready)</small>${soon ? ` <small class="idsoon" data-ids-soon>⏳ ${soon} ${soon === 1 ? 'deletes itself' : 'delete themselves'} this week</small>` : ''}</span><span class="tog"><span class="t-shut">Tap to open ▾</span><span class="t-open">Tap to close ▴</span></span></summary>
+    <h2>IDs ready to delete <small class="muted">${rows.length}</small></h2>
     <p class="muted" style="margin:0 0 8px" data-ids-why>Each one deletes itself ${ID_AUTO_DAYS} days after it lands here. You can delete sooner or keep one longer.</p>
-    ${rows.map((r) => idReadyRow(r, today, folderUrl)).join('')}</section>`;
+    ${rows.map((r) => idReadyRow(r, today, folderUrl)).join('')}</details></section>`;
 }
 
 // "Keep it longer" from the 7 AM email: the confirm screen (GET never changes anything).
@@ -1702,19 +1715,23 @@ export function dashboardPage({ newKeys = new Set(), remindersLine = '', request
   // Phone first (owner, 19 Oct 2026): the request list comes straight after the heading and the
   // one-line week card; tomorrow's reminders are one tappable line at the bottom; the three-step
   // panel sits under the list on a phone and stays on top on a wide screen (CSS order, .rqflow).
+  // Put away sits right under Cancelled, above the 1·2·3 Shortcuts (owner, 24 Oct 2026); the
+  // Shortcuts are a closed accordion on a phone; "Delete customer ID photos" is last, closed.
   return layout(MAIN_PAGE_NAV, `<style>${CARD_CSS}${NEW_CSS}${STEP_CSS}${MISSED_CSS}${CUST_CSS}${QT_CSS}${ENDED_CSS}</style>${missedTop}${flash ? `<div class="notice ok">${esc(flash)}</div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
 ${setupBanner(missingPayment)}
-    <div class="rqgrid">${customerSpine(shown)}<div class="rqcol"><div class="rqflow"><div class="rqpanel">${requestsPanel(folderUrl)}</div>
+    <div class="rqgrid">${customerSpine(shown)}<div class="rqcol"><div class="rqflow"><div class="rqpanel"><details class="fold rqsteps" id="shortcuts" data-steps-fold><summary${tip('req.shortcuts')}><span>1·2·3 Shortcuts</span><span class="tog"><span class="t-shut">Tap to open ▾</span><span class="t-open">Tap to close ▴</span></span></summary>${requestsPanel(folderUrl)}</details></div>
     <div class="rqmain">${extraTop}${week}${holdsBox}${err}
     ${filterChips(f)}${filterSelect(f, rows)}${customerBar(shown)}
     <div data-request-list>${listWithBanner}</div>
     ${endSections}
-    ${remindersLine}</div></div>
     ${putSection}
+    ${remindersLine}</div></div>
     ${idsBox}</div></div>
     <template id="undo-tpl">${undoBanner('')}</template>
     <div class="undo-slot" id="undo-slot" aria-live="polite">${putAway ? undoBanner(putAway) : ''}</div>
-    <script>${DASH_JS}${NEW_JS}${CUST_JS}${QT_JS}${ENDED_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}</script>`, { home: true, screen: '', panelWide: true, spine: true });
+    <script>${DASH_JS}${NEW_JS}${CUST_JS}${QT_JS}${ENDED_JS}if(location.hash==='#put-away'){var pa=document.getElementById('put-away');if(pa)pa.open=true;}
+(function(){var sc=document.getElementById('shortcuts');if(sc&&window.matchMedia&&window.matchMedia('(min-width:900px)').matches)sc.open=true;
+function ids(){if(location.hash==='#ids-ready'){var d=document.getElementById('ids-fold');if(d)d.open=true;}}ids();window.addEventListener('hashchange',ids);})();</script>`, { home: true, screen: '', panelWide: true, spine: true });
 }
 
 export function invoicesPage({ invoices }) {
@@ -2023,7 +2040,7 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
       ${voided || invoice.status === 'done' ? '' : status('done', 'Job finished (mark done)', 'iv.done')}
     </div>
     <p class="muted">Email: ${esc(invoice.customer_email || 'none')}${invoice.customer_phone ? ` · Phone: ${esc(invoice.customer_phone)}` : ''}</p>
-    <label for="sms">Text message to send with the PDF</label><textarea id="sms" readonly rows="4">${esc(smsText)}</textarea>
+    <label for="sms">Text message to send with the PDF</label><textarea id="sms" readonly rows="14">${esc(smsText)}</textarea>
     <button type="button" class="btn ghost" data-copy="sms"${tip('iv.copySms')}>Copy the message</button>
   </details>
   <script>${SHARE_JS}</script>`, { screen: 'invoice', back: { href: '/admin/invoices', label: 'Back to invoices' } });

@@ -12,7 +12,7 @@
  *  4. the Requests screen has any "More" disclosure other than each step card's ONE "More:
  *     answers, history, other buttons" (owner-approved step cards, 19 Oct 2026: exactly one per
  *     card, inside the card, after its next-step box), or any disclosure with an id outside the
- *     whitelist (only #put-away, #done-list, #cancelled-list: the three groups under the cards), or lacks the steps panel with
+ *     whitelist (only #put-away, #done-list, #cancelled-list: the three groups under the cards; #shortcuts and #ids-fold, owner 24 Oct 2026), or lacks the steps panel with
  *     each button in its owner-approved step (JOB B, 18 Oct 2026); Calendar & Bookings and Money
  *     carry the same panel; /admin/archive redirects to the opened Put away section.
  * Rule 0: fewer than 20 screens or 150 controls checked is a failure.
@@ -331,7 +331,8 @@ for (const [p, o, res] of pages) {
       } else if (card.indexOf('data-next-step') < 0 || card.indexOf('data-next-step') > card.indexOf('data-details')) errors.push(`${p}: a request card's "More" comes before (or without) its next-step box`);
     }
     // The Done and Cancelled groups (owner-approved "Done Cards", 20 Oct 2026) and Put away.
-    const DISCLOSURE_WHITELIST = ['put-away', 'done-list', 'cancelled-list'];
+    // + #shortcuts (the 1·2·3 steps, closed on a phone) and #ids-fold (Delete customer ID photos): owner, 24 Oct 2026.
+    const DISCLOSURE_WHITELIST = ['put-away', 'done-list', 'cancelled-list', 'shortcuts', 'ids-fold'];
     for (const m of html.matchAll(/<details\b[^>]*\bid="([^"]+)"/g)) if (!DISCLOSURE_WHITELIST.includes(m[1])) errors.push(`${p}: disclosure #${m[1]} is not on the whitelist (only the Put away section may be one)`);
     const lis = steps ? steps.split('<li>').slice(1) : [];
     const PANEL = [['See who&#39;s asking.|See who\'s asking.', ['Check for new requests', 'Find a customer', 'Open responses sheet', 'Open ID folder']],

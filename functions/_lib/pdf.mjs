@@ -35,15 +35,36 @@ export function payLines({ invoice, lines, pickup = '', paid = 0, payments = [] 
     words: [cs.head, ...cs.rows.map((r) => `${r.mark} ${r.words}: ${money(r.cents)}${r.tag ? ` ${r.tag}` : ''}`), cs.sum, cs.owed].filter(Boolean).join(' ') };
 }
 
-// The short message that goes with the PDF in a text.
-export function textMessage({ invoice, lines, settings, pickup = '', paid = 0, payments = [] }) {
+// The short message that goes with the PDF in a text (owner, 24 Oct 2026: short, with line
+// breaks, the refundable deposit said in words, the police station named in full). Lines:
+// greeting; what it is for + the date; the total with its maths in words; the numbered payments;
+// how to pay (Cash App link); the pickup line + "Pickup place: <police station, address>";
+// sign-off. meet: PRICE_TABLE.pickupWhere (games.json pickup), only on a pickup (not delivery) note.
+// jobDate: the job's first booked day (YYYY-MM-DD), '' when none is booked yet.
+export function textMessage({ invoice, lines, settings, pickup = '', paid = 0, payments = [], meet = '', jobDate = '' }) {
   const business = settings.business_name || 'Porch & Party';
   const p = payLines({ invoice, lines, pickup, paid, payments });
   const first = (invoice.customer_name || '').split(' ')[0] || 'there';
-  const how = [settings.zelle ? `Zelle ${settings.zelle}` : '', cashtag(settings.cashapp) ? `Cash App ${cashtag(settings.cashapp)}` : ''].filter(Boolean).join(' or ');
-  return [`Hi ${first}, here is your ${business} invoice ${invoice.number} (PDF attached). Total ${money(p.total)}.`,
-    `How you pay: ${p.words}`,
-    how ? `Pay by ${how}, with ${invoice.number} in the note.` : '', p.pickup, 'Thank you!'].filter(Boolean).join(' ');
+  const tag = cashtag(settings.cashapp);
+  const how = [settings.zelle ? `Zelle ${settings.zelle}` : '', tag ? `Cash App ${tag} (https://cash.app/${tag})` : ''].filter(Boolean).join(' or ');
+  const day = jobDate ? dayShort(jobDate) : '';
+  const what = pickup ? 'game rental' : 'booking';
+  const atPolice = pickup && meet && /Mt\. Moriah Station/.test(pickup);
+  const groups = [
+    [`Hi ${first},`, `Here is your ${business} invoice ${invoice.number} for your ${what}${day ? ` on ${day}` : ''} (PDF attached).`],
+    [`Total: ${money(p.total)}${p.totalWords ? ` (${p.totalWords})` : ''}`, p.head, ...p.rows.map((r) => `${r.mark} ${r.words}: ${money(r.cents)}${r.tag ? ` ${r.tag}` : ''}`), p.sum, p.owed],
+    [how ? `Pay by ${how}, with ${invoice.number} in the note.` : ''],
+    [p.pickup, atPolice ? `Pickup place: ${meet}.` : ''],
+    ['Thank you!', business],
+  ];
+  return groups.map((g) => g.filter(Boolean)).filter((g) => g.length).map((g) => g.join('\n')).join('\n\n');
+}
+
+// "Sat 24 Oct" (the same day words as the pay steps).
+function dayShort(iso) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })} ${d.getUTCDate()} ${d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })}`;
 }
 
 export async function renderInvoicePdf({ invoice, lines, settings, contact, pickup = '', paid = 0, payments = [] }) {

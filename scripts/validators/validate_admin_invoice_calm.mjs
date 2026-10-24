@@ -237,7 +237,7 @@ must(p5.includes('How Cara pays') && p5.includes('Deposit · now · holds the da
 const m5 = E.renderInvoiceEmail({ invoice: inv5, lines: lines5, settings: {}, contact: {}, qrSrc: null });
 must(m5.text.includes('① Deposit now (holds your date): $50.00') && m5.text.includes('② The rest, by Wed 28 Oct: $150.00') && m5.text.includes('Total: $200.00'), "#5's email does not read ① $50 now, ② $150 by Wed 28 Oct");
 const sms5 = PDF.textMessage({ invoice: inv5, lines: lines5, settings: {} });
-must(sms5.includes('Total $200.00') && sms5.includes('$50 + $150 = $200 total'), "#5's text message numbers changed");
+must(/^Total: \$200\.00( \(.+\))?$/m.test(sms5) && sms5.includes('\n$50 + $150 = $200 total'), "#5's text message numbers changed");
 must(PS.payStepsOf({ ...inv5, pay_plan: 'custom', deposit_due_cents: 0 }, lines5).noDeposit, 'a $0 typed deposit does not read as No deposit');
 // A row from before 'none' existed keeps its plan.
 must(s.util.payPlanOf({ pay_plan: 'half', deposit_due_cents: 0 }, 1000) === 'half' && s.util.payPlanOf({ pay_plan: 'custom', deposit_due_cents: 0 }, 1000) === 'custom', 'an existing invoice changed plan');

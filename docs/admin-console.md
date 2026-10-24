@@ -37,6 +37,14 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   `GET /admin/invoices/:id/invoice.pdf` renders the same invoice as a PDF (functions/_lib/pdf.mjs,
   pdf-lib) for customers reached by text; "Text the invoice (PDF)" shares it from the phone and
   the `texted` status action marks it sent without an email.
+- **Main page on a phone** (owner, 24 Oct 2026): list → Done → Cancelled → Put away → tomorrow's
+  reminders → "1·2·3 Shortcuts · Tap to open ▾" (closed; always open on a computer, on top) →
+  "Delete customer ID photos (N ready) · Tap to open ▾" (closed; `#ids-ready` opens it).
+- **Invoice text message** (`textMessage` in `functions/_lib/pdf.mjs`, owner 24 Oct 2026): short lines —
+  greeting; invoice for your game rental on <day>; `Total: $170.00 ($120 rental + $50 refundable damage
+  deposit)`; the numbered payments; Zelle / Cash App link; the pickup line and `Pickup place: Mt. Moriah
+  Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115.` (from `data/rentals/games.json`
+  pickup); Thank you! Porch & Party. Pinned by `validate:admin-pay-plan`.
 - **Send**: HTML email from hello@porchandparty901.com with a copy (Bcc) to hello@; payment block
   from Settings (Zelle, Cash App, QR as an inline CID image, which Gmail renders; Gmail strips
   data: URIs). A test send goes to hello@ only with a `TEST` subject and changes nothing.
