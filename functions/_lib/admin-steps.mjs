@@ -1,5 +1,5 @@
 // The step-card actions on Requests (owner-approved 19 Oct 2026; steps.mjs has the rules):
-//   POST /admin/requests/talked   "I've talked to them" -> "Are you taking this job?"
+//   POST /admin/requests/talked   "After the call: are you taking this job?" (inline on the card)
 //        go=yes   Yes, book it: called + confirmed; the date(s) she sees (editable right there)
 //                 become solid bookings (porch install / party or grazing setup, or the rental
 //                 pickup + return pair), the form's takedown day books itself, a held rental is
@@ -35,7 +35,11 @@ const backOr = (back, key, m, e = false) => {
   return redirect(`${path}${path.includes('?') ? '&' : '?'}${e ? 'e' : 'm'}=${encodeURIComponent(m)}${hash ? `#${hash}` : ''}`);
 };
 
-export async function bookIt(env, req, { date, returnDate = '', eventDate = '' }) {
+// time (optional "HH:MM"): the ready-by time of the setup / install, or the pickup time of a
+// games-only rental (the card's Yes, book it, owner-approved mock-up 25 Oct 2026). Empty keeps
+// whatever time the booking already had.
+export const bookTime = (v) => (/^([01]\d|2[0-3]):[0-5]\d$/.test(String(v || '').trim()) ? String(v).trim() : '');
+export async function bookIt(env, req, { date, returnDate = '', eventDate = '', time = '' }) {
   const key = req.key;
   const services = servicesOf(req);
   const base = C.bookingFromRequest(req, PRICE_TABLE);
@@ -45,7 +49,8 @@ export async function bookIt(env, req, { date, returnDate = '', eventDate = '' }
   if (services.includes('rentals')) {
     const p = have('rental_pickup');
     const items = (p && p.items) || base.items;
-    const pick = { ...base, kind: 'rental_pickup', date, time: p ? p.time : null, place: C.rentalPlace(req, PRICE_TABLE) || base.place, items };
+    const decorToo = services.some((k) => k !== 'rentals');
+    const pick = { ...base, kind: 'rental_pickup', date, time: (!decorToo && time) || (p ? p.time : null), place: C.rentalPlace(req, PRICE_TABLE) || base.place, items };
     await C.saveRequestBooking(env.DB, key, pick);
     const r = have('rental_return');
     await C.saveRequestBooking(env.DB, key, { ...pick, kind: 'rental_return', date: returnDate, time: r ? r.time : null });
@@ -59,7 +64,7 @@ export async function bookIt(env, req, { date, returnDate = '', eventDate = '' }
   for (const svc of services.filter((k) => k !== 'rentals')) {
     const kind = SCHEDULE_FIRST[svc][1];
     const b = have(kind);
-    await C.saveRequestBooking(env.DB, key, { ...base, kind, date: day, time: b ? b.time : null, items: (b && b.items) || base.items });
+    await C.saveRequestBooking(env.DB, key, { ...base, kind, date: day, time: time || (b ? b.time : null), items: (b && b.items) || base.items });
     booked.push(`${svc === 'porch' ? 'install' : 'setup'} ${shortDate(day)}`);
   }
   if (services.some((k) => k === 'porch' || k === 'party')) await autoBookTakedown(env.DB, req);
@@ -98,7 +103,7 @@ export async function talkedRoute(env, request) {
   if (rentals && !(returnDate && returnDate > date)) return backOr(back, key, 'Pick a return day after the pickup day, then tap Yes, book it.', true);
   if (rentals && services.some((k) => k !== 'rentals') && !eventDate) return backOr(back, key, 'Pick the setup day too, then tap Yes, book it.', true);
   await markConfirmed(env.DB, key, 'yes, book it');
-  const booked = await bookIt(env, req, { date, returnDate, eventDate });
+  const booked = await bookIt(env, req, { date, returnDate, eventDate, time: bookTime(form.get('time')) });
   await logEvent(env.DB, key, `Called back: taking this job. Booked (${booked.join('; ')})`, 'Valerie');
   if (back) return backOr(back, key, `✓ Booked ${req.name || 'them'}: ${booked.join(' · ')}. It is solid on the calendar now.`);
   return toCard(key, `Booked ✓ ${booked.join(' · ')} is on the calendar, confirmed.`);

@@ -139,7 +139,10 @@ const cellOf = (html, d) => html.slice(html.indexOf(`data-day="${d}"`), html.ind
 must(/class="k req rental_pickup"[^>]*>\? Rentals: Rae S\.</.test(cellOf(cal6, span6[0])), 'the unpaid rental has no outlined pickup chip');
 { const mid6 = span6.slice(1, -1).filter((d) => d.slice(0, 7) === span6[1].slice(0, 7)); must(mid6.length > 0, 'Rule 0: no span days between pickup and return to check'); }
 must(span6.slice(1, -1).filter((d) => d.slice(0, 7) === span6[1].slice(0, 7)).every((d) => /class="k req rental_out"[^>]*>\? Rental out: Rae S\.</.test(cellOf(cal6, d))), 'the unpaid rental has no outlined Rental out chips between');
-must(span6[span6.length - 1].slice(0, 7) !== span6[1].slice(0, 7) || /class="k req rental_return"[^>]*>Requested · not confirmed · Rental return: Rae S\./.test(cellOf(cal6, span6[span6.length - 1])), 'the unpaid rental has no outlined return chip');
+// The return day is checked in ITS month (the old pin skipped it whenever the return fell in the
+// next month, and still read the pre-calm "Requested · not confirmed ·" words).
+{ const r6 = span6[span6.length - 1]; const calR = r6.slice(0, 7) === span6[1].slice(0, 7) ? cal6 : (await s.get(`/admin/calendar?month=${r6.slice(0, 7)}`)).text;
+  must(/class="k req rental_return"[^>]*>\? Rental return: Rae S\.</.test(cellOf(calR, r6)), 'the unpaid rental has no outlined return chip'); }
 must(!/data-rental-out="[^"]*"[^>]*>Rental out: Rae Span7/.test(cal6), 'an unpaid rental is drawn as filled Rental out');
 
 // ---- 5. Edit -> Rental dates -----------------------------------------------------------------

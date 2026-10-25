@@ -132,10 +132,14 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   invoice · Mark paid, and a total line. Drafts are listed apart as "Invoice not sent yet"; the
   refundable damage deposit is never owed. The Requests chip uses the same rule (`notPaidYet`).
 
-- **Contextual scheduling** (migration 0009 adds `requests.takedown_note`): Porch → Schedule
-  install, then takedown; Party & decor → Schedule setup, then takedown; Grazing → Schedule setup,
-  then pickup (optional); Rentals → Schedule pickup + return as a pair (the return day defaults from
+- **Contextual scheduling** (migration 0009 adds `requests.takedown_note`): Porch → book the
+  install, then takedown; Party & decor → book the setup, then takedown; Grazing → book the setup,
+  then pickup (optional); Rentals → pickup + return as a pair (the return day defaults from
   the length, editable; the return is always required, its time may be left empty = not sure yet).
+  Booking is the card's inline **Yes, book it** (the job card redo, 25 Oct 2026): there is no
+  "Schedule setup / install / pickup + return" button any more (it repeated Yes, book it); a step
+  that is still not booked shows the same inline form. To move a booked day: More about <name> ›
+  Everything they wrote › "Change the setup / install / pickup day or time" (the booking's edit page).
   The takedown is never required. **Inline takedown row** (owner, 18 Oct 2026, "too many steps";
   `takedownRow` in `views.mjs`, `cards.mjs inlineRowKind`, `POST /admin/requests/takedown-inline`):
   every porch and party & decor card has ONE line "Takedown:" with a date box (the booked day, else
@@ -491,19 +495,44 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
 `request_opened` (migration 0016, every older request backfilled as opened); the rule is
 `functions/_lib/request-new.mjs` (`npm run validate:admin-requests-phone`).
 
+## Job card redo (owner-approved mock-up "P&P Job Card Redo", 25 Oct 2026)
+Every card type (party & decor, porch, grazing, rentals). Guard: `validate:admin-job-card`.
+- **Header**: Customer N · service, name, the event line, then **"Asked Sun 25 Oct, 12:06 PM · 2
+  hours ago"** (Memphis time; minutes, hours, then days; `card-told.mjs askedWords`). More keeps it.
+- **Step bar**: "Step N of M: <what>" plus a green ✓ chip only for steps already settled (undo
+  beside the last ✓). Steps still to come are not drawn.
+- **Step 1 (call back)**: two big buttons, **📋 Open the walk-through checklist**
+  (`/admin/checklist/online?r=`, party / porch / grazing) and **💬 Text <first name> the questions
+  (N still to ask)**: a free `sms:` link (body URL-encoded, `quick-texts.mjs smsHref`) with only the
+  questions the request did not answer, numbered 1, 2, 3, in Valerie's words ("Hi <name>! 💕 I'd
+  love to help you create a beautiful hotel room setup / porch / party for your <occasion>! … —
+  Valerie, Porch & Party"). Ten for party & decor (occasion; hotel or address; date and ready-by
+  time; guests; decorations; inspiration photos; colors or theme; add-ons; takedown; budget);
+  porch, grazing and rentals have their own sets (porch size, food, allergies, games, pickup time,
+  return). A tap logs "Texted: the questions still to ask". Then **What they told us** (always
+  visible: event, where, ready by, guests, budget, colors & notes, grazing / add-ons, takedown;
+  rentals: games, pick up, back; an empty or "Not sure yet" answer never shows), the **Still to
+  ask** chips (the same missing list) and **After the call: are you taking this job?**.
+  Rules: `functions/_lib/card-told.mjs`.
+- **More about <first name>** is ONE section: Contact & ID · Money · Notes (+ Add a note lives
+  here; the newest note still shows on the card face) · Everything they wrote (the job lines, the
+  calendar link, "Change the … day or time", the other buttons, then every other answer), then
+  Edit · Print checklist · Put away.
+- **Bottom row**: "📄 Invoice draft: $X · Check and send" and "✕ Cancel this job" on one line;
+  Cancel stays apart, labelled, and confirms first.
+
 ## Step cards, tentative -> confirmed, invoice quick-adds (owner-approved 19 Oct 2026, migration 0018)
 - **Step cards** (`requestCard` in `views.mjs`, rules in `functions/_lib/steps.mjs`): NEW, service,
-  name, one date line; a green bar, "N of M done" and the named steps (done = green ✓, current
-  bold, later grey) with ONE "undo" beside the last ✓; then ONE "Next step · step N" box (one
+  name, one date line; the short step bar (see "Job card redo" above) with ONE "undo" beside the last ✓; then ONE "Next step · step N" box (one
   sentence, one big button, small Call / Text where useful). Everything else (answers, phone and
   email, ID, notes, history, Edit, Print checklist, Put away, the Payment box, the other buttons)
   is under "More about <first name>". "✕ Cancel this job" is NOT under More: it is the grey button
   at the very bottom of every card (see "Cancel any job in two taps" below).
   - **Calm card** (owner-approved mock-up, 20 Oct 2026; `validate:admin-card-calm`): always
     visible: name, Call / Text, the when-line, the "🚚 Business delivery" tag, the **Latest note**
-    (newest note in full + its day) with "+ Add a note", then the next step. "More about <first
-    name>" holds four groups, only the first open: What they booked · Money · Their details and
-    ID · Notes and history (all notes, then history newest first, 5 shown + "Show all (N)"), then
+    (newest note in full + its day), then the next step. "More about <first
+    name>" holds four plain sections (job card redo, 25 Oct 2026): Contact & ID · Money · Notes
+    (+ Add a note, all notes, then history newest first, 5 shown + "Show all (N)") · Everything they wrote, then
     a quiet row Edit · Print checklist · Put away. Raw ISO dates and UTC history stamps read as Memphis
     words on screen only; stored rows never change.
   - **One money wording** (`ledger.mjs dueWords`): "$180 due ($130 + $50 refundable deposit)"
@@ -535,8 +564,9 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   - Undo: a tap on the card is taken back there (Called back, Setup done, Takedown / Pickup done or
     not needed, Picked up, Returned via the check-in); a money or invoice step only explains where
     to change it (the invoice / Edit page). Nothing deletes a payment or an invoice.
-- **"I've talked to them"** asks "Are you taking this job?": **Yes, book it** (the day(s) editable
-  right there; books the install / setup or the rental pickup + return as her bookings, books the
+- **"After the call: are you taking this job?"** (inline on step 1 since 25 Oct 2026, no dropdown):
+  **Yes, book it** (the day(s) from the request in words, "change" opens the date box; an optional
+  **Ready by** time (games-only rental: pickup time) saved on the booking; books the install / setup or the rental pickup + return as her bookings, books the
   form's takedown day, keeps a held rental held with no end time), **Not yet** (called only; "Not
   booked yet: Book it now" stays on the card), **No, put it away** (puts it away, frees held games).
   Routes: `functions/_lib/admin-steps.mjs` (`/admin/requests/talked`, `/called`, `/note`);
@@ -695,10 +725,11 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   `dueWords` / `dueCents` say nothing for it; Money (`money.mjs`), Not paid yet, the calendar
   ("Invoice not sent yet"), the card and the 7 AM email never count it. Its `remaining` and
   `depositOwed` are unchanged, so nothing reads it as paid or its damage deposit as collected.
-- **The card**: "📄 Invoice draft ready: $X" + "Made from <name>'s request. Nothing has been sent.
-  Check the price, then send." On the invoice step that is the next-step box with the big "Check and
-  send the invoice"; while another step comes first it sits on the card face with an outlined
-  button (one big button per card). Bookings made for the request carry its invoice.
+- **The card**: on the invoice step the next-step box reads "📄 Invoice draft ready: $X" + "Made
+  from <name>'s request. Nothing has been sent. Check the price, then send." with the big "Check and
+  send the invoice"; while another step comes first it sits in the card's bottom row as
+  "📄 Invoice draft: $X · Check and send", on the same line as ✕ Cancel this job (job card redo,
+  25 Oct 2026). Bookings made for the request carry its invoice.
 - **What they want changed** (Edit page section 1, `admin-edit.mjs saveWant` → `rebuildAutoDraft`):
   an auto draft that was never sent is rebuilt to match; every line she typed or changed by hand is
   kept; the flash says so. A sent or void invoice, or a hand-made one, is never touched.
@@ -978,7 +1009,7 @@ customer bar, Customer 4 card), `phone-menu-open.jpg`, `phone-scrolled-customer-
 - **A Done card**: greyed, the ✓ watermark, "✓ DONE · <date>" in place of the step dots, the money
   in words ("Paid $110 · $50 deposit returned", `cards.mjs endedMoneyWords`), Call / Text top right,
   and two small buttons: Put away and "Not done after all (undo)" (clears `done_at` and voids the
-  rows Done recorded, so the card is back exactly as it was). Show more about <name> keeps the
+  rows Done recorded, so the card is back exactly as it was). More about <name> keeps the
   groups and Edit; "✕ Cancel this job" sits at the very bottom, as on every card.
 - **Cancel any job in two taps** (owner, 21 Oct 2026: "all jobs should be able to be cancelled
   with 2 taps - one tap then a confirmation tap"; mock-up "Cancel In Two Taps"; a put-away card had
