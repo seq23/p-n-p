@@ -1426,7 +1426,8 @@ export function requestCard(r, o) {
   const bizLine = addr ? `<p class="scdelivery" data-business-delivery><span class="biztag">🚚 Business delivery</span> ${esc([biz, addr].filter(Boolean).join(', '))}</p>`
     : (feeNoAddr && !quiet ? `<details class="dlprompt" data-delivery-prompt><summary${tip('card.deliveryPrompt')}>🚚 Business delivery: add the business name and address</summary>${deliveryForm(r, rk, { prompt: true, place: pickupPlace, idp: 'dp' })}</details>` : '');
   // Latest note (owner-approved mock-up, 20 Oct 2026): the newest note in full and its day, on
-  // the card face. "+ Add a note" lives under More about <name> › Notes (mock-up, 25 Oct 2026).
+  // the card face. At step 1 it sits just under the next step, so the walk-through checklist is on
+  // the first phone screen while she is on the call (owner, 25 Oct 2026). "+ Add a note" lives under More about <name> › Notes (mock-up, 25 Oct 2026).
   const last = notes.length ? notes[notes.length - 1] : null;
   const noteForm = `<details class="disclose addnote" data-add-note><summary${tip('card.addNote')}>+ Add a note</summary><form class="noteform" method="post" action="/admin/requests/note">${hiddenInputs({ r: rk })}<label for="nt-${esc(rk)}">Note (only you see this)</label><textarea id="nt-${esc(rk)}" name="body" required></textarea>${act(`<button class="btn ghost" type="submit"${tip('card.noteSave')}>Save note</button>`, 'card.noteSave')}</form></details>`;
   const latest = last ? `<div class="lnote" data-latest-note><p class="lnh"><b>Latest note</b>${last.created_at ? ` <span class="muted" data-latest-note-day>${esc(memphisDay(last.created_at))}</span>` : ''}</p><p class="lnb" data-latest-note-body>${esc(last.body)}</p></div>` : '';
@@ -1473,9 +1474,10 @@ export function requestCard(r, o) {
         <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
         ${asked ? `<p class="scasked" data-asked-head>${esc(asked)}</p>` : ''}
         ${bizLine}</div>
-      ${latest}
+      ${step1 ? '' : latest}
       ${steps}
       ${nb.html}
+      ${step1 ? latest : ''}
       ${archived || pr.void ? '' : toldHtml}
       ${askHtml}
       ${after}

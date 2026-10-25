@@ -205,6 +205,16 @@ for (const [svc, row] of Object.entries(made)) {
   must((c.match(/data-more-show>More about /g) || []).length === 1 && /data-more-group="history"[\s\S]*data-add-note/.test(c) && !/data-add-note/.test(c.slice(0, c.indexOf('data-details'))), `${svc}: not ONE "More about ${first}" with + Add a note inside`);
   must(/data-step-count data-step="called" data-step-current>Step 1 of \d: call back</.test(c), `${svc}: the step bar is not "Step 1 of N: call back"`);
 }
+// 9. Step 1, with a note: the walk-through checklist comes BEFORE the latest note, so it is on the
+//    first phone screen during the call (owner, 25 Oct 2026). Off step 1 the note stays up top.
+{
+  const key = made.party.request_key;
+  const n = await s.post('/admin/requests/note', { r: s.rk(key), body: 'Needs everything done by 6pm, a long note that would push the next step below the fold on a phone' });
+  must(n.status === 303, `party: saving a note answered ${n.status}`);
+  const c = await card(key);
+  const ci = c.indexOf('data-step1-checklist'), ni = c.indexOf('data-latest-note');
+  must(ci > 0 && ni > 0 && ci < ni, `party step 1: the latest note sits above the walk-through checklist (checklist @${ci}, note @${ni})`);
+}
 // 7. Yes, book it: the ready-by time is saved, the chip turns solid, held games stay held.
 {
   const key = made.party.request_key;
