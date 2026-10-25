@@ -73,6 +73,11 @@ for (const [name, text] of Object.entries(variants)) {
 }
 must(IV.parseRow('Big tent\t$1,250.00').cents === 125000 && IV.parseRow('Big tent  300').cents === 30000 && IV.parseRow('Big tent $300').cents === 30000 && IV.parseRow('Big tent - 1,250').cents === 125000, '"$1,250.00", "300" and "$300" do not all read as prices');
 must(IV.parseRow('Two balloons "28"') === null && IV.parseRow('Call me at 5') === null && IV.parseRow('') === null, 'a row with no price separator read as a priced row');
+// A note saved before line breaks were kept: its tabbed rows ran together with spaces (shape of
+// PNP-2026-0010's line note, made-up words). It shows as its rows again, without changing data.
+const flat = IV.noteRows('Room setup (balloons, 8–12 tea lights)\t$300 Foil banner\t$25 Number balloons "28"\t$25 Total\t$350');
+must(flat.length === 4 && flat[0].item === 'Room setup (balloons, 8–12 tea lights)' && flat[0].price === '$300' && flat[2].item === 'Number balloons "28"' && flat[3].item === 'Total' && flat[3].price === '$350', `a run-together tabbed note does not split back into rows: ${JSON.stringify(flat)}`);
+must(IV.noteRows('Pick up at 5 pm sharp').length === 1 && IV.noteRows('Gate code 1234 then left').length === 1, 'a plain note row was split');
 const off = IV.parsePriceList(LIST.replace('Total    $400', 'Total    $410'));
 must(off.match === false && off.sum === 40000 && off.total.cents === 41000, `a $410 total over $400 of lines is not a mismatch: ${JSON.stringify(off)}`);
 const noTotal = IV.parsePriceList(LIST.split('\n').slice(0, 5).join('\n'));
