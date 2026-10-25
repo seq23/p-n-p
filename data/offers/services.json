@@ -71,7 +71,12 @@
       "notes": [
         "Final pricing depends on setup size, location, and design complexity.",
         "Availability is not guaranteed until your request is confirmed."
-      ]
+      ],
+      "roomSetup": {
+        "description": "Basic room setup (15 ceiling balloons, banner, petal walkway, bed design, 8–12 LED tea lights)",
+        "price": 300,
+        "provenance": "Owner-approved 2026-10-25: a party request in a hotel room, suite, Airbnb or bedroom (functions/_lib/pricing.mjs isRoomSetup) starts its auto-drafted invoice at this line instead of the \"Party decor\" starting line. New drafts only; a sent invoice is never rewritten. Guarded by scripts/validators/validate_admin_room_setup.mjs."
+      }
     },
     "grazing": {
       "name": "Grazing Tables & Styled Setups",
