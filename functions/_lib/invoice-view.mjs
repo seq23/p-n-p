@@ -46,7 +46,10 @@ export function parsePriceList(text) {
 // A note -> its rows, line breaks kept: { item, price } for a priced row, { text } otherwise
 // ({ text: '' } is a blank line between paragraphs). Leading and trailing blank rows are dropped.
 export function noteRows(note) {
-  const rows = String(note == null ? '' : note).replace(/\r\n?/g, '\n').split('\n').map((raw) => {
+  // A note saved before line breaks were kept (a one-line input, e.g. PNP-2026-0010) has its
+  // "item<TAB>$price" rows run together with spaces; each "<TAB>$price " starts a new row again.
+  const text = String(note == null ? '' : note).replace(/\r\n?/g, '\n').replace(/(\t[ \t]*\$?\s?-?\d[\d,]*(?:\.\d{1,2})?) +(?=\S)/g, '$1\n');
+  const rows = text.split('\n').map((raw) => {
     const r = parseRow(raw);
     return r ? { item: r.item, price: r.price } : { text: raw.trim() };
   });
