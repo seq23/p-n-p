@@ -80,7 +80,14 @@ async function loadInvoice(db, id) {
   return { invoice, lines: results || [] };
 }
 
-function parseInvoiceForm(form) {
+// A later day is kept; today (the default) = NULL, due now; a day already past is kept only when
+// it is the one already saved (the deposit is late), never from a stale form.
+export function depositDueFromForm(plan, value, { today = chicagoDate(), saved = null } = {}) {
+  const d = String(value || '').trim();
+  return plan === 'custom' && /^\d{4}-\d{2}-\d{2}$/.test(d) && (d > today || (saved && d === saved)) ? d : null;
+}
+
+function parseInvoiceForm(form, saved = null) {
   const lines = linesFromForm(form);
   const total = invoiceTotal(lines);
   const plan = PAY_PLANS.includes(form.get('pay_plan')) ? form.get('pay_plan') : 'half';
@@ -93,6 +100,8 @@ function parseInvoiceForm(form) {
       due_date: String(form.get('due_date') || todayISO(7)),
       pay_plan: plan,
       deposit_due_cents: amountDueNow(plan, total, toCents(form.get('deposit'))),
+      // "Deposit due by" (Other deposit only): a day after today, else NULL = due now.
+      deposit_due_date: depositDueFromForm(plan, form.get('deposit_due_date'), { saved }),
       notes: String(form.get('notes') || '').replace(/\r\n?/g, '\n').trim(),
     },
     lines,
@@ -372,9 +381,9 @@ async function createInvoice(env, request) {
   let id = null;
   for (let attempt = 0; attempt < 3 && id === null; attempt += 1) {
     try {
-      const row = await env.DB.prepare(`INSERT INTO invoices (number, request_key, customer_name, customer_email, customer_phone, issue_date, due_date, deposit_due_cents, notes, status, pay_plan, name_norm)
-        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'draft', ?10, ?11) RETURNING id`).bind(number, key, invoice.customer_name, invoice.customer_email,
-        invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, invoice.pay_plan, C.normName(invoice.customer_name)).first();
+      const row = await env.DB.prepare(`INSERT INTO invoices (number, request_key, customer_name, customer_email, customer_phone, issue_date, due_date, deposit_due_cents, notes, status, pay_plan, name_norm, deposit_due_date)
+        VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, 'draft', ?10, ?11, ?12) RETURNING id`).bind(number, key, invoice.customer_name, invoice.customer_email,
+        invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, invoice.pay_plan, C.normName(invoice.customer_name), invoice.deposit_due_date ?? null).first();
       id = row.id;
     } catch (e) {
       if (!/UNIQUE/i.test(String(e))) throw e;
@@ -403,11 +412,11 @@ function afterSaveMessage(go) {
 
 async function updateInvoice(env, request, id) {
   const form = await request.formData();
-  const { invoice, lines } = parseInvoiceForm(form);
-  const current = await env.DB.prepare('SELECT status FROM invoices WHERE id = ?1').bind(id).first();
+  const current = await env.DB.prepare('SELECT status, deposit_due_date FROM invoices WHERE id = ?1').bind(id).first();
+  const { invoice, lines } = parseInvoiceForm(form, current ? current.deposit_due_date : null);
   if (current && current.status === 'void') return redirect(`/admin/invoices/${id}?e=${encodeURIComponent('This invoice is void. Bring it back first (Payment box), then change it.')}`);
-  await env.DB.prepare(`UPDATE invoices SET customer_name=?1, customer_email=?2, customer_phone=?3, issue_date=?4, due_date=?5, deposit_due_cents=?6, notes=?7, pay_plan=?9, name_norm=?10, updated_at=datetime('now') WHERE id=?8`)
-    .bind(invoice.customer_name, invoice.customer_email, invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, id, invoice.pay_plan, C.normName(invoice.customer_name)).run();
+  await env.DB.prepare(`UPDATE invoices SET customer_name=?1, customer_email=?2, customer_phone=?3, issue_date=?4, due_date=?5, deposit_due_cents=?6, notes=?7, pay_plan=?9, name_norm=?10, deposit_due_date=?11, updated_at=datetime('now') WHERE id=?8`)
+    .bind(invoice.customer_name, invoice.customer_email, invoice.customer_phone, invoice.issue_date, invoice.due_date, invoice.deposit_due_cents, invoice.notes, id, invoice.pay_plan, C.normName(invoice.customer_name), invoice.deposit_due_date ?? null).run();
   await saveLines(env.DB, id, lines);
   // An extra game added (or removed) here is held for (or freed from) the rental's days at once.
   const rkey = (await env.DB.prepare('SELECT request_key FROM invoices WHERE id = ?1').bind(id).first() || {}).request_key;

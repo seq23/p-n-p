@@ -4,7 +4,7 @@
 // the one map in helptext.mjs, primary actions carry a visible helper line under them, every
 // screen opens with a numbered 1-2-3 and (except Requests itself) a Back link.
 import { esc, money, lineTotal, invoiceTotal, prettyDate, shortDate, STATUS_LABELS, SHEET_URL, SA_EMAIL, b64urlText, needsPrice, payPlanOf, singlePayment, autoTag } from './util.mjs';
-import { payStepsOf, payStepsHtml, payStepsLine, PAY_STEPS_CSS, dollars } from './pay-steps.mjs';
+import { payStepsOf, payStepsHtml, payStepsLine, PAY_STEPS_CSS, dollars, depositDueDate } from './pay-steps.mjs';
 import { tip, hint, stepsBar, stepsPanel, helpGlossary, STEPS } from './helptext.mjs';
 import { servicesOf, cardStage, cardButtons, cardPayment, cardDates, grazingFacts, notPaidYet, matchesFilter, serviceBadge, FILTERS, GROUP_FILTERS, inlineRowKind, SCHEDULE_FIRST, groupOf, endedMoneyWords } from './cards.mjs';
 import { HOLD_DEFAULT_HOURS } from './hold-rules.mjs';
@@ -1164,7 +1164,8 @@ function nextBox(r, s, x) {
       const key = full ? 'pay.paid' : 'pay.deposit';
       const due = inv && inv.status !== 'draft' ? dueWords(bal) : '';
       const moneyLine = due ? `<p class="why" data-next-money>Invoice sent · ${esc(due)}</p>` : '';
-      return box(full ? 'Wait for the payment' : 'Wait for the deposit', `Tap the button when the ${amt ? `${money(amt)} ` : ''}${full ? 'payment' : 'deposit'} comes in.`, `${moneyLine}${holdBit}<div class="actions" data-primary>${cardButton(key, ctx, true)}</div>`, tent, key);
+      const depBy = !full && inv && depositDueDate(inv) ? ` It is due by ${shortDate(depositDueDate(inv))}.` : '';
+      return box(full ? 'Wait for the payment' : 'Wait for the deposit', `Tap the button when the ${amt ? `${money(amt)} ` : ''}${full ? 'payment' : 'deposit'} comes in.${depBy}`, `${moneyLine}${holdBit}<div class="actions" data-primary>${cardButton(key, ctx, true)}</div>`, tent, key);
     }
     case 'setup': {
       const word = services.includes('porch') ? 'Install' : 'Setup';
@@ -1856,6 +1857,7 @@ const EDITOR_JS = `
   function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
   function lineOf(el){var d=el.querySelector('[name=line_desc]').value.trim(),q=parseFloat(el.querySelector('[data-qty]').value)||0,p=Math.round((parseFloat(el.querySelector('[data-price]').value)||0)*100);
     return {d:d,q:q,p:p,t:Math.round(q*p),r:el.querySelector('[name=line_refundable]').value==='1',n:el.querySelector('[name=line_note]').value.trim()};}
+  function dd2Val(){var e=form.querySelector('[name=deposit_due_date]');return e&&/^\\d{4}-\\d{2}-\\d{2}$/.test(e.value)&&(e.value>(form.getAttribute('data-today')||'')||e.value===e.getAttribute('data-saved'))?e.value:'';}
   function recalc(){var t=0,ref=0,missing=[];list.querySelectorAll('[data-line]').forEach(function(el){var l=lineOf(el),free=l.n==='free';
       var sd=el.querySelector('[data-l-desc]'),sn=el.querySelector('[data-l-note]'),sq=el.querySelector('[data-l-qty]'),st=el.querySelector('[data-l-total]'),th=el.querySelector('[data-l-this]'),rn=el.querySelector('[data-rm-name]');
       if(sd)sd.textContent=l.d||'New line: type what it is';if(sn){sn.textContent=l.r?(l.n?l.n+' · ':'')+'Given back after the event':(free?'':l.n);sn.hidden=!sn.textContent;}
@@ -1870,7 +1872,8 @@ const EDITOR_JS = `
     txt('sum-sofar',fmt(t));txt('sum-total',fmt(t));
     txt('plan-amt-half',dol(Math.round(t/2))+' now · '+dol(t-Math.round(t/2))+' by the due date');txt('plan-amt-full',dol(t)+' now');txt('plan-amt-none','Nothing now · all '+dol(t)+' by the due date');
     var due=form.querySelector('[name=due_date]').value,by=due?'by '+day(due):'by the due date',rows=[];
-    if(t>0&&now>=t)rows.push([1,'All of it · now',t]);else if(now<=0)rows.push([1,'All of it · '+by,t]);else rows.push([1,'Deposit · now · holds the date',now],[2,'The rest · '+by,t-now]);
+    if(t>0&&now>=t)rows.push([1,'All of it · now',t]);else if(now<=0)rows.push([1,'All of it · '+by,t]);else{var dv=p==='custom'?dd2Val():'';rows.push([1,'Deposit · '+(dv?'by '+day(dv):'now')+' · holds the date',now],[2,'The rest · '+by,t-now]);}
+    var dn=document.getElementById('dep-due-words');if(dn){var dv2=dd2Val();dn.textContent=dv2?'The deposit is due by '+day(dv2)+'.':'Today means the deposit is due now.';}
     var box=document.getElementById('pay-steps-live');
     if(box)box.innerHTML='<h3>How '+esc(who)+' pays</h3>'+(t>0&&now<=0?'<p class="none" data-no-deposit>No deposit. Nothing to pay now.</p>':'')+rows.map(function(r){return '<div class="ps" data-pay-step="'+r[0]+'"><span><span class="n">'+(r[0]===1?'①':'②')+'</span>'+esc(r[1])+'</span><strong>'+fmt(r[2])+'</strong></div>';}).join('')+(rows.length>1?'<p class="sum" data-pay-sum>'+dol(rows[0][2])+' + '+dol(rows[1][2])+' = '+dol(t)+' total</p>':'');
     txt('sum-split',ref>0?dol(t-ref)+' rental + '+dol(ref)+' refundable damage deposit':'');show('sum-split',ref>0);}
@@ -2120,12 +2123,16 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
   const priceNeeded = lines.filter((l) => l.description && needsPrice(l));
   const who = firstName(invoice.customer_name) || 'they';
   const ps = payStepsOf({ ...invoice, pay_plan: plan }, lines);
+  // "Deposit due by" (Other deposit): today = due now (stored NULL); a later day is kept.
+  const today = chicagoDate();
+  // A saved day already past stays as it is (the deposit is late), until she changes it.
+  const depDue = /^\d{4}-\d{2}-\d{2}$/.test(String(invoice.deposit_due_date || '')) && invoice.pay_plan === 'custom' ? invoice.deposit_due_date : '';
   const half = Math.round(total / 2);
   const amt = { 'plan-amt-half': `${dollars(half)} now · ${dollars(total - half)} by the due date`, 'plan-amt-full': `${dollars(total)} now`, 'plan-amt-none': `Nothing now · all ${dollars(total)} by the due date` };
   return layout(title, `<style>${EDITOR_CSS}${PAY_STEPS_CSS}</style><h1>${esc(title)}</h1>
   ${pay ? paymentWarning(pay) : ''}
   ${warnings.map((w) => `<div class="notice warn">${esc(w)}</div>`).join('')}
-  <form id="inv" class="ed" method="post" action="${esc(action)}" data-who="${esc(who)}">
+  <form id="inv" class="ed" method="post" action="${esc(action)}" data-who="${esc(who)}" data-today="${esc(today)}">
     ${request ? `<input type="hidden" name="r" value="${esc(b64urlText(request.key))}">` : ''}
     <section class="card who" data-ed-who><span class="muted">For</span> <strong>${esc(invoice.customer_name || 'No name yet')}</strong> <span class="muted">${esc(invoice.customer_email || 'no email: text them the PDF after saving')}</span>
       <details><summary${tip('ed.change')}>Change name, email or phone</summary>
@@ -2140,7 +2147,9 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
       ${addMenu(quick)}
       ${pasteBox()}</section>
     <section class="card" data-ed-plan><h2>How they pay</h2>
-      <div class="plans list">${PLAN_CHOICES.map(([v, big, id]) => `<label class="plan" data-plan-choice="${v}"><input type="radio" name="pay_plan" value="${v}"${plan === v ? ' checked' : ''}><span><strong>${big}</strong><small${id ? ` id="${id}"` : ''}>${esc(id ? amt[id] : 'You type the deposit')}</small></span></label>${v === 'custom' ? `<div id="custom-wrap"${plan === 'custom' ? '' : ' hidden'}><label for="dep">Deposit to ask for now ($)</label><input id="dep" name="deposit" type="number" step="0.01" inputmode="decimal" value="${esc((invoice.deposit_due_cents / 100).toFixed(2))}"></div>` : ''}`).join('')}</div>
+      <div class="plans list">${PLAN_CHOICES.map(([v, big, id]) => `<label class="plan" data-plan-choice="${v}"><input type="radio" name="pay_plan" value="${v}"${plan === v ? ' checked' : ''}><span><strong>${big}</strong><small${id ? ` id="${id}"` : ''}>${esc(id ? amt[id] : 'You type the deposit')}</small></span></label>${v === 'custom' ? `<div id="custom-wrap"${plan === 'custom' ? '' : ' hidden'}><label for="dep">Deposit to ask for ($)</label><input id="dep" name="deposit" type="number" step="0.01" inputmode="decimal" value="${esc((invoice.deposit_due_cents / 100).toFixed(2))}">
+        <label for="ddd"><span${tip('ed.depositDue')}>Deposit due by</span></label><input id="ddd" name="deposit_due_date" type="date" min="${esc(depDue && depDue < today ? depDue : today)}" value="${esc(depDue || today)}"${depDue ? ` data-saved="${esc(depDue)}"` : ''} data-deposit-due>
+        <p class="muted" id="dep-due-words" style="margin:6px 0 0;font-size:.92rem" data-deposit-due-words>${depDue ? `The deposit is due by ${esc(shortDate(depDue))}.` : 'Today means the deposit is due now.'}</p></div>` : ''}`).join('')}</div>
       <label for="dd">Due date</label><input id="dd" name="due_date" type="date" value="${esc(invoice.due_date)}">
       <p class="muted" style="margin:6px 0 0;font-size:.92rem">The amounts in grey update as you add lines.</p>
       <input type="hidden" name="issue_date" value="${esc(invoice.issue_date)}"></section>

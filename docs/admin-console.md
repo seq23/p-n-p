@@ -59,6 +59,13 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   The presets are defined once in `data/offers/services.json` `celebration.roomSetupPresets`; a
   rebuild after a picked preset does not add Basic or Takedown back (`reconcileRoomPreset`).
   Guarded by `validate:admin-room-setup`.
+- **Deposit due by** (owner, 25 Oct 2026): with **Other deposit** the editor shows "Deposit due by"
+  (a date, default today = due now). A later day is stored in `invoices.deposit_due_date`
+  (migration 0025, additive; NULL = due now, every older invoice). `pay-steps.mjs payStepsOf` words
+  it once for every surface: "① Deposit · by Fri 30 Oct · holds the date" (admin) / "Deposit, due by
+  Fri 30 Oct (holds your date)" (emails, PDF, text); the rest stays by the due date. Not paid yet
+  (`notpaid.mjs nextDue`, feeding Money, the 7 AM email and reminders) is never late before that
+  day. Guarded by `validate:admin-deposit-due`.
 - **What we sent ✉** (owner, 25 Oct 2026): every real invoice email keeps its exact HTML, text and
   the PDF as it read then, with from / to / Bcc / time, in the private R2 bucket pnp-receipts under
   `sent-invoices/<id>/<stamp>/`, listed in D1 `invoice_sent_copies` (migration 0024, additive).
