@@ -23,6 +23,7 @@ import * as VM2 from './views-messages.mjs';
 import { hasEmail } from './reminders.mjs';
 import { PRICE_TABLE, TRACK_TABLE, CONTACT } from './prices.mjs';
 import { renderInvoicePdf, textMessage } from './pdf.mjs';
+import { keepSentCopy, sentCopies, sentCopy, sentFile } from './sent-copies.mjs';
 import { prefillLines, porchPrefill, isRentalInvoice } from './pricing.mjs';
 import { pickupNote, businessDelivery } from './invoice-note.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
@@ -92,7 +93,7 @@ function parseInvoiceForm(form) {
       due_date: String(form.get('due_date') || todayISO(7)),
       pay_plan: plan,
       deposit_due_cents: amountDueNow(plan, total, toCents(form.get('deposit'))),
-      notes: String(form.get('notes') || '').trim(),
+      notes: String(form.get('notes') || '').replace(/\r\n?/g, '\n').trim(),
     },
     lines,
   };
@@ -430,6 +431,11 @@ async function noteFor(env, invoice, lines, { view = false } = {}) {
   return pickupNote(lines, PRICE_TABLE, { invoice, paidCents: paid, delivery: businessDelivery(req), view });
 }
 
+// The invoice PDF as it reads now: the /invoice.pdf route and the copy kept when it is emailed.
+async function invoicePdf(env, invoice, lines, settings) {
+  return renderInvoicePdf({ invoice, lines, settings, contact: CONTACT, pickup: await noteFor(env, invoice, lines), ...(await paidFor(env, invoice)) });
+}
+
 async function emailParts(env, invoice, lines, settings, forPreview) {
   const qrSrc = settings.qr_png ? (forPreview ? '/api/admin/qr.png' : 'cid:pnp-payment-qr') : null;
   const rendered = renderInvoiceEmail({ invoice, lines, settings, contact: CONTACT, qrSrc, pickup: await noteFor(env, invoice, lines), ...(await paidFor(env, invoice)) });
@@ -467,6 +473,10 @@ async function deliver(env, id, test) {
   } catch (e) { out = { ok: false, error: String(e && e.message ? e.message : e) }; }
   if (!out.ok) return { ok: false, error: `The email did not go out. Nothing was changed; please try again in a minute. (${out.error || 'no answer'})` };
   if (test) return { ok: true, message: `Test copy sent ✓ to ${FROM_EMAIL}` };
+  // Keep the exact copy (sent-copies.mjs): the HTML and text the mailer got, and the PDF as it reads now.
+  let pdfBytes = null;
+  try { pdfBytes = await invoicePdf(env, invoice, lines, settings); } catch (e) { console.error('sent copy pdf', e && e.message); }
+  await keepSentCopy(env, { invoiceId: id, payload, pdfBytes });
   const status = invoice.status === 'draft' ? 'sent' : invoice.status;
   await env.DB.prepare("UPDATE invoices SET status=?1, sent_at=datetime('now'), updated_at=datetime('now') WHERE id=?2").bind(status, id).run();
   if (invoice.request_key && invoice.status === 'draft') await setRequestStatus(env.DB, invoice.request_key, 'invoiced', id);
@@ -1052,7 +1062,7 @@ async function routeAdmin(context) {
         const balance = (await balances(env.DB))[id];
         if (balance) Object.assign(balance, await depositHeld(env.DB, id));
         const payments = (await paymentsByInvoice(env.DB))[id] || [];
-        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pickup, balance, payments, pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
+        return htmlResponse(V.invoiceViewPage({ ...loaded, emailHtml, smsText, pickup, balance, payments, sentCopies: await sentCopies(env.DB, id), pay: paymentStatus(settings), flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '' }));
       }
       if (segs[2] === 'edit' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
@@ -1063,13 +1073,26 @@ async function routeAdmin(context) {
           action: `/admin/invoices/${id}`, title: `Change invoice for ${V.firstName(loaded.invoice.customer_name)}`, pay, mode: 'edit', quick, backHref: loaded.invoice.request_key ? `/admin/#c-${b64urlText(loaded.invoice.request_key)}` : '/admin/' }));
       }
       if (segs.length === 2 && method === 'POST') return updateInvoice(env, request, id);
+      if (segs[2] === 'sent' && /^\d+$/.test(segs[3] || '') && method === 'GET') {
+        const loaded = await loadInvoice(env.DB, id);
+        const copy = loaded ? await sentCopy(env, id, Number(segs[3])) : null;
+        if (!copy) return htmlResponse(V.layout('Not found', '<p>No such copy.</p>', { screen: 'notfound', back: { href: `/admin/invoices/${id}`, label: 'Back to the invoice' } }), 404);
+        if (segs[4] === 'invoice.pdf') {
+          const pdf = await sentFile(env, copy, 'invoice.pdf');
+          return pdf ? new Response(pdf, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `inline; filename="Porch-and-Party-Invoice-${loaded.invoice.number}-as-sent.pdf"`, 'Cache-Control': 'no-store' } }) : htmlResponse('Not found', 404);
+        }
+        const dec = new TextDecoder();
+        const html = await sentFile(env, copy, 'email.html'); const text = await sentFile(env, copy, 'email.txt');
+        const hasPdf = Boolean(await sentFile(env, copy, 'invoice.pdf'));
+        return htmlResponse(V.sentCopyPage({ invoice: loaded.invoice, copy, html: html ? dec.decode(html) : '', text: text ? dec.decode(text) : '', hasPdf }));
+      }
       if (segs[2] === 'send' && method === 'POST') return sendInvoice(env, request, id);
       if (segs[2] === 'status' && method === 'POST') return changeStatus(env, request, id);
       if (segs[2] === 'deposit' && method === 'POST') return AM.depositOutcome(env, request, id);
       if (segs[2] === 'invoice.pdf' && method === 'GET') {
         const loaded = await loadInvoice(env.DB, id);
         if (!loaded) return htmlResponse('Not found', 404);
-        const bytes = await renderInvoicePdf({ invoice: loaded.invoice, lines: loaded.lines, settings: await getSettings(env.DB), contact: CONTACT, pickup: await noteFor(env, loaded.invoice, loaded.lines), ...(await paidFor(env, loaded.invoice)) });
+        const bytes = await invoicePdf(env, loaded.invoice, loaded.lines, await getSettings(env.DB));
         const filename = `Porch-and-Party-Invoice-${loaded.invoice.number}.pdf`;
         return new Response(bytes, { headers: { 'Content-Type': 'application/pdf', 'Content-Disposition': `${url.searchParams.get('dl') === '1' ? 'attachment' : 'inline'}; filename="${filename}"`, 'Cache-Control': 'no-store' } });
       }

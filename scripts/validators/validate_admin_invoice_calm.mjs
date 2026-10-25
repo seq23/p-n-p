@@ -244,11 +244,19 @@ must(PS.payStepsOf({ ...inv5, pay_plan: 'custom', deposit_due_cents: 0 }, lines5
 // A row from before 'none' existed keeps its plan.
 must(s.util.payPlanOf({ pay_plan: 'half', deposit_due_cents: 0 }, 1000) === 'half' && s.util.payPlanOf({ pay_plan: 'custom', deposit_due_cents: 0 }, 1000) === 'custom', 'an existing invoice changed plan');
 
+// The editor keeps every ability and adds the itemized-list tools (owner, 25 Oct 2026;
+// validate:admin-invoice-lists pins them in depth): a multi-line note per line, "📋 Paste a
+// list", and a full-width invoice note.
+const edNow = (await s.get('/admin/invoices/new')).text;
+must(/<textarea name="line_note" rows="3"/.test(edNow) && !/<input name="line_note"/.test(edNow), 'the line note is a one-line input again');
+must(edNow.includes('📋 Paste a list') && edNow.includes('Save these lines') && /<textarea id="nt" name="notes" rows="6"/.test(edNow), 'the editor lost 📋 Paste a list or the full-width invoice note');
+must((edNow.match(/class="btn primary/g) || []).length === 2, 'the editor has more than its two big buttons (＋ Add something, Send invoice)');
+
 // ---- 8. Migration 0020 is additive only ----------------------------------------------------
 const mig = fs.readFileSync(path.join(ROOT, 'migrations/0020_invoice_auto_draft.sql'), 'utf8').replace(/--.*$/gm, '');
 const stmts = mig.split(';').map((x) => x.trim()).filter(Boolean);
 must(stmts.length === 2 && stmts.every((x) => /^ALTER TABLE (invoices|invoice_lines) ADD COLUMN \w+ (INTEGER|TEXT)$/.test(x)), `migration 0020 is not two nullable ADD COLUMNs: ${stmts.join(' / ')}`);
 
-if (checks < 75) errors.push(`Rule 0: only ${checks} checks ran`);
+if (checks < 82) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) { console.error(`VALIDATION FAIL: calm invoices (${errors.length} of ${checks})\n - ${errors.join('\n - ')}`); process.exit(1); }
 console.log(`calm invoices: OK (${checks} checks: auto draft on website + phone requests, one per request, failure keeps the request, no backfill, drafts never owed, card draft box, rebuild keeps hand lines + leaves sent/void alone, editor ✏️ Change / Done / Remove… / ＋ Add list / NEW LINE, numbered payments with paid steps, #4/#5 shapes unchanged, additive migration)`);

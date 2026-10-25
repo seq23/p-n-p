@@ -2,12 +2,21 @@
 // (cream #faf7f2, ink #3b302a, accent #c46e4e; Cormorant Garamond / Inter with
 // safe fallbacks) plus a plain-text twin. The QR code rides as an inline CID
 // attachment: Gmail strips data: URIs from <img>, CID images render.
-import { esc, money, lineTotal, invoiceTotal, prettyDate, FROM_EMAIL } from './util.mjs';
+import { esc, money, invoiceTotal, prettyDate, FROM_EMAIL } from './util.mjs';
 import { payStepsOf, customerSteps } from './pay-steps.mjs';
+import { invoiceView, linesText, noteRowsText } from './invoice-view.mjs';
 
 const C = { cream: '#faf7f2', ink: '#3b302a', accent: '#c46e4e', line: '#e8dfd4', muted: '#7a6b60' };
 const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
 const SANS = "Inter, 'Helvetica Neue', Arial, sans-serif";
+
+// Note rows as email HTML: a priced row is a two-cell row (item left, price right, both wrap
+// safely); a plain row is its own line; a blank row is a small gap.
+function noteHtml(rows) {
+  return rows.map((r) => (r.item
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:1px 12px 1px 0;font-family:${SANS};font-size:inherit;color:inherit;vertical-align:top;word-break:break-word;overflow-wrap:anywhere;">${esc(r.item)}</td><td align="right" style="padding:1px 0;font-family:${SANS};font-size:inherit;color:inherit;white-space:nowrap;vertical-align:top;">${esc(r.price)}</td></tr></table>`
+    : (r.text ? `<div style="word-break:break-word;overflow-wrap:anywhere;">${esc(r.text)}</div>` : '<div style="height:8px;line-height:8px;">&nbsp;</div>'))).join('');
+}
 
 export function paymentStatus(settings) {
   const missing = [];
@@ -35,14 +44,17 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
   const phone = contact && contact.telephoneDisplay ? contact.telephoneDisplay : '';
   const tag = cashtag(settings.cashapp);
 
-  const rows = lines.map((l) => `
+  // Lines from the one view model (invoice-view.mjs): long names wrap, the price stays on the
+  // right, a line's note keeps its line breaks and its "item  $price" rows line up.
+  const view = invoiceView({ invoice, lines });
+  const rows = view.rows.map((r) => `
       <tr>
-        <td style="padding:12px 0;border-bottom:1px solid ${C.line};font-family:${SANS};font-size:15px;color:${C.ink};">
-          ${esc(l.description)}${Number(l.qty) !== 1 ? ` <span style="color:${C.muted};">&times; ${esc(l.qty)}</span>` : ''}
-          ${l.refundable ? `<div style="font-size:12px;color:${C.accent};margin-top:2px;">Given back after the event</div>` : ''}
-          ${l.note && l.note !== 'free' ? `<div style="font-size:12px;color:${C.muted};margin-top:2px;">${esc(l.note)}</div>` : ''}
+        <td style="padding:12px 12px 12px 0;border-bottom:1px solid ${C.line};font-family:${SANS};font-size:15px;color:${C.ink};vertical-align:top;word-break:break-word;overflow-wrap:anywhere;" data-line-desc>
+          ${esc(r.description)}${r.qty ? ` <span style="color:${C.muted};">&times; ${esc(r.qty)}</span>` : ''}
+          ${r.refundable ? `<div style="font-size:12px;color:${C.accent};margin-top:2px;">Given back after the event</div>` : ''}
+          ${r.note.length ? `<div style="font-size:13px;color:${C.muted};margin-top:4px;" data-line-note>${noteHtml(r.note)}</div>` : ''}
         </td>
-        <td align="right" style="padding:12px 0;border-bottom:1px solid ${C.line};font-family:${SANS};font-size:15px;color:${C.ink};white-space:nowrap;">${lineTotal(l) === 0 ? 'Free' : money(lineTotal(l))}</td>
+        <td align="right" style="padding:12px 0;border-bottom:1px solid ${C.line};font-family:${SANS};font-size:15px;color:${C.ink};white-space:nowrap;vertical-align:top;">${esc(r.amount)}</td>
       </tr>`).join('');
 
   const payItems = [];
@@ -92,7 +104,7 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
     <div style="font-family:${SERIF};font-size:20px;font-weight:600;margin:8px 0;">How to pay</div>
     ${payItems.join('')}${qr}${coming}
     <div style="margin-top:10px;font-size:13px;color:${C.muted};">Please put ${esc(invoice.number)} in the payment note.</div>
-    ${invoice.notes ? `<div style="margin-top:16px;padding-top:12px;border-top:1px solid ${C.line};">${esc(invoice.notes).replace(/\n/g, '<br>')}</div>` : ''}
+    ${view.notes.length ? `<div style="margin-top:16px;padding-top:12px;border-top:1px solid ${C.line};" data-invoice-notes>${noteHtml(view.notes)}</div>` : ''}
   </td></tr>
   <tr><td style="padding:16px 24px 24px;border-top:1px solid ${C.line};font-family:${SANS};font-size:12px;color:${C.muted};line-height:1.6;">
     ${esc(business)} &middot; ${esc(footerLine)}<br>
@@ -104,7 +116,7 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
     `${business} - Invoice ${invoice.number}`,
     `Issued ${prettyDate(invoice.issue_date)} - Due ${prettyDate(invoice.due_date)}`,
     '',
-    ...lines.map((l) => `${l.description}${Number(l.qty) !== 1 ? ` x ${l.qty}` : ''}${l.refundable ? ' (given back after the event)' : ''}: ${lineTotal(l) === 0 ? 'Free' : money(lineTotal(l))}`),
+    linesText(view, { refundableWords: '(given back after the event)' }),
     '',
     `Total: ${money(total)}`,
     ...(cs.totalWords ? [cs.totalWords] : []),
@@ -121,7 +133,7 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
     ...(tag ? [`Cash App: ${tag}`] : []),
     ...(pay.complete ? [] : ['Payment details coming. We will follow up with how to pay.']),
     `Please put ${invoice.number} in the payment note.`,
-    ...(invoice.notes ? ['', invoice.notes] : []),
+    ...(view.notes.length ? ['', noteRowsText(view.notes)] : []),
     '',
     `${business} - ${footerLine}`,
     `Questions? Reply to this email or write ${FROM_EMAIL}.`,
