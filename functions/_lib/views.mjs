@@ -24,6 +24,7 @@ import { dayWords, chicagoDate } from './reminders.mjs';
 import { idRowState, KEEP_CHOICES, ID_AUTO_DAYS } from './id-auto.mjs';
 import { quickMenu, QT_CSS, QT_JS } from './views-quick-texts.mjs';
 import { shortName } from './requested.mjs';
+import { toldFacts, stillToAsk, questionsText, questionsSms, askedWords } from './card-told.mjs';
 
 const CSS = `
 :root{--cream:#faf7f2;--ink:#3b302a;--accent:#b85f40;--line:#e3d8cb;--muted:#5f5148;--card:#fff;--ok:#3f6b3a;--warn:#8a5212}
@@ -247,12 +248,10 @@ export function firstName(name) {
   return String(name || '').trim().split(/\s+/)[0] || 'the customer';
 }
 
+// "Asked Sun 25 Oct, 12:06 PM · 2 hours ago" (Memphis; card-told.mjs askedWords). The card header
+// shows it under the event line on every card (owner, 25 Oct 2026); More keeps it too.
 function friendlyWhen(r) {
-  if (!r.sortTime) return r.timestamp || '';
-  const d = new Date(r.sortTime);
-  const date = d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: 'UTC' });
-  const time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'UTC' });
-  return `Asked ${date}, ${time}`;
+  return askedWords(r);
 }
 
 function answerOf(r, re) {
@@ -516,7 +515,7 @@ function memphisDay(utc) {
 const SHOWN_ELSEWHERE = /^(business delivery|business name|delivery address)$/i;
 
 // Group 3: their details and ID. used: the answer labels the other groups already show.
-function detailsGroupBody(r, rk, { referrers = {}, used = new Set(), archived = false, st = {} } = {}) {
+function detailsGroupBody(r, rk, { referrers = {}, used = new Set(), archived = false, st = {}, answers = true } = {}) {
   const other = [...r.rentals, ...r.decor, ...r.other].filter((x) => !used.has(x.label) && !SHOWN_ELSEWHERE.test(String(x.label || '')));
   const rules = rulesLine(r);
   const robot = r.robotCheck === 'no-js' ? '<p class="gl warnline" data-robot-check>⚠ Sent without the robot check (their phone had JavaScript off). Check it looks real.</p>' : '';
@@ -531,7 +530,7 @@ function detailsGroupBody(r, rk, { referrers = {}, used = new Set(), archived = 
     ])}${asked}${rules}${robot}
     ${(() => { const id = idCell(r, rk); return id ? `<div class="gl" data-id-cell><b>${r.idDeletedAuto && r.idDeletedAt ? 'ID' : 'Photo ID'}:</b> ${id}</div>` : ''; })()}
     ${deleteIdStep(r, rk)}
-    ${other.length ? `<div data-other-answers><h4>Other answers</h4>${kv(other.map((x) => [x.label, answerWords(x.value)]))}</div>` : ''}</div>`;
+    ${answers && other.length ? `<div data-other-answers><h4>Other answers</h4>${kv(other.map((x) => [x.label, answerWords(x.value)]))}</div>` : ''}</div>`;
 }
 
 // Top of the main page: a thin banner, nothing to open (owner-approved mock-up, 20 Oct 2026).
@@ -747,13 +746,12 @@ export function quickContact(r) {
 const CARD_LABEL = {
   'card.createInvoice': 'Create invoice', 'card.openInvoice': 'Open invoice', 'card.seeCal': 'See it on the calendar',
   'card.checklist': 'Walk-through checklist', 'card.printChecklist': 'Print checklist', 'ret.mark': 'Mark returned', 'ret.see': 'See the check-in',
-  'card.schedInstall': 'Schedule install', 'card.schedSetup': 'Schedule setup', 'card.schedPickup': 'Schedule pickup + return',
   'td.markDone': 'Mark takedown done',
 };
 
 // One button from the rules table. ctx: { rk, inv, st, sched, payTarget, who, plan }.
 function cardButton(keyKind, ctx, primary, { helper = true } = {}) {
-  const [key, kind] = keyKind.split('|');
+  const [key] = keyKind.split('|');
   const cls = primary ? 'btn primary' : 'btn ghost';
   const wrap = (html) => (primary ? act(html, key) : `<div class="act">${html}</div>`);
   const a = (href, label, extra = '') => wrap(`<a class="${cls}" href="${esc(href)}"${extra}${tip(key)}>${esc(label)}</a>`);
@@ -766,8 +764,6 @@ function cardButton(keyKind, ctx, primary, { helper = true } = {}) {
     case 'card.printChecklist': return a(`/admin/checklist?r=${rk}`, CARD_LABEL[key], ' target="_blank" rel="noopener"');
     case 'ret.mark': case 'ret.see': return a(`/admin/returns?k=${rk}`, CARD_LABEL[key]);
     case 'msg.pickupText': { const m = ctx.msgs && ctx.msgs.pickup; return m && m.sms ? a(m.sms.href, 'Text about pickup time', ` data-msg-tap="pickupTime" data-rk="${esc(rk)}"`) : ''; }
-    case 'card.schedInstall': case 'card.schedSetup': case 'card.schedPickup':
-      return a(`/admin/calendar/new?r=${rk}&kind=${kind}`, CARD_LABEL[key]);
     case 'td.markDone': return ctx.td && ctx.td.booking ? `<form method="post" action="/admin/calendar/bookings/${ctx.td.booking.id}/takedown-done">${wrap(`<button class="${cls}" type="submit"${tip(key)}>Mark takedown done</button>`)}</form>` : '';
     case 'card.jobDone':
       // Takedown not decided yet: ask once, at the moment of Job done; never blocks it.
@@ -963,6 +959,22 @@ details.disclose>summary:focus-visible,details.grp>summary:focus-visible{outline
 .dlform .btn{min-height:48px}
 details.dlprompt>summary{display:inline-flex;align-items:center;min-height:44px;color:#1e3a8a;font-weight:700;text-decoration:underline;cursor:pointer;list-style:none}
 @media(min-width:700px){.nextbox .actions .btn.primary{max-width:420px}}
+.scprog{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.scprog .scof{margin:0;padding:3px 12px;border-radius:999px;background:var(--cream);border:1.5px solid var(--accent);color:var(--accent);font-weight:700;font-size:.95rem}
+.scprog .sclist{display:contents}.scprog .sclist li{padding:3px 10px;border-radius:999px;background:#e7f3ea;color:#2f5a2b;font-size:.9rem;gap:6px}.scprog .sclist li .ck{width:auto;height:auto;border:0;background:none;color:#2f5a2b}.scprog .sclist li.d .t{color:#2f5a2b}
+.scasked{margin:0;color:var(--muted);font-size:.95rem}
+.btn.big{min-height:56px;font-size:1.08rem;font-weight:700}
+.told{background:#fbf7f1;border:1px solid var(--line);border-radius:12px;padding:10px 12px}.told dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0}
+.told dt{color:var(--muted)}.told dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.tlbl{margin:0 0 6px;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.askchips{display:flex;flex-wrap:wrap;gap:6px}.askchip{display:inline-block;padding:4px 12px;border-radius:999px;border:1.5px solid var(--accent);color:var(--accent);background:#fff;font-weight:700;font-size:.92rem}
+.aftercall .talkbox{border-width:1.5px}.talkrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}.talkrow form{margin:0}.talkrow .btn{width:100%;min-height:48px}
+.bkday{margin:0;font-size:1.02rem}details.bkchg>summary{display:inline-flex;align-items:center;min-height:40px;color:var(--accent);font-weight:700;text-decoration:underline;cursor:pointer;list-style:none}
+details.bkchg>summary::-webkit-details-marker{display:none}details.bkchg[open]>summary{margin-bottom:4px}.bkin{display:grid;gap:6px}.talkbox input[type=time]{min-height:48px;font-size:1.05rem}
+details.disclose.more>summary{flex-wrap:wrap}.msub{flex-basis:100%;font-weight:400;color:var(--muted);font-size:.9rem;order:3}
+.mgrp{padding:10px 0 0;border-top:1px solid var(--line);margin-top:10px}.mgrp:first-of-type{border-top:0}.mgh{margin:0 0 6px;font-size:1.05rem}.mgh small{font-weight:400;color:var(--muted);font-size:.88rem}
+.cardfoot{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 12px;border-top:1px solid var(--line);padding-top:10px}
+.cardfoot .cxrow{margin:0;padding:0;border:0;margin-left:auto}.cardfoot .cxrow:has(details[open]){flex-basis:100%;margin-left:0}
+.footinv{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font-size:1rem}.footinv .btn{width:auto;min-height:44px;padding:6px 14px}
 `;
 
 const wdOf = (d) => shortDate(d).split(' ')[0];
@@ -984,16 +996,27 @@ function whenLine(r, services, bookings) {
   return [first ? shortDate(first) : '', tail].filter(Boolean).join(' · ');
 }
 
-// The checklist with the one undo beside the last ✓.
-function stepList(s, undo, ctx) {
-  const pct = s.total ? Math.round((100 * s.doneCount) / s.total) : 0;
-  const items = s.steps.map((x) => {
-    const cls = x.done ? 'd' : (x.key === s.current ? 'c' : 'u');
+// The short step bar (owner-approved mock-up, 25 Oct 2026): "Step N of M: <what>", then a green
+// chip only for each step already settled, with the one undo beside the last ✓. Steps still to
+// come are not drawn.
+export const STEP_NOW = {
+  called: 'call back', invoiced: 'send the invoice', deposit: 'wait for the deposit', setup: 'setup day',
+  takedown: 'takedown', pickup: 'pickup (optional)', picked: 'pickup', returned: 'games back', deposit_back: 'give back the deposit', paid: 'collect the rest',
+};
+export function stepNowWords(s, services = []) {
+  if (s.finished) return 'Finished ✓';
+  const cur = s.steps.find((x) => x.key === s.current);
+  if (!cur) return `${s.doneCount} of ${s.total} done`;
+  const what = s.current === 'setup' && services.includes('porch') ? 'install day' : (STEP_NOW[s.current] || cur.label.toLowerCase());
+  return `Step ${cur.n} of ${s.total}: ${what}`;
+}
+function stepList(s, undo, ctx, services = []) {
+  const items = s.steps.filter((x) => x.done).map((x) => {
     const u = undo && s.lastDone && s.lastDone.key === x.key ? undoHtml(undo, ctx) : '';
-    return `<li class="${cls}" data-step="${esc(x.key)}"${x.done ? ' data-step-done' : ''}${x.key === s.current ? ' data-step-current' : ''}><span class="ck" aria-hidden="true">${x.done ? '✓' : x.n}</span><span class="t">${esc(x.label)}${x.done ? '<span class="sr"> (done)</span>' : ''}</span>${u}</li>`;
+    return `<li class="d" data-step="${esc(x.key)}" data-step-done><span class="ck" aria-hidden="true">✓</span><span class="t">${esc(x.label)}<span class="sr"> (done)</span></span>${u}</li>`;
   }).join('');
-  return `<div class="scprog" data-step-progress><div class="scbar" role="progressbar" aria-valuemin="0" aria-valuemax="${s.total}" aria-valuenow="${s.doneCount}" aria-label="Steps done"><i style="width:${pct}%"></i></div>
-    <p class="scof" data-step-count>${s.finished ? 'Finished ✓' : `${s.doneCount} of ${s.total} done`}</p><ol class="sclist" data-progress data-step-list>${items}</ol></div>`;
+  const cur = s.finished ? '' : (s.steps.find((x) => x.key === s.current) || null);
+  return `<div class="scprog" data-step-progress><p class="scof" data-step-count${cur ? ` data-step="${esc(cur.key)}" data-step-current` : ''}>${esc(stepNowWords(s, services))}</p>${items ? `<ol class="sclist" data-progress data-step-list>${items}</ol>` : ''}</div>`;
 }
 
 function undoHtml(u, ctx) {
@@ -1014,27 +1037,50 @@ function undoHtml(u, ctx) {
 // label "Book it", an id prefix (two copies on one page) and back= so she stays on the calendar.
 export function bookYesForm(r, { rk, services, bookings }, { label = 'Yes, book it', idp = 't', back = '', key = 'step.bookYes' } = {}) {
   const rentalsOnly = services.length === 1 && services[0] === 'rentals';
-  let dates;
+  // The day(s) read as words "from the request", with a small "change" that opens the date box
+  // (open already when a day is missing, so a required box is never hidden). Then the optional
+  // ready-by / pickup time (owner-approved mock-up, 25 Oct 2026).
+  const parts = [];
+  const words = [];
+  let missing = false;
+  let timeNow = '';
   if (services.includes('rentals')) {
     const { pickup, ret } = rentalDates(r, bookings);
-    dates = `<label for="${idp}p-${esc(rk)}">Pickup day</label><input type="date" id="${idp}p-${esc(rk)}" name="date" value="${esc(pickup || '')}" required${tip('step.date')}>
-      <label for="${idp}r-${esc(rk)}">Return day</label><input type="date" id="${idp}r-${esc(rk)}" name="return_date" value="${esc(ret || '')}" required${tip('step.date')}>`;
+    if (!pickup || !ret) missing = true;
+    words.push(`Pick up <b>${esc(pickup ? shortDate(pickup) : 'not set')}</b> · back <b>${esc(ret ? shortDate(ret) : 'not set')}</b>`);
+    parts.push(`<label for="${idp}p-${esc(rk)}">Pickup day</label><input type="date" id="${idp}p-${esc(rk)}" name="date" value="${esc(pickup || '')}" required${tip('step.date')}>
+      <label for="${idp}r-${esc(rk)}">Return day</label><input type="date" id="${idp}r-${esc(rk)}" name="return_date" value="${esc(ret || '')}" required${tip('step.date')}>`);
+    timeNow = ((bookings || []).find((b) => b.kind === 'rental_pickup') || {}).time || '';
   }
   if (!rentalsOnly) {
-    const first = services.filter((k) => k !== 'rentals').map((k) => ((bookings || []).find((b) => b.kind === SCHEDULE_FIRST[k][1]) || {}).date).filter(Boolean).sort()[0] || parseFormDate(answerOf(r, /event date/i));
+    const firstB = services.filter((k) => k !== 'rentals').map((k) => (bookings || []).find((b) => b.kind === SCHEDULE_FIRST[k][1])).filter(Boolean).sort((a, b) => String(a.date).localeCompare(String(b.date)))[0] || null;
+    const first = (firstB && firstB.date) || parseFormDate(answerOf(r, /event date/i));
     const word = services.includes('porch') ? 'Install day' : 'Setup day';
-    dates = `${dates || ''}<label for="${idp}e-${esc(rk)}">${word}</label><input type="date" id="${idp}e-${esc(rk)}" name="${services.includes('rentals') ? 'event_date' : 'date'}" value="${esc(first || '')}" required${tip('step.date')}>`;
+    if (!first) missing = true;
+    words.push(`${word}: <b>${esc(first ? shortDate(first) : 'not set')}</b>`);
+    parts.push(`<label for="${idp}e-${esc(rk)}">${word}</label><input type="date" id="${idp}e-${esc(rk)}" name="${services.includes('rentals') ? 'event_date' : 'date'}" value="${esc(first || '')}" required${tip('step.date')}>`);
+    timeNow = (firstB && firstB.time) || '';
   }
-  return `<form method="post" action="/admin/requests/talked" data-talk-yes>${hiddenInputs({ r: rk, go: 'yes', ...(back ? { back } : {}) })}${dates}<button class="btn yes" type="submit"${tip(key)}>${esc(label)}</button></form>`;
+  const timeWord = rentalsOnly ? 'Pickup time (optional)' : 'Ready by (time, optional)';
+  const time = `<label for="${idp}t-${esc(rk)}">${timeWord}</label><input type="time" id="${idp}t-${esc(rk)}" name="time" value="${esc(timeNow)}"${tip('step.bookTime')}>`;
+  return `<form method="post" action="/admin/requests/talked" data-talk-yes>${hiddenInputs({ r: rk, go: 'yes', ...(back ? { back } : {}) })}
+    <p class="bkday" data-book-day>${words.join(' · ')} <span class="muted">${missing ? '(pick the day below)' : '(from the request)'}</span></p>
+    <details class="bkchg" data-book-change${missing ? ' open' : ''}><summary${tip('step.bookChange')}>change</summary><span class="bkin">${parts.join('')}</span></details>
+    ${time}<button class="btn yes" type="submit"${tip(key)}>${esc(label)}</button></form>`;
 }
 
-// "Are you taking this job?" Yes, book it (the date editable right here) / Not yet / No, put it away.
-function talkBox(r, s, x, { withNo = true } = {}) {
+// "After the call: are you taking this job?" Yes, book it (the day from the request, a ready-by
+// time, "change" for the day) / Not yet / No, put it away. Inline on the card, never a dropdown
+// (owner-approved mock-up, 25 Oct 2026). The same box is the "Book it now" panel on later steps.
+function talkBox(r, s, x, { withNo = true, q = 'Are you taking this job?' } = {}) {
   const { rk } = x;
   const yes = bookYesForm(r, x);
   const later = `<form method="post" action="/admin/requests/talked">${hiddenInputs({ r: rk, go: 'later' })}<button class="btn ghost" type="submit"${tip('step.notYet')}>Not yet</button></form>`;
   const no = withNo ? `<form method="post" action="/admin/requests/talked">${hiddenInputs({ r: rk, go: 'no' })}<button class="btn danger" type="submit"${tip('step.putAwayNo')}>No, put it away</button></form>` : '';
-  return `<div class="talkbox" data-talk-box><p class="q"><strong>Are you taking this job?</strong></p>${yes}${s.called ? '' : later}${no}</div>`;
+  return `<div class="talkbox" data-talk-box>${q === 'Are you taking this job?' ? `<p class="q"><strong>${esc(q)}</strong></p>` : `<div class="q"${tip('step.talked')}><strong>${esc(q)}</strong></div>`}${yes}<div class="talkrow">${s.called ? '' : later}${no}</div></div>`;
+}
+export function afterCallBox(r, s, x) {
+  return `<section class="aftercall" data-after-call data-talk>${talkBox(r, s, x, { q: 'After the call: are you taking this job?' })}${hint('step.talked')}</section>`;
 }
 
 const holdUntilWords = (h) => {
@@ -1052,15 +1098,6 @@ export function draftWords(r, inv) {
   const who = firstName(r && r.name);
   return { what: `📄 Invoice draft ready: ${money(total)}`, why: `${inv.auto_draft ? `Made from ${who ? `${who}'s` : 'their'} request. ` : ''}Nothing has been sent. Check the price, then send.` };
 }
-// The same words on the card face while another step is the next one (one big button only: this
-// one is outlined), so the draft is never hidden under More.
-export const DRAFT_CSS = `.draftready{margin:10px 0;padding:10px 12px;border:1.5px solid #b9cfe8;border-left-width:6px;border-radius:10px;background:#eef4fb}
-.draftready .dw{margin:0;font-weight:700;color:#1f3b5c;font-size:1.05rem}.draftready .dy{margin:2px 0 8px;font-size:.95rem}.draftready .btn{width:100%}`;
-function draftNotice(r, inv) {
-  const d = draftWords(r, inv);
-  return `<section class="draftready" data-draft-ready><p class="dw" data-draft-what>${esc(d.what)}</p><p class="dy">${esc(d.why)}</p>${act(`<a class="btn ghost" href="/admin/invoices/${inv.id}/edit"${tip('card.checkDraft')}>Check and send the invoice</a>`, 'card.checkDraft')}</section>`;
-}
-
 // The ONE next-step box. -> { html, big } (big = the help key of its one big button, or '').
 function nextBox(r, s, x) {
   const { rk, services, inv, ctx, dates, bookings, tdS, hold, holdHtml, pickupPlace, today } = x;
@@ -1086,14 +1123,23 @@ function nextBox(r, s, x) {
       return { big: 'card.markDone', html: `<section class="nextbox" data-next-step="finished"><p class="done-msg" data-put-away-prompt>Everything is finished</p><p class="why" data-finished-facts>${esc(facts.join(', '))}.</p><div class="actions" data-primary>${cardButton('card.markDone', ctx, true)}</div><div class="secrow" data-finished-putaway>${cardButton('card.archive', ctx, false)}</div></section>` };
     }
     case 'called': {
-      const tel = r.phone ? `<a class="btn ghost" href="tel:${esc(String(r.phone).replace(/[^\d+]/g, ''))}"${tip('step.call')}>Call</a>` : '';
-      const sms = r.phone ? `<a class="btn ghost" href="sms:${esc(String(r.phone).replace(/[^\d+]/g, ''))}"${tip('step.text')}>Text</a>` : '';
-      const why = rentalsOnly ? 'Confirm the games and the date. If you already talked, tap the button.' : 'Talk about what they want and the date. If you already talked, tap the button.';
+      // Step 1 (owner-approved mock-up, 25 Oct 2026): two big buttons while she is on the phone,
+      // the walk-through checklist (decor jobs) and the pre-made questions text (only the questions
+      // the request did not answer). Call / Text sit top right of every card; "After the call:
+      // are you taking this job?" follows "What they told us" below.
       // How long they have waited (Memphis days; the daily "Call these people back" email says the same).
       const wd = waitingDays(sentMs(r), today);
       const waitLine = `<p class="waitline${wd >= WAIT_HIGHLIGHT_DAYS ? ' late' : ''}" data-waiting="${wd}">${esc(waitingWords(wd))}</p>`;
       const how = services.includes('rentals') ? `<div class="dlstep" data-delivery-step>${deliveryForm(r, rk)}</div>` : '';
-      return box(`Call or text ${who} back`, why, `${waitLine}${tel || sms ? `<div class="smallrow">${tel}${sms}</div>` : ''}<details class="talk" data-talk><summary class="btn primary"${tip('step.talked')}>I've talked to them</summary>${talkBox(r, s, x)}</details>${hint('step.talked')}${how}`, '', 'step.talked');
+      const decorish = services.some((k) => k !== 'rentals');
+      const checklist = decorish ? `<div class="actions" data-primary><div class="act"><a class="btn primary" href="/admin/checklist/online?r=${esc(rk)}" data-step1-checklist${tip('card.checklist')}>📋 Open the walk-through checklist</a></div></div>` : '';
+      const ask = stillToAsk(r, services, bookings);
+      const smsQ = ask.length ? questionsSms(r.phone, questionsText(r, services, ask, bookings)) : '';
+      const label = `💬 Text ${who === 'the customer' ? 'them' : who} the questions (${ask.length} still to ask)`;
+      const textQ = smsQ ? `<div class="actions"${decorish ? '' : ' data-primary'}>${(() => { const a = `<a class="btn ${decorish ? 'ghost big' : 'primary'}" href="${esc(smsQ)}" data-questions-text data-ask-count="${ask.length}" data-msg-tap="questions" data-rk="${esc(rk)}"${tip('step.textQuestions')}>${esc(label)}</a>`; return `<div class="act">${a}</div>`; })()}</div>`
+        : (ask.length ? '' : '<p class="why" data-nothing-to-ask>Nothing left to ask: they answered every question ✓</p>');
+      const big = decorish ? 'card.checklist' : (smsQ ? 'step.textQuestions' : '');
+      return { big, html: `<section class="nextbox" data-next-step="called"><p class="lbl">Next step · on the phone with ${esc(who)}</p><p class="what" data-next-what>${esc(`Call or text ${who} back`)}</p>${waitLine}${checklist}${textQ}${how}</section>` };
     }
     case 'invoiced': {
       const lines = inv && inv.lines ? inv.lines : null;
@@ -1116,10 +1162,9 @@ function nextBox(r, s, x) {
     }
     case 'setup': {
       const word = services.includes('porch') ? 'Install' : 'Setup';
-      if (!firstB) {
-        const k = services.includes('porch') ? 'card.schedInstall' : 'card.schedSetup';
-        return box(`Book the ${word.toLowerCase()} day`, 'Pick the day on the calendar. The setup checklist goes on the Day sheet.', bigA(k, `/admin/calendar/new?r=${rk}&kind=${firstKind}`, `Book the ${word.toLowerCase()} day`), '', k);
-      }
+      // Not booked yet (she tapped Not yet earlier): the same inline Yes, book it as step 1, the day
+      // from the request already in it. The old "Schedule setup / install" page button is gone.
+      if (!firstB) return box(`Book the ${word.toLowerCase()} day`, 'The day from the request is filled in. Add the ready-by time and tap Yes, book it.', `<div class="talkbox" data-talk-box>${bookYesForm(r, x)}</div>${hint('step.bookYes')}`, '', 'step.bookYes');
       const where = answerOf(r, /^location|address|where is it/i);
       const why = [r.eventType, where ? `at ${where}` : '', firstB.time ? prettyTimeOf(firstB.time) : ''].filter(Boolean).join(', ');
       const reached = !today || today >= firstB.date;
@@ -1141,7 +1186,9 @@ function nextBox(r, s, x) {
     }
     case 'picked': {
       const pb = s.pickupBooking;
-      if (!pb) return box('Book the pickup and return', 'Pick both days on the calendar.', bigA('card.schedPickup', `/admin/calendar/new?r=${rk}&kind=rental_pickup`, 'Book pickup + return'), tent, 'card.schedPickup');
+      // Not booked yet: the inline Yes, book it with both days from the request (the old "Schedule
+      // pickup + return" page button repeated it).
+      if (!pb) return box('Book the pickup and return', 'Both days from the request are filled in. Check them and tap Yes, book it.', `<div class="talkbox" data-talk-box>${bookYesForm(r, x)}</div>${hint('step.bookYes')}`, '', 'step.bookYes');
       // Still to pay (ledger.mjs dueCents: charges + any damage deposit not collected yet).
       const owed = dueCents(bal);
       const addr = deliveryAddress(r);
@@ -1275,8 +1322,8 @@ export function endedDay(utc) {
 // A Done or Cancelled card (owner-approved "Done Cards", 20 Oct 2026): greyed, a large faint ✓
 // (green) or ✕ (grey, never red) watermark, "✓ DONE · <date>" / "✕ CANCELLED · <date>" in place of
 // the steps, the money in words, Call / Text top right, and two small buttons: Put away and the undo.
-// Everything else stays under "Show more about <name>".
-function endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, services, bk, hold, groups }) {
+// Everything else stays under "More about <name>".
+function endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, services, bk, hold, groups, asked = '' }) {
   const done = stage === 'done';
   const group = done ? 'done' : 'cancelled';
   const day = endedDay(done ? st.done_at : (st.cancelled_at || st.updated_at));
@@ -1287,17 +1334,16 @@ function endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, se
   return `<article class="card stepcard ended ${done ? 'isdone' : 'iscancelled'}" data-card="${esc(rk)}" id="c-${esc(rk)}" data-reqcard data-ended="${group}" data-stage="${esc(stage)}" data-services="${esc(services.join(' '))}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
       <span class="wm" aria-hidden="true">${done ? '✓' : '✕'}</span>
       <div class="schead">${quickContact(r)}${num ? `<p class="custno" data-customer-label>Customer ${num}</p>` : ''}<div class="sctags"><span class="svcs" data-badges>${svcBadges}</span></div>
-        <h3 class="who">${esc(r.name || 'No name given')}</h3></div>
+        <h3 class="who">${esc(r.name || 'No name given')}</h3>${asked ? `<p class="scasked" data-asked-head>${esc(asked)}</p>` : ''}</div>
       <p class="endlbl ${done ? 'ok' : 'grey'}" data-ended-label>${done ? '✓ DONE' : '✕ CANCELLED'}${day ? ` · ${esc(day)}` : ''}</p>
       <p class="endmoney" data-ended-money>${esc(words)}</p>
       ${r.idDeletedAt && r.idDeletedAuto ? `<p class="endmoney" data-id-auto-deleted>ID: <b>deleted automatically on ${esc(autoDeletedDay(r))}</b></p>` : ''}
       <div class="secrow endbtns" data-ended-buttons>${cardButton('card.archive', ectx, false)}${done ? cardButton('card.undone', ectx, false) : ''}</div>
-      <details class="disclose more" data-details><summary${tip('card.details')}><span class="mshow" data-more-show>Show more about ${esc(name)}</span><span class="mhide" data-more-hide>Hide more about ${esc(name)}</span><span class="mchev" aria-hidden="true">▾</span></summary>
-        <p class="mhint" data-more-hint>Tap any line below to see more.</p>
+      <details class="disclose more" data-details><summary${tip('card.details')}><span class="mshow" data-more-show>More about ${esc(name)}</span><span class="mhide" data-more-hide>Hide more about ${esc(name)}</span><span class="mchev" aria-hidden="true">▾</span><small class="msub" data-more-sub>contact &amp; ID · money · notes · everything they wrote</small></summary>
         ${groups}
         <div class="morerow quiet" data-more-row><a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a></div>
       </details>
-      ${cancelRow(r, inv, ctx, !done)}
+      <div class="cardfoot" data-card-foot>${cancelRow(r, inv, ctx, !done)}</div>
       ${quickMenu({ r, bookings: bk, inv, hold, dates: services.includes('rentals') ? rentalDates(r, bk) : {}, services, current: 'finished', rk })}
     </article>`;
 }
@@ -1305,7 +1351,7 @@ function endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, se
 // One request card. o: everything dashboardPage knows about this request.
 export function requestCard(r, o) {
   const { st = { status: 'new' }, inv = null, sched = null, ret = null, cl = '', kinds = [], extras = '', referrers = {}, events = [], notes = [], archived = false, foodPerHead = null, pickupPlace,
-    bookings = [], today = chicagoToday(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '', isNew = false, stored = null, depositOut = null, hold = null, holdHtml = '', missed = [], num = null } = o;
+    bookings = [], today = chicagoToday(), nowMs = Date.now(), msgs = null, invoiceTakedown = false, bottom = '', tdSaved = '', isNew = false, stored = null, depositOut = null, hold = null, holdHtml = '', missed = [], num = null } = o;
   const rk = b64urlText(r.key);
   const services = servicesOf(r);
   const rental = Boolean(r.gamesAnswer) || (r.wantsRentals && !r.wantsDecor);
@@ -1347,7 +1393,7 @@ export function requestCard(r, o) {
   const nb = archived ? { big: 'pa.bringBack', html: `<section class="nextbox" data-next-step="archived"><p class="what">Put away</p><div class="actions" data-primary>${cardButton('pa.bringBack', ctx, true)}</div></section>` }
     : (miss ? missedNextBox(miss, { rk }) : nextBox(r, s, x));
   const undo = archived || pr.void ? null : undoFor(s, { tdS, stored });
-  const steps = archived || pr.void ? '' : stepList(s, undo, ctx);
+  const steps = archived || pr.void ? '' : stepList(s, undo, ctx, services);
   const big = nb.big;
   // The takedown / pickup line lives in the next-step box while it IS the next step; otherwise
   // under More, never twice.
@@ -1379,43 +1425,65 @@ export function requestCard(r, o) {
   const feeNoAddr = !addr && services.includes('rentals') && inv && (inv.lines || []).some((l) => DELIVERY_LINE.test(String(l.description || '')));
   const bizLine = addr ? `<p class="scdelivery" data-business-delivery><span class="biztag">🚚 Business delivery</span> ${esc([biz, addr].filter(Boolean).join(', '))}</p>`
     : (feeNoAddr && !quiet ? `<details class="dlprompt" data-delivery-prompt><summary${tip('card.deliveryPrompt')}>🚚 Business delivery: add the business name and address</summary>${deliveryForm(r, rk, { prompt: true, place: pickupPlace, idp: 'dp' })}</details>` : '');
-  // Latest note (owner-approved mock-up, 20 Oct 2026): the newest note in full, its day, and
-  // "+ Add a note" right there (never behind More).
+  // Latest note (owner-approved mock-up, 20 Oct 2026): the newest note in full and its day, on
+  // the card face. "+ Add a note" lives under More about <name> › Notes (mock-up, 25 Oct 2026).
   const last = notes.length ? notes[notes.length - 1] : null;
   const noteForm = `<details class="disclose addnote" data-add-note><summary${tip('card.addNote')}>+ Add a note</summary><form class="noteform" method="post" action="/admin/requests/note">${hiddenInputs({ r: rk })}<label for="nt-${esc(rk)}">Note (only you see this)</label><textarea id="nt-${esc(rk)}" name="body" required></textarea>${act(`<button class="btn ghost" type="submit"${tip('card.noteSave')}>Save note</button>`, 'card.noteSave')}</form></details>`;
-  const latest = `<div class="lnote${last ? '' : ' empty'}" data-latest-note>${last ? `<p class="lnh"><b>Latest note</b>${last.created_at ? ` <span class="muted" data-latest-note-day>${esc(memphisDay(last.created_at))}</span>` : ''}</p><p class="lnb" data-latest-note-body>${esc(last.body)}</p>` : ''}${noteForm}</div>`;
-  // 1. What they booked (open).
+  const latest = last ? `<div class="lnote" data-latest-note><p class="lnh"><b>Latest note</b>${last.created_at ? ` <span class="muted" data-latest-note-day>${esc(memphisDay(last.created_at))}</span>` : ''}</p><p class="lnb" data-latest-note-body>${esc(last.body)}</p></div>` : '';
+  // "What they told us", always on the card face (card-told.mjs: only answers that exist), and at
+  // step 1 the "Still to ask" chips (only the questions the request did not answer) and "After the
+  // call: are you taking this job?" with Yes, book it / Not yet / No, put it away.
+  const told = toldFacts(r, services, bk);
+  const toldHtml = told.length ? `<section class="told" data-told><p class="tlbl">What ${esc(r.name ? who : 'they')} told us</p><dl>${told.map((f) => `<dt>${esc(f.label)}</dt><dd data-told-item="${esc(f.key)}">${esc(f.value)}</dd>`).join('')}</dl></section>` : '';
+  const step1 = s.current === 'called' && !archived && !pr.void && !miss;
+  const ask = step1 ? stillToAsk(r, services, bk) : [];
+  const askHtml = ask.length ? `<section class="stillask" data-still-to-ask><p class="tlbl">Still to ask</p><div class="askchips">${ask.map((q) => `<span class="askchip" data-ask="${esc(q.key)}">${esc(q.chip)}</span>`).join('')}</div></section>` : '';
+  const after = step1 ? afterCallBox(r, s, x) : '';
+  // ONE "More about <name>" (owner-approved mock-up, 25 Oct 2026): contact & ID, money, notes,
+  // everything they wrote; plain headed sections inside it, nothing more to open.
   const bk1 = bookedGroupBody(r, { services, bookings: bk, pickupPlace, row, gLine, cl, sched });
-  const grp = (key, title, small, body, open = false) => `<details class="grp" data-more-group="${key}"${open ? ' open' : ''}><summary${tip(`card.grp${key[0].toUpperCase()}${key.slice(1)}`)}><span class="gt">${esc(title)}${small ? ` <small>${esc(small)}</small>` : ''} <span class="tapopen" data-tap-open>Tap to open</span></span><span class="gchev" aria-hidden="true">›</span></summary><div class="gin">${body}</div></details>`;
-  const booked = grp('booked', 'What they booked', '', `${bk1.html}${btnRow(bookedBtns, 'data-secondary')}`, true);
-  // 2. Money.
+  const sec = (key, title, small, body) => `<section class="mgrp" data-more-group="${key}"><h4 class="mgh">${esc(title)}${small ? ` <small>${esc(small)}</small>` : ''}</h4><div class="gin">${body}</div></section>`;
+  // A genuine reschedule path: "change" the booked day (the booking's own edit page).
+  const firstBk = (bk || []).filter((b) => b.id && (b.kind === 'rental_pickup' || Object.values(SCHEDULE_FIRST).some(([, k]) => k === b.kind))).sort((a, b) => String(a.date).localeCompare(String(b.date)))[0] || null;
+  const changeDay = firstBk && !quiet && !archived ? `<p class="gl"><a class="glink" href="/admin/calendar/bookings/${esc(firstBk.id)}/edit" data-change-day${tip('card.changeDay')}>Change the ${firstBk.kind === 'rental_pickup' ? 'pickup' : (firstBk.kind === 'porch_install' ? 'install' : 'setup')} day or time</a></p>` : '';
+  // Everything they wrote = the job lines above (each fact once) + every other answer, word for word.
+  const wrote = [...r.rentals, ...r.decor, ...r.other].filter((y) => y && y.value !== '' && y.value != null && !bk1.used.has(y.label) && !SHOWN_ELSEWHERE.test(String(y.label || '')));
+  const wroteHtml = wrote.length ? `<div data-other-answers><h4>Their other answers</h4>${kv(wrote.map((y) => [y.label, answerWords(y.value)]))}</div>` : '';
+  // Money.
   const moneySmall = inv && inv.balance && inv.status !== 'draft' ? (dueWords(inv.balance) || (inv.balance.void ? 'void' : 'paid')) : (inv ? 'not sent yet' : 'no invoice yet');
   const reserveHere = hold && s.current !== 'deposit' && !quiet ? `<style>${HOLD_CSS}</style>${reserveLongerControl(rk, { untilMs: hold.by_hand ? NaN : hold.untilMs, card: true })}` : '';
   const moneyBody = `${payment}${btnRow(moneyBtns, 'data-money-buttons')}${messagesLine(msgs, { rk, services, primary: big, returned, quiet })}${extrasHere}${reserveHere}${damage}${quiet ? '' : bottom}`;
-  const moneyG = grp('money', 'Money', moneySmall, moneyBody || '<p class="muted" style="margin:0">Nothing here yet.</p>');
-  // 3. Their details and ID.
-  const detailsG = grp('details', 'Their details and ID', 'phone, email, ID, rules', detailsGroupBody(r, rk, { referrers, used: bk1.used, archived, st }));
-  // 4. Notes and history.
-  const historyG = grp('history', 'Notes and history', 'newest first', historyHtml(events, notes));
+  const detailsG = sec('details', 'Contact & ID', 'phone, email, ID, rules', detailsGroupBody(r, rk, { referrers, used: bk1.used, archived, st, answers: false }));
+  const moneyG = sec('money', 'Money', moneySmall, moneyBody || '<p class="muted" style="margin:0">Nothing here yet.</p>');
+  const historyG = sec('history', 'Notes', 'newest first', `${archived || stage === 'done' || stage === 'void' ? '' : `<div class="lnote empty" data-note-add>${noteForm}</div>`}${historyHtml(events, notes)}`);
+  const booked = sec('booked', 'Everything they wrote', '', `${bk1.html}${changeDay}${btnRow(bookedBtns, 'data-secondary')}${wroteHtml}`);
+  const groups = `${detailsG}${moneyG}${historyG}${booked}`;
   const moreRow = `<div class="morerow quiet" data-more-row><a class="editlink" href="/admin/requests/edit?r=${esc(rk)}" data-edit-link${tip('card.edit')}>Edit</a>
       ${decorish && !archived ? `<div class="act"><a class="btn ghost" href="/admin/checklist?r=${esc(rk)}" target="_blank" rel="noopener"${tip('card.printChecklist')}>Print checklist</a></div>` : ''}
       ${!archived && !quiet ? `<form method="post" action="/admin/requests/archive" data-archive>${hiddenInputs({ r: rk })}<div class="act"><button class="btn ghost" type="submit"${tip('card.putAway')}>Put away</button></div></form>` : ''}
       ${stage === 'void' && !bottomBtns.some((k) => k.startsWith('card.archive')) ? cardButton('card.archive', ctx, false) : ''}${bottomBtns.map((k) => cardButton(k, ctx, false)).join('')}</div>`;
-  if (!archived && (stage === 'done' || stage === 'void')) return endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, services, bk, hold, groups: `${booked}${moneyG}${detailsG}${historyG}` });
+  const asked = askedWords(r, nowMs);
+  if (!archived && (stage === 'done' || stage === 'void')) return endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, services, bk, hold, groups, asked });
+  // The bottom row: "📄 Invoice draft: $X · Check and send" and "✕ Cancel this job" on the same
+  // line (owner-approved mock-up, 25 Oct 2026). Cancel stays apart, labelled, and confirms first.
+  const draftFoot = inv && inv.status === 'draft' && !quiet && !archived && s.current !== 'invoiced' && !miss ? `<p class="footinv" data-draft-ready><b data-draft-what>📄 Invoice draft: ${esc(money(inv.total_cents != null ? inv.total_cents : invoiceTotal(inv.lines || [])))}</b> <a class="btn ghost" href="/admin/invoices/${inv.id}/edit"${tip('card.checkDraft')}>Check and send</a></p>` : '';
+  const moreName = esc(r.name ? who : 'this request');
   return `<article class="card stepcard${red ? ' miss' : (miss ? ' tidy' : '')}" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''}${red ? ` data-missed="${esc(miss.id)}"` : (miss ? ` data-tidy="${esc(miss.id)}"` : '')} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${num ? ` data-customer="${num}" data-first="${esc(firstName(r.name) || 'No name')}"` : ''}${first ? ` style="border-left-color:${first.bar}${num ? `;--cc:${first.bar}` : ''}"` : ''}>
       ${num ? `<span class="cnum" data-customer-num aria-hidden="true">${num}</span>` : ''}${red ? `<span class="mchip" data-missed-tag>⚠ ${esc(miss.tag)}</span>` : (miss ? `<span class="ychip" data-tidy-tag>${esc(miss.tag)}</span>` : '')}<div class="schead">${quickContact(r)}${num ? `<p class="custno" data-customer-label>Customer ${num}</p>` : ''}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
         <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
+        ${asked ? `<p class="scasked" data-asked-head>${esc(asked)}</p>` : ''}
         ${bizLine}</div>
       ${latest}
       ${steps}
       ${nb.html}
-      ${inv && inv.status === 'draft' && !quiet && !archived && s.current !== 'invoiced' && !miss ? `<style>${DRAFT_CSS}</style>${draftNotice(r, inv)}` : ''}
-      <details class="disclose more" data-details><summary${tip('card.details')}><span class="mshow" data-more-show>Show more about ${esc(r.name ? who : 'this request')}</span><span class="mhide" data-more-hide>Hide more about ${esc(r.name ? who : 'this request')}</span><span class="mchev" aria-hidden="true">▾</span></summary>
-        <p class="mhint" data-more-hint>Tap any line below to see more.</p>
-        ${booked}${moneyG}${detailsG}${historyG}
+      ${archived || pr.void ? '' : toldHtml}
+      ${askHtml}
+      ${after}
+      <details class="disclose more" data-details><summary${tip('card.details')}><span class="mshow" data-more-show>More about ${moreName}</span><span class="mhide" data-more-hide>Hide more about ${moreName}</span><span class="mchev" aria-hidden="true">▾</span><small class="msub" data-more-sub>contact &amp; ID · money · notes · everything they wrote</small></summary>
+        ${groups}
         ${moreRow}
       </details>
-      ${cancelRow(r, inv, ctx, pr.void)}
+      <div class="cardfoot" data-card-foot>${draftFoot}${cancelRow(r, inv, ctx, pr.void)}</div>
       ${quickMenu({ r, bookings: bk, inv, hold, dates: services.includes('rentals') ? rentalDates(r, bk) : {}, services, current: archived ? 'finished' : s.current, rk })}
     </article>`;
 }

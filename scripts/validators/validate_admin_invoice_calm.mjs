@@ -139,8 +139,10 @@ must(!/\$375 due/.test(pc), 'the card says a draft is due');
 
 // ---- 4. The card ---------------------------------------------------------------------------
 const total = pl.reduce((t, l) => t + l.qty * l.unit_cents, 0);
-must(pc.includes(`📄 Invoice draft ready: ${money(total)}`) && pc.includes("Made from Coco's request. Nothing has been sent. Check the price, then send."), 'the card lacks "📄 Invoice draft ready" with "Made from Coco\'s request"');
-must(new RegExp(`href="/admin/invoices/${pd.id}/edit" data-help="card\\.checkDraft"[^>]*>Check and send the invoice<`).test(pc), 'the card lacks "Check and send the invoice" (while Call back is the next step)');
+// Job card mock-up (25 Oct 2026): the draft sits in the bottom row, on the same line as ✕ Cancel this job.
+{ const foot = pc.slice(pc.indexOf('data-card-foot'));
+  must(pc.indexOf('data-card-foot') > pc.indexOf('data-details') && foot.includes(`📄 Invoice draft: ${money(total)}`) && !/Invoice draft ready/.test(pc.slice(0, pc.indexOf('data-card-foot'))), 'the card lacks "📄 Invoice draft: $X" in its bottom row (or shows the draft twice)');
+  must(new RegExp(`<p class="footinv" data-draft-ready><b data-draft-what>📄 Invoice draft: [^<]+</b> <a class="btn ghost" href="/admin/invoices/${pd.id}/edit" data-help="card\\.checkDraft"[^>]*>Check and send</a></p><div class="cxrow" data-cancel-row="cancel">`).test(foot), 'the bottom row is not "📄 Invoice draft: $X · Check and send" then ✕ Cancel this job (while Call back is the next step)'); }
 must((pc.match(/class="btn primary"/g) || []).length <= 1 && !/data-help="card\.checkDraft"[^>]*class="btn primary"|class="btn primary"[^>]*data-help="card\.checkDraft"/.test(pc), 'the card has more than one big button');
 must(!/data-help="card\.createInvoice"/.test(pc), 'the card still offers Create invoice next to its draft');
 await s.post('/admin/requests/called', { r: s.rk(pKey) });

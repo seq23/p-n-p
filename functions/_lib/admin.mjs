@@ -740,6 +740,11 @@ async function tappedMessage(env, request) {
     if (qcol) await env.DB.prepare(`UPDATE requests SET ${qcol} = COALESCE(${qcol}, datetime('now')) WHERE request_key = ?1`).bind(key).run();
     return Response.json({ ok: true });
   }
+  // Step 1's "💬 Text <first name> the questions" (job card, 25 Oct 2026): one history line.
+  if (key && String(form.get('template') || '') === 'questions') {
+    await logEvent(env.DB, key, 'Texted: the questions still to ask', 'Valerie');
+    return Response.json({ ok: true });
+  }
   const col = TAP_COLUMNS[String(form.get('template') || '')];
   if (key && col) await env.DB.prepare(`UPDATE requests SET ${col} = COALESCE(${col}, datetime('now')) WHERE request_key = ?1`).bind(key).run();
   return Response.json({ ok: true });

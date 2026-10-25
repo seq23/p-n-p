@@ -65,7 +65,9 @@ check(realGamesAnswer('a giant trampoline', PRICE_TABLE) === '', 'an answer nami
   check(!/>\s*\d?\s*Returned/.test(card.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').replace(/^/, '>')) && !/data-step="job_done"[^>]*>Returned/.test(card), 'decor card progress says Returned');
   // Step cards (19 Oct 2026): a decor card's steps are the decor ones (Setup done, Takedown),
   // never the rental ones; its next step is the dated setup with Mark setup done.
-  check(/data-step="setup"[^>]*>[\s\S]*?<span class="t">Setup done/.test(card) && !/data-step="(picked|returned|deposit_back)"/.test(card), 'decor card steps lack "Setup done" (or carry rental steps)');
+  // Short step bar (job card, 25 Oct 2026): the current step reads "Step 4 of 6: setup day" (the six
+  // decor steps; a rental plan has none called setup), settled ones are ✓ chips.
+  check(/<p class="scof" data-step-count data-step="setup" data-step-current>Step 4 of 6: setup day<\/p>/.test(card) && /<li class="d" data-step="deposit" data-step-done>/.test(card) && !/data-step="(picked|returned|deposit_back)"/.test(card), 'decor card steps lack "Step 4 of 6: setup day" after the ✓ deposit (or carry rental steps)');
   check(/data-next-step="setup"[\s\S]*data-next-what>Setup day: Sat 17 Oct<[\s\S]*data-help="card\.jobDone"[^>]*>Mark setup done</.test(card), 'decor card next step is not "Setup day: Sat 17 Oct" with Mark setup done');
   check(/data-when>Sat 17 Oct/.test(card) && !/chip sched/.test(card), 'decor card date line lacks the booked day (or the duplicate pill is back)');
   check(!/data-step="scheduled"/.test(card), 'decor card shows a bare "Scheduled" chip beside the dated one');

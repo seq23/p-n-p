@@ -101,13 +101,13 @@ const stepRows = async () => (await s.one('SELECT COUNT(*) AS n FROM request_ste
 
 async function expectStep1(key, label) {
   const c = await card(key);
-  must(c && cur(c) === 'called' && !calledDone(c) && /Call or text [^<]* back/.test(c) && /I've talked to them/.test(c), `${label}: the card is not back on Step 1 "Call or text … back" (current ${cur(c)})`);
+  must(c && cur(c) === 'called' && !calledDone(c) && /Call or text [^<]* back/.test(c) && /data-after-call/.test(c) && /After the call: are you taking this job\?/.test(c), `${label}: the card is not back on Step 1 "Call or text … back" (current ${cur(c)})`);
   must(await inCallback(key), `${label}: not on the callback list`);
   must(await inEmail(key), `${label}: not in the to-do email's "Call these people back"`);
 }
 async function expectTicked(key, label) {
   const c = await card(key);
-  must(c && cur(c) !== 'called' && calledDone(c) && !/Call or text [^<]* back/.test(c), `${label}: the card still shows Step 1 (current ${cur(c)})`);
+  must(c && cur(c) !== 'called' && calledDone(c) && !/Call or text [^<]* back/.test(c) && !/data-after-call|data-step1-checklist|data-questions-text/.test(c), `${label}: the card still shows Step 1 (current ${cur(c)})`);
   must(!(await inCallback(key)), `${label}: still on the callback list`);
   must(!(await inEmail(key)), `${label}: the to-do email still asks her to call them back`);
 }

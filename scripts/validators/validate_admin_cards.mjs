@@ -25,7 +25,9 @@ let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
 // Big buttons a viewer sees on a card: filled .btn / .btn primary, not counting the "Yes, …"
 // buttons inside a closed confirm box.
-const bigButtons = (h) => (String(h).replace(/<div class="confirmbox[^"]*">[\s\S]*?<\/details>/g, '').match(/class="btn( primary)?"/g) || []).length;
+// A big button: a plain / primary .btn, or the green "Yes, book it" (.btn.yes) when it is the next
+// step itself (job card, 25 Oct 2026). Step 1's "After the call" box is counted on its own below.
+const bigButtons = (h) => (String(h).replace(/<div class="confirmbox[^"]*">[\s\S]*?<\/details>/g, '').replace(/<section class="aftercall"[\s\S]*?<\/section>/g, '').replace(/<details class="talk" data-book-later>[\s\S]*?<\/section>/g, '</section>').match(/class="btn( primary| yes)?"/g) || []).length;
 const TODAY = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Chicago', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
 
 // ---- 1. the rules table --------------------------------------------------------------
@@ -84,9 +86,11 @@ const P = (services, stage, extra = {}) => K.cardButtons({ services, stage, inv:
 must(P(['porch'], 'new') === 'card.createInvoice', 'new: primary is not Create invoice');
 must(P(['porch'], 'draft') === 'card.openInvoice', 'draft: primary is not Open invoice');
 must(P(['porch'], 'invoiced') === 'pay.deposit' && P(['porch'], 'invoiced', { plan: 'full' }) === 'pay.paid', 'invoiced: primary is not the deposit (or paid in full on a full plan)');
-must(P(['porch'], 'deposit_paid') === 'card.schedInstall|porch_install', 'porch deposit paid: primary is not Schedule install');
-must(P(['party'], 'deposit_paid') === 'card.schedSetup|party_setup' && P(['grazing'], 'deposit_paid') === 'card.schedSetup|grazing_setup', 'party/grazing deposit paid: primary is not Schedule setup');
-must(P(['rentals'], 'deposit_paid') === 'card.schedPickup|rental_pickup', 'rentals deposit paid: primary is not Schedule pickup + return');
+// No "Schedule install / setup / pickup" button any more (job card mock-up, 25 Oct 2026): the next step
+// is the card's own inline Yes, book it, and no rule ever hands out a card.sched* key.
+must(P(['porch'], 'deposit_paid') === 'step.bookYes', 'porch deposit paid (not booked): primary is not the inline Yes, book it');
+must(P(['party'], 'deposit_paid') === 'step.bookYes' && P(['grazing'], 'deposit_paid') === 'step.bookYes', 'party/grazing deposit paid (not booked): primary is not the inline Yes, book it');
+must(P(['rentals'], 'deposit_paid') === 'step.bookYes', 'rentals deposit paid (not booked): primary is not the inline Yes, book it');
 must(P(['porch'], 'scheduled', { sched: true, kinds: ['porch_install'] }) === 'card.jobDone' && P(['rentals'], 'scheduled', { sched: true }) === 'ret.mark', 'scheduled: primary is not Mark job done / Mark returned');
 must(P(['porch'], 'job_done', { jobDoneAt: true }) === 'pay.paid', 'job done: primary is not Mark paid in full');
 // ---- 1b. ONE big button, time-aware (owner, 18 Oct 2026) ---------------------------------
@@ -188,17 +192,21 @@ const pc = card(html, 'Pat Porch');
 must(/border-left-color:#c2410c/.test(pc), 'porch card has no orange left border');
 // "More about <first name>" (owner-approved mock-up, 20 Oct 2026): the date and place once, under
 // What they booked (open first); Call / Text only once, top right (the old facts line's second Call is gone).
-must(/<details class="grp" data-more-group="booked" open><summary data-help="card\.grpBooked"[^>]*><span class="gt">What they booked <span class="tapopen" data-tap-open>Tap to open<\/span><\/span><span class="gchev" aria-hidden="true">›<\/span><\/summary>[\s\S]*data-booked-event><b>Event:<\/b> Sat 24 Oct[\s\S]*data-booked-where><b>Where:<\/b> Germantown</.test(pc), 'porch card: What they booked (open) lacks the event day and where');
+// One "More about <first name>" (job card mock-up, 25 Oct 2026): plain headed sections, the job
+// facts under "Everything they wrote"; the face reads them in "What they told us".
+must(/<section class="mgrp" data-more-group="booked"><h4 class="mgh">Everything they wrote<\/h4><div class="gin">[\s\S]*data-booked-event><b>Event:<\/b> Sat 24 Oct[\s\S]*data-booked-where><b>Where:<\/b> Germantown</.test(pc), 'porch card: Everything they wrote lacks the event day and where');
+must(/<section class="told" data-told><p class="tlbl">What Pat told us<\/p><dl>[\s\S]*<dt>Event<\/dt><dd data-told-item="event">Sat 24 Oct[^<]*<\/dd>[\s\S]*<dt>Where<\/dt><dd data-told-item="where">[^<]*Germantown<\/dd>/.test(pc.slice(0, pc.indexOf('data-details'))), 'porch card face lacks "What Pat told us" with the event day and where');
 must(/data-quick-contact>[\s\S]*data-card-call/.test(pc.slice(0, pc.indexOf('data-next-step'))) && !/>(?:&#128222; )?Call</.test(pc.slice(pc.indexOf('data-details'))) && !/data-facts/.test(pc), 'porch card: Call is not top right, a second Call is under More, or the old facts line is back');
 must((pc.match(/class="btn primary"/g) || []).length === 1, 'porch card does not have exactly ONE big primary button');
-must(/<details class="disclose more" data-details><summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>Show more about Pat<\/span><span class="mhide" data-more-hide>Hide more about Pat<\/span><span class="mchev" aria-hidden="true">▾<\/span><\/summary>\s*<p class="mhint" data-more-hint>Tap any line below to see more\.<\/p>[\s\S]*Where:<\/b> Germantown/.test(pc) && !/Where:|data-booked/.test(pc.slice(0, pc.indexOf('data-details'))), 'answers are not behind "Show more about Pat" (or show above it)');
+must(/<details class="disclose more" data-details><summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>More about Pat<\/span><span class="mhide" data-more-hide>Hide more about Pat<\/span><span class="mchev" aria-hidden="true">▾<\/span><small class="msub" data-more-sub>contact &amp; ID · money · notes · everything they wrote<\/small><\/summary>\s*<section class="mgrp" data-more-group="details">[\s\S]*Where:<\/b> Germantown/.test(pc) && !/Where:|data-booked/.test(pc.slice(0, pc.indexOf('data-details'))), 'answers are not behind "More about Pat" (or show above it)');
 must(!/More about Pat<\/summary>[\s\S]*class="btn primary"/.test(pc), 'an action is hidden behind More');
 // Only the first group opens by itself; the four groups in the owner's order, then the quiet row.
 {
   const more = pc.slice(pc.indexOf('data-details'));
-  const order = ['data-more-group="booked"', 'data-more-group="money"', 'data-more-group="details"', 'data-more-group="history"', 'data-more-row'].map((x) => more.indexOf(x));
-  must(order.every((x, i) => x > 0 && (i === 0 || x > order[i - 1])), `More groups are not booked, money, details, history, then the quiet row (${order})`);
-  must((more.match(/<details class="grp"[^>]*\sopen>/g) || []).length === 1 && /data-more-group="booked" open>/.test(more), 'a group other than What they booked opens by itself');
+  const order = ['data-more-group="details"', 'data-more-group="money"', 'data-more-group="history"', 'data-more-group="booked"', 'data-more-row'].map((x) => more.indexOf(x));
+  must(order.every((x, i) => x > 0 && (i === 0 || x > order[i - 1])), `More sections are not contact & ID, money, notes, everything they wrote, then the quiet row (${order})`);
+  must(!/<details class="grp"/.test(more) && (more.match(/<section class="mgrp" data-more-group="/g) || []).length === 4, 'More is not ONE section of four plain headed parts (a group to open is back)');
+  must(/data-more-group="history">[\s\S]*data-add-note[\s\S]*data-more-group="booked"/.test(more) && !/data-add-note/.test(pc.slice(0, pc.indexOf('data-details'))), '+ Add a note is not under More › Notes (or is still on the card face)');
   must(!/What they picked/.test(pc), 'the "What they picked" row is back (the service badge says it)');
 }
 // Calm card render: no invoice -> one quiet line and no money buttons; Void a small link under
@@ -213,7 +221,7 @@ must(!/data-help="pay\.(deposit|paid|unpaid|void)"/.test(beforeDetails(pc)), 'no
   const moreAt = pcU.indexOf('<details class="disclose more"');
   const rowAt = pcU.indexOf('data-cancel-row="cancel"');
   must(moreAt > 0 && rowAt > moreAt && !/data-cancel-job|Cancel this job/.test(pcU.slice(pcU.indexOf('data-more-row'), pcU.lastIndexOf('</details>', rowAt)))
-    && /<\/details>\s*<div class="cxrow" data-cancel-row="cancel"><details class="confirm cxconfirm" data-cancel-job><summary class="cxbtn" data-help="card\.cancelJob"[^>]*>✕ Cancel this job<\/summary>[\s\S]*<p><strong>Cancel Pat's job\?<\/strong><\/p><p class="muted">Nothing is owed\. Pat is not told\. You can undo this\.<\/p>[\s\S]*action="\/admin\/requests\/cancel"><input type="hidden" name="r" value="[^"]+"><button class="btn danger" type="submit" data-help="card\.cancelYes"[^>]*>Yes, cancel Pat's job<\/button><\/form>[\s\S]*>No, keep it<\/button>/.test(pcU)
+    && /<\/details>\s*<div class="cardfoot" data-card-foot>(?:<p class="footinv" data-draft-ready>[\s\S]*?<\/p>)?<div class="cxrow" data-cancel-row="cancel"><details class="confirm cxconfirm" data-cancel-job><summary class="cxbtn" data-help="card\.cancelJob"[^>]*>✕ Cancel this job<\/summary>[\s\S]*<p><strong>Cancel Pat's job\?<\/strong><\/p><p class="muted">Nothing is owed\. Pat is not told\. You can undo this\.<\/p>[\s\S]*action="\/admin\/requests\/cancel"><input type="hidden" name="r" value="[^"]+"><button class="btn danger" type="submit" data-help="card\.cancelYes"[^>]*>Yes, cancel Pat's job<\/button><\/form>[\s\S]*>No, keep it<\/button>/.test(pcU)
     && !/Void this request|data-void-link/.test(pc), '"✕ Cancel this job" is not the grey button at the bottom of the card face (outside More, with its two-tap confirm posting the cancel)');
 }
 must(!/data-help="card\.(markDone|undone|uncancel)"/.test(pc), 'an ending button (Mark as done / an undo) shows on a New card');
@@ -293,6 +301,9 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
           if (stage === 'done' || stage === 'void') must(big === 0 && (top.match(new RegExp(`data-ended-buttons>(?:<form[^>]*>(?:<input[^>]*>)+<div class="act"><button class="btn ghost" type="submit"[^>]*>[^<]+<\\/button><\\/div><\\/form>){${stage === 'done' ? 2 : 1}}<\\/div>`, 'g')) || []).length === 1
             && (c.match(/data-cancel-row="(cancel|undo)"/g) || []).join() === `data-cancel-row="${stage === 'done' ? 'cancel' : 'undo'}"`, `${tag}: a Done / Cancelled card has ${big} big buttons, or not exactly its two small ones`);
           else must(wait ? big === 0 : big === 1, `${tag}: ${big} big buttons${wait ? ' while waiting for the day' : ''} (want exactly one)`);
+          // Step 1: the After the call box holds exactly one Yes, book it, and no other card step has it.
+          { const cur = (c.match(/data-current-step="([^"]+)"/) || [])[1]; const ac = (top.match(/<section class="aftercall"[\s\S]*?<\/section>/) || [''])[0];
+            must(cur === 'called' ? (ac.match(/class="btn yes"/g) || []).length === 1 && /data-after-call/.test(ac) : !/data-after-call/.test(c), `${tag}: the After the call box is ${cur === 'called' ? 'missing or not exactly one Yes, book it' : 'shown past step 1'}`); }
           must(bigButtons(c.slice(c.indexOf('data-details'))) === 0, `${tag}: a big button under Show details`);
           // ✕ Cancel this job (or, cancelled, ↩ Not cancelled after all) once, at the bottom of the face.
           must((c.match(/data-cancel-row="(cancel|undo)"/g) || []).join() === `data-cancel-row="${stage === 'void' ? 'undo' : 'cancel'}"` && c.indexOf('data-cancel-row') > c.lastIndexOf('data-more-row'), `${tag}: the cancel / undo row is missing, doubled or not at the bottom of the card`);
