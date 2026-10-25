@@ -49,6 +49,16 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   add up to $400 ✓" or a yellow "These don't match". Preview, then Save these lines (saves the
   draft, back to the same invoice) or Cancel; optional "Take out the lines already on this
   invoice". The browser runs the same `parsePriceList` source as the server.
+- **Room setups** (owner, 25 Oct 2026): a party request whose "Where is it?" names a hotel, motel,
+  Airbnb, suite, bedroom or room (not a living / dining / ball / party / event room), or whose event
+  type says "hotel room" / "room setup" (`pricing.mjs isRoomSetup`), starts its auto draft at
+  "Basic room setup (…)" $300. On an unsent room setup invoice the editor offers **🛏️ Room setup
+  presets: Basic $300 · Luxury $500 · Signature $1,500**: tap one, see its lines, notes, what comes
+  out and the new total, then Use these lines (saves, back to the same invoice) or Cancel. It swaps
+  the room setup lines only; Signature includes takedown, so a separate Takedown line comes out.
+  The presets are defined once in `data/offers/services.json` `celebration.roomSetupPresets`; a
+  rebuild after a picked preset does not add Basic or Takedown back (`reconcileRoomPreset`).
+  Guarded by `validate:admin-room-setup`.
 - **What we sent ✉** (owner, 25 Oct 2026): every real invoice email keeps its exact HTML, text and
   the PDF as it read then, with from / to / Bcc / time, in the private R2 bucket pnp-receipts under
   `sent-invoices/<id>/<stamp>/`, listed in D1 `invoice_sent_copies` (migration 0024, additive).

@@ -72,11 +72,161 @@
         "Final pricing depends on setup size, location, and design complexity.",
         "Availability is not guaranteed until your request is confirmed."
       ],
-      "roomSetup": {
-        "description": "Basic room setup (15 ceiling balloons, banner, petal walkway, bed design, 8–12 LED tea lights)",
-        "price": 300,
-        "provenance": "Owner-approved 2026-10-25: a party request in a hotel room, suite, Airbnb or bedroom (functions/_lib/pricing.mjs isRoomSetup) starts its auto-drafted invoice at this line instead of the \"Party decor\" starting line. New drafts only; a sent invoice is never rewritten. Guarded by scripts/validators/validate_admin_room_setup.mjs."
-      }
+      "roomSetupPresets": [
+        {
+          "key": "basic",
+          "name": "Basic",
+          "total": 300,
+          "includesTakedown": false,
+          "lines": [
+            {
+              "description": "Basic room setup (15 ceiling balloons, banner, petal walkway, bed design, 8–12 LED tea lights)",
+              "price": 300,
+              "note": []
+            }
+          ]
+        },
+        {
+          "key": "luxury",
+          "name": "Luxury",
+          "total": 500,
+          "includesTakedown": false,
+          "lines": [
+            {
+              "description": "Luxury Balloon Display",
+              "price": 175,
+              "note": [
+                "Custom-designed black, white, and silver balloon arrangement",
+                "Premium metallic and coordinating balloon accents",
+                "Elegant statement display tailored to the room"
+              ]
+            },
+            {
+              "description": "Floating Balloon Décor",
+              "price": 75,
+              "note": [
+                "Coordinating ceiling balloons with decorative ribbons",
+                "Placement customized to complement the overall design"
+              ]
+            },
+            {
+              "description": "Romantic LED Candle Styling",
+              "price": 65,
+              "note": [
+                "Elegant, flameless votive-style LED candles",
+                "Beautiful candle arrangements throughout designated areas",
+                "Warm ambient lighting accents"
+              ]
+            },
+            {
+              "description": "Luxury Rose-Petal Styling",
+              "price": 65,
+              "note": [
+                "Decorative faux rose-petal walkway",
+                "Elegant rose-petal bed arrangement",
+                "Additional petal accents where appropriate"
+              ]
+            },
+            {
+              "description": "Personalized Decorative Touches",
+              "price": 35,
+              "note": [
+                "Celebration signage or lettering",
+                "Coordinating ribbons and decorative accents",
+                "Finishing details to complement the theme"
+              ]
+            },
+            {
+              "description": "Professional Design & Installation",
+              "price": 85,
+              "note": [
+                "Custom décor planning and styling",
+                "Arrangement of all decorative elements",
+                "Local delivery and professional room installation"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "signature",
+          "name": "Signature",
+          "total": 1500,
+          "includesTakedown": true,
+          "lines": [
+            {
+              "description": "Grand Balloon Installation",
+              "price": 400,
+              "note": [
+                "Balloon arch or floor-standing design, installed",
+                "Oversized or glossy luxury balloons",
+                "Can include a photo backdrop"
+              ]
+            },
+            {
+              "description": "Floating Balloon Ceiling",
+              "price": 150,
+              "note": [
+                "Full ceiling of coordinating balloons with ribbon tails",
+                "Placement planned around the room's layout"
+              ]
+            },
+            {
+              "description": "Luxury Floral Arrangements",
+              "price": 250,
+              "note": [
+                "Premium floral centerpieces and accents",
+                "Coordinated with the color palette",
+                "Placed on tables, nightstands and entry"
+              ]
+            },
+            {
+              "description": "Candlelit Ambiance",
+              "price": 150,
+              "note": [
+                "40+ flameless LED pillar and votive candles",
+                "Candle clusters throughout the room",
+                "Warm fairy-light accents"
+              ]
+            },
+            {
+              "description": "Rose-Petal Luxe Styling",
+              "price": 125,
+              "note": [
+                "Faux rose-petal walkway",
+                "Petal heart or initials on the bed",
+                "Petal accents in the bath and seating areas"
+              ]
+            },
+            {
+              "description": "Personalized Signage",
+              "price": 125,
+              "note": [
+                "Custom name or celebration sign",
+                "Coordinating lettering and décor accents"
+              ]
+            },
+            {
+              "description": "Signature Styling Accents",
+              "price": 100,
+              "note": [
+                "Extra décor touches chosen for the room",
+                "Styled table, tray or vignette accents",
+                "Finishing details to complete the look"
+              ]
+            },
+            {
+              "description": "Professional Design, Installation & Takedown",
+              "price": 200,
+              "note": [
+                "Design call and custom plan",
+                "Local delivery and full room installation",
+                "Takedown included"
+              ]
+            }
+          ]
+        }
+      ],
+      "roomSetupPresetsProvenance": "Owner-approved 2026-10-25: the room setup presets, defined only here. The auto draft of a room-setup party request (functions/_lib/pricing.mjs isRoomSetup) starts at the first preset (Basic); the unsent invoice editor offers all of them (\"Room setup presets\"), which replace the room-setup lines only. \"total\" must equal the sum of the line prices; each \"note\" entry is its own row of the line note. includesTakedown: applying it takes out a separate Takedown line. Guarded by scripts/validators/validate_admin_room_setup.mjs."
     },
     "grazing": {
       "name": "Grazing Tables & Styled Setups",

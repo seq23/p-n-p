@@ -14,6 +14,7 @@ import { parseFormDate, deliveryAddress, PICKUP_CHOICES, RETURN_CHOICES } from '
 import { dueWords, dueCents, balanceWords, depositHeldCents, cancelHeldCents } from './ledger.mjs';
 import { DELIVERY_LINE } from './invoice-note.mjs';
 import { invoiceView, parseRow, parsePriceList } from './invoice-view.mjs';
+import { roomPresetPlan } from './pricing.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 import { takedownState, inlineDefaultDate } from './takedown.mjs';
@@ -1930,8 +1931,30 @@ const EDITOR_JS = `
       var rp=pb.querySelector('[data-paste-replace]');if(rp&&rp.checked)list.querySelectorAll('[data-line]').forEach(function(el){el.remove();});
       r.lines.forEach(function(l){addLine(l.description,(l.cents/100).toFixed(2),{quiet:true});});
       pt.value='';var sv=form.querySelector('button[name=go][value=save]');if(form.requestSubmit)form.requestSubmit(sv);else sv.click();});}
+  // "Room setup presets" (owner, 25 Oct 2026): preview first, then swap the room setup lines only.
+  var rb=form.querySelector('[data-room-presets]');
+  if(rb){var rpd=JSON.parse(document.getElementById('room-presets-data').textContent),rpv=rb.querySelector('[data-room-preview]'),rkey=null;
+    function rlines(){return [].slice.call(list.querySelectorAll('[data-line]'));}
+    function rplan(k){return roomPresetPlan(rlines().map(function(el){return el.querySelector('[name=line_desc]').value;}),rpd,k);}
+    function rnote(n){return n?'<div class="rpnote">'+esc(n)+'</div>':'';}
+    function rshow(k){var p=rplan(k);if(!p)return;rkey=k;rpv.hidden=false;var els=rlines(),out=0,gone=[];
+      txt('rp-count',p.name+' room setup: '+(p.add.length===1?'this 1 line':'these '+p.add.length+' lines')+' go on the invoice:');
+      rb.querySelector('[data-room-lines]').innerHTML=p.add.map(function(l){return '<tr data-room-line><td>'+esc(l.description)+rnote(l.note)+'</td><td class="amt">'+fmt(l.unit_cents)+'</td></tr>';}).join('');
+      rb.querySelector('[data-room-total]').textContent=(p.add.length===1?'This line is ':'These '+p.add.length+' lines add up to ')+dol(p.totalCents)+' ✓';
+      p.remove.forEach(function(i){var l=lineOf(els[i]);out+=l.t;gone.push(l.d+' ('+dol(l.t)+')'+(p.takedown.indexOf(i)>=0?': takedown is included in '+p.name:''));});
+      var ro=rb.querySelector('[data-room-out]');ro.hidden=!gone.length;ro.querySelector('span').textContent=gone.join(' · ');
+      var t=0;els.forEach(function(el){var l=lineOf(el);if(l.d)t+=l.t;});txt('rp-newtotal',fmt(t-out+p.totalCents));
+      rb.querySelectorAll('[data-room-preset]').forEach(function(b){b.setAttribute('aria-pressed',b.getAttribute('data-room-preset')===k?'true':'false');});
+      rpv.scrollIntoView({block:'nearest'});}
+    rb.addEventListener('click',function(e){var b=e.target.closest('[data-room-preset]');if(b)rshow(b.getAttribute('data-room-preset'));});
+    rb.querySelector('[data-room-cancel]').addEventListener('click',function(){rkey=null;rpv.hidden=true;rb.open=false;});
+    rb.querySelector('[data-room-use]').addEventListener('click',function(e){var p=rkey&&rplan(rkey);if(!p)return;var b=e.currentTarget;b.disabled=true;b.textContent='Saving…';
+      var els=rlines();p.remove.forEach(function(i){els[i].remove();});var keep=rlines(),before=keep[p.at]||null;
+      p.add.forEach(function(l){var el=addLine(l.description,(l.unit_cents/100).toFixed(2),{quiet:true,note:l.note});if(before)list.insertBefore(el,before);});
+      recalc();var sv=form.querySelector('button[name=go][value=save]');if(form.requestSubmit)form.requestSubmit(sv);else sv.click();});}
   ${parseRow.toString()}
   ${parsePriceList.toString()}
+  ${roomPresetPlan.toString()}
   recalc();
 })();`;
 
@@ -2005,6 +2028,7 @@ const EDITOR_CSS = `.ed .card{padding:14px}.ed h2{font-size:1.3rem;margin:0 0 8p
 .lgrid .lthis{margin:2px 0 0;font-weight:600}.lgrid textarea{margin:2px 0 0;min-height:70px}.lsum [data-l-note]{white-space:pre-line}
 .paste{margin-top:12px;border:1.5px dashed #cbbcad;border-radius:12px;padding:0 12px}.paste>summary{display:flex;align-items:center;min-height:52px;font-weight:700;cursor:pointer;list-style:none}.paste>summary::-webkit-details-marker{display:none}
 .paste textarea{min-height:170px;white-space:pre;overflow-x:auto}.paste .pv{margin:10px 0 12px}.paste .pv table{margin:6px 0}.paste .pastesave{background:var(--ok);border-color:var(--ok);color:#fff}.paste .pvbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.roompre .rpbtns{display:grid;gap:8px;margin:8px 0}.roompre .rpbtns .btn{min-height:52px;text-align:left}.roompre .rpbtns .btn[aria-pressed=true]{border-color:var(--accent);background:#eef4fb}.roompre .rpnote{color:var(--muted);font-size:.92rem;white-space:pre-line;margin-top:2px}
 .ivnote textarea{min-height:150px}.lgrid .btn.done{background:var(--ok);border-color:var(--ok);color:#fff;min-height:52px;font-size:1.05rem}
 .lgrid .rmzone{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line)}.rmask p{margin:4px 0 8px}.rmbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sofar{display:flex;justify-content:space-between;gap:10px;padding:10px 2px 4px;border-top:2px solid var(--ink);margin-top:6px;font-size:1.05rem}.sofar strong{font-size:1.2rem}
@@ -2039,6 +2063,29 @@ function pasteBox() {
         <label class="choice" data-paste-replace-wrap style="display:flex;gap:10px;align-items:center;margin-top:8px" hidden><input type="checkbox" data-paste-replace style="width:24px;height:24px;min-height:0"> Take out the lines already on this invoice</label>
         <p style="margin:8px 0 0">Invoice total after saving: <strong id="paste-newtotal"></strong></p>
         <div class="pvbtns">${act(`<button type="button" class="btn pastesave" data-paste-save${tip('ed.pasteSave')}>Save these lines</button>`, 'ed.pasteSave')}<button type="button" class="btn ghost" data-paste-cancel${tip('ed.pasteCancel')}>Cancel</button></div></div></details>`;
+}
+
+// "Room setup presets" (owner, 25 Oct 2026): Basic / Luxury / Signature from services.json
+// roomSetupPresets (PRICE_TABLE), on an unsent invoice only. Tapping one shows its lines, their
+// notes, what comes out and the new total first; "Use these lines" swaps the room setup lines
+// only (pricing.mjs roomPresetPlan, the same source the browser runs) and saves; Cancel changes
+// nothing. She lands back on the same invoice.
+const dollarsShort = (c) => `$${(c / 100).toLocaleString('en-US', { minimumFractionDigits: c % 100 ? 2 : 0, maximumFractionDigits: 2 })}`;
+export function roomPresetLabel(presets) {
+  return `Room setup presets: ${presets.map((p) => `${p.name} ${dollarsShort(p.totalCents)}`).join(' · ')}`;
+}
+function roomPresetBox(presets) {
+  const data = presets.map((p) => ({ key: p.key, name: p.name, includesTakedown: p.includesTakedown, totalCents: p.totalCents, lines: p.lines.map((l) => ({ description: l.description, unit_cents: l.unit_cents, note: l.note })) }));
+  return `<details class="paste roompre" data-room-presets><summary${tip('ed.roomPresets')}>🛏️ ${esc(roomPresetLabel(presets))}</summary>
+      <p class="muted" style="margin:0 0 6px">Tap one to see its lines first. It takes the place of the room setup line. Your other lines stay.</p>
+      <div class="rpbtns">${presets.map((p) => `<button type="button" class="btn ghost" data-room-preset="${esc(p.key)}"${tip('ed.roomPresetPick')}>See the ${esc(p.name)} lines · ${esc(dollarsShort(p.totalCents))}</button>`).join('')}</div>
+      <div class="pv" data-room-preview hidden><p style="margin:0;font-weight:700" id="rp-count"></p>
+        <table class="sumlines" data-room-lines></table>
+        <div class="notice ok" data-room-total></div>
+        <div class="notice" data-room-out hidden><strong>Comes out:</strong> <span></span></div>
+        <p style="margin:8px 0 0">Invoice total after: <strong id="rp-newtotal"></strong></p>
+        <div class="pvbtns">${act(`<button type="button" class="btn pastesave" data-room-use${tip('ed.roomPresetUse')}>Use these lines</button>`, 'ed.roomPresetUse')}<button type="button" class="btn ghost" data-room-cancel${tip('ed.roomPresetCancel')}>Cancel</button></div></div>
+      <script type="application/json" id="room-presets-data">${JSON.stringify(data).replace(/</g, '\\u003c')}</script></details>`;
 }
 
 function addMenu(q) {
@@ -2089,6 +2136,7 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
       <div data-lines>${lines.map((l) => lineRow(l)).join('')}</div>
       <template id="line-tpl">${lineRow(blank, { open: true, fresh: true })}</template>
       <div class="sofar" data-total-so-far><span>Total so far</span><strong id="sum-sofar">${money(total)}</strong></div>
+      ${quick && quick.roomPresets && quick.roomPresets.length && !invoice.sent_at ? roomPresetBox(quick.roomPresets) : ''}
       ${addMenu(quick)}
       ${pasteBox()}</section>
     <section class="card" data-ed-plan><h2>How they pay</h2>

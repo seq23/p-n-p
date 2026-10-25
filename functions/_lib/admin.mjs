@@ -24,7 +24,7 @@ import { hasEmail } from './reminders.mjs';
 import { PRICE_TABLE, TRACK_TABLE, CONTACT } from './prices.mjs';
 import { renderInvoicePdf, textMessage } from './pdf.mjs';
 import { keepSentCopy, sentCopies, sentCopy, sentFile } from './sent-copies.mjs';
-import { prefillLines, porchPrefill, isRentalInvoice } from './pricing.mjs';
+import { prefillLines, porchPrefill, isRentalInvoice, isRoomSetup } from './pricing.mjs';
 import { pickupNote, businessDelivery } from './invoice-note.mjs';
 import { renderInvoiceEmail, paymentStatus } from './email.mjs';
 import * as V from './views.mjs';
@@ -303,6 +303,11 @@ async function quickAddsFor(env, key, lines) {
   const porch = pkg ? pkg.seasons.flatMap((x) => pkg.tierOrder.map((t) => porchPrefill({ porchSeason: x.key, porchDecor: t }, PRICE_TABLE).lines[0]).filter(Boolean)) : [];
   const out = { deliveryCents: Math.round(Number(q.deliveryFee || 0) * 100), extraGameCents: Math.round(Number(q.extraGame || 0) * 100), rental: false, games: [], span: '', baseCount: 0, porch };
   const request = key ? await findRequest(env, key) : null;
+  // "Room setup presets" (owner, 25 Oct 2026): offered when the request is a room setup or the
+  // invoice already carries a room setup preset line (services.json roomSetupPresets).
+  const presets = PRICE_TABLE.roomSetupPresets || [];
+  const presetNames = new Set(presets.flatMap((p) => p.lines.map((l) => l.description.toLowerCase())));
+  if (presets.length && ((request && (request.services || []).includes('party') && isRoomSetup(request)) || (lines || []).some((l) => presetNames.has(String(l.description || '').trim().toLowerCase())))) out.roomPresets = presets;
   out.rental = Boolean((request && (request.gamesAnswer || (request.wantsRentals && !request.wantsDecor))) || isRentalInvoice(lines, PRICE_TABLE));
   if (!out.rental) return out;
   const { results: bk } = key ? await env.DB.prepare("SELECT kind, date, items FROM bookings WHERE request_key = ?1 AND kind IN ('rental_pickup','rental_return')").bind(key).all() : { results: [] };
