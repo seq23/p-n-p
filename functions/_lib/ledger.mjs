@@ -204,7 +204,7 @@ export function linesFromForm(form) {
     const description = String(d || '').trim();
     if (!description) return;
     const q = Number(qty[i]);
-    const line = { description, qty: Number.isFinite(q) ? q : 1, unit_cents: toCents(price[i]), note: String(note[i] || '').trim(), refundable: ref[i] === '1' ? 1 : 0 };
+    const line = { description, qty: Number.isFinite(q) ? q : 1, unit_cents: toCents(price[i]), note: String(note[i] || '').replace(/\r\n?/g, '\n').trim(), refundable: ref[i] === '1' ? 1 : 0 };
     const [kind, sig] = String(auto[i] || '').split(':');
     line.auto = AUTO_KINDS.includes(kind) && sig === lineSig(line) ? kind : null;
     lines.push(line);

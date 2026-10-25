@@ -37,6 +37,24 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   `GET /admin/invoices/:id/invoice.pdf` renders the same invoice as a PDF (functions/_lib/pdf.mjs,
   pdf-lib) for customers reached by text; "Text the invoice (PDF)" shares it from the phone and
   the `texted` status action marks it sent without an email.
+- **Itemized lists and notes** (owner, 25 Oct 2026): every surface (invoice page, HTML and text
+  email, PDF, text message) reads ONE view model, `functions/_lib/invoice-view.mjs invoiceView`,
+  so a field can never be on one and missing from another. A line's note and the invoice's own
+  note ("Message to the customer", a full-width box) are multi-line and keep their line breaks
+  everywhere; a note row "item<TAB>$price" (or spaces / " - " / "…" before the price) shows as the
+  item with its price on the right. The text message lists the lines (with their notes), then the
+  total, payments, pickup and the note, in the invoice page's order. **📋 Paste a list** in the
+  editor turns each pasted row with a price at its end into its own ordinary line ("$300",
+  "300", "$1,250.00"); a Total / Subtotal row is only compared: "Your list said $400. The lines
+  add up to $400 ✓" or a yellow "These don't match". Preview, then Save these lines (saves the
+  draft, back to the same invoice) or Cancel; optional "Take out the lines already on this
+  invoice". The browser runs the same `parsePriceList` source as the server.
+- **What we sent ✉** (owner, 25 Oct 2026): every real invoice email keeps its exact HTML, text and
+  the PDF as it read then, with from / to / Bcc / time, in the private R2 bucket pnp-receipts under
+  `sent-invoices/<id>/<stamp>/`, listed in D1 `invoice_sent_copies` (migration 0024, additive).
+  The invoice shows "What we sent ✉ Sat 25 Oct, 1:43 PM", which opens that copy
+  (`/admin/invoices/:id/sent/:copy`). Test sends keep none. Invoices already Bcc hello@ (ownerCopy).
+  Proof: `npm run validate:admin-invoice-lists`.
 - **Main page on a phone** (owner, 24 Oct 2026): list → Done → Cancelled → Put away → tomorrow's
   reminders → "1·2·3 Shortcuts · Tap to open ▾" (closed; always open on a computer, on top) →
   "Delete customer ID photos (N ready) · Tap to open ▾" (closed; `#ids-ready` opens it).

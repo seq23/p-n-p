@@ -13,6 +13,7 @@ import { deriveSteps, undoFor, waitingDays, waitingWords, sentMs, WAIT_HIGHLIGHT
 import { parseFormDate, deliveryAddress, PICKUP_CHOICES, RETURN_CHOICES } from './calendar.mjs';
 import { dueWords, dueCents, balanceWords, depositHeldCents, cancelHeldCents } from './ledger.mjs';
 import { DELIVERY_LINE } from './invoice-note.mjs';
+import { invoiceView, parseRow, parsePriceList } from './invoice-view.mjs';
 import { kindCss } from './kinds.mjs';
 import { deriveProgress, STATUS_MEANINGS } from './progress.mjs';
 import { takedownState, inlineDefaultDate } from './takedown.mjs';
@@ -79,6 +80,10 @@ textarea{min-height:90px}
 .notice a{font-weight:600}
 .sumlines{width:100%;border-collapse:collapse}.sumlines td{padding:10px 0;border-bottom:1px solid var(--line);vertical-align:top}
 .sumlines .amt{text-align:right;white-space:nowrap;padding-left:12px}
+.sumlines td:first-child{overflow-wrap:anywhere;word-break:break-word}
+.nrows{margin-top:4px;font-size:.92rem;color:var(--muted)}.nrow{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.nrow>span:first-child{min-width:0;overflow-wrap:anywhere}.nrow .p{white-space:nowrap}.ngap{height:8px}
+.ivnotes{font-size:1rem;color:var(--ink)}.ivnotes .nrows{font-size:1rem;color:var(--ink)}
+.sentcopies{margin:6px 0 0;padding:0;list-style:none}.sentcopies li{margin:4px 0}.sentcopies a{display:inline-flex;align-items:center;min-height:44px;font-weight:600}
 .calc{margin-top:10px;border-top:2px solid var(--ink);padding-top:8px}.calc .spread{padding:4px 0}.calc .now{color:var(--accent);font-size:1.15rem}
 .plans{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 10px}@media(max-width:520px){.plans{grid-template-columns:1fr}}
 .plan{display:flex;gap:8px;align-items:flex-start;border:1.5px solid var(--line);border-radius:10px;padding:10px;cursor:pointer;background:#fff;margin:0}
@@ -1819,7 +1824,7 @@ export function lineEditor(line) {
       <div><label>How many</label><input name="line_qty" type="number" step="any" min="0" inputmode="decimal" value="${esc(line.qty)}" data-qty></div>
       <div><label>Price each ($)</label><input name="line_price" type="number" step="0.01" inputmode="decimal" value="${esc((line.unit_cents / 100).toFixed(2))}" data-price></div>
       <div class="full"><label>Given back after the event?</label><select name="line_refundable"><option value="0"${line.refundable ? '' : ' selected'}>No</option><option value="1"${line.refundable ? ' selected' : ''}>Yes, it is a refundable deposit</option></select></div>
-      <div class="full"><label>Note on this line (optional)</label><input name="line_note" value="${esc(line.note)}"></div>
+      <div class="full"><label>Note on this line (optional)</label><textarea name="line_note" rows="3" data-line-note-input>${esc(line.note)}</textarea></div>
       <input type="hidden" name="line_auto" value="${esc(autoTag(line))}">
     </div>
     <div style="margin-top:10px"><button type="button" class="btn danger" data-remove${tip('ed.removeLine')}>Remove this line…</button></div>
@@ -1878,9 +1883,10 @@ const EDITOR_JS = `
     if(b.hasAttribute('data-remove')){var a=el.querySelector('[data-rm-ask]');if(a){a.hidden=false;b.hidden=true;}return;}
     if(b.hasAttribute('data-rm-no')){el.querySelector('[data-rm-ask]').hidden=true;el.querySelector('[data-remove]').hidden=false;return;}
     if(b.hasAttribute('data-rm-yes')){el.remove();recalc();return;}});
-  function addLine(desc,price,o){o=o||{};list.insertAdjacentHTML('beforeend',tpl.innerHTML);var el=list.lastElementChild;el.querySelector('[name=line_desc]').value=desc||'';
+  function addLine(desc,price,o){o=o||{};list.insertAdjacentHTML('beforeend',tpl.innerHTML);var el=list.lastElementChild;el.querySelector('[name=line_desc]').value=desc||'';if(o.quiet)el.removeAttribute('data-open');
     var pr=el.querySelector('[data-price]');pr.value=(price!==null&&price!==undefined)?price:'';if(o.discount){el.setAttribute('data-discount','');pr.placeholder='Amount off, e.g. 20';}
     if(o.refundable)el.querySelector('[name=line_refundable]').value='1';if(o.note)el.querySelector('[name=line_note]').value=o.note;
+    if(o.quiet){el.removeAttribute('data-new');recalc();return el;}
     recalc();openLine(el,desc?'[data-price]':'[name=line_desc]');el.setAttribute('data-new','');closeMenu();el.scrollIntoView({block:'center'});return el;}
   var menu=document.getElementById('add-menu'),opener=document.getElementById('add-open');
   function closeMenu(){if(menu)menu.hidden=true;if(opener)opener.setAttribute('aria-expanded','false');}
@@ -1901,6 +1907,31 @@ const EDITOR_JS = `
       var first=[].slice.call(list.querySelectorAll('[data-line]')).find(function(el){return el.querySelector('[name=line_desc]').value.trim()&&!(parseFloat(el.querySelector('[data-price]').value)>0)&&el.querySelector('[name=line_note]').value!=='free'&&!el.hasAttribute('data-discount');});if(first)openLine(first,'[data-price]');return;}
     b.disabled=true;b.textContent='Sending…';
     var h=document.createElement('input');h.type='hidden';h.name='go';h.value='send';form.appendChild(h);}});
+  // "📋 Paste a list" (owner, 25 Oct 2026): each pasted row becomes its own priced line. The
+  // parser is invoice-view.mjs parseRow / parsePriceList, the same code the server tests run.
+  var pb=form.querySelector('[data-paste]');
+  if(pb){var pt=pb.querySelector('[data-paste-text]'),pv=pb.querySelector('[data-paste-preview]'),last=null;
+    function curTotal(){var t=0;list.querySelectorAll('[data-line]').forEach(function(el){var l=lineOf(el);if(l.d)t+=l.t;});return t;}
+    function pshow(){var r=parsePriceList(pt.value);last=r;if(!r.lines.length&&!r.skipped.length){pv.hidden=true;return;}pv.hidden=false;
+      txt('paste-count',r.lines.length===1?'This 1 line will be added:':'These '+r.lines.length+' lines will be added:');
+      pb.querySelector('[data-paste-lines]').innerHTML=r.lines.map(function(l){return '<tr data-paste-line><td>'+esc(l.description)+'</td><td class="amt">'+fmt(l.cents)+'</td></tr>';}).join('');
+      var tot=pb.querySelector('[data-paste-total]');
+      if(r.match===null){tot.className='notice';tot.textContent='The lines add up to '+dol(r.sum)+'.';}
+      else if(r.match){tot.className='notice ok';tot.textContent='Your list said '+dol(r.total.cents)+'. The lines add up to '+dol(r.sum)+' ✓';}
+      else{tot.className='notice warn';tot.textContent='Your list said '+dol(r.total.cents)+', but the lines add up to '+dol(r.sum)+'. These don’t match. Check the prices before you save.';}
+      var sk=pb.querySelector('[data-paste-skipped]');sk.hidden=!r.skipped.length;sk.querySelector('span').textContent=r.skipped.join(' · ');
+      var rp=pb.querySelector('[data-paste-replace]'),had=curTotal(),n=list.querySelectorAll('[data-line]').length;
+      var rw=pb.querySelector('[data-paste-replace-wrap]');rw.hidden=!n;
+      txt('paste-newtotal',fmt((rp&&rp.checked?0:had)+r.sum));
+      pb.querySelector('[data-paste-save]').disabled=!r.lines.length;}
+    pt.addEventListener('input',pshow);pb.addEventListener('change',pshow);
+    pb.querySelector('[data-paste-cancel]').addEventListener('click',function(){pt.value='';pv.hidden=true;pb.open=false;});
+    pb.querySelector('[data-paste-save]').addEventListener('click',function(e){var r=parsePriceList(pt.value);if(!r.lines.length)return;var b=e.currentTarget;b.disabled=true;b.textContent='Saving…';
+      var rp=pb.querySelector('[data-paste-replace]');if(rp&&rp.checked)list.querySelectorAll('[data-line]').forEach(function(el){el.remove();});
+      r.lines.forEach(function(l){addLine(l.description,(l.cents/100).toFixed(2),{quiet:true});});
+      pt.value='';var sv=form.querySelector('button[name=go][value=save]');if(form.requestSubmit)form.requestSubmit(sv);else sv.click();});}
+  ${parseRow.toString()}
+  ${parsePriceList.toString()}
   recalc();
 })();`;
 
@@ -1948,7 +1979,7 @@ export function lineRow(line, { open = false, fresh = false } = {}) {
       <div><label>How many</label><input name="line_qty" type="number" step="any" min="0" inputmode="decimal" value="${esc(line.qty)}" data-qty></div>
       <div><label>Price each ($)</label><input name="line_price" type="number" step="0.01" inputmode="decimal" value="${esc((line.unit_cents / 100).toFixed(2))}" data-price></div>
       <div class="full"><label>Given back after the event?</label><select name="line_refundable"><option value="0"${line.refundable ? '' : ' selected'}>No</option><option value="1"${line.refundable ? ' selected' : ''}>Yes, it is a refundable deposit</option></select></div>
-      <div class="full"><label>Note on this line (optional)</label><input name="line_note" value="${esc(line.note)}"></div>
+      <div class="full"><label>Note on this line (optional)</label><textarea name="line_note" rows="3" data-line-note-input>${esc(line.note)}</textarea></div>
       <input type="hidden" name="line_auto" value="${esc(autoTag(line))}">
       <p class="full lthis" data-l-this>This line: ${esc(line.qty)} × ${money(line.unit_cents)} = ${money(cents)}</p>
       <div class="full"><button type="button" class="btn done" data-done${tip('ed.lineDone')}>✓ Done with this line</button></div>
@@ -1971,7 +2002,10 @@ const EDITOR_CSS = `.ed .card{padding:14px}.ed h2{font-size:1.3rem;margin:0 0 8p
 .lrow[data-open]{background:var(--cream);border-radius:10px;padding:4px 8px;margin:4px -8px}
 .newtag{display:none;grid-column:1 / -1;margin:0;font:800 .8rem Inter,Arial,sans-serif;letter-spacing:.08em;color:#1f3b5c}.lrow[data-new] .newtag{display:block}
 .lgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;padding:4px 2px 12px}.lgrid .full{grid-column:1 / -1}.lgrid label{font-size:.9rem;margin:0}.lgrid input,.lgrid select{margin:2px 0 0}
-.lgrid .lthis{margin:2px 0 0;font-weight:600}.lgrid .btn.done{background:var(--ok);border-color:var(--ok);color:#fff;min-height:52px;font-size:1.05rem}
+.lgrid .lthis{margin:2px 0 0;font-weight:600}.lgrid textarea{margin:2px 0 0;min-height:70px}.lsum [data-l-note]{white-space:pre-line}
+.paste{margin-top:12px;border:1.5px dashed #cbbcad;border-radius:12px;padding:0 12px}.paste>summary{display:flex;align-items:center;min-height:52px;font-weight:700;cursor:pointer;list-style:none}.paste>summary::-webkit-details-marker{display:none}
+.paste textarea{min-height:170px;white-space:pre;overflow-x:auto}.paste .pv{margin:10px 0 12px}.paste .pv table{margin:6px 0}.paste .pastesave{background:var(--ok);border-color:var(--ok);color:#fff}.paste .pvbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.ivnote textarea{min-height:150px}.lgrid .btn.done{background:var(--ok);border-color:var(--ok);color:#fff;min-height:52px;font-size:1.05rem}
 .lgrid .rmzone{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line)}.rmask p{margin:4px 0 8px}.rmbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sofar{display:flex;justify-content:space-between;gap:10px;padding:10px 2px 4px;border-top:2px solid var(--ink);margin-top:6px;font-size:1.05rem}.sofar strong{font-size:1.2rem}
 .addwrap{margin-top:12px}.addwrap .addbig{width:100%;min-height:56px;font-size:1.08rem}
@@ -1991,6 +2025,22 @@ const EDITOR_CSS = `.ed .card{padding:14px}.ed h2{font-size:1.3rem;margin:0 0 8p
 // data/offers/services.json invoiceQuickAdds and data/offers/porch_packages.json (quickAddsFor in
 // admin.mjs), never typed here. On a rental, "Extra game" lists the games free for the whole
 // pickup -> return span; booked ones cannot be picked.
+// "📋 Paste a list" (owner, 25 Oct 2026): a full-width box; every row with a price at its end
+// becomes its own invoice line (EDITOR_JS, invoice-view.mjs parsePriceList). A "Total" row is
+// only checked against the sum. Nothing is saved until "Save these lines".
+function pasteBox() {
+  return `<details class="paste" data-paste><summary${tip('ed.paste')}>📋 Paste a list</summary>
+      <p class="muted" style="margin:0 0 6px">Paste one thing per row with its price at the end. Each row becomes its own line on the invoice.</p>
+      <label for="paste-text">Your list</label><textarea id="paste-text" rows="8" data-paste-text spellcheck="false" placeholder="Balloon garland    $300&#10;Banner    $25&#10;Total    $325"></textarea>
+      <div class="pv" data-paste-preview hidden><p style="margin:0;font-weight:700" id="paste-count"></p>
+        <table class="sumlines" data-paste-lines></table>
+        <div class="notice" data-paste-total></div>
+        <div class="notice warn" data-paste-skipped hidden><strong>These rows have no price, so they are left out:</strong> <span></span></div>
+        <label class="choice" data-paste-replace-wrap style="display:flex;gap:10px;align-items:center;margin-top:8px" hidden><input type="checkbox" data-paste-replace style="width:24px;height:24px;min-height:0"> Take out the lines already on this invoice</label>
+        <p style="margin:8px 0 0">Invoice total after saving: <strong id="paste-newtotal"></strong></p>
+        <div class="pvbtns">${act(`<button type="button" class="btn pastesave" data-paste-save${tip('ed.pasteSave')}>Save these lines</button>`, 'ed.pasteSave')}<button type="button" class="btn ghost" data-paste-cancel${tip('ed.pasteCancel')}>Cancel</button></div></div></details>`;
+}
+
 function addMenu(q) {
   const d = (c) => (c / 100).toFixed(2);
   const opt = (key, icon, big, small, attrs) => `<button type="button" class="addopt" ${attrs}${tip(key)}><span class="ai" aria-hidden="true">${icon}</span><span><b>${esc(big)}</b><small>${esc(small)}</small></span></button>`;
@@ -2039,13 +2089,15 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
       <div data-lines>${lines.map((l) => lineRow(l)).join('')}</div>
       <template id="line-tpl">${lineRow(blank, { open: true, fresh: true })}</template>
       <div class="sofar" data-total-so-far><span>Total so far</span><strong id="sum-sofar">${money(total)}</strong></div>
-      ${addMenu(quick)}</section>
+      ${addMenu(quick)}
+      ${pasteBox()}</section>
     <section class="card" data-ed-plan><h2>How they pay</h2>
       <div class="plans list">${PLAN_CHOICES.map(([v, big, id]) => `<label class="plan" data-plan-choice="${v}"><input type="radio" name="pay_plan" value="${v}"${plan === v ? ' checked' : ''}><span><strong>${big}</strong><small${id ? ` id="${id}"` : ''}>${esc(id ? amt[id] : 'You type the deposit')}</small></span></label>${v === 'custom' ? `<div id="custom-wrap"${plan === 'custom' ? '' : ' hidden'}><label for="dep">Deposit to ask for now ($)</label><input id="dep" name="deposit" type="number" step="0.01" inputmode="decimal" value="${esc((invoice.deposit_due_cents / 100).toFixed(2))}"></div>` : ''}`).join('')}</div>
       <label for="dd">Due date</label><input id="dd" name="due_date" type="date" value="${esc(invoice.due_date)}">
       <p class="muted" style="margin:6px 0 0;font-size:.92rem">The amounts in grey update as you add lines.</p>
       <input type="hidden" name="issue_date" value="${esc(invoice.issue_date)}"></section>
-    <details class="card note"${invoice.notes ? ' open' : ''}><summary${tip('ed.note')}>Message to the customer (optional)</summary><textarea id="nt" name="notes" aria-label="Message to the customer">${esc(invoice.notes)}</textarea></details>
+    <section class="card note ivnote" data-ed-note><label for="nt"><span${tip('ed.note')}><strong>Message to the customer (optional)</strong></span></label><textarea id="nt" name="notes" rows="6" aria-label="Message to the customer">${esc(invoice.notes)}</textarea>
+      <p class="muted" style="margin:6px 0 0;font-size:.92rem">Line breaks stay as you type them.</p></section>
     <section class="card sumbox" data-ed-summary>
       <div class="notice err" id="price-needed"${priceNeeded.length ? '' : ' hidden'}><strong>Add a price first:</strong> <span>${esc(priceNeeded.map((l) => l.description).join(', '))}</span>. Tap ✏️ Change on the line, type the price, then send.</div>
       <div class="row2"><span>Total</span><span class="big" id="sum-total">${money(total)}</span></div>
@@ -2057,8 +2109,21 @@ export function invoiceEditorPage({ invoice, lines, request, action, title, warn
   <script>${EDITOR_JS}</script>`, { screen: 'invoiceEdit', back: { href: backHref, label: 'Back' } });
 }
 
-export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml = '', smsText = '', pickup = '', balance = null, payments = [] }) {
+// Note rows (invoice-view.mjs noteRows) as page HTML: "item ... $price" rows with the price on
+// the right, plain rows as their own lines, blank rows as a gap. Never cut off: rows wrap.
+export function noteRowsHtml(rows) {
+  return `<div class="nrows">${rows.map((r) => (r.item ? `<div class="nrow"><span>${esc(r.item)}</span><span class="p">${esc(r.price)}</span></div>` : (r.text ? `<div class="nrow"><span>${esc(r.text)}</span></div>` : '<div class="ngap"></div>'))).join('')}</div>`;
+}
+
+// "What we sent ✉ Sat 25 Oct, 1:43 PM": each stored copy of an invoice email (sent-copies.mjs).
+function sentCopiesHtml(id, copies = []) {
+  if (!copies.length) return '';
+  return `<ul class="sentcopies" data-sent-copies>${copies.map((c) => `<li><a href="/admin/invoices/${id}/sent/${c.id}"${tip('iv.sentCopy')}>What we sent ✉ ${esc(c.when)}</a> <span class="muted">to ${esc(c.to_email)}</span></li>`).join('')}</ul>`;
+}
+
+export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml = '', smsText = '', pickup = '', balance = null, payments = [], sentCopies = [] }) {
   const total = invoiceTotal(lines);
+  const view = invoiceView({ invoice, lines });
   const plan = payPlanOf(invoice, total);
   const ps = payStepsOf(invoice, lines, { paid: balance && !balance.void ? balance.paid : 0, payments });
   const id = invoice.id;
@@ -2082,11 +2147,12 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
     <iframe class="emailframe" title="Invoice email" srcdoc="${esc(emailHtml)}" onload="try{this.style.height=(this.contentDocument.documentElement.scrollHeight+24)+'px'}catch(e){}"></iframe></div>` : '';
   return layout(invoice.customer_name || invoice.number, `<div class="spread"><h1 style="margin:0">${esc(invoice.customer_name || 'Invoice')}</h1>${chip(invoice.status)}</div>
   <p class="muted" style="margin-top:4px">Invoice ${esc(invoice.number)}${invoice.sent_at ? ` · last sent ${esc(prettyDate(invoice.sent_at.slice(0, 10)))}` : ' · not sent yet'}</p>
+  ${sentCopiesHtml(invoice.id, sentCopies)}
   ${voided ? '<div class="stamp" data-void-stamp aria-label="This invoice is void">VOID</div><div class="notice warn">This invoice is void. It cannot be sent or marked paid, and it is off the calendar. It keeps its number.</div>' : ''}
   ${flash ? `<div class="notice ok" style="font-size:1.1rem"><strong>${esc(flash)}</strong></div>` : ''}${error ? `<div class="notice err">${esc(error)}</div>` : ''}
   ${!voided && invoice.status === 'draft' ? paymentWarning(pay) : ''}
   <style>${PAY_STEPS_CSS}</style><div class="card" data-invoice-total><table class="sumlines">
-    ${lines.map((l) => `<tr><td>${esc(l.description)}${Number(l.qty) !== 1 ? ` × ${esc(l.qty)}` : ''}${l.refundable ? '<div class="muted">Given back after the event</div>' : (l.note && l.note !== 'free' ? `<div class="muted">${esc(l.note)}</div>` : '')}</td><td class="amt">${needsPrice(l) ? '<strong style="color:#8f3427">Price needed</strong>' : (lineTotal(l) === 0 ? 'Free' : money(lineTotal(l)))}</td></tr>`).join('')}
+    ${view.rows.map((r) => `<tr data-line-row><td>${esc(r.label)}${r.refundable ? '<div class="muted">Given back after the event</div>' : ''}${r.note.length ? `<div data-line-note>${noteRowsHtml(r.note)}</div>` : ''}</td><td class="amt">${r.needsPrice ? '<strong style="color:#8f3427">Price needed</strong>' : esc(r.amount)}</td></tr>`).join('')}
   </table>
     <div class="calc">
       <div class="spread"><span>Total</span><span class="bigtotal">${money(total)}</span></div>
@@ -2094,6 +2160,7 @@ export function invoiceViewPage({ invoice, lines, pay, flash, error, emailHtml =
       ${voided ? '' : payStepsHtml(ps, { who })}
       ${pickup ? `<p class="muted" style="margin:8px 0 0" data-pickup-line>${esc(pickup)}</p>` : ''}
     </div>
+    ${view.notes.length ? `<div class="ivnotes" data-invoice-notes><h3 style="margin:14px 0 4px">Message to ${esc(who)}</h3>${noteRowsHtml(view.notes)}</div>` : ''}
   </div>
   ${invoice.status === 'draft' ? preview : ''}
   ${main}
@@ -2331,3 +2398,18 @@ export function checklistOnlinePage({ request, rk, sections, photos, values, max
 }
 
 export { act, chip, confirmStep, hiddenInputs, BACK_REQUESTS };
+
+// "What we sent ✉": the exact email a customer got (sent-copies.mjs), with who / when and its PDF.
+// The stored HTML is shown untouched except that the inline QR picture (cid:) is pointed at the
+// current QR so it shows here; the stored file itself is never changed.
+export function sentCopyPage({ invoice, copy, html = '', text = '', hasPdf = false }) {
+  const base = `/admin/invoices/${invoice.id}/sent/${copy.id}`;
+  const shown = String(html).replace(/cid:pnp-payment-qr/g, '/api/admin/qr.png');
+  return layout(`What we sent ${invoice.customer_name || invoice.number}`, `<h1 style="margin:0">What we sent ✉</h1>
+  <div class="card" data-sent-meta><p style="margin:0"><strong>${esc(copy.when)}</strong></p>
+    <p class="muted" style="margin:6px 0 0">From ${esc(copy.from_email)}<br>To ${esc(copy.to_email)}${copy.bcc ? `<br>Copy (Bcc) to ${esc(copy.bcc)}` : ''}<br>Subject: ${esc(copy.subject)}</p>
+    <div class="actions" style="margin-top:10px">${hasPdf ? `<a class="btn ghost" href="${base}/invoice.pdf" target="_blank" rel="noopener">Open the PDF from that day</a>` : ''}<a class="btn ghost" href="/admin/invoices/${invoice.id}">Back to the invoice</a></div></div>
+  <div class="card" style="padding:0;overflow:hidden"><div class="muted" style="padding:10px 14px;border-bottom:1px solid var(--line)">The email exactly as it went out</div>
+    <iframe class="emailframe" title="The email that was sent" sandbox="allow-same-origin" srcdoc="${esc(shown)}" onload="try{this.style.height=(this.contentDocument.documentElement.scrollHeight+24)+'px'}catch(e){}"></iframe></div>
+  <details class="disclose"><summary>The plain-text part</summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere" data-sent-text>${esc(text)}</pre></details>`, { screen: 'invoice', back: { href: `/admin/invoices/${invoice.id}`, label: 'Back to the invoice' } });
+}
