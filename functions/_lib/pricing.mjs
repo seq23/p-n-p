@@ -37,6 +37,9 @@ export function buildPriceTable(source, services, porchPackages = null) {
   const fromOf = (k) => { const v = services && services.services && services.services[k]; const n = Number(String((v && v.price) || '').replace(/[^0-9.]/g, '')); return Number.isFinite(n) ? cents(n) : 0; };
   return {
     celebrationFromCents: fromOf('celebration'),
+    // The room setup starting line (owner-approved 25 Oct 2026): services.json
+    // services.celebration.roomSetup, the one definition of its words and price.
+    roomSetup: (() => { const r = services && services.services && services.services.celebration && services.services.celebration.roomSetup; return r && r.description ? { description: String(r.description), cents: cents(Number(r.price) || 0) } : null; })(),
     grazingFromCents: fromOf('grazing'),
     dayCents: cents(games.rates.day),
     weekendCents: cents(games.rates.weekend),
@@ -240,7 +243,10 @@ export function prefillLines(request, table) {
     if (party || grazing) {
       const a = serviceAnswers(request);
       const note = (x) => [x.where, x.guests ? `${x.guests} guests` : '', x.budget ? `budget ${x.budget}` : ''].filter(Boolean).join(' · ');
-      if (party) lines.push({ description: `Party decor${a.party.event ? `: ${a.party.event}` : ''}`, qty: 1, unit_cents: table.celebrationFromCents || 0, note: note(a.party), refundable: 0, auto: 'start' });
+      // A room setup (hotel room, suite, Airbnb, bedroom; owner, 25 Oct 2026) starts at the basic
+      // room setup line from the price table instead of the "Party decor" line.
+      if (party && table.roomSetup && isRoomSetup(request, a)) lines.push({ description: table.roomSetup.description, qty: 1, unit_cents: table.roomSetup.cents, note: note(a.party), refundable: 0, auto: 'start' });
+      else if (party) lines.push({ description: `Party decor${a.party.event ? `: ${a.party.event}` : ''}`, qty: 1, unit_cents: table.celebrationFromCents || 0, note: note(a.party), refundable: 0, auto: 'start' });
       if (grazing) {
         lines.push({ description: `Grazing table styling${a.grazing.event ? `: ${a.grazing.event}` : ''}`, qty: 1, unit_cents: table.grazingFromCents || 0, note: note(a.grazing), refundable: 0, auto: 'start' });
         if (/^yes/i.test(a.grazing.food)) lines.push({ description: 'Food (at cost)', qty: 1, unit_cents: 0, note: '', refundable: 0, auto: 'food' }); // $0 = price needed
@@ -255,6 +261,19 @@ export function prefillLines(request, table) {
     }
   }
   return lines;
+}
+
+// A party request for a room setup: its "Where is it?" names a hotel, motel, Airbnb, suite, bedroom
+// or a room (not a living / dining / ball / party / event room, a home or a venue, even in a hotel), or its
+// event type says "hotel room" or "room setup". Porches, grazing and rentals never reach this.
+const ROOM_WHERE = /\b(hotels?|motels?|airbnbs?|air bnb|suites?|bedrooms?|rooms?)\b/i;
+const NOT_A_ROOM = /\b(living|dining|family|ball|banquet|conference|meeting|party|event|community|game|rec|recreation|board|break|club|show|class)\s?rooms?\b/i;
+const ROOM_EVENT = /\bhotel\s+room\b|\broom\s+set\s?-?up\b/i;
+export function isRoomSetup(request, answers = serviceAnswers(request)) {
+  const where = String((answers && answers.party && answers.party.where) || '');
+  const event = [answers && answers.party && answers.party.event, request && request.eventType].filter(Boolean).join(' ');
+  if (ROOM_EVENT.test(event)) return true;
+  return ROOM_WHERE.test(where) && !NOT_A_ROOM.test(where);
 }
 
 // The party and grazing answers of one request, apart (both ask "How many guests?" and "Budget",
