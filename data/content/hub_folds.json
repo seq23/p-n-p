@@ -1,0 +1,482 @@
+{
+  "schema_version": 1,
+  "written_by": "scripts/search_intelligence/extract_hub_folds.py (one-shot, 26 Oct 2026)",
+  "rendered_by": "scripts/install_hub_folds.js",
+  "rule": "Text only, one copy of each question and answer per hub; a question the hub already asks is dropped.",
+  "hubs": {
+    "/services/baby-shower-decor-memphis": [
+      {
+        "q": "Baby shower decorations in Memphis",
+        "a": "Porch & Party provides baby shower decorations in Memphis for hosts who want the space to feel polished, photo-ready, and emotionally aligned with the event.",
+        "from": "/answers/baby-shower-decorations-memphis"
+      },
+      {
+        "q": "Can baby shower decor be done at home or only in venues?",
+        "a": "It can work in both. The quote depends on layout, guest flow, focal areas, and the overall level of styling needed.",
+        "from": "/answers/baby-shower-decorations-memphis"
+      },
+      {
+        "q": "How much does it cost to decorate for a gender reveal party in Memphis?",
+        "a": "A styled and installed gender reveal setup from Porch & Party starts at $300, the published starting price for celebration setups. The final quote depends on how much of the space is decorated, the venue and access window, and whether a grazing table is added, which starts at $250+ for styling. Buying and assembling decor yourself costs less and takes your own time.",
+        "from": "/faq/how-much-does-gender-reveal-decor-cost-in-memphis"
+      },
+      {
+        "q": "Can Porch & Party set up a gender reveal in a backyard?",
+        "a": "Yes, subject to availability and the space. Outdoor setups need a plan for wind and heat, so say in the quote form that the reveal is outdoors and describe the area the decor will go in.",
+        "from": "/faq/how-much-does-gender-reveal-decor-cost-in-memphis"
+      }
+    ],
+    "/services/birthday-party-decor-memphis": [
+      {
+        "q": "Balloon garland vs full birthday setup",
+        "a": "A balloon garland works when you need one focal decorative moment. A full birthday setup makes more sense when the event needs a stronger overall look with multiple styled elements or a more finished room transformation.",
+        "from": "/answers/balloon-garland-vs-full-birthday-setup"
+      },
+      {
+        "q": "Which option is better for photos?",
+        "a": "A full setup usually gives stronger photo coverage because more of the space looks intentional, not just one focal corner.",
+        "from": "/answers/balloon-garland-vs-full-birthday-setup"
+      },
+      {
+        "q": "Birthday decorations at home in Memphis",
+        "a": "Porch & Party provides birthday decorations at home in Memphis for families who want a more styled, photo-ready celebration without taking on setup stress themselves.",
+        "from": "/answers/birthday-decorations-at-home-memphis"
+      },
+      {
+        "q": "Can the setup focus on one part of the house?",
+        "a": "Yes. Some home birthday setups focus on one key area, while others style multiple connected spaces based on the event and budget.",
+        "from": "/answers/birthday-decorations-at-home-memphis"
+      },
+      {
+        "q": "How much does birthday decoration at home cost?",
+        "a": "For Porch & Party, at-home celebration setups start at $300+. The final quote depends on the age group, focal areas being styled, materials, timing, and how full the setup needs to feel.",
+        "from": "/answers/how-much-does-birthday-decoration-at-home-cost"
+      },
+      {
+        "q": "What usually affects the final home birthday quote most?",
+        "a": "The biggest variables are how many areas need to be styled, how full the setup should feel, the materials involved, and how much setup time is required.",
+        "from": "/answers/how-much-does-birthday-decoration-at-home-cost"
+      },
+      {
+        "q": "Last-minute birthday setup ideas in Memphis",
+        "a": "The best last-minute birthday setups focus on one strong visual moment, one clean color direction, and a realistic setup scope. Porch & Party can help turn a short-notice request into something more polished and less chaotic.",
+        "from": "/answers/last-minute-birthday-setup-ideas-memphis"
+      },
+      {
+        "q": "Can a last-minute setup still look polished?",
+        "a": "Yes, if the scope stays focused and the visual priorities are clear. A smaller, stronger setup usually performs better than an overreaching rushed one.",
+        "from": "/answers/last-minute-birthday-setup-ideas-memphis"
+      },
+      {
+        "q": "How much does a balloon garland cost in Memphis?",
+        "a": "A balloon garland delivered and installed as part of a Porch & Party celebration setup starts at $300, the published starting price for celebration setups. A self-assembly balloon kit bought retail costs far less and takes a few hours of your own time to inflate and build. The two are not the same purchase, and comparing them by price alone hides the difference.",
+        "from": "/faq/how-much-does-a-balloon-garland-cost-in-memphis"
+      },
+      {
+        "q": "Can I book just a balloon garland with nothing else?",
+        "a": "You can ask. A garland on its own is a small scope, so whether it works as a standalone booking depends on the date, the venue, and what else is on the schedule. Describe the request in the quote form and Porch & Party will say quickly whether it fits.",
+        "from": "/faq/how-much-does-a-balloon-garland-cost-in-memphis"
+      }
+    ],
+    "/services/birthday-party-planner-memphis": [
+      {
+        "q": "Can I book decor only without full event planning?",
+        "a": "Yes. Porch & Party is built for decor-only help when you need the room, table, porch, or focal setup handled without hiring a full-service event planner.",
+        "from": "/answers/can-i-book-decor-only-without-event-planning"
+      },
+      {
+        "q": "What is the difference between party decor and event planning?",
+        "a": "Party decor focuses on how the space looks and feels: styling, setup, room presentation, table moments, and focal decor.",
+        "from": "/answers/party-decor-vs-event-planning-memphis"
+      },
+      {
+        "q": "Party planner in Memphis",
+        "a": "Porch & Party is not a full-service event-planning agency handling vendors and logistics from start to finish. It is a Memphis-area styling and setup business focused on celebration decor, hotel-room setups, porch installations, and grazing-table presentation.",
+        "from": "/answers/party-planner-memphis"
+      },
+      {
+        "q": "Baby shower planning checklist for Memphis hosts",
+        "a": "Work the checklist in this order: confirm the guest of honour’s date window and guest count first, then the venue, then the date, then invitations, then food, then decor and setup. Decor comes late deliberately — styling decisions depend on the space and the guest count, and locking them earlier is what forces the expensive reversals.",
+        "from": "/guides/baby-shower-planning-checklist-memphis"
+      },
+      {
+        "q": "How far in advance should a baby shower be planned?",
+        "a": "Give yourself enough runway to confirm the venue and send invitations with several weeks of notice for guests. Shorter timelines are workable — the order of the checklist matters more than the total lead time, and decor requests can still be reviewed on short notice subject to availability.",
+        "from": "/guides/baby-shower-planning-checklist-memphis"
+      },
+      {
+        "q": "Bridal shower planning checklist for Memphis hosts",
+        "a": "Plan a bridal shower in this order: agree who is hosting and the budget, fix the date against the wedding calendar, build the guest list from the wedding guest list, confirm the venue, send invitations, choose the palette, plan the food, then book decor and setup. Decor comes after the venue and the count because both decide what the styling has to fill.",
+        "from": "/guides/bridal-shower-planning-checklist-memphis"
+      },
+      {
+        "q": "Who usually plans and pays for a bridal shower?",
+        "a": "It is commonly hosted by the maid of honour, the bridal party, or a family member, and the hosts usually cover it between them. The only hard rule is to agree it before booking anything, because the budget decides the venue and the scope of decor.",
+        "from": "/guides/bridal-shower-planning-checklist-memphis"
+      }
+    ],
+    "/services/bridal-shower-decor-memphis": [
+      {
+        "q": "Bridal shower decorations in Memphis",
+        "a": "Porch & Party provides bridal shower decorations in Memphis for hosts who want the setup to feel polished, cohesive, and visually strong in photos and in person.",
+        "from": "/answers/bridal-shower-decorations-memphis"
+      },
+      {
+        "q": "Can Porch & Party style the table area too?",
+        "a": "Yes. Depending on the event, the quote can include decor styling for the table presentation, the focal area, or both.",
+        "from": "/answers/bridal-shower-decorations-memphis"
+      },
+      {
+        "q": "What are good grazing table ideas for bridal showers, birthdays, and small events?",
+        "a": "Good grazing table ideas combine a clean layout, layered serving pieces, color direction, small floral or decor accents, signage when useful, and enough negative space for the table to look styled instead of crowded.",
+        "from": "/answers/grazing-table-ideas-bridal-showers-birthdays-small-events"
+      }
+    ],
+    "/services/budget-party-decor-memphis": [
+      {
+        "q": "DIY vs hiring a party decorator",
+        "a": "DIY is best when the setup is simple, time is flexible, and visual polish is not the main priority. Hiring a decorator makes more sense when the event needs to feel cleaner, stronger, and ready without you spending the day setting it up.",
+        "from": "/answers/diy-vs-hiring-party-decorator"
+      },
+      {
+        "q": "When is hiring a decorator most worth it?",
+        "a": "It is most worth it when timing is tight, the setup matters emotionally, or the event needs to look polished without you spending the day building it.",
+        "from": "/answers/diy-vs-hiring-party-decorator"
+      }
+    ],
+    "/services/celebration-setups-memphis": [
+      {
+        "q": "Do party decorators come to your house?",
+        "a": "Yes. Porch & Party comes to homes in Memphis and the surrounding service area for birthday setups, celebration styling, and other decor-focused requests that fit its setup scope.",
+        "from": "/answers/do-party-decorators-come-to-your-house"
+      },
+      {
+        "q": "Do home setups cost less than venue setups?",
+        "a": "Not always. The quote depends more on the scope, layout, and setup requirements than on the word “home” versus “venue.”",
+        "from": "/answers/do-party-decorators-come-to-your-house"
+      },
+      {
+        "q": "Event decorator in Memphis",
+        "a": "Porch & Party provides event decorating in Memphis for celebrations, showers, corporate gatherings, porch installs, and room setups that need strong visual presentation without bloated planning overhead.",
+        "from": "/answers/event-decorator-memphis"
+      },
+      {
+        "q": "What kinds of events fit Porch & Party best?",
+        "a": "Celebrations, room setups, porch installs, showers, and smaller events where decor and visual setup are a major part of the experience.",
+        "from": "/answers/event-decorator-memphis"
+      },
+      {
+        "q": "How far in advance should I book party decor?",
+        "a": "Earlier is better, especially for seasonal porch installs, weekends, hotel surprises, and dates tied to birthdays or milestone events. Porch & Party can still review shorter-notice requests, but availability is never guaranteed until confirmed.",
+        "from": "/answers/how-far-in-advance-should-i-book-party-decor"
+      },
+      {
+        "q": "What should be booked earliest?",
+        "a": "Seasonal porch installs, holiday dates, hotel surprises, and weekend celebration setups should be requested first because they tend to create the most schedule pressure.",
+        "from": "/answers/how-far-in-advance-should-i-book-party-decor"
+      },
+      {
+        "q": "How long does it take to set up party decor?",
+        "a": "Simple setups can move faster, while fuller room transformations, staircase moments, and multi-area installs naturally take longer. Porch & Party quotes and schedules setup time based on the real design and access conditions.",
+        "from": "/answers/how-long-does-it-take-to-set-up-party-decor"
+      },
+      {
+        "q": "What usually makes setup take longer?",
+        "a": "Multiple focal areas, more materials, tight access windows, and room transformations all increase setup time.",
+        "from": "/answers/how-long-does-it-take-to-set-up-party-decor"
+      },
+      {
+        "q": "How much does party decor cost in Memphis?",
+        "a": "Party decor in Memphis with Porch & Party starts at $300+ for celebration setups.",
+        "from": "/answers/how-much-does-party-decor-cost-in-memphis"
+      },
+      {
+        "q": "Memphis celebration setups",
+        "a": "Porch & Party provides celebration setups in Memphis for home birthdays, hotel room decorations, romantic surprises, and other personal events that need a polished, warm, and photo-ready result.",
+        "from": "/answers/memphis-celebration-setups"
+      },
+      {
+        "q": "Where should someone start?",
+        "a": "Start with the type of celebration you are planning, review the related service and FAQ pages, and then submit the quote form with the date, city, and setup notes.",
+        "from": "/answers/memphis-celebration-setups"
+      },
+      {
+        "q": "What are good small party decor ideas in Memphis?",
+        "a": "The best small party decor ideas in Memphis focus on one strong focal area, a clean color palette, table or entry styling, and a setup that fits the space instead of overcrowding it.",
+        "from": "/answers/small-party-decor-ideas-memphis"
+      },
+      {
+        "q": "What is included in a party decor setup?",
+        "a": "A party decor setup usually includes the approved visual styling for the occasion: a focal area, room presentation, balloon or table accents when included, and on-site setup.",
+        "from": "/answers/what-is-included-in-party-decor-setup"
+      }
+    ],
+    "/services/christmas-porch-decorating": [
+      {
+        "q": "Can the setup be customized?",
+        "a": "Yes. Christmas porch decorating is quoted by scale and visual direction so the setup works with the home and the desired holiday feel.",
+        "from": "/answers/christmas-porch-decorating-memphis"
+      },
+      {
+        "q": "What does Seasonal Porch Decorating include?",
+        "a": "Memphis seasonal porch decorating, front porch styling, holiday porch decorating, and seasonal porch installations for homes that need a polished front-entry look.",
+        "from": "/answers/christmas-porch-decorating-memphis"
+      },
+      {
+        "q": "What can change the final quote for Seasonal Porch Decorating?",
+        "a": "Seasonal Porch Decorating starts at $350+. Takedown starts at $75, quoted with your setup. Final pricing depends on scale, material choice, and setup complexity.",
+        "from": "/answers/christmas-porch-decorating-memphis"
+      },
+      {
+        "q": "Do you offer take-down for seasonal porch decorating?",
+        "a": "Yes. Takedown starts at $75, quoted with your setup.",
+        "from": "/answers/christmas-porch-decorating-memphis"
+      },
+      {
+        "q": "How much does professional Christmas decorating cost in Memphis?",
+        "a": "Porch & Party seasonal porch decorating, which covers Christmas porch installs in the Memphis metro area, starts at $350. That is a starting price rather than a package price: the final quote depends on how much frontage is being styled, whether materials are supplied or reused from what you already own, how complex the install is, and whether you add take-down in January.",
+        "from": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis"
+      },
+      {
+        "q": "Is Christmas porch decorating priced per hour or per job?",
+        "a": "Per job. Porch & Party quotes a seasonal porch install on scope — the size of the entry, the materials involved, and the install complexity — starting at $350, rather than billing an hourly rate.",
+        "from": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis"
+      }
+    ],
+    "/services/fall-porch-decorating": [
+      {
+        "q": "What are good fall porch decorating ideas for Southern homes?",
+        "a": "Good Southern fall porch decorating usually uses layered pumpkins, warm neutrals, lanterns, planters, a seasonal wreath, and enough symmetry to make the front entry feel intentional without looking cluttered.",
+        "from": "/answers/fall-porch-decorating-ideas-southern-homes"
+      },
+      {
+        "q": "Halloween porch decorating in Memphis",
+        "a": "Porch & Party offers Halloween porch decorating in Memphis for clients who want the front of the home to feel seasonal, welcoming, and visually strong without handling the install themselves.",
+        "from": "/answers/halloween-porch-decorating-memphis"
+      },
+      {
+        "q": "What does Seasonal Porch Decorating include?",
+        "a": "Memphis seasonal porch decorating, front porch styling, holiday porch decorating, and seasonal porch installations for homes that need a polished front-entry look.",
+        "from": "/answers/halloween-porch-decorating-memphis"
+      },
+      {
+        "q": "What can change the final quote for Seasonal Porch Decorating?",
+        "a": "Seasonal Porch Decorating starts at $350+. Takedown starts at $75, quoted with your setup. Final pricing depends on scale, material choice, and setup complexity.",
+        "from": "/answers/halloween-porch-decorating-memphis"
+      },
+      {
+        "q": "Do you offer take-down for seasonal porch decorating?",
+        "a": "Yes. Takedown starts at $75, quoted with your setup.",
+        "from": "/answers/halloween-porch-decorating-memphis"
+      }
+    ],
+    "/services/grazing-tables-memphis": [
+      {
+        "q": "Corporate event decor in Memphis",
+        "a": "Porch & Party provides corporate event decor in Memphis for businesses that want a cleaner, more intentional visual setup for hosted gatherings, retreats, and internal or client-facing events.",
+        "from": "/answers/corporate-event-decor-memphis"
+      },
+      {
+        "q": "Does corporate event decor have to be elaborate to feel polished?",
+        "a": "No. The strongest corporate event decor often comes from restraint, consistency, and a setup that matches the room and event purpose well.",
+        "from": "/answers/corporate-event-decor-memphis"
+      },
+      {
+        "q": "Corporate grazing tables in Memphis",
+        "a": "Porch & Party offers corporate grazing-table styling in Memphis for businesses and hosts who want a stronger presentation for a work event, hosted gathering, or client-facing setup.",
+        "from": "/answers/corporate-grazing-tables-memphis"
+      },
+      {
+        "q": "Is food included in the base corporate grazing quote?",
+        "a": "No. Base grazing pricing covers styling only. Food sourcing can be added separately when requested.",
+        "from": "/answers/corporate-grazing-tables-memphis"
+      },
+      {
+        "q": "Do grazing tables include food?",
+        "a": "No. Porch & Party grazing-table starting pricing covers styling only. Food is not included by default, but food sourcing can be requested for an additional fee.",
+        "from": "/answers/do-grazing-tables-include-food"
+      },
+      {
+        "q": "Can food be added later?",
+        "a": "Yes. If food is needed, that can be requested in the quote process and priced separately from the base styling setup.",
+        "from": "/answers/do-grazing-tables-include-food"
+      },
+      {
+        "q": "Grazing tables in Memphis",
+        "a": "Porch & Party offers grazing-table styling in Memphis for showers, corporate gatherings, and small events that need a cleaner, more elevated presentation. Base pricing starts at $250+ for styling only.",
+        "from": "/answers/grazing-tables-memphis"
+      },
+      {
+        "q": "Is this better for corporate events or personal events?",
+        "a": "It works for both. The main difference is tone, guest count, and whether the setup needs to feel more intimate or more polished for a professional environment.",
+        "from": "/answers/grazing-tables-memphis"
+      },
+      {
+        "q": "How much does a grazing table cost in Memphis?",
+        "a": "Grazing table styling in Memphis starts at $250+ with Porch & Party.",
+        "from": "/answers/how-much-does-a-grazing-table-cost-in-memphis"
+      },
+      {
+        "q": "How much do grazing tables cost?",
+        "a": "For Porch & Party, grazing-table and styled table setups start at $250+ for styling only. Food is not included by default and can be quoted separately when requested.",
+        "from": "/answers/how-much-does-grazing-tables-cost"
+      },
+      {
+        "q": "Does the starting price include food?",
+        "a": "No. The starting price covers styling only. Food can be sourced for an additional fee if requested during the quote process.",
+        "from": "/answers/how-much-does-grazing-tables-cost"
+      },
+      {
+        "q": "Grazing table vs charcuterie board: what is the difference?",
+        "a": "A charcuterie board is a single board of cured meats, cheeses and accompaniments that a few people share. A grazing table is a whole table styled with food laid directly across it, built on site to feed and anchor a larger gathering. Choose a board for a small group; choose a grazing table when the food is also part of the room's decor.",
+        "from": "/comparisons/grazing-table-vs-charcuterie-board"
+      },
+      {
+        "q": "Does a Porch & Party grazing table include the food?",
+        "a": "Not by default. The base price covers styling and table presentation. Food can be sourced for an additional fee, so say in the quote form whether you are supplying it or want it arranged.",
+        "from": "/comparisons/grazing-table-vs-charcuterie-board"
+      }
+    ],
+    "/services/hotel-room-decor-memphis": [
+      {
+        "q": "Anniversary room decorations in Memphis",
+        "a": "Porch & Party provides anniversary room decorations in Memphis for couples planning a private celebration in a hotel room, home, or other intimate setting.",
+        "from": "/answers/anniversary-room-decorations-memphis"
+      },
+      {
+        "q": "Do anniversary setups work better in a hotel or at home?",
+        "a": "They can work well in either setting. The better fit depends on privacy, timing, the type of surprise, and how the room will be used.",
+        "from": "/answers/anniversary-room-decorations-memphis"
+      },
+      {
+        "q": "What are good birthday hotel room setup ideas in Memphis?",
+        "a": "Good birthday hotel room setup ideas include a styled bed moment, balloons, candles or soft lighting when allowed, a simple color story, table treats, and a clear focal area for photos.",
+        "from": "/answers/birthday-hotel-room-setup-ideas-memphis"
+      },
+      {
+        "q": "Can someone decorate a hotel room for a birthday in Memphis?",
+        "a": "Yes. Porch & Party can review Memphis hotel-room birthday decor requests when hotel access, timing, date availability, and setup scope work.",
+        "from": "/answers/can-someone-decorate-hotel-room-birthday-memphis"
+      },
+      {
+        "q": "Hotel room decorations in Memphis",
+        "a": "Porch & Party provides hotel room decoration setups in Memphis for clients planning birthdays, romantic surprises, anniversaries, and personal celebrations that need a stronger visual experience.",
+        "from": "/answers/hotel-room-decorations-memphis"
+      },
+      {
+        "q": "What occasions fit hotel-room decor best?",
+        "a": "Birthdays, anniversaries, surprise stays, romantic occasions, and milestone celebrations are all common fits for hotel-room decoration.",
+        "from": "/answers/hotel-room-decorations-memphis"
+      },
+      {
+        "q": "How much does hotel room decor cost in Memphis?",
+        "a": "For Porch & Party, hotel-room celebration setups start at $300+. Smaller installs may stay close to that floor, while fuller setups increase based on materials, complexity, timing, and room access.",
+        "from": "/answers/how-much-does-hotel-room-decor-cost-in-memphis"
+      },
+      {
+        "q": "What usually pushes the price up?",
+        "a": "More materials, more setup time, tighter access windows, and a fuller visual design are the biggest factors that increase the final quote.",
+        "from": "/answers/how-much-does-hotel-room-decor-cost-in-memphis"
+      },
+      {
+        "q": "How to decorate a hotel room for a romantic surprise",
+        "a": "To decorate a hotel room for a romantic surprise, focus on one strong mood, keep the decor controlled, and plan around room access and timing. If the setup needs to be ready before arrival, hiring a local decorator can remove a lot of friction.",
+        "from": "/answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise"
+      },
+      {
+        "q": "When does it make sense to hire someone instead of doing it yourself?",
+        "a": "If the room needs to be ready before arrival, if access is limited, or if you want the result to feel polished without the setup stress falling on you, hiring help makes more sense.",
+        "from": "/answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise"
+      },
+      {
+        "q": "Proposal room setup in Memphis",
+        "a": "Porch & Party provides proposal room setups in Memphis for clients who want the space styled before the moment happens, whether the setting is a hotel, home, or another private space.",
+        "from": "/answers/proposal-room-setup-memphis"
+      },
+      {
+        "q": "Can proposal setups work outside of hotels?",
+        "a": "Yes. Proposal setups can work in homes, private rentals, and other spaces where access can be planned in advance.",
+        "from": "/answers/proposal-room-setup-memphis"
+      },
+      {
+        "q": "Romantic room decorations in Memphis",
+        "a": "Porch & Party provides romantic room decorations in Memphis for anniversaries, hotel surprises, proposals, and private celebrations that need a warm, polished visual treatment.",
+        "from": "/answers/romantic-room-decorations-memphis"
+      },
+      {
+        "q": "Are romantic room setups only for hotels?",
+        "a": "No. Romantic setups can work in hotel rooms, private homes, and other personal spaces as long as the setup can be accessed and styled in advance.",
+        "from": "/answers/romantic-room-decorations-memphis"
+      }
+    ],
+    "/services/porch-decorating": [
+      {
+        "q": "What does front porch styling include in Memphis?",
+        "a": "Front porch styling usually includes a clear seasonal direction, front door styling, wreath or entry accents, planters, pumpkins or holiday materials, lanterns, and layered details that make the home feel finished from the street.",
+        "from": "/answers/front-porch-styling-memphis"
+      },
+      {
+        "q": "How much does porch decorating cost in Memphis?",
+        "a": "Most Memphis porch decorating projects from Porch & Party start at $350+.",
+        "from": "/answers/how-much-does-porch-decorating-cost-in-memphis"
+      },
+      {
+        "q": "Can you get porch decorating under $500 in Memphis?",
+        "a": "Yes, some Memphis porch decorating requests can fit under $500 when the scope is focused: a smaller entry, one seasonal theme, controlled materials, and no oversized custom install.",
+        "from": "/answers/porch-decorating-under-500-memphis"
+      },
+      {
+        "q": "Porch decorating service in Memphis: the four packages and what each costs",
+        "a": "A porch decorating service from Porch & Party costs from $350 (most fall porches $350–$1,200) for fall and from $450 (most Christmas porches $450–$1,600) for Christmas. Stoop is a simple touch ($350 fall, $450 Christmas), Classic a full porch ($550 / $750), Grand the porch and steps ($750 / $1,050) and Showstopper the porch, steps and walkway ($1,200 / $1,600). Book fall and Christmas together and save 10% on your Christmas package.",
+        "from": "/guides/porch-decorating-packages-memphis"
+      },
+      {
+        "q": "What does the Stoop porch package include?",
+        "a": "A simple touch. Fall: 8–10 pumpkins and gourds, door accent. From $350. Christmas: Wreath and door accent. From $450.",
+        "from": "/guides/porch-decorating-packages-memphis"
+      },
+      {
+        "q": "What does the Classic porch package include?",
+        "a": "A full porch. Fall: A fuller porch display: more pumpkins and gourds in mixed sizes, door accent, layered height. From $550. Christmas: Wreath, door garland and a pair of porch accents. From $750.",
+        "from": "/guides/porch-decorating-packages-memphis"
+      },
+      {
+        "q": "What does the Grand porch package include?",
+        "a": "The porch and the steps. Fall: A large display across the porch and steps with a statement piece. From $750. Christmas: Garland across the door and railings, wreaths, lit accents, steps styled. From $1,050.",
+        "from": "/guides/porch-decorating-packages-memphis"
+      },
+      {
+        "q": "What does the Showstopper porch package include?",
+        "a": "The works: porch, steps and walkway. Fall: Porch, steps and walkway, fully layered, our most dramatic look. From $1,200. Christmas: The full porch: lit garland everywhere, windows, statement pieces. From $1,600.",
+        "from": "/guides/porch-decorating-packages-memphis"
+      },
+      {
+        "q": "Which porch package do I need?",
+        "a": "Not sure which one? A small stoop is usually our Stoop package, a standard porch our Classic, and a large porch or one with steps our Grand. If you are not sure, pick “Not sure yet, help me decide” on the request form.",
+        "from": "/guides/porch-decorating-packages-memphis"
+      },
+      {
+        "q": "Is there a discount for booking fall and Christmas?",
+        "a": "Yes. Book fall and Christmas together and save 10% on your Christmas package.",
+        "from": "/guides/porch-decorating-packages-memphis"
+      },
+      {
+        "q": "Are add-ons included in the package price?",
+        "a": "No. Want more? Ask about add-ons: takedown, extra pumpkins or accents, a Thanksgiving refresh, lighting, matching windows or a lamp post. Add-ons are priced with your quote.",
+        "from": "/guides/porch-decorating-packages-memphis"
+      },
+      {
+        "q": "How much does a porch decorating service cost in Memphis?",
+        "a": "With Porch & Party, fall porches start at $350 and most land between $350 and $1,200; Christmas porches start at $450 and most land between $450 and $1,600. Rough estimate; final price after a quick look at your porch.",
+        "from": "/guides/porch-decorating-packages-memphis"
+      }
+    ],
+    "/services/small-porch-decorating": [
+      {
+        "q": "How should you decorate a small porch in Memphis?",
+        "a": "Small porch styling works best when the setup is focused: one wreath or door moment, two planters, a compact seasonal cluster, and a clean color palette.",
+        "from": "/answers/small-porch-styling-ideas-memphis"
+      }
+    ]
+  }
+}

@@ -105,7 +105,10 @@ for (const [what, needle] of [['tel:', TEL], ['sms:', SMS], ['Google listing', G
 if (!PRIORITY_PAGES.length) fail('data/ops/priority_pages.json lists 0 pages');
 for (const p of PRIORITY_PAGES) {
   for (const from of ['index.html', 'contact.html']) if (!read(from).includes(`href="${p.href}"`)) fail(`${from}: no link to priority page ${p.href}`);
-  const html = read(`${p.href.replace(/^\//, '')}.html`);
+  const html = read(`${p.href.replace(/^\//, '').replace(/#.*$/, '')}.html`);
+  // A priority question folded into a hub (26 Oct 2026) must land on its own question there.
+  const frag = p.href.includes('#') ? p.href.split('#')[1] : null;
+  if (frag && html && !html.includes(`id="${frag}"`)) fail(`priority page ${p.href}: the hub has no id="${frag}" to land on`);
   if (!html) fail(`priority page ${p.href} has no published file`);
   else if (!html.includes(TEL)) fail(`priority page ${p.href} lacks the tel: link`);
 }

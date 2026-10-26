@@ -16,7 +16,7 @@
  *     in data/offers/service_ai_images.json with its exact sha1, or a registered one is missing,
  *     outside assets/img/<service>/ai-*.webp, or a placeholder drawing. Approved pictures pass by
  *     their hash, one by one; anything else stays banned.
- * Rule 0: fewer than 100 pages scanned, 20 images hashed or 9 placeholders known is a failure.
+ * Rule 0: fewer pages scanned than sitemap.xml lists (or a sitemap under 50 URLs), 20 images hashed or 9 placeholders known is a failure.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -103,7 +103,11 @@ for (const [f, h] of reg) {
   must(fs.existsSync(path.join(ROOT, f)), `${f}: registered but missing`);
 }
 
-if (pages < 100) errors.push(`Rule 0: only ${pages} pages scanned`);
+// The floor is every page the site submits, not a fixed number: a fixed 100 held while the site had
+// 175 pages and stopped meaning anything once 73 thin pages were folded into hubs (26 Oct 2026).
+// Scanning fewer pages than sitemap.xml lists, or a sitemap under 50 URLs, is a broken scan.
+const submitted = (fs.readFileSync(path.join(ROOT, 'sitemap.xml'), 'utf8').match(/<loc>/g) || []).length;
+if (submitted < 50 || pages < submitted) errors.push(`Rule 0: only ${pages} pages scanned against ${submitted} URLs in sitemap.xml`);
 if (images.length < 20) errors.push(`Rule 0: only ${images.length} images hashed`);
 if (errors.length) { console.error(`VALIDATION FAIL: placeholder images (${errors.length})\n${errors.map((e) => `- ${e}`).join('\n')}`); process.exit(1); }
 console.log(`validate_no_placeholder_images: OK (${checks} checks: ${pages} pages and every source file free of the ${olds.length} placeholder drawings, ${images.length} images hashed, no missing page images, drawings deleted, replacements real, thank-you email pictures real and light, ${aiFiles.length} AI pictures and ${ownerFiles.length} owner photos each registered by hash)`);

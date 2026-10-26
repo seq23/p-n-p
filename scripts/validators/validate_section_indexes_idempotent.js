@@ -44,7 +44,13 @@ for (const s of CHAIN) if (!build.includes(`node ${s}`)) errors.push(`${s} is no
 
 const registry = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/cadence/section_indexes.json'), 'utf8'));
 const indexes = (registry.routes || []).filter((r) => r.endsWith('/index.html')).map((r) => r.slice(1));
-if (indexes.length < 5) errors.push(`data/cadence/section_indexes.json lists ${indexes.length} section index page(s), expected at least 5`);
+// Exactly the three section indexes left after local/ and events/ were retired on 26 Oct 2026
+// (their pages were folded into service hubs; scripts/lib/hub_consolidation.js), and never a
+// retired one. Was "at least 5" while five existed.
+const EXPECTED_INDEXES = ['areas/index.html', 'faq/index.html', 'services/index.html'];
+if (JSON.stringify([...indexes].sort()) !== JSON.stringify(EXPECTED_INDEXES)) errors.push(`data/cadence/section_indexes.json lists [${indexes.join(', ')}], expected exactly [${EXPECTED_INDEXES.join(', ')}]`);
+const HCx = require('../lib/hub_consolidation');
+for (const rel of indexes) if (HCx.isRetiredFile(rel)) errors.push(`${rel} is listed as a section index but was retired (it 301s)`);
 for (const rel of indexes) {
   const html = fs.readFileSync(path.join(ROOT, rel), 'utf8');
   if (!html.includes(MARKER)) errors.push(`${rel}: committed page has no related-pages block`);

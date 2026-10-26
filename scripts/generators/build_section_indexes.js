@@ -184,7 +184,7 @@ const SECTIONS = [
       ['Do the starting prices include take-down or food?',
         `No. ${offers.services.porch.notes[0]} ${offers.services.grazing.notes[0]} ${offers.services.grazing.notes[1]}`]
     ],
-    related: ['/faq/index.html', '/areas/index.html', '/local/index.html', '/events/index.html', '/pricing.html']
+    related: ['/faq/index.html', '/areas/index.html', '/rentals/index.html', '/pricing.html']
   },
   {
     dir: 'areas',
@@ -204,7 +204,7 @@ const SECTIONS = [
       ['Why does each city have four pages?',
         'Porch decorating, party decor, grazing tables and party game rentals are separate services with separate scope and separate starting prices, so each city has one page per service, and every city page links to the other three.']
     ],
-    related: ['/services/index.html', '/local/index.html', '/faq/index.html', '/contact.html']
+    related: ['/services/index.html', '/faq/index.html', '/pricing.html', '/contact.html']
   },
   {
     dir: 'faq',
@@ -217,49 +217,19 @@ const SECTIONS = [
     lead: 'Every question we get, in one place, sectioned by service: booking and payment, porch decor, party and room decor, grazing tables and party game rentals. The grazing estimator and the Price my porch calculator give you a starting price before you ask.',
     heroNote: 'Use the estimator below for a starting price before you ask.',
     summary: 'Jump to your service below. Setup and styling prices are firm starting points from our price list; food for grazing tables is always a separate rough estimate until the menu is confirmed.',
-    group: (pages) => [{ heading: 'Longer answers', blurb: 'Each of these is a full page with the pricing detail behind one question.', pages }],
+    // The longer answer pages that used to be listed here were folded into their service hubs on
+    // 26 Oct 2026 (scripts/lib/hub_consolidation.js); the FAQ page is its own content and needs none.
+    minPages: 0,
+    group: (pages) => (pages.length ? [{ heading: 'Longer answers', blurb: 'Each of these is a full page with the pricing detail behind one question.', pages }] : []),
     groups: faqContent.SECTIONS,
     faq: faqContent.flat(),
-    related: ['/answers/index.html', '/pricing.html', '/services/index.html', '/how-it-works.html']
-  },
-  {
-    dir: 'local',
-    eyebrow: 'Memphis Pages',
-    crumb: 'Local',
-    h1: 'Porch &amp; Party local setup pages for Memphis',
-    title: 'Memphis Local Setups | Hotel, Birthday &amp; Grazing | Porch &amp; Party',
-    description: 'Memphis Porch & Party pages for hotel room, at-home birthday, grazing table, and romantic room decorations, each with local scope and starting pricing.',
-    lead: 'These pages cover the four Porch &amp; Party setups requested most often inside Memphis itself: hotel room decorations, birthday decorations at home, grazing tables, and romantic room decorations. Each one explains what the setup covers locally and where the starting price begins.',
-    summary: 'Use these pages when the setup is in Memphis and you already know the occasion. For a city outside Memphis, start from the service area pages instead.',
-    group: (pages) => [{ heading: 'Memphis setups', blurb: '', pages }],
-    faq: [
-      ['What do these Memphis setups start at?',
-        `Hotel-room, at-home birthday, and romantic room setups are ${offers.services.celebration.name.toLowerCase()} and start at ${offers.services.celebration.price}. Grazing-table styling starts at ${offers.services.grazing.price} and covers styling only.`],
-      ['Are these pages only for Memphis?',
-        `Yes. These four cover setups inside Memphis itself. For ${areasData.areas.slice(1).map((a) => a.split(',')[0]).join(', ')}, use the service area pages instead.`]
-    ],
-    related: ['/areas/index.html', '/services/index.html', '/events/index.html', '/pricing.html']
-  },
-  {
-    dir: 'events',
-    eyebrow: 'Occasions',
-    crumb: 'Events',
-    h1: 'Porch &amp; Party decor by occasion',
-    title: 'Memphis Decor by Occasion | Showers &amp; Proposals | Porch &amp; Party',
-    description: 'Porch & Party occasion pages for baby showers, bridal showers, proposal room setups, and anniversary room decorations in the Memphis metro area.',
-    lead: 'Some setups are defined by the occasion rather than the room. These pages cover the four occasions Porch &amp; Party is asked for most - baby showers, bridal showers, proposals, and anniversaries - and what changes about the styling for each one.',
-    summary: 'Start from the occasion when the event is the fixed part and the venue is not. Celebration setups start at $300+ regardless of occasion; the occasion drives the styling direction, not the floor price.',
-    group: (pages) => [{ heading: 'Setups by occasion', blurb: '', pages }],
-    faq: [
-      ['Does the occasion change the starting price?',
-        `No. ${offers.services.celebration.name} start at ${offers.services.celebration.price} whatever the occasion. The occasion drives the styling direction and which areas get styled, not the floor price.`],
-      ['Can an occasion setup happen in a hotel room?',
-        'Yes. Proposal, anniversary, and shower setups are styled in hotel rooms, private homes, and event spaces across the Memphis metro area, depending on access and timing.']
-    ],
-    related: ['/services/index.html', '/local/index.html', '/answers/index.html', '/contact.html']
+    related: ['/areas/index.html', '/pricing.html', '/services/index.html', '/how-it-works.html']
   }
 ];
 
+// local/ and events/ (and answers/) were retired on 26 Oct 2026: every page they listed was folded
+// into a service hub (data/search_intelligence/hub_consolidation.json), and an index of nothing
+// is not a page. Their URLs 301 (local/, events/ -> /services/; answers/ -> /faq/).
 const MIN_PAGES = 4;
 
 // --- rendering --------------------------------------------------------------
@@ -268,9 +238,7 @@ const RELATED_LABELS = {
   '/services/index.html': 'Porch & Party services in the Memphis metro area',
   '/areas/index.html': 'Porch & Party service areas across the Memphis metro',
   '/faq/index.html': 'Porch & Party frequently asked questions',
-  '/local/index.html': 'Porch & Party local setup pages for Memphis',
-  '/events/index.html': 'Porch & Party decor by occasion',
-  '/answers/index.html': 'Porch & Party Answer Index',
+  '/rentals/index.html': 'Party game rentals in Memphis',
   '/pricing.html': 'Memphis Event Decor Pricing',
   '/contact.html': 'Request a Memphis Event Decor Quote',
   '/how-it-works.html': 'How Porch & Party Works'
@@ -542,7 +510,7 @@ const skipped = [];
 const routes = [];
 for (const section of SECTIONS) {
   const pages = pagesIn(section.dir);
-  if (pages.length < MIN_PAGES) { skipped.push(`${section.dir} (${pages.length} pages)`); continue; }
+  if (pages.length < (section.minPages ?? MIN_PAGES)) { skipped.push(`${section.dir} (${pages.length} pages)`); continue; }
   routes.push(`/${section.dir}/index.html`);
   const out = path.join(ROOT, section.dir, 'index.html');
   const before = fs.existsSync(out) ? fs.readFileSync(out, 'utf8') : null;
@@ -591,7 +559,7 @@ const HTML_SITEMAP = 'sitemap.html';
 const siteChrome = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
 function htmlSitemapBody(indexRoutes) {
   const ul = (items) => `<ul>${items.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join('')}</ul>`;
-  const extra = ['answers/index.html'].filter((rel) => fs.existsSync(path.join(ROOT, rel))).map((rel) => `/${rel}`);
+  const extra = [];
   const indexes = [...new Set([...indexRoutes, ...extra])].filter((r) => r !== '/services/index.html' && r !== '/faq/index.html').sort()
     .map((r) => [r.replace(/index\.html$/, ''), esc(readPage(r.slice(1)).h1)]);
   return '<span class="eyebrow">Sitemap</span><h1>Sitemap</h1>'

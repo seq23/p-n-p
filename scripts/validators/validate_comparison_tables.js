@@ -39,7 +39,7 @@
  */
 const fs = require('fs');
 const path = require('path');
-const { tableSection, IS_COMPARISON, titleOf, publishedPages, DATA } = require('../install_comparison_tables');
+const { tableSection, IS_COMPARISON, titleOf, publishedPages, foldedComparisons, DATA } = require('../install_comparison_tables');
 
 const MIN_ROWS = 3;
 const MIN_COLUMNS = 3;
@@ -101,7 +101,17 @@ function run() {
       }
     }
   }
-  if (!comparisons) errors.push('zero published comparison pages found; the title test is broken, not the site.');
+  // A comparison folded into a hub (26 Oct 2026) counts only when that hub carries its table,
+  // byte for byte as the data file renders it, and passes the same table checks a page does.
+  let folded = 0;
+  for (const { slug, hubRel } of foldedComparisons(tables)) {
+    const hub = pages.find((p) => p.rel === hubRel);
+    if (!hub) { errors.push(`${slug}: folded into ${hubRel}, which is not a published page`); continue; }
+    if (!hub.html.includes(tableSection(slug, tables[slug]))) { errors.push(`${hubRel}: does not carry the "${slug}" comparison table folded into it; run node scripts/install_comparison_tables.js`); continue; }
+    errors.push(...tableProblems(hubRel, hub.html));
+    folded += 1;
+  }
+  if (!comparisons && !folded) errors.push('zero published comparison pages found; the title test is broken, not the site.');
 
   // Self-test: each broken copy must fail.
   const good = `<title>A vs B</title><table><caption>c</caption><thead><tr><th>F</th><th>A</th><th>B</th></tr></thead>`

@@ -70,21 +70,24 @@ const counters = {
 // live sitemap happen to be identical.
 //
 // Both spellings are written out literally. Deriving one from the other with
+// pageIdentity() would make the fixtures self-referential. (The answers/ and local/ fixtures moved to
+// services/, areas/ and faq/ on 26 Oct 2026: those pages were folded into hubs and now 301.)
+// Deriving them with
 // pageIdentity() would make the fixtures self-referential: a pageIdentity() that
 // stopped normalising would produce two identical lists and every case below
 // would pass while proving nothing.
 const FIXTURE_LEDGER = [
   `${DOMAIN}/index.html`,
-  `${DOMAIN}/answers/index.html`,
-  `${DOMAIN}/answers/grazing-tables-memphis.html`,
-  `${DOMAIN}/local/index.html`,
+  `${DOMAIN}/services/index.html`,
+  `${DOMAIN}/areas/memphis-tn-grazing-tables.html`,
+  `${DOMAIN}/faq/index.html`,
   `${DOMAIN}/pricing.html`,
 ];
 const RESPELLED = [
   `${DOMAIN}/`,
-  `${DOMAIN}/answers/`,
-  `${DOMAIN}/answers/grazing-tables-memphis`,
-  `${DOMAIN}/local/`,
+  `${DOMAIN}/services/`,
+  `${DOMAIN}/areas/memphis-tn-grazing-tables`,
+  `${DOMAIN}/faq/`,
   `${DOMAIN}/pricing`,
 ];
 

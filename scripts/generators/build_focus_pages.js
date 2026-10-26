@@ -117,6 +117,11 @@ function finalHtml(p, before) {
   // One insert, keeping the order the tags were in, so a re-render is byte-identical.
   const social = ((before && before.match(SOCIAL)) || []).filter((tag) => !html.includes(tag));
   if (social.length) html = html.replace(/(<meta\b[^>]*\bproperty="og:image"[^>]*>)/i, `$1\n${social.join('\n')}`);
+  // The folded questions (scripts/install_hub_folds.js, 26 Oct 2026): the hotel-room focused
+  // page is also the hub its six thin satellites were folded into.
+  const FOLDS = /<!--hub-folds-->[\s\S]*?<!--\/hub-folds-->/;
+  const folds = before && before.match(FOLDS);
+  if (folds && !FOLDS.test(html)) html = html.replace('<!--/focus-page-->', () => `<!--/focus-page-->${folds[0]}`);
   const DATES = /<p class="page-dates" data-page-dates>[\s\S]*?<\/p>/;
   const dates = before && before.match(DATES);
   if (dates && !DATES.test(html)) html = html.replace(/<\/h1>/i, () => `</h1>${dates[0]}`);
