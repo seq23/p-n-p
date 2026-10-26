@@ -221,6 +221,56 @@
       "accepted_urls": [
         "https://porchandparty901.com/rentals/giant-lawn-games-memphis"
       ]
+    },
+    {
+      "accepted_at": "2026-10-26",
+      "reason": "Search Readiness item j9 (owner, 25 Oct 2026) requires a page for every town, neighborhood and local anchor on this site's coverage manifest; the 26 Oct audit found 32 of 64 missing and these 33 URLs are those pages plus the /areas/ index. All of them are generated from data (build_area_pages.js and build_place_pages.js over areas.json, city_profiles.json and place_pages.json), so each refreshes on a generator run rather than consuming the 8-a-week human refresh capacity the ceiling is derived from. The library was already 37 pages over that ceiling before this change and is now 70 over; the weekly cap of 1 and the capacity of 8 are the owner's 11 Oct throttle and are left exactly as they are. The publication freeze is untouched: it governs the authority queue (publish_governed_queue.mjs), which published nothing here.",
+      "urls_total_after": 174,
+      "accepted_count": 33,
+      "accepted_publications": 33,
+      "accepted_section_indexes": 0,
+      "weekly_cap": 1,
+      "publication_allowance": 1,
+      "ledger_baseline_date": "2026-10-21",
+      "accrual_weeks": 1,
+      "over_cap_by": 32,
+      "maintainable_ceiling": 104,
+      "library_over_ceiling_by": 70,
+      "accepted_urls": [
+        "https://porchandparty901.com/about",
+        "https://porchandparty901.com/areas/cooper-young-memphis-tn-party-decor",
+        "https://porchandparty901.com/areas/cordova-tn-grazing-tables",
+        "https://porchandparty901.com/areas/cordova-tn-party-decor",
+        "https://porchandparty901.com/areas/cordova-tn-party-game-rentals",
+        "https://porchandparty901.com/areas/cordova-tn-porch-decorating",
+        "https://porchandparty901.com/areas/downtown-memphis-tn-party-decor",
+        "https://porchandparty901.com/areas/east-memphis-tn-party-decor",
+        "https://porchandparty901.com/areas/guest-house-at-graceland-hotel-room-decor",
+        "https://porchandparty901.com/areas/hernando-ms-grazing-tables",
+        "https://porchandparty901.com/areas/hernando-ms-party-decor",
+        "https://porchandparty901.com/areas/hernando-ms-party-game-rentals",
+        "https://porchandparty901.com/areas/hernando-ms-porch-decorating",
+        "https://porchandparty901.com/areas/horn-lake-ms-grazing-tables",
+        "https://porchandparty901.com/areas/horn-lake-ms-party-decor",
+        "https://porchandparty901.com/areas/horn-lake-ms-party-game-rentals",
+        "https://porchandparty901.com/areas/horn-lake-ms-porch-decorating",
+        "https://porchandparty901.com/areas/hu-hotel-memphis-hotel-room-decor",
+        "https://porchandparty901.com/areas/midtown-memphis-tn-party-decor",
+        "https://porchandparty901.com/areas/millington-tn-grazing-tables",
+        "https://porchandparty901.com/areas/millington-tn-party-decor",
+        "https://porchandparty901.com/areas/millington-tn-party-game-rentals",
+        "https://porchandparty901.com/areas/millington-tn-porch-decorating",
+        "https://porchandparty901.com/areas/oakland-tn-grazing-tables",
+        "https://porchandparty901.com/areas/oakland-tn-party-decor",
+        "https://porchandparty901.com/areas/oakland-tn-party-game-rentals",
+        "https://porchandparty901.com/areas/oakland-tn-porch-decorating",
+        "https://porchandparty901.com/areas/raleigh-memphis-tn-party-decor",
+        "https://porchandparty901.com/areas/the-central-station-memphis-hotel-room-decor",
+        "https://porchandparty901.com/areas/the-madison-hotel-memphis-hotel-room-decor",
+        "https://porchandparty901.com/areas/the-peabody-memphis-hotel-room-decor",
+        "https://porchandparty901.com/areas/westin-memphis-beale-street-hotel-room-decor",
+        "https://porchandparty901.com/areas/whitehaven-memphis-tn-party-decor"
+      ]
     }
   ]
 }
