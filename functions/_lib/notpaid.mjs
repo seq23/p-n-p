@@ -7,6 +7,19 @@ import { balances, linesByInvoice, dueWords as amountDueWords, dueCents } from '
 import { serviceOfLine } from './kinds.mjs';
 import { isRentalInvoice } from './pricing.mjs';
 import { PRICE_TABLE } from './prices.mjs';
+import { depositDueDate } from './pay-steps.mjs';
+
+// "Deposit due by" (owner, 25 Oct 2026): an Other deposit with its own day, not paid yet, is due
+// by that day when it comes before the invoice's due date; so it is never late (red) before it.
+// No day (NULL) = as before: the invoice's due date.
+export function nextDue(inv, paid, today) {
+  const dd = depositDueDate(inv, inv.pay_plan);
+  const depositNext = Boolean(dd) && (paid || 0) < (inv.deposit_due_cents || 0) && dd < String(inv.due_date || '9999');
+  const due = depositNext ? dd : inv.due_date;
+  const w = dueWords(due, today);
+  if (depositNext) w.words = /^Due\b/.test(w.words) ? `Deposit due${w.words.slice(3)}` : `Deposit ${w.words}`;
+  return { due, depositNext, ...w };
+}
 
 const DAY = 86400000;
 const daysBetween = (a, b) => Math.round((Date.parse(`${b}T12:00:00Z`) - Date.parse(`${a}T12:00:00Z`)) / DAY);
@@ -39,8 +52,8 @@ export function notPaidRows(bals, linesBy, requestsByKey, today) {
       email: inv.customer_email || (req && req.email) || '', requestKey: inv.request_key || '', services, whatFor,
       // Total - Paid = what the due words say (ledger.mjs balanceOf: remaining = charges + any damage
       // deposit not collected yet); owed (charges) decides who is listed.
-      total: b.total, paid: b.paid, owed: b.owed, remaining: dueCents(b), depositOwed: Math.max(0, dueCents(b) - b.owed), dueWords: amountDueWords(b), due: inv.due_date, remindedAt: inv.reminded_at || '', status: inv.status,
-      ...dueWords(inv.due_date, today),
+      total: b.total, paid: b.paid, owed: b.owed, remaining: dueCents(b), depositOwed: Math.max(0, dueCents(b) - b.owed), dueWords: amountDueWords(b), due: nextDue(inv, b.paid, today).due, remindedAt: inv.reminded_at || '', status: inv.status,
+      ...nextDue(inv, b.paid, today),
     };
     if (inv.status === 'draft') { if (b.charges > 0) drafts.push(row); continue; }
     if (b.owed > 0) owed.push(row);

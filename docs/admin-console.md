@@ -37,6 +37,49 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   `GET /admin/invoices/:id/invoice.pdf` renders the same invoice as a PDF (functions/_lib/pdf.mjs,
   pdf-lib) for customers reached by text; "Text the invoice (PDF)" shares it from the phone and
   the `texted` status action marks it sent without an email.
+- **Itemized lists and notes** (owner, 25 Oct 2026): every surface (invoice page, HTML and text
+  email, PDF, text message) reads ONE view model, `functions/_lib/invoice-view.mjs invoiceView`,
+  so a field can never be on one and missing from another. A line's note and the invoice's own
+  note ("Message to the customer", a full-width box) are multi-line and keep their line breaks
+  everywhere; a note row "item<TAB>$price" (or spaces / " - " / "…" before the price) shows as the
+  item with its price on the right. The text message lists the lines (with their notes), then the
+  total, payments, pickup and the note, in the invoice page's order. **📋 Paste a list** in the
+  editor turns each pasted row with a price at its end into its own ordinary line ("$300",
+  "300", "$1,250.00"); a Total / Subtotal row is only compared: "Your list said $400. The lines
+  add up to $400 ✓" or a yellow "These don't match". Preview, then Save these lines (saves the
+  draft, back to the same invoice) or Cancel; optional "Take out the lines already on this
+  invoice". The browser runs the same `parsePriceList` source as the server.
+- **Room setups** (owner, 25 Oct 2026): a party request whose "Where is it?" names a hotel, motel,
+  Airbnb, suite, bedroom or room (not a living / dining / ball / party / event room), or whose event
+  type says "hotel room" / "room setup" (`pricing.mjs isRoomSetup`), starts its auto draft at
+  "Basic room setup (…)" $300. On an unsent room setup invoice the editor offers **🛏️ Room setup
+  presets: Basic $300 · Luxury $500 · Signature $1,500**: tap one, see its lines, notes, what comes
+  out and the new total, then Use these lines (saves, back to the same invoice) or Cancel. It swaps
+  the room setup lines only; Signature includes takedown, so a separate Takedown line comes out.
+  The presets are defined once in `data/offers/services.json` `celebration.roomSetupPresets`; a
+  rebuild after a picked preset does not add Basic or Takedown back (`reconcileRoomPreset`).
+  Guarded by `validate:admin-room-setup`.
+- **Deposit due by** (owner, 25 Oct 2026): with **Other deposit** the editor shows "Deposit due by"
+  (a date, default today = due now). A later day is stored in `invoices.deposit_due_date`
+  (migration 0025, additive; NULL = due now, every older invoice). `pay-steps.mjs payStepsOf` words
+  it once for every surface: "① Deposit · by Fri 30 Oct · holds the date" (admin) / "Deposit, due by
+  Fri 30 Oct (holds your date)" (emails, PDF, text); the rest stays by the due date. Not paid yet
+  (`notpaid.mjs nextDue`, feeding Money, the 7 AM email and reminders) is never late before that
+  day. Guarded by `validate:admin-deposit-due`.
+- **What we sent ✉** (owner, 25 Oct 2026): every real invoice email keeps its exact HTML, text and
+  the PDF as it read then, with from / to / Bcc / time, in the private R2 bucket pnp-receipts under
+  `sent-invoices/<id>/<stamp>/`, listed in D1 `invoice_sent_copies` (migration 0024, additive).
+  The invoice shows "What we sent ✉ Sat 25 Oct, 1:43 PM", which opens that copy
+  (`/admin/invoices/:id/sent/:copy`). Test sends keep none. Invoices already Bcc hello@ (ownerCopy).
+  Proof: `npm run validate:admin-invoice-lists`.
+- **Main page on a phone** (owner, 24 Oct 2026): list → Done → Cancelled → Put away → tomorrow's
+  reminders → "1·2·3 Shortcuts · Tap to open ▾" (closed; always open on a computer, on top) →
+  "Delete customer ID photos (N ready) · Tap to open ▾" (closed; `#ids-ready` opens it).
+- **Invoice text message** (`textMessage` in `functions/_lib/pdf.mjs`, owner 24 Oct 2026): short lines —
+  greeting; invoice for your game rental on <day>; `Total: $170.00 ($120 rental + $50 refundable damage
+  deposit)`; the numbered payments; Zelle / Cash App link; the pickup line and `Pickup place: Mt. Moriah
+  Station, Memphis Police Department, 2602 Mt. Moriah Rd, Memphis, TN 38115.` (from `data/rentals/games.json`
+  pickup); Thank you! Porch & Party. Pinned by `validate:admin-pay-plan`.
 - **Send**: HTML email from hello@porchandparty901.com with a copy (Bcc) to hello@; payment block
   from Settings (Zelle, Cash App, QR as an inline CID image, which Gmail renders; Gmail strips
   data: URIs). A test send goes to hello@ only with a `TEST` subject and changes nothing.
@@ -90,7 +133,7 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   moves every number, private facts never in text / email / print, the send path end to end.
 
 ## Request cards + admin homepage (JOB B, owner-approved 18 Oct 2026, migration 0008)
-- **Main nav**: Customers (main page) (was "Requests" until 20 Oct 2026) · Calendar & Bookings · Money · Inventory · Settings · Help · Quick Pricing Summary (Inventory added 19 Oct 2026; Quick Pricing Summary, the last button, 20 Oct 2026). Put away and Invoices
+- **Main nav**: Customers (main page) (was "Requests" until 20 Oct 2026) · Calendar & Bookings · Money · Inventory · Design Library · Settings · Help · Quick Pricing Summary (Inventory added 19 Oct 2026; Quick Pricing Summary, the last button, 20 Oct 2026; Design Library 22 Oct 2026). Put away and Invoices
   left the nav: Put away is the collapsed "Put away (N)" section at the bottom of Requests ("Show
   put-away requests", `#put-away`, the only whitelisted disclosure in `validate:admin-tooltips`);
   `/admin/archive` redirects to `/admin/?pa=1#put-away` with it open. All invoices are linked from
@@ -124,10 +167,14 @@ Phone-first invoicing console for Valerie (bookings). Owner-approved 14 Oct 2026
   invoice · Mark paid, and a total line. Drafts are listed apart as "Invoice not sent yet"; the
   refundable damage deposit is never owed. The Requests chip uses the same rule (`notPaidYet`).
 
-- **Contextual scheduling** (migration 0009 adds `requests.takedown_note`): Porch → Schedule
-  install, then takedown; Party & decor → Schedule setup, then takedown; Grazing → Schedule setup,
-  then pickup (optional); Rentals → Schedule pickup + return as a pair (the return day defaults from
+- **Contextual scheduling** (migration 0009 adds `requests.takedown_note`): Porch → book the
+  install, then takedown; Party & decor → book the setup, then takedown; Grazing → book the setup,
+  then pickup (optional); Rentals → pickup + return as a pair (the return day defaults from
   the length, editable; the return is always required, its time may be left empty = not sure yet).
+  Booking is the card's inline **Yes, book it** (the job card redo, 25 Oct 2026): there is no
+  "Schedule setup / install / pickup + return" button any more (it repeated Yes, book it); a step
+  that is still not booked shows the same inline form. To move a booked day: More about <name> ›
+  Everything they wrote › "Change the setup / install / pickup day or time" (the booking's edit page).
   The takedown is never required. **Inline takedown row** (owner, 18 Oct 2026, "too many steps";
   `takedownRow` in `views.mjs`, `cards.mjs inlineRowKind`, `POST /admin/requests/takedown-inline`):
   every porch and party & decor card has ONE line "Takedown:" with a date box (the booked day, else
@@ -483,19 +530,44 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
 `request_opened` (migration 0016, every older request backfilled as opened); the rule is
 `functions/_lib/request-new.mjs` (`npm run validate:admin-requests-phone`).
 
+## Job card redo (owner-approved mock-up "P&P Job Card Redo", 25 Oct 2026)
+Every card type (party & decor, porch, grazing, rentals). Guard: `validate:admin-job-card`.
+- **Header**: Customer N · service, name, the event line, then **"Asked Sun 25 Oct, 12:06 PM · 2
+  hours ago"** (Memphis time; minutes, hours, then days; `card-told.mjs askedWords`). More keeps it.
+- **Step bar**: "Step N of M: <what>" plus a green ✓ chip only for steps already settled (undo
+  beside the last ✓). Steps still to come are not drawn.
+- **Step 1 (call back)**: two big buttons, **📋 Open the walk-through checklist**
+  (`/admin/checklist/online?r=`, party / porch / grazing) and **💬 Text <first name> the questions
+  (N still to ask)**: a free `sms:` link (body URL-encoded, `quick-texts.mjs smsHref`) with only the
+  questions the request did not answer, numbered 1, 2, 3, in Valerie's words ("Hi <name>! 💕 I'd
+  love to help you create a beautiful hotel room setup / porch / party for your <occasion>! … —
+  Valerie, Porch & Party"). Ten for party & decor (occasion; hotel or address; date and ready-by
+  time; guests; decorations; inspiration photos; colors or theme; add-ons; takedown; budget);
+  porch, grazing and rentals have their own sets (porch size, food, allergies, games, pickup time,
+  return). A tap logs "Texted: the questions still to ask". Then **What they told us** (always
+  visible: event, where, ready by, guests, budget, colors & notes, grazing / add-ons, takedown;
+  rentals: games, pick up, back; an empty or "Not sure yet" answer never shows), the **Still to
+  ask** chips (the same missing list) and **After the call: are you taking this job?**.
+  Rules: `functions/_lib/card-told.mjs`.
+- **More about <first name>** is ONE section: Contact & ID · Money · Notes (+ Add a note lives
+  here; the newest note still shows on the card face) · Everything they wrote (the job lines, the
+  calendar link, "Change the … day or time", the other buttons, then every other answer), then
+  Edit · Print checklist · Put away.
+- **Bottom row**: "📄 Invoice draft: $X · Check and send" and "✕ Cancel this job" on one line;
+  Cancel stays apart, labelled, and confirms first.
+
 ## Step cards, tentative -> confirmed, invoice quick-adds (owner-approved 19 Oct 2026, migration 0018)
 - **Step cards** (`requestCard` in `views.mjs`, rules in `functions/_lib/steps.mjs`): NEW, service,
-  name, one date line; a green bar, "N of M done" and the named steps (done = green ✓, current
-  bold, later grey) with ONE "undo" beside the last ✓; then ONE "Next step · step N" box (one
+  name, one date line; the short step bar (see "Job card redo" above) with ONE "undo" beside the last ✓; then ONE "Next step · step N" box (one
   sentence, one big button, small Call / Text where useful). Everything else (answers, phone and
   email, ID, notes, history, Edit, Print checklist, Put away, the Payment box, the other buttons)
   is under "More about <first name>". "✕ Cancel this job" is NOT under More: it is the grey button
   at the very bottom of every card (see "Cancel any job in two taps" below).
   - **Calm card** (owner-approved mock-up, 20 Oct 2026; `validate:admin-card-calm`): always
     visible: name, Call / Text, the when-line, the "🚚 Business delivery" tag, the **Latest note**
-    (newest note in full + its day) with "+ Add a note", then the next step. "More about <first
-    name>" holds four groups, only the first open: What they booked · Money · Their details and
-    ID · Notes and history (all notes, then history newest first, 5 shown + "Show all (N)"), then
+    (newest note in full + its day), then the next step. "More about <first
+    name>" holds four plain sections (job card redo, 25 Oct 2026): Contact & ID · Money · Notes
+    (+ Add a note, all notes, then history newest first, 5 shown + "Show all (N)") · Everything they wrote, then
     a quiet row Edit · Print checklist · Put away. Raw ISO dates and UTC history stamps read as Memphis
     words on screen only; stored rows never change.
   - **One money wording** (`ledger.mjs dueWords`): "$180 due ($130 + $50 refundable deposit)"
@@ -527,8 +599,9 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   - Undo: a tap on the card is taken back there (Called back, Setup done, Takedown / Pickup done or
     not needed, Picked up, Returned via the check-in); a money or invoice step only explains where
     to change it (the invoice / Edit page). Nothing deletes a payment or an invoice.
-- **"I've talked to them"** asks "Are you taking this job?": **Yes, book it** (the day(s) editable
-  right there; books the install / setup or the rental pickup + return as her bookings, books the
+- **"After the call: are you taking this job?"** (inline on step 1 since 25 Oct 2026, no dropdown):
+  **Yes, book it** (the day(s) from the request in words, "change" opens the date box; an optional
+  **Ready by** time (games-only rental: pickup time) saved on the booking; books the install / setup or the rental pickup + return as her bookings, books the
   form's takedown day, keeps a held rental held with no end time), **Not yet** (called only; "Not
   booked yet: Book it now" stays on the card), **No, put it away** (puts it away, frees held games).
   Routes: `functions/_lib/admin-steps.mjs` (`/admin/requests/talked`, `/called`, `/note`);
@@ -687,10 +760,11 @@ from the New-request email link, or acts on it (status, invoice, put away). Open
   `dueWords` / `dueCents` say nothing for it; Money (`money.mjs`), Not paid yet, the calendar
   ("Invoice not sent yet"), the card and the 7 AM email never count it. Its `remaining` and
   `depositOwed` are unchanged, so nothing reads it as paid or its damage deposit as collected.
-- **The card**: "📄 Invoice draft ready: $X" + "Made from <name>'s request. Nothing has been sent.
-  Check the price, then send." On the invoice step that is the next-step box with the big "Check and
-  send the invoice"; while another step comes first it sits on the card face with an outlined
-  button (one big button per card). Bookings made for the request carry its invoice.
+- **The card**: on the invoice step the next-step box reads "📄 Invoice draft ready: $X" + "Made
+  from <name>'s request. Nothing has been sent. Check the price, then send." with the big "Check and
+  send the invoice"; while another step comes first it sits in the card's bottom row as
+  "📄 Invoice draft: $X · Check and send", on the same line as ✕ Cancel this job (job card redo,
+  25 Oct 2026). Bookings made for the request carry its invoice.
 - **What they want changed** (Edit page section 1, `admin-edit.mjs saveWant` → `rebuildAutoDraft`):
   an auto draft that was never sent is rebuilt to match; every line she typed or changed by hand is
   kept; the flash says so. A sent or void invoice, or a hand-made one, is never touched.
@@ -970,7 +1044,7 @@ customer bar, Customer 4 card), `phone-menu-open.jpg`, `phone-scrolled-customer-
 - **A Done card**: greyed, the ✓ watermark, "✓ DONE · <date>" in place of the step dots, the money
   in words ("Paid $110 · $50 deposit returned", `cards.mjs endedMoneyWords`), Call / Text top right,
   and two small buttons: Put away and "Not done after all (undo)" (clears `done_at` and voids the
-  rows Done recorded, so the card is back exactly as it was). Show more about <name> keeps the
+  rows Done recorded, so the card is back exactly as it was). More about <name> keeps the
   groups and Edit; "✕ Cancel this job" sits at the very bottom, as on every card.
 - **Cancel any job in two taps** (owner, 21 Oct 2026: "all jobs should be able to be cancelled
   with 2 taps - one tap then a confirmation tap"; mock-up "Cancel In Two Taps"; a put-away card had
@@ -1036,6 +1110,22 @@ email's last box (`todo-email.mjs`). Proof: `npm run validate:admin-id-auto-dele
   by itself." In the plain text too. Keep it longer opens `GET /admin/requests/id/keep`, a confirm
   screen that changes nothing until a choice is tapped.
 
+## Owner feed for Boss OS and channel source tags (owner-approved 22 Oct 2026, migration 0023)
+
+- **Owner feed:** `GET /api/owner-feed?range=day|week` with `Authorization: Bearer <token>` (Pages
+  secret `OWNER_FEED_TOKEN`; vault name `pnp-owner-feed-token`). Read-only JSON for Boss OS
+  (Simone's "Porch & Party — To do for Valerie"): `{"generated_at","range","items":[{"kind","title",
+  "detail","due","link"}]}`, kinds deadline / money / renewal / id_delete / mark_done / post / other.
+  The items are the 7 AM to-do email's own list (`functions/_lib/owner-feed.mjs` maps `todoData()`
+  from `todo-email.mjs`, never a second copy); `week` adds the "Your week" figures, the jobs of the
+  next 7 days and any Marketplace renewal day. 401 without the right token (constant-time compare),
+  no CORS, never cached. Validator: `validate:owner-feed` (proves the feed and the email match for
+  one fixture).
+- **Source tags:** `/request?src=<tag>` (mailer-38117, hotel, hoa, school, facebook, instagram,
+  tiktok, pinterest, google ...) rides a hidden field into `requests.source_tag`, cleaned to a-z 0-9
+  "-", at most 40 characters (`request-form.mjs cleanSrc`). Stored only; /admin does not show it yet
+  (that waits for an approved mock-up). Checked in `validate:request-form`.
+
 ## Where things live
 | Piece | Place |
 |---|---|
@@ -1072,3 +1162,34 @@ photos and deleted (old image URLs are not redirected: redirects go to pages onl
 holds each drawing's hash; `npm run validate:no-placeholder-images` fails if any page or source names
 one, or any image under `assets/` has those bytes. The frozen pages were refrozen
 (`frozen_outputs.mjs prepare-scope … && freeze && clear-scope`).
+
+## Design Library (owner-approved 22 Oct 2026)
+- **Where**: `/admin/library` (menu button "Design Library", after Inventory). Every section, design,
+  color set, tips group and collection has its own page: `/admin/library/<porches|rooms|balloons|grazing>/<slug>`,
+  `/admin/library/colors/<slug>`, `/admin/library/tips/<slug>`, `/admin/library/collections/<key>`,
+  `/admin/library/shopping`. Server: `functions/_lib/admin-library.mjs` (shell pages through `layout()`);
+  page code: `functions/_lib/assets/design-library.{js,css}.txt`, served as `/admin/library/app.{js,css}`.
+- **Data**: `data/admin/design-library/library.json`, bundled into the Functions and served only as
+  `/admin/library/data.json` behind the guard (`data/` is never published). Refresh from the research
+  build with `npm run library:sync` (reads `~/claude-work/design-library/build/index.html`, or
+  `LIBRARY_SRC=<dir>`), then `npm run validate:admin-design-library` and a PR.
+- **Pictures = real Pinterest pins** (owner, 22 Oct 2026). `data/admin/design-library/pins.json` holds
+  3–6 pins per design group (65 groups), found by web search and checked through Pinterest's public
+  oEmbed (`npm run library:pins:check` re-checks, drops dead pins, refreshes credits). Cards show the
+  pin's oEmbed picture hotlinked from `i.pinimg.com` (never copied) with "Picture: <maker> on
+  Pinterest ↗"; design pages lead with Pinterest's official embed widget (`pinit.js`, loaded on design
+  pages only) and keep "See more on Pinterest". Nothing is scraped or rehosted.
+- **Fallback**: the 51 AI idea pictures (`data/admin/design-library/images/`, published by
+  `scripts/assemble_pages_output.js` to `admin/library/img/`, read only through `env.ASSETS` behind the
+  guard; one mapping in `scripts/lib/library_assets.js`) show, labelled "Idea picture (AI)", only when a
+  design has no pin or its pin picture stops loading; with neither, "Picture coming".
+- **Behaviour** (from the approved preview): porch tabs (Fall / Halloween · Winter / Christmas · Other)
+  + size pull-down, price / kind / collection pull-downs (kept in the address, so ← Back returns to the
+  same filter), collections, Rules to remember (sticky column on a computer, pill + bottom sheet with
+  ✕ Close on a phone), balloon map with counts by colour and size, numbered clusters and a recolour
+  picker, dot strips on balloon cards, the supply calculator, per-design shopping lists and the trip
+  list combined by store (this phone's localStorage; Clear sits apart and confirms).
+- **Guard**: `npm run validate:admin-design-library` (in validate:admin): data and pins in step, every
+  group ≥ 3 pins, every route signed out → sign-in, pinit.js on design pages only, and the page code
+  run in a stand-in DOM for every view.
+

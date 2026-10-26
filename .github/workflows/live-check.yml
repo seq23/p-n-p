@@ -1,0 +1,54 @@
+name: Post-deploy live check
+
+# Her Search Readiness Checklist item h4: "The build can pass and the edge can
+# still serve the wrong thing (a Worker that 301'd robots.txt did)." Every other
+# check in this repository reads files on disk. This one fetches the deployed
+# site and compares it to the commit, so a Cloudflare Pages deploy that
+# half-published, a redirect rule shadowing a real page, or an asset that never
+# uploaded is caught here instead of by an external audit weeks later.
+#
+# It runs AFTER the deploy, never as a merge gate: Pages publishes on push to
+# main, so this waits for that to land and then checks the live host. A pull
+# request is deliberately not a trigger - there is nothing deployed to check.
+# scripts/ops/post_deploy_live_check.mjs retries each request before calling it a
+# failure, so a deploy still propagating is not reported as a broken site.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # 13:10 UTC daily, after the authority cycle has had its say on main.
+    - cron: "10 13 * * *"
+  workflow_dispatch:
+    inputs:
+      sample:
+        description: How many published pages to fetch and compare (the whole set is ~142)
+        required: false
+        default: "12"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  live-check:
+    # The script's own retries are the budget (4 attempts, 20s apart, per request).
+    # A fault detector, not a time budget: a slow edge is not a broken site.
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+
+
+      - name: Fetch the live site and compare it to this commit
+        # On a push, wait (up to 15 min) until the edge serves THIS commit's sitemap.xml and
+        # llms.txt before comparing. A fixed sleep 90 compared #149 against the previous deploy.
+        run: npm run live:check -- --sample "${{ github.event.inputs.sample || '12' }}" ${{ github.event_name == 'push' && '--wait-for-deploy 900' || '' }}

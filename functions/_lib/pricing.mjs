@@ -37,6 +37,12 @@ export function buildPriceTable(source, services, porchPackages = null) {
   const fromOf = (k) => { const v = services && services.services && services.services[k]; const n = Number(String((v && v.price) || '').replace(/[^0-9.]/g, '')); return Number.isFinite(n) ? cents(n) : 0; };
   return {
     celebrationFromCents: fromOf('celebration'),
+    // The room setup presets (owner-approved 25 Oct 2026): services.json
+    // services.celebration.roomSetupPresets, the one definition of their words, prices and notes.
+    // Each note entry is its own row of the line note. The first (Basic, one line) is the auto
+    // draft's room setup starting line, roomSetup.
+    roomSetupPresets: roomPresetsOf(services, cents),
+    roomSetup: (() => { const b = roomPresetsOf(services, cents)[0]; return b && b.lines.length === 1 ? { description: b.lines[0].description, cents: b.lines[0].unit_cents } : null; })(),
     grazingFromCents: fromOf('grazing'),
     dayCents: cents(games.rates.day),
     weekendCents: cents(games.rates.weekend),
@@ -50,6 +56,10 @@ export function buildPriceTable(source, services, porchPackages = null) {
     // The rental invoice note's phone (invoice-note.mjs rentalNote words it per invoice).
     pickupPhone: String(pickup.phone || ''),
     pickupPlace: String(pickup.place || '').split(',')[0],
+    // The invoice text message names the police station in full (owner, 24 Oct 2026), from the
+    // same games.json pickup the site and FAQ read: "Mt. Moriah Station, Memphis Police
+    // Department, 2602 Mt. Moriah Rd, Memphis, TN 38115".
+    pickupWhere: [pickup.place, pickup.address].filter(Boolean).join(', '),
     gameNames: items.filter((i) => i.kind === 'game').map((i) => i.name),
     // The games an all-games bundle counts (owner, 18 Oct 2026: "the 6 games" are both Giant
     // Color Stack sets + four others), so a game with bundleSets 2 fills two of its slots.
@@ -236,7 +246,10 @@ export function prefillLines(request, table) {
     if (party || grazing) {
       const a = serviceAnswers(request);
       const note = (x) => [x.where, x.guests ? `${x.guests} guests` : '', x.budget ? `budget ${x.budget}` : ''].filter(Boolean).join(' · ');
-      if (party) lines.push({ description: `Party decor${a.party.event ? `: ${a.party.event}` : ''}`, qty: 1, unit_cents: table.celebrationFromCents || 0, note: note(a.party), refundable: 0, auto: 'start' });
+      // A room setup (hotel room, suite, Airbnb, bedroom; owner, 25 Oct 2026) starts at the basic
+      // room setup line from the price table instead of the "Party decor" line.
+      if (party && table.roomSetup && isRoomSetup(request, a)) lines.push({ description: table.roomSetup.description, qty: 1, unit_cents: table.roomSetup.cents, note: note(a.party), refundable: 0, auto: 'start' });
+      else if (party) lines.push({ description: `Party decor${a.party.event ? `: ${a.party.event}` : ''}`, qty: 1, unit_cents: table.celebrationFromCents || 0, note: note(a.party), refundable: 0, auto: 'start' });
       if (grazing) {
         lines.push({ description: `Grazing table styling${a.grazing.event ? `: ${a.grazing.event}` : ''}`, qty: 1, unit_cents: table.grazingFromCents || 0, note: note(a.grazing), refundable: 0, auto: 'start' });
         if (/^yes/i.test(a.grazing.food)) lines.push({ description: 'Food (at cost)', qty: 1, unit_cents: 0, note: '', refundable: 0, auto: 'food' }); // $0 = price needed
@@ -251,6 +264,64 @@ export function prefillLines(request, table) {
     }
   }
   return lines;
+}
+
+function roomPresetsOf(services, cents) {
+  const list = services && services.services && services.services.celebration && services.services.celebration.roomSetupPresets;
+  return (Array.isArray(list) ? list : []).map((p) => {
+    const lines = (p.lines || []).map((l) => ({ description: String(l.description), qty: 1, unit_cents: cents(Number(l.price) || 0), note: (Array.isArray(l.note) ? l.note : [l.note || '']).filter(Boolean).join('\n'), refundable: 0 }));
+    return { key: String(p.key), name: String(p.name), includesTakedown: Boolean(p.includesTakedown), declaredCents: cents(Number(p.total) || 0), totalCents: lines.reduce((t, l) => t + l.unit_cents, 0), lines };
+  }).filter((p) => p.lines.length);
+}
+
+// "Room setup presets" on the unsent invoice editor (owner, 25 Oct 2026). Pure and written in
+// plain ES5 so the editor runs this exact source in the browser (views.mjs EDITOR_JS): given the
+// descriptions of the lines on the invoice, which ones a preset takes out (every room setup preset
+// line; a separate Takedown line too when the preset includes takedown) and where its lines go
+// (where the first room setup line was, else at the top). Every other line stays.
+export function roomPresetPlan(descs, presets, key) {
+  var p = null; var room = {}; var i; var j;
+  for (i = 0; i < presets.length; i += 1) { if (presets[i].key === key) p = presets[i]; for (j = 0; j < presets[i].lines.length; j += 1) room[String(presets[i].lines[j].description).trim().toLowerCase()] = 1; }
+  if (!p) return null;
+  var remove = []; var takedown = []; var at = -1; var kept = 0;
+  for (i = 0; i < descs.length; i += 1) {
+    var d = String(descs[i] || '').trim().toLowerCase();
+    if (room[d]) { if (at < 0) at = kept; remove.push(i); } else if (p.includesTakedown && (d === 'takedown' || d === 'setup / takedown fee')) { remove.push(i); takedown.push(i); } else kept += 1;
+  }
+  return { remove: remove, takedown: takedown, at: at < 0 ? 0 : at, add: p.lines, totalCents: p.totalCents, name: p.name };
+}
+
+// The same plan on saved lines -> the invoice's new lines (the preset's lines are ordinary hand
+// lines: a later rebuild keeps them, reconcileRoomPreset).
+export function applyRoomPreset(lines, presets, key) {
+  const plan = roomPresetPlan(lines.map((l) => l.description), presets, key);
+  if (!plan) return lines;
+  const kept = lines.filter((l, i) => !plan.remove.includes(i));
+  return [...kept.slice(0, plan.at), ...plan.add.map((l) => ({ ...l })), ...kept.slice(plan.at)];
+}
+
+// rebuildAutoDraft: when the lines kept by hand already carry a room setup preset, the fresh
+// prefill does not add the Basic line again, nor a Takedown the kept preset already includes.
+export function reconcileRoomPreset(fresh, kept, presets) {
+  const of = (l) => String(l.description || '').trim().toLowerCase();
+  const room = new Map(); for (const p of presets || []) for (const l of p.lines) room.set(of(l), p);
+  const held = kept.map((l) => room.get(of(l))).filter(Boolean);
+  if (!held.length) return fresh;
+  const takedown = held.some((p) => p.includesTakedown);
+  return fresh.filter((l) => !room.has(of(l)) && !(takedown && (of(l) === 'takedown' || of(l) === 'setup / takedown fee')));
+}
+
+// A party request for a room setup: its "Where is it?" names a hotel, motel, Airbnb, suite, bedroom
+// or a room (not a living / dining / ball / party / event room, a home or a venue, even in a hotel), or its
+// event type says "hotel room" or "room setup". Porches, grazing and rentals never reach this.
+const ROOM_WHERE = /\b(hotels?|motels?|airbnbs?|air bnb|suites?|bedrooms?|rooms?)\b/i;
+const NOT_A_ROOM = /\b(living|dining|family|ball|banquet|conference|meeting|party|event|community|game|rec|recreation|board|break|club|show|class)\s?rooms?\b/i;
+const ROOM_EVENT = /\bhotel\s+room\b|\broom\s+set\s?-?up\b/i;
+export function isRoomSetup(request, answers = serviceAnswers(request)) {
+  const where = String((answers && answers.party && answers.party.where) || '');
+  const event = [answers && answers.party && answers.party.event, request && request.eventType].filter(Boolean).join(' ');
+  if (ROOM_EVENT.test(event)) return true;
+  return ROOM_WHERE.test(where) && !NOT_A_ROOM.test(where);
 }
 
 // The party and grazing answers of one request, apart (both ask "How many guests?" and "Budget",

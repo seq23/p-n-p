@@ -7,6 +7,7 @@ import path from 'node:path';
 import module from 'node:module';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
+import { createRequire } from 'node:module';
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', '..');
 
 // The rentals inventory is Valerie's to edit (Settings -> Inventory, 18 Oct 2026), so the
@@ -40,6 +41,7 @@ if (typeof module.registerHooks === 'function') {
   module.register(`data:text/javascript,${encodeURIComponent(HOOKS)}`, import.meta.url);
 }
 
+const LIB_ASSETS = createRequire(import.meta.url)('../../lib/library_assets.js');
 export const mod = (p) => import(pathToFileURL(path.join(ROOT, p)).href);
 
 let sqlite;
@@ -107,7 +109,10 @@ export function makeEnv(db) {
       delete: async (key) => { idObjects.delete(key); },
     },
     // Static assets (the Pages ASSETS binding): request.html and friends from the repo.
-    ASSETS: { fetch: async (req) => { const p = new URL(req.url || req).pathname.replace(/^\//, ''); const f = path.join(ROOT, `${p || 'index'}.html`); return fs.existsSync(f) ? new Response(fs.readFileSync(f, 'utf8'), { headers: { 'Content-Type': 'text/html' } }) : new Response('not found', { status: 404 }); } },
+    // The Design Library's pictures are published by assemble_pages_output.js from LIB_ASSETS.SOURCE
+    // to LIB_ASSETS.OUTPUT; the harness serves that same mapping.
+    ASSETS: { fetch: async (req) => { const p = new URL(req.url || req).pathname.replace(/^\//, '');
+      if (p.startsWith(`${LIB_ASSETS.OUTPUT}/`)) { const n = p.slice(LIB_ASSETS.OUTPUT.length + 1); const f = path.join(ROOT, LIB_ASSETS.SOURCE, n); return LIB_ASSETS.NAME.test(n) && fs.existsSync(f) ? new Response(fs.readFileSync(f), { headers: { 'Content-Type': 'image/webp' } }) : new Response('not found', { status: 404 }); } const f = path.join(ROOT, `${p || 'index'}.html`); return fs.existsSync(f) ? new Response(fs.readFileSync(f, 'utf8'), { headers: { 'Content-Type': 'text/html' } }) : new Response('not found', { status: 404 }); } },
     // Workers AI stand-in: answers whatever aiReply holds (a string, or a function of the input).
     AI: {
       run: async (model, input) => { aiCalls.push({ model, input }); const r = typeof aiReply.value === 'function' ? aiReply.value(input) : aiReply.value; if (r instanceof Error) throw r; return { response: r }; },

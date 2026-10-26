@@ -98,7 +98,7 @@ for (const [plan, now] of Object.entries(plans)) {
   const loadedPdf = await PDFDocument.load(bytes);
   must(loadedPdf.getPageCount() === 1 && loadedPdf.getTitle() === 'Invoice PNP-2026-0007 from Porch & Party', `${plan}: PDF is not one titled page`);
   const sms = pdf.textMessage({ invoice, lines, settings });
-  must(sms.includes('PNP-2026-0007') && sms.includes('$170.00') && sms.includes('How you pay: ') && (plan === 'full' ? sms.includes('① All of it, now: $170.00') : (plan === 'none' ? sms.includes('Nothing to pay now. ① All of it, by Thu 22 Oct: $170.00') : sms.includes(`① Deposit now (holds your date): ${util.money(now)}`))), `${plan}: text message lacks the number, total or the numbered payments`);
+  must(sms.includes('PNP-2026-0007') && sms.includes('Total: $170.00 ($120 rental + $50 refundable damage deposit)') && (plan === 'full' ? sms.includes('① All of it, now: $170.00') : (plan === 'none' ? sms.includes('Nothing to pay now.\n① All of it, by Thu 22 Oct: $170.00') : sms.includes(`① Deposit now (holds your date): ${util.money(now)}`))), `${plan}: text message lacks the number, total or the numbered payments`);
   const pl = pdf.payLines({ invoice, lines });
   must(pl.rows.length === (plan === 'full' || plan === 'none' ? 1 : 2) && pl.rows.reduce((t, r) => t + r.cents, 0) === total && pl.totalWords === '$120 rental + $50 refundable damage deposit', `${plan}: the PDF's How you pay rows do not add up to the total`);
   must(page.includes('Text the invoice (PDF)') && page.includes('/invoice.pdf') && page.includes('data-copy="sms"'), `${plan}: invoice page lacks the text/PDF buttons or the copyable message`);
@@ -133,6 +133,32 @@ const PICKUP = 'Pay the rest ($85.00) at pickup. Text or call 901-355-1518 to se
       'invoice page': page.includes(PICKUP.replace(/\./g, '.')), 'PDF pay box': pay.pickup === PICKUP };
     for (const [where, yes] of Object.entries(has)) must(yes === (kind === 'rental'), `${kind} invoice: ${where} ${yes ? 'carries' : 'lacks'} the pickup line`);
     must(mail.text.includes('② The rest, by Thu 22 Oct: $85.00'), `${kind} invoice: "② The rest, by Thu 22 Oct" wording changed`);
+  }
+  // The invoice text message (owner, 24 Oct 2026): (1) names the police station in full, from
+  // games.json pickup, on a pickup invoice only; (2) says the deposit is refundable on the total
+  // line; (3) is short lines with breaks: greeting, purpose + date, total, payments, pay, pickup,
+  // sign-off. Never "insured".
+  {
+    const read = (p) => JSON.parse(fs.readFileSync(path.join(ROOT, p), 'utf8'));
+    const { buildPriceTable } = await mod('functions/_lib/pricing.mjs');
+    const table = buildPriceTable(read('data/rentals/games.json'), read('data/offers/services.json'), read('data/offers/porch_packages.json'));
+    const g = read('data/rentals/games.json').pickup;
+    must(table.pickupWhere === `${g.place}, ${g.address}` && /Police Department/.test(table.pickupWhere) && /^2602 Mt\. Moriah Rd/.test(g.address), `the pickup place is not the police station from games.json: ${table.pickupWhere}`);
+    const st = { ...settings, cashapp: 'PorchParty901' };
+    const t = pdf.textMessage({ invoice, lines, settings: st, pickup: PICKUP, meet: table.pickupWhere, jobDate: '2026-10-24' });
+    const L = t.split('\n');
+    must(L[0] === 'Hi Jane,' && L[1] === 'Here is your Porch & Party invoice PNP-2026-0008 for your game rental on Sat 24 Oct (PDF attached).' && L[2] === '', `text: greeting / purpose + date lines wrong: ${JSON.stringify(L.slice(0, 3))}`);
+    must(L.includes('Total: $170.00 ($120 rental + $50 refundable damage deposit)'), 'text: the total line does not say the deposit is refundable');
+    must(L.includes(`Pickup place: ${table.pickupWhere}.`) && t.includes('Memphis Police Department') && t.includes('2602 Mt. Moriah Rd'), 'text: the police station is not named in full');
+    must(L.some((l) => l.startsWith('Pay by ') && l.includes('https://cash.app/$PorchParty901') && l.includes('PNP-2026-0008 in the note')), 'text: no pay line with the Cash App link');
+    must(L.slice(-2).join('|') === 'Thank you!|Porch & Party' && !/\n{3}/.test(t) && L.every((l) => l.length <= 160) && !/insur/i.test(t), 'text: sign-off, blank lines, a line too long, or "insured"');
+    const order = ['Hi Jane,', 'Total: ', '① ', 'Pay by ', 'Pay the rest', 'Pickup place: ', 'Thank you!'].map((w) => t.indexOf(w));
+    must(order.every((v, i) => v >= 0 && (i === 0 || v > order[i - 1])), `text: lines out of order: ${order}`);
+    const dec = pdf.textMessage({ invoice, lines, settings: st, pickup: '', meet: table.pickupWhere, jobDate: '' });
+    must(!dec.includes('Pickup place') && !dec.includes('Police') && dec.includes('for your booking (PDF attached)'), 'text: a decor (no pickup) invoice names the pickup place or a date');
+    const del = pdf.textMessage({ invoice, lines, settings: st, pickup: 'Pay the rest ($85.00) at delivery. Text or call 901-355-1518 to set your delivery time unless otherwise agreed upon.', meet: table.pickupWhere });
+    must(!del.includes('Pickup place'), 'text: a delivery invoice names the pickup place');
+    must(/meet: PRICE_TABLE\.pickupWhere, jobDate: await jobDateOf\(env, loaded\.invoice\)/.test(fs.readFileSync(path.join(ROOT, 'functions/_lib/admin.mjs'), 'utf8')), 'admin.mjs does not pass the police station and job date to the text message');
   }
   must(/pickupRows/.test(fs.readFileSync(path.join(ROOT, 'functions/_lib/pdf.mjs'), 'utf8')), 'pdf.mjs no longer draws the pickup line in the pay box');
   const adminSrc = fs.readFileSync(path.join(ROOT, 'functions/_lib/admin.mjs'), 'utf8');

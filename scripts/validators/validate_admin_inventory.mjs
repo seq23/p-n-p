@@ -83,7 +83,7 @@ const settingsPage0 = await get('/admin/settings');
 must(settingsPage0.status === 200 && /<details class="set-sec" id="inventory"[\s\S]*?href="\/admin\/inventory"[^>]*data-help="set.inventoryLink"/.test(settingsPage0.text), 'Settings has no Inventory section linking to /admin/inventory');
 must(settingsPage0.text.includes("if(location.hash==='#inventory')location.replace('/admin/inventory')"), 'an old /admin/settings#inventory link does not land on the Inventory page');
 must(/data-inv-status/.test(settingsPage0.text), 'Settings lost the website-update box');
-must(/<nav aria-label="Main">[\s\S]*?>Money<\/a><a href="\/admin\/inventory"[^>]*>Inventory<\/a><a href="\/admin\/settings"/.test(settingsPage0.text), 'the main nav lacks Inventory between Money and Settings');
+must(/<nav aria-label="Main">[\s\S]*?>Money<\/a><a href="\/admin\/inventory"[^>]*>Inventory<\/a><a href="\/admin\/library"[^>]*>Design Library<\/a><a href="\/admin\/settings"/.test(settingsPage0.text), 'the main nav lacks Inventory between Money and Design Library (then Settings)');
 const settings0 = await get('/admin/inventory');
 must(settings0.status === 200 && /id="inventory"/.test(settings0.text), 'the Inventory page does not answer');
 const seedRows = await all('SELECT slug, section, position, data FROM inventory_items ORDER BY section, position');
@@ -175,7 +175,13 @@ const inv1 = await s.invoiceFor(s.requests.find((r) => r.email === 'test.renter@
 const linesBefore = await all('SELECT description FROM invoice_lines WHERE invoice_id = ?1 ORDER BY id', inv1.id);
 await post('/admin/calendar/bookings', { kind: 'rental_pickup', date: s.util.todayISO(9), return_date: s.util.todayISO(10), customer_name: 'Una Uno', phone: '901-555-0102', email: '', place: '', items: 'Giant Uno' });
 const unoBooking = await one("SELECT id FROM bookings WHERE customer_name = 'Una Uno' AND kind = 'rental_pickup'");
-const nUno = (await I.futureBookingsFor(db, 'Giant Uno', s.util.todayISO(0), P.TRACK_TABLE)).length;
+// The business day, in Memphis time, which is the clock the Inventory page itself counts from
+// (functions/_lib/admin.mjs calls futureBookingsFor with chicagoDate()). s.util.todayISO is
+// UTC-based, so between 19:00 and midnight Memphis time the two are different days and this check
+// compared the page's count against a count taken from tomorrow: it failed every evening with
+// nothing wrong with the page. A rental business's "future bookings" is a Memphis-time question.
+const { chicagoDate } = await mod('functions/_lib/reminders.mjs');
+const nUno = (await I.futureBookingsFor(db, 'Giant Uno', chicagoDate(), P.TRACK_TABLE)).length;
 must(nUno >= 1, 'the future booking with Giant Uno is not found');
 const st1 = await get('/admin/inventory/giant-uno');
 must(st1.text.includes(`Remove Giant Uno? ${nUno} future ${nUno === 1 ? 'booking has' : 'bookings have'} it. ${nUno === 1 ? 'It keeps' : 'They keep'} it.`), 'Remove does not say plainly how many future bookings have the item');

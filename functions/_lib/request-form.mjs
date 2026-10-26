@@ -301,6 +301,15 @@ function section(key, title, body, { hidden = false } = {}) {
 }
 
 // The whole form. values/errors after a failed POST; ts = the server-signed render time.
+// Channel source tag (owner, 22 Oct 2026): /request?src=<tag> says where a request came from
+// (mailer-38117, hotel, hoa, school, facebook, instagram, tiktok, pinterest, google ...). Lower
+// case, only a-z 0-9 and "-", at most 40 characters; anything else is dropped. Carried in a hidden
+// field and stored on the request (requests.source_tag, migration 0023). Not shown in /admin yet.
+export const SRC_MAX = 40;
+export function cleanSrc(raw) {
+  return String(raw == null ? '' : raw).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, SRC_MAX);
+}
+
 export function renderForm({ offers, table, values = {}, errors = {}, ts = '', sitekey = '', referral = '', today = '' }) {
   const Q = questions(offers, table);
   const choices = serviceChoices(offers, table);
@@ -347,7 +356,7 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
   return `<!--request-form--><div class="rq-wrap" id="request-form">${summary}
   <form class="rq-form" method="post" action="/request" enctype="multipart/form-data" novalidate data-today="${esc(today)}">
     <div class="rq-hp" aria-hidden="true"><label for="f-website">Leave this empty</label><input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"></div>
-    <input type="hidden" name="ts" value="${esc(ts)}"><input type="hidden" name="ref" value="${esc(referral)}">
+    <input type="hidden" name="ts" value="${esc(ts)}"><input type="hidden" name="ref" value="${esc(referral)}"><input type="hidden" name="src" value="${esc(cleanSrc(values.src))}">
     ${page1}${sections}${contact}${id}${agree}
   </form></div>
   ${sitekey ? '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>' : ''}

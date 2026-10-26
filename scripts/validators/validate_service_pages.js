@@ -137,7 +137,17 @@ for (const rel of ['index.html', 'services/index.html']) {
   if (rel === 'index.html') ok(BO.heroBookLink(html) === BO.href(null), `${rel}: no "Book online" link to /request above the first <h2>`);
 }
 
-// ---- the 32 city pages.
+// ---- every city service page: one per served town per service.
+//
+// This used to be pinned to the literal 32 (eight towns x four services).
+// On 2026-10-26 the owner's Search Readiness Checklist (item j9) required pages
+// for five more towns inside the coverage radius, the count became 52, and this
+// failed with "52 city service pages checked, want 32" - a validator reporting
+// the fix as the defect. The count now comes from the same two lists the pages
+// are generated from, so it cannot go stale again, and the floor below keeps
+// Rule 0: a shrinking or empty city list is still a hard failure.
+const WANT_AREA_PAGES = G.cities().length * G.SERVICE_KEYS.length;
+const MIN_AREA_PAGES = 32;
 let areaPages = 0;
 for (const city of G.cities()) {
   for (const svc of G.SERVICE_KEYS) {
@@ -152,7 +162,8 @@ for (const city of G.cities()) {
     ok(BO.heroBookLink(html) === BO.href(G.REQUEST_KEY[svc]), `${rel}: no "Book online" link to ${BO.href(G.REQUEST_KEY[svc])} above the first <h2>`);
   }
 }
-if (areaPages !== 32) ok(false, `${areaPages} city service pages checked, want 32`);
+if (areaPages !== WANT_AREA_PAGES) ok(false, `${areaPages} city service pages checked, want ${WANT_AREA_PAGES} (${G.cities().length} towns x ${G.SERVICE_KEYS.length} services)`);
+if (WANT_AREA_PAGES < MIN_AREA_PAGES) ok(false, `the served city list expects only ${WANT_AREA_PAGES} city service pages; it has never been below ${MIN_AREA_PAGES}, so a town was dropped`);
 
 // ---- the two focused pages (owner approval 21 Oct 2026: out of the nav, inside the four services).
 const footerHtml = require(path.join(ROOT, 'templates/page-shell.js')).footer();
@@ -330,4 +341,4 @@ if (errors.length) {
   console.error(`SERVICE PAGES FAILED (${errors.length}):\n${errors.slice(0, 40).map((x) => `  - ${x}`).join('\n')}`);
   process.exit(1);
 }
-console.log(`service-pages: OK - ${checks} checks: exactly ${pages} service pages (${KEYS.join(' · ')}), each priced from data, Book online above the fold and after the FAQ, 5+ FAQ = FAQPage JSON-LD, Service JSON-LD, ${SP.AI.images.length} registered pictures (AI + owner photos; rentals only availableNow items, no captions), #hotel-room-setups + #giant-lawn-games; home + ${areaPages} city pages carry Book online and link all four; ${Object.keys(probes).length + 1 + probeCount} self-test probes fail as they should; ${focusPages} focused pages (${FP.PAGES.map((p) => p.url).join(', ')}) out of the nav, priced from data, linked from their parent sub-section, all 32 city pages, the sitemap and the llms files`);
+console.log(`service-pages: OK - ${checks} checks: exactly ${pages} service pages (${KEYS.join(' · ')}), each priced from data, Book online above the fold and after the FAQ, 5+ FAQ = FAQPage JSON-LD, Service JSON-LD, ${SP.AI.images.length} registered pictures (AI + owner photos; rentals only availableNow items, no captions), #hotel-room-setups + #giant-lawn-games; home + ${areaPages} city pages carry Book online and link all four; ${Object.keys(probes).length + 1 + probeCount} self-test probes fail as they should; ${focusPages} focused pages (${FP.PAGES.map((p) => p.url).join(', ')}) out of the nav, priced from data, linked from their parent sub-section, all ${areaPages} city pages, the sitemap and the llms files`);

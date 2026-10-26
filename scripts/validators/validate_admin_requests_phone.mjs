@@ -55,6 +55,10 @@ must(before.length > 0 && before.every((r) => r.submitted_at < '2026-10-16' && r
 const today = F.chicagoToday();
 const plus = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
 const tomorrow = (() => { const d = new Date(`${R.chicagoDate()}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + 1); return d.toISOString().slice(0, 10); })();
+// The fixture request has fixed dates (24/25 Oct 2026), so on some days its own bookings are
+// tomorrow too (red on 24 Oct 2026, no commit behind it): count them in rather than assume 3.
+const preTmr = (await R.tomorrowsBookings(s.db)).length;
+const nRem = preTmr + 3;
 for (const n of ['Avery Rem', 'Blake Rem', 'Casey Rem']) await s.db.prepare("INSERT INTO bookings (kind, date, customer_name, phone, items) VALUES ('rental_pickup', ?1, ?2, '9015550123', 'Giant Uno')").bind(tomorrow, n).run();
 const a = await s.siteRequest({ service: 'party', party_event: 'Birthday', party_where: 'Home', event_date: plus(12), location: 'Bartlett', name: 'Nora Newone', phone: '(901) 555-0161', email: 'nora.new@example.com' });
 const b = await s.siteRequest({ service: 'party', party_event: 'Birthday', party_where: 'Home', event_date: plus(13), location: 'Bartlett', name: 'Olive Other', phone: '(901) 555-0162', email: 'olive.other@example.com' });
@@ -71,16 +75,26 @@ must(at('data-reminders-line') > at('data-request-list') && at("Tomorrow's remin
 const rqpanel = at('class="rqpanel"');
 must(rqpanel > 0 && /\.rqmain\{order:1\}\.rqpanel\{order:2/.test(dash) && /@media\(min-width:900px\)\{\.rqpanel\{order:0/.test(dash), 'the three-step panel is not under the list on a phone and on top on a wide screen');
 must(at('class="rqmain"') > rqpanel && !dash.slice(at('class="rqmain"'), at('data-request-list')).includes('data-reminders'), 'something besides the week card / alerts sits between the heading and the list');
+// 1b. Owner, 24 Oct 2026: the 1·2·3 steps are one slim closed accordion on a phone (opened by
+// script on a wide screen, summary hidden there), and Put away sits right under Cancelled, above
+// the steps, inside the list column; the ID photos box is last.
+const fold = dash.slice(at('data-steps-fold') - 60, at('data-steps-panel'));
+must(/<details class="fold rqsteps" id="shortcuts" data-steps-fold><summary data-help="req\.shortcuts"[^>]*><span>1·2·3 Shortcuts<\/span><span class="tog"><span class="t-shut">Tap to open ▾<\/span><span class="t-open">Tap to close ▴<\/span><\/span><\/summary>/.test(fold) && at('data-steps-panel') > at('data-steps-fold') && at('data-steps-panel') < at('class="rqmain"'), 'the 1·2·3 steps are not inside a closed "1·2·3 Shortcuts · Tap to open ▾" accordion');
+must(!/<details class="fold rqsteps"[^>]* open/.test(dash) && /@media\(min-width:900px\)\{\.rqsteps\[open\]>summary\{display:none\}\}/.test(dash) && /matchMedia\('\(min-width:900px\)'\)\.matches\)sc\.open=true/.test(dash), 'the Shortcuts accordion is not closed on a phone and open (summary hidden) on a wide screen');
+must(!/position:\s*(fixed|sticky)[^}]*\}[^{]*\.rqsteps|\.rqsteps[^{]*\{[^}]*position:\s*(fixed|sticky)/.test(dash), 'the Shortcuts accordion floats over content');
+const iCx = at('data-cancelled-group'); const iPut = at('id="put-away-section"');
+must(iCx > at('data-request-list') && iPut > iCx && iPut < at('data-reminders-line') && iPut > at('class="rqmain"') && dash.slice(iCx, iPut).indexOf('class="rqpanel"') < 0, 'Put away is not right under Cancelled, inside the list column (so above the steps on a phone)');
+must(at('data-ids-ready') < 0 || at('data-ids-ready') > iPut, 'the ID photos box is not below Put away');
 // 2. Reminders line.
 const line = dash.slice(at('data-reminders-line') - 40, at('data-reminders-line') + 600);
 must(/<details class="card remline" data-reminders data-reminders-line>/.test(dash) && !/<details class="card remline"[^>]* open/.test(dash), 'the reminders are not one collapsed <details> line');
-must(/<span class="remcount">3 reminders<\/span>/.test(line) && line.includes('▸'), `the reminders line does not read "3 reminders ▸": ${line.slice(0, 300)}`);
-must((dash.match(/data-reminder="/g) || []).length === 3, 'the reminders are not all inside the line');
+must(new RegExp(`<span class="remcount">${nRem} reminders</span>`).test(line) && line.includes('▸'), `the reminders line does not read "${nRem} reminders ▸": ${line.slice(0, 300)}`);
+must((dash.match(/data-reminder="/g) || []).length === nRem && ['Avery Rem', 'Blake Rem', 'Casey Rem'].every((n) => dash.includes(n)), 'the reminders are not all inside the line');
 const cal = (await s.get('/admin/calendar')).text;
 // Calm calendar (19 Oct 2026): the open reminders box is Step 4, "Check tomorrow's reminders.", every row inside it.
 const step4 = cal.slice(cal.indexOf('id="calstep-4"'), cal.indexOf('</details>', cal.indexOf('id="calstep-4"')));
 must(/Check tomorrow&#39;s reminders\.|Check tomorrow's reminders\./.test(step4) && /<section data-reminders>/.test(step4) && !cal.includes('data-reminders-line'), 'the Calendar lost its open reminders box (Step 4)');
-must((step4.match(/data-reminder="/g) || []).length === 3 && (cal.match(/data-reminder="/g) || []).length === 3, 'the Calendar does not show all 3 reminders inside Step 4');
+must((step4.match(/data-reminder="/g) || []).length === nRem && (cal.match(/data-reminder="/g) || []).length === nRem, `the Calendar does not show all ${nRem} reminders inside Step 4`);
 // 3. NEW.
 must(/data-reqcard data-new/.test(cardOf(dash, rkA)) && /data-new-badge[^>]*>NEW</.test(cardOf(dash, rkA)), 'a new website request does not wear NEW');
 must(/data-new-badge[^>]*>NEW</.test(cardOf(dash, rkB)), 'the second new request does not wear NEW');

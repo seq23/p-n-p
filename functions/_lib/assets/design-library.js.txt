@@ -1,0 +1,623 @@
+/* Design Library (/admin/library), owner-approved 22 Oct 2026. Ported from the research preview
+   (~/claude-work/design-library/build/index.html). Each page is its own /admin URL; the server
+   says which view to draw (data-view / data-sec / data-key on #dl-app), and this file draws it
+   from /admin/library/data.json, which only answers behind the admin sign-in.
+   Pictures are real Pinterest pins: cards show the pin's oEmbed picture (hotlinked from
+   Pinterest's own i.pinimg.com, never copied) with its credit and a link to the pin; design pages
+   lead with Pinterest's official embed widget (pinit.js, loaded by the server on design pages
+   only). The AI idea pictures appear only when a design has no pin, or its pin picture fails.
+   Trip list, ticks and "I own this" stay on this phone (localStorage). Every class is dl-*, so
+   nothing collides with the console's own styles. */
+(function () {
+  "use strict";
+  var root = document.getElementById("dl-app");
+  if (!root) return;
+  var app = document.getElementById("dl-main");
+  var BASE = "/admin/library";
+  var VIEW = root.getAttribute("data-view") || "home";
+  var SEC = root.getAttribute("data-sec") || "";
+  var KEY = root.getAttribute("data-key") || "";
+
+  var SECTIONS = [
+    {k: "porches", n: "Porches", sub: "By season and porch size"},
+    {k: "rooms", n: "Party & Room Decor", sub: "By occasion, plus full room layouts"},
+    {k: "balloons", n: "Balloons", sub: "Garlands, clusters and bouquets"},
+    {k: "grazing", n: "Grazing Tables", sub: "Boards, small and full tables"},
+    {k: "colors", n: "Color Schemes", sub: "Ready-made color sets"},
+    {k: "tips", n: "Tips & Tricks", sub: "Short on time, ran out, on-site fixes"},
+    {k: "shopping", n: "Shopping List", sub: "By design, or one trip list by store"}
+  ];
+  var DESIGN_SECS = ["porches", "rooms", "balloons", "grazing"];
+  var TIERS = ["$", "$$", "$$$", "$$$$"];
+  var TIER_WORDS = {"$": "$ (budget)", "$$": "$$ (mid)", "$$$": "$$$ (premium)", "$$$$": "$$$$ (luxury)"};
+  var PORCH_TABS = ["Fall / Halloween", "Winter / Christmas", "Other"];
+  var PORCH_SIZES = ["stoop", "standard", "large", "grand"];
+  var DATA = null, byKey = {};
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
+  function money(n) { return n == null ? "—" : "$" + Math.round(n).toLocaleString("en-US"); }
+  function cap(s) { return String(s).replace(/^\w/, function (c) { return c.toUpperCase(); }); }
+  function secOf(k) { for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].k === k) return SECTIONS[i]; return null; }
+  function href(d) { return BASE + "/" + d.sec + "/" + encodeURIComponent(d.slug); }
+  function pinUrl(id) { return "https://www.pinterest.com/pin/" + id + "/"; }
+  function searchUrl(q) { return "https://www.pinterest.com/search/pins/?q=" + encodeURIComponent(q); }
+
+  // ---------- this phone's trip list
+  function load(k, d) { try { var v = JSON.parse(localStorage.getItem(k) || ""); return v == null ? d : v; } catch (e) { return d; } }
+  var trip = load("dl-trip", []), owned = load("dl-owned", {}), ticked = load("dl-ticked", {}), calcs = load("dl-calcs", []);
+  function save() { try { localStorage.setItem("dl-trip", JSON.stringify(trip)); localStorage.setItem("dl-owned", JSON.stringify(owned)); localStorage.setItem("dl-ticked", JSON.stringify(ticked)); localStorage.setItem("dl-calcs", JSON.stringify(calcs)); } catch (e) {} }
+  function tripLabel() {
+    var n = trip.length + calcs.length;
+    document.querySelectorAll("[data-trip-count]").forEach(function (el) { el.textContent = n ? " (" + n + ")" : ""; });
+  }
+  function toast(msg) {
+    var t = document.getElementById("dl-toast");
+    if (!t) { t = document.createElement("div"); t.id = "dl-toast"; t.className = "dl-toast"; t.setAttribute("role", "status"); document.body.appendChild(t); }
+    t.textContent = msg; t.hidden = false; clearTimeout(toast.h); toast.h = setTimeout(function () { t.hidden = true; }, 2400);
+  }
+
+  function store(w) {
+    w = (w || "").toLowerCase();
+    if (w.indexOf("balloon") >= 0) return "Balloon supplier";
+    if (w.indexOf("dollar") >= 0) return "Dollar store";
+    if (w.indexOf("craft") >= 0) return "Craft store";
+    if (w.indexOf("party") >= 0) return "Party store";
+    if (w.indexOf("amazon") >= 0) return "Amazon";
+    if (w.indexOf("garden") >= 0 || w.indexOf("nursery") >= 0) return "Garden center";
+    if (w.indexOf("florist") >= 0 || w.indexOf("flower") >= 0) return "Florist";
+    if (/grocery|warehouse|costco|sam/.test(w)) return "Grocery or warehouse club";
+    return "Other";
+  }
+
+  // ---------- pictures: the lead Pinterest pin, else the AI idea picture, else "Picture coming"
+  function aiPic(d) {
+    return d.img
+      ? '<img src="' + BASE + "/img/" + esc(d.img) + '" alt="Idea picture: ' + esc(d.n) + '" loading="lazy" decoding="async"><span class="dl-aitag">Idea picture (AI)</span>'
+      : '<span class="dl-nopic">Picture coming</span>';
+  }
+  function leadPin(d) { var id = (d.pins || [])[0]; return id && DATA.pinInfo[id] ? {id: id, p: DATA.pinInfo[id]} : null; }
+  function picHTML(d) {
+    var L = leadPin(d);
+    if (!L) return '<div class="dl-pic">' + aiPic(d) + "</div>";
+    return '<div class="dl-pic"><img src="' + esc(L.p.img) + '" alt="Real example from Pinterest: ' + esc(L.p.t || d.n) + '" loading="lazy" decoding="async" referrerpolicy="no-referrer" data-dl-fallback="' + esc(d.sec + "." + d.id) + '"></div>';
+  }
+  function creditHTML(d) {
+    var L = leadPin(d); if (!L) return "";
+    return '<a class="dl-credit" href="' + pinUrl(L.id) + '" target="_blank" rel="noopener" title="Opens this picture on Pinterest">Picture: ' + esc(L.p.by || "Pinterest") + " on Pinterest ↗</a>";
+  }
+  // A pin picture that stops loading falls back to the AI picture or "Picture coming".
+  document.addEventListener("error", function (e) {
+    var img = e.target;
+    if (!img || img.tagName !== "IMG" || !img.hasAttribute("data-dl-fallback")) return;
+    var d = byKey[img.getAttribute("data-dl-fallback")]; var box = img.parentNode;
+    img.removeAttribute("data-dl-fallback");
+    if (d && box) box.innerHTML = aiPic(d);
+  }, true);
+
+  function cardHTML(d) {
+    var price = d.lo != null ? "Customer pays " + money(d.lo) + "–" + money(d.hi) : "";
+    return '<div class="dl-card"><a class="dl-cardlink" href="' + href(d) + '" title="Opens this design">' + picHTML(d) +
+      '<div class="dl-cbody"><h3>' + esc(d.n) + '</h3><p class="dl-price"><b class="dl-tier">' + esc(d.tier || "") + "</b> " + esc(price) + "</p>" +
+      (d.g0 || d.g ? '<span class="dl-chip">' + esc(d.g0 || d.g) + "</span>" : "") + (d.sec === "balloons" ? miniMap(d) : "") +
+      '<span class="dl-open">Tap to open ›</span></div></a>' + creditHTML(d) + "</div>";
+  }
+  function grid(ds) { return '<div class="dl-grid">' + (ds.map(cardHTML).join("") || '<div class="dl-empty">Nothing matches. Pick "Every …" in a filter to see more.</div>') + "</div>"; }
+
+  // ---------- home
+  function home() {
+    var counts = {};
+    DATA.designs.forEach(function (d) { counts[d.sec] = (counts[d.sec] || 0) + 1; });
+    counts.colors = DATA.palettes.length;
+    counts.tips = DATA.tips.reduce(function (s, c) { return s + (c.tips || []).length; }, 0);
+    var unit = {colors: "color sets", tips: "tips", shopping: ""};
+    var pick = DATA.designs.slice().sort(function () { return Math.random() - 0.5; }).slice(0, 3);
+    app.innerHTML = '<h1>Design Library</h1>' +
+      '<p class="dl-lead">Ideas for every job, from one balloon bouquet to a whole room. Every design has real examples from Pinterest, its price tier, what it costs you, what the customer pays, the steps and a shopping list.</p>' +
+      '<p class="dl-note">Costs and store prices are estimates. Check them against what you really pay.</p>' +
+      "<h2>Sections</h2>" +
+      '<div class="dl-rows">' + SECTIONS.map(function (s) {
+        var n = s.k === "shopping" ? (trip.length + calcs.length) : counts[s.k];
+        var cnt = s.k === "shopping" ? (n ? n + " on your trip list" : "Your trip list is empty") : n + " " + (unit[s.k] || "designs");
+        return '<a class="dl-row" href="' + BASE + "/" + s.k + '"><b>' + esc(s.n) + "</b><span>" + esc(s.sub) + " · " + esc(cnt) + '</span><span class="dl-open">Tap to open ›</span></a>';
+      }).join("") + "</div>" +
+      "<h2>Fresh ideas</h2>" + grid(pick) + collectionsRow();
+  }
+
+  // ---------- collections
+  function inCol(d, k) { return (d.cl || []).indexOf(k) >= 0; }
+  function collectionsRow() {
+    return '<h2>Collections</h2><div class="dl-rows">' + DATA.collections.map(function (c) {
+      return '<a class="dl-row" href="' + BASE + "/collections/" + c.k + '"><b>' + esc(c.n) + "</b><span>" + DATA.designs.filter(function (d) { return inCol(d, c.k); }).length + ' designs</span><span class="dl-open">Tap to open ›</span></a>';
+    }).join("") + "</div>";
+  }
+  function collectionPage(k) {
+    var c = DATA.collections.filter(function (x) { return x.k === k; })[0];
+    if (!c) { app.innerHTML = "<p>No such collection.</p>"; return; }
+    app.innerHTML = "<h1>" + esc(c.n) + '</h1><p class="dl-lead">Every design in this collection, across all four sections.</p>' +
+      DESIGN_SECS.map(function (sk) {
+        var ds = DATA.designs.filter(function (d) { return d.sec === sk && inCol(d, k); });
+        return ds.length ? "<h2>" + esc(secOf(sk).n) + ' <span class="dl-muted">' + ds.length + "</span></h2>" + grid(ds) : "";
+      }).join("");
+  }
+
+  // ---------- a section: porch tabs, filters (pull-downs), supply calculator on Balloons
+  function readFilters() {
+    var q = new URLSearchParams(location.search), f = {};
+    ["tab", "tier", "g", "size", "cl", "q"].forEach(function (k) { f[k] = q.get(k) || ""; });
+    if (SEC === "porches" && PORCH_TABS.indexOf(f.tab) < 0) f.tab = PORCH_TABS[0];
+    return f;
+  }
+  function writeFilters(f) {
+    var q = new URLSearchParams();
+    Object.keys(f).forEach(function (k) { if (f[k] && !(k === "tab" && f[k] === PORCH_TABS[0])) q.set(k, f[k]); });
+    var s = q.toString();
+    try { history.replaceState(null, "", location.pathname + (s ? "?" + s : "")); } catch (e) {}
+  }
+  function sel(id, label, opts, cur) {
+    return '<label class="dl-field" for="' + id + '">' + esc(label) + '<select id="' + id + '">' +
+      opts.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === cur ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") + "</select></label>";
+  }
+  function section(k, f) {
+    var s = secOf(k);
+    var all = DATA.designs.filter(function (d) { return d.sec === k; });
+    var inTab = k === "porches" ? all.filter(function (d) { return d.g === f.tab; }) : all;
+    var groups = []; inTab.forEach(function (d) { var g = k === "porches" ? d.g0 : d.g; if (g && groups.indexOf(g) < 0) groups.push(g); });
+    var cols = DATA.collections.map(function (c) { return {k: c.k, n: c.n, c: all.filter(function (d) { return inCol(d, c.k); }).length}; }).filter(function (c) { return c.c; });
+    var shown = inTab.filter(function (d) {
+      return (!f.tier || d.tier === f.tier) && (!f.g || d.g === f.g || d.g0 === f.g) && (!f.size || (d.x && d.x.size) === f.size) && (!f.cl || inCol(d, f.cl)) &&
+        (!f.q || (d.n + " " + d.d + " " + (d.occ || []).join(" ")).toLowerCase().indexOf(f.q.toLowerCase()) >= 0);
+    });
+    var tabs = k !== "porches" ? "" : '<div class="dl-tabs" role="tablist" aria-label="Porch seasons">' + PORCH_TABS.map(function (t) {
+      return '<button type="button" class="dl-tab' + (f.tab === t ? " on" : "") + '" role="tab" aria-selected="' + (f.tab === t) + '" data-tab="' + esc(t) + '">' + esc(t) + " <span>" + all.filter(function (d) { return d.g === t; }).length + " designs</span></button>";
+    }).join("") + "</div>";
+    var filters = '<div class="dl-filters">' +
+      sel("f-tier", "Price: tap to choose", [["", "Every price"]].concat(TIERS.map(function (t) { return [t, TIER_WORDS[t]]; })), f.tier) +
+      sel("f-g", (k === "porches" ? "Occasion" : "Kind") + ": tap to choose", [["", k === "porches" ? "Every occasion" : "Everything"]].concat(groups.map(function (g) { return [g, g]; })), f.g) +
+      (k === "porches" ? sel("f-size", "Porch size: tap to choose", [["", "Every porch size"]].concat(PORCH_SIZES.map(function (z) { return [z, cap(z)]; })), f.size) : "") +
+      (cols.length ? sel("f-cl", "Collection: tap to choose", [["", "Every collection"]].concat(cols.map(function (c) { return [c.k, c.n + " (" + c.c + ")"]; })), f.cl) : "") +
+      '<label class="dl-field dl-search" for="f-q">Search<input type="search" id="f-q" placeholder="e.g. blush, birthday" value="' + esc(f.q) + '"></label></div>';
+    app.innerHTML = "<h1>" + esc(s.n) + '</h1><p class="dl-lead">' + esc(s.sub) + ". " + all.length + " designs.</p>" +
+      momentChip() + tabs + (k === "balloons" ? calcHTML() : "") + filters +
+      '<p class="dl-count" aria-live="polite">' + shown.length + " shown" + (shown.length < inTab.length ? ' · <button type="button" class="dl-linkbtn" data-clear>Show everything</button>' : "") + "</p>" + grid(shown);
+    var rerun = function () { var y = scrollY; writeFilters(f); section(k, f); rules(k, null); scrollTo(0, y); };
+    app.querySelectorAll("[data-tab]").forEach(function (b) { b.onclick = function () { f.tab = b.getAttribute("data-tab"); f.g = ""; rerun(); }; });
+    [["f-tier", "tier"], ["f-g", "g"], ["f-size", "size"], ["f-cl", "cl"]].forEach(function (p) { var el = document.getElementById(p[0]); if (el) el.onchange = function () { f[p[1]] = el.value; rerun(); }; });
+    var c = app.querySelector("[data-clear]"); if (c) c.onclick = function () { f.tier = f.g = f.size = f.cl = f.q = ""; rerun(); };
+    var q = document.getElementById("f-q");
+    q.oninput = function () { f.q = q.value; clearTimeout(q.h); q.h = setTimeout(function () { writeFilters(f); section(k, f); rules(k, null); var n = document.getElementById("f-q"); n.focus(); n.setSelectionRange(n.value.length, n.value.length); }, 300); };
+    if (k === "balloons") calcWire();
+  }
+
+  // ---------- a design page: Pinterest pins first
+  function listTable(d) {
+    if (!d.list || !d.list.length) return '<p class="dl-muted">No shopping list for this one.</p>';
+    return '<div class="dl-tablewrap"><table class="dl-table"><thead><tr><th>Item</th><th class="num">How many</th><th>Where</th><th class="num">Cost</th></tr></thead><tbody>' +
+      d.list.map(function (i) {
+        return "<tr><td>" + esc(i.i) + (i.s && i.s !== "-" ? ' <span class="dl-small">' + esc(i.s) + "</span>" : "") + (i.c ? '<br><span class="dl-small">' + esc(i.c) + "</span>" : "") + (i.r ? '<br><span class="dl-small">Buy once, reuse</span>' : "") +
+          '</td><td class="num">' + esc(i.q) + ' <span class="dl-small">' + esc(i.u || "") + "</span></td><td>" + esc(store(i.w)) + '</td><td class="num">' + money(i.t) + "</td></tr>";
+      }).join("") +
+      '<tr><td colspan="3"><b>Supplies total</b>' + (d.cons != null ? '<br><span class="dl-small">' + money(d.cons) + " if you already own the reusable pieces</span>" : "") + '</td><td class="num"><b>' + money(d.sup) + "</b></td></tr></tbody></table></div>";
+  }
+  function pinsHTML(d) {
+    var ids = (d.pins || []).filter(function (id) { return DATA.pinInfo[id]; });
+    var more = d.pin ? '<p class="dl-actions"><a class="btn ghost inline" href="' + searchUrl(d.pin) + '" target="_blank" rel="noopener" title="Opens a Pinterest search for this design in a new tab">See more on Pinterest ↗</a></p>' : "";
+    if (!ids.length) return '<div class="dl-hero"><div class="dl-pic">' + aiPic(d) + "</div></div>" + more;
+    return '<section class="dl-pins" aria-label="Real examples from Pinterest"><h2>Real examples from Pinterest</h2>' +
+      '<p class="dl-small">Shown with Pinterest\'s own viewer, with each maker\'s name. Tap one to open it on Pinterest.</p>' +
+      (ids.length > 1 ? '<p class="dl-swipe">Swipe sideways for all ' + ids.length + " examples →</p>" : "") + '<div class="dl-pinrow">' +
+      ids.map(function (id) {
+        var p = DATA.pinInfo[id];
+        return '<div class="dl-pinbox"><a data-pin-do="embedPin" data-pin-width="medium" href="' + pinUrl(id) + '" target="_blank" rel="noopener">' +
+          '<img src="' + esc(p.img) + '" alt="' + esc(p.t || "Pinterest pin") + '" loading="lazy" referrerpolicy="no-referrer"><span>' + esc(p.by || "Pinterest") + " on Pinterest ↗</span></a></div>";
+      }).join("") + '</div><a class="dl-jump" href="#dl-facts">Skip to the costs, steps and shopping list ↓</a></section>' + more;
+  }
+  function stepsList(d) { return '<ol class="dl-steps">' + (d.steps || []).map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ol>"; }
+  function design(d) {
+    var key = d.sec + "." + d.id, inTrip = trip.indexOf(key) >= 0, x = "";
+    if (d.x && d.x.parts && d.sec !== "balloons") x += '<h2>Balloons</h2><div class="dl-tablewrap"><table class="dl-table"><thead><tr><th>Size</th><th class="num">Count</th><th>Rate</th><th>Fill</th></tr></thead><tbody>' + d.x.parts.map(function (p) { return "<tr><td>" + esc(p.size) + '</td><td class="num">' + esc(p.count) + "</td><td>" + esc(p.per_unit || "") + "</td><td>" + esc(p.fill || "") + "</td></tr>"; }).join("") + '</tbody></table></div><p class="dl-muted">' + esc(d.x.total) + " balloons for " + esc(d.x.unit || "") + (d.x.helium ? ", about " + esc(d.x.helium) + " cu ft of helium" : "") + ".</p>";
+    if (d.x && d.x.layout) x += "<h2>Top-down layout</h2><p>" + esc(d.x.layout) + "</p>";
+    if (d.x && d.x.food && d.x.food.length) x += '<h2>Food by guest count</h2><div class="dl-tablewrap"><table class="dl-table"><thead><tr><th>Guests</th><th>Food</th></tr></thead><tbody>' + d.x.food.map(function (f) { return '<tr><td class="num">' + esc(f.guests) + "</td><td>" + Object.keys(f.food || {}).map(function (a) { return esc(a) + ": " + esc(f.food[a]); }).join(" · ") + "</td></tr>"; }).join("") + '</tbody></table></div><p class="dl-muted">Food is quoted separately from the setup price.</p>';
+    var addBtn = '<p class="dl-actions"><button type="button" class="btn primary" id="dl-addtrip" aria-pressed="' + inTrip + '">' + (inTrip ? "On your trip list ✓ (tap to take it off)" : "Add to my trip list") + "</button></p>";
+    app.innerHTML = "<h1>" + esc(d.n) + "</h1>" + pinsHTML(d) +
+      '<div class="dl-facts" id="dl-facts">' +
+      '<div class="dl-fact"><small>Price tier</small><b>' + esc(TIER_WORDS[d.tier] || d.tier || "—") + "</b></div>" +
+      '<div class="dl-fact"><small>Customer pays</small><b>' + (d.lo != null ? money(d.lo) + "–" + money(d.hi) : "—") + "</b></div>" +
+      '<div class="dl-fact"><small>Your supplies</small><b>' + money(d.sup) + "</b>" + (d.cons != null ? '<span class="dl-small">' + money(d.cons) + " if you own the reusable pieces</span>" : "") + "</div>" +
+      '<div class="dl-fact"><small>Time</small><b>' + esc(d.time || "—") + "</b></div>" +
+      '<div class="dl-fact"><small>Difficulty</small><b>' + esc(cap(d.diff || "—")) + "</b></div></div>" +
+      '<p class="dl-note"><b>Fits:</b> ' + esc(d.pkg || "—") + "</p>" + addBtn +
+      '<p class="dl-meta">' + (d.g ? '<span class="dl-chip">' + esc(d.g0 || d.g) + "</span>" : "") + (d.lv && d.lv !== d.g ? '<span class="dl-chip">' + esc(d.lv) + "</span>" : "") + (d.x && d.x.hotel ? '<span class="dl-chip">Hotel-safe</span>' : "") + "</p>" +
+      '<p class="dl-desc">' + esc(d.d) + "</p>" +
+      (d.sec === "balloons" ? balloonMapHTML(d) : "") +
+      (d.occ && d.occ.length ? "<h2>Good for</h2><p>" + d.occ.map(esc).join(" · ") + "</p>" : "") +
+      (d.col && d.col.length ? "<h2>Color ideas</h2><p>" + d.col.map(esc).join("<br>") + '</p><p><a class="dl-ext" href="' + BASE + '/colors">Browse all color sets ›</a></p>' : "") +
+      x + "<h2>Steps</h2>" + stepsList(d) + "<h2>Shopping list</h2>" + listTable(d) +
+      (d.addons && d.addons.length ? "<h2>Add-ons to offer</h2><p>" + d.addons.map(function (a) { return esc(typeof a === "string" ? a : (a.name || a.item || "")); }).join(" · ") + "</p>" : "") +
+      '<h2>Tips for this</h2><p><a class="dl-ext" href="' + BASE + '/tips">Short on time, ran out of something, or a problem on site ›</a></p>' +
+      (d.src && d.src.length ? '<p class="dl-small dl-sources">Sources: ' + d.src.slice(0, 4).map(function (u) { return '<a class="dl-ext" href="' + esc(u) + '" target="_blank" rel="noopener">' + esc(u.replace(/^https?:\/\/(www\.)?/, "").split("/")[0]) + "</a>"; }).join(" · ") + "</p>" : "");
+    document.getElementById("dl-addtrip").onclick = function (e) {
+      var b = e.currentTarget;
+      if (trip.indexOf(key) >= 0) { trip = trip.filter(function (t) { return t !== key; }); b.textContent = "Add to my trip list"; b.setAttribute("aria-pressed", "false"); toast("Taken off the trip list"); }
+      else { trip.push(key); b.textContent = "On your trip list ✓ (tap to take it off)"; b.setAttribute("aria-pressed", "true"); toast("Added to the trip list"); }
+      save(); tripLabel();
+    };
+    var s = document.getElementById("dl-mappal");
+    if (s) s.onchange = function () { document.getElementById("dl-bmap").innerHTML = mapInner(d, palById(s.value, d)); };
+    if (window.PinUtils && window.PinUtils.build) try { window.PinUtils.build(); } catch (e) {}
+  }
+
+  // ---------- color schemes: a list, then a page per color set
+  function groupName(g) { return String(g).replace(/[_-]/g, " ").replace(/\b\w/g, function (c) { return c.toUpperCase(); }); }
+  function swatch(p) {
+    var cls = ["s60", "s30", "s10", "s10"];
+    return '<div class="dl-sw" role="img" aria-label="' + esc(p.colors.map(function (c) { return c.name; }).join(", ")) + '">' + p.colors.map(function (c, i) { return '<div class="' + (cls[i] || "s10") + '" style="background:' + esc(c.hex) + '"></div>'; }).join("") + "</div>";
+  }
+  function colors() {
+    var groups = []; DATA.palettes.forEach(function (p) { if (groups.indexOf(p.group) < 0) groups.push(p.group); });
+    app.innerHTML = '<h1>Color Schemes</h1><p class="dl-lead">' + esc(DATA.rule603010 || "") + "</p>" + (DATA.balloonNote ? '<p class="dl-note">' + esc(DATA.balloonNote) + "</p>" : "") +
+      groups.map(function (g) {
+        return "<h2>" + esc(groupName(g)) + '</h2><div class="dl-palgrid">' + DATA.palettes.filter(function (p) { return p.group === g; }).map(function (p) {
+          return '<a class="dl-pal" href="' + BASE + "/colors/" + encodeURIComponent(p.slug) + '"><h3>' + esc(p.name) + "</h3>" + swatch(p) + '<p class="dl-small">' + p.colors.map(function (c) { return esc(c.name); }).join(" · ") + '</p><span class="dl-open">Tap to open ›</span></a>';
+        }).join("") + "</div>";
+      }).join("");
+  }
+  function palette(p) {
+    var share = p.split_60_30_10 || {};
+    var uses = DATA.designs.filter(function (d) { return (d.col || []).some(function (c) { return p.colors.some(function (k) { return c.toLowerCase().indexOf(String(k.name).toLowerCase()) >= 0; }); }); }).slice(0, 6);
+    app.innerHTML = "<h1>" + esc(p.name) + '</h1><p class="dl-lead">' + esc(groupName(p.group)) + (p.tier ? " · " + esc(p.tier) : "") + "</p>" + swatch(p) +
+      '<div class="dl-tablewrap"><table class="dl-table"><thead><tr><th>Color</th><th>Hex</th></tr></thead><tbody>' + p.colors.map(function (c) { return '<tr><td><span class="dl-dot" style="background:' + esc(c.hex) + '"></span>' + esc(c.name) + "</td><td>" + esc(c.hex) + "</td></tr>"; }).join("") + "</tbody></table></div>" +
+      (Object.keys(share).length ? "<h2>60 · 30 · 10</h2><p>" + Object.keys(share).map(function (k) { return "<b>" + esc(k) + ":</b> " + esc(share[k]); }).join("<br>") + "</p>" : "") +
+      "<h2>What to buy</h2><p><b>Balloons:</b> " + (p.balloon_colors_to_buy || []).map(esc).join(", ") + "<br><b>Ribbon:</b> " + (p.ribbon_colors_to_buy || []).map(esc).join(", ") + "</p>" +
+      (p.occasions && p.occasions.length ? "<h2>Good for</h2><p>" + p.occasions.map(esc).join(" · ") + "</p>" : "") +
+      (p.pinterest_search ? '<p class="dl-actions"><a class="btn ghost inline" href="' + searchUrl(p.pinterest_search) + '" target="_blank" rel="noopener" title="Opens a Pinterest search for this color set in a new tab">See ideas on Pinterest ↗</a></p>' : "") +
+      (uses.length ? "<h2>Designs in these colors</h2>" + grid(uses) : "");
+  }
+
+  // ---------- tips: a list of groups, then a page per group
+  function nowFirst(ts) { return ts.slice().sort(function (a, b) { return (String(a.urgency).indexOf("now") >= 0 ? 0 : 1) - (String(b.urgency).indexOf("now") >= 0 ? 0 : 1); }); }
+  function tips() {
+    app.innerHTML = '<h1>Tips &amp; Tricks</h1><p class="dl-lead">Quick help on the job. Pick a group.</p><div class="dl-rows">' +
+      DATA.tips.map(function (c) { return '<a class="dl-row" href="' + BASE + "/tips/" + encodeURIComponent(c.slug) + '"><b>' + esc(c.name) + "</b><span>" + (c.tips || []).length + " tips" + ((c.videos || []).length ? " · " + c.videos.length + " videos" : "") + '</span><span class="dl-open">Tap to open ›</span></a>'; }).join("") + "</div>";
+  }
+  function tipGroup(c) {
+    app.innerHTML = "<h1>" + esc(c.name) + '</h1><p class="dl-lead">"At the job now" tips come first.</p><div class="dl-list">' +
+      nowFirst(c.tips || []).map(function (t) { return '<div class="dl-tip"><b>' + esc(t.title) + "</b> " + (t.urgency ? '<span class="dl-chip">' + esc(t.urgency) + "</span>" : "") + "<p>" + esc(t.body) + "</p></div>"; }).join("") + "</div>" +
+      ((c.videos || []).length ? '<h2>Videos</h2><div class="dl-list">' + c.videos.map(function (v) { return '<div class="dl-tip"><a class="dl-ext" href="' + esc(v.url) + '" target="_blank" rel="noopener">' + esc(v.title) + " ↗</a><p>" + esc(v.channel || "") + (v.length ? " · " + esc(v.length) : "") + (v.teaches ? " · " + esc(v.teaches) : "") + "</p></div>"; }).join("") + "</div>" : "");
+  }
+
+  // ---------- shopping: the combined trip list by store, then every design's list
+  function tkey(k) { try { return btoa(unescape(encodeURIComponent(k))).replace(/[^a-zA-Z0-9]/g, ""); } catch (e) { return String(Math.random()).slice(2); } }
+  function shopping() {
+    var picked = trip.map(function (k) { return byKey[k]; }).filter(Boolean).concat(calcs);
+    var lines = {};
+    picked.forEach(function (d) { (d.list || []).forEach(function (i) {
+      var k = (i.i || "") + "|" + (i.s || "") + "|" + (i.c || "");
+      var l = lines[k] || (lines[k] = {i: i.i, s: i.s, c: i.c, u: i.u, q: 0, t: 0, r: i.r, st: store(i.w), from: []});
+      l.q += Number(i.q) || 0; l.t += Number(i.t) || 0; if (l.from.indexOf(d.n) < 0) l.from.push(d.n);
+    }); });
+    var all = Object.keys(lines).map(function (k) { return [k, lines[k]]; });
+    var stores = []; all.forEach(function (e) { if (stores.indexOf(e[1].st) < 0) stores.push(e[1].st); }); stores.sort();
+    var need = all.filter(function (e) { return !(e[1].r && owned[e[0]]); });
+    var total = need.reduce(function (s, e) { return s + e[1].t; }, 0), full = all.reduce(function (s, e) { return s + e[1].t; }, 0);
+    app.innerHTML = "<h1>Shopping List</h1><h2>My trip list</h2>" + (picked.length
+      ? '<p class="dl-lead">' + picked.length + " design" + (picked.length > 1 ? "s" : "") + ": " + picked.map(function (d) { return d.sec ? '<a class="dl-ext" href="' + href(d) + '">' + esc(d.n) + "</a>" : esc(d.n); }).join(", ") + '. Shared items are added together. Tick "I own this already" on reusable pieces and they drop off the total.</p>' +
+        '<div class="dl-facts"><div class="dl-fact"><small>Trip total</small><b>' + money(total) + "</b>" + (full !== total ? '<span class="dl-small">' + money(full) + " − " + money(full - total) + " you already own</span>" : "") + '</div><div class="dl-fact"><small>Stores</small><b>' + stores.length + "</b></div></div>" +
+        stores.map(function (st) {
+          var ls = all.filter(function (e) { return e[1].st === st; });
+          var sub = ls.filter(function (e) { return !(e[1].r && owned[e[0]]); }).reduce(function (s, e) { return s + e[1].t; }, 0);
+          return '<div class="dl-store"><h3>' + esc(st) + " · " + money(sub) + "</h3>" + ls.map(function (e) {
+            var k = e[0], l = e[1], id = "t-" + tkey(k);
+            return '<div class="dl-check"><input type="checkbox" id="' + id + '" data-k="' + esc(k) + '"' + (ticked[k] ? " checked" : "") + '><label for="' + id + '"><b>' + esc(Math.round(l.q * 100) / 100) + " × " + esc(l.i) + "</b>" + (l.s && l.s !== "-" ? ' <span class="dl-small">' + esc(l.s) + "</span>" : "") + (l.c ? '<br><span class="dl-small">' + esc(l.c) + "</span>" : "") + '<br><span class="dl-small">For: ' + l.from.map(esc).join(", ") + " · " + money(l.t) + "</span></label>" +
+              (l.r ? '<label class="dl-own"><input type="checkbox" class="dl-ownbox" data-k="' + esc(k) + '"' + (owned[k] ? " checked" : "") + "> I own this already</label>" : "") + "</div>";
+          }).join("") + "</div>";
+        }).join("") +
+        '<div class="dl-apart"><p class="dl-small">Clearing takes every design off this trip list on this phone. It cannot be undone.</p><button type="button" class="btn danger inline" id="dl-clear">Clear the whole trip list</button></div>'
+      : '<div class="dl-empty">Your trip list is empty. Open any design and tap "Add to my trip list". Add several designs for one job and they combine into one list by store.</div>') +
+      "<h2>Lists by design</h2>" + DESIGN_SECS.map(function (sk) {
+        return "<h3>" + esc(secOf(sk).n) + '</h3><div class="dl-rows">' + DATA.designs.filter(function (d) { return d.sec === sk; }).map(function (d) {
+          return '<a class="dl-row" href="' + href(d) + '"><b>' + esc(d.n) + "</b><span>" + (d.list || []).length + " items · " + esc(d.tier) + " · supplies " + money(d.sup) + '</span><span class="dl-open">Tap to open ›</span></a>';
+        }).join("") + "</div>";
+      }).join("");
+    app.querySelectorAll(".dl-check > input").forEach(function (b) { b.onchange = function () { ticked[b.getAttribute("data-k")] = b.checked; save(); }; });
+    app.querySelectorAll(".dl-ownbox").forEach(function (b) { b.onchange = function () { owned[b.getAttribute("data-k")] = b.checked; save(); var y = scrollY; shopping(); scrollTo(0, y); }; });
+    var c = document.getElementById("dl-clear");
+    if (c) c.onclick = function () { if (!confirm("Clear the whole trip list? Every design comes off it.")) return; trip = []; calcs = []; ticked = {}; save(); tripLabel(); shopping(); toast("Trip list cleared"); };
+  }
+
+  // ---------- rules to remember: sticky column on a computer, a pill + bottom sheet on a phone
+  function ruleTitle(s) { var t = String(s).split(/[:.;]/)[0]; return t.length > 70 ? t.slice(0, 67).replace(/\s+\S*$/, "") + "…" : t; }
+  function rulesList(sec, d) {
+    var color = {t: "The 60-30-10 color rule", b: DATA.rule603010 || "", tag: "Color"};
+    var hotel = (DATA.hotelRules || []).map(function (r) { var s = typeof r === "string" ? r : (r.rule || ""); return {t: ruleTitle(s), b: s, tag: "Hotel"}; });
+    if (sec === "porches") return (DATA.porchRules || []).map(function (r) { return {t: r.rule, b: r.how, tag: "Porch"}; }).concat([color]);
+    if (sec === "rooms") return (!d || (d.x && d.x.hotel)) ? hotel.concat([color]) : [color].concat(hotel);
+    if (sec === "balloons") {
+      var want = /pop|gap|cluster|three sizes|knot|strip|heat|underinflate|sun makes|transport|crooked|wind|night before|float time/i, pins = [];
+      DATA.tips.forEach(function (c) { (c.tips || []).forEach(function (t) { if (want.test(t.title)) pins.push({t: t.title, b: t.body, tag: "No-pop, no-gap"}); }); });
+      return pins.concat((DATA.techniques || []).map(function (t) { return {t: t.name, b: (t.what + " " + (t.effect || "")).trim(), tag: "Technique"}; })).concat([color]);
+    }
+    if (sec === "grazing") { var g = (DATA.grazingGuide || {}).per_guest_ounces || {}; return Object.keys(g).map(function (a) { return {t: cap(a.replace(/_/g, " ")), b: g[a], tag: "Food per guest"}; }).concat([color]); }
+    return [];
+  }
+  function rulesDetails(rs, pfx) { return rs.map(function (r, i) { return '<details open id="' + pfx + "-" + i + '"><summary><span class="dl-rtag">' + esc(r.tag) + "</span>" + esc(r.t) + "</summary><p>" + esc(r.b) + "</p></details>"; }).join(""); }
+  function openSheet(i) {
+    var s = document.getElementById("dl-rsheet"); if (!s) return;
+    s.hidden = false; document.documentElement.style.overflow = "hidden";
+    document.getElementById("dl-rsheet-close").focus();
+    if (i != null) { var el = document.getElementById("rs-" + i); if (el) { el.open = true; el.scrollIntoView({block: "center"}); } }
+  }
+  function closeSheet() { var s = document.getElementById("dl-rsheet"); if (!s || s.hidden) return; s.hidden = true; document.documentElement.style.overflow = ""; var p = document.querySelector(".dl-rulespill"); if (p) p.focus(); }
+  function momentChip() { return '<button class="dl-moment" id="dl-moment" type="button" hidden></button>'; }
+  function rules(sec, d) {
+    document.querySelectorAll(".dl-rulespill,#dl-rsheet").forEach(function (n) { n.remove(); });
+    document.documentElement.style.overflow = "";
+    var rs = rulesList(sec, d);
+    var aside = document.getElementById("dl-aside");
+    if (!rs.length) { if (aside) aside.innerHTML = ""; root.classList.remove("dl-hasrules"); return; }
+    root.classList.add("dl-hasrules");
+    aside.innerHTML = "<h2>Rules to remember</h2>" + rulesDetails(rs, "ra");
+    document.body.insertAdjacentHTML("beforeend", '<button class="dl-rulespill" type="button" aria-haspopup="dialog">Rules to remember (' + rs.length + ') · tap to open</button>' +
+      '<div class="dl-sheet" id="dl-rsheet" hidden><div class="dl-sheetback" data-sheet-close></div><div class="dl-sheetpanel dl-rules" role="dialog" aria-modal="true" aria-label="Rules to remember">' +
+      '<div class="dl-sheethead"><h2>Rules to remember</h2><button class="btn ghost inline" id="dl-rsheet-close" type="button">✕ Close</button></div>' + rulesDetails(rs, "rs") + "</div></div>");
+    document.querySelector(".dl-rulespill").onclick = function () { openSheet(); };
+    document.getElementById("dl-rsheet-close").onclick = closeSheet;
+    document.querySelector("#dl-rsheet [data-sheet-close]").onclick = closeSheet;
+    // One rule to remember on a section page, picked once per visit (it does not change under her).
+    var m = document.getElementById("dl-moment");
+    if (m) {
+      var i = Math.floor(Math.random() * rs.length) % rs.length, r = rs[i];
+      m.hidden = false;
+      m.innerHTML = "<b>Rule to remember</b><span>" + esc(r.t) + (r.b && r.t.length < 40 ? " — " + esc(r.b) : "") + "</span><em>Tap to see all " + rs.length + "</em>";
+      m.onclick = function () {
+        if (matchMedia("(min-width: 900px)").matches) { var el = document.getElementById("ra-" + i); if (el) { el.open = true; el.scrollIntoView({block: "nearest", behavior: "smooth"}); el.classList.add("flash"); setTimeout(function () { el.classList.remove("flash"); }, 1600); } }
+        else openSheet(i);
+      };
+    }
+  }
+  addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
+
+  // ---------- colours for the balloon map
+  var SHARES = {1: [1], 2: [0.7, 0.3], 3: [0.6, 0.3, 0.1], 4: [0.6, 0.3, 0.05, 0.05]};
+  function alloc(n, shares) {
+    var raw = shares.map(function (s) { return s * n; }), out = raw.map(Math.floor);
+    var left = n - out.reduce(function (a, b) { return a + b; }, 0);
+    raw.map(function (r, i) { return [r - Math.floor(r), i]; }).sort(function (a, b) { return b[0] - a[0]; }).forEach(function (p) { if (left > 0) { out[p[1]]++; left--; } });
+    return out;
+  }
+  function hexFor(name) {
+    var n = String(name).toLowerCase().replace(/\(.*?\)/g, "").replace(/\b(all|latex|balloons?|pearl|matte|with|confetti|numbers?|vinyl on|tassel)\b/g, " ").replace(/\s+/g, " ").trim();
+    var H = DATA.hexes;
+    if (H[n]) return H[n];
+    var keys = Object.keys(H).sort(function (a, b) { return b.length - a.length; });
+    for (var i = 0; i < keys.length; i++) if (keys[i].length > 2 && n.indexOf(keys[i]) >= 0) return H[keys[i]];
+    return "#CBBFC6";
+  }
+  function palFromString(str) {
+    var s = String(str || "").replace(/\(.*?\)/g, "");
+    if (/rainbow/i.test(s)) return ["Red", "Orange", "Yellow", "Green"].map(function (n) { return {name: n, hex: hexFor(n)}; });
+    if (/school|team/i.test(s)) return [{name: "Color A", hex: "#1F2A44"}, {name: "Color B", hex: "#C9A227"}, {name: "White", hex: "#FFFFFF"}];
+    var out = [];
+    s.split(/,|\+|\band\b|\bover\b|\bto\b/i).map(function (x) { return x.trim(); }).filter(function (x) { return x && !/client|brand|family|palette/i.test(x); }).forEach(function (n) {
+      var short = cap(n.replace(/\b(latex|balloons?)\b/gi, "").trim());
+      if (short && !out.some(function (o) { return o.name.toLowerCase() === short.toLowerCase(); })) out.push({name: short, hex: hexFor(n)});
+    });
+    return out.length ? out.slice(0, 4) : [{name: "Gold", hex: "#C9A227"}, {name: "White", hex: "#FFFFFF"}, {name: "Blush", hex: "#F2C4C4"}];
+  }
+  function palById(v, d) {
+    if (v && v.indexOf("col:") === 0) return palFromString(d.col[+v.slice(4)]);
+    var p = DATA.palettes.filter(function (p) { return p.id === v; })[0];
+    return p ? p.colors.slice(0, 4).map(function (c) { return {name: c.name, hex: c.hex}; }) : palFromString((d.col || [])[0]);
+  }
+  function shareFor(pal) { return SHARES[Math.min(pal.length, 4)] || SHARES[3]; }
+
+  // ---------- balloon map model (counts by colour and size, numbered clusters)
+  function inchOf(s) { if (/\b260\b/.test(String(s))) return 2; var m = String(s).match(/(\d+)\s*(?:"|in\b|-inch)/) || String(s).match(/(\d+)/); return m ? +m[1] : 11; }
+  function szTxt(inch) { return inch === 2 ? "260 twisting" : inch + "-inch"; }
+  function rOf(inch) { return Math.max(6, Math.min(52, inch * 1.55)); }
+  function mapKind(d) {
+    if (/spiral|column|diamond|quad|tower|tunnel/i.test(d.g + " " + d.n) && !/organic/i.test(d.n)) return "quad";
+    if (d.lv === "Garland" || /garland|wall|cloud|bunches|mosaic/i.test(d.g)) return "organic";
+    return "bundle";
+  }
+  function unitInfo(d) {
+    var u = (d.x && d.x.unit) || "", ft = u.match(/([\d.]+)\s*ft of garland/);
+    if (ft) return {ft: +ft[1]};
+    var n = u.match(/^(\d+)\s+(bouquets|bunches|clouds|towers|topiaries|starbursts|clusters|tables|columns|arches)/);
+    return n ? {per: +n[1], what: n[2]} : {};
+  }
+  function mapModel(d, pal) {
+    var parts = ((d.x && d.x.parts) || []).filter(function (p) { return p.count > 0; }).map(function (p) { return {label: p.size, inch: inchOf(p.size), count: p.count, fill: p.fill}; });
+    var shares = shareFor(pal);
+    var totals = parts.map(function (p) { return {label: p.label, inch: p.inch, count: p.count, byColor: alloc(p.count, shares)}; });
+    var kind = mapKind(d), u = unitInfo(d), clusters = [], repeatNote = "";
+    if (kind === "organic" || kind === "quad") {
+      var L = u.ft || 0, R = L ? Math.min(L, L >= 6 ? 2 : L) : 1, scale = L ? R / L : 1 / (u.per || 1);
+      if (kind === "quad") {
+        var main = parts.slice().sort(function (a, b) { return b.count - a.count; })[0] || {inch: 11, count: 24};
+        var nQuads = Math.max(1, Math.round(main.count / 4)), show = Math.min(nQuads, pal.length * 2 >= 4 ? pal.length * 2 : 4);
+        for (var q = 0; q < Math.min(show, 8); q++) clusters.push([0, 1, 2, 3].map(function (j) { return {inch: main.inch, c: (j + q) % pal.length}; }));
+        repeatNote = nQuads + " quads in all. Each quad turns one balloon along, so the colors spiral; the pattern repeats every " + pal.length + " quads.";
+      } else {
+        var balloons = [];
+        parts.forEach(function (p) {
+          var n = Math.max(p.inch >= 18 && p.count * scale >= 0.4 ? 1 : 0, Math.round(p.count * scale));
+          alloc(n, shares).forEach(function (k, ci) { for (var i = 0; i < k; i++) balloons.push({inch: p.inch, c: ci}); });
+        });
+        var C = Math.max(2, Math.min(6, Math.round(balloons.length / 5)));
+        var lead = []; for (var i = 0; i < C; i++) lead.push([0, 1, 0, 2, 0, 1][i] % pal.length);
+        clusters = lead.map(function () { return []; });
+        var vol = lead.map(function () { return 0; });
+        balloons.sort(function (a, b) { return b.inch - a.inch; }).forEach(function (b) {
+          var best = 0, bs = Infinity, avg = vol.reduce(function (a, x) { return a + x; }, 0) / C + 1;
+          for (var i = 0; i < C; i++) { var s = vol[i] + (lead[i] === b.c ? 0 : avg * 0.6); if (s < bs) { bs = s; best = i; } }
+          clusters[best].push(b); vol[best] += b.inch * b.inch;
+        });
+        clusters = clusters.filter(function (c) { return c.length; });
+        repeatNote = L ? "One repeat is about " + R + " ft. Repeat clusters 1–" + clusters.length + " about " + Math.max(1, Math.round(L / R)) + " times for " + L + " ft." : (u.per ? "This drawing is one of " + u.per + " " + u.what + "; make " + u.per + "." : "");
+      }
+    } else {
+      var per = u.per && u.per > 1 ? u.per : 1;
+      parts.slice().sort(function (a, b) { return b.inch - a.inch; }).forEach(function (p) {
+        var n = Math.max(1, Math.round(p.count / per)), shown = Math.min(n, 12), cl = [];
+        alloc(shown, shares).forEach(function (k, ci) { for (var i = 0; i < k; i++) cl.push({inch: p.inch, c: ci, label: p.label}); });
+        cl.label = p.label; cl.n = n; clusters.push(cl);
+      });
+      repeatNote = per > 1 ? "Drawn for one of " + per + " " + (u.what || "pieces") + "; make " + per + "." : "";
+    }
+    return {kind: kind, pal: pal, totals: totals, clusters: clusters, repeatNote: repeatNote, u: u};
+  }
+  function packCluster(bs) {
+    var pts = [];
+    bs.forEach(function (b, i) {
+      var r = rOf(b.inch);
+      if (i === 0) { pts.push({x: 0, y: 0, r: r, b: b}); return; }
+      var ang = i * 2.399, best = null;
+      for (var dist = r; dist < 400 && !best; dist += 3) for (var k = 0; k < 24 && !best; k++) {
+        var a = ang + k * Math.PI / 12, x = Math.cos(a) * dist, y = Math.sin(a) * dist * 0.8;
+        if (pts.every(function (p) { return Math.hypot(p.x - x, p.y - y) >= (p.r + r) * 0.86; })) best = {x: x, y: y, r: r, b: b};
+      }
+      pts.push(best || {x: 0, y: 0, r: r, b: b});
+    });
+    return pts;
+  }
+  function mapSVG(m) {
+    var groups = m.clusters.map(packCluster);
+    var ext = groups.map(function (g) { var xs = [], ys = []; g.forEach(function (p) { xs.push(p.x - p.r, p.x + p.r); ys.push(p.y - p.r, p.y + p.r); }); return {x0: Math.min.apply(null, xs), x1: Math.max.apply(null, xs), y0: Math.min.apply(null, ys), y1: Math.max.apply(null, ys)}; });
+    var H = Math.max.apply(null, ext.map(function (e) { return e.y1 - e.y0; })) + 70, x = 16, parts = [];
+    groups.forEach(function (g, i) {
+      var e = ext[i], cx = x - e.x0, cy = 40 + (H - 70) / 2;
+      g.forEach(function (p) {
+        var c = m.pal[p.b.c] || m.pal[0];
+        parts.push('<circle class="dl-balloon" cx="' + (cx + p.x).toFixed(1) + '" cy="' + (cy + p.y).toFixed(1) + '" r="' + p.r.toFixed(1) + '" fill="' + esc(c.hex) + '"><title>' + esc(szTxt(p.b.inch)) + " " + esc(c.name) + '</title></circle><ellipse class="dl-shine" cx="' + (cx + p.x - p.r * 0.35).toFixed(1) + '" cy="' + (cy + p.y - p.r * 0.4).toFixed(1) + '" rx="' + (p.r * 0.22).toFixed(1) + '" ry="' + (p.r * 0.14).toFixed(1) + '"/>');
+      });
+      var bx = cx + (e.x0 + e.x1) / 2;
+      parts.push('<circle class="dl-badge" cx="' + bx.toFixed(1) + '" cy="16" r="13"/><text class="dl-badgetxt" x="' + bx.toFixed(1) + '" y="20.5" text-anchor="middle">' + (i + 1) + "</text>");
+      x += e.x1 - e.x0 + 22;
+    });
+    var W = x - 6;
+    var line = m.kind === "bundle" ? "" : '<path class="dl-stripline" d="M8 ' + (40 + (H - 70) / 2).toFixed(0) + " H" + (W - 8) + '"/>';
+    var foot = m.kind === "bundle" ? "" : '<text class="dl-striptxt" x="' + (W - 8) + '" y="' + (H - 6) + '" text-anchor="end">' + (m.kind === "quad" ? "then keep turning →" : "repeat 1 → " + m.clusters.length + " →") + "</text>";
+    return '<svg viewBox="0 0 ' + W.toFixed(0) + " " + H.toFixed(0) + '" width="' + Math.min(W, 1100).toFixed(0) + '" role="img" aria-label="Numbered cluster order drawing">' + line + parts.join("") + foot + "</svg>";
+  }
+  function describe(bs, pal) {
+    var g = {};
+    bs.forEach(function (b) { var k = b.inch + "|" + b.c; g[k] = (g[k] || 0) + 1; });
+    return Object.keys(g).sort(function (a, b) { return +b.split("|")[0] - +a.split("|")[0]; }).map(function (k) { var p = k.split("|"); return g[k] + " × " + szTxt(+p[0]) + " " + (pal[p[1]] ? pal[p[1]].name.toLowerCase() : ""); }).join(", ");
+  }
+  function mapSteps(m) {
+    var s = ["Inflate and size every balloon on the sizer first: " + m.totals.map(function (t) { return t.count + " × " + szTxt(inchOf(t.label)); }).join(", ") + "."];
+    if (m.kind === "quad") {
+      m.clusters.slice(0, m.pal.length).forEach(function (c, i) { s.push("Quad " + (i + 1) + ": tie two pairs and twist them together — " + describe(c, m.pal) + "."); });
+      s.push("Push each quad onto the frame or strip pressed tight against the last, turning the colors one place each time. " + m.repeatNote);
+    } else if (m.kind === "organic") {
+      m.clusters.forEach(function (c, i) { s.push("Cluster " + (i + 1) + ": " + describe(c, m.pal) + ". Twist the biggest balloons onto the strip first, then tuck the small ones in close."); });
+      s.push(m.repeatNote || "Add the clusters to the strip in order.");
+      s.push("Fill gaps with the small balloons on glue dots, then hide the strip with greenery or extra 5-inch balloons.");
+    } else {
+      m.clusters.forEach(function (c, i) { s.push("Step " + (i + 1) + ": " + (c.n || c.length) + " × " + (c.label || "") + (c.n > c.length ? " (drawing shows " + c.length + ")" : "") + " — " + describe(c, m.pal) + "."); });
+      if (m.repeatNote) s.push(m.repeatNote);
+    }
+    return s;
+  }
+  function dot(c) { return '<span class="dl-dot" style="background:' + esc(c.hex) + '"></span>'; }
+  function mapInner(d, pal) {
+    var m = mapModel(d, pal);
+    if (!m.totals.length) return '<p class="dl-muted">No balloon counts for this one.</p>';
+    var rows = m.totals.map(function (t) { return "<tr><td>" + (inchOf(t.label) === 2 ? "260" : esc(inchOf(t.label)) + " in") + ' <span class="dl-small">' + esc(t.label.replace(/^\d+"?\s*/, "")) + '</span></td><td class="num">' + t.count + "</td><td>" + t.byColor.map(function (n, i) { return n ? dot(pal[i]) + n + " " + esc(pal[i].name.toLowerCase()) : ""; }).filter(Boolean).join(", ") + "</td></tr>"; }).join("");
+    var sum = pal.map(function (c, i) { return m.totals.reduce(function (a, t) { return a + (t.byColor[i] || 0); }, 0); });
+    return '<div class="dl-tablewrap"><table class="dl-table"><thead><tr><th>Size</th><th class="num">Count</th><th>By colour (60/30/10)</th></tr></thead><tbody>' + rows +
+      '<tr><td><b>Total</b></td><td class="num"><b>' + m.totals.reduce(function (a, t) { return a + t.count; }, 0) + "</b></td><td>" + sum.map(function (n, i) { return n ? dot(pal[i]) + n + " " + esc(pal[i].name.toLowerCase()) : ""; }).filter(Boolean).join(", ") + "</td></tr></tbody></table></div>" +
+      "<h3>" + (m.kind === "quad" ? "Quad order" : m.kind === "organic" ? "Cluster order along the strip" : "Build order") + '</h3><div class="dl-bmapwrap">' + mapSVG(m) + "</div>" +
+      '<ol class="dl-steps">' + mapSteps(m).map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ol>" +
+      (d.x && d.x.helium ? '<p class="dl-muted">About ' + esc(d.x.helium) + " cu ft of helium.</p>" : "");
+  }
+  function balloonMapHTML(d) {
+    var groups = []; DATA.palettes.forEach(function (p) { if (groups.indexOf(p.group) < 0) groups.push(p.group); });
+    return '<h2>Balloon map</h2><label class="dl-field" for="dl-mappal">Colors: tap to pick any color scheme and the map recolors<select id="dl-mappal">' +
+      (d.col || []).map(function (c, i) { return '<option value="col:' + i + '">' + (i === 0 ? "This design: " : "Idea: ") + esc(c) + "</option>"; }).join("") +
+      groups.map(function (g) { return '<optgroup label="' + esc(groupName(g)) + '">' + DATA.palettes.filter(function (p) { return p.group === g; }).map(function (p) { return '<option value="' + esc(p.id) + '">' + esc(p.name) + "</option>"; }).join("") + "</optgroup>"; }).join("") +
+      '</select></label><div id="dl-bmap">' + mapInner(d, palFromString((d.col || [])[0])) + "</div>";
+  }
+  function miniMap(d) {
+    var pal = palFromString((d.col || [])[0]), m = mapModel(d, pal);
+    if (!m.clusters.length) return "";
+    var dots = [], reps = m.kind === "bundle" ? 1 : 2;
+    for (var r = 0; r < reps; r++) m.clusters.forEach(function (c) {
+      var cnt = {}; c.forEach(function (b) { cnt[b.c] = (cnt[b.c] || 0) + b.inch; });
+      var lead = +Object.keys(cnt).sort(function (a, b) { return cnt[b] - cnt[a]; })[0];
+      dots.push({c: pal[lead] || pal[0], r: Math.max(3.5, Math.min(8, Math.max.apply(null, c.map(function (b) { return b.inch; })) / 3))});
+    });
+    var x = 4, svg = dots.slice(0, 12).map(function (o) { var cx = x + o.r; x += o.r * 2 + 4; return '<circle class="dl-balloon" cx="' + cx.toFixed(1) + '" cy="10" r="' + o.r.toFixed(1) + '" fill="' + esc(o.c.hex) + '"/>'; }).join("");
+    return '<svg class="dl-minimap" viewBox="0 0 ' + Math.max(x, 40).toFixed(0) + ' 20" preserveAspectRatio="xMinYMid meet" role="img" aria-label="Cluster pattern">' + svg + "</svg>";
+  }
+
+  // ---------- supply calculator (formulas from the data file)
+  var CALC_STYLES = [{k: "light", n: "Light organic"}, {k: "full", n: "Full organic"}, {k: "lux", n: "Luxury organic"}, {k: "spiral", n: "Spiral or classic arch"}, {k: "column", n: "Column"}];
+  var HELIUM = {5: 0.06, 9: 0.25, 11: 0.5, 16: 1.5, 18: 2, 24: 4.5, 36: 15};
+  function calcCompute(len, style, floating) {
+    var F = DATA.formulas.garland_balloons_per_foot.this_library_recipes_per_foot, P = DATA.calcPrices || {}, waste = 1.15, rows = [], recipe;
+    if (style === "column") recipe = {balloons: {'11" latex': 6}, customer_rate_usd_per_ft: (F.spiral || {}).customer_rate_usd_per_ft};
+    else recipe = F[style];
+    Object.keys(recipe.balloons).forEach(function (k) { rows.push({k: k, q: Math.ceil(recipe.balloons[k] * len * waste)}); });
+    if (style === "column") { var n = Math.max(1, Math.round(len / 6)); rows.push({k: '18" latex', q: n * 4, note: "4 per column base"}); rows.push({k: '24" latex', q: n, note: "1 topper per column"}); }
+    var items = rows.map(function (r) { var inch = inchOf(r.k), p = P[r.k] || P[inch + '" latex'] || 0; return {i: r.k + " balloons", s: inch + '"', q: r.q, u: "balloons", w: "balloon supplier", p: p, t: +(p * r.q).toFixed(2), c: "", note: r.note || ""}; });
+    if (style !== "column") { var ft = Math.ceil(len * 1.1); items.push({i: "Balloon decorating strip", s: "-", q: ft, u: "ft", w: "balloon supplier", p: P.strip_ft || 0.3, t: +((P.strip_ft || 0.3) * ft).toFixed(2), c: "clear"}); }
+    var glue = Math.max(1, Math.ceil(len / 10));
+    items.push({i: "Glue dots for filling gaps", s: "-", q: glue, u: "pack", w: "craft store", p: P.glue_pack || 5, t: glue * (P.glue_pack || 5), c: ""});
+    if (floating) { var cu = Math.ceil(rows.reduce(function (a, r) { return a + r.q * (HELIUM[inchOf(r.k)] || 0.5); }, 0)); items.push({i: "Helium", s: "-", q: cu, u: "cu ft", w: "party store or gas supplier", p: P.helium_cuft || 1.25, t: +(cu * (P.helium_cuft || 1.25)).toFixed(2), c: ""}); }
+    var label = ""; CALC_STYLES.forEach(function (s) { if (s.k === style) label = s.n; });
+    return {items: items, total: items.reduce(function (a, i) { return a + i.t; }, 0), rate: recipe.customer_rate_usd_per_ft, label: label};
+  }
+  function calcHTML() {
+    return '<section class="dl-calc" aria-label="Supply calculator"><h2>Supply calculator</h2><p class="dl-small">Type the length and pick the style. The numbers change as you type.</p><div class="dl-calcrow">' +
+      '<label class="dl-field" for="c-len">Length in feet<input type="number" id="c-len" min="1" max="300" step="1" value="10" inputmode="decimal"></label>' +
+      sel("c-style", "Style: tap to choose", CALC_STYLES.map(function (s) { return [s.k, s.n]; }), "light") +
+      '<label class="dl-chk"><input type="checkbox" id="c-he"> Floating (helium)</label></div><div id="c-out" aria-live="polite"></div>' +
+      '<p class="dl-actions"><button class="btn primary" id="c-use" type="button">Add these numbers to my trip list</button></p></section>';
+  }
+  function calcWire() {
+    var len = document.getElementById("c-len"), st = document.getElementById("c-style"), he = document.getElementById("c-he"), out = document.getElementById("c-out");
+    if (!len) return;
+    function draw() {
+      var L = Math.max(0, Math.min(300, +len.value || 0));
+      if (!L) { out.innerHTML = '<p class="dl-muted">Type a length to see the numbers.</p>'; return null; }
+      var r = calcCompute(L, st.value, he.checked);
+      out.innerHTML = '<div class="dl-tablewrap"><table class="dl-table"><thead><tr><th>Item</th><th class="num">How many</th><th class="num">Cost</th></tr></thead><tbody>' +
+        r.items.map(function (i) { return "<tr><td>" + esc(i.i) + (i.note ? ' <span class="dl-small">' + esc(i.note) + "</span>" : "") + '</td><td class="num">' + i.q + ' <span class="dl-small">' + esc(i.u) + '</span></td><td class="num">' + money(i.t) + "</td></tr>"; }).join("") +
+        '<tr><td colspan="2"><b>Supplies estimate</b><br><span class="dl-small">Includes 15% extra for pops and sizing</span></td><td class="num"><b>' + money(r.total) + "</b></td></tr></tbody></table></div>" +
+        (r.rate ? '<p class="dl-muted">Customer price guide: about ' + money(r.rate * L) + " (" + L + " ft × " + money(r.rate) + " per ft).</p>" : "");
+      return {L: L, r: r};
+    }
+    len.oninput = st.onchange = he.onchange = draw;
+    draw();
+    document.getElementById("c-use").onclick = function () {
+      var x = draw(); if (!x) return;
+      calcs.push({n: "Calculator: " + x.L + " ft " + x.r.label.toLowerCase() + (he.checked ? ", floating" : ""), list: x.r.items});
+      save(); tripLabel(); toast("Added to the trip list");
+    };
+  }
+
+  // ---------- draw the page the server asked for (a Rules panel problem never blanks the page)
+  function safeRules(sec, d) { try { rules(sec, d); } catch (e) { if (window.DL_DEBUG) console.error(e); } }
+  function draw() {
+    tripLabel();
+    if (VIEW === "home") home();
+    else if (VIEW === "section") { section(SEC, readFilters()); safeRules(SEC, null); }
+    else if (VIEW === "design") { var d = byKey[SEC + "." + KEY] || DATA.designs.filter(function (x) { return x.sec === SEC && x.slug === KEY; })[0]; if (d) { design(d); safeRules(SEC, d); } else app.innerHTML = "<p>No such design.</p>"; }
+    else if (VIEW === "colors") colors();
+    else if (VIEW === "palette") { var p = DATA.palettes.filter(function (x) { return x.slug === KEY; })[0]; if (p) palette(p); else app.innerHTML = "<p>No such color set.</p>"; }
+    else if (VIEW === "tips") tips();
+    else if (VIEW === "tipgroup") { var c = DATA.tips.filter(function (x) { return x.slug === KEY; })[0]; if (c) tipGroup(c); else app.innerHTML = "<p>No such tips group.</p>"; }
+    else if (VIEW === "shopping") shopping();
+    else if (VIEW === "collection") collectionPage(KEY);
+    else home();
+  }
+  fetch(BASE + "/data.json?v=" + encodeURIComponent(root.getAttribute("data-v") || ""), {credentials: "same-origin"})
+    .then(function (r) { if (!r.ok) throw new Error("status " + r.status); return r.json(); })
+    .then(function (data) {
+      DATA = data;
+      DATA.designs.forEach(function (d) { byKey[d.sec + "." + d.id] = d; byKey[d.sec + "." + d.slug] = d; });
+      draw();
+    })
+    .catch(function (e) { if (window.DL_DEBUG) console.error(e); app.innerHTML = '<p class="dl-note">The library did not load. Check the phone has signal, then <a href="">tap here to try again</a>.</p>'; });
+})();

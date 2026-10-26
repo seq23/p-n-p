@@ -12,7 +12,7 @@
 //     changed by hand (invoice_lines.auto NULL). A sent or void invoice is never touched.
 import { todayISO, invoiceTotal, amountDueNow, payPlanOf } from './util.mjs';
 import { PRICE_TABLE } from './prices.mjs';
-import { prefillLines } from './pricing.mjs';
+import { prefillLines, reconcileRoomPreset } from './pricing.mjs';
 import { rentalDates } from './phone-requests.mjs';
 import { fromRow, logEvent } from './requests.mjs';
 import { saveLines } from './ledger.mjs';
@@ -113,7 +113,8 @@ export async function rebuildAutoDraft(env, key) {
   if (!r) return null;
   const { results: old } = await db.prepare('SELECT * FROM invoice_lines WHERE invoice_id = ?1 ORDER BY position, id').bind(inv.id).all();
   const kept = (old || []).filter((l) => !l.auto);
-  const fresh = prefillLines(r, PRICE_TABLE);
+  // A room setup preset she picked (kept by hand) is not doubled by the Basic line or a Takedown.
+  const fresh = reconcileRoomPreset(prefillLines(r, PRICE_TABLE), kept, PRICE_TABLE.roomSetupPresets);
   // A line she changed by hand that the new prefill would write again is not written twice.
   const keptNames = new Set(kept.map((l) => String(l.description).toLowerCase()));
   const lines = [...fresh.filter((l) => !keptNames.has(String(l.description).toLowerCase())), ...kept];

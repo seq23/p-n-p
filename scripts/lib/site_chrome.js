@@ -71,6 +71,7 @@ const MARK = Object.freeze({
   fonts: 'data-site-chrome="fonts"',
   footerRentals: 'data-footer-link="rentals"',
   footerFaq: 'data-footer-link="faq"',
+  footerAboutPage: 'data-footer-link="about"',
   footerAbout: 'data-site-chrome="footer-about"',
   footerCity: 'data-site-chrome="footer-city"',
   legal: 'data-site-chrome="legal"'
@@ -81,6 +82,10 @@ const FONTS_HREF = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:
 const RENTALS_FOOTER = `<a href="/rentals/" ${MARK.footerRentals}>Party Game Rentals</a>`;
 // Owner ruling 2026-10-17: the consolidated FAQ page is in the header and the footer of every page.
 const FAQ_FOOTER = `<a href="/faq/" ${MARK.footerFaq}>FAQ</a>`;
+// Her Search Readiness Checklist item c6 (2026-10-25) wants a real About page that the homepage
+// links to: an unnamed page with no About is the last thing an answer engine cites. Putting it in
+// the Explore list puts it in the footer of every page, the homepage included.
+const ABOUT_FOOTER = `<a href="/about" ${MARK.footerAboutPage}>About</a>`;
 
 /*
  * Footer identity and legal row (owner-approved 2026-10-18, professional
@@ -169,6 +174,7 @@ const HEADER_RE = /<header\b[^>]*class="site-header[^"]*"[^>]*>[\s\S]*?<\/header
 const EXPLORE_RE = /(<div class="footer-title">Explore<\/div>\s*<div class="footer-list">)([\s\S]*?)(<\/div>)/;
 const RENTALS_ANY_RE = /<a\b[^>]*href="\/rentals\/?"[^>]*>[^<]*<\/a>/g;
 const FAQ_ANY_RE = /<a\b[^>]*href="\/faq\/?(?:index\.html)?"[^>]*>[^<]*<\/a>/g;
+const ABOUT_ANY_RE = /<a\b[^>]*href="\/about(?:\.html|\/)?"[^>]*>[^<]*<\/a>/g;
 
 /** True when an anchor (its attribute string and inner HTML) is a quote call-to-action. */
 function isQuoteCta(attrs, inner) {
@@ -235,6 +241,18 @@ function applySiteChrome(html, rel) {
     next = next.slice(0, at) + FAQ_FOOTER + next.slice(at);
     out = out.slice(0, ex2.index) + ex2[1] + next + ex2[3] + out.slice(ex2.index + ex2[0].length);
   }
+  const exA = EXPLORE_RE.exec(out);
+  const listA = exA[2];
+  if (!listA.includes(ABOUT_FOOTER) || (listA.match(ABOUT_ANY_RE) || []).length !== 1) {
+    let next = listA.replace(ABOUT_ANY_RE, '');
+    // Anchored on the FAQ link, which the block above has just guaranteed is in this list
+    // exactly once (404.html, for one, has no How It Works link in its Explore list).
+    const faq = next.indexOf(FAQ_FOOTER);
+    if (faq < 0) throw new Error(`${rel}: footer Explore list has no FAQ link to anchor About`);
+    const at = faq + FAQ_FOOTER.length;
+    next = next.slice(0, at) + ABOUT_FOOTER + next.slice(at);
+    out = out.slice(0, exA.index) + exA[1] + next + exA[3] + out.slice(exA.index + exA[0].length);
+  }
   const ex3 = EXPLORE_RE.exec(out);
   if (EXPLORE_LEGAL_RE.test(ex3[2])) {
     out = out.slice(0, ex3.index) + ex3[1] + ex3[2].replace(EXPLORE_LEGAL_RE, '') + ex3[3] + out.slice(ex3.index + ex3[0].length);
@@ -254,6 +272,7 @@ function withoutChrome(html) {
     .replace(/<link\b[^>]*data-site-chrome="(?:css|fonts)"[^>]*>/g, '')
     .replace(RENTALS_ANY_RE, '')
     .replace(FAQ_ANY_RE, '')
+    .replace(ABOUT_ANY_RE, '')
     .replace(FOOTER_ABOUT_RE, '$1')
     .replace(LEGAL_RE, '')
     .replace(EXPLORE_LEGAL_RE, '')
@@ -262,7 +281,7 @@ function withoutChrome(html) {
 }
 
 module.exports = {
-  NAV_ITEMS, QUOTE, QUOTE_ATTRS, RETIRED_FORM_RE, CALL_LABEL, MARK, LEGAL_LINKS, LEGAL_YEAR, footerAbout, legal, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, HEADER_RE, EXPLORE_RE,
+  NAV_ITEMS, QUOTE, QUOTE_ATTRS, RETIRED_FORM_RE, CALL_LABEL, MARK, LEGAL_LINKS, LEGAL_YEAR, footerAbout, legal, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, ABOUT_FOOTER, HEADER_RE, EXPLORE_RE,
   header, cssLink, fontsLink, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
   isQuoteCta, retargetQuoteCtas
 };

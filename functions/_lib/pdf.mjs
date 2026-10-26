@@ -4,8 +4,9 @@
 // pdf-lib is pure JavaScript and runs in Pages Functions; standard fonts only, so text
 // is reduced to WinAnsi before drawing.
 import { PDFDocument, StandardFonts, rgb, degrees } from 'pdf-lib';
-import { money, lineTotal, invoiceTotal, prettyDate, needsPrice, FROM_EMAIL } from './util.mjs';
+import { money, lineTotal, invoiceTotal, prettyDate, FROM_EMAIL } from './util.mjs';
 import { payStepsOf, customerSteps } from './pay-steps.mjs';
+import { invoiceView, linesText, noteRowsText } from './invoice-view.mjs';
 
 const INK = rgb(0.23, 0.19, 0.16);
 const ACCENT = rgb(0.72, 0.37, 0.25);
@@ -35,15 +36,41 @@ export function payLines({ invoice, lines, pickup = '', paid = 0, payments = [] 
     words: [cs.head, ...cs.rows.map((r) => `${r.mark} ${r.words}: ${money(r.cents)}${r.tag ? ` ${r.tag}` : ''}`), cs.sum, cs.owed].filter(Boolean).join(' ') };
 }
 
-// The short message that goes with the PDF in a text.
-export function textMessage({ invoice, lines, settings, pickup = '', paid = 0, payments = [] }) {
+// The short message that goes with the PDF in a text (owner, 24 Oct 2026: short, with line
+// breaks, the refundable deposit said in words, the police station named in full). Lines:
+// greeting; what it is for + the date; the total with its maths in words; the numbered payments;
+// how to pay (Cash App link); the pickup line + "Pickup place: <police station, address>";
+// sign-off. meet: PRICE_TABLE.pickupWhere (games.json pickup), only on a pickup (not delivery) note.
+// jobDate: the job's first booked day (YYYY-MM-DD), '' when none is booked yet.
+export function textMessage({ invoice, lines, settings, pickup = '', paid = 0, payments = [], meet = '', jobDate = '' }) {
   const business = settings.business_name || 'Porch & Party';
   const p = payLines({ invoice, lines, pickup, paid, payments });
   const first = (invoice.customer_name || '').split(' ')[0] || 'there';
-  const how = [settings.zelle ? `Zelle ${settings.zelle}` : '', cashtag(settings.cashapp) ? `Cash App ${cashtag(settings.cashapp)}` : ''].filter(Boolean).join(' or ');
-  return [`Hi ${first}, here is your ${business} invoice ${invoice.number} (PDF attached). Total ${money(p.total)}.`,
-    `How you pay: ${p.words}`,
-    how ? `Pay by ${how}, with ${invoice.number} in the note.` : '', p.pickup, 'Thank you!'].filter(Boolean).join(' ');
+  const tag = cashtag(settings.cashapp);
+  const how = [settings.zelle ? `Zelle ${settings.zelle}` : '', tag ? `Cash App ${tag} (https://cash.app/${tag})` : ''].filter(Boolean).join(' or ');
+  const day = jobDate ? dayShort(jobDate) : '';
+  const what = pickup ? 'game rental' : 'booking';
+  const atPolice = pickup && meet && /Mt\. Moriah Station/.test(pickup);
+  // The lines (with their notes) and the invoice's own note come from the one view model
+  // (invoice-view.mjs), in the invoice page's order: lines, total, payments, pickup, note.
+  const view = invoiceView({ invoice, lines });
+  const groups = [
+    [`Hi ${first},`, `Here is your ${business} invoice ${invoice.number} for your ${what}${day ? ` on ${day}` : ''} (PDF attached).`],
+    [linesText(view, { refundableWords: '(refundable)' })],
+    [`Total: ${money(p.total)}${p.totalWords ? ` (${p.totalWords})` : ''}`, p.head, ...p.rows.map((r) => `${r.mark} ${r.words}: ${money(r.cents)}${r.tag ? ` ${r.tag}` : ''}`), p.sum, p.owed],
+    [how ? `Pay by ${how}, with ${invoice.number} in the note.` : ''],
+    [p.pickup, atPolice ? `Pickup place: ${meet}.` : ''],
+    [noteRowsText(view.notes)],
+    ['Thank you!', business],
+  ];
+  return groups.map((g) => g.filter(Boolean)).filter((g) => g.length).map((g) => g.join('\n')).join('\n\n');
+}
+
+// "Sat 24 Oct" (the same day words as the pay steps).
+function dayShort(iso) {
+  const d = new Date(`${iso}T12:00:00Z`);
+  if (Number.isNaN(d.getTime())) return '';
+  return `${d.toLocaleDateString('en-US', { weekday: 'short', timeZone: 'UTC' })} ${d.getUTCDate()} ${d.toLocaleDateString('en-US', { month: 'short', timeZone: 'UTC' })}`;
 }
 
 export async function renderInvoicePdf({ invoice, lines, settings, contact, pickup = '', paid = 0, payments = [] }) {
@@ -71,7 +98,17 @@ export async function renderInvoicePdf({ invoice, lines, settings, contact, pick
   };
   const wrap = (s, font, size, maxWidth) => {
     const out = []; let line = '';
-    for (const word of winAnsi(s).split(/\s+/).filter(Boolean)) {
+    const words = [];
+    for (const w of winAnsi(s).split(/\s+/).filter(Boolean)) {
+      // A word wider than the column (a long link, a run of letters) is cut into pieces that fit.
+      let rest = w;
+      while (font.widthOfTextAtSize(rest, size) > maxWidth && rest.length > 1) {
+        let n = rest.length - 1; while (n > 1 && font.widthOfTextAtSize(rest.slice(0, n), size) > maxWidth) n -= 1;
+        words.push(rest.slice(0, n)); rest = rest.slice(n);
+      }
+      words.push(rest);
+    }
+    for (const word of words) {
       const probe = line ? `${line} ${word}` : word;
       if (font.widthOfTextAtSize(probe, size) <= maxWidth || !line) line = probe; else { out.push(line); line = word; }
     }
@@ -98,15 +135,29 @@ export async function renderInvoicePdf({ invoice, lines, settings, contact, pick
   text('Description', left, y, { font: sansBold, size: 9, color: MUTED });
   text('Amount', right, y, { font: sansBold, size: 9, color: MUTED, align: 'right' });
   y -= 8; rule(y); y -= 16;
-  for (const l of lines) {
-    const label = `${l.description}${Number(l.qty) !== 1 ? ` x ${l.qty}` : ''}`;
-    const rows = wrap(label, sans, 11, width - 110);
-    ensure(rows.length * 14 + (l.refundable ? 14 : 0) + 10);
-    rows.forEach((r, i) => text(r, left, y - i * 14, { size: 11 }));
-    const amt = needsPrice(l) ? 'Price needed' : (lineTotal(l) === 0 ? 'Free' : money(lineTotal(l)));
-    text(amt, right, y, { size: 11, align: 'right', font: needsPrice(l) ? sansBold : sans, color: needsPrice(l) ? ACCENT : INK });
-    y -= rows.length * 14;
-    if (l.refundable) { text('Given back after the event', left, y, { size: 9, color: MUTED }); y -= 14; }
+  // Lines from the one view model (invoice-view.mjs). A long name wraps inside its column with
+  // the amount on the right of its first row; the line's note follows in grey with its line
+  // breaks, a priced note row ("item  $price") with its price lined up at the column's right.
+  const view = invoiceView({ invoice, lines });
+  const descW = width - 110;
+  const noteRowsDraw = (rows, x, colRight, size) => {
+    for (const r of rows) {
+      if (r.item) {
+        const pw = sans.widthOfTextAtSize(winAnsi(r.price), size);
+        const parts = wrap(r.item, sans, size, colRight - x - pw - 14);
+        parts.forEach((t, i) => { ensure(size + 6); text(t, x, y, { size, color: MUTED }); if (i === 0) text(r.price, colRight, y, { size, color: MUTED, align: 'right' }); y -= size + 3.5; });
+      } else if (r.text) {
+        for (const t of wrap(r.text, sans, size, colRight - x)) { ensure(size + 6); text(t, x, y, { size, color: MUTED }); y -= size + 3.5; }
+      } else y -= 6;
+    }
+  };
+  for (const r of view.rows) {
+    const rows = wrap(r.labelPlain, sans, 11, descW);
+    ensure(rows.length * 14 + (r.refundable ? 14 : 0) + 10);
+    text(r.amount, right, y, { size: 11, align: 'right', font: r.needsPrice ? sansBold : sans, color: r.needsPrice ? ACCENT : INK });
+    rows.forEach((t) => { ensure(18); text(t, left, y, { size: 11 }); y -= 14; });
+    if (r.refundable) { text('Given back after the event', left, y, { size: 9, color: MUTED }); y -= 14; }
+    if (r.note.length) { y -= 1; noteRowsDraw(r.note, left + 10, left + descW, 9.5); }
     y -= 4; rule(y); y -= 16;
   }
   ensure(60);
@@ -152,11 +203,15 @@ export async function renderInvoicePdf({ invoice, lines, settings, contact, pick
   }
   y -= 14;
 
-  if (invoice.notes) {
-    rule(y); y -= 16;
-    for (const para of String(invoice.notes).split(/\n+/)) {
-      for (const r of wrap(para, sans, 10.5, width)) { ensure(16); text(r, left, y, { size: 10.5 }); y -= 14; }
-      y -= 4;
+  if (view.notes.length) {
+    ensure(40); rule(y); y -= 16;
+    for (const r of view.notes) {
+      if (r.item) {
+        const pw = sans.widthOfTextAtSize(winAnsi(r.price), 10.5);
+        wrap(r.item, sans, 10.5, width - pw - 16).forEach((t, i) => { ensure(16); text(t, left, y, { size: 10.5 }); if (i === 0) text(r.price, right, y, { size: 10.5, align: 'right' }); y -= 14; });
+      } else if (r.text) {
+        for (const t of wrap(r.text, sans, 10.5, width)) { ensure(16); text(t, left, y, { size: 10.5 }); y -= 14; }
+      } else y -= 8;
     }
   }
 

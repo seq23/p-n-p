@@ -81,12 +81,15 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
   must(/data-quick-contact>[\s\S]*data-card-call[\s\S]*data-card-text/.test(t), 'A: Call / Text are not on the card top');
   must(/data-latest-note><p class="lnh"><b>Latest note<\/b> <span class="muted" data-latest-note-day>Tue 20 Oct<\/span><\/p><p class="lnb" data-latest-note-body>THIS CLIENT IS GETTING DELIVERY TO HER BUSINESS ON OCT 30 AND WILL NEED PICKUP FROM HER BUSINESS OCT 31<\/p>/.test(t), 'A: the Latest note is not the newest note in full with its day');
   must(!/Older note/.test(t), 'A: an older note shows as the latest');
-  must(/data-add-note><summary data-help="card\.addNote"[^>]*>\+ Add a note<\/summary><form class="noteform" method="post" action="\/admin\/requests\/note">/.test(t) && !/data-add-note/.test(more(c1)), 'A: "+ Add a note" is not right at the Latest note (or is still under More)');
+  must(at(c1, 'data-next-step') < at(c1, 'data-told') && at(c1, 'data-told') < at(c1, 'data-details') && /data-asked-head>Asked [A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}, \d{1,2}:\d{2} [AP]M · /.test(t), 'A: "What they told us" is not on the face between the next step and More, or the header lacks "Asked <day>, <time> · <age>"');
+  // Job card mock-up (25 Oct 2026): "+ Add a note" moved into More about <name> › Notes; the newest
+  // note itself stays on the card face.
+  must(/data-more-group="history"><h4 class="mgh">Notes[\s\S]*?data-add-note><summary data-help="card\.addNote"[^>]*>\+ Add a note<\/summary><form class="noteform" method="post" action="\/admin\/requests\/note">/.test(more(c1)) && !/data-add-note/.test(t), 'A: "+ Add a note" is not under More › Notes (or is still on the card face)');
   must(!/data-business-delivery/.test(c1), 'A: a pickup rental shows the Business delivery tag');
   const c2 = V.requestCard(withDelivery(den), cardOpts);
   must(/data-business-delivery><span class="biztag">🚚 Business delivery<\/span> Acme Offices, 100 Main St, Memphis</.test(top(c2)) && at(c2, 'data-business-delivery') < at(c2, 'data-latest-note'), 'A: the 🚚 Business delivery tag is not on the top of a delivery card, before the note');
   const c3 = V.requestCard(den, { ...cardOpts, notes: [] });
-  must(/data-latest-note>[\s\S]*\+ Add a note/.test(top(c3)) && !/Latest note/.test(c3), 'A: a card with no notes lacks "+ Add a note" (or says Latest note)');
+  must(/data-add-note/.test(more(c3)) && !/data-latest-note|Latest note|data-add-note/.test(top(c3)), 'A: a card with no notes lacks "+ Add a note" under More (or shows an empty Latest note on the face)');
 }
 
 // ---- B. More about <first name> ------------------------------------------------------------
@@ -94,10 +97,11 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
   const m = more(c1);
   // The toggle reads as an action (20 Oct 2026, Valerie could not tell it opens): "Show more about
   // Denise ▾" closed, "Hide more about Denise ▴" open (CSS-only via details[open]), a button-like row.
-  must(/<details class="disclose more" data-details><summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>Show more about Denise<\/span><span class="mhide" data-more-hide>Hide more about Denise<\/span><span class="mchev" aria-hidden="true">▾<\/span><\/summary>\s*<p class="mhint" data-more-hint>Tap any line below to see more\.<\/p>\s*<details class="grp" data-more-group="booked"/.test(c1) && !/More: answers, history, other buttons/.test(c1), 'B: the toggle is not "Show more about Denise" / "Hide more about Denise" with its chevron, then the "Tap any line below to see more." hint right above the groups');
-  must(count(c1, /Tap any line below to see more\./g) === 1, 'B: the hint line is not there exactly once');
-  // Every group row: title, "Tap to open" (hidden when open), big › on the right.
-  must(count(m, /<details class="grp"[^>]*><summary[^>]*><span class="gt">[^]*?<span class="tapopen" data-tap-open>Tap to open<\/span><\/span><span class="gchev" aria-hidden="true">›<\/span><\/summary>/g) === 4, 'B: not all four group rows carry "Tap to open" and a › chevron');
+  // Job card mock-up (25 Oct 2026): ONE "More about Denise ▾" whose summary says what is inside,
+  // then four plain headed sections (nothing more to open).
+  must(/<details class="disclose more" data-details><summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>More about Denise<\/span><span class="mhide" data-more-hide>Hide more about Denise<\/span><span class="mchev" aria-hidden="true">▾<\/span><small class="msub" data-more-sub>contact &amp; ID · money · notes · everything they wrote<\/small><\/summary>\s*<section class="mgrp" data-more-group="details">/.test(c1) && !/More: answers, history, other buttons|Show more about/.test(c1), 'B: the toggle is not "More about Denise" / "Hide more about Denise" with its chevron and "contact & ID · money · notes · everything they wrote", then the sections');
+  must(count(c1, /Tap any line below to see more\./g) === 0 && count(m, /<details class="grp"/g) === 0, 'B: an old "Tap any line" hint or a group to open is back inside More');
+  must(count(m, /<section class="mgrp" data-more-group="[a-z]+"><h4 class="mgh">[^<]+(?:<small>[^<]*<\/small>)?<\/h4><div class="gin">/g) === 4, 'B: More is not four plain headed sections');
   const css = V.STEP_CSS;
   const rule = (sel, decl) => new RegExp(`(^|[},\\n])${sel.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*\\{[^}]*${decl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(css);
   must(rule('details.disclose.more .mhide', 'display:none') && rule('details.disclose.more[open]>summary .mshow', 'display:none') && rule('details.disclose.more[open]>summary .mhide', 'display:inline') && rule('details.disclose.more[open]>summary .mchev', 'transform:rotate(180deg)'), 'B: Show/Hide does not swap on details[open] (CSS only)');
@@ -106,15 +110,14 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
   must(rule('details.grp>summary', 'list-style:none') && rule('details.grp>summary::-webkit-details-marker', 'display:none') && rule('details.grp>summary::marker', 'content:""') && rule('details.disclose.more>summary::marker', 'content:""'), 'B: the default disclosure markers are not hidden (double arrows)');
   must(rule('details.grp>summary', 'background:') && /min-height:(4[4-9]|[5-9]\d)px/.test((css.match(/details\.grp>summary\{[^}]*\}/) || [''])[0]) && rule('details.grp[open]>summary .tapopen', 'display:none') && rule('details.grp[open]>summary .gchev', 'transform:rotate(90deg)'), 'B: group rows are not filled >=44px rows whose › turns down and whose "Tap to open" hides when open');
   must(/details\.grp>summary:focus-visible[^{]*\{[^}]*outline:3px/.test(css) && /details\.disclose>summary:focus-visible/.test(css), 'B: no visible keyboard focus on the toggle and group rows');
-  const groups = [['booked', 'What they booked'], ['money', 'Money'], ['details', 'Their details and ID'], ['history', 'Notes and history']];
+  const groups = [['details', 'Contact &amp; ID'], ['money', 'Money'], ['history', 'Notes'], ['booked', 'Everything they wrote']];
   let last = -1;
   for (const [k, title] of groups) {
     const i = at(m, `data-more-group="${k}"`);
-    must(i > last && new RegExp(`data-more-group="${k}"( open)?><summary data-help="card\\.grp${k[0].toUpperCase()}${k.slice(1)}"[^>]*><span class="gt">${title}`).test(m), `B: group ${title} missing or out of order`);
+    must(i > last && new RegExp(`data-more-group="${k}"><h4 class="mgh">${title}`).test(m), `B: section ${title} missing or out of order`);
     last = i;
   }
-  must(at(m, 'data-more-row') > last, 'B: the quiet row is not after the four groups');
-  must(count(m, /<details class="grp"[^>]*\sopen>/g) === 1 && /data-more-group="booked" open>/.test(m), 'B: only What they booked opens by itself');
+  must(at(m, 'data-more-row') > last, 'B: the quiet row is not after the four sections');
   // Every item the old More rendered, still reachable (by its data- attribute or help key).
   const ITEMS = {
     'games (old want line)': 'data-booked-games', 'event day + length + occasion': 'data-booked-event', 'pickup day/choice/place': 'data-booked-pickup', 'return day': 'data-booked-return',
@@ -127,11 +130,11 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
     'Show all history': 'data-history-all', 'Edit': 'data-edit-link', 'Put away': 'data-archive',
   };
   for (const [what, attr] of Object.entries(ITEMS)) if (attr) must(m.includes(attr), `B: "${what}" is no longer under More (${attr})`);
-  must(/data-more-group="money"[\s\S]*data-hold=[\s\S]*data-more-group="details"/.test(m) && /data-more-group="money"[\s\S]*data-messages[\s\S]*data-more-group="details"/.test(m), 'B: the hold controls / messages are not under Money');
-  must(/data-more-group="details"[\s\S]*data-id-open[\s\S]*data-more-group="history"/.test(m), 'B: the ID is not under Their details and ID');
+  must(/data-more-group="money"[\s\S]*data-hold=[\s\S]*data-more-group="history"/.test(m) && /data-more-group="money"[\s\S]*data-messages[\s\S]*data-more-group="history"/.test(m), 'B: the hold controls / messages are not under Money');
+  must(/data-more-group="details"[\s\S]*data-id-open[\s\S]*data-more-group="money"/.test(m), 'B: the ID is not under Contact & ID');
   const mOnly = m.split('<div class="cxrow"')[0].replace(/data-help="[^"]*"|title="[^"]*"/g, '');
   must(m.includes('<div class="cxrow"') && /data-more-row>[\s\S]*data-edit-link[\s\S]*data-archive/.test(mOnly) && !/data-cancel|data-void-link|Cancel this job/.test(mOnly) && !/Void this request/.test(c1), 'B: the quiet row is not Edit · Put away, or Cancel is still under More (it is on the card face now)');
-  must(/<\/details>\s*<div class="cxrow" data-cancel-row="cancel"><details class="confirm cxconfirm" data-cancel-job><summary class="cxbtn" data-help="card\.cancelJob"[^>]*>✕ Cancel this job<\/summary>[\s\S]*action="\/admin\/requests\/cancel"/.test(m), 'B: "✕ Cancel this job" is not on the card face right under More (with its confirm posting the cancel)');
+  must(/<\/details>\s*<div class="cardfoot" data-card-foot>(?:<p class="footinv" data-draft-ready>[\s\S]*?<\/p>)?<div class="cxrow" data-cancel-row="cancel"><details class="confirm cxconfirm" data-cancel-job><summary class="cxbtn" data-help="card\.cancelJob"[^>]*>✕ Cancel this job<\/summary>[\s\S]*action="\/admin\/requests\/cancel"/.test(m), 'B: "✕ Cancel this job" is not in the bottom row of the card face right under More (with its confirm posting the cancel)');
   // A decor card: the takedown row, checklist state, Print checklist, porch line, where, grazing facts.
   const porch = { ...base, key: 'site|pp', name: 'Pat Porch', services: ['porch', 'grazing'], wantsDecor: true, wantsRentals: false, gamesAnswer: '', porchLine: 'Fall · picturing a full porch', porchAddOns: 'Pumpkins',
     decor: [{ label: 'Event date', value: '2026-10-24' }, { label: 'Location (hotel name, address or neighborhood)', value: 'Germantown' }, { label: 'How many guests?', value: '15–40' }, { label: 'Should we source the food?', value: 'Yes' }, { label: 'Budget', value: '$500–$1,000' }] };
@@ -153,7 +156,8 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
   // Duplicates gone.
   must(!/data-facts|What they picked/.test(c1), 'B: the old facts line / "What they picked" row is back');
   must(!/>(?:&#128222; )?Call</.test(m), 'B: a second Call is under More');
-  must(count(text(c1), /Giant Connect Four/g) === 1, `B: the game list shows ${count(text(c1), /Giant Connect Four/g)} times on the card (once)`);
+  // Once in "What they told us" on the face, once under More (job card mock-up, 25 Oct 2026).
+  must(count(text(top(c1)), /Giant Connect Four/g) === 1 && count(text(m), /Giant Connect Four/g) === 1 && /data-told-item="games">[^<]*Giant Connect Four/.test(top(c1)), `B: the game list shows ${count(text(top(c1)), /Giant Connect Four/g)} times on the face and ${count(text(m), /Giant Connect Four/g)} under More (once each, the face in What they told us)`);
   must(count(text(m), /Thu 29 Oct/g) === 1, `B: the pickup date shows ${count(text(m), /Thu 29 Oct/g)} times under More (once)`);
   must(/data-booked-pickup><b>Pickup:<\/b> Thu 29 Oct, the day before · Mt\. Moriah Station</.test(m) && /data-booked-return><b>Back:<\/b> Sat 31 Oct, the day after</.test(m) && /data-booked-event><b>Event:<\/b> Fri 30 Oct · 2 days · Movie night by the pool</.test(m), `B: What they booked does not read the event, pickup and back days (${(m.match(/data-booked-event>[^]*?<\/p>/) || [''])[0]})`);
   // Raw dates and UTC stamps read as words (display only).
@@ -168,11 +172,11 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
   must(/Reserved until Fri 23 Oct/.test(firstLi), `B: history is not newest first (${firstLi})`);
   must(count((hist.match(/<ul data-history>([\s\S]*?)<\/ul>/) || ['', ''])[1], /<li>/g) === V.HISTORY_SHOWN && V.HISTORY_SHOWN === 5 && /data-history-all><summary data-help="card\.historyAll"[^>]*>Show all \(7\)<\/summary><ul><li>/.test(hist), 'B: history does not show the newest 5 + "Show all (7)"');
   // Money group: hold info without a second Call / games / Reserve longer (the deposit step has it).
-  const mg = m.slice(at(m, 'data-more-group="money"'), at(m, 'data-more-group="details"'));
+  const mg = m.slice(at(m, 'data-more-group="money"'), at(m, 'data-more-group="history"'));
   must(!/data-help="hold\.call"/.test(mg) && !/data-help="hold\.longer|reslonger/.test(mg) && /Release the games now/.test(mg), 'B: the card hold controls repeat Call / Reserve longer, or Release is not "Release the games now"');
   must(/class="reslonger/.test(top(c1)), 'B: Reserve their games longer is not in the deposit step');
   const c4 = V.requestCard(den, { ...cardOpts, st: { status: 'new' }, inv: null, hold, holdHtml });
-  must(/data-more-group="money"[\s\S]*class="reslonger[\s\S]*data-more-group="details"/.test(more(c4)) && !/class="reslonger/.test(top(c4)), 'B: a held rental not at the deposit step lost Reserve their games longer (under Money)');
+  must(/data-more-group="money"[\s\S]*class="reslonger[\s\S]*data-more-group="history"/.test(more(c4)) && !/class="reslonger/.test(top(c4)), 'B: a held rental not at the deposit step lost Reserve their games longer (under Money)');
 }
 
 // ---- C. business delivery -------------------------------------------------------------------
@@ -286,7 +290,7 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
 {
   must(/data-pay-words>Invoice sent · \$180 due \(\$130 \+ \$50 refundable deposit\)</.test(c1), `D: the card's Money line is not "Invoice sent · $180 due ($130 + $50 refundable deposit)" (${(c1.match(/data-pay-words>[^<]*/) || [''])[0]})`);
   must(/data-next-money>Invoice sent · \$180 due \(\$130 \+ \$50 refundable deposit\)</.test(top(c1)), 'D: the next step does not say the amount due in the one form');
-  must(/data-more-group="money"><summary[^>]*><span class="gt">Money <small>\$180 due \(\$130 \+ \$50 refundable deposit\)<\/small>/.test(c1), 'D: the Money group summary does not say the amount due');
+  must(/data-more-group="money"><h4 class="mgh">Money <small>\$180 due \(\$130 \+ \$50 refundable deposit\)<\/small><\/h4>/.test(c1), 'D: the Money section heading does not say the amount due');
   must(!/\bowes\b|still owed/i.test(text(c1)), 'D: the card still says "owes" / "still owed"');
   const noDep = [lines[0], lines[1]];
   const c5 = V.requestCard(den, { ...cardOpts, inv: { ...sentInv, lines: noDep, total_cents: 13000, balance: L.balanceOf({ status: 'sent' }, noDep, 0) } });

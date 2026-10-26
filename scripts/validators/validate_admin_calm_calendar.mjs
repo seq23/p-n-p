@@ -157,7 +157,7 @@ const cardHtml = (await s.get('/admin/')).text;
 const cardForm = (cardHtml.slice(cardHtml.indexOf(`id="c-${s.rk(party.row.request_key)}"`)).match(/<form method="post" action="\/admin\/requests\/talked" data-talk-yes>[^]*?<\/form>/) || [])[0] || '';
 const names = (f) => [...f.matchAll(/name="([a-z_]+)"/g)].map((m) => m[1]).filter((n) => n !== 'back').join(',');
 must(Boolean(calForm) && Boolean(cardForm), 'no Yes, book it form on the calendar row or on the card');
-must(names(calForm) === names(cardForm) && names(calForm) === 'r,go,date', `the calendar's Yes, book it does not send the card's fields (${names(calForm)} vs ${names(cardForm)})`);
+must(names(calForm) === names(cardForm) && names(calForm) === 'r,go,date,time' && /<input type="time"[^>]*name="time"/.test(calForm), `the calendar's Yes, book it (with its ready-by time) does not send the card's fields (${names(calForm)} vs ${names(cardForm)})`);
 must(new RegExp(`name="date" value="${day0}"`).test(calForm), 'the calendar date box is not prefilled with the requested day');
 must(/<input type="hidden" name="back" value="\/admin\/calendar\?month=\d{4}-\d{2}">/.test(calForm) && /data-help="cal.bookYes"[^>]*>Book it<\/button>/.test(calForm), 'the calendar form does not come back to the calendar with a Book it button');
 const vc = fs.readFileSync(path.join(ROOT, 'functions/_lib/views-calendar.mjs'), 'utf8');

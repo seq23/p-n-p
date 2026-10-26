@@ -25,7 +25,10 @@ const heldBack = (entry) => {
   const item = priorStatus.get(`${entry.folder}/${entry.slug}`);
   return Boolean(item && item.status !== 'published');
 };
-const publishable = entries.filter(entry => !heldBack(entry));
+// A page folded into a hub (scripts/lib/hub_consolidation.js, 26 Oct 2026) 301s to that hub;
+// rendering it again would publish a page the redirect hides and the guard refuses.
+const HC = require('../lib/hub_consolidation');
+const publishable = entries.filter(entry => !heldBack(entry) && !HC.isRetiredFile(`${entry.folder}/${entry.slug}.html`));
 const selected = publishable.filter(entry => filterFolder === 'all' || entry.folder === filterFolder);
 
 /**
@@ -73,6 +76,7 @@ const RETROFIT_MARKERS = [
   { marker: 'data-retrofit=', wrote: 'scripts/retrofit_*.js', is: 'a retrofitted content block' },
   { marker: 'data-contact=', wrote: 'scripts/install_contact_surface.js', is: 'the phone / Google listing contact block' },
   { marker: 'data-site-chrome=', wrote: 'scripts/install_site_chrome.js', is: 'the canonical site header / nav stylesheet' },
+  { marker: 'data-comparison-table=', wrote: 'scripts/install_comparison_tables.js', is: 'the comparison table a "vs" page is required to carry' },
 ];
 
 const wouldLose = [];

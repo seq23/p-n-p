@@ -166,7 +166,10 @@ const out = await s.get('/admin/pricing', { auth: false });
 must(out.status === 303 && out.location === '/admin', `signed out, /admin/pricing must send to sign-in (got ${out.status} ${out.location})`);
 const nav = (pageRes.text.match(/<nav aria-label="Main">([\s\S]*?)<\/nav>/) || ['', ''])[1];
 const links = [...nav.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g)].map((m) => [m[1], m[2]]);
-must(links.length === 7 && links[6][0] === '/admin/pricing' && links[6][1] === 'Quick Pricing Summary' && links[5][1] === 'Help', `Quick Pricing Summary is not the last menu button (${links.map((l) => l[1]).join(' · ')})`);
+// The whole menu, in order (owner: Quick Pricing Summary last, 20 Oct 2026; Design Library after
+// Inventory, 22 Oct 2026).
+const MENU = [['/admin/', 'Customers (main page)'], ['/admin/calendar', 'Calendar &amp; Bookings'], ['/admin/money', 'Money'], ['/admin/inventory', 'Inventory'], ['/admin/library', 'Design Library'], ['/admin/settings', 'Settings'], ['/admin/help', 'Help'], ['/admin/pricing', 'Quick Pricing Summary']];
+must(JSON.stringify(links) === JSON.stringify(MENU), `the menu is not ${MENU.map((l) => l[1]).join(' · ')} with Quick Pricing Summary last (got ${links.map((l) => l[1]).join(' · ')})`);
 must(/<h1>Quick Pricing Summary<\/h1>/.test(pageRes.text), 'the heading is not "Quick Pricing Summary"');
 const chips = [...(pageRes.text.match(/<nav class="pjump"[^>]*>([\s\S]*?)<\/nav>/) || ['', ''])[1].matchAll(/<a href="#([a-z]+)"[^>]*>([^<]+)<\/a>/g)].map((m) => [m[1], m[2].replace(/&amp;/g, '&')]);
 must(JSON.stringify(chips.map((c) => c[1])) === JSON.stringify(['Rentals', 'Porch', 'Party & decor', 'Grazing']), `the jump chips read ${chips.map((c) => c[1]).join(' · ')}`);

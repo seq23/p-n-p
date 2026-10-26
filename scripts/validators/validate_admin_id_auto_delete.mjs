@@ -114,6 +114,10 @@ let dash = await s.get('/admin/');
 const box = (html) => { const i = html.indexOf('data-ids-ready'); return i < 0 ? '' : html.slice(i, html.indexOf('</section>', i)); };
 let b = box(dash.text);
 must(b.length > 0 && /id="ids-ready"/.test(dash.text), 'the main page has no "IDs ready to delete" box (#ids-ready)');
+// Owner, 24 Oct 2026: the box is a closed accordion, "Delete customer ID photos (N ready)", that
+// #ids-ready (where every button lands) opens again; deleting still asks first (below).
+must(/<details class="fold idsfold" id="ids-fold" data-ids-fold><summary data-help="ids\.fold"[^>]*><span>Delete customer ID photos <small class="muted">\(\d+ ready\)<\/small>/.test(b) && !/<details class="fold idsfold"[^>]* open/.test(b) && b.includes('Tap to open ▾'), 'the ID photos box is not a closed "Delete customer ID photos (N ready) · Tap to open ▾" accordion');
+must(/if\(location\.hash==='#ids-ready'\)\{var d=document\.getElementById\('ids-fold'\);if\(d\)d\.open=true;\}/.test(dash.text) && /addEventListener\('hashchange',ids\)/.test(dash.text), 'landing on #ids-ready does not open the ID photos accordion');
 const rowOf = (html, name) => { const i = html.indexOf(`<strong>${name}`); return i < 0 ? '' : html.slice(i, (html.indexOf('data-id-ready', i) + 1 || html.length + 1) - 1); };
 const rows = (b.match(/data-id-ready/g) || []).length;
 must(rows >= 3, `Rule 0: the box has ${rows} rows, expected the paid, the cancelled and the Drive one`);

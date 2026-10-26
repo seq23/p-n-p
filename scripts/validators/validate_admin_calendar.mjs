@@ -437,6 +437,10 @@ let invA;
 // Reminders: tomorrow box, no double email, void/archived skipped.
 {
   const tmr = R.tomorrowChicago();
+  // The fixture request has fixed dates (event 24 Oct 2026, takedown/return 25 Oct), so on some
+  // days its bookings are "tomorrow" too (red on 24 Oct 2026 with no commit behind it). Count
+  // them in, by id, instead of assuming tomorrow holds only the two bookings made here.
+  const pre = (await R.tomorrowsBookings(s.db)).filter((b) => R.hasEmail(b.reminder_email) && !b.email_reminded_at);
   await s.post('/admin/calendar/bookings', { kind: 'grazing_setup', date: tmr, time: '14:00', customer_name: 'Gia Graze', phone: '901-555-0123', email: 'gia@example.com', place: '12 Oak St', items: 'Grazing table' });
   await s.post('/admin/calendar/bookings', { kind: 'porch_install', date: tmr, customer_name: 'No Phone', phone: '', email: 'np@example.com', place: '', items: '' });
   const dash = (await s.get('/admin/')).text;
@@ -444,7 +448,10 @@ let invA;
   const sent = [];
   const r1 = await R.sendEmailReminders(s.db, async (m) => { sent.push(m); return true; });
   const r2 = await R.sendEmailReminders(s.db, async (m) => { sent.push(m); return true; });
-  must(r1.sent === 2 && r2.sent === 0 && sent.length === 2 && sent.every((m) => !('bcc' in m) && !('cc' in m) && m.to !== 'hello@porchandparty901.com'), `email reminders double-sent or missed: ${JSON.stringify([r1, r2])}`);
+  const want = pre.length + 2;
+  const tos = sent.map((m) => m.to);
+  must(['gia@example.com', 'np@example.com', ...pre.map((b) => b.reminder_email)].every((e) => tos.includes(e)), `a due reminder was not emailed: ${JSON.stringify(tos)}`);
+  must(r1.sent === want && r2.sent === 0 && sent.length === want && sent.every((m) => !('bcc' in m) && !('cc' in m) && m.to !== 'hello@porchandparty901.com'), `email reminders double-sent or missed: ${JSON.stringify([r1, r2])}`);
   const before = (await R.tomorrowsBookings(s.db)).length;
   const gia = await s.one("SELECT id FROM bookings WHERE customer_name = 'Gia Graze'");
   await s.db.prepare("UPDATE bookings SET request_key = 'zz' WHERE id = ?1").bind(gia.id).run();

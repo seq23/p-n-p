@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-09-21..2026-10-18",
-  "coverage_collected_at": "2026-10-21T19:11:45.727092+00:00",
+  "gsc_window": "2026-09-25..2026-10-22",
+  "coverage_collected_at": "2026-10-25T18:16:27.134961+00:00",
   "url_count": 141,
   "roles": {
     "candidate": 111,
@@ -11,7 +11,7 @@
     "root": 6,
     "hub": 17
   },
-  "candidates_with_impressions": 0,
+  "candidates_with_impressions": 1,
   "candidates_by_hub": {
     "/services/celebration-setups-memphis": 34,
     "/services/grazing-tables-memphis": 20,
@@ -397,7 +397,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 477,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -507,7 +507,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 438,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -1208,7 +1208,7 @@
       "url": "https://porchandparty901.com/",
       "file": "index.html",
       "role": "root",
-      "impressions_28d": 46,
+      "impressions_28d": 11,
       "clicks_28d": 0,
       "word_count": 1477,
       "coverage_state": "Submitted and indexed",
@@ -1318,7 +1318,7 @@
       "url": "https://porchandparty901.com/request",
       "file": "request.html",
       "role": "candidate",
-      "impressions_28d": 0,
+      "impressions_28d": 1,
       "clicks_28d": 0,
       "word_count": 995,
       "coverage_state": "URL is unknown to Google",

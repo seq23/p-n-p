@@ -22,6 +22,7 @@ const { publishedPages } = require('../install_contact_surface');
 const ROOT = path.resolve(__dirname, '../..');
 const FB = 'https://www.facebook.com/porchandparty901';
 const MAPS = 'https://www.google.com/maps?cid=1437103205402862394';
+const ADDRESS = require(path.join(ROOT, 'data/offers/services.json')).contact.entity.address;
 const ID = 'https://porchandparty901.com/#business';
 const EXEMPT = new Set(['404.html']);
 const errors = [];
@@ -59,7 +60,21 @@ for (const rel of pages) {
   for (const u of [FB, MAPS]) if (!same.includes(u)) fail(`${rel}: business sameAs lacks ${u}`);
   if (b.hasMap !== MAPS) fail(`${rel}: business hasMap is ${JSON.stringify(b.hasMap)}, expected ${MAPS}`);
   if (b.name !== 'Porch & Party' || b.url !== 'https://porchandparty901.com/') fail(`${rel}: business name/url is ${b.name} / ${b.url}`);
-  if ('address' in b) fail(`${rel}: business node carries an address; it is a service-area business with no public street address`);
+  // 2026-10-16 ruling: no street address of hers is public. 2026-10-25: Google will not place a
+  // service-area business with no address at all (her Search Readiness Checklist, item c3), so the
+  // ban on an address became a requirement for a locality-only one - stricter, not looser: the
+  // node must be there, and a streetAddress or postalCode appearing in it is still a failure.
+  const addr = b.address;
+  if (!addr || typeof addr !== 'object' || Array.isArray(addr)) fail(`${rel}: business node has no PostalAddress; Google cannot place a service-area business without a city, region and country`);
+  else {
+    if (addr['@type'] !== 'PostalAddress') fail(`${rel}: business address @type is ${JSON.stringify(addr['@type'])}, expected PostalAddress`);
+    for (const [k, want] of [['addressLocality', ADDRESS.addressLocality], ['addressRegion', ADDRESS.addressRegion], ['addressCountry', ADDRESS.addressCountry]]) {
+      if (addr[k] !== want) fail(`${rel}: business address ${k} is ${JSON.stringify(addr[k])}, expected ${JSON.stringify(want)}`);
+    }
+    for (const k of ['streetAddress', 'postalCode']) {
+      if (k in addr) fail(`${rel}: business address carries a ${k}; it is a service-area business and no street address of hers is public`);
+    }
+  }
   const footer = html.slice(html.indexOf('<footer'));
   if (html.indexOf('<footer') < 0) { fail(`${rel}: no <footer>`); continue; }
   if (!footer.includes(`href="${FB}"`)) fail(`${rel}: footer lacks the Facebook Page link`);

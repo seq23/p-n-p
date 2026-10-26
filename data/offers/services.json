@@ -25,6 +25,13 @@
       "logo": "https://porchandparty901.com/assets/img/icons/icon-512.png",
       "image": "https://porchandparty901.com/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg",
       "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Memphis",
+        "addressRegion": "TN",
+        "addressCountry": "US"
+      },
+      "addressProvenance": "Added 2026-10-25 for her Search Readiness Checklist item c3, which wants a LocalBusiness with telephone, address and areaServed: Google needs a city, region and country before it will place a service-area business, and the site had none. It carries NO streetAddress and NO postalCode, so the 2026-10-16 ruling above still holds exactly - no street address is public. The locality is the one already printed in the footer of every page (\"Memphis, TN - by appointment\"), so nothing new about her is published. scripts/validators/validate_business_entity.js requires this node and fails if a streetAddress or postalCode ever appears in it.",
       "provenance": "Owner-approved 2026-10-16: the site, the Google Business Profile and the Facebook Page are one entity. Every page carries exactly one business node with this @id (sameAs = Facebook Page + Maps cid, hasMap = Maps cid); every other node references it by @id. Service-area business: no street address is public, so none is published. priceRange $$ because the site publishes starting prices (pricing.html). Guarded by scripts/validators/validate_business_entity.js. Type is LocalBusiness alone (2026-10-21): \"EventPlanner\" is not a schema.org type, so validator.schema.org and Ahrefs reported INVALID_ITEMTYPE on every page; the event-planner meaning is carried by businessTypes.additionalType (Wikidata). Guarded by scripts/validators/validate_structured_data.js."
     }
   },
@@ -71,7 +78,162 @@
       "notes": [
         "Final pricing depends on setup size, location, and design complexity.",
         "Availability is not guaranteed until your request is confirmed."
-      ]
+      ],
+      "roomSetupPresets": [
+        {
+          "key": "basic",
+          "name": "Basic",
+          "total": 300,
+          "includesTakedown": false,
+          "lines": [
+            {
+              "description": "Basic room setup (15 ceiling balloons, banner, petal walkway, bed design, 8\u201312 LED tea lights)",
+              "price": 300,
+              "note": []
+            }
+          ]
+        },
+        {
+          "key": "luxury",
+          "name": "Luxury",
+          "total": 500,
+          "includesTakedown": false,
+          "lines": [
+            {
+              "description": "Luxury Balloon Display",
+              "price": 175,
+              "note": [
+                "Custom-designed black, white, and silver balloon arrangement",
+                "Premium metallic and coordinating balloon accents",
+                "Elegant statement display tailored to the room"
+              ]
+            },
+            {
+              "description": "Floating Balloon D\u00e9cor",
+              "price": 75,
+              "note": [
+                "Coordinating ceiling balloons with decorative ribbons",
+                "Placement customized to complement the overall design"
+              ]
+            },
+            {
+              "description": "Romantic LED Candle Styling",
+              "price": 65,
+              "note": [
+                "Elegant, flameless votive-style LED candles",
+                "Beautiful candle arrangements throughout designated areas",
+                "Warm ambient lighting accents"
+              ]
+            },
+            {
+              "description": "Luxury Rose-Petal Styling",
+              "price": 65,
+              "note": [
+                "Decorative faux rose-petal walkway",
+                "Elegant rose-petal bed arrangement",
+                "Additional petal accents where appropriate"
+              ]
+            },
+            {
+              "description": "Personalized Decorative Touches",
+              "price": 35,
+              "note": [
+                "Celebration signage or lettering",
+                "Coordinating ribbons and decorative accents",
+                "Finishing details to complement the theme"
+              ]
+            },
+            {
+              "description": "Professional Design & Installation",
+              "price": 85,
+              "note": [
+                "Custom d\u00e9cor planning and styling",
+                "Arrangement of all decorative elements",
+                "Local delivery and professional room installation"
+              ]
+            }
+          ]
+        },
+        {
+          "key": "signature",
+          "name": "Signature",
+          "total": 1500,
+          "includesTakedown": true,
+          "lines": [
+            {
+              "description": "Grand Balloon Installation",
+              "price": 400,
+              "note": [
+                "Balloon arch or floor-standing design, installed",
+                "Oversized or glossy luxury balloons",
+                "Can include a photo backdrop"
+              ]
+            },
+            {
+              "description": "Floating Balloon Ceiling",
+              "price": 150,
+              "note": [
+                "Full ceiling of coordinating balloons with ribbon tails",
+                "Placement planned around the room's layout"
+              ]
+            },
+            {
+              "description": "Luxury Floral Arrangements",
+              "price": 250,
+              "note": [
+                "Premium floral centerpieces and accents",
+                "Coordinated with the color palette",
+                "Placed on tables, nightstands and entry"
+              ]
+            },
+            {
+              "description": "Candlelit Ambiance",
+              "price": 150,
+              "note": [
+                "40+ flameless LED pillar and votive candles",
+                "Candle clusters throughout the room",
+                "Warm fairy-light accents"
+              ]
+            },
+            {
+              "description": "Rose-Petal Luxe Styling",
+              "price": 125,
+              "note": [
+                "Faux rose-petal walkway",
+                "Petal heart or initials on the bed",
+                "Petal accents in the bath and seating areas"
+              ]
+            },
+            {
+              "description": "Personalized Signage",
+              "price": 125,
+              "note": [
+                "Custom name or celebration sign",
+                "Coordinating lettering and d\u00e9cor accents"
+              ]
+            },
+            {
+              "description": "Signature Styling Accents",
+              "price": 100,
+              "note": [
+                "Extra d\u00e9cor touches chosen for the room",
+                "Styled table, tray or vignette accents",
+                "Finishing details to complete the look"
+              ]
+            },
+            {
+              "description": "Professional Design, Installation & Takedown",
+              "price": 200,
+              "note": [
+                "Design call and custom plan",
+                "Local delivery and full room installation",
+                "Takedown included"
+              ]
+            }
+          ]
+        }
+      ],
+      "roomSetupPresetsProvenance": "Owner-approved 2026-10-25: the room setup presets, defined only here. The auto draft of a room-setup party request (functions/_lib/pricing.mjs isRoomSetup) starts at the first preset (Basic); the unsent invoice editor offers all of them (\"Room setup presets\"), which replace the room-setup lines only. \"total\" must equal the sum of the line prices; each \"note\" entry is its own row of the line note. includesTakedown: applying it takes out a separate Takedown line. Guarded by scripts/validators/validate_admin_room_setup.mjs."
     },
     "grazing": {
       "name": "Grazing Tables & Styled Setups",
@@ -163,7 +325,17 @@
     }
   },
   "travel": {
-    "includedAreasFrom": "data/service_areas/areas.json",
+    "includedAreas": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN",
+      "Lakeland, TN",
+      "Arlington, TN",
+      "Southaven, MS",
+      "Olive Branch, MS"
+    ],
+    "includedAreasNote": "The eight cities the owner approved on 2026-10-17 as carrying no travel fee. This used to read includedAreasFrom: data/service_areas/areas.json, i.e. \"whatever that file holds\". That was safe only while the two lists were the same list. On 2026-10-26 the owner's Search Readiness Checklist (item j9) required pages for five more towns inside the 35-mile coverage radius - Cordova, Millington, Oakland, Horn Lake and Hernando - and adding them to areas.json would have extended fee-free travel to five towns by a side effect of a search fix. A page is not a price. The published towns live in data/service_areas/areas.json; the fee-free ones are this list, and only the owner moves a town onto it.",
     "extendedFee": 75,
     "line": "Memphis, Germantown, Collierville, Bartlett, Lakeland, Arlington, Southaven and Olive Branch are included. Anywhere further is a flat $75 travel fee, shown on your quote up front.",
     "appliesTo": [
@@ -171,7 +343,7 @@
       "celebration",
       "grazing"
     ],
-    "provenance": "Owner-approved 2026-10-17: the eight cities on data/service_areas/areas.json carry no travel fee; beyond them a flat $75, said on the quote. Rentals are pickup only, so travel never applies to them."
+    "provenance": "Owner-approved 2026-10-17: the eight cities in includedAreas carry no travel fee; beyond them a flat $75, said on the quote. Rentals are pickup only, so travel never applies to them. The list was made explicit on 2026-10-26 (see includedAreasNote) without changing a single price or a single included town."
   },
   "payment": {
     "methods": "Zelle or Cash App",

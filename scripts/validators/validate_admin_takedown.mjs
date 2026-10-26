@@ -83,11 +83,14 @@ for (const svc of ['porch', 'party']) {
     // ticked when done ("Takedown done") or not needed ("Takedown: not needed"), else it is THE
     // current step (job done and paid, takedown still open).
     if (status !== 'none') {
-      const li = html.match(/<li class="([duc])" data-step="takedown"([^>]*)><span class="ck"[^>]*>([^<]*)<\/span><span class="t">([^<]*)/) || [];
+      // Short step bar (job card mock-up, 25 Oct 2026): a settled step is a ✓ chip; the current one
+      // is the "Step N of M: takedown" line, N right after the setup step's number.
+      const li = html.match(/<li class="(d)" data-step="takedown"([^>]*)><span class="ck"[^>]*>([^<]*)<\/span><span class="t">([^<]*)/) || [];
+      const nowM = html.match(/<p class="scof" data-step-count data-step="takedown" data-step-current>Step (\d) of (\d): takedown<\/p>/);
       const wantDone = status === 'done' || status === 'customer_handles';
       const wantLabel = status === 'customer_handles' ? 'Takedown: not needed' : 'Takedown done';
-      must(li[1] === (wantDone ? 'd' : 'c') && li[4] === wantLabel && (li[3] === '✓') === wantDone && /data-step-current/.test(li[2] || '') === !wantDone
-        && html.indexOf('data-step="takedown"') > html.indexOf('data-step="setup"'), `${tag}: the takedown step is not ${wantDone ? `ticked as "${wantLabel}"` : 'the current step'} right after the setup step (${li.slice(1).join(' | ')})`);
+      must(wantDone ? (li[1] === 'd' && li[4] === wantLabel && li[3] === '✓' && !nowM && html.indexOf('data-step="takedown"') > html.indexOf('data-step="setup"'))
+        : (Boolean(nowM) && Number(nowM[1]) === 5 && Number(nowM[2]) === 6 && /<li class="d" data-step="setup" data-step-done>/.test(html) && !li[1]), `${tag}: the takedown step is not ${wantDone ? `ticked as "${wantLabel}"` : 'the current step ("Step 5 of 6: takedown")'} right after the setup step (${li.slice(1).join(' | ')} | ${nowM ? nowM[0] : ''})`);
     }
     if (status === 'to_schedule' && plan === 'scheduled') must(/data-takedown-row="open"[\s\S]*Asked for, not booked yet[\s\S]*name="date" value="2026-10-18"[\s\S]*class="btn primary" type="submit" name="go" value="save"/.test(html) && !/calendar\/new\?r=[^"]*_takedown/.test(html), `${tag}: no inline Takedown row with the asked-for day (Sun 18 Oct) and Save as the big button`);
     if (status === 'booked' || status === 'due') must(/data-takedown-row="booked"[\s\S]*data-takedown-booked="2026-10-(20|18|16)"/.test(html) && /Booked for (Tue 20|Sun 18|Fri 16) Oct/.test(html) && (html.match(/data-takedown-done-tap/g) || []).length === 1 && bigBtns(html) === 1, `${tag}: the booked row lacks "Booked for …" + exactly one one-tap Mark takedown done (and one big button)`);

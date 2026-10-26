@@ -139,8 +139,10 @@ must(!/\$375 due/.test(pc), 'the card says a draft is due');
 
 // ---- 4. The card ---------------------------------------------------------------------------
 const total = pl.reduce((t, l) => t + l.qty * l.unit_cents, 0);
-must(pc.includes(`📄 Invoice draft ready: ${money(total)}`) && pc.includes("Made from Coco's request. Nothing has been sent. Check the price, then send."), 'the card lacks "📄 Invoice draft ready" with "Made from Coco\'s request"');
-must(new RegExp(`href="/admin/invoices/${pd.id}/edit" data-help="card\\.checkDraft"[^>]*>Check and send the invoice<`).test(pc), 'the card lacks "Check and send the invoice" (while Call back is the next step)');
+// Job card mock-up (25 Oct 2026): the draft sits in the bottom row, on the same line as ✕ Cancel this job.
+{ const foot = pc.slice(pc.indexOf('data-card-foot'));
+  must(pc.indexOf('data-card-foot') > pc.indexOf('data-details') && foot.includes(`📄 Invoice draft: ${money(total)}`) && !/Invoice draft ready/.test(pc.slice(0, pc.indexOf('data-card-foot'))), 'the card lacks "📄 Invoice draft: $X" in its bottom row (or shows the draft twice)');
+  must(new RegExp(`<p class="footinv" data-draft-ready><b data-draft-what>📄 Invoice draft: [^<]+</b> <a class="btn ghost" href="/admin/invoices/${pd.id}/edit" data-help="card\\.checkDraft"[^>]*>Check and send</a></p><div class="cxrow" data-cancel-row="cancel">`).test(foot), 'the bottom row is not "📄 Invoice draft: $X · Check and send" then ✕ Cancel this job (while Call back is the next step)'); }
 must((pc.match(/class="btn primary"/g) || []).length <= 1 && !/data-help="card\.checkDraft"[^>]*class="btn primary"|class="btn primary"[^>]*data-help="card\.checkDraft"/.test(pc), 'the card has more than one big button');
 must(!/data-help="card\.createInvoice"/.test(pc), 'the card still offers Create invoice next to its draft');
 await s.post('/admin/requests/called', { r: s.rk(pKey) });
@@ -237,16 +239,24 @@ must(p5.includes('How Cara pays') && p5.includes('Deposit · now · holds the da
 const m5 = E.renderInvoiceEmail({ invoice: inv5, lines: lines5, settings: {}, contact: {}, qrSrc: null });
 must(m5.text.includes('① Deposit now (holds your date): $50.00') && m5.text.includes('② The rest, by Wed 28 Oct: $150.00') && m5.text.includes('Total: $200.00'), "#5's email does not read ① $50 now, ② $150 by Wed 28 Oct");
 const sms5 = PDF.textMessage({ invoice: inv5, lines: lines5, settings: {} });
-must(sms5.includes('Total $200.00') && sms5.includes('$50 + $150 = $200 total'), "#5's text message numbers changed");
+must(/^Total: \$200\.00( \(.+\))?$/m.test(sms5) && sms5.includes('\n$50 + $150 = $200 total'), "#5's text message numbers changed");
 must(PS.payStepsOf({ ...inv5, pay_plan: 'custom', deposit_due_cents: 0 }, lines5).noDeposit, 'a $0 typed deposit does not read as No deposit');
 // A row from before 'none' existed keeps its plan.
 must(s.util.payPlanOf({ pay_plan: 'half', deposit_due_cents: 0 }, 1000) === 'half' && s.util.payPlanOf({ pay_plan: 'custom', deposit_due_cents: 0 }, 1000) === 'custom', 'an existing invoice changed plan');
+
+// The editor keeps every ability and adds the itemized-list tools (owner, 25 Oct 2026;
+// validate:admin-invoice-lists pins them in depth): a multi-line note per line, "📋 Paste a
+// list", and a full-width invoice note.
+const edNow = (await s.get('/admin/invoices/new')).text;
+must(/<textarea name="line_note" rows="3"/.test(edNow) && !/<input name="line_note"/.test(edNow), 'the line note is a one-line input again');
+must(edNow.includes('📋 Paste a list') && edNow.includes('Save these lines') && /<textarea id="nt" name="notes" rows="6"/.test(edNow), 'the editor lost 📋 Paste a list or the full-width invoice note');
+must((edNow.match(/class="btn primary/g) || []).length === 2, 'the editor has more than its two big buttons (＋ Add something, Send invoice)');
 
 // ---- 8. Migration 0020 is additive only ----------------------------------------------------
 const mig = fs.readFileSync(path.join(ROOT, 'migrations/0020_invoice_auto_draft.sql'), 'utf8').replace(/--.*$/gm, '');
 const stmts = mig.split(';').map((x) => x.trim()).filter(Boolean);
 must(stmts.length === 2 && stmts.every((x) => /^ALTER TABLE (invoices|invoice_lines) ADD COLUMN \w+ (INTEGER|TEXT)$/.test(x)), `migration 0020 is not two nullable ADD COLUMNs: ${stmts.join(' / ')}`);
 
-if (checks < 75) errors.push(`Rule 0: only ${checks} checks ran`);
+if (checks < 82) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) { console.error(`VALIDATION FAIL: calm invoices (${errors.length} of ${checks})\n - ${errors.join('\n - ')}`); process.exit(1); }
 console.log(`calm invoices: OK (${checks} checks: auto draft on website + phone requests, one per request, failure keeps the request, no backfill, drafts never owed, card draft box, rebuild keeps hand lines + leaves sent/void alone, editor ✏️ Change / Done / Remove… / ＋ Add list / NEW LINE, numbered payments with paid steps, #4/#5 shapes unchanged, additive migration)`);

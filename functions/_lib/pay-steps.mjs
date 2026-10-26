@@ -33,6 +33,10 @@ export function payStepsOf(invoice, lines, { paid = 0, payments = [] } = {}) {
   const plan = payPlanOf(invoice || {}, total);
   const due = (invoice && invoice.due_date) || '';
   const byDate = due ? `by ${shortDate(due)}` : 'by the due date';
+  // "Deposit due by" (owner, 25 Oct 2026): with Other deposit, invoices.deposit_due_date is the day
+  // the deposit is due; NULL = now, as before. The rest stays due by the due date.
+  const depDate = depositDueDate(invoice, plan);
+  const depWhen = depDate ? `by ${shortDate(depDate)}` : 'now';
   // The amount now is the stored deposit_due_cents (what "Mark deposit received" records, ledger.mjs
   // recordPayment; the editor saves it with util.mjs amountDueNow), the total for All now, nothing
   // for No deposit.
@@ -41,7 +45,7 @@ export function payStepsOf(invoice, lines, { paid = 0, payments = [] } = {}) {
   const steps = [];
   if (now >= total && total > 0) steps.push({ n: 1, what: 'All of it', when: 'now', why: '', cents: total });
   else if (now <= 0) steps.push({ n: 1, what: 'All of it', when: byDate, why: '', cents: total });
-  else steps.push({ n: 1, what: 'Deposit', when: 'now', why: 'holds the date', cents: now }, { n: 2, what: 'The rest', when: byDate, why: '', cents: total - now });
+  else steps.push({ n: 1, what: 'Deposit', when: depWhen, why: 'holds the date', cents: now, dueDate: depDate }, { n: 2, what: 'The rest', when: byDate, why: '', cents: total - now });
   let need = 0;
   for (const s of steps) {
     need += s.cents;
@@ -55,9 +59,16 @@ export function payStepsOf(invoice, lines, { paid = 0, payments = [] } = {}) {
   return {
     plan, total, refundable, charges: total - refundable, now, rest: total - now, steps, noDeposit,
     paid: got, stillOwed: bal.remaining, paidInFull: bal.paidInFull, balance: bal, dueDay: due ? shortDate(due) : '',
+    depositDueDate: now > 0 && now < total ? depDate : '', depositDueDay: now > 0 && now < total && depDate ? shortDate(depDate) : '',
     sumWords: steps.length > 1 ? `${steps.map((s) => dollars(s.cents)).join(' + ')} = ${dollars(total)} total` : '',
     totalWords: refundable > 0 ? `${dollars(total - refundable)} rental + ${dollars(refundable)} refundable damage deposit` : '',
   };
+}
+
+// The deposit's own due day: only for Other deposit, only a real date; '' = due now.
+export function depositDueDate(invoice, plan = payPlanOf(invoice || {}, 0)) {
+  const d = String((invoice && invoice.deposit_due_date) || '');
+  return plan === 'custom' && /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : '';
 }
 
 const stepWords = (s) => [s.what, s.when, s.why].filter(Boolean).join(' · ');
@@ -93,6 +104,6 @@ export function payStepsLine(ps, fmt = dollars) {
 // "Still owed $150.00" (the same number as the admin box, ledger.mjs balanceOf remaining).
 export function customerSteps(ps) {
   if (!ps || ps.total <= 0) return { head: '', rows: [], sum: '', totalWords: '', owed: '' };
-  const rows = ps.steps.map((s) => ({ n: s.n, mark: circled(s.n), words: s.what === 'Deposit' ? 'Deposit now (holds your date)' : `${s.what}, ${s.when}`, cents: s.cents, paid: s.paid, paidOn: s.paidOn || '', tag: s.paid ? paidWords(s) : '' }));
+  const rows = ps.steps.map((s) => ({ n: s.n, mark: circled(s.n), words: s.what === 'Deposit' ? (s.dueDate ? `Deposit, due ${s.when} (holds your date)` : 'Deposit now (holds your date)') : `${s.what}, ${s.when}`, cents: s.cents, paid: s.paid, paidOn: s.paidOn || '', tag: s.paid ? paidWords(s) : '' }));
   return { head: ps.noDeposit ? 'Nothing to pay now.' : '', rows, sum: ps.sumWords, totalWords: ps.totalWords, owed: ps.paid > 0 && ps.stillOwed > 0 ? `Still owed ${money(ps.stillOwed)}` : '' };
 }

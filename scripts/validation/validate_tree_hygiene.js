@@ -13,6 +13,12 @@ const allowedRootFiles = new Set([
   '404.html',
   'AGENTS.md',
   'ARTIFACT_MANIFEST.md',
+  // The repo authority file an agent reads first, and the home of the owner's
+  // "nothing paid" rule (docs/cost/zero-paid-llm.md holds the detail). Search
+  // Readiness item i10 reads this exact path, and
+  // scripts/llm/validate_zero_paid_llm.mjs fails if it loses the line. Never
+  // published: scripts/assemble_pages_output.js drops every root .md.
+  'CLAUDE.md',
   'README.md',
   // The portfolio-wide repo-to-domain map. The site-audit duty greps
   // ~/GitHub/*/REPO_IDENTITY.md for a domain to decide which repository owns an
@@ -25,6 +31,7 @@ const allowedRootFiles = new Set([
   'apple-touch-icon.png',
   'favicon.ico',
   'site.webmanifest',
+  'about.html',
   'accessibility.html',
   'contact.html',
   'request.html',

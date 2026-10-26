@@ -12,7 +12,7 @@
  *  4. the Requests screen has any "More" disclosure other than each step card's ONE "More:
  *     answers, history, other buttons" (owner-approved step cards, 19 Oct 2026: exactly one per
  *     card, inside the card, after its next-step box), or any disclosure with an id outside the
- *     whitelist (only #put-away, #done-list, #cancelled-list: the three groups under the cards), or lacks the steps panel with
+ *     whitelist (only #put-away, #done-list, #cancelled-list: the three groups under the cards; #shortcuts and #ids-fold, owner 24 Oct 2026), or lacks the steps panel with
  *     each button in its owner-approved step (JOB B, 18 Oct 2026); Calendar & Bookings and Money
  *     carry the same panel; /admin/archive redirects to the opened Put away section.
  * Rule 0: fewer than 20 screens or 150 controls checked is a failure.
@@ -104,6 +104,7 @@ const screens = [
   // Quick Pricing Summary (20 Oct 2026): plain, after a send, and after a refused send.
   ['/admin/pricing'], ['/admin/pricing?s=rentals&sent=hana%40example.com'], ['/admin/pricing?s=all&to=x&err=That%20email%20address%20does%20not%20look%20right.'],
   // Settings -> Inventory (18 Oct 2026): the Add and Edit forms.
+  ['/admin/library'], ['/admin/library/balloons'], ['/admin/library/porches/p01'], ['/admin/library/shopping'], ['/admin/library/colors/c01'], ['/admin/library/tips/short-on-time'],
   ['/admin/inventory'], ['/admin/inventory/new'], ['/admin/inventory/giant-uno'], ['/admin/inventory/giant-uno/edit'], ['/admin/inventory/giant-tumble-tower'], ['/admin/inventory/projector'],
   [`/admin/confirmed?r=${s.rk(heldReq.row.request_key)}&m=Deposit%20received&back=/admin/`],
   [`/admin/checklist/online?r=${s.rk(reqA.key)}`], ['/admin/checklist', { print: true }], [`/admin/checklist?r=${s.rk(reqA.key)}`, { print: true }],
@@ -242,6 +243,11 @@ pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/req
   const ri = await s.one('SELECT invoice_id FROM request_status WHERE request_key = ?1', handReq.row.request_key);
   if (ri && ri.invoice_id) { const ed = await s.get(`/admin/invoices/${ri.invoice_id}/edit`); if (!/data-quick-game-pick/.test(ed.text)) errors.push(`the rental invoice editor has no game picker: ${(ed.text.match(/data-quick-game>[\s\S]{0,300}/) || [''])[0]}`); pages.push([`/admin/invoices/${ri.invoice_id}/edit (extra game)`, {}, ed]); }
   else errors.push('the held rental has no draft invoice, so + Extra game goes untested');
+  // The invoice editor's "Room setup presets" (a hotel-room party request's draft).
+  const room = await s.siteRequest({ service: 'party', party_event: 'Anniversary', party_where: 'Hotel room', party_guests: 'Just the two of us', party_budget: '$300–$500', party_takedown: 'no', event_date: dplus(20), location: 'Memphis', name: 'Tip Example', phone: '901-555-0794', email: 'tip.example@example.com' });
+  const roomInv = room.row ? await s.one('SELECT id FROM invoices WHERE request_key = ?1', room.row.request_key) : null;
+  if (roomInv) { const ed = await s.get(`/admin/invoices/${roomInv.id}/edit`); if (!/data-room-presets>/.test(ed.text)) errors.push('the room setup invoice editor has no Room setup presets'); pages.push([`/admin/invoices/${roomInv.id}/edit (room setup presets)`, {}, ed]); }
+  else errors.push('the hotel-room request has no draft invoice, so the room setup presets go untested');
 }
 
 // Three ways a job ends (owner-approved "Done Cards", 20 Oct 2026): a Finished card with its
@@ -316,11 +322,12 @@ for (const [p, o, res] of pages) {
     // A summary's own text, or the text of its first span (the card toggle wraps Show/Hide in spans).
     const mores = [...html.matchAll(/<summary([^>]*)>(?:<span[^>]*>)?([^<]*\b[Mm]ore\b[^<]*)</g)];
     // "Show more about <first name>" (owner-approved mock-up 20 Oct 2026; Show/Hide wording 20 Oct 2026).
-    for (const m of mores) if (!m[0].startsWith(MORE_CARD) || !/^Show more about (\S+|this request)$/.test(m[2])) errors.push(`${p}: a "More" toggle that is not a card's "Show more about <first name>": ${m[0].slice(0, 80)}`);
+    // ONE "More about <first name>" (job card mock-up, 25 Oct 2026).
+    for (const m of mores) if (!m[0].startsWith(MORE_CARD) || !/^More about (\S+|this request)$/.test(m[2])) errors.push(`${p}: a "More" toggle that is not a card's "Show more about <first name>": ${m[0].slice(0, 80)}`);
     for (const a of html.split('<article').slice(1)) {
       const card = a.slice(0, a.indexOf('</article>'));
       if (!/data-reqcard/.test(card)) continue;
-      const n = (card.match(/<summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>Show more about ([^<]+)<\/span><span class="mhide" data-more-hide>Hide more about \1<\/span>/g) || []).length;
+      const n = (card.match(/<summary data-help="card\.details"[^>]*><span class="mshow" data-more-show>More about ([^<]+)<\/span><span class="mhide" data-more-hide>Hide more about \1<\/span><span class="mchev" aria-hidden="true">▾<\/span><small class="msub" data-more-sub>contact &amp; ID · money · notes · everything they wrote<\/small><\/summary>/g) || []).length;
       if (n !== 1) errors.push(`${p}: a request card has ${n} "More" toggles (must be exactly one)`);
       // A Done / Cancelled card (owner-approved "Done Cards", 20 Oct 2026) has no next step: its
       // "✓ DONE / ✕ CANCELLED · <date>" label, money words and its two small buttons come first.
@@ -330,7 +337,8 @@ for (const [p, o, res] of pages) {
       } else if (card.indexOf('data-next-step') < 0 || card.indexOf('data-next-step') > card.indexOf('data-details')) errors.push(`${p}: a request card's "More" comes before (or without) its next-step box`);
     }
     // The Done and Cancelled groups (owner-approved "Done Cards", 20 Oct 2026) and Put away.
-    const DISCLOSURE_WHITELIST = ['put-away', 'done-list', 'cancelled-list'];
+    // + #shortcuts (the 1·2·3 steps, closed on a phone) and #ids-fold (Delete customer ID photos): owner, 24 Oct 2026.
+    const DISCLOSURE_WHITELIST = ['put-away', 'done-list', 'cancelled-list', 'shortcuts', 'ids-fold'];
     for (const m of html.matchAll(/<details\b[^>]*\bid="([^"]+)"/g)) if (!DISCLOSURE_WHITELIST.includes(m[1])) errors.push(`${p}: disclosure #${m[1]} is not on the whitelist (only the Put away section may be one)`);
     const lis = steps ? steps.split('<li>').slice(1) : [];
     const PANEL = [['See who&#39;s asking.|See who\'s asking.', ['Check for new requests', 'Find a customer', 'Open responses sheet', 'Open ID folder']],

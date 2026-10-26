@@ -59,14 +59,16 @@
       "queued",
       "published",
       "skipped",
-      "retired"
+      "retired",
+      "folded"
     ],
     "current_expected_mode": "fully_published_queue_until_new_candidates_are_explicitly_enriched_and_queued",
     "published_items_must_have_html": true,
     "published_items_must_be_in_manifest": true,
     "manifest_items_must_have_html": true,
     "query_universe_items_must_be_represented_in_queue": true,
-    "empty_unpublished_queue_is_allowed": true
+    "empty_unpublished_queue_is_allowed": true,
+    "folded_status_why": "folded = published once, then folded into a service hub on 26 Oct 2026 (data/search_intelligence/hub_consolidation.json): the HTML is gone, the URL 301s, and the item is never republished."
   },
   "self_heal_policy": {
     "validation_may_mutate_files": false,

@@ -180,10 +180,21 @@ async function main() {
   for (const l of landings) {
     let hit = null;
     for (const sha of l.candidates) {
+      const on = sha === l.tip ? 'exact sha' : `PR head ${sha.slice(0, 8)}`;
       const runs = await api(`/repos/${repo}/actions/runs?head_sha=${sha}&per_page=5`, tok);
       if (runs.total_count > 0) {
         const r = runs.workflow_runs[0];
-        hit = { on: sha === l.tip ? 'exact sha' : `PR head ${sha.slice(0, 8)}`, run_id: r.id, workflow: r.name, event: r.event, conclusion: r.conclusion || r.status };
+        hit = { on, run_id: r.id, workflow: r.name, event: r.event, conclusion: r.conclusion || r.status };
+        break;
+      }
+      // The runs list's head_sha filter is search-backed and intermittently answers 0 for a sha
+      // that has runs (22 Oct 2026: PR #135's run saw 5 landings "uncovered" that a run minutes
+      // later saw covered, and the reverse). The commit's own check suites are read from the
+      // commit itself: a GitHub Actions suite there IS a workflow run on that exact sha.
+      const suites = await api(`/repos/${repo}/commits/${sha}/check-suites?app_id=15368&per_page=10`, tok);
+      const gha = (suites.check_suites || []).filter((x) => x.app && x.app.slug === 'github-actions');
+      if (gha.length) {
+        hit = { on, run_id: `check-suite ${gha[0].id}`, workflow: 'GitHub Actions', event: 'check-suite', conclusion: gha[0].conclusion || gha[0].status };
         break;
       }
     }

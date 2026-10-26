@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Every published page has a title of 30-70 characters and a meta description
- * of 110-160 characters, and no two published pages share either.
+ * Every published page has a title of 30-65 characters and a meta description
+ * of 120-160 characters, and no two published pages share either. No page is
+ * exempt, the homepage included.
  *
  * WHY
  * ---
@@ -15,6 +16,13 @@
  * descriptions of 41-98; the bounds here sit above both with room to spare.
  * Bing Site Scan also flags "Title too long" above 70 characters, where results
  * truncate: 18 published titles were 71-97 characters on 2026-09-25.
+ *
+ * Tightened 2026-10-25 to the owner's Search Readiness Checklist (b1: title
+ * 30-65; b2: meta description 120-160), which audits this site every Monday.
+ * Google's result line cuts a title near 600px - about 65 characters - and a
+ * snippet under 120 characters loses the room to carry the query. Twenty
+ * published titles were 66-70 and twelve descriptions 110-119 when the
+ * checklist first ran this site; all were rewritten in the same change.
  *
  * SOURCES THIS GUARDS
  * -------------------
@@ -42,16 +50,25 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const DOMAIN = 'https://porchandparty901.com';
 const TITLE_MIN = 30;
-const TITLE_MAX = 70;
-const DESC_MIN = 110;
+const TITLE_MAX = 65;
+const DESC_MIN = 120;
 const DESC_MAX = 160;
 const MIN_PUBLISHED = 20;
-// The one owner-ruled exception (2026-10-18): the homepage title names all four
-// services and is approved verbatim at 87 characters. It is pinned EXACTLY to
-// scripts/install_brand_surfaces.js HOME.title, so the homepage is held to a
-// stricter rule than the range (one string, nothing else); every other page
-// keeps the 30-70 range.
-const HOME_TITLE = require('../install_brand_surfaces').HOME.title;
+// No page is exempt from the range, the homepage least of all.
+//
+// Until 2026-10-26 the homepage carried an owner-ruled exception (2026-10-18):
+// its title named all four services and was approved verbatim at 87 characters.
+// The owner's Search Readiness Checklist (25 Oct 2026) audits this site every
+// Monday and item b1 is 30-65 for EVERY sampled page; the homepage is the first
+// page it samples, so the exception was the one standing failure the checklist
+// could never clear, and it reported it again on 2026-10-26. The later ruling
+// wins: the carve-out is gone and the homepage title is 61 characters, naming
+// three services with the fourth (game rentals) carried by the description, the
+// H1 and /rentals/. Nothing here reads HOME.title any more, so the homepage is
+// held to exactly the same range as every other page.
+//
+// This is the stricter rule, not the looser one: removing the exception can
+// only make more titles fail, never fewer. Do not put it back.
 
 const decode = (s) => String(s)
   .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
@@ -104,9 +121,7 @@ for (const loc of locs) {
   else {
     titles += 1;
     const title = decode(t[1]);
-    if (rel === 'index.html' && title.length > TITLE_MAX) {
-      if (title !== HOME_TITLE) fail(`${rel}: title is ${title.length} characters; above ${TITLE_MAX} only the owner-approved "${HOME_TITLE}" is allowed: "${title}"`);
-    } else if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
+    if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
       fail(`${rel}: title is ${title.length} characters, must be ${TITLE_MIN}-${TITLE_MAX}: "${title}"`);
     }
     if (!byTitle.has(title)) byTitle.set(title, []);

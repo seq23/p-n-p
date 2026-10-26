@@ -119,7 +119,7 @@ export const SERVICE_ONLY = {
 // Calm cards (owner, 18 Oct 2026): at most this many secondary buttons show on a card; the rest
 // wait under "Show details", most relevant first (the order below).
 export const MAX_SECONDARY = 3;
-const SECONDARY_ORDER = ['card.openInvoice', 'card.createInvoice', 'card.schedInstall', 'card.schedSetup', 'card.schedPickup', 'ret.mark', 'card.seeCal',
+const SECONDARY_ORDER = ['card.openInvoice', 'card.createInvoice', 'ret.mark', 'card.seeCal',
   'ret.see', 'card.checklist', 'card.undoJobDone', 'card.printChecklist'];
 const rank = (k) => { const i = SECONDARY_ORDER.indexOf(k.split('|')[0]); return i < 0 ? SECONDARY_ORDER.length : i; };
 
@@ -150,7 +150,10 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
   if (stage === 'void') return { primary: '', secondary: ['card.archive', 'card.uncancel'], more: [] };
   if (stage === 'done') return { primary: '', secondary: ['card.archive', 'card.undone'], more: [] };
   if (stage === 'finished') return { primary: 'card.markDone', secondary: ['card.archive'], more: [] };
-  const firstSched = services.filter((k) => SCHEDULE_FIRST[k] && !kinds.includes(SCHEDULE_FIRST[k][1])).map((k) => `${SCHEDULE_FIRST[k][0]}|${SCHEDULE_FIRST[k][1]}`);
+  // Not booked yet: the card's own inline "Yes, book it" (views.mjs bookYesForm) books it, the day
+  // from the request filled in. There is no "Schedule setup / install / pickup" button any more
+  // (owner-approved job card mock-up, 25 Oct 2026): it repeated Yes, book it.
+  const firstSched = services.some((k) => SCHEDULE_FIRST[k] && !kinds.includes(SCHEDULE_FIRST[k][1])) ? ['step.bookYes'] : [];
   let primary = '';
   if (stage === 'new') primary = 'card.createInvoice';
   else if (stage === 'draft') primary = 'card.openInvoice';
@@ -176,7 +179,6 @@ export function cardButtons({ services, stage, inv = null, plan = 'half', sched 
   const sec = [];
   if (inv && primary !== 'card.openInvoice') sec.push('card.openInvoice');
   if (!inv && primary !== 'card.createInvoice') sec.push('card.createInvoice');
-  for (const s of firstSched) if (s !== primary) sec.push(s);
   if (sched) sec.push('card.seeCal');
   // The second booking (porch/party takedown, grazing pickup) is never a button that opens
   // another page any more: the inline row on the card books it in place (owner, 18 Oct 2026).

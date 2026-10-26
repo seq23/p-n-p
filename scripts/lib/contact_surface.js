@@ -102,6 +102,15 @@ const ENTITY = C.entity;
 if (!ENTITY || !ENTITY.id || !Array.isArray(ENTITY.type) || !ENTITY.type.includes('LocalBusiness') || !C.facebookPageUrl) {
   throw new Error('data/offers/services.json is missing contact.entity (id, type incl. LocalBusiness) or contact.facebookPageUrl');
 }
+// The locality-only PostalAddress (no street, no postal code - see entity.addressProvenance).
+// Google will not place a service-area business without a city, region and country.
+if (!ENTITY.address || ENTITY.address['@type'] !== 'PostalAddress' || !ENTITY.address.addressLocality
+  || !ENTITY.address.addressRegion || !ENTITY.address.addressCountry) {
+  throw new Error('data/offers/services.json contact.entity.address must be a PostalAddress with addressLocality, addressRegion and addressCountry');
+}
+if ('streetAddress' in ENTITY.address || 'postalCode' in ENTITY.address) {
+  throw new Error('data/offers/services.json contact.entity.address must not carry a streetAddress or postalCode: no street address of hers is public');
+}
 const BUSINESS_ID = ENTITY.id;
 const SAME_AS = [C.facebookPageUrl, C.googleBusinessProfileUrl];
 const AREAS = require(path.join(__dirname, '../../data/service_areas/areas.json')).areas;
@@ -110,7 +119,7 @@ const businessRef = () => ({ '@id': BUSINESS_ID });
 
 /** Fields every business node carries (spread into generator output; the page pass then dedupes). */
 function businessContactFields() {
-  return { '@id': BUSINESS_ID, telephone: C.telephone, email: 'hello@porchandparty901.com', hasMap: C.googleBusinessProfileUrl, sameAs: SAME_AS.slice(), additionalType: T.additionalType.slice() };
+  return { '@id': BUSINESS_ID, telephone: C.telephone, email: 'hello@porchandparty901.com', address: { ...ENTITY.address }, hasMap: C.googleBusinessProfileUrl, sameAs: SAME_AS.slice(), additionalType: T.additionalType.slice() };
 }
 
 const typesOf = (n) => [].concat((n && n['@type']) || []);
@@ -141,6 +150,7 @@ function canonicalBusiness(existing = {}) {
     ...rest,
     telephone: C.telephone,
     email: 'hello@porchandparty901.com',
+    address: { ...ENTITY.address },
     logo: ENTITY.logo,
     image: existing.image || ENTITY.image,
     priceRange: ENTITY.priceRange,

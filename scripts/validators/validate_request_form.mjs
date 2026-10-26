@@ -145,6 +145,27 @@ for (const [p, fields] of Object.entries(PATHS)) {
 }
 must(made.porch && made.party && made.porch.takedown_plan === 'not_sure' && made.party.takedown_plan === 'scheduled', 'the takedown answer does not map into takedown_plan');
 must(made.multi && JSON.stringify(JSON.parse(made.multi.services)) === JSON.stringify(['party', 'rentals']), 'the "more than one" path did not store both services');
+// ---- Channel source tags (owner, 22 Oct 2026; migration 0023, request-form.mjs cleanSrc) ------
+// /request?src=<tag> rides a hidden field into requests.source_tag, cleaned to [a-z0-9-], max 40.
+must(F.SRC_MAX === 40, 'the source tag limit is not 40');
+for (const tag of ['mailer-38117', 'hotel', 'hoa', 'school', 'facebook', 'instagram', 'tiktok', 'pinterest', 'google']) must(F.cleanSrc(tag) === tag, `the source tag "${tag}" does not survive cleaning`);
+must(F.cleanSrc('Mailer_38117 <script>') === 'mailer38117script' && F.cleanSrc(null) === '' && F.cleanSrc('é/../x') === 'x' && F.cleanSrc('a'.repeat(60)).length === 40, 'cleanSrc does not keep only a-z 0-9 "-" at most 40 characters');
+must(Object.values(made).every((r) => r && r.source_tag === ''), 'a request sent without ?src= stored a source tag');
+const srcPage = await handler({ request: new Request('https://porchandparty901.com/request?src=Hotel%22%3E%3Cb%3E'), env, params: {} });
+const srcHtml = await srcPage.text();
+must(srcPage.status === 200 && srcHtml.includes('<input type="hidden" name="src" value="hotelb">') && !srcHtml.includes('hotel"'), 'GET /request?src= does not carry the cleaned tag in the hidden src field');
+must((await (await handler({ request: new Request('https://porchandparty901.com/request'), env, params: {} })).text()).includes('<input type="hidden" name="src" value="">'), 'GET /request without ?src= does not render an empty src field');
+const tagged = await send({ ...PATHS.porch, ...contact(12), src: 'Mailer-38117' });
+const taggedRow = await s.one('SELECT source_tag FROM requests WHERE email = ?1', 'path12@example.com');
+must(tagged.status === 303 && taggedRow && taggedRow.source_tag === 'mailer-38117', `a request with src=Mailer-38117 stored "${taggedRow && taggedRow.source_tag}" (want mailer-38117)`);
+const longTag = await send({ ...PATHS.party, ...contact(13), src: `facebook-${'x'.repeat(80)}` });
+const longRow = await s.one('SELECT source_tag FROM requests WHERE email = ?1', 'path13@example.com');
+must(longTag.status === 303 && longRow && longRow.source_tag === `facebook-${'x'.repeat(31)}`, 'a long source tag is not cut to 40 characters');
+const srcKept = await send({ ...PATHS.porch, ...contact(14), porch_season: '', src: 'hoa' });
+must(srcKept.status === 400 && srcKept.text.includes('<input type="hidden" name="src" value="hoa">'), 'a form re-shown with an error drops its source tag');
+const mig = fs.readFileSync(path.join(ROOT, 'migrations/0023_request_source_tag.sql'), 'utf8').replace(/--.*$/gm, '');
+must(/ALTER TABLE requests ADD COLUMN source_tag TEXT NOT NULL DEFAULT ''/.test(mig) && !/\b(UPDATE|DELETE|DROP|INSERT)\b/i.test(mig), 'migration 0023 is not one additive column');
+
 const bad = await send({ ...PATHS.porch, ...contact(9), porch_season: '' });
  must(bad.status === 400 && bad.text.includes('rq-summary') && bad.text.includes('value="path9@example.com"') && bad.text.includes('id="err-porch_season"') && bad.text.includes('href="#q-porch_season"'), 'a missing answer does not re-show the form with the answers kept and the error named');
 // The entire weekend is Fri-Sun: a Monday-Thursday event date with "The entire weekend" is refused.

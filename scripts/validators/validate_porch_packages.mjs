@@ -35,6 +35,7 @@ import { mod, ROOT } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
 
 const require = createRequire(import.meta.url);
+const HC = require('../lib/hub_consolidation.js');
 const PP = require(path.join(ROOT, 'scripts/lib/porch_packages.js'));
 const pk = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/porch_packages.json'), 'utf8'));
 const services = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/services.json'), 'utf8'));
@@ -290,7 +291,17 @@ for (const a of pk.articles || []) {
   checkArticle(renderPage(entry, { porchPackages: pk2 }), pk2, `${a.path} (perturbed data)`);
   articlesChecked += 1;
 }
-for (const e of drafts) if (!(pk.articles || []).some((a) => a.path === `${e.folder}/${e.slug}.html`)) fail(`${e.folder}/${e.slug}: a porchPackages draft missing from porch_packages.json articles`);
+// Porch price articles folded into a porch hub (26 Oct 2026, scripts/lib/hub_consolidation.js):
+// each still counts as a checked article, but only when the page is really gone, every link to
+// it lands on its hub, and that hub carries the full grid (it must be in pk.pages, checked above).
+for (const a of pk.foldedArticles || []) {
+  const target = HC.foldTarget(`/${a.path}`);
+  if (fs.existsSync(path.join(ROOT, a.path))) fail(`${a.path}: listed as folded but still on disk`);
+  else if (!target || `${target.to.replace(/^\//, '')}.html` !== a.hub) fail(`${a.path}: folded into ${a.hub} in porch_packages.json, but hub_consolidation.json sends it to ${target ? target.to : 'nowhere'}`);
+  else if (!pk.pages.includes(a.hub)) fail(`${a.path}: its hub ${a.hub} is not in porch_packages.json pages, so nothing holds the grid it used to carry`);
+  else articlesChecked += 1;
+}
+for (const e of drafts) if (!(pk.articles || []).some((a) => a.path === `${e.folder}/${e.slug}.html`) && !(pk.foldedArticles || []).some((a) => a.path === `${e.folder}/${e.slug}.html`)) fail(`${e.folder}/${e.slug}: a porchPackages draft missing from porch_packages.json articles`);
 if (articlesChecked < 4) fail(`Rule 0: only ${articlesChecked} porch price articles checked`);
 for (const rel of pk.pages) {
   const abs = path.join(ROOT, rel);

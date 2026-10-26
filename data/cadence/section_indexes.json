@@ -3,9 +3,7 @@
   "generated_by": "scripts/generators/build_section_indexes.js",
   "routes": [
     "/areas/index.html",
-    "/events/index.html",
     "/faq/index.html",
-    "/local/index.html",
     "/services/index.html",
     "/sitemap"
   ]

@@ -152,8 +152,35 @@ function localLinks(city, svc) {
   return (city.localPages || []).filter((p) => p.for === svc).map((p) => `<a href="${p.href}">${esc(p.label)}</a>`);
 }
 
+/**
+ * A page is not a price.
+ *
+ * Until 2026-10-26 every city in data/service_areas/areas.json was also a
+ * fee-free city, because data/offers/services.json travel read
+ * `includedAreasFrom: data/service_areas/areas.json` - "whatever that file
+ * holds". The checklist's item j9 then required pages for five more towns
+ * inside the coverage radius, and publishing them would have handed five towns
+ * fee-free travel as a side effect of a search fix. The fee-free eight are now
+ * their own list in that file (travel.includedAreas) and this says, per city,
+ * which of the two it is. Both sentences are true of the city they are on.
+ */
+const INCLUDED = new Set(TRAVEL.includedAreas);
+const isIncluded = (city) => INCLUDED.has(city.area);
 function travelSentence(city) {
-  return `${esc(city.name)} is on the included list, so there is no travel fee. ${esc(TRAVEL.line)}`;
+  return isIncluded(city)
+    ? `${esc(city.name)} is on the included list, so there is no travel fee. ${esc(TRAVEL.line)}`
+    : `${esc(city.name)} is inside the service area but outside the included list, so a flat ${money(TRAVEL.extendedFee)} travel fee applies, shown on your quote up front. ${esc(TRAVEL.line)}`;
+}
+/** The travel clause for a meta description: short, and true of this city. */
+const travelClause = (city) => (isIncluded(city)
+  ? `no travel fee to ${city.name}`
+  : `a flat ${money(TRAVEL.extendedFee)} travel fee to ${city.name}`);
+
+/** The fee-free claim for a FAQ answer, correct for either kind of city. */
+function travelAnswer(city) {
+  return isIncluded(city)
+    ? `Yes. ${city.name} is in ${city.county}, ${city.stateName}, and it is on the included list, so there is no travel fee.`
+    : `Yes. ${city.name} is in ${city.county}, ${city.stateName}, inside the service area but not on the included list, so a flat ${money(TRAVEL.extendedFee)} travel fee applies and is shown on the quote up front.`;
 }
 
 // --- per-service content ------------------------------------------------------
@@ -223,7 +250,7 @@ function grazingContent(city, i) {
     eyebrow: 'Grazing Tables',
     h1: pick([`Grazing tables in ${city.name}, ${city.state}`, `${city.name} grazing tables and styled boards`, `Grazing table styling for ${city.name}, ${city.state}`], i),
     title: `${city.name}, ${city.state} Grazing Tables | From ${money(grazeFrom)} | Porch & Party`,
-    description: `Grazing tables in ${city.name}, ${city.state}: styled boards from ${money(grazeFrom)} and full tables from ${money(GRAZE.tiers[2].from)}, food quoted separately, no travel fee to ${city.name}.`,
+    description: `Grazing tables in ${city.name}, ${city.state}: styled boards from ${money(grazeFrom)} and full tables from ${money(GRAZE.tiers[2].from)}, food quoted separately, ${travelClause(city)}.`,
     lead: pick([
       `${esc(city.name)} is ${esc(city.where)}. Porch &amp; Party styles grazing boards and tables there for showers, birthdays, office gatherings and small events, starting at ${money(grazeFrom)} for a board.`,
       `A grazing table for a ${esc(city.name)} shower, birthday or office lunch starts at ${money(grazeFrom)} for a board and ${money(GRAZE.tiers[1].from)} for a small table, styled on site.`,
@@ -237,7 +264,7 @@ function grazingContent(city, i) {
     image: '/assets/img/grazing/grazing-table-corporate.jpg',
     imageAlt: `Styled grazing table setup for a ${city.name} event`,
     faqs: [
-      [`Do you set up grazing tables in ${city.name}?`, `Yes. ${city.name} is one of the eight included cities, so there is no travel fee. Anywhere further is a flat ${money(TRAVEL.extendedFee)}.`],
+      [`Do you set up grazing tables in ${city.name}?`, travelAnswer(city)],
       ['Is food included in the grazing table price?', `${GRAZE.notes[0]} ${GRAZE.notes[1]} Food is estimated at about ${money(GRAZE.foodPerHead.low)}–${money(GRAZE.foodPerHead.high)} a guest and quoted once the menu and headcount are set.`],
       ['How many guests does a board feed?', `A board feeds ${GRAZE.tiers[0].feedsSnack[0]}–${GRAZE.tiers[0].feedsSnack[1]} guests as a snack or ${GRAZE.tiers[0].feedsMeal[0]}–${GRAZE.tiers[0].feedsMeal[1]} as a meal. A full table feeds ${GRAZE.tiers[2].feedsSnack[0]}–${GRAZE.tiers[2].feedsSnack[1]} as a snack.`],
     ],
@@ -259,7 +286,7 @@ function porchContent(city, i) {
     eyebrow: 'Porch Decorating',
     h1: pick([`${city.name} porch decorating and seasonal front-entry styling`, `Porch decorating in ${city.name}, ${city.state}`], i),
     title: `${city.name}, ${city.state} Porch Decorating | From ${money(porchFrom)} | Porch & Party`,
-    description: `${city.name}, ${city.state} porch decorating for fall and Christmas: Stoop, Classic, Grand and Showstopper packages from ${money(porchFrom)}, no travel fee to ${city.name}.`,
+    description: `${city.name}, ${city.state} porch decorating for fall and Christmas: Stoop, Classic, Grand and Showstopper packages from ${money(porchFrom)}, ${travelClause(city)}.`,
     lead: `${esc(city.name)} is ${esc(city.where)}. Porch &amp; Party decorates ${esc(city.name)} front porches for fall, Halloween, Thanksgiving and Christmas, from a simple stoop to the works: porch, steps and walkway.`,
     second: `Packages start at ${money(porchFrom)}. ${esc(PK.estimateLine)}`,
     primary: { href: '/request?service=porch#request-form', label: 'Request a porch quote' },
@@ -269,7 +296,7 @@ function porchContent(city, i) {
     image: pick(['/assets/img/porch/seasonal-exterior-fall.jpg', '/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg'], i),
     imageAlt: `Seasonal front porch decorating for a ${city.name} home`,
     faqs: [
-      [`Does Porch & Party decorate porches in ${city.name}?`, `Yes. ${city.name} is in ${city.county}, ${city.stateName}, one of the eight included cities, so there is no travel fee.`],
+      [`Does Porch & Party decorate porches in ${city.name}?`, travelAnswer(city)],
       ['How much does porch decorating cost?', `Fall and Christmas packages start at ${money(porchFrom)} for the Stoop package. ${PK.finalQuoteLine}`],
       ['Is takedown included?', TAKEDOWN],
       ['Is there a discount for booking fall and Christmas?', PK.bundle.line],
@@ -281,8 +308,65 @@ function porchContent(city, i) {
   };
 }
 
+/**
+ * Party decor and celebration setups, for a city that is not a baseline page.
+ *
+ * There was no generator for this service until 2026-10-26: all eight baseline
+ * cities' party-decor pages were in LEGACY, so `plan()` threw
+ * "no generator for service party-decor" the moment a ninth city was added.
+ * That is what it did when the checklist's item j9 required five more towns.
+ * Everything here is read from data/offers/services.json services.celebration:
+ * the room-setup presets and their totals, what the styling includes, the two
+ * pricing notes, and the travel rule for this city. No reviews, counts,
+ * "insured" claims or invented inclusions - none are on record.
+ */
+function partyContent(city, i) {
+  const presets = CELEB.roomSetupPresets || [];
+  const rows = presets.map((x) => [esc(x.name), money(x.total), x.includesTakedown ? 'Included' : esc(TAKEDOWN)]);
+  const table = `<div class="table-scroll" style="overflow-x:auto;"><table><caption>Room setup presets for ${esc(city.name)}</caption>`
+    + `<thead><tr><th scope="col">Setup</th><th scope="col">Total</th><th scope="col">Takedown</th></tr></thead>`
+    + `<tbody>${rows.map((r) => `<tr><th scope="row">${r[0]}</th>${r.slice(1).map((c) => `<td>${c}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
+    + `<p class="muted" style="margin-top:16px;">${esc(CELEB.notes.join(' '))}</p>`;
+  const local = localLinks(city, 'party-decor');
+  const panels = [
+    panel(`Party decor prices for ${esc(city.name)}`, table, ' data-area-prices="party-decor"'),
+    panel('What the styling covers', list(CELEB.includes.map(esc))),
+    panel(`Travel to ${esc(city.name)}`, `<p>${travelSentence(city)}</p>`),
+  ];
+  const presetFrom = money(Math.min(...presets.map((x) => x.total)));
+  return {
+    eyebrow: 'Party Decor',
+    h1: pick([
+      `${city.name} party decor and celebration setups`,
+      `Party decor in ${city.name}, ${city.state}`,
+      `Celebration setups for ${city.name}, ${city.state}`,
+    ], i),
+    title: `${city.name}, ${city.state} Party Decor | From ${presetFrom} | Porch & Party`,
+    description: `Party decor and celebration setups in ${city.name}, ${city.state}: birthday, hotel-room and home setups from ${presetFrom}, styled on site, quoted before anything is booked.`,
+    lead: `${esc(city.name)} is ${esc(city.where)}. Porch &amp; Party styles ${esc(city.name)} birthdays, showers, anniversaries, hotel rooms and home celebrations, from a single focal moment to a fully styled room, starting at ${presetFrom}.`,
+    second: `${esc(CELEB.notes[0])} ${esc(CELEB.notes[1])}${local.length ? ` In Memphis, see also ${local.join(' and ')}.` : ''}`,
+    primary: { href: '/request?service=party', label: 'Request a Quote' },
+    secondary: { href: '/pricing', label: 'View Pricing' },
+    panels: rotate(panels, i + 2),
+    aside: [photoCard('/assets/img/celebrations/romantic-bedroom-experience.jpg', `${city.name} party decor and celebration setup styling`, `Setups from ${presetFrom}`, esc(CELEB.notes[0]))],
+    image: '/assets/img/celebrations/romantic-bedroom-experience.jpg',
+    imageAlt: `${city.name} party decor and celebration setup styling`,
+    faqs: [
+      [`Do you set up party decor in ${city.name}?`, travelAnswer(city)],
+      ['How much does a party setup cost?', `${presets.map((x) => `${x.name} is ${money(x.total)}`).join(', ')}. ${CELEB.notes[0]}`],
+      ['Is takedown included?', TAKEDOWN],
+      ['Can you decorate a hotel room?', `Yes. Hotel rooms are one of the settings this service covers; see /services/hotel-room-decor-memphis. ${CELEB.notes[1]}`],
+    ],
+    serviceName: `Party decor and celebration setups in ${city.area}`,
+    offers: presets.map((x) => ({ '@type': 'Offer', name: `${x.name} room setup`, price: x.total, priceCurrency: 'USD' })),
+    ctaH: `Planning a ${city.name} celebration?`,
+    ctaP: 'Share the date, the occasion, whether it is a home or a hotel room, and the look you want, so we can quote the setup.',
+  };
+}
+
 const CONTENT = {
   'porch-decorating': porchContent,
+  'party-decor': partyContent,
   'grazing-tables': grazingContent,
   'party-game-rentals': rentalsContent,
 };
@@ -314,8 +398,8 @@ function renderPage(city, svc, i) {
   const url = `${DOMAIN}${urlOf(city, svc)}`;
   const t = esc(c.title);
   const d = esc(c.description);
-  if (c.title.length < 30 || c.title.length > 70) throw new Error(`${pathUrl}: title is ${c.title.length} characters (30-70): ${c.title}`);
-  if (c.description.length < 110 || c.description.length > 160) throw new Error(`${pathUrl}: description is ${c.description.length} characters (110-160): ${c.description}`);
+  if (c.title.length < 30 || c.title.length > 65) throw new Error(`${pathUrl}: title is ${c.title.length} characters (30-65): ${c.title}`);
+  if (c.description.length < 120 || c.description.length > 160) throw new Error(`${pathUrl}: description is ${c.description.length} characters (120-160): ${c.description}`);
   const faqHtml = c.faqs.map(([q, a]) => `<div class="faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></div>`).join('');
   const html = `<!doctype html>
 <html lang="en">
