@@ -341,6 +341,33 @@
         "release",
         "core"
       ]
+    },
+    {
+      "id": "page-dates",
+      "command": "npm run validate:page-dates",
+      "detects": "A page whose structured data states a datePublished or dateModified and shows it nowhere a reader can see, a visible date the structured data does not state, a date line on a page that claims none, or a date line placed above the lead paragraph where it displaces the page's direct answer.",
+      "profiles": [
+        "release",
+        "core"
+      ]
+    },
+    {
+      "id": "about-page",
+      "command": "npm run validate:about-page",
+      "detects": "No /about, an /about that is unpublished or noindex, a published page that does not link it, an About page that omits the publisher, the Terms, the Privacy Policy, the Google Business Profile, the Facebook Page or a service's starting price from the data, one that quotes a price the data files do not hold, one carrying a review, rating, award, certification, insurance, years-in-business or job-count claim this repository holds no record of, or one that prints the legal entity's name (owner-approved 2026-10-18: only the Terms and the Privacy Policy may).",
+      "profiles": [
+        "release",
+        "core"
+      ]
+    },
+    {
+      "id": "live-check-wired",
+      "command": "npm run validate:live-check-wired",
+      "detects": "A post-deploy live check that exists but never runs, runs before the deploy or on a pull request, has no timeout, or whose script no longer fetches the live host, no longer hard-fails on zero checks, or no longer covers the crawl files, icons, og images, schema @id, redirects and IndexNow key.",
+      "profiles": [
+        "release",
+        "core"
+      ]
     }
   ]
 }

@@ -520,6 +520,8 @@ ${section.groups ? '' : `
 // --- run --------------------------------------------------------------------
 
 const RELATED_RE = /<section[^>]+data-nav="related-pages"[\s\S]*?<\/section>/i;
+const SOCIAL_RE = /<meta property="og:(?:site_name|image:width|image:height)" content="[^"]*" \/>/g;
+const DATES_RE = /<p class="page-dates" data-page-dates>[\s\S]*?<\/p>/;
 const written = [];
 const skipped = [];
 const routes = [];
@@ -538,6 +540,25 @@ for (const section of SECTIONS) {
   let html = normalizeHtmlUrls(render(section, section.group(pages)));
   const related = before && before.match(RELATED_RE);
   if (related) html = html.replace('</main>', () => `${related[0]}</main>`);
+  // Same carry-over, for the two passes that run last in build:all (added
+  // 2026-10-25 for her Search Readiness Checklist items b6 and d4): the
+  // social-card tags (scripts/install_social_tags.js) and the visible
+  // published/updated line (scripts/install_page_dates.js). Without this, a
+  // rebuild stripped both from the five section indexes, site-chrome then
+  // refroze them in that stripped state, and install_social_tags drifted them
+  // again with no mutation scope - the chain never reached a fixed point.
+  const social = ((before && before.match(SOCIAL_RE)) || []).filter((tag) => !html.includes(tag));
+  if (social.length) html = html.replace(/(<meta\b[^>]*\bproperty="og:image"[^>]*>)/i, `$1\n${social.join('\n')}`);
+  const dates = before && before.match(DATES_RE);
+  if (dates && !DATES_RE.test(html)) {
+    const h1 = /<h1[^>]*>[\s\S]*?<\/h1>/i.exec(html);
+    if (h1) {
+      const afterH1 = h1.index + h1[0].length;
+      const lead = /^\s*<p[^>]*>[\s\S]*?<\/p>/i.exec(html.slice(afterH1));
+      const at = afterH1 + (lead ? lead[0].length : 0);
+      html = html.slice(0, at) + dates[0] + html.slice(at);
+    }
+  }
   if (before === html) { written.push(`${section.dir}/index.html (unchanged, ${pages.length} pages)`); continue; }
   if (CHECK) { console.error(`would rewrite ${section.dir}/index.html`); process.exitCode = 1; continue; }
   fs.writeFileSync(out, html);

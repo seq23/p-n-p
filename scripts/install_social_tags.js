@@ -101,7 +101,9 @@ for (const rel of files) {
   try { size = S.measure(path.join(ROOT, local)); } catch (e) { problems.push(`${rel}: ${e.message}`); continue; }
 
   // og:image:width / og:image:height - written from the file, corrected if wrong.
-  for (const [key, value] of [['og:image:width', size.width], ['og:image:height', size.height]]) {
+  // Height first, then width: each insert goes immediately after the og:image
+  // tag, so this leaves them in width-then-height order on the page.
+  for (const [key, value] of [['og:image:height', size.height], ['og:image:width', size.width]]) {
     if (hasMeta(html, 'property', key)) {
       html = html.replace(new RegExp(`(<meta\\b[^>]*\\bproperty="${key}"[^>]*\\bcontent=")[^"]*(")`, 'i'), `$1${value}$2`)
                  .replace(new RegExp(`(<meta\\b[^>]*\\bcontent=")[^"]*("[^>]*\\bproperty="${key}")`, 'i'), `$1${value}$2`);
