@@ -34,6 +34,24 @@
       },
       "publication_frozen": true,
       "updated_at": "2026-10-19T20:28:16.844Z"
+    },
+    "2026-10-26": {
+      "new_pages": 1,
+      "ceiling": 3,
+      "routes": [
+        "/guides/holiday-porch-decorating-service-memphis"
+      ],
+      "released_by": {
+        "/guides/holiday-porch-decorating-service-memphis": {
+          "query": "holiday porch decorating service",
+          "source": "measured_demand",
+          "metric": "search_volume_monthly",
+          "value": 20,
+          "observed_at": "2026-10-18"
+        }
+      },
+      "publication_frozen": true,
+      "updated_at": "2026-10-26T16:37:39.632Z"
     }
   }
 }

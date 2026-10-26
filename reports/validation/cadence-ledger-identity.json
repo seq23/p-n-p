@@ -1,11 +1,11 @@
 {
   "schema_version": "1.0",
-  "generated_at": "2026-10-26T08:52:02.968Z",
+  "generated_at": "2026-10-26T16:38:24.558Z",
   "validator": "cadence_ledger_identity",
   "status": "PASS",
   "hard_failures": 0,
-  "ledger_urls": 174,
-  "sitemap_urls": 174,
+  "ledger_urls": 98,
+  "sitemap_urls": 99,
   "fixture_cases": 10,
   "callers_checked": 2,
   "failures": []
