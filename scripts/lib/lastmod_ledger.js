@@ -67,6 +67,29 @@ function buildDate() {
  * ledger after the change without inventing a single date.
  */
 const CHROME = /<(script|style|nav|footer|header|head|svg)\b[\s\S]*?<\/\1>/gi;
+
+/**
+ * The page's own printed freshness line, which the hash must never see.
+ *
+ * scripts/install_page_dates.js prints "Published <date> · Updated <date>" from
+ * the page's JSON-LD dateModified, which scripts/lib/article_schema.js takes
+ * from this ledger's own lastmod. Hashing it closes a loop: the date is printed
+ * FROM the hash's verdict, so letting it back INTO the hash means the stamp
+ * reports a content change that is only ever the stamp itself.
+ *
+ * It did. PR #145 added the line to 126 published pages at once on 2026-10-26;
+ * every one of those hashes changed in the same build, every lastmod advanced to
+ * that day, and the sitemap went to 159 of 174 URLs dated 2026-10-26 - the
+ * uniform_lastmod date-bump this module exists to remove, and the condition
+ * item a6 of the owner's Search Readiness Checklist reads as a build date. The
+ * repair was `node scripts/rekey_lastmod_ledger.js --restore-from 63372f0`, the
+ * last ledger before that PR, which restored all 126 dates from a committed
+ * ledger without estimating one.
+ *
+ * Same reason <header> joined CHROME after PR #25: a line that appears on every
+ * page and says nothing about what the page says is not the page's content.
+ */
+const DERIVED = /<p\b[^>]*\bdata-page-dates\b[^>]*>[\s\S]*?<\/p>/gi;
 const TAG = /<[^>]+>/g;
 
 /**
@@ -83,6 +106,7 @@ const TAG = /<[^>]+>/g;
 function visibleText(payload) {
   const text = String(payload instanceof Buffer ? payload.toString('utf8') : payload)
     .replace(CHROME, ' ')
+    .replace(DERIVED, ' ')
     .replace(TAG, ' ');
   return text.split(/\s+/).filter(Boolean).join(' ');
 }
