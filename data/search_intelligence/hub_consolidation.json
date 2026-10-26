@@ -1,0 +1,603 @@
+{
+  "schema_version": 1,
+  "decided": "2026-10-26",
+  "brief": "~/.boss-os/portfolio-check-2026-10-25.md, Brief 1",
+  "why": "1 of 141 URLs indexed for 15 days with the sitemap registered; 110 of the 111 ledger candidates had 0 impressions in 28 days. The thin pages repeat the hubs, so they are folded into them: their questions, answers and prices move into the hub (data/content/hub_folds.json, rendered by scripts/install_hub_folds.js), each URL 301s to its hub, and nothing links or lists it again.",
+  "measurement": "data/search_intelligence/index_coverage.json: at least 6 of the 12 hubs \"Submitted and indexed\" by 2026-11-15. Baseline 2026-10-25: 0 of 17 hubs indexed.",
+  "fallback": "Fewer than 3 hubs indexed by 2026-11-15 means discovery, not duplication: link the 12 hubs from the Memphis vendor library and the Google Business Profile.",
+  "ledger": "data/search_intelligence/consolidation_candidates.json (role candidate, column fold_into_if_crawled_not_indexed)",
+  "guard": "scripts/validators/validate_hub_consolidation.js (npm run validate:hub-consolidation, inside validate:release)",
+  "folds": [
+    {
+      "from": "/answers/anniversary-room-decorations-memphis",
+      "file": "answers/anniversary-room-decorations-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/baby-shower-decorations-memphis",
+      "file": "answers/baby-shower-decorations-memphis.html",
+      "to": "/services/baby-shower-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/balloon-garland-vs-full-birthday-setup",
+      "file": "answers/balloon-garland-vs-full-birthday-setup.html",
+      "to": "/services/birthday-party-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/birthday-decorations-at-home-memphis",
+      "file": "answers/birthday-decorations-at-home-memphis.html",
+      "to": "/services/birthday-party-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/birthday-hotel-room-setup-ideas-memphis",
+      "file": "answers/birthday-hotel-room-setup-ideas-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/bridal-shower-decorations-memphis",
+      "file": "answers/bridal-shower-decorations-memphis.html",
+      "to": "/services/bridal-shower-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/can-i-book-decor-only-without-event-planning",
+      "file": "answers/can-i-book-decor-only-without-event-planning.html",
+      "to": "/services/birthday-party-planner-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/can-someone-decorate-hotel-room-birthday-memphis",
+      "file": "answers/can-someone-decorate-hotel-room-birthday-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/christmas-porch-decorating-memphis",
+      "file": "answers/christmas-porch-decorating-memphis.html",
+      "to": "/services/christmas-porch-decorating",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/corporate-event-decor-memphis",
+      "file": "answers/corporate-event-decor-memphis.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/corporate-grazing-tables-memphis",
+      "file": "answers/corporate-grazing-tables-memphis.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/diy-vs-hiring-party-decorator",
+      "file": "answers/diy-vs-hiring-party-decorator.html",
+      "to": "/services/budget-party-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/do-grazing-tables-include-food",
+      "file": "answers/do-grazing-tables-include-food.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/do-party-decorators-come-to-your-house",
+      "file": "answers/do-party-decorators-come-to-your-house.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/event-decorator-memphis",
+      "file": "answers/event-decorator-memphis.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/fall-porch-decorating-ideas-southern-homes",
+      "file": "answers/fall-porch-decorating-ideas-southern-homes.html",
+      "to": "/services/fall-porch-decorating",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/front-porch-styling-memphis",
+      "file": "answers/front-porch-styling-memphis.html",
+      "to": "/services/porch-decorating",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/grazing-table-ideas-bridal-showers-birthdays-small-events",
+      "file": "answers/grazing-table-ideas-bridal-showers-birthdays-small-events.html",
+      "to": "/services/bridal-shower-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/grazing-tables-memphis",
+      "file": "answers/grazing-tables-memphis.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/halloween-porch-decorating-memphis",
+      "file": "answers/halloween-porch-decorating-memphis.html",
+      "to": "/services/fall-porch-decorating",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/hotel-room-decorations-memphis",
+      "file": "answers/hotel-room-decorations-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/how-far-in-advance-should-i-book-party-decor",
+      "file": "answers/how-far-in-advance-should-i-book-party-decor.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/how-long-does-it-take-to-set-up-party-decor",
+      "file": "answers/how-long-does-it-take-to-set-up-party-decor.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/how-much-does-a-grazing-table-cost-in-memphis",
+      "file": "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/how-much-does-birthday-decoration-at-home-cost",
+      "file": "answers/how-much-does-birthday-decoration-at-home-cost.html",
+      "to": "/services/birthday-party-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/how-much-does-grazing-tables-cost",
+      "file": "answers/how-much-does-grazing-tables-cost.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/how-much-does-hotel-room-decor-cost-in-memphis",
+      "file": "answers/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/how-much-does-party-decor-cost-in-memphis",
+      "file": "answers/how-much-does-party-decor-cost-in-memphis.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/how-much-does-porch-decorating-cost-in-memphis",
+      "file": "answers/how-much-does-porch-decorating-cost-in-memphis.html",
+      "to": "/services/porch-decorating",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise",
+      "file": "answers/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/last-minute-birthday-setup-ideas-memphis",
+      "file": "answers/last-minute-birthday-setup-ideas-memphis.html",
+      "to": "/services/birthday-party-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/memphis-celebration-setups",
+      "file": "answers/memphis-celebration-setups.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/party-decor-vs-event-planning-memphis",
+      "file": "answers/party-decor-vs-event-planning-memphis.html",
+      "to": "/services/birthday-party-planner-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/party-planner-memphis",
+      "file": "answers/party-planner-memphis.html",
+      "to": "/services/birthday-party-planner-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/porch-decorating-under-500-memphis",
+      "file": "answers/porch-decorating-under-500-memphis.html",
+      "to": "/services/porch-decorating",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/proposal-room-setup-memphis",
+      "file": "answers/proposal-room-setup-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/romantic-room-decorations-memphis",
+      "file": "answers/romantic-room-decorations-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/small-party-decor-ideas-memphis",
+      "file": "answers/small-party-decor-ideas-memphis.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/small-porch-styling-ideas-memphis",
+      "file": "answers/small-porch-styling-ideas-memphis.html",
+      "to": "/services/small-porch-decorating",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/answers/what-is-included-in-party-decor-setup",
+      "file": "answers/what-is-included-in-party-decor-setup.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/authority/event-decorator-memphis",
+      "file": "authority/event-decorator-memphis.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/authority/party-planner-memphis",
+      "file": "authority/party-planner-memphis.html",
+      "to": "/services/birthday-party-planner-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/comparisons/balloon-garland-vs-full-birthday-setup",
+      "file": "comparisons/balloon-garland-vs-full-birthday-setup.html",
+      "to": "/services/birthday-party-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/comparisons/diy-vs-hiring-party-decorator",
+      "file": "comparisons/diy-vs-hiring-party-decorator.html",
+      "to": "/services/budget-party-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/comparisons/grazing-table-vs-charcuterie-board",
+      "file": "comparisons/grazing-table-vs-charcuterie-board.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/corporate/corporate-event-decor-memphis",
+      "file": "corporate/corporate-event-decor-memphis.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/corporate/corporate-grazing-tables-memphis",
+      "file": "corporate/corporate-grazing-tables-memphis.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/events/anniversary-room-decorations-memphis",
+      "file": "events/anniversary-room-decorations-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/events/baby-shower-decorations-memphis",
+      "file": "events/baby-shower-decorations-memphis.html",
+      "to": "/services/baby-shower-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/events/bridal-shower-decorations-memphis",
+      "file": "events/bridal-shower-decorations-memphis.html",
+      "to": "/services/bridal-shower-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/events/proposal-room-setup-memphis",
+      "file": "events/proposal-room-setup-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/do-grazing-tables-include-food",
+      "file": "faq/do-grazing-tables-include-food.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/do-party-decorators-come-to-your-house",
+      "file": "faq/do-party-decorators-come-to-your-house.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/how-far-in-advance-should-i-book-party-decor",
+      "file": "faq/how-far-in-advance-should-i-book-party-decor.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/how-long-does-it-take-to-set-up-party-decor",
+      "file": "faq/how-long-does-it-take-to-set-up-party-decor.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/how-much-does-a-balloon-garland-cost-in-memphis",
+      "file": "faq/how-much-does-a-balloon-garland-cost-in-memphis.html",
+      "to": "/services/birthday-party-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/how-much-does-birthday-decoration-at-home-cost",
+      "file": "faq/how-much-does-birthday-decoration-at-home-cost.html",
+      "to": "/services/birthday-party-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/how-much-does-gender-reveal-decor-cost-in-memphis",
+      "file": "faq/how-much-does-gender-reveal-decor-cost-in-memphis.html",
+      "to": "/services/baby-shower-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/how-much-does-grazing-tables-cost",
+      "file": "faq/how-much-does-grazing-tables-cost.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/how-much-does-hotel-room-decor-cost-in-memphis",
+      "file": "faq/how-much-does-hotel-room-decor-cost-in-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis",
+      "file": "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
+      "to": "/services/christmas-porch-decorating",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/guides/baby-shower-planning-checklist-memphis",
+      "file": "guides/baby-shower-planning-checklist-memphis.html",
+      "to": "/services/birthday-party-planner-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/guides/bridal-shower-planning-checklist-memphis",
+      "file": "guides/bridal-shower-planning-checklist-memphis.html",
+      "to": "/services/birthday-party-planner-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise",
+      "file": "guides/how-to-decorate-a-hotel-room-for-a-romantic-surprise.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/guides/last-minute-birthday-setup-ideas-memphis",
+      "file": "guides/last-minute-birthday-setup-ideas-memphis.html",
+      "to": "/services/birthday-party-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/guides/porch-decorating-packages-memphis",
+      "file": "guides/porch-decorating-packages-memphis.html",
+      "to": "/services/porch-decorating",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/hubs/memphis-celebration-setups",
+      "file": "hubs/memphis-celebration-setups.html",
+      "to": "/services/celebration-setups-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/local/birthday-decorations-at-home-memphis",
+      "file": "local/birthday-decorations-at-home-memphis.html",
+      "to": "/services/birthday-party-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/local/grazing-tables-memphis",
+      "file": "local/grazing-tables-memphis.html",
+      "to": "/services/grazing-tables-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/local/hotel-room-decorations-memphis",
+      "file": "local/hotel-room-decorations-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/local/romantic-room-decorations-memphis",
+      "file": "local/romantic-room-decorations-memphis.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/seasonal/christmas-porch-decorating-memphis",
+      "file": "seasonal/christmas-porch-decorating-memphis.html",
+      "to": "/services/christmas-porch-decorating",
+      "coverage_state_25_oct": "Crawled - currently not indexed",
+      "impressions_28d": 0
+    },
+    {
+      "from": "/seasonal/halloween-porch-decorating-memphis",
+      "file": "seasonal/halloween-porch-decorating-memphis.html",
+      "to": "/services/fall-porch-decorating",
+      "coverage_state_25_oct": "URL is unknown to Google",
+      "impressions_28d": 0
+    }
+  ],
+  "retired_sections": [
+    {
+      "from": "/answers/",
+      "file": "answers/index.html",
+      "to": "/faq/",
+      "why": "Listed only folded answer pages."
+    },
+    {
+      "from": "/local/",
+      "file": "local/index.html",
+      "to": "/services/",
+      "why": "Listed only folded pages; an index needs at least four (build_section_indexes MIN_PAGES)."
+    },
+    {
+      "from": "/events/",
+      "file": "events/index.html",
+      "to": "/services/",
+      "why": "Listed only folded pages; an index needs at least four (build_section_indexes MIN_PAGES)."
+    }
+  ],
+  "excluded": [
+    {
+      "file": "request.html",
+      "why": "The only candidate with impressions (brief: exclude)."
+    },
+    {
+      "file": "accessibility.html",
+      "why": "Utility/legal page (brief: exclude)."
+    },
+    {
+      "file": "rules.html",
+      "why": "Utility/legal page (brief: exclude)."
+    },
+    {
+      "file": "sitemap.html",
+      "why": "Utility page (brief: exclude)."
+    },
+    {
+      "file": "rentals/giant-lawn-games-memphis.html",
+      "why": "Owner-approved focused landing page (21 Oct 2026, scripts/lib/focus_pages.js) for the fourth service; the ledger would fold it into a party-decor hub, which is the wrong service."
+    },
+    {
+      "files": [
+        "areas/arlington-tn-grazing-tables.html",
+        "areas/arlington-tn-party-decor.html",
+        "areas/arlington-tn-party-game-rentals.html",
+        "areas/arlington-tn-porch-decorating.html",
+        "areas/bartlett-tn-grazing-tables.html",
+        "areas/bartlett-tn-party-decor.html",
+        "areas/bartlett-tn-party-game-rentals.html",
+        "areas/bartlett-tn-porch-decorating.html",
+        "areas/collierville-tn-grazing-tables.html",
+        "areas/collierville-tn-party-decor.html",
+        "areas/collierville-tn-party-game-rentals.html",
+        "areas/collierville-tn-porch-decorating.html",
+        "areas/east-memphis-tn-porch-styling.html",
+        "areas/germantown-tn-grazing-tables.html",
+        "areas/germantown-tn-party-decor.html",
+        "areas/germantown-tn-party-game-rentals.html",
+        "areas/germantown-tn-porch-decorating.html",
+        "areas/lakeland-tn-grazing-tables.html",
+        "areas/lakeland-tn-party-decor.html",
+        "areas/lakeland-tn-party-game-rentals.html",
+        "areas/lakeland-tn-porch-decorating.html",
+        "areas/memphis-tn-grazing-tables.html",
+        "areas/memphis-tn-party-decor.html",
+        "areas/memphis-tn-party-game-rentals.html",
+        "areas/memphis-tn-porch-decorating.html",
+        "areas/olive-branch-ms-grazing-tables.html",
+        "areas/olive-branch-ms-party-decor.html",
+        "areas/olive-branch-ms-party-game-rentals.html",
+        "areas/olive-branch-ms-porch-decorating.html",
+        "areas/southaven-ms-grazing-tables.html",
+        "areas/southaven-ms-party-decor.html",
+        "areas/southaven-ms-party-game-rentals.html",
+        "areas/southaven-ms-porch-decorating.html"
+      ],
+      "why": "City x service and neighborhood/anchor coverage pages. The owner Search Readiness Checklist item j9 (25 Oct 2026) requires one per town and service, validate:place-pages and validate:area-pages hold them, and the Monday checklist run re-creates any that go missing (it added 32 on 26 Oct, #147). Folding them here would start a loop between two automated systems; they stay until j9 changes."
+    }
+  ]
+}

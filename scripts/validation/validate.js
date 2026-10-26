@@ -69,7 +69,19 @@ function fail(msg) {
   failed = true;
 }
 
+// A required answer page folded into its hub on 26 Oct 2026 (scripts/lib/hub_consolidation.js)
+// is still required - as content: the page must be gone (it 301s) and its hub must carry the
+// question it answered, at the anchor every old link now lands on.
+const HC = require('../lib/hub_consolidation');
 for (const rel of requiredFiles) {
+  if (HC.isRetiredFile(rel)) {
+    const t = HC.foldTarget(`/${rel}`);
+    const hubRel = `${t.to.replace(/^\//, '')}.html`;
+    if (fs.existsSync(path.join(root, rel))) fail(`${rel} was folded into ${t.to} but is still on disk`);
+    else if (!fs.existsSync(path.join(root, hubRel))) fail(`${rel} was folded into ${hubRel}, which is missing`);
+    else if (!fs.readFileSync(path.join(root, hubRel), 'utf8').includes(`id="${t.hash.slice(1)}"`)) fail(`${hubRel} does not carry ${t.hash}, where links to the folded ${rel} land`);
+    continue;
+  }
   if (!fs.existsSync(path.join(root, rel))) fail(`missing required file ${rel}`);
 }
 
@@ -209,7 +221,9 @@ if (!/<h2 id="privacy-choices">/.test(privacy) || !/Microsoft Clarity/.test(priv
 for (const rel of ['terms-and-conditions.html', 'privacy-policy.html']) if (!/Kerseta LLC \("Porch &amp; Party"\)<br>/.test(readRoot(rel)) || !readRoot(rel).includes('hello@porchandparty901.com')) fail(`${rel} contact block does not name Kerseta LLC with hello@porchandparty901.com`);
 if (!/WCAG\) 2\.1 at level AA/.test(readRoot('accessibility.html'))) fail('accessibility.html does not state the WCAG 2.1 AA target');
 const sitemapPage = readRoot('sitemap.html');
-for (const href of ['/services/', '/rentals/', '/pricing', '/faq/', '/how-it-works', '/contact', '/answers/', '/local/', '/areas/', '/events/', '/sitemap.xml']) if (!sitemapPage.includes(`href="${href}"`)) fail(`sitemap.html does not link ${href}`);
+for (const href of ['/services/', '/rentals/', '/pricing', '/faq/', '/how-it-works', '/contact', '/areas/', '/sitemap.xml']) if (!sitemapPage.includes(`href="${href}"`)) fail(`sitemap.html does not link ${href}`);
+// answers/, local/ and events/ were retired on 26 Oct 2026 and 301; the HTML sitemap must not list them.
+for (const href of ['/answers/', '/local/', '/events/']) if (sitemapPage.includes(`href="${href}"`)) fail(`sitemap.html still links ${href}, a retired section that 301s`);
 for (const rel of ['llms.txt', 'llms-full.txt', 'llms-entities.txt', 'llms-answers.txt', 'llms-services.txt', 'site.webmanifest']) if (/\binsured\b/i.test(readRoot(rel))) fail(`${rel} says "insured"; the business is not insured`);
 
 if (failed) process.exit(1);

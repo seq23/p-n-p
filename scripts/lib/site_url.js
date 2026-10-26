@@ -34,6 +34,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DOMAIN = 'https://porchandparty901.com';
+const { foldTarget } = require('./hub_consolidation');
 // The directory Cloudflare Pages serves. Everything here is Node built-ins, so
 // the module stays dependency-free.
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -119,6 +120,11 @@ function internalHref(href) {
   if (pathPart === '/index.html') pathPart = '/';
   else if (/\/index\.html$/.test(pathPart)) pathPart = pathPart.replace(/index\.html$/, '');
   else if (pathPart.endsWith('.html')) pathPart = pathPart.slice(0, -'.html'.length);
+  // A page folded into a hub (scripts/lib/hub_consolidation.js) 301s to that hub, so a link to
+  // it is a redirecting form like any other: it is rewritten to the hub, landing on the folded
+  // page's own question there (an old fragment named that page's markup, not the hub's).
+  const folded = foldTarget(pathPart);
+  if (folded) return `${prefix}${servedSlashForm(folded.to)}${query}${folded.hash || hash}`;
   pathPart = servedSlashForm(pathPart);
 
   return `${prefix}${pathPart}${query}${hash}`;

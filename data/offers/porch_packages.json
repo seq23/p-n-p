@@ -127,29 +127,30 @@
     "services/christmas-porch-decorating.html",
     "services/small-porch-decorating.html",
     "services/front-door-styling.html",
-    "pricing.html",
-    "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
-    "answers/how-much-does-porch-decorating-cost-in-memphis.html"
+    "pricing.html"
   ],
   "pagesWhy": "Every page that carries the full porch package grid + Offer schema (scripts/install_porch_packages.js stamps it; validate:porch-packages checks each one). New porch articles add their path here.",
   "provenance": "Owner, 18 Oct 2026: FINAL prices fall 350/550/750/1,200 and Christmas 450/750/1,050/1,600, seasonal, shown as from-prices. Full grid on website pages and articles (corrected ruling); the request form carries no tier prices, only the from-price + range lines; add-ons named, never priced; 10% off the Christmas package when fall and Christmas are booked together. Replaces the 17 Oct small stoop / standard porch / large porch tiers ($350/$600/$800).",
   "articles": [
     {
-      "path": "answers/how-much-does-porch-decorating-cost-in-memphis.html",
-      "title": "How much does porch decorating cost in Memphis?"
-    },
-    {
-      "path": "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
-      "title": "How much does professional Christmas decorating cost?"
-    },
-    {
-      "path": "guides/porch-decorating-packages-memphis.html",
-      "title": "Porch decorating packages: Stoop, Classic, Grand and Showstopper"
-    },
-    {
       "path": "guides/holiday-porch-decorating-service-memphis.html",
       "title": "Holiday porch decorating, fall to Christmas"
     }
   ],
+  "foldedArticles": [
+    {
+      "path": "answers/how-much-does-porch-decorating-cost-in-memphis.html",
+      "hub": "services/porch-decorating.html"
+    },
+    {
+      "path": "faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html",
+      "hub": "services/christmas-porch-decorating.html"
+    },
+    {
+      "path": "guides/porch-decorating-packages-memphis.html",
+      "hub": "services/porch-decorating.html"
+    }
+  ],
+  "foldedArticlesWhy": "Porch price articles folded into a porch hub on 26 Oct 2026 (data/search_intelligence/hub_consolidation.json). Each still counts as a checked article: validate:porch-packages holds that the file is gone, its URL resolves to the hub, and the hub carries the full grid (it is in pages).",
   "articlesWhy": "The porch price articles (owner-approved 18 Oct 2026). Each published one carries the full grid + Offer schema and is linked from every page in `pages`, every other published article and the FAQ porch section (scripts/install_porch_packages.js). An article not yet published waits in data/publish_queue/publish_queue.json and publishes one a week through scripts/authority_scale/publish_governed_queue.mjs, only while data/search_intelligence/target_query_set.json names its route with a measured number (cadence policy: measured_target_only). The Christmas cost article is the Christmas porch cost page; no second one is drafted."
 }

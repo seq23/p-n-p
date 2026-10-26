@@ -2,13 +2,46 @@
   "schema_version": "1.0",
   "purpose": "The pages that answer the measured-demand queries the owner prioritised on 2026-10-10. scripts/install_contact_surface.js links every one of them from the homepage and the contact page, and scripts/validators/validate_contact_surface.js fails if any is missing, unlinked from either page, or lacks the phone CTA.",
   "source": "data/demand/measured_demand.json (ACCEPTED records) plus the two hotel-room queries named by the owner, plus the party-planner family that Search Console shows impressions for (11 Sep-8 Oct 2026, data/search_intelligence/gsc_search_analytics_export.json)",
-  "link_from": ["index.html", "contact.html"],
+  "link_from": [
+    "index.html",
+    "contact.html"
+  ],
   "pages": [
-    { "query": "birthday party planner", "href": "/services/birthday-party-planner-memphis", "label": "Birthday party planner in Memphis" },
-    { "query": "hotel room decor cost Memphis", "href": "/faq/how-much-does-hotel-room-decor-cost-in-memphis", "label": "How much does hotel room decor cost in Memphis?" },
-    { "query": "birthday hotel room setup ideas", "href": "/answers/birthday-hotel-room-setup-ideas-memphis", "label": "Birthday hotel room setup ideas" },
-    { "query": "how much does a balloon garland cost", "href": "/faq/how-much-does-a-balloon-garland-cost-in-memphis", "label": "How much does a balloon garland cost?" },
-    { "query": "how much does professional christmas decorating cost", "href": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis", "label": "What professional Christmas decorating costs" },
-    { "query": "baby shower planning checklist", "href": "/guides/baby-shower-planning-checklist-memphis", "label": "Baby shower planning checklist" }
-  ]
+    {
+      "query": "birthday party planner",
+      "href": "/services/birthday-party-planner-memphis",
+      "label": "Birthday party planner in Memphis"
+    },
+    {
+      "query": "hotel room decor cost Memphis",
+      "href": "/services/hotel-room-decor-memphis#how-much-does-hotel-room-decor-cost-in-memphis",
+      "label": "How much does hotel room decor cost in Memphis?",
+      "folded_from": "/faq/how-much-does-hotel-room-decor-cost-in-memphis"
+    },
+    {
+      "query": "birthday hotel room setup ideas",
+      "href": "/services/hotel-room-decor-memphis#birthday-hotel-room-setup-ideas-memphis",
+      "label": "Birthday hotel room setup ideas",
+      "folded_from": "/answers/birthday-hotel-room-setup-ideas-memphis"
+    },
+    {
+      "query": "how much does a balloon garland cost",
+      "href": "/services/birthday-party-decor-memphis#how-much-does-a-balloon-garland-cost-in-memphis",
+      "label": "How much does a balloon garland cost?",
+      "folded_from": "/faq/how-much-does-a-balloon-garland-cost-in-memphis"
+    },
+    {
+      "query": "how much does professional christmas decorating cost",
+      "href": "/services/christmas-porch-decorating#how-much-does-professional-christmas-decorating-cost-in-memphis",
+      "label": "What professional Christmas decorating costs",
+      "folded_from": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis"
+    },
+    {
+      "query": "baby shower planning checklist",
+      "href": "/services/birthday-party-planner-memphis#baby-shower-planning-checklist-memphis",
+      "label": "Baby shower planning checklist",
+      "folded_from": "/guides/baby-shower-planning-checklist-memphis"
+    }
+  ],
+  "folded_note": "On 26 Oct 2026 five of these pages were folded into their service hubs (data/search_intelligence/hub_consolidation.json). Each href now lands on the question it answered, inside the hub; folded_from records the old URL, which 301s there."
 }

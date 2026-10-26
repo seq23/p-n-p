@@ -25,7 +25,10 @@ const heldBack = (entry) => {
   const item = priorStatus.get(`${entry.folder}/${entry.slug}`);
   return Boolean(item && item.status !== 'published');
 };
-const publishable = entries.filter(entry => !heldBack(entry));
+// A page folded into a hub (scripts/lib/hub_consolidation.js, 26 Oct 2026) 301s to that hub;
+// rendering it again would publish a page the redirect hides and the guard refuses.
+const HC = require('../lib/hub_consolidation');
+const publishable = entries.filter(entry => !heldBack(entry) && !HC.isRetiredFile(`${entry.folder}/${entry.slug}.html`));
 const selected = publishable.filter(entry => filterFolder === 'all' || entry.folder === filterFolder);
 
 /**

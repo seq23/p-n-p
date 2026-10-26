@@ -111,6 +111,20 @@ function ownedSpan(html, slug) {
   return null;
 }
 
+/**
+ * Tables whose comparison page was folded into a hub: { slug, hubRel }. The slug is the folded
+ * page's basename (answers/ and comparisons/ copies of one comparison share it and one hub).
+ */
+function foldedComparisons(tables) {
+  const HC = require('./lib/hub_consolidation');
+  const out = new Map();
+  for (const f of HC.load().plan.folds || []) {
+    const slug = path.basename(f.file, '.html');
+    if (tables[slug] && !out.has(slug)) out.set(slug, { slug, hubRel: `${f.to.replace(/^\//, '')}.html` });
+  }
+  return [...out.values()];
+}
+
 /** Every published page, from the sitemap, as { rel, slug, html }. */
 function publishedPages() {
   const sitemap = path.join(ROOT, 'sitemap.xml');
@@ -171,10 +185,32 @@ function run() {
     stamped.push(p.rel);
   }
 
+  // A comparison page folded into a service hub on 26 Oct 2026 (scripts/lib/hub_consolidation.js)
+  // keeps its table: the hub carries it now, stamped and checked exactly as the page was.
+  let folded = 0;
+  for (const { slug, hubRel } of foldedComparisons(tables)) {
+    if (used.has(slug)) continue;
+    const hub = pages.find((p) => p.rel === hubRel);
+    if (!hub) { errors.push(`${slug}: folded into ${hubRel}, which is not a published page`); continue; }
+    const section = tableSection(slug, tables[slug]);
+    let html = hub.html;
+    const span = ownedSpan(html, slug);
+    if (span) html = html.slice(0, span.start) + section + html.slice(span.end);
+    else {
+      const anchor = ANCHORS.find((a) => html.includes(a));
+      if (!anchor) { errors.push(`${hubRel}: none of the insertion anchors is present for the folded "${slug}" table`); continue; }
+      html = html.replace(anchor, `${section}${anchor}`);
+    }
+    if (html !== hub.html) { fs.writeFileSync(path.join(ROOT, hubRel), html); hub.html = html; }
+    used.add(slug);
+    stamped.push(`${hubRel} (${slug}, folded)`);
+    folded += 1;
+  }
+
   for (const slug of Object.keys(tables)) {
     if (!used.has(slug)) errors.push(`data/content/comparison_tables.json has a table for "${slug}", which no published comparison page uses`);
   }
-  if (!comparisons) errors.push('zero published comparison pages found; the title test is broken, not the site.');
+  if (!comparisons && !folded) errors.push('zero published comparison pages found; the title test is broken, not the site.');
   if (!stamped.length && !already.length) errors.push('nothing stamped and nothing already in place: this pass did nothing.');
 
   if (errors.length) {
@@ -186,5 +222,5 @@ function run() {
     + `${comparisons} published comparison page(s) in all`);
 }
 
-module.exports = { tableSection, ownedSpan, IS_COMPARISON, titleOf, hasTable, publishedPages, DATA };
+module.exports = { tableSection, ownedSpan, IS_COMPARISON, titleOf, hasTable, publishedPages, foldedComparisons, DATA };
 if (require.main === module) run();

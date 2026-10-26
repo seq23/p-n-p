@@ -17,7 +17,12 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const SP = require(path.join(ROOT, 'scripts/lib/service_pages.js'));
 
-const PAGES = ['services/baby-shower-decor-memphis.html', 'answers/baby-shower-decorations-memphis.html', 'events/baby-shower-decorations-memphis.html'];
+// The answers/ and events/ baby shower pages were folded into the baby shower hub on 26 Oct 2026
+// (scripts/lib/hub_consolidation.js); the hub is the one baby shower page left, and it keeps the pair.
+const HC = require('./lib/hub_consolidation');
+const PAGES = ['services/baby-shower-decor-memphis.html', 'answers/baby-shower-decorations-memphis.html', 'events/baby-shower-decorations-memphis.html']
+  .filter((rel) => !HC.isRetiredFile(rel));
+if (!PAGES.length) throw new Error('install_owner_photos: zero baby shower pages left to carry the owner photos');
 const KEY = 'baby-shower';
 const BLOCK_RE = /<!--owner-photos-->[\s\S]*?<!--\/owner-photos-->/;
 const RELATED_RE = /<section[^>]+data-nav="related-pages"/;

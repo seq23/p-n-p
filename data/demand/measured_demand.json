@@ -95,7 +95,8 @@
         "pay someone to decorate my house for christmas",
         "can you hire someone to decorate your house for christmas"
       ],
-      "covered_by": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html"
+      "covered_by": "/services/christmas-porch-decorating.html",
+      "folded_from": "/faq/how-much-does-professional-christmas-decorating-cost-in-memphis.html"
     },
     {
       "query": "how much does a balloon garland cost",
@@ -116,7 +117,8 @@
         "how much balloon garland cost",
         "how much is a balloon garland set up"
       ],
-      "covered_by": "/faq/how-much-does-a-balloon-garland-cost-in-memphis.html"
+      "covered_by": "/services/birthday-party-decor-memphis.html",
+      "folded_from": "/faq/how-much-does-a-balloon-garland-cost-in-memphis.html"
     },
     {
       "query": "baby shower planning checklist",
@@ -143,7 +145,8 @@
         "how to plan a baby shower step by step",
         "how to start planning a baby shower"
       ],
-      "covered_by": "/guides/baby-shower-planning-checklist-memphis.html"
+      "covered_by": "/services/birthday-party-planner-memphis.html",
+      "folded_from": "/guides/baby-shower-planning-checklist-memphis.html"
     }
   ],
   "disposition_policy": "A record with disposition REJECTED_WRONG_BUSINESS is evidence of what NOT to build. It stays in the file so the same wrong mapping cannot be re-imported and re-proposed, and validate:demand-backed-pages must not report it as an uncovered gap.",
@@ -194,8 +197,9 @@
         "how much does a grazing table for 50 people cost"
       ],
       "build": {
-        "covered_by": "/answers/how-much-does-a-grazing-table-cost-in-memphis.html",
-        "why": "Answered by the grazing table cost page. Porch & Party prices grazing styling per table ($250+, food extra), not per head, so a per-person page would state a price structure the business does not use."
+        "covered_by": "/services/grazing-tables-memphis.html",
+        "why": "Folded on 26 Oct 2026 from /answers/how-much-does-a-grazing-table-cost-in-memphis into this hub (data/search_intelligence/hub_consolidation.json): the hub now carries that page's question and answer at #how-much-does-a-grazing-table-cost-in-memphis.",
+        "folded_from": "/answers/how-much-does-a-grazing-table-cost-in-memphis.html"
       }
     },
     {
@@ -214,8 +218,9 @@
         "how much does event decor cost"
       ],
       "build": {
-        "covered_by": "/answers/how-much-does-party-decor-cost-in-memphis.html",
-        "why": "Same intent as the existing party decor cost answer, which carries the published $300+ starting price."
+        "covered_by": "/services/celebration-setups-memphis.html",
+        "why": "Folded on 26 Oct 2026 from /answers/how-much-does-party-decor-cost-in-memphis into this hub (data/search_intelligence/hub_consolidation.json): the hub now carries that page's question and answer at #how-much-does-party-decor-cost-in-memphis.",
+        "folded_from": "/answers/how-much-does-party-decor-cost-in-memphis.html"
       }
     },
     {
@@ -233,7 +238,9 @@
         "bridal shower party planning checklist"
       ],
       "build": {
-        "page": "guides/bridal-shower-planning-checklist-memphis"
+        "covered_by": "/services/birthday-party-planner-memphis.html",
+        "why": "Folded on 26 Oct 2026 from /guides/bridal-shower-planning-checklist-memphis into this hub (data/search_intelligence/hub_consolidation.json): the hub now carries that page's question and answer at #bridal-shower-planning-checklist-memphis.",
+        "folded_from": "/guides/bridal-shower-planning-checklist-memphis.html"
       }
     },
     {
@@ -250,7 +257,9 @@
         "grazing vs charcuterie"
       ],
       "build": {
-        "page": "comparisons/grazing-table-vs-charcuterie-board"
+        "covered_by": "/services/grazing-tables-memphis.html",
+        "why": "Folded on 26 Oct 2026 from /comparisons/grazing-table-vs-charcuterie-board into this hub (data/search_intelligence/hub_consolidation.json): the hub now carries that page's question and answer at #grazing-table-vs-charcuterie-board.",
+        "folded_from": "/comparisons/grazing-table-vs-charcuterie-board.html"
       }
     },
     {
@@ -265,8 +274,9 @@
         "christmas lighting memphis"
       ],
       "build": {
-        "covered_by": "/seasonal/christmas-porch-decorating-memphis.html",
-        "why": "Porch & Party's Christmas service is porch and entry styling; the Memphis Christmas porch page is the intent-matched URL. Roofline lighting is not a service it sells."
+        "covered_by": "/services/christmas-porch-decorating.html",
+        "why": "Folded on 26 Oct 2026 from /seasonal/christmas-porch-decorating-memphis into this hub (data/search_intelligence/hub_consolidation.json): the hub now carries that page's question and answer at #christmas-porch-decorating-memphis.",
+        "folded_from": "/seasonal/christmas-porch-decorating-memphis.html"
       }
     },
     {
@@ -295,7 +305,9 @@
       "source_url": "https://www.revealtogether.com/blog/gender-reveal-party-cost-budget-guide",
       "note": "Query coverage review 2026-09-25: real phrasing, no page on porchandparty901.com (checked against the live sitemap, 112 URLs). Both occasions fall under the existing party-decor service (birthdays, showers, home celebrations, small events).",
       "build": {
-        "page": "faq/how-much-does-gender-reveal-decor-cost-in-memphis"
+        "covered_by": "/services/baby-shower-decor-memphis.html",
+        "why": "Folded on 26 Oct 2026 from /faq/how-much-does-gender-reveal-decor-cost-in-memphis into this hub (data/search_intelligence/hub_consolidation.json): the hub now carries that page's question and answer at #how-much-does-gender-reveal-decor-cost-in-memphis.",
+        "folded_from": "/faq/how-much-does-gender-reveal-decor-cost-in-memphis.html"
       }
     },
     {
@@ -321,7 +333,9 @@
       "observed_at": "2026-10-18",
       "measured_by": "DataForSEO, US, measured 18 Oct 2026 (owner-approved JOB D brief, ~/porch-and-party/admin-next-jobs-brief.md)",
       "build": {
-        "page": "guides/porch-decorating-packages-memphis"
+        "covered_by": "/services/porch-decorating.html",
+        "why": "Folded on 26 Oct 2026 from /guides/porch-decorating-packages-memphis into this hub (data/search_intelligence/hub_consolidation.json): the hub now carries that page's question and answer at #porch-decorating-packages-memphis.",
+        "folded_from": "/guides/porch-decorating-packages-memphis.html"
       }
     },
     {

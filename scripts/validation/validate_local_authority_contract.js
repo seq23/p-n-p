@@ -41,6 +41,7 @@ for (const [key, rel] of Object.entries(sources)) {
   if (!exists(rel)) fail(`source_of_truth.${key} points to missing file ${rel}`);
 }
 
+const HC = require('../lib/hub_consolidation');
 const queryUniverse = asArray(readJson('data/queries/query_universe.json'), 'query universe');
 const queue = asArray(readJson('data/publish_queue/publish_queue.json'), 'publish queue');
 const manifest = asArray(readJson('data/published_manifest/published_manifest.json'), 'published manifest');
@@ -71,6 +72,15 @@ for (const item of queue) {
     if (!manifestKeys.has(`${item.folder}/${item.slug}`)) fail(`published queue item missing from manifest: ${item.folder}/${item.slug}`);
     if (!exists(htmlPath)) fail(`published queue item missing HTML: ${htmlPath}`);
   }
+  // Folded into a service hub (26 Oct 2026, scripts/lib/hub_consolidation.js): the page must be
+  // gone, the plan must name it, and its folded_into must be the hub the plan sends it to.
+  if (item.status === 'folded') {
+    const target = HC.foldTarget(`/${item.folder}/${item.slug}`);
+    if (!target) fail(`queue item ${item.folder}/${item.slug} is folded but data/search_intelligence/hub_consolidation.json does not fold it`);
+    else if (item.folded_into !== target.to) fail(`queue item ${item.folder}/${item.slug} says folded_into ${item.folded_into}, the plan says ${target.to}`);
+    if (exists(htmlPath)) fail(`folded queue item still has HTML: ${htmlPath}`);
+    if (manifestKeys.has(`${item.folder}/${item.slug}`)) fail(`folded queue item still in the published manifest: ${item.folder}/${item.slug}`);
+  } else if (HC.isRetiredFile(htmlPath)) fail(`queue item ${item.folder}/${item.slug} is ${item.status} but was folded into a hub; mark it folded`);
 }
 
 for (const item of manifest) {

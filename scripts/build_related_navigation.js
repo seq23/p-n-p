@@ -260,10 +260,16 @@ const rank = (dir) => {
  * same subject written at a different depth, which is how answers/, local/ and
  * services/ already mirror each other. After that, the rest of the territory.
  */
+const QUOTE_PAGES = new Set(['contact.html', 'request.html']);
+
 function relatedTo(page) {
   if (page.slug === 'index') return [];
   const shared = (other) => other.territories.filter((t) => page.territories.includes(t)).length;
-  const pool = pages.filter((o) => o.rel !== page.rel && o.slug !== 'index' && shared(o) > 0);
+  // The quote form pages are never a "related page": a link to them is a quote CTA, which the
+  // contact surface owns and sends to /request (owner ruling 2026-10-15). They only stayed out of
+  // these lists while 73 thin pages filled every slot; after the 26 Oct 2026 hub consolidation
+  // /contact surfaced here as "Tell Porch & Party what you're planning." on 42 pages.
+  const pool = pages.filter((o) => o.rel !== page.rel && o.slug !== 'index' && !QUOTE_PAGES.has(o.rel) && shared(o) > 0);
   const sameSubject = pool.filter((o) => o.slug === page.slug);
   const rest = pool.filter((o) => o.slug !== page.slug)
     .sort((a, b) => (shared(b) - shared(a))
@@ -287,10 +293,12 @@ function structureFor(page) {
   // the site's own entry points, and specifically the ones the header nav and
   // the footer "Explore" list do not already carry. Repeating the three service
   // links that are already in the header would look like nine links and be two.
-  const wanted = ['services/index.html', 'answers/index.html', 'areas/index.html',
-    'local/index.html', 'events/index.html', 'faq/index.html',
-    'hubs/memphis-celebration-setups.html', 'authority/event-decorator-memphis.html',
-    'authority/party-planner-memphis.html'];
+  // answers/, local/, events/, the celebration hub and the two authority pages were folded into
+  // the service hubs on 26 Oct 2026 (scripts/lib/hub_consolidation.js); their places go to the
+  // hubs that hold that content now.
+  const wanted = ['services/index.html', 'areas/index.html', 'faq/index.html', 'rentals/index.html',
+    'services/celebration-setups-memphis.html', 'services/birthday-party-planner-memphis.html',
+    'services/grazing-tables-memphis.html', 'services/hotel-room-decor-memphis.html'];
   return wanted.map((rel) => byRel.get(rel)).filter((p) => p && p.rel !== page.rel);
 }
 
