@@ -29,7 +29,11 @@ const CHAIN = [
   'scripts/install_site_icons.js',
   'scripts/install_contact_surface.js',
   'scripts/install_site_chrome.js',
-  'scripts/normalize_public_urls.js'
+  'scripts/normalize_public_urls.js',
+  // The last two passes in build:all (added 2026-10-25 for her Search Readiness
+  // Checklist items b6 and d4).
+  'scripts/install_social_tags.js',
+  'scripts/install_page_dates.js'
 ];
 const MARKER = 'data-nav="related-pages"';
 const SKIP = new Set(['node_modules', '.git', '.pages-output', '.wrangler', '.claude', '.build']);

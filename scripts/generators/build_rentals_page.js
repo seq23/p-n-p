@@ -327,6 +327,25 @@ function finalHtml(before) {
   const RELATED = /<section[^>]+data-nav="related-pages"[\s\S]*?<\/section>/i;
   const related = before && before.match(RELATED);
   if (related) html = html.replace('</main>', () => `${related[0]}</main>`);
+  // And for the two passes added 2026-10-25 for her Search Readiness Checklist
+  // items b6 and d4: the social-card tags (scripts/install_social_tags.js, which
+  // measures the og:image from the file) and the visible published/updated line
+  // (scripts/install_page_dates.js). Both run last in build:all and export
+  // nothing, so like Clarity's loader they are carried over rather than dropped.
+  const SOCIAL = /<meta property="og:(?:site_name|image:width|image:height)" content="[^"]*" \/>/g;
+  const social = ((before && before.match(SOCIAL)) || []).filter((tag) => !html.includes(tag));
+  if (social.length) html = html.replace(/(<meta\b[^>]*\bproperty="og:image"[^>]*>)/i, `$1\n${social.join('\n')}`);
+  const DATES = /<p class="page-dates" data-page-dates>[\s\S]*?<\/p>/;
+  const dates = before && before.match(DATES);
+  if (dates && !DATES.test(html)) {
+    const h1 = /<h1[^>]*>[\s\S]*?<\/h1>/i.exec(html);
+    if (h1) {
+      const afterH1 = h1.index + h1[0].length;
+      const lead = /^\s*<p[^>]*>[\s\S]*?<\/p>/i.exec(html.slice(afterH1));
+      const at = afterH1 + (lead ? lead[0].length : 0);
+      html = html.slice(0, at) + dates[0] + html.slice(at);
+    }
+  }
   return html;
 }
 

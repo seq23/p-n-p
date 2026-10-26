@@ -106,6 +106,20 @@ function finalHtml(p, before) {
   const RELATED = /<section[^>]+data-nav="related-pages"[\s\S]*?<\/section>/i;
   const related = before && before.match(RELATED);
   if (related) html = html.replace('</main>', () => `${related[0]}</main>`);
+  // Same carry-over as the Clarity loader and the related-pages block, for the two
+  // passes that run after every generator in build:all: the social-card tags
+  // (scripts/install_social_tags.js: og:site_name and the og:image size measured
+  // from the file) and the visible published/updated line
+  // (scripts/install_page_dates.js). Without this, re-rendering a focused page
+  // stripped both and validate:service-pages' "equals a fresh run" check failed
+  // against the committed file every time.
+  const SOCIAL = /<meta property="og:(?:site_name|image:width|image:height)" content="[^"]*" \/>/g;
+  // One insert, keeping the order the tags were in, so a re-render is byte-identical.
+  const social = ((before && before.match(SOCIAL)) || []).filter((tag) => !html.includes(tag));
+  if (social.length) html = html.replace(/(<meta\b[^>]*\bproperty="og:image"[^>]*>)/i, `$1\n${social.join('\n')}`);
+  const DATES = /<p class="page-dates" data-page-dates>[\s\S]*?<\/p>/;
+  const dates = before && before.match(DATES);
+  if (dates && !DATES.test(html)) html = html.replace(/<\/h1>/i, () => `</h1>${dates[0]}`);
   return html;
 }
 
