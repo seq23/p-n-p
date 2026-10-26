@@ -1,0 +1,20 @@
+{
+  "_why": "Memphis NEIGHBORHOODS and local ANCHORS, the two coverage shapes the city x service generator cannot express. The owner's Search Readiness Checklist (item j9, 25 Oct 2026) holds a hyperlocal site to its own coverage manifest - every town, neighborhood and anchor on the list has its page - and on 2026-10-26 it reported 32 of 64 missing: 20 service x town (fixed by adding the five towns to areas.json) and these 12. A neighborhood is a part of Memphis, not a city, so it has no county, no state line and no travel question of its own; an anchor is a hotel, where the service is a room setup for a guest. Slugs and URL shapes here are exactly the ones the manifest expects (/areas/{slug}-party-decor and /areas/{slug}-hotel-room-decor), so the audit's expansion and this file cannot disagree.",
+  "_rules": "Only what is on record: the neighborhood's own position in Memphis, and for an anchor the hotel's name and that it is in Memphis. NO claim of partnership, affiliation, approval or preferred-vendor status with any hotel - none exists - and every anchor page says so in its own words and answers the permission question honestly. No prices typed here: they come from data/offers/services.json. No reviews, counts, ratings or \"insured\" claims.",
+  "neighborhoods": [
+    { "slug": "east-memphis-tn", "name": "East Memphis", "where": "the established residential side of Memphis east of midtown, around Poplar Avenue" },
+    { "slug": "midtown-memphis-tn", "name": "Midtown", "where": "the older central neighbourhoods of Memphis around Overton Park and Cooper Street" },
+    { "slug": "downtown-memphis-tn", "name": "Downtown", "where": "the riverfront core of Memphis, where most of the city's hotels are" },
+    { "slug": "cooper-young-memphis-tn", "name": "Cooper-Young", "where": "the historic district around the Cooper Street and Young Avenue corner in midtown Memphis" },
+    { "slug": "whitehaven-memphis-tn", "name": "Whitehaven", "where": "south Memphis, the neighbourhood around Graceland and Elvis Presley Boulevard" },
+    { "slug": "raleigh-memphis-tn", "name": "Raleigh", "where": "north Memphis, inside the loop off Austin Peay Highway" }
+  ],
+  "anchors": [
+    { "slug": "the-peabody-memphis", "name": "The Peabody Memphis", "type": "hotel", "where": "downtown Memphis on Union Avenue" },
+    { "slug": "guest-house-at-graceland", "name": "The Guest House at Graceland", "type": "hotel", "where": "south Memphis, beside Graceland" },
+    { "slug": "the-central-station-memphis", "name": "The Central Station Memphis", "type": "hotel", "where": "the South Main district of downtown Memphis" },
+    { "slug": "hu-hotel-memphis", "name": "Hu. Hotel", "type": "hotel", "where": "downtown Memphis on Main Street, by the Court Square trolley stop" },
+    { "slug": "westin-memphis-beale-street", "name": "The Westin Memphis Beale Street", "type": "hotel", "where": "downtown Memphis by Beale Street and FedExForum" },
+    { "slug": "the-madison-hotel-memphis", "name": "The Madison Hotel", "type": "hotel", "where": "downtown Memphis on Madison Avenue" }
+  ]
+}

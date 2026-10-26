@@ -44,7 +44,7 @@ const cityList = `${CITIES.slice(0, -1).join(', ')}, and ${CITIES[CITIES.length 
 const PICKUP = games.pickup.place;
 
 const HOME = Object.freeze({
-  title: 'Memphis Porch Decorating, Party Planning, Grazing Tables & Game Rentals | Porch & Party',
+  title: 'Memphis Porch Decor, Party Decor & Grazing Tables | Porch & Party',
   description: `Memphis porch decorating from $${PRICES.porch}, party planning & decor, grazing tables, and party game rentals at $${PRICES.gameDay} a game per day, for homes and hotels.`,
   socialTitle: `Porch & Party · ${SERVICE_SENTENCE}`,
   h1: SERVICE_SENTENCE.replace(/\.$/, ' for homes, hotels and porches.'),

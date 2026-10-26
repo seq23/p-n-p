@@ -122,6 +122,61 @@
       "where": "the DeSoto County city southeast of Memphis, across the Mississippi state line",
       "pickupNote": "Mt. Moriah Station is north of Olive Branch, across the state line in Memphis.",
       "localPages": []
+    },
+    {
+      "area": "Cordova, TN",
+      "slug": "cordova-tn",
+      "name": "Cordova",
+      "state": "TN",
+      "stateName": "Tennessee",
+      "county": "Shelby County",
+      "where": "the Shelby County community east of downtown Memphis, largely inside the city limits",
+      "pickupNote": "Mt. Moriah Station is southwest of Cordova, in Memphis.",
+      "localPages": []
+    },
+    {
+      "area": "Millington, TN",
+      "slug": "millington-tn",
+      "name": "Millington",
+      "state": "TN",
+      "stateName": "Tennessee",
+      "county": "Shelby County",
+      "where": "the Shelby County city north of Memphis",
+      "pickupNote": "Mt. Moriah Station is south of Millington, in Memphis.",
+      "localPages": []
+    },
+    {
+      "area": "Oakland, TN",
+      "slug": "oakland-tn",
+      "name": "Oakland",
+      "state": "TN",
+      "stateName": "Tennessee",
+      "county": "Fayette County",
+      "where": "the Fayette County town east of Shelby County, past Collierville and Arlington",
+      "pickupNote": "Mt. Moriah Station is west of Oakland, in Memphis.",
+      "localPages": []
+    },
+    {
+      "area": "Horn Lake, MS",
+      "slug": "horn-lake-ms",
+      "name": "Horn Lake",
+      "state": "MS",
+      "stateName": "Mississippi",
+      "county": "DeSoto County",
+      "where": "the DeSoto County city southwest of Memphis, across the Mississippi state line",
+      "pickupNote": "Mt. Moriah Station is northeast of Horn Lake, across the state line in Memphis.",
+      "localPages": []
+    },
+    {
+      "area": "Hernando, MS",
+      "slug": "hernando-ms",
+      "name": "Hernando",
+      "state": "MS",
+      "stateName": "Mississippi",
+      "county": "DeSoto County",
+      "where": "the DeSoto County seat south of Southaven, across the Mississippi state line",
+      "pickupNote": "Mt. Moriah Station is north of Hernando, across the state line in Memphis.",
+      "localPages": []
     }
   ]
 }
