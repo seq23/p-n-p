@@ -34,7 +34,7 @@
  * The deployed state can lag a push by a minute or two, so each request is
  * retried (RETRIES x RETRY_DELAY_MS) before it is called a failure.
  *
- * Usage: node scripts/ops/post_deploy_live_check.mjs [--host porchandparty901.com] [--sample 12]
+ * Usage: node scripts/ops/post_deploy_live_check.mjs [--host porchandparty901.com] [--sample 12] [--wait-for-deploy 900]
  * Exits 0 when everything answered, 1 naming every URL that did not.
  */
 import fs from 'node:fs';
@@ -111,6 +111,34 @@ for (const loc of committedLocs) {
 }
 
 console.log(`post-deploy live check: ${BASE} (${committedLocs.length} committed URLs, ${ogImages.size} og:images, sample ${SAMPLE})`);
+
+// --- 0. wait for THIS commit to be the one the edge serves ------------------
+//
+// On a push the workflow used to sleep a fixed 90 s and compare. Pages does not always finish
+// in 90 s, and an old deploy answers every URL with a 200, so the per-request retries above never
+// fire: on 26 Oct 2026 (#149, 76 URLs folded into hubs) the check compared the commit against the
+// previous deploy and reported 81 "failures" that a rerun two minutes later passed. So, with
+// --wait-for-deploy <seconds>, poll until the live sitemap.xml and llms.txt are byte-identical
+// to the committed ones before comparing anything, and fail by name if they never are.
+const WAIT_S = Number(arg('wait-for-deploy', '0'));
+if (WAIT_S > 0) {
+  const committedLlms = read('llms.txt');
+  const started = Date.now();
+  let served = false;
+  for (;;) {
+    try {
+      const [sm, ll] = await Promise.all([`${BASE}/sitemap.xml`, `${BASE}/llms.txt`].map((u) => fetch(`${u}?live-check=${Date.now()}`, { headers: { 'user-agent': UA } }).then((r) => r.text())));
+      if (sm === committedSitemap && ll === committedLlms) { served = true; break; }
+    } catch { /* not up yet; keep waiting */ }
+    if (Date.now() - started > WAIT_S * 1000) break;
+    await sleep(15_000);
+  }
+  if (!served) {
+    console.error(`POST-DEPLOY LIVE CHECK FAILED: after ${WAIT_S}s ${BASE} still does not serve this commit's sitemap.xml and llms.txt - the Pages deploy of this push never reached the edge (or failed). Check the Cloudflare Pages build for this commit.`);
+    process.exit(1);
+  }
+  console.log(`deploy of this commit is live (sitemap.xml and llms.txt match) after ${Math.round((Date.now() - started) / 1000)}s`);
+}
 
 // --- 1. robots.txt ----------------------------------------------------------
 
