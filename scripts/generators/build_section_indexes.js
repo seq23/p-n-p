@@ -230,7 +230,7 @@ const SECTIONS = [
     eyebrow: 'Occasions',
     crumb: 'Events',
     h1: 'Porch &amp; Party decor by occasion',
-    title: 'Decor by Occasion in Memphis | Showers &amp; Proposals | Porch &amp; Party',
+    title: 'Memphis Decor by Occasion | Showers &amp; Proposals | Porch &amp; Party',
     description: 'Porch & Party occasion pages for baby showers, bridal showers, proposal room setups, and anniversary room decorations in the Memphis metro area.',
     lead: 'Some setups are defined by the occasion rather than the room. These pages cover the four occasions Porch &amp; Party is asked for most - baby showers, bridal showers, proposals, and anniversaries - and what changes about the styling for each one.',
     summary: 'Start from the occasion when the event is the fixed part and the venue is not. Celebration setups start at $300+ regardless of occasion; the occasion drives the styling direction, not the floor price.',

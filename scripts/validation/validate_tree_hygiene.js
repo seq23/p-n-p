@@ -25,6 +25,7 @@ const allowedRootFiles = new Set([
   'apple-touch-icon.png',
   'favicon.ico',
   'site.webmanifest',
+  'about.html',
   'accessibility.html',
   'contact.html',
   'request.html',

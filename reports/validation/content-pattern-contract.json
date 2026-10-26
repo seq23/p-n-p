@@ -2,9 +2,9 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-10-25T18:17:11.032Z",
+  "generated_at": "2026-10-26T03:48:10.120Z",
   "enforcement": "block",
-  "pages_checked": 134,
+  "pages_checked": 135,
   "status": "PASS",
   "blocking_failures": 0,
   "summary": [
@@ -47,7 +47,7 @@
       "id": "comparison_table",
       "blocking": false,
       "pages_missing": 113,
-      "coverage_pct": 15.7,
+      "coverage_pct": 16.3,
       "why": "no comparison or cost table (agent request #2, 529 occurrences)"
     },
     {
@@ -67,8 +67,8 @@
     {
       "id": "faq",
       "blocking": false,
-      "pages_missing": 0,
-      "coverage_pct": 100,
+      "pages_missing": 1,
+      "coverage_pct": 99.3,
       "why": "no FAQ block or FAQPage schema (agent request #9)"
     },
     {
@@ -81,21 +81,21 @@
     {
       "id": "recommendation_summary",
       "blocking": false,
-      "pages_missing": 25,
-      "coverage_pct": 81.3,
+      "pages_missing": 26,
+      "coverage_pct": 80.7,
       "why": "no recommendation summary - asked for on 913 of 913 agent recommendations, the single most requested block"
     },
     {
       "id": "definition_callout",
       "blocking": false,
-      "pages_missing": 127,
+      "pages_missing": 128,
       "coverage_pct": 5.2,
       "why": "no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\""
     },
     {
       "id": "trust_block",
       "blocking": false,
-      "pages_missing": 127,
+      "pages_missing": 128,
       "coverage_pct": 5.2,
       "why": "no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor"
     },
@@ -110,7 +110,7 @@
       "id": "protocol",
       "blocking": false,
       "pages_missing": 128,
-      "coverage_pct": 4.5,
+      "coverage_pct": 5.2,
       "why": "no ordered protocol - ordered steps are what gets lifted for \"how do I\""
     },
     {
@@ -123,13 +123,13 @@
     {
       "id": "prompt_template",
       "blocking": false,
-      "pages_missing": 134,
+      "pages_missing": 135,
       "coverage_pct": 0,
       "why": "no copy-ready prompt - the artifact this audience actually reuses"
     }
   ],
   "spec_producer_parity": {
-    "generator_sources_scanned": 108,
+    "generator_sources_scanned": 112,
     "blocks_in_spec": 10,
     "blocks_required_of_this_repo": 9,
     "orphan_blocks": [],
@@ -209,9 +209,12 @@
     ],
     "concrete_numbers": [],
     "named_sources": [],
-    "faq": [],
+    "faq": [
+      "about.html"
+    ],
     "structured_data": [],
     "recommendation_summary": [
+      "about.html",
       "areas/arlington-tn-grazing-tables.html",
       "areas/arlington-tn-party-game-rentals.html",
       "areas/bartlett-tn-grazing-tables.html",
@@ -235,10 +238,10 @@
       "index.html",
       "pricing.html",
       "rentals/giant-lawn-games-memphis.html",
-      "rentals/index.html",
-      "services/hotel-room-decor-memphis.html"
+      "rentals/index.html"
     ],
     "definition_callout": [
+      "about.html",
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
       "answers/balloon-garland-vs-full-birthday-setup.html",
@@ -262,10 +265,10 @@
       "answers/hotel-room-decorations-memphis.html",
       "answers/how-far-in-advance-should-i-book-party-decor.html",
       "answers/how-long-does-it-take-to-set-up-party-decor.html",
-      "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
-      "answers/how-much-does-birthday-decoration-at-home-cost.html"
+      "answers/how-much-does-a-grazing-table-cost-in-memphis.html"
     ],
     "trust_block": [
+      "about.html",
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
       "answers/balloon-garland-vs-full-birthday-setup.html",
@@ -289,8 +292,7 @@
       "answers/hotel-room-decorations-memphis.html",
       "answers/how-far-in-advance-should-i-book-party-decor.html",
       "answers/how-long-does-it-take-to-set-up-party-decor.html",
-      "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
-      "answers/how-much-does-birthday-decoration-at-home-cost.html"
+      "answers/how-much-does-a-grazing-table-cost-in-memphis.html"
     ],
     "source_block": [],
     "protocol": [
@@ -324,6 +326,7 @@
       "answers/index.html"
     ],
     "prompt_template": [
+      "about.html",
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
       "answers/balloon-garland-vs-full-birthday-setup.html",
@@ -347,8 +350,7 @@
       "answers/hotel-room-decorations-memphis.html",
       "answers/how-far-in-advance-should-i-book-party-decor.html",
       "answers/how-long-does-it-take-to-set-up-party-decor.html",
-      "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
-      "answers/how-much-does-birthday-decoration-at-home-cost.html"
+      "answers/how-much-does-a-grazing-table-cost-in-memphis.html"
     ]
   },
   "gaps_full": {
@@ -474,9 +476,12 @@
     ],
     "concrete_numbers": [],
     "named_sources": [],
-    "faq": [],
+    "faq": [
+      "about.html"
+    ],
     "structured_data": [],
     "recommendation_summary": [
+      "about.html",
       "areas/arlington-tn-grazing-tables.html",
       "areas/arlington-tn-party-game-rentals.html",
       "areas/bartlett-tn-grazing-tables.html",
@@ -504,6 +509,7 @@
       "services/hotel-room-decor-memphis.html"
     ],
     "definition_callout": [
+      "about.html",
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
       "answers/balloon-garland-vs-full-birthday-setup.html",
@@ -633,6 +639,7 @@
       "services/small-porch-decorating.html"
     ],
     "trust_block": [
+      "about.html",
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
       "answers/balloon-garland-vs-full-birthday-setup.html",
@@ -896,6 +903,7 @@
       "answers/index.html"
     ],
     "prompt_template": [
+      "about.html",
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
       "answers/balloon-garland-vs-full-birthday-setup.html",
