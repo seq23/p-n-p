@@ -7,7 +7,7 @@
  *
  * Fails when any of these surfaces lacks any one of the four (label or alias,
  * case-insensitive, entities decoded):
- *   index.html   <title>, meta description, og:description, og:title, H1, the
+ *   index.html   meta description, og:description, og:title, H1, the
  *                Quick Answer block, the business (Organization) JSON-LD
  *                description, the WebPage JSON-LD description;
  *   site.webmanifest description; llms.txt Primary Identity line;
@@ -20,6 +20,21 @@
  * pricing.html also links the FAQ page's two tools ("Price my porch" ->
  * /faq/#porch-picker, "Estimate my grazing table" -> /faq/#grazing-estimator)
  * as btn-secondary links, and both ids exist in faq/index.html.
+ * THE HOMEPAGE <title> IS THE ONE SURFACE NOT HELD TO ALL FOUR, because at the
+ * length a search result shows it cannot be. The owner's Search Readiness
+ * Checklist (25 Oct 2026) holds every sampled page's title to 30-65 characters
+ * (item b1) and audits this site every Monday; the four labels and aliases are
+ * 53 characters before a separator or the city, so "all four in the title" and
+ * "65 characters" cannot both hold. Until 2026-10-26 the title won, at 87
+ * characters, and the checklist reported the homepage as its one standing
+ * failure every run. The later ruling wins.
+ *
+ * So the title keeps its own rule, checked here and nowhere else: it names at
+ * least TITLE_MIN_SERVICES (3) of the four, and it names the city. That is a
+ * NEW assertion, not a dropped one - before this the title had no city check at
+ * all - and the fourth service is still required on all eight other homepage
+ * surfaces, so nothing about what the site advertises has changed.
+ *
  * Plus the pins that make those surfaces the approved ones: the homepage
  * title, og:title, H1, definition and Quick Answer openings are exactly the
  * brand.js strings; the homepage description is <=160 characters, quotes the
@@ -48,6 +63,35 @@ const ROOT = path.resolve(__dirname, '../..');
 const FILES = ['index.html', 'site.webmanifest', 'llms.txt', 'llms-entities.txt', 'llms-answers.txt',
   'services/index.html', 'pricing.html', 'contact.html', 'how-it-works.html', 'faq/index.html'];
 /** The FAQ page's tools the pricing page links to (labels match the FAQ map cards). */
+/**
+ * The homepage <title> names at least this many of the four services, plus the
+ * city. Three is the most that fits inside the checklist's 65 characters with
+ * the city and the site name; see the header. Raising it makes this stricter,
+ * lowering it does not - do not lower it.
+ */
+const TITLE_MIN_SERVICES = 3;
+const TITLE_CITY = 'Memphis';
+
+/**
+ * Everything wrong with a homepage <title>, as its own function.
+ *
+ * It is separate from check() on purpose: check() also pins the title to
+ * HOME.title exactly, so a probe that alters the title fails on the pin no
+ * matter what, and a self-test driven through check() cannot tell whether the
+ * services-and-city rule works at all. The probes below call this directly.
+ */
+function titleProblems(title) {
+  const bad = [];
+  if (title === '') { bad.push('index.html <title>: surface not found'); return bad; }
+  const named = brand.SERVICES.filter((s) => brand.names(title, s));
+  if (named.length < TITLE_MIN_SERVICES) {
+    bad.push(`index.html <title> names ${named.length} of the four services (${named.map((s) => `"${s.label}"`).join(', ') || 'none'}), needs at least ${TITLE_MIN_SERVICES}: "${title}"`);
+  }
+  if (!title.toLowerCase().includes(TITLE_CITY.toLowerCase())) {
+    bad.push(`index.html <title> does not name ${TITLE_CITY}: "${title}"`);
+  }
+  return bad;
+}
 const PRICING_TOOLS = Object.freeze([
   Object.freeze({ label: 'Price my porch', id: 'porch-picker' }),
   Object.freeze({ label: 'Estimate my grazing table', id: 'grazing-estimator' })
@@ -73,7 +117,9 @@ function check(files) {
   const home = files['index.html'];
   if (home != null) {
     const title = decode((home.match(/<title>([^<]*)<\/title>/) || [])[1] || '');
-    surface('index.html <title>', title);
+    const titleBad = titleProblems(title);
+    if (titleBad.length) errors.push(...titleBad);
+    if (title !== '') checked += 1;
     if (title !== HOME.title) errors.push(`index.html <title> is not the approved "${HOME.title}"`);
     const desc = meta(home, 'name', 'description');
     surface('index.html meta description', desc);
@@ -187,7 +233,6 @@ for (const [label, [p, o]] of Object.entries(staleProbes)) if (!staleCheck(p, o)
 
 // Self-test: each broken copy must fail.
 const probes = {
-  'homepage title without grazing tables': { ...files, 'index.html': files['index.html'].replace(/<title>[^<]*<\/title>/, '<title>Memphis Porch Decorating, Party Planning &amp; Game Rentals | Porch &amp; Party</title>') },
   'services index without its rentals card': { ...files, 'services/index.html': files['services/index.html'].replace(/<div class="answer-block"><h2>Party Game Rentals[^<]*<\/h2>/, '<div class="answer-block"><h2>More</h2>') },
   'manifest without porch decorating': { ...files, 'site.webmanifest': files['site.webmanifest'].replace(/porch decorating, /, '') },
   'homepage without the fourth card': { ...files, 'index.html': files['index.html'].replace(/<article class="card" data-brand="rentals-card">[\s\S]*?<\/article>/, '') },
@@ -201,5 +246,18 @@ const probes = {
 };
 for (const [label, broken] of Object.entries(probes)) if (!check(broken).errors.length) result.errors.push(`self-test: "${label}" passed when it should fail`);
 
+// Self-test for the homepage title's own rule. Called directly, not through
+// check(), so the HOME.title pin cannot be what makes these fail.
+const titleProbes = {
+  'a title naming only two of the four services': 'Memphis Porch Decor & Grazing Tables | Porch & Party',
+  'a title naming one service': 'Memphis Porch Decor | Porch & Party',
+  'a title naming no service': 'Memphis Event Help | Porch & Party',
+  'a title that does not name the city': 'Porch Decor, Party Decor & Grazing Tables | Porch & Party',
+  'an empty title': ''
+};
+for (const [label, t] of Object.entries(titleProbes)) if (!titleProblems(t).length) result.errors.push(`self-test: "${label}" passed when it should fail`);
+// ...and the approved title itself must pass, or the rule is unreachable.
+if (titleProblems(HOME.title).length) result.errors.push(`self-test: the approved HOME.title fails its own rule: ${titleProblems(HOME.title).join('; ')}`);
+
 if (result.errors.length) { console.error(`service-coverage: FAIL (${result.errors.length})`); result.errors.forEach((e) => console.error(`  - ${e}`)); process.exit(1); }
-console.log(`service-coverage: OK - ${result.checked} surface(s) name all ${brand.SERVICES.length} services (${brand.SERVICES.map((s) => s.label).join(' · ')}); ${Object.keys(pages).length} html file(s) free of retired identity wording; ${Object.keys(probes).length + Object.keys(staleProbes).length} self-test probes fail as they should`);
+console.log(`service-coverage: OK - ${result.checked} surface(s) name all ${brand.SERVICES.length} services (${brand.SERVICES.map((s) => s.label).join(' · ')}); ${Object.keys(pages).length} html file(s) free of retired identity wording; ${Object.keys(probes).length + Object.keys(staleProbes).length + Object.keys(titleProbes).length} self-test probes fail as they should`);
