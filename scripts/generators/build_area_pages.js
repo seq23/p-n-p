@@ -314,8 +314,8 @@ function renderPage(city, svc, i) {
   const url = `${DOMAIN}${urlOf(city, svc)}`;
   const t = esc(c.title);
   const d = esc(c.description);
-  if (c.title.length < 30 || c.title.length > 70) throw new Error(`${pathUrl}: title is ${c.title.length} characters (30-70): ${c.title}`);
-  if (c.description.length < 110 || c.description.length > 160) throw new Error(`${pathUrl}: description is ${c.description.length} characters (110-160): ${c.description}`);
+  if (c.title.length < 30 || c.title.length > 65) throw new Error(`${pathUrl}: title is ${c.title.length} characters (30-65): ${c.title}`);
+  if (c.description.length < 120 || c.description.length > 160) throw new Error(`${pathUrl}: description is ${c.description.length} characters (120-160): ${c.description}`);
   const faqHtml = c.faqs.map(([q, a]) => `<div class="faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></div>`).join('');
   const html = `<!doctype html>
 <html lang="en">

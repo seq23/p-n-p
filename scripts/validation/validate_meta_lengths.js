@@ -16,6 +16,13 @@
  * Bing Site Scan also flags "Title too long" above 70 characters, where results
  * truncate: 18 published titles were 71-97 characters on 2026-09-25.
  *
+ * Tightened 2026-10-25 to the owner's Search Readiness Checklist (b1: title
+ * 30-65; b2: meta description 120-160), which audits this site every Monday.
+ * Google's result line cuts a title near 600px - about 65 characters - and a
+ * snippet under 120 characters loses the room to carry the query. Twenty
+ * published titles were 66-70 and twelve descriptions 110-119 when the
+ * checklist first ran this site; all were rewritten in the same change.
+ *
  * SOURCES THIS GUARDS
  * -------------------
  * The rendered pages are what a crawler reads, so they are what is measured.
@@ -42,8 +49,8 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const DOMAIN = 'https://porchandparty901.com';
 const TITLE_MIN = 30;
-const TITLE_MAX = 70;
-const DESC_MIN = 110;
+const TITLE_MAX = 65;
+const DESC_MIN = 120;
 const DESC_MAX = 160;
 const MIN_PUBLISHED = 20;
 // The one owner-ruled exception (2026-10-18): the homepage title names all four
