@@ -25,6 +25,13 @@
       "logo": "https://porchandparty901.com/assets/img/icons/icon-512.png",
       "image": "https://porchandparty901.com/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg",
       "priceRange": "$$",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Memphis",
+        "addressRegion": "TN",
+        "addressCountry": "US"
+      },
+      "addressProvenance": "Added 2026-10-25 for her Search Readiness Checklist item c3, which wants a LocalBusiness with telephone, address and areaServed: Google needs a city, region and country before it will place a service-area business, and the site had none. It carries NO streetAddress and NO postalCode, so the 2026-10-16 ruling above still holds exactly - no street address is public. The locality is the one already printed in the footer of every page (\"Memphis, TN - by appointment\"), so nothing new about her is published. scripts/validators/validate_business_entity.js requires this node and fails if a streetAddress or postalCode ever appears in it.",
       "provenance": "Owner-approved 2026-10-16: the site, the Google Business Profile and the Facebook Page are one entity. Every page carries exactly one business node with this @id (sameAs = Facebook Page + Maps cid, hasMap = Maps cid); every other node references it by @id. Service-area business: no street address is public, so none is published. priceRange $$ because the site publishes starting prices (pricing.html). Guarded by scripts/validators/validate_business_entity.js. Type is LocalBusiness alone (2026-10-21): \"EventPlanner\" is not a schema.org type, so validator.schema.org and Ahrefs reported INVALID_ITEMTYPE on every page; the event-planner meaning is carried by businessTypes.additionalType (Wikidata). Guarded by scripts/validators/validate_structured_data.js."
     }
   },
