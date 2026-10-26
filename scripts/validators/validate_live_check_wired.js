@@ -55,6 +55,11 @@ ok(/^\s*timeout-minutes:\s*\d+/m.test(wf), `${WF} has no job timeout-minutes`);
 
 // what it runs
 ok(/npm run live:check/.test(wf), `${WF} does not run npm run live:check`);
+// A push must wait for THIS commit's deploy, not a fixed sleep: on 26 Oct 2026 a "sleep 90"
+// compared #149 against the previous deploy and reported 81 false failures (main red, rerun green).
+ok(/github\.event_name == 'push' && '--wait-for-deploy \d+'/.test(wf), `${WF} does not pass --wait-for-deploy on a push, so it can compare a commit against the previous deploy`);
+ok(!/^\s*run:\s*sleep\s+\d+/m.test(wf), `${WF} waits with a fixed sleep; wait for the deploy of this commit instead (--wait-for-deploy)`);
+ok(/wait-for-deploy/.test(fs.readFileSync(path.join(ROOT, SCRIPT), 'utf8')) && /committedSitemap && ll === committedLlms/.test(fs.readFileSync(path.join(ROOT, SCRIPT), 'utf8')), `${SCRIPT} does not implement --wait-for-deploy against the committed sitemap.xml and llms.txt`);
 ok(pkg.scripts && pkg.scripts['live:check'] === `node ${SCRIPT}`, `package.json live:check must be "node ${SCRIPT}"`);
 
 // the script does real work

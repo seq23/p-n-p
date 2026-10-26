@@ -47,11 +47,8 @@ jobs:
           cache: npm
       - run: npm ci
 
-      # Pages builds from the same push. Give it a head start before the first
-      # fetch; the script retries anyway, so this only shortens the run.
-      - name: Wait for the Pages deploy of this push
-        if: github.event_name == 'push'
-        run: sleep 90
 
       - name: Fetch the live site and compare it to this commit
-        run: npm run live:check -- --sample "${{ github.event.inputs.sample || '12' }}"
+        # On a push, wait (up to 15 min) until the edge serves THIS commit's sitemap.xml and
+        # llms.txt before comparing. A fixed sleep 90 compared #149 against the previous deploy.
+        run: npm run live:check -- --sample "${{ github.event.inputs.sample || '12' }}" ${{ github.event_name == 'push' && '--wait-for-deploy 900' || '' }}
