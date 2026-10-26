@@ -22,6 +22,16 @@
       "routes": [
         "/guides/porch-decorating-packages-memphis"
       ],
+      "released_by": {
+        "/guides/porch-decorating-packages-memphis": {
+          "query": "porch decorating service",
+          "source": "measured_demand",
+          "metric": "search_volume_monthly",
+          "value": 90,
+          "observed_at": "2026-10-18",
+          "recovered_from": "data/search_intelligence/target_query_set.json at 531b21c, the 19 Oct 2026 cycle commit that published this route"
+        }
+      },
       "publication_frozen": true,
       "updated_at": "2026-10-19T20:28:16.844Z"
     }

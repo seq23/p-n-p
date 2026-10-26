@@ -25,7 +25,7 @@ const remaining=Math.max(0,Math.min(ceiling-used,weekRemaining,gateHeadroom));co
 // a page was published past it.
 const freeze=policy.new_page_publication||{};const frozen=freeze.frozen===true;
 const targetSet=fs.existsSync(path.join(ROOT,'data/search_intelligence/target_query_set.json'))?JSON.parse(fs.readFileSync(path.join(ROOT,'data/search_intelligence/target_query_set.json'),'utf8')):{targets:[]};
-const measuredRoutes=new Set((targetSet.targets||[]).filter(t=>t.expected_owned_route&&t.measurement&&Number(t.measurement.value)>0).map(t=>String(t.expected_owned_route).replace(/\.html$/,'')));
+const measuredTargets=new Map((targetSet.targets||[]).filter(t=>t.expected_owned_route&&t.measurement&&Number(t.measurement.value)>0).map(t=>[String(t.expected_owned_route).replace(/\.html$/,''),{query:t.query,source:t.source||null,metric:t.measurement.metric,value:Number(t.measurement.value),observed_at:t.measurement.observed_at||null}])),measuredRoutes=new Set(measuredTargets.keys());
 let heldByFreeze=0;
 const entryMap=new Map(universe.map(x=>[`${x.folder}/${x.slug}`,x]));let published=0;const publishedRoutes=[];
 function validateEntry(e){const required=['slug','folder','title','h1','description','serviceKey','intent','intro','quickAnswer','forWho','includes','practical','faqQuestion','faqAnswer','cities','related','localContext','beforeBook','nextStep'];for(const k of required)if(e[k]===undefined||e[k]===null||(Array.isArray(e[k])&&!e[k].length)||(!Array.isArray(e[k])&&String(e[k]).trim()===''))throw new Error(`Candidate ${e.folder}/${e.slug} missing ${k}`);for(const city of e.cities)if(!areas.includes(city))throw new Error(`Candidate ${e.folder}/${e.slug} uses undeclared service area ${city}`);if(String(e.quickAnswer).length<90)throw new Error(`Candidate ${e.folder}/${e.slug} quickAnswer too thin`);if(String(e.practical).length<120)throw new Error(`Candidate ${e.folder}/${e.slug} practical section too thin`);}
@@ -62,7 +62,13 @@ if(published){const run=(args)=>execFileSync('node',args,{cwd:ROOT,stdio:'inheri
   // here: on 26 Oct 2026 the first page published after #145 failed validate:social-tags
   // and validate:page-dates in the cycle. One list now; validate:publish-finish pins it.
   execFileSync('npm',['run','-s','build:finish'],{cwd:ROOT,stdio:'inherit'});}
-if(published){ledger.days=ledger.days||{};ledger.days[day]={new_pages:used+published,ceiling,routes:[...(ledger.days[day]?.routes||[]),...publishedRoutes],publication_frozen:frozen,updated_at:new Date().toISOString()};fs.writeFileSync(queuePath,JSON.stringify(queue,null,2)+'\n');fs.writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(slugPath,JSON.stringify(slugs.sort(),null,2)+'\n');fs.writeFileSync(ledgerPath,JSON.stringify(ledger,null,2)+'\n');}
+if(published){ledger.days=ledger.days||{};// The measured target that released each page during the freeze is recorded with it.
+// Targets are re-derived every day (a route can be folded into a hub and its target
+// re-pointed, as /guides/porch-decorating-packages-memphis was on 26 Oct 2026), so
+// validate:publication-freeze judges a past publication by the evidence it had then,
+// not by today's target set.
+const releasedBy={...(ledger.days[day]?.released_by||{})};if(frozen)for(const r of publishedRoutes)releasedBy[r]=measuredTargets.get(r);
+ledger.days[day]={new_pages:used+published,ceiling,routes:[...(ledger.days[day]?.routes||[]),...publishedRoutes],...(frozen?{released_by:releasedBy}:{}),publication_frozen:frozen,updated_at:new Date().toISOString()};fs.writeFileSync(queuePath,JSON.stringify(queue,null,2)+'\n');fs.writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(slugPath,JSON.stringify(slugs.sort(),null,2)+'\n');fs.writeFileSync(ledgerPath,JSON.stringify(ledger,null,2)+'\n');}
 // Rule 0: no stage may exit 0 having done nothing. Publishing zero pages is often
 // legitimate here, but "success" with no explanation is how a create stage reports
 // green for weeks while the queue quietly stays empty. The stop is now named, and the
