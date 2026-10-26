@@ -99,14 +99,45 @@ if (capped.json.stop_reason !== 'CADENCE_CEILING_REACHED') fail(`a measured page
 const targets = read('data/search_intelligence/target_query_set.json', { targets: [] }).targets || [];
 const measured = new Set(targets.filter((t) => t.expected_owned_route && t.measurement && Number(t.measurement.value) > 0).map((t) => t.expected_owned_route));
 const ledger = read('data/release/daily_velocity_ledger.json', { days: {} });
-if (freeze && freeze.frozen) {
-  for (const [day, v] of Object.entries(ledger.days || {})) {
-    if (day < freeze.frozen_at || !Number(v.new_pages)) continue;
+// A past publication is judged by the evidence it was released on. Targets are
+// re-derived every day: on 26 Oct 2026 /guides/porch-decorating-packages-memphis
+// (published 19 Oct on "porch decorating service", 90 searches a month) was folded
+// into /services/porch-decorating and its target re-pointed there, and this check,
+// reading only today's target set, called a legitimate release a freeze breach and
+// failed the Daily Authority Cycle. The publisher now records the releasing target
+// per route (ledger days[day].released_by); a route passes on that recorded,
+// positive measurement, or on a measured target today. Nothing else passes.
+function historyProblems(days, frozenAt, measuredNow) {
+  const out = [];
+  for (const [day, v] of Object.entries(days || {})) {
+    if (day < frozenAt || !Number(v.new_pages)) continue;
     const routes = v.routes || [];
-    if (!routes.length) fail(`${day}: ${v.new_pages} page(s) published during the freeze with no routes recorded`);
-    for (const r of routes) if (!measured.has(r)) fail(`${day}: ${r} was published during the freeze without a measured target`);
+    if (!routes.length) out.push(`${day}: ${v.new_pages} page(s) published during the freeze with no routes recorded`);
+    for (const r of routes) {
+      const e = (v.released_by || {})[r];
+      const recorded = e && e.query && e.metric && Number(e.value) > 0;
+      if (!recorded && !measuredNow.has(r)) out.push(`${day}: ${r} was published during the freeze without a measured target`);
+    }
+  }
+  return out;
+}
+// Fixtures: the rule must still bite. A route with no recorded evidence and no
+// target today fails; a recorded zero is not evidence; a recorded positive passes.
+{
+  const ev = { query: 'q', metric: 'impressions_28d', value: 3 };
+  const cases = [
+    [{ '2026-10-20': { new_pages: 1, routes: ['/a'] } }, 1, 'unrecorded, unmeasured route'],
+    [{ '2026-10-20': { new_pages: 1, routes: ['/a'], released_by: { '/a': { ...ev, value: 0 } } } }, 1, 'recorded zero measurement'],
+    [{ '2026-10-20': { new_pages: 1, routes: ['/a'], released_by: { '/a': ev } } }, 0, 'recorded positive measurement'],
+    [{ '2026-10-20': { new_pages: 1, routes: ['/a'], released_by: { '/b': ev } } }, 1, 'evidence recorded for another route'],
+    [{ '2026-10-01': { new_pages: 1, routes: ['/a'] } }, 0, 'published before the freeze'],
+  ];
+  for (const [days, want, name] of cases) {
+    const got = historyProblems(days, '2026-10-11', new Set()).length;
+    if (got !== want) fail(`history fixture "${name}": ${got} problem(s), expected ${want}`);
   }
 }
+if (freeze && freeze.frozen) for (const p of historyProblems(ledger.days, freeze.frozen_at, measured)) fail(p);
 
 if (errors.length) {
   console.error(`publication-freeze: FAIL (${errors.length})`);

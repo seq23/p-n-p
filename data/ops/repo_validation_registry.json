@@ -354,6 +354,15 @@
       ]
     },
     {
+      "id": "publish-finish",
+      "command": "npm run validate:publish-finish",
+      "detects": "The daily cycle's publisher (authority:publish) finishing a new page with its own list of passes instead of package.json build:finish; build:finish missing structured data, Clarity, URL form, social tags or page dates; or build:all not ending with build:finish straight after the sitemap.",
+      "profiles": [
+        "release",
+        "core"
+      ]
+    },
+    {
       "id": "territory-health",
       "command": "npm run validate:territories",
       "detects": "data/authority_scale/territory_health.json missing a required territory or reporting a thin public surface count.",

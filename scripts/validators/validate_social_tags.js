@@ -20,6 +20,11 @@
  *     exactly scripts/install_brand_surfaces.js HOME.socialTitle, the registered
  *     social headline, and nothing else.
  *
+ * The same rules hold for every publish-queue row rendered through
+ * templates/page-shell.js exactly as authority:publish renders it, so the page
+ * the daily cycle will publish next is checked before it is born. Zero rows
+ * rendered is a hard failure.
+ *
  * WHY
  * ---
  * Her Search Readiness Checklist item b6. On 26 Oct 2026 all 141 published pages
@@ -68,13 +73,8 @@ const REQUIRED = [['og:title', 'property'], ['og:description', 'property'], ['og
 let pages = 0;
 let tags = 0;
 
-for (const loc of locs) {
-  const bare = loc.replace(DOMAIN, '').replace(/^\/|\/$/g, '') || 'index';
-  const rel = [`${bare}.html`, `${bare}/index.html`].find((c) => fs.existsSync(path.join(ROOT, c)));
-  if (!rel) { fail(`sitemap advertises ${loc}, which resolves to no file`); continue; }
-  pages += 1;
-  const html = fs.readFileSync(path.join(ROOT, rel), 'utf8');
-
+/** The full social-card head of one rendered page; problems go to fail(). */
+function checkPage(rel, html) {
   const got = {};
   for (const [key, attr] of REQUIRED) {
     const v = meta(html, attr, key);
@@ -82,7 +82,7 @@ for (const loc of locs) {
     got[key] = v;
     tags += 1;
   }
-  if (Object.keys(got).length !== REQUIRED.length) continue;
+  if (Object.keys(got).length !== REQUIRED.length) return;
 
   if (got['twitter:card'] !== 'summary_large_image') fail(`${rel}: twitter:card is "${got['twitter:card']}", must be summary_large_image`);
   if (decode(got['og:site_name']) !== offers.brandName) fail(`${rel}: og:site_name is "${decode(got['og:site_name'])}", must be "${offers.brandName}"`);
@@ -101,13 +101,50 @@ for (const loc of locs) {
 
   const url = got['og:image'];
   const local = url.startsWith(`${DOMAIN}/`) ? url.slice(DOMAIN.length + 1) : (url.startsWith('/') ? url.slice(1) : null);
-  if (!local) { fail(`${rel}: og:image ${url} is not on ${DOMAIN}`); continue; }
-  if (!fs.existsSync(path.join(ROOT, local))) { fail(`${rel}: og:image ${url} is not in the repository`); continue; }
+  if (!local) { fail(`${rel}: og:image ${url} is not on ${DOMAIN}`); return; }
+  if (!fs.existsSync(path.join(ROOT, local))) { fail(`${rel}: og:image ${url} is not in the repository`); return; }
   let size;
-  try { size = S.measure(path.join(ROOT, local)); } catch (e) { fail(`${rel}: ${e.message}`); continue; }
+  try { size = S.measure(path.join(ROOT, local)); } catch (e) { fail(`${rel}: ${e.message}`); return; }
   if (Number(got['og:image:width']) !== size.width || Number(got['og:image:height']) !== size.height) {
     fail(`${rel}: og:image:width/height say ${got['og:image:width']}x${got['og:image:height']} but ${local} is ${size.width}x${size.height}`);
   }
+}
+
+for (const loc of locs) {
+  const bare = loc.replace(DOMAIN, '').replace(/^\/|\/$/g, '') || 'index';
+  const rel = [`${bare}.html`, `${bare}/index.html`].find((c) => fs.existsSync(path.join(ROOT, c)));
+  if (!rel) { fail(`sitemap advertises ${loc}, which resolves to no file`); continue; }
+  pages += 1;
+  const html = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+
+  checkPage(rel, html);
+}
+
+// Pages not yet born. The daily cycle's publisher (authority:publish) writes a
+// queued page straight from templates/page-shell.js and never runs build:all, so
+// whatever the template leaves out ships until the next full build. On 26 Oct
+// 2026 the template wrote og:image without its width and height (only the
+// build:all installer added them) and the first page the cycle published failed
+// this validator inside the cycle. Every publish-queue row with a query-universe
+// entry is rendered here, the same way the publisher renders it, and held to the
+// same rules, so a template that would publish an incomplete card fails at the
+// PR instead of in the cycle.
+const { renderPage } = require(path.join(ROOT, 'templates/page-shell.js'));
+const queue = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/publish_queue/publish_queue.json'), 'utf8'));
+const universe = new Map(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/queries/query_universe.json'), 'utf8')).map((x) => [`${x.folder}/${x.slug}`, x]));
+let births = 0;
+for (const item of queue) {
+  const entry = universe.get(`${item.folder}/${item.slug}`);
+  if (!entry) continue;
+  const rel = `${item.folder}/${item.slug}.html (as authority:publish renders it)`;
+  let html;
+  try { html = renderPage(entry); } catch (e) { fail(`${rel}: page-shell could not render it: ${e.message}`); continue; }
+  births += 1;
+  checkPage(rel, html);
+}
+if (!births) {
+  console.error(`SOCIAL TAGS FAILED: rendered 0 publish-queue page(s) from ${queue.length} queue row(s); the publisher's output is unchecked. The read is broken, not the site.`);
+  process.exit(1);
 }
 
 if (!locs.length || pages < MIN_PUBLISHED || !tags) {
@@ -122,4 +159,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Social tags OK: ${pages} published page(s), ${tags} tag(s); every og:image on ${DOMAIN} with its measured width and height, twitter:card summary_large_image throughout.`);
+console.log(`Social tags OK: ${pages} published page(s) + ${births} publish-queue render(s), ${tags} tag(s); every og:image on ${DOMAIN} with its measured width and height, twitter:card summary_large_image throughout.`);
