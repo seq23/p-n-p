@@ -4,6 +4,7 @@ const siteIcons = require('../scripts/lib/site_icons');
 const siteChrome = require('../scripts/lib/site_chrome');
 const areas = require('../data/service_areas/areas.json');
 const PP = require('../scripts/lib/porch_packages');
+const SocialImage = require('../scripts/lib/social_image');
 
 const fs = require('fs');
 const path = require('path');
@@ -44,6 +45,23 @@ function pickSocialImage(pathUrl, serviceKey) {
     url: `${offers.domain}/assets/img/celebrations/romantic-bedroom-experience.jpg`,
     alt: 'Celebration setup in a hotel room with balloons and candles'
   };
+}
+
+// og:image:width / og:image:height, measured from the picture itself
+// (scripts/lib/social_image.js), so a page is born with the complete social-card
+// head. Before 26 Oct 2026 only scripts/install_social_tags.js wrote them, as the
+// last pass of build:all; the daily cycle's publisher (authority:publish) never
+// runs build:all, so the first page it published after #145 shipped without them
+// and validate:social-tags failed the cycle. The bytes match what the installer
+// writes (unindented, width then height, straight after og:image), so every page
+// already on main re-renders identically and the installer stays a no-op here.
+// An image that is off-host, missing or too small throws: a share card is never
+// written from a guess.
+function socialImageSize(url) {
+  const local = url.startsWith(`${offers.domain}/`) ? url.slice(offers.domain.length + 1) : null;
+  if (!local) throw new Error(`og:image ${url} is not on ${offers.domain}; its size cannot be measured`);
+  const size = SocialImage.measure(path.join(__dirname, '..', local));
+  return `\n<meta property="og:image:width" content="${size.width}" />\n<meta property="og:image:height" content="${size.height}" />`;
 }
 
 function breadcrumbJsonLd(pathUrl, title) {
@@ -373,7 +391,7 @@ function renderPage(input, opts = {}) {
   <meta property="og:url" content="${fullUrl}" />
   <meta property="og:site_name" content="Porch &amp; Party" />
   <meta property="og:locale" content="en_US" />
-  <meta property="og:image" content="${socialImage.url}" />
+  <meta property="og:image" content="${socialImage.url}" />${socialImageSize(socialImage.url)}
   <meta property="og:image:alt" content="${socialImage.alt}" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="${entry.title}" />

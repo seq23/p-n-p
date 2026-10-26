@@ -54,7 +54,14 @@ if(published){const run=(args)=>execFileSync('node',args,{cwd:ROOT,stdio:'inheri
   const porchWriters=porchPublished?[...porchPk.pages,...porchArticles.filter(p=>fs.existsSync(path.join(ROOT,p))),'faq/index.html'].map(r=>`/${r.replace(/\.html$/,'')}`):[];
   const scopeRoutes=[...new Set([...publishedRoutes,...linkIn.link_in_writers.map(r=>`/${r.replace(/\.html$/,'')}`),...porchWriters])];
   run(['scripts/authority_scale/frozen_outputs.mjs','prepare-scope',...scopeRoutes]);
-  run(['scripts/build_related_navigation.js','--write',`--only=${rels.join(',')}`,`--link-in=${rels.join(',')}`]);if(porchPublished)run(['scripts/install_porch_packages.js']);run(['scripts/install_clarity.js']);run(['scripts/normalize_public_urls.js']);}
+  run(['scripts/build_related_navigation.js','--write',`--only=${rels.join(',')}`,`--link-in=${rels.join(',')}`]);if(porchPublished)run(['scripts/install_porch_packages.js']);
+  // Then the same finishing passes build:all ends with (npm run build:finish: Article
+  // schema, Clarity, icons, contact surface, chrome, comparison tables, URL form, social
+  // tags, page dates). This stage used to keep its own shorter copy of that list (Clarity
+  // + URL form), so every pass later added to build:all was missing from a page born
+  // here: on 26 Oct 2026 the first page published after #145 failed validate:social-tags
+  // and validate:page-dates in the cycle. One list now; validate:publish-finish pins it.
+  execFileSync('npm',['run','-s','build:finish'],{cwd:ROOT,stdio:'inherit'});}
 if(published){ledger.days=ledger.days||{};ledger.days[day]={new_pages:used+published,ceiling,routes:[...(ledger.days[day]?.routes||[]),...publishedRoutes],publication_frozen:frozen,updated_at:new Date().toISOString()};fs.writeFileSync(queuePath,JSON.stringify(queue,null,2)+'\n');fs.writeFileSync(manifestPath,JSON.stringify(manifest,null,2)+'\n');fs.writeFileSync(slugPath,JSON.stringify(slugs.sort(),null,2)+'\n');fs.writeFileSync(ledgerPath,JSON.stringify(ledger,null,2)+'\n');}
 // Rule 0: no stage may exit 0 having done nothing. Publishing zero pages is often
 // legitimate here, but "success" with no explanation is how a create stage reports
