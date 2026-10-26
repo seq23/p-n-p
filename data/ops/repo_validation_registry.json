@@ -284,6 +284,17 @@
       "no_repair_reason": "Fails on page substance. No generator in this repo rewrites page substance, and none should do so unattended."
     },
     {
+      "id": "place-pages",
+      "command": "npm run validate:place-pages",
+      "detects": "A Memphis neighborhood or local anchor on the coverage list with no page, a place page missing from the sitemap or unlinked from /areas/, a title, description, canonical, H1 or opening paragraph that is not the generator's, or a hotel anchor page that does not state it is unaffiliated with the hotel and who arranges permission.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": "npm run place-pages:build",
+      "repair_note": "The generator regenerates exactly the artifact this detects, from data/service_areas/place_pages.json. The post-generation passes must follow it (see CLAUDE.md \"Working here\"); the sitemap and /areas/ index links come from those."
+    },
+    {
       "id": "profile-purity",
       "command": "npm run validate:profile-purity",
       "detects": "Content or configuration that does not belong to the Porch & Party operating profile.",
@@ -351,6 +362,17 @@
       ],
       "repair_command": "npm run authority:territories:build",
       "repair_rationale": "build_territory_health.mjs writes that exact file by counting the live public surfaces. A territory that is genuinely thin stays red after the rebuild - the repair refreshes the measurement, it cannot fake it."
+    },
+    {
+      "id": "travel-claims",
+      "command": "npm run validate:travel-claims",
+      "detects": "A published page promising fee-free travel to a town that pays the travel fee, a fee-paying town whose pages never state the fee, a fee-free town with no page, or travel.line naming a different set of towns than travel.includedAreas.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "A false price is a copy and data decision, not a regenerable artifact. The failure names the town and the page; whoever fixes it decides whether the town belongs on travel.includedAreas (the owner's call) or whether the page's wording is wrong (the generator's)."
     },
     {
       "id": "tree-hygiene",

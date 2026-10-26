@@ -87,7 +87,7 @@
           "includesTakedown": false,
           "lines": [
             {
-              "description": "Basic room setup (15 ceiling balloons, banner, petal walkway, bed design, 8–12 LED tea lights)",
+              "description": "Basic room setup (15 ceiling balloons, banner, petal walkway, bed design, 8\u201312 LED tea lights)",
               "price": 300,
               "note": []
             }
@@ -109,7 +109,7 @@
               ]
             },
             {
-              "description": "Floating Balloon Décor",
+              "description": "Floating Balloon D\u00e9cor",
               "price": 75,
               "note": [
                 "Coordinating ceiling balloons with decorative ribbons",
@@ -147,7 +147,7 @@
               "description": "Professional Design & Installation",
               "price": 85,
               "note": [
-                "Custom décor planning and styling",
+                "Custom d\u00e9cor planning and styling",
                 "Arrangement of all decorative elements",
                 "Local delivery and professional room installation"
               ]
@@ -209,14 +209,14 @@
               "price": 125,
               "note": [
                 "Custom name or celebration sign",
-                "Coordinating lettering and décor accents"
+                "Coordinating lettering and d\u00e9cor accents"
               ]
             },
             {
               "description": "Signature Styling Accents",
               "price": 100,
               "note": [
-                "Extra décor touches chosen for the room",
+                "Extra d\u00e9cor touches chosen for the room",
                 "Styled table, tray or vignette accents",
                 "Finishing details to complete the look"
               ]
@@ -325,7 +325,17 @@
     }
   },
   "travel": {
-    "includedAreasFrom": "data/service_areas/areas.json",
+    "includedAreas": [
+      "Memphis, TN",
+      "Germantown, TN",
+      "Collierville, TN",
+      "Bartlett, TN",
+      "Lakeland, TN",
+      "Arlington, TN",
+      "Southaven, MS",
+      "Olive Branch, MS"
+    ],
+    "includedAreasNote": "The eight cities the owner approved on 2026-10-17 as carrying no travel fee. This used to read includedAreasFrom: data/service_areas/areas.json, i.e. \"whatever that file holds\". That was safe only while the two lists were the same list. On 2026-10-26 the owner's Search Readiness Checklist (item j9) required pages for five more towns inside the 35-mile coverage radius - Cordova, Millington, Oakland, Horn Lake and Hernando - and adding them to areas.json would have extended fee-free travel to five towns by a side effect of a search fix. A page is not a price. The published towns live in data/service_areas/areas.json; the fee-free ones are this list, and only the owner moves a town onto it.",
     "extendedFee": 75,
     "line": "Memphis, Germantown, Collierville, Bartlett, Lakeland, Arlington, Southaven and Olive Branch are included. Anywhere further is a flat $75 travel fee, shown on your quote up front.",
     "appliesTo": [
@@ -333,7 +343,7 @@
       "celebration",
       "grazing"
     ],
-    "provenance": "Owner-approved 2026-10-17: the eight cities on data/service_areas/areas.json carry no travel fee; beyond them a flat $75, said on the quote. Rentals are pickup only, so travel never applies to them."
+    "provenance": "Owner-approved 2026-10-17: the eight cities in includedAreas carry no travel fee; beyond them a flat $75, said on the quote. Rentals are pickup only, so travel never applies to them. The list was made explicit on 2026-10-26 (see includedAreasNote) without changing a single price or a single included town."
   },
   "payment": {
     "methods": "Zelle or Cash App",

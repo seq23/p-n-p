@@ -37,6 +37,7 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const brand = require(path.join(ROOT, 'scripts/lib/brand.js'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
+const placesData = require(path.join(ROOT, 'data/service_areas/place_pages.json'));
 const faqContent = require(path.join(ROOT, 'scripts/lib/faq_content.js'));
 const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js'));
 const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
@@ -123,14 +124,28 @@ function groupServices(pages) {
 
 /**
  * Area pages group by city. The city is taken from the slug, which encodes it
- * ahead of the -tn-/-ms- state marker, and East Memphis is a Memphis
- * neighbourhood rather than a separate city in data/service_areas/areas.json.
+ * ahead of the -tn-/-ms- state marker.
+ *
+ * A neighborhood and a local anchor are both inside Memphis, so both group
+ * under Memphis. That used to be one hardcoded line - `east-memphis` mapped to
+ * `memphis` - which held while East Memphis was the only neighborhood page on
+ * the site. On 2026-10-26 the checklist's item j9 required five more
+ * neighborhoods and six hotel anchors, and eleven of the twelve new pages threw
+ * "area pages outside the served city list" here. The mapping now comes from
+ * data/service_areas/place_pages.json, the same file the pages are generated
+ * from (scripts/generators/build_place_pages.js), so a place can never exist as
+ * a page and be unknown to this index at the same time.
  */
+const MEMPHIS_PLACES = new Set([
+  ...placesData.neighborhoods.map((n) => n.slug),
+  ...placesData.anchors.map((a) => a.slug)
+]);
 function groupAreas(pages) {
   const cityKey = (slug) => {
+    // An anchor slug carries no -tn-/-ms- marker, so match it before the regex.
+    for (const place of MEMPHIS_PLACES) if (slug === place || slug.startsWith(`${place}-`)) return 'memphis';
     const m = slug.match(/^(.*?)-(tn|ms)-/);
-    const key = m ? m[1] : slug;
-    return key === 'east-memphis' ? 'memphis' : key;
+    return m ? m[1] : slug;
   };
   const order = areasData.areas.map((a) => ({
     label: a,
