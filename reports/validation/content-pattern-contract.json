@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-10-26T03:59:20.315Z",
+  "generated_at": "2026-10-26T06:54:34.935Z",
   "enforcement": "block",
   "pages_checked": 135,
   "status": "PASS",
@@ -46,8 +46,8 @@
     {
       "id": "comparison_table",
       "blocking": false,
-      "pages_missing": 113,
-      "coverage_pct": 16.3,
+      "pages_missing": 108,
+      "coverage_pct": 20,
       "why": "no comparison or cost table (agent request #2, 529 occurrences)"
     },
     {
@@ -129,7 +129,7 @@
     }
   ],
   "spec_producer_parity": {
-    "generator_sources_scanned": 113,
+    "generator_sources_scanned": 114,
     "blocks_in_spec": 10,
     "blocks_required_of_this_repo": 9,
     "orphan_blocks": [],
@@ -183,7 +183,6 @@
     "comparison_table": [
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
-      "answers/balloon-garland-vs-full-birthday-setup.html",
       "answers/birthday-decorations-at-home-memphis.html",
       "answers/birthday-hotel-room-setup-ideas-memphis.html",
       "answers/bridal-shower-decorations-memphis.html",
@@ -192,7 +191,6 @@
       "answers/christmas-porch-decorating-memphis.html",
       "answers/corporate-event-decor-memphis.html",
       "answers/corporate-grazing-tables-memphis.html",
-      "answers/diy-vs-hiring-party-decorator.html",
       "answers/do-grazing-tables-include-food.html",
       "answers/do-party-decorators-come-to-your-house.html",
       "answers/event-decorator-memphis.html",
@@ -205,7 +203,9 @@
       "answers/how-far-in-advance-should-i-book-party-decor.html",
       "answers/how-long-does-it-take-to-set-up-party-decor.html",
       "answers/how-much-does-a-grazing-table-cost-in-memphis.html",
-      "answers/how-much-does-birthday-decoration-at-home-cost.html"
+      "answers/how-much-does-birthday-decoration-at-home-cost.html",
+      "answers/how-much-does-grazing-tables-cost.html",
+      "answers/how-much-does-hotel-room-decor-cost-in-memphis.html"
     ],
     "concrete_numbers": [],
     "named_sources": [],
@@ -362,7 +362,6 @@
     "comparison_table": [
       "answers/anniversary-room-decorations-memphis.html",
       "answers/baby-shower-decorations-memphis.html",
-      "answers/balloon-garland-vs-full-birthday-setup.html",
       "answers/birthday-decorations-at-home-memphis.html",
       "answers/birthday-hotel-room-setup-ideas-memphis.html",
       "answers/bridal-shower-decorations-memphis.html",
@@ -371,7 +370,6 @@
       "answers/christmas-porch-decorating-memphis.html",
       "answers/corporate-event-decor-memphis.html",
       "answers/corporate-grazing-tables-memphis.html",
-      "answers/diy-vs-hiring-party-decorator.html",
       "answers/do-grazing-tables-include-food.html",
       "answers/do-party-decorators-come-to-your-house.html",
       "answers/event-decorator-memphis.html",
@@ -393,7 +391,6 @@
       "answers/index.html",
       "answers/last-minute-birthday-setup-ideas-memphis.html",
       "answers/memphis-celebration-setups.html",
-      "answers/party-decor-vs-event-planning-memphis.html",
       "answers/party-planner-memphis.html",
       "answers/porch-decorating-under-500-memphis.html",
       "answers/proposal-room-setup-memphis.html",
@@ -421,8 +418,6 @@
       "areas/southaven-ms-porch-decorating.html",
       "authority/event-decorator-memphis.html",
       "authority/party-planner-memphis.html",
-      "comparisons/balloon-garland-vs-full-birthday-setup.html",
-      "comparisons/diy-vs-hiring-party-decorator.html",
       "corporate/corporate-event-decor-memphis.html",
       "corporate/corporate-grazing-tables-memphis.html",
       "events/anniversary-room-decorations-memphis.html",

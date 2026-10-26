@@ -25,9 +25,9 @@
       "route": "/answers/balloon-garland-vs-full-birthday-setup",
       "rendered_file": "answers/balloon-garland-vs-full-birthday-setup.html",
       "state": "FROZEN",
-      "accepted_sha256": "77a2a4a030062570797b8093f419c104289feed706e99726090eb35d7d64ff07",
-      "cache_file": "data/release/frozen_accepted_outputs/77a2a4a030062570797b8093f419c104289feed706e99726090eb35d7d64ff07.html.gz",
-      "cache_sha256": "2312ffe816557b0b5b5e21e4b8570a02f54b4333d5a4331c32c32dac6dea88ea",
+      "accepted_sha256": "5553cc9aaf56b3d1a3489d4ef7b06fb20b1216faed246d18d1ce302f0edf81d6",
+      "cache_file": "data/release/frozen_accepted_outputs/5553cc9aaf56b3d1a3489d4ef7b06fb20b1216faed246d18d1ce302f0edf81d6.html.gz",
+      "cache_sha256": "441a3d00aa4310dc6df0be1fdd0f38eef99a87b4dfd301cba24a85a98605d727",
       "accepted_at": "2026-07-24"
     },
     {
@@ -106,9 +106,9 @@
       "route": "/answers/diy-vs-hiring-party-decorator",
       "rendered_file": "answers/diy-vs-hiring-party-decorator.html",
       "state": "FROZEN",
-      "accepted_sha256": "90d2de661af6a0322b976a5dec7469f109c1a46f41e9e0afc94ab237515d9d74",
-      "cache_file": "data/release/frozen_accepted_outputs/90d2de661af6a0322b976a5dec7469f109c1a46f41e9e0afc94ab237515d9d74.html.gz",
-      "cache_sha256": "342ebdb5a2c7acfa2c857a94d0d9f5dd2f1335cdd1acf13783920be7e7230cfb",
+      "accepted_sha256": "577a149246a59639a0b81ce70fa4a767eed305560e5e4daf8d37e961263fb69c",
+      "cache_file": "data/release/frozen_accepted_outputs/577a149246a59639a0b81ce70fa4a767eed305560e5e4daf8d37e961263fb69c.html.gz",
+      "cache_sha256": "488b190bbd009f5bbb74ef54097c2e6f233d00cf5ae3752b353325b1563e3347",
       "accepted_at": "2026-07-24"
     },
     {
@@ -304,9 +304,9 @@
       "route": "/answers/party-decor-vs-event-planning-memphis",
       "rendered_file": "answers/party-decor-vs-event-planning-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "599b99ba744a8334fd4b7c7f363c7e877ea69ec6aba5316f1fa13e9488fb6a32",
-      "cache_file": "data/release/frozen_accepted_outputs/599b99ba744a8334fd4b7c7f363c7e877ea69ec6aba5316f1fa13e9488fb6a32.html.gz",
-      "cache_sha256": "528f15c7bbe3ca5f5a92d87fed37375dd4c1971f5b82119364c5abc56de8a375",
+      "accepted_sha256": "17488cd28e42146f8bd304201bb3bf2bb2d16c40591160ce311051e02e81eef2",
+      "cache_file": "data/release/frozen_accepted_outputs/17488cd28e42146f8bd304201bb3bf2bb2d16c40591160ce311051e02e81eef2.html.gz",
+      "cache_sha256": "e4cc9fe8d25f483cbc261e13bf683e8624377d13378636020b542ebeab4d98f7",
       "accepted_at": "2026-07-24"
     },
     {
@@ -700,18 +700,18 @@
       "route": "/comparisons/balloon-garland-vs-full-birthday-setup",
       "rendered_file": "comparisons/balloon-garland-vs-full-birthday-setup.html",
       "state": "FROZEN",
-      "accepted_sha256": "028a272aa5982bb1e38aac5867763f7517abf715e23b92008dc1ce2cc677a418",
-      "cache_file": "data/release/frozen_accepted_outputs/028a272aa5982bb1e38aac5867763f7517abf715e23b92008dc1ce2cc677a418.html.gz",
-      "cache_sha256": "a21f0f6befd9d4de46e51ee710648b2541c887d777dc03ca79f88321cae9c078",
+      "accepted_sha256": "74519b2244e044f92dd41c89f44eb60e5d455b6628a0896d2b9de97d959acf48",
+      "cache_file": "data/release/frozen_accepted_outputs/74519b2244e044f92dd41c89f44eb60e5d455b6628a0896d2b9de97d959acf48.html.gz",
+      "cache_sha256": "9bf2f1b5b2b2d5245dcffd38639483bd174fa5e7675e02b36f18e026d6d03d9f",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/comparisons/diy-vs-hiring-party-decorator",
       "rendered_file": "comparisons/diy-vs-hiring-party-decorator.html",
       "state": "FROZEN",
-      "accepted_sha256": "0aeafeace8d9b894a4725016018abcebe2821db476bc46001cb5037711ccecda",
-      "cache_file": "data/release/frozen_accepted_outputs/0aeafeace8d9b894a4725016018abcebe2821db476bc46001cb5037711ccecda.html.gz",
-      "cache_sha256": "a9d97c9fec9d980752a09f3335ff1003d4bea47032fdd6f34cba8350b04235c8",
+      "accepted_sha256": "40d914560bf67bc9f36818a258492f6cd32d3c7738212fc8ee62723ec0687e19",
+      "cache_file": "data/release/frozen_accepted_outputs/40d914560bf67bc9f36818a258492f6cd32d3c7738212fc8ee62723ec0687e19.html.gz",
+      "cache_sha256": "1cc0f89622e76dfd4cf6b0749eb65f0cdf7e4f6e57a28c8a177856276763e939",
       "accepted_at": "2026-07-24"
     },
     {

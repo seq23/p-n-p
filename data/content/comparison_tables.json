@@ -1,0 +1,117 @@
+{
+  "_why": "A page whose title says \"vs\" is a comparison, and a comparison is read as a table. Google and the answer engines lift a list or table snippet from a literal <table>, never from prose; the owner's Search Readiness Checklist (item d2, 25 Oct 2026) audits this site for it every Monday and reported /answers/party-decor-vs-event-planning-memphis on 2026-10-26. Five published comparison pages carried none. This file is the ONE source for all of them, keyed by slug, so the same comparison cannot drift apart between its /answers/ and /comparisons/ copies. scripts/install_comparison_tables.js stamps them in; scripts/validators/validate_comparison_tables.js fails if a published comparison page has no table. The sixth, grazing-table-vs-charcuterie-board, keeps its table in data/queries/query_universe.json (costTable), which the page generator renders directly; the installer leaves any page that already has a table alone.",
+  "_rules": "Every cell non-empty (validate:no-empty-cells). No prices: they live in data/offers/services.json and data/rentals/games.json, and a number copied here would drift. No reviews, ratings, counts or \"insured\" claims - none exist on record.",
+  "tables": {
+    "party-decor-vs-event-planning-memphis": {
+      "title": "Party decor vs event planning, side by side",
+      "caption": "What each one covers, and which Porch & Party does.",
+      "columns": [
+        "Factor",
+        "Party decor",
+        "Event planning"
+      ],
+      "rows": [
+        [
+          "What it covers",
+          "How the space looks and feels",
+          "How the whole event runs"
+        ],
+        [
+          "The work",
+          "Styling, setup, room presentation, table moments and focal decor",
+          "Vendor coordination, timeline management, logistics and production"
+        ],
+        [
+          "Who it answers to",
+          "The room on the day",
+          "Every vendor and every hour of the event"
+        ],
+        [
+          "When you need it",
+          "The space needs to look finished",
+          "The event has moving parts that need holding together"
+        ],
+        [
+          "Does Porch & Party do it",
+          "Yes - this is what the business is",
+          "No - Porch & Party is not a full-service planner"
+        ]
+      ],
+      "note": "Decor support can still be the right fit for birthdays, hotel rooms, showers and small events. Use the quote request to say whether you need decor only or broader planning."
+    },
+    "diy-vs-hiring-party-decorator": {
+      "title": "DIY vs hiring a party decorator, side by side",
+      "caption": "Which one fits, by what the setup asks of you.",
+      "columns": [
+        "Factor",
+        "Doing it yourself",
+        "Hiring a decorator"
+      ],
+      "rows": [
+        [
+          "Best when",
+          "The setup is simple and the look is not the main priority",
+          "The event needs to feel cleaner and stronger than a simple setup"
+        ],
+        [
+          "Your day",
+          "You spend it setting up",
+          "It is ready without you setting it up"
+        ],
+        [
+          "Visual polish",
+          "As far as your own time and materials reach",
+          "A finished look as the point of the job, not a side effect"
+        ],
+        [
+          "What you buy",
+          "Materials, and the hours to put them up",
+          "The setup, the styling and the hours"
+        ],
+        [
+          "Flexibility",
+          "Change anything, any time, at your own cost",
+          "Agreed in the quote before the day"
+        ]
+      ],
+      "note": "This page is for buyers still deciding whether to handle the decor themselves or pay for help."
+    },
+    "balloon-garland-vs-full-birthday-setup": {
+      "title": "Balloon garland vs full birthday setup, side by side",
+      "caption": "One focal moment, or a styled room.",
+      "columns": [
+        "Factor",
+        "Balloon garland",
+        "Full birthday setup"
+      ],
+      "rows": [
+        [
+          "What it is",
+          "One focal decorative moment",
+          "Several styled elements across the space"
+        ],
+        [
+          "Best when",
+          "One corner needs to carry the look",
+          "The whole room needs a finished look"
+        ],
+        [
+          "Photo coverage",
+          "The focal corner photographs well",
+          "More of the space looks intentional, so more of it photographs well"
+        ],
+        [
+          "Scope of the install",
+          "A single statement piece",
+          "A more finished room transformation"
+        ],
+        [
+          "Who it suits",
+          "Buyers who know one statement piece is enough",
+          "Buyers who want the room, not just the corner"
+        ]
+      ],
+      "note": "This page is for buyers who know they want birthday decor but are unsure whether a single statement piece is enough."
+    }
+  }
+}

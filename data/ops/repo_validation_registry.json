@@ -11,50 +11,82 @@
   "repair_policy": "repair_command may only be declared when the command regenerates the exact artifact whose defect the validator detects. A repair is never declared to make an unrelated failure disappear; validators whose failures require human judgement are left with no repair and are reported by name.",
   "validators": [
     {
-      "id": "profile-purity",
-      "command": "npm run validate:profile-purity",
-      "detects": "Content or configuration that does not belong to the Porch & Party operating profile.",
+      "id": "about-page",
+      "command": "npm run validate:about-page",
+      "detects": "No /about, an /about that is unpublished or noindex, a published page that does not link it, an About page that omits the publisher, the Terms, the Privacy Policy, the Google Business Profile, the Facebook Page or a service's starting price from the data, one that quotes a price the data files do not hold, one carrying a review, rating, award, certification, insurance, years-in-business or job-count claim this repository holds no record of, or one that prints the legal entity's name (owner-approved 2026-10-18: only the Terms and the Privacy Policy may).",
       "profiles": [
         "release",
         "core"
       ]
     },
     {
-      "id": "tree-hygiene",
-      "command": "npm run validate:tree-hygiene",
-      "detects": "Stray, orphaned or non-canonical files in the published tree.",
+      "id": "answer-coverage",
+      "command": "npm run validate:answer-coverage",
+      "detects": "An answer record with no id or no direct answer, a direct answer under 70 characters, an answer page named in the index but missing from the tree, or a missing llms-*.txt extraction surface. Also fails if the index carries zero records.",
       "profiles": [
         "release",
         "core"
-      ]
+      ],
+      "repair_command": null,
+      "no_repair_reason": "A thin or missing direct answer is authored content. Regenerating the surfaces would hide the gap rather than close it."
     },
     {
-      "id": "local-authority-contract",
-      "command": "npm run validate:local-authority",
-      "detects": "Violations of data/ops/pnp_local_authority_contract.json.",
+      "id": "authority-scale",
+      "command": "npm run validate:authority-scale",
+      "detects": "Violations of the authority-scale governance contract across the admission registry, operational window, velocity governor/decision and the accepted-output freeze.",
       "profiles": [
         "release"
-      ]
+      ],
+      "repair_command": null,
+      "no_repair_reason": "Spans artifacts owned by several different actions, two of which (authority:scale:freeze, authority:publish) are governance decisions with publishing side effects rather than regenerations. Running them to clear a validation failure would be a cadence change disguised as a repair."
     },
     {
-      "id": "no-internal-instruction-leak",
-      "command": "npm run validate:no-instruction-leak",
-      "detects": "Internal agent/prompt instructions leaking into published HTML.",
+      "id": "backlog-reaches-builder",
+      "command": "npm run validate:backlog-reaches-builder",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "The validated demand backlog in data/demand/measured_demand.json was reported and never built from: seven rows sat from 2026-08-27 while authority:publish named QUEUE_EXHAUSTED_NOTHING_REFILLS_IT daily. Hard-fails when a backlog row older than the draft deadline (7 / new_pages_per_week days, from data/cadence/policy.json) has no build attempt - no covering page, or a draft not in the publish queue; when a build link points at nothing (covering page off disk or out of the sitemap, draft missing from the query universe, a queue status that never publishes); when the backlog is empty; or when authority:backlog:promote is not run before authority:publish in both authority:cycle and authority-daily.yml.",
+      "no_repair_reason": "Resolving a row means authoring a page draft or judging that an existing page answers it. Both are content decisions no generator can make; authority:backlog:promote only queues drafts that already exist."
+    },
+    {
+      "id": "cadence-cap-accrual",
+      "command": "npm run validate:cadence-cap-accrual",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "The publication cap is a rate and the gate must enforce it as one. cadence_gate.js compared `newPublications.length` - which accumulates from the last acceptance with no window - against `new_pages_per_week`, one week's worth, and never read the ledger's `generated_at`. Two denominators, one comparison. Reproduced 2026-09-04: a baseline 8 weeks old with 4 pages published since, against an allowance of 1/week x 8 = 8, still printed BLOCK weekly_cap and exited 1, reddening Deploy Distribution on main for publishing at exactly the permitted rate. Runs the real gate against fixture repositories with CADENCE_TODAY pinned to 2026-09-04 under UTC, UTC+14 and UTC-11: the allowance accrues, still blocks one page past it, grants one week's worth on a same-day baseline rather than zero, cannot bank credit past the refresh window, hard-stops on a ledger with no baseline date, and still blocks the 105-page spree behind run 33709958800. Hard-fails on Rule 0 when it runs zero cases.",
+      "no_repair_reason": "A cadence breach is a publishing decision, not a defect a repair pass can undo. The pages are already written; the only honest answers are to hold them or to record a deliberate `cadence:accept` with a reason."
+    },
+    {
+      "id": "cadence-policy-authority",
+      "command": "npm run validate:cadence-policy",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "data/cadence/policy.json is the only source of the cadence rates. The gate previously carried a DEFAULT_POLICY of the pre-throttle rates (2/week, 25/week) merged UNDER the file, so a missing policy silently restored the old, looser cap and still printed CLEAR. Also asserts behaviourally that the gate exits non-zero with no policy.",
+      "no_repair_reason": "The rates are a deliberate policy decision. Regenerating them automatically would mean inventing a publication cap, which is the exact defect this validator exists to prevent."
+    },
+    {
+      "id": "citation-yield-feedback",
+      "command": "npm run validate:yield",
+      "detects": "Scoreboard counts that disagree with the citation-yield observation ledger, and a velocity decision that disagrees with velocity health (upshift or ceiling change while health is UNKNOWN).",
+      "profiles": [
+        "release"
+      ],
+      "repair_command": "npm run authority:yield:build",
+      "repair_rationale": "build_citation_yield_feedback.mjs recomputes the scoreboard directly from the observation ledger (fixing scoreboard_truth), and evaluate_velocity.mjs recomputes the velocity decision from velocity health under its stated safety law - unknown always holds, only explicit failure downshifts (fixing upshift_on_unknown / changed_on_unknown). Both are derivations of the exact artifacts the validator compares; neither invents observations."
+    },
+    {
+      "id": "comparison-tables",
+      "command": "npm run validate:comparison-tables",
+      "detects": "A published page whose title says \"vs\" with no comparison table, a table with a missing caption, too few rows or columns, an empty cell, or a stamped table that no longer matches data/content/comparison_tables.json.",
       "profiles": [
         "release",
         "core"
       ],
-      "evidence": "reports/validation/internal-instruction-leak.json"
-    },
-    {
-      "id": "no-empty-table-cells",
-      "command": "npm run validate:no-empty-cells",
-      "detects": "Empty table cells in published HTML.",
-      "profiles": [
-        "release",
-        "core"
-      ],
-      "evidence": "reports/validation/empty-table-cells.json"
+      "repair_command": "npm run comparison-tables:install",
+      "repair_note": "The installer regenerates exactly the artifact this detects: it stamps every table in data/content/comparison_tables.json into every published comparison page that has none, and re-stamps one that has drifted. It cannot invent a table for a new comparison slug the data file does not hold; that failure names the slug and needs an author."
     },
     {
       "id": "content-pattern-contract",
@@ -86,97 +118,6 @@
       "no_repair_reason": "Composite page-level matrix. Its failures (missing canonical, broken href, missing footer, malformed JSON-LD) are authored defects with no single regenerator. The one derived-artifact defect it also covers - sitemap desync - is attributed precisely by the sitemap-coverage validator below, which does carry a repair."
     },
     {
-      "id": "sitemap-coverage",
-      "command": "node scripts/validation/validate_sitemap_coverage.js",
-      "detects": "sitemap.xml out of sync with the published HTML tree in either direction.",
-      "profiles": [
-        "release",
-        "core"
-      ],
-      "repair_command": "npm run build:sitemap",
-      "repair_rationale": "scripts/generators/update_sitemap.js rewrites sitemap.xml by walking the same HTML tree this validator walks. It is the regenerator of the exact artifact whose staleness is the defect."
-    },
-    {
-      "id": "url-rule-single-source",
-      "command": "npm run validate:url-rule-single-source",
-      "detects": "A component that decides what a public URL looks like without asking scripts/lib/site_url.js, which is how the sitemap builder and its coverage guard came to disagree after 450e1f8 and left Bounded Self-Healing repairing an already-correct sitemap three times before giving up.",
-      "profiles": [
-        "release",
-        "core"
-      ],
-      "no_repair_reason": "A second copy of the URL rule is an authored defect, not a stale artifact. Nothing can regenerate it away: the fix is to delete the copy and require the shared module, which is a code change a person or an agent makes. A repair command here would run, change nothing, and be the same non-terminating loop this validator exists to prevent."
-    },
-    {
-      "id": "max-fanout",
-      "command": "npm run validate:max-fanout",
-      "detects": "Corruption or absence of the 100k opportunity reserve: missing shards, sha256 mismatch, duplicate ids/queries, undeclared geography, wrong disposition, wrong record count.",
-      "profiles": [
-        "release"
-      ],
-      "repair_command": "npm run authority:scale:fanout",
-      "repair_rationale": "build_max_fanout.mjs writes data/authority_scale/fanout_100k/ and its index.json - the exact shard corpus and manifest this validator hashes and counts. Regeneration is deterministic under AUTHORITY_RUN_DATE."
-    },
-    {
-      "id": "authority-scale",
-      "command": "npm run validate:authority-scale",
-      "detects": "Violations of the authority-scale governance contract across the admission registry, operational window, velocity governor/decision and the accepted-output freeze.",
-      "profiles": [
-        "release"
-      ],
-      "repair_command": null,
-      "no_repair_reason": "Spans artifacts owned by several different actions, two of which (authority:scale:freeze, authority:publish) are governance decisions with publishing side effects rather than regenerations. Running them to clear a validation failure would be a cadence change disguised as a repair."
-    },
-    {
-      "id": "kpi-truth",
-      "command": "npm run validate:kpi-truth",
-      "detects": "KPI claims not backed by the observed surfacing ledger.",
-      "profiles": [
-        "release"
-      ],
-      "repair_command": null,
-      "no_repair_reason": "The ledger is measured evidence. Nothing in the repo may generate it, and generating it would be fabrication."
-    },
-    {
-      "id": "citation-yield-feedback",
-      "command": "npm run validate:yield",
-      "detects": "Scoreboard counts that disagree with the citation-yield observation ledger, and a velocity decision that disagrees with velocity health (upshift or ceiling change while health is UNKNOWN).",
-      "profiles": [
-        "release"
-      ],
-      "repair_command": "npm run authority:yield:build",
-      "repair_rationale": "build_citation_yield_feedback.mjs recomputes the scoreboard directly from the observation ledger (fixing scoreboard_truth), and evaluate_velocity.mjs recomputes the velocity decision from velocity health under its stated safety law - unknown always holds, only explicit failure downshifts (fixing upshift_on_unknown / changed_on_unknown). Both are derivations of the exact artifacts the validator compares; neither invents observations."
-    },
-    {
-      "id": "page-quality-contract",
-      "command": "npm run validate:page-quality",
-      "detects": "Published pages that do not meet the citation-yield page quality patterns.",
-      "profiles": [
-        "release"
-      ],
-      "repair_command": null,
-      "no_repair_reason": "Fails on page substance. No generator in this repo rewrites page substance, and none should do so unattended."
-    },
-    {
-      "id": "improvement-plan",
-      "command": "npm run validate:improvements",
-      "detects": "data/authority_scale/page_improvement_plan.json missing, thin (<10 route plans), or carrying plans with no recommended improvements.",
-      "profiles": [
-        "release"
-      ],
-      "repair_command": "npm run authority:improvements:build",
-      "repair_rationale": "build_improvement_plan.mjs writes that exact file from the candidate backlog. If the plan is genuinely thin after rebuild the validator stays red, which is the correct outcome."
-    },
-    {
-      "id": "territory-health",
-      "command": "npm run validate:territories",
-      "detects": "data/authority_scale/territory_health.json missing a required territory or reporting a thin public surface count.",
-      "profiles": [
-        "release"
-      ],
-      "repair_command": "npm run authority:territories:build",
-      "repair_rationale": "build_territory_health.mjs writes that exact file by counting the live public surfaces. A territory that is genuinely thin stays red after the rebuild - the repair refreshes the measurement, it cannot fake it."
-    },
-    {
       "id": "distribution-contract",
       "command": "npm run validate:distribution-contract",
       "detects": "Missing .build distribution artifacts, or an IndexNow batch that does not match sitemap.xml exactly.",
@@ -187,58 +128,23 @@
       "repair_rationale": "build_distribution_artifacts.mjs writes .build/indexnow-batch.txt, .build/indexnow-priority.txt and .build/distribution-manifest.json, deriving the batch from sitemap.xml. batch_sitemap_mismatch is precisely the staleness this command clears."
     },
     {
-      "id": "search-intelligence-contract",
-      "command": "npm run validate:search-intelligence",
-      "detects": "Violations of R1-R5 of the search-intelligence truth contract, including silent green on a degraded provider and any lane write to a protected publishing path.",
+      "id": "evidence-openness-coverage",
+      "command": "npm run validate:evidence-openness",
       "profiles": [
         "release"
       ],
-      "repair_command": null,
-      "no_repair_reason": "The only writable artifact in the lane (authority_feedback_receipt.json) comes from `search:feedback --write`, which applies authority feedback derived from live provider truth. Running it unattended to clear a red validator would manufacture feedback state with no provider reachable - exactly what R4 forbids."
+      "repair_command": "npm run queries:score-discovery-gap",
+      "purpose": "Every evidence query carries a lead-intent tier and an occupancy verdict. The scorer that derives them was invoked by nothing, so 19 of 22 rows were unscored while the observation data sat in the same repo; the GSC ingest then rebuilt rows from scratch and erased any reading that had been written. UNMEASURED is an accepted verdict; a row with no reading at all is not."
     },
     {
-      "id": "query-atlas",
-      "command": "npm run validate:query-atlas",
-      "detects": "Query evidence missing a tier or source_type, a publishable atlas entry on a non-publishable tier or with no volume, and a query_atlas.json that is absent or stale against the evidence file.",
+      "id": "improvement-plan",
+      "command": "npm run validate:improvements",
+      "detects": "data/authority_scale/page_improvement_plan.json missing, thin (<10 route plans), or carrying plans with no recommended improvements.",
       "profiles": [
-        "release",
-        "core"
+        "release"
       ],
-      "repair_command": "npm run atlas:build",
-      "repair_rationale": "build_query_atlas.mjs writes data/authority_scale/query_atlas.json from data/queries/evidence/evidence_queries.json. The validator's own failure text says 'run the atlas build first'. This is the pairing that closes the loop after queries:ingest writes new measured T1 evidence."
-    },
-    {
-      "id": "local-scope",
-      "command": "npm run validate:local-scope",
-      "detects": "A service/city/occasion row outside the Memphis-metro allowlist, or a matrix whose declared scope has drifted off \"Memphis metro only\". Also fails if the matrix carries zero rows.",
-      "profiles": [
-        "release",
-        "core"
-      ],
-      "repair_command": null,
-      "no_repair_reason": "An out-of-area row is an authored decision about where the business operates. No generator can decide whether the row or the allowlist is wrong."
-    },
-    {
-      "id": "answer-coverage",
-      "command": "npm run validate:answer-coverage",
-      "detects": "An answer record with no id or no direct answer, a direct answer under 70 characters, an answer page named in the index but missing from the tree, or a missing llms-*.txt extraction surface. Also fails if the index carries zero records.",
-      "profiles": [
-        "release",
-        "core"
-      ],
-      "repair_command": null,
-      "no_repair_reason": "A thin or missing direct answer is authored content. Regenerating the surfaces would hide the gap rather than close it."
-    },
-    {
-      "id": "no-orphan-scripts",
-      "command": "npm run validate:no-orphan-scripts",
-      "detects": "A tracked script under scripts/ that nothing invokes or imports. An unwired validator enforces nothing and an unwired generator aimed at a live path is a loaded gun.",
-      "profiles": [
-        "release",
-        "core"
-      ],
-      "repair_command": null,
-      "no_repair_reason": "Wiring or deleting an orphan is a judgement about whether the repo still wants the rule it encodes. No generator can make that call."
+      "repair_command": "npm run authority:improvements:build",
+      "repair_rationale": "build_improvement_plan.mjs writes that exact file from the candidate backlog. If the plan is genuinely thin after rebuild the validator stays red, which is the correct outcome."
     },
     {
       "id": "internal-links",
@@ -252,6 +158,16 @@
       "no_repair_reason": "A broken href is either a typo or a page that was never built. Both are authored defects; a regenerator would only paper over the second."
     },
     {
+      "id": "kpi-truth",
+      "command": "npm run validate:kpi-truth",
+      "detects": "KPI claims not backed by the observed surfacing ledger.",
+      "profiles": [
+        "release"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "The ledger is measured evidence. Nothing in the repo may generate it, and generating it would be fabrication."
+    },
+    {
       "id": "link-reachability",
       "command": "npm run validate:link-reachability",
       "detects": "An internal link with no target, a published page with zero inbound internal links (orphan), a _redirects rule that shadows a published page, or a mailto: anchor outside <!--email_off--> that Cloudflare's edge rewrites into a 404 /cdn-cgi/l/email-protection link.",
@@ -262,58 +178,32 @@
       "repair_command": "node scripts/generators/build_section_indexes.js && node scripts/build_related_navigation.js --write && node scripts/normalize_public_urls.js"
     },
     {
-      "id": "workflow-lane-integrity",
-      "command": "npm run validate:workflow-lanes",
+      "id": "live-check-wired",
+      "command": "npm run validate:live-check-wired",
+      "detects": "A post-deploy live check that exists but never runs, runs before the deploy or on a pull request, has no timeout, or whose script no longer fetches the live host, no longer hard-fails on zero checks, or no longer covers the crawl files, icons, og images, schema @id, redirects and IndexNow key.",
       "profiles": [
-        "release"
-      ],
-      "purpose": "Lane wiring, not script correctness: a dry-run step that aborts the job before the real repair runs, and a workflow that pushes with GITHUB_TOKEN (which raises no push event) without being named in the distribution lane workflow_run trigger. Both were live and both left every individual script correct. Since 2026-09-17 also: every workflow file parses under a real YAML parser with on: and jobs:, some workflow carries an unfiltered on.push reaching main, and some workflow runs on pull_request targeting main - the exact-SHA pre-merge check AGENTS.md requires, and the only trigger that does not depend on GitHub emitting the push event for a merge (it did not, for 1c9c6cb6).",
-      "no_repair_reason": "A broken lane is an authored wiring defect in a workflow file. There is no generator that can re-derive the intended trigger graph, and a script that edited .github/workflows/ automatically would be repairing the thing that governs it."
+        "release",
+        "core"
+      ]
     },
     {
-      "id": "provider-transport-resilience",
-      "command": "npm run validate:provider-transport",
-      "detects": "A googleapiclient execute() in distribution_scripts/ with no num_retries (one socket timeout fails the lane - run 35239441050), or gsc_inspect_urls.py / deploy_distribution.sh no longer mapping retry-served -> COMPLETED, persistent transport fault -> FAILED with evidence kept, 429 -> HELD_QUOTA, 401/403 -> HELD_CREDENTIAL. Proven behaviourally against a stub provider, not by reading.",
+      "id": "local-authority-contract",
+      "command": "npm run validate:local-authority",
+      "detects": "Violations of data/ops/pnp_local_authority_contract.json.",
       "profiles": [
         "release"
-      ],
-      "no_repair_reason": "A missing retry or a wrong exit-code mapping is authored code in the provider scripts; nothing regenerates it."
+      ]
     },
     {
-      "id": "cadence-policy-authority",
-      "command": "npm run validate:cadence-policy",
+      "id": "local-scope",
+      "command": "npm run validate:local-scope",
+      "detects": "A service/city/occasion row outside the Memphis-metro allowlist, or a matrix whose declared scope has drifted off \"Memphis metro only\". Also fails if the matrix carries zero rows.",
       "profiles": [
-        "release"
+        "release",
+        "core"
       ],
-      "purpose": "data/cadence/policy.json is the only source of the cadence rates. The gate previously carried a DEFAULT_POLICY of the pre-throttle rates (2/week, 25/week) merged UNDER the file, so a missing policy silently restored the old, looser cap and still printed CLEAR. Also asserts behaviourally that the gate exits non-zero with no policy.",
-      "no_repair_reason": "The rates are a deliberate policy decision. Regenerating them automatically would mean inventing a publication cap, which is the exact defect this validator exists to prevent."
-    },
-    {
-      "id": "evidence-openness-coverage",
-      "command": "npm run validate:evidence-openness",
-      "profiles": [
-        "release"
-      ],
-      "repair_command": "npm run queries:score-discovery-gap",
-      "purpose": "Every evidence query carries a lead-intent tier and an occupancy verdict. The scorer that derives them was invoked by nothing, so 19 of 22 rows were unscored while the observation data sat in the same repo; the GSC ingest then rebuilt rows from scratch and erased any reading that had been written. UNMEASURED is an accepted verdict; a row with no reading at all is not."
-    },
-    {
-      "id": "operator-doc-currency",
-      "command": "npm run validate:operator-doc-currency",
-      "profiles": [
-        "release"
-      ],
-      "purpose": "Every repo path an operator doc points at still exists. The validator shipped wired to an npm script that nothing ran, so it enforced nothing - the fourth guard found in this repo reachable only from an npm alias no lane invokes.",
-      "no_repair_reason": "A stale doc reference is authored prose. Repointing it requires knowing which surface replaced the old one, which no generator can infer."
-    },
-    {
-      "id": "cadence-cap-accrual",
-      "command": "npm run validate:cadence-cap-accrual",
-      "profiles": [
-        "release"
-      ],
-      "purpose": "The publication cap is a rate and the gate must enforce it as one. cadence_gate.js compared `newPublications.length` - which accumulates from the last acceptance with no window - against `new_pages_per_week`, one week's worth, and never read the ledger's `generated_at`. Two denominators, one comparison. Reproduced 2026-09-04: a baseline 8 weeks old with 4 pages published since, against an allowance of 1/week x 8 = 8, still printed BLOCK weekly_cap and exited 1, reddening Deploy Distribution on main for publishing at exactly the permitted rate. Runs the real gate against fixture repositories with CADENCE_TODAY pinned to 2026-09-04 under UTC, UTC+14 and UTC-11: the allowance accrues, still blocks one page past it, grants one week's worth on a same-day baseline rather than zero, cannot bank credit past the refresh window, hard-stops on a ledger with no baseline date, and still blocks the 105-page spree behind run 33709958800. Hard-fails on Rule 0 when it runs zero cases.",
-      "no_repair_reason": "A cadence breach is a publishing decision, not a defect a repair pass can undo. The pages are already written; the only honest answers are to hold them or to record a deliberate `cadence:accept` with a reason."
+      "repair_command": null,
+      "no_repair_reason": "An out-of-area row is an authored decision about where the business operates. No generator can decide whether the row or the allowlist is wrong."
     },
     {
       "id": "main-push-coverage",
@@ -325,22 +215,54 @@
       "no_repair_reason": "Needs the GitHub API and a token, so it runs as a step in deploy-distribution.yml rather than inside validate:release. An uncovered sha is covered by dispatching the lane on a branch at that sha (git push origin <sha>:refs/heads/validate/<sha> && gh workflow run \"Deploy Distribution\" --ref validate/<sha>); no generator can do that from inside a validation pass."
     },
     {
-      "id": "backlog-reaches-builder",
-      "command": "npm run validate:backlog-reaches-builder",
+      "id": "max-fanout",
+      "command": "npm run validate:max-fanout",
+      "detects": "Corruption or absence of the 100k opportunity reserve: missing shards, sha256 mismatch, duplicate ids/queries, undeclared geography, wrong disposition, wrong record count.",
       "profiles": [
         "release"
       ],
-      "purpose": "The validated demand backlog in data/demand/measured_demand.json was reported and never built from: seven rows sat from 2026-08-27 while authority:publish named QUEUE_EXHAUSTED_NOTHING_REFILLS_IT daily. Hard-fails when a backlog row older than the draft deadline (7 / new_pages_per_week days, from data/cadence/policy.json) has no build attempt - no covering page, or a draft not in the publish queue; when a build link points at nothing (covering page off disk or out of the sitemap, draft missing from the query universe, a queue status that never publishes); when the backlog is empty; or when authority:backlog:promote is not run before authority:publish in both authority:cycle and authority-daily.yml.",
-      "no_repair_reason": "Resolving a row means authoring a page draft or judging that an existing page answers it. Both are content decisions no generator can make; authority:backlog:promote only queues drafts that already exist."
+      "repair_command": "npm run authority:scale:fanout",
+      "repair_rationale": "build_max_fanout.mjs writes data/authority_scale/fanout_100k/ and its index.json - the exact shard corpus and manifest this validator hashes and counts. Regeneration is deterministic under AUTHORITY_RUN_DATE."
     },
     {
-      "id": "social-tags",
-      "command": "npm run validate:social-tags",
-      "detects": "A published page missing og:title, og:description, og:type, og:url, og:site_name, og:image, og:image:width, og:image:height or twitter:card summary_large_image; an og:image on another host, absent from the repository, or smaller than a large share card needs; og:image:width/height that disagree with the image file; or an og:title or og:description that contradicts the page title or meta description.",
+      "id": "no-empty-table-cells",
+      "command": "npm run validate:no-empty-cells",
+      "detects": "Empty table cells in published HTML.",
       "profiles": [
         "release",
         "core"
-      ]
+      ],
+      "evidence": "reports/validation/empty-table-cells.json"
+    },
+    {
+      "id": "no-internal-instruction-leak",
+      "command": "npm run validate:no-instruction-leak",
+      "detects": "Internal agent/prompt instructions leaking into published HTML.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "evidence": "reports/validation/internal-instruction-leak.json"
+    },
+    {
+      "id": "no-orphan-scripts",
+      "command": "npm run validate:no-orphan-scripts",
+      "detects": "A tracked script under scripts/ that nothing invokes or imports. An unwired validator enforces nothing and an unwired generator aimed at a live path is a loaded gun.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "Wiring or deleting an orphan is a judgement about whether the repo still wants the rule it encodes. No generator can make that call."
+    },
+    {
+      "id": "operator-doc-currency",
+      "command": "npm run validate:operator-doc-currency",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "Every repo path an operator doc points at still exists. The validator shipped wired to an npm script that nothing ran, so it enforced nothing - the fourth guard found in this repo reachable only from an npm alias no lane invokes.",
+      "no_repair_reason": "A stale doc reference is authored prose. Repointing it requires knowing which surface replaced the old one, which no generator can infer."
     },
     {
       "id": "page-dates",
@@ -352,22 +274,111 @@
       ]
     },
     {
-      "id": "about-page",
-      "command": "npm run validate:about-page",
-      "detects": "No /about, an /about that is unpublished or noindex, a published page that does not link it, an About page that omits the publisher, the Terms, the Privacy Policy, the Google Business Profile, the Facebook Page or a service's starting price from the data, one that quotes a price the data files do not hold, one carrying a review, rating, award, certification, insurance, years-in-business or job-count claim this repository holds no record of, or one that prints the legal entity's name (owner-approved 2026-10-18: only the Terms and the Privacy Policy may).",
+      "id": "page-quality-contract",
+      "command": "npm run validate:page-quality",
+      "detects": "Published pages that do not meet the citation-yield page quality patterns.",
+      "profiles": [
+        "release"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "Fails on page substance. No generator in this repo rewrites page substance, and none should do so unattended."
+    },
+    {
+      "id": "profile-purity",
+      "command": "npm run validate:profile-purity",
+      "detects": "Content or configuration that does not belong to the Porch & Party operating profile.",
       "profiles": [
         "release",
         "core"
       ]
     },
     {
-      "id": "live-check-wired",
-      "command": "npm run validate:live-check-wired",
-      "detects": "A post-deploy live check that exists but never runs, runs before the deploy or on a pull request, has no timeout, or whose script no longer fetches the live host, no longer hard-fails on zero checks, or no longer covers the crawl files, icons, og images, schema @id, redirects and IndexNow key.",
+      "id": "provider-transport-resilience",
+      "command": "npm run validate:provider-transport",
+      "detects": "A googleapiclient execute() in distribution_scripts/ with no num_retries (one socket timeout fails the lane - run 35239441050), or gsc_inspect_urls.py / deploy_distribution.sh no longer mapping retry-served -> COMPLETED, persistent transport fault -> FAILED with evidence kept, 429 -> HELD_QUOTA, 401/403 -> HELD_CREDENTIAL. Proven behaviourally against a stub provider, not by reading.",
+      "profiles": [
+        "release"
+      ],
+      "no_repair_reason": "A missing retry or a wrong exit-code mapping is authored code in the provider scripts; nothing regenerates it."
+    },
+    {
+      "id": "query-atlas",
+      "command": "npm run validate:query-atlas",
+      "detects": "Query evidence missing a tier or source_type, a publishable atlas entry on a non-publishable tier or with no volume, and a query_atlas.json that is absent or stale against the evidence file.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": "npm run atlas:build",
+      "repair_rationale": "build_query_atlas.mjs writes data/authority_scale/query_atlas.json from data/queries/evidence/evidence_queries.json. The validator's own failure text says 'run the atlas build first'. This is the pairing that closes the loop after queries:ingest writes new measured T1 evidence."
+    },
+    {
+      "id": "search-intelligence-contract",
+      "command": "npm run validate:search-intelligence",
+      "detects": "Violations of R1-R5 of the search-intelligence truth contract, including silent green on a degraded provider and any lane write to a protected publishing path.",
+      "profiles": [
+        "release"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "The only writable artifact in the lane (authority_feedback_receipt.json) comes from `search:feedback --write`, which applies authority feedback derived from live provider truth. Running it unattended to clear a red validator would manufacture feedback state with no provider reachable - exactly what R4 forbids."
+    },
+    {
+      "id": "sitemap-coverage",
+      "command": "node scripts/validation/validate_sitemap_coverage.js",
+      "detects": "sitemap.xml out of sync with the published HTML tree in either direction.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": "npm run build:sitemap",
+      "repair_rationale": "scripts/generators/update_sitemap.js rewrites sitemap.xml by walking the same HTML tree this validator walks. It is the regenerator of the exact artifact whose staleness is the defect."
+    },
+    {
+      "id": "social-tags",
+      "command": "npm run validate:social-tags",
+      "detects": "A published page missing og:title, og:description, og:type, og:url, og:site_name, og:image, og:image:width, og:image:height or twitter:card summary_large_image; an og:image on another host, absent from the repository, or smaller than a large share card needs; og:image:width/height that disagree with the image file; or an og:title or og:description that contradicts the page title or meta description.",
       "profiles": [
         "release",
         "core"
       ]
+    },
+    {
+      "id": "territory-health",
+      "command": "npm run validate:territories",
+      "detects": "data/authority_scale/territory_health.json missing a required territory or reporting a thin public surface count.",
+      "profiles": [
+        "release"
+      ],
+      "repair_command": "npm run authority:territories:build",
+      "repair_rationale": "build_territory_health.mjs writes that exact file by counting the live public surfaces. A territory that is genuinely thin stays red after the rebuild - the repair refreshes the measurement, it cannot fake it."
+    },
+    {
+      "id": "tree-hygiene",
+      "command": "npm run validate:tree-hygiene",
+      "detects": "Stray, orphaned or non-canonical files in the published tree.",
+      "profiles": [
+        "release",
+        "core"
+      ]
+    },
+    {
+      "id": "url-rule-single-source",
+      "command": "npm run validate:url-rule-single-source",
+      "detects": "A component that decides what a public URL looks like without asking scripts/lib/site_url.js, which is how the sitemap builder and its coverage guard came to disagree after 450e1f8 and left Bounded Self-Healing repairing an already-correct sitemap three times before giving up.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "no_repair_reason": "A second copy of the URL rule is an authored defect, not a stale artifact. Nothing can regenerate it away: the fix is to delete the copy and require the shared module, which is a code change a person or an agent makes. A repair command here would run, change nothing, and be the same non-terminating loop this validator exists to prevent."
+    },
+    {
+      "id": "workflow-lane-integrity",
+      "command": "npm run validate:workflow-lanes",
+      "profiles": [
+        "release"
+      ],
+      "purpose": "Lane wiring, not script correctness: a dry-run step that aborts the job before the real repair runs, and a workflow that pushes with GITHUB_TOKEN (which raises no push event) without being named in the distribution lane workflow_run trigger. Both were live and both left every individual script correct. Since 2026-09-17 also: every workflow file parses under a real YAML parser with on: and jobs:, some workflow carries an unfiltered on.push reaching main, and some workflow runs on pull_request targeting main - the exact-SHA pre-merge check AGENTS.md requires, and the only trigger that does not depend on GitHub emitting the push event for a merge (it did not, for 1c9c6cb6).",
+      "no_repair_reason": "A broken lane is an authored wiring defect in a workflow file. There is no generator that can re-derive the intended trigger graph, and a script that edited .github/workflows/ automatically would be repairing the thing that governs it."
     }
   ]
 }
