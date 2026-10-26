@@ -222,6 +222,35 @@ if (policy) {
   notes.push(`router behaviour: 11 cases`);
 }
 
+// 7. The policy is written where an agent reads it ------------------------------
+// A rule no code reads is a wish: the posture has to be findable in the repo's own
+// authority file, not only in a validator. Search Readiness item i10 checks the same
+// two files from outside; this stage makes a PR fail before that check ever sees it.
+const POLICY_DOC = 'docs/cost/zero-paid-llm.md';
+const CLAUDE_MD = 'CLAUDE.md';
+let docChecks = 0;
+const readDoc = (r) => { const abs = path.join(ROOT, r); return fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8') : null; };
+const docText = readDoc(POLICY_DOC);
+docChecks++;
+if (!docText) errors.push(`policy doc: ${POLICY_DOC} is missing; the zero-paid posture has nowhere an agent can read it`);
+else {
+  for (const [what, re] of [['the free router', new RegExp(ROUTER.replace(/[.\/]/g, '\\$&'))], ['the routing config', /config\/llm_routing\.json/], ['its own guard', /validate:zero-paid-llm/]]) {
+    docChecks++;
+    if (!re.test(docText)) errors.push(`policy doc: ${POLICY_DOC} does not name ${what}`);
+  }
+}
+const claudeText = readDoc(CLAUDE_MD);
+docChecks++;
+if (!claudeText) errors.push(`${CLAUDE_MD} is missing; an agent arriving in this repo never reads the zero-paid rule`);
+else {
+  for (const [what, re] of [['"nothing paid"', /nothing paid/i], [`a link to ${POLICY_DOC}`, new RegExp(POLICY_DOC.replace(/[.\/]/g, '\\$&'))], ['the guard npm script', /validate:zero-paid-llm/]]) {
+    docChecks++;
+    if (!re.test(claudeText)) errors.push(`${CLAUDE_MD} does not state ${what}`);
+  }
+}
+if (docChecks < 8) errors.push(`policy doc: only ${docChecks} documentation checks ran; the stage is not reaching its files`);
+notes.push(`policy written in ${CLAUDE_MD} and ${POLICY_DOC}: ${docChecks} checks`);
+
 if (errors.length) {
   console.error(`zero-paid-llm: FAIL (${errors.length})`);
   for (const e of errors) console.error(` - ${e}`);
