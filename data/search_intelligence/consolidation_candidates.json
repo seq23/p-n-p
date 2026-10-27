@@ -2,11 +2,11 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-09-26..2026-10-23",
-  "coverage_collected_at": "2026-10-26T16:37:31.874024+00:00",
-  "url_count": 98,
+  "gsc_window": "2026-09-27..2026-10-24",
+  "coverage_collected_at": "2026-10-27T15:17:34.166180+00:00",
+  "url_count": 99,
   "roles": {
-    "candidate": 71,
+    "candidate": 72,
     "section_index": 4,
     "root": 6,
     "hub": 17
@@ -16,7 +16,8 @@
     "/services/celebration-setups-memphis": 38,
     "/services/porch-decorating": 14,
     "/services/grazing-tables-memphis": 13,
-    "/services/hotel-room-decor-memphis": 6
+    "/services/hotel-room-decor-memphis": 6,
+    "/services/christmas-porch-decorating": 1
   },
   "rows": [
     {
@@ -784,10 +785,21 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 2419,
+      "word_count": 2428,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
+    },
+    {
+      "url": "https://porchandparty901.com/guides/holiday-porch-decorating-service-memphis",
+      "file": "guides/holiday-porch-decorating-service-memphis.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 1443,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/christmas-porch-decorating",
+      "fold_rule": "/christmas|holiday/"
     },
     {
       "url": "https://porchandparty901.com/how-it-works",
@@ -817,7 +829,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 792,
+      "word_count": 801,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -960,7 +972,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 842,
+      "word_count": 851,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -971,7 +983,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 777,
+      "word_count": 786,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -982,7 +994,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 619,
+      "word_count": 628,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1059,7 +1071,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1556,
+      "word_count": 1565,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -1070,7 +1082,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 660,
+      "word_count": 669,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
