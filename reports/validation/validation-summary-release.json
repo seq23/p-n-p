@@ -1,196 +1,16 @@
 {
   "schema_version": "1.0",
   "profile": "release",
-  "generated_at": "2026-10-21T16:25:51.006Z",
-  "total": 32,
+  "generated_at": "2026-10-28T21:04:32.775Z",
+  "total": 41,
   "failed": 0,
   "results": [
     {
-      "id": "profile-purity",
-      "command": "npm run validate:profile-purity",
+      "id": "about-page",
+      "command": "npm run validate:about-page",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 152,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "tree-hygiene",
-      "command": "npm run validate:tree-hygiene",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 150,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "local-authority-contract",
-      "command": "npm run validate:local-authority",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 153,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "no-internal-instruction-leak",
-      "command": "npm run validate:no-instruction-leak",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 167,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "no-empty-table-cells",
-      "command": "npm run validate:no-empty-cells",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 170,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "content-pattern-contract",
-      "command": "npm run validate:content-pattern",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 278,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "content-pattern-reaches-plan",
-      "command": "npm run validate:content-pattern-reaches-plan",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 150,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "core-html-matrix",
-      "command": "npm run validate:all",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 1846,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "sitemap-coverage",
-      "command": "node scripts/validation/validate_sitemap_coverage.js",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 65,
-      "repair_command": "npm run build:sitemap",
-      "output_tail": null
-    },
-    {
-      "id": "url-rule-single-source",
-      "command": "npm run validate:url-rule-single-source",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 148,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "max-fanout",
-      "command": "npm run validate:max-fanout",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 549,
-      "repair_command": "npm run authority:scale:fanout",
-      "output_tail": null
-    },
-    {
-      "id": "authority-scale",
-      "command": "npm run validate:authority-scale",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 334,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "kpi-truth",
-      "command": "npm run validate:kpi-truth",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 153,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "citation-yield-feedback",
-      "command": "npm run validate:yield",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 160,
-      "repair_command": "npm run authority:yield:build",
-      "output_tail": null
-    },
-    {
-      "id": "page-quality-contract",
-      "command": "npm run validate:page-quality",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 168,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "improvement-plan",
-      "command": "npm run validate:improvements",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 154,
-      "repair_command": "npm run authority:improvements:build",
-      "output_tail": null
-    },
-    {
-      "id": "territory-health",
-      "command": "npm run validate:territories",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 150,
-      "repair_command": "npm run authority:territories:build",
-      "output_tail": null
-    },
-    {
-      "id": "distribution-contract",
-      "command": "npm run validate:distribution-contract",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 153,
-      "repair_command": "npm run distribution:prepare",
-      "output_tail": null
-    },
-    {
-      "id": "search-intelligence-contract",
-      "command": "npm run validate:search-intelligence",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 2108,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "query-atlas",
-      "command": "npm run validate:query-atlas",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 157,
-      "repair_command": "npm run atlas:build",
-      "output_tail": null
-    },
-    {
-      "id": "local-scope",
-      "command": "npm run validate:local-scope",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 148,
+      "duration_ms": 162,
       "repair_command": null,
       "output_tail": null
     },
@@ -199,88 +19,16 @@
       "command": "npm run validate:answer-coverage",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 147,
+      "duration_ms": 141,
       "repair_command": null,
       "output_tail": null
     },
     {
-      "id": "no-orphan-scripts",
-      "command": "npm run validate:no-orphan-scripts",
+      "id": "authority-scale",
+      "command": "npm run validate:authority-scale",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 265,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "internal-links",
-      "command": "npm run validate:internal-links",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 254,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "link-reachability",
-      "command": "npm run validate:link-reachability",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 408,
-      "repair_command": "node scripts/generators/build_section_indexes.js && node scripts/build_related_navigation.js --write && node scripts/normalize_public_urls.js",
-      "output_tail": null
-    },
-    {
-      "id": "workflow-lane-integrity",
-      "command": "npm run validate:workflow-lanes",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 542,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "provider-transport-resilience",
-      "command": "npm run validate:provider-transport",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 657,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "cadence-policy-authority",
-      "command": "npm run validate:cadence-policy",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 184,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "evidence-openness-coverage",
-      "command": "npm run validate:evidence-openness",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 152,
-      "repair_command": "npm run queries:score-discovery-gap",
-      "output_tail": null
-    },
-    {
-      "id": "operator-doc-currency",
-      "command": "npm run validate:operator-doc-currency",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 172,
-      "repair_command": null,
-      "output_tail": null
-    },
-    {
-      "id": "cadence-cap-accrual",
-      "command": "npm run validate:cadence-cap-accrual",
-      "status": "PASS",
-      "exit_code": 0,
-      "duration_ms": 686,
+      "duration_ms": 310,
       "repair_command": null,
       "output_tail": null
     },
@@ -289,7 +37,340 @@
       "command": "npm run validate:backlog-reaches-builder",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 155,
+      "duration_ms": 147,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "cadence-cap-accrual",
+      "command": "npm run validate:cadence-cap-accrual",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 681,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "cadence-policy-authority",
+      "command": "npm run validate:cadence-policy",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 173,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "citation-yield-feedback",
+      "command": "npm run validate:yield",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 147,
+      "repair_command": "npm run authority:yield:build",
+      "output_tail": null
+    },
+    {
+      "id": "comparison-tables",
+      "command": "npm run validate:comparison-tables",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 156,
+      "repair_command": "npm run comparison-tables:install",
+      "output_tail": null
+    },
+    {
+      "id": "content-pattern-contract",
+      "command": "npm run validate:content-pattern",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 250,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "content-pattern-reaches-plan",
+      "command": "npm run validate:content-pattern-reaches-plan",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 138,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "core-html-matrix",
+      "command": "npm run validate:all",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 1621,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "distribution-contract",
+      "command": "npm run validate:distribution-contract",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 143,
+      "repair_command": "npm run distribution:prepare",
+      "output_tail": null
+    },
+    {
+      "id": "evidence-openness-coverage",
+      "command": "npm run validate:evidence-openness",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 143,
+      "repair_command": "npm run queries:score-discovery-gap",
+      "output_tail": null
+    },
+    {
+      "id": "improvement-plan",
+      "command": "npm run validate:improvements",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 142,
+      "repair_command": "npm run authority:improvements:build",
+      "output_tail": null
+    },
+    {
+      "id": "internal-links",
+      "command": "npm run validate:internal-links",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 204,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "kpi-truth",
+      "command": "npm run validate:kpi-truth",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 154,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "link-reachability",
+      "command": "npm run validate:link-reachability",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 347,
+      "repair_command": "node scripts/generators/build_section_indexes.js && node scripts/build_related_navigation.js --write && node scripts/normalize_public_urls.js",
+      "output_tail": null
+    },
+    {
+      "id": "live-check-wired",
+      "command": "npm run validate:live-check-wired",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 138,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "local-authority-contract",
+      "command": "npm run validate:local-authority",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 148,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "local-scope",
+      "command": "npm run validate:local-scope",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 147,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "max-fanout",
+      "command": "npm run validate:max-fanout",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 542,
+      "repair_command": "npm run authority:scale:fanout",
+      "output_tail": null
+    },
+    {
+      "id": "no-empty-table-cells",
+      "command": "npm run validate:no-empty-cells",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 161,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "no-internal-instruction-leak",
+      "command": "npm run validate:no-instruction-leak",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 157,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "no-orphan-scripts",
+      "command": "npm run validate:no-orphan-scripts",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 277,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "operator-doc-currency",
+      "command": "npm run validate:operator-doc-currency",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 165,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "page-dates",
+      "command": "npm run validate:page-dates",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 159,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "page-quality-contract",
+      "command": "npm run validate:page-quality",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 148,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "place-pages",
+      "command": "npm run validate:place-pages",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 195,
+      "repair_command": "npm run place-pages:build",
+      "output_tail": null
+    },
+    {
+      "id": "profile-purity",
+      "command": "npm run validate:profile-purity",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 141,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "provider-transport-resilience",
+      "command": "npm run validate:provider-transport",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 626,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "query-atlas",
+      "command": "npm run validate:query-atlas",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 144,
+      "repair_command": "npm run atlas:build",
+      "output_tail": null
+    },
+    {
+      "id": "search-intelligence-contract",
+      "command": "npm run validate:search-intelligence",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 2084,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "sitemap-coverage",
+      "command": "node scripts/validation/validate_sitemap_coverage.js",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 61,
+      "repair_command": "npm run build:sitemap",
+      "output_tail": null
+    },
+    {
+      "id": "clarity-scope",
+      "command": "node scripts/validators/validate_clarity_scope.js",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 167,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "social-tags",
+      "command": "npm run validate:social-tags",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 274,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "publish-finish",
+      "command": "npm run validate:publish-finish",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 143,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "territory-health",
+      "command": "npm run validate:territories",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 146,
+      "repair_command": "npm run authority:territories:build",
+      "output_tail": null
+    },
+    {
+      "id": "travel-claims",
+      "command": "npm run validate:travel-claims",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 176,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "tree-hygiene",
+      "command": "npm run validate:tree-hygiene",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 144,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "url-rule-single-source",
+      "command": "npm run validate:url-rule-single-source",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 144,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "workflow-lane-integrity",
+      "command": "npm run validate:workflow-lanes",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 533,
       "repair_command": null,
       "output_tail": null
     }
