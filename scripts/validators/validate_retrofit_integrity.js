@@ -30,7 +30,7 @@
  * an error. Both show up as a number that never moves.
  *
  * This ran green on introduction: 112 of 112 published pages carried both.
- * A failure here means something removed one, which is always a regression.
+ * Clarity is now required only on form/checkout pages (owner, 25 Oct 2026).
  *
  * Scope is the sitemap, not the disk. The sitemap is the set of pages this site
  * claims to publish; a file on disk it does not name is not a published page and
@@ -38,6 +38,7 @@
  */
 const fs = require('fs');
 const path = require('path');
+const { formOrBuy } = require('../lib/clarity_scope');
 
 const ROOT = path.resolve(__dirname, '../..');
 const EVIDENCE = path.join(ROOT, 'reports/validation/retrofit-integrity.json');
@@ -86,7 +87,11 @@ for (const pathname of locs) {
   const html = fs.readFileSync(abs, 'utf8');
   const rel = path.relative(ROOT, abs).replace(/\\/g, '/');
   for (const req of REQUIRED) {
-    if (!html.includes(req.marker)) missing.push({ path: rel, block: req.id, why: req.why, repair: req.repair });
+    if (req.id === 'clarity_tag') {
+      const expected = formOrBuy(html);
+      if (expected !== html.includes(req.marker)) missing.push({ path: rel, block: req.id,
+        why: expected ? req.why : 'Clarity loads outside a form or checkout page', repair: req.repair });
+    } else if (!html.includes(req.marker)) missing.push({ path: rel, block: req.id, why: req.why, repair: req.repair });
   }
 }
 
@@ -132,4 +137,5 @@ if (missing.length) {
   process.exit(1);
 }
 
-console.log(`Retrofit integrity OK: ${checked} published pages all carry the Clarity tag and the related-pages block.`);
+if (!checked) { console.error('RETROFIT INTEGRITY FAIL: zero published pages checked'); process.exit(1); }
+console.log(`Retrofit integrity OK: ${checked} published pages carry related navigation and Clarity only where visitors fill a form or buy.`);

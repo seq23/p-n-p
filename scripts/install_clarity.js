@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Install the Microsoft Clarity tag into every published page.
+ * Reconcile Microsoft Clarity on form and checkout pages only.
  *
  * The Clarity projects already existed - one per property - but no tag was ever
  * installed, so every project sat on "Almost there!" and none of them recorded a
@@ -13,11 +13,12 @@
  * two separate Clarity projects). A hardcoded id would send one domain's sessions
  * to the other domain's project.
  *
- * Idempotent: pages already carrying the marker are left alone, so this can run
- * on every build.
+ * Reconcile existing tags too: the former all-page installer left recording on
+ * informational pages. Removing a form or checkout removes its tag next build.
  */
 const fs = require('fs');
 const path = require('path');
+const { formOrBuy, stripLoader } = require('./lib/clarity_scope');
 
 const ROOT = path.resolve(__dirname, '..');
 const CONFIG = path.join(ROOT, 'data/clarity_projects.json');
@@ -49,6 +50,7 @@ const snippet = `<script ${MARKER}>(function(w,d,m){var h=(w.location.hostname||
 let touched = 0;
 let already = 0;
 let skipped = 0;
+let removed = 0;
 
 function walk(dir, depth) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -59,12 +61,22 @@ function walk(dir, depth) {
     const rel = path.relative(outDir, abs).replace(/\\/g, '/');
     if (skipFiles.has(rel) || skipFiles.has(entry.name)) { skipped += 1; continue; }
     const html = fs.readFileSync(abs, 'utf8');
-    if (html.includes(MARKER)) { already += 1; continue; }
-    if (!/<\/head>/i.test(html)) { skipped += 1; continue; }
-    fs.writeFileSync(abs, html.replace(/<\/head>/i, `${snippet}</head>`));
+    const clean = stripLoader(html);
+    if (!formOrBuy(clean)) {
+      if (clean !== html) { fs.writeFileSync(abs, clean); removed += 1; }
+      else skipped += 1;
+      continue;
+    }
+    // Generators carry the tag in place alongside other head passes. Preserve
+    // a current, single tag so rebuilding an index cannot reorder those passes.
+    if (html.includes(snippet) && html.split(MARKER).length === 2) { already += 1; continue; }
+    if (!/<\/head>/i.test(clean)) { skipped += 1; continue; }
+    const next = clean.replace(/<\/head>/i, `${snippet}</head>`);
+    if (next === html) { already += 1; continue; }
+    fs.writeFileSync(abs, next);
     touched += 1;
   }
 }
 walk(outDir, 0);
 
-console.log(`clarity: installed on ${touched} page(s); ${already} already had it; ${skipped} skipped`);
+console.log(`clarity: installed on ${touched} form/checkout page(s); ${already} already correct; removed from ${removed} informational page(s); ${skipped} skipped`);

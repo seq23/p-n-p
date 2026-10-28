@@ -51,10 +51,11 @@ execFileSync(process.execPath, ['scripts/search_intelligence/ingest_provider_tru
 const truth = JSON.parse(fs.readFileSync(outPath, 'utf8'));
 fs.rmSync(tmp, { recursive: true, force: true });
 
-// Several targets can share one owned URL; each of them carries the page row.
+// Several targets can share one owned URL; each carries the page row. The
+// fixture also has a homepage row, so targets now assigned to / match it too.
 const norm = (q) => String(q || '').toLowerCase().replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
 const expectedMatches = targets.filter(
-  (t) => t.expected_owned_url === pageTarget.expected_owned_url || norm(t.query) === norm(queryTarget.query) || norm(t.query) === 'party planner near me'
+  (t) => [pageTarget.expected_owned_url, 'https://porchandparty901.com/'].includes(t.expected_owned_url) || norm(t.query) === norm(queryTarget.query) || norm(t.query) === 'party planner near me'
 ).length;
 const byId = new Map(truth.per_target.map((t) => [t.target_id, t]));
 const checks = [
