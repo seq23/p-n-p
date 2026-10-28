@@ -345,6 +345,17 @@
       "repair_rationale": "scripts/generators/update_sitemap.js rewrites sitemap.xml by walking the same HTML tree this validator walks. It is the regenerator of the exact artifact whose staleness is the defect."
     },
     {
+      "id": "clarity-scope",
+      "command": "node scripts/validators/validate_clarity_scope.js",
+      "detects": "Clarity recording outside a form/checkout page, a conversion page missing its loader, duplicate loaders, or an installer that does not remove legacy tags and stay idempotent. Exercises the real installer with fixtures.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "Run scripts/install_clarity.js inside an exact-route thaw/refreeze scope for frozen pages; an unattended repair must not mutate accepted output outside that scope."
+    },
+    {
       "id": "social-tags",
       "command": "npm run validate:social-tags",
       "detects": "A published page missing og:title, og:description, og:type, og:url, og:site_name, og:image, og:image:width, og:image:height or twitter:card summary_large_image; an og:image on another host, absent from the repository, or smaller than a large share card needs; og:image:width/height that disagree with the image file; or an og:title or og:description that contradicts the page title or meta description.",

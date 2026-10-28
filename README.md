@@ -25,7 +25,7 @@ them, and the generator knows nothing about either:
 
 | Pass | Writes | Losing it means |
 |---|---|---|
-| `scripts/install_clarity.js` | `<script data-clarity-loader>` | the page records no analytics sessions, silently, forever |
+| `scripts/install_clarity.js` | `<script data-clarity-loader>` on form/checkout pages only | losing it on a conversion page stops session recording; adding it elsewhere records outside the owner's scope |
 | `scripts/build_related_navigation.js` | `<section data-nav="related-pages">` | the page is orphaned; orphan count is this portfolio's strongest measured correlate with being cited |
 | `scripts/normalize_public_urls.js` | the 200-serving form of every self-referential URL | the page's canonical names a redirect, which is what tells Google to index a URL that never serves |
 
@@ -46,7 +46,9 @@ Two guards now exist:
   marker that is on disk. `--force` overrides; on a frozen route that still needs
   an active mutation scope.
 - `npm run validate:retrofit-integrity` (in `validate:pnp-phase`) hard-fails if
-  any published page has lost either block by any other route.
+  any published page has lost related navigation, or Clarity differs from the
+  form/checkout scope. It exercises the real installer against legacy tags,
+  inert markup, checkout links and form removal, and proves repeatability.
 
 ## Site navigation (header + footer Rentals link)
 

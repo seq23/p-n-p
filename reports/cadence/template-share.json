@@ -1,30 +1,30 @@
 {
-  "measured_at": "2026-10-11",
-  "pages_total": 117,
-  "sampled": 116,
-  "median_template_share": 0.005,
+  "measured_at": "2026-10-28",
+  "pages_total": 100,
+  "sampled": 99,
+  "median_template_share": 0.0224,
   "ceiling": 0.4,
   "pages_over_ceiling": 0,
   "worst": [
     {
-      "file": "privacy-policy.html",
-      "share": 0.016
+      "file": "sitemap.html",
+      "share": 0.167
     },
     {
-      "file": "terms-and-conditions.html",
-      "share": 0.014
+      "file": "accessibility.html",
+      "share": 0.074
     },
     {
-      "file": "services/christmas-porch-decorating.html",
-      "share": 0.007
+      "file": "services/party-decor-memphis.html",
+      "share": 0.045
     },
     {
-      "file": "services/fall-porch-decorating.html",
-      "share": 0.007
+      "file": "contact.html",
+      "share": 0.039
     },
     {
-      "file": "services/front-door-styling.html",
-      "share": 0.007
+      "file": "areas/east-memphis-tn-porch-styling.html",
+      "share": 0.036
     }
   ]
 }
