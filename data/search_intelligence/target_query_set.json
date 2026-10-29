@@ -9,17 +9,17 @@
   "max_targets": 500,
   "measurement_rule": "Every target carries a source (gsc_export | measured_demand) and a positive measured number. Anything unmeasured is dropped, not kept with a null.",
   "gsc_window": {
-    "start_date": "2026-09-28",
-    "end_date": "2026-10-25",
-    "collected_at": "2026-10-28T15:11:19.168059+00:00"
+    "start_date": "2026-09-29",
+    "end_date": "2026-10-26",
+    "collected_at": "2026-10-29T15:11:32.628830+00:00"
   },
-  "target_count": 13,
+  "target_count": 10,
   "targets_by_source": {
     "measured_demand": 2,
-    "gsc_export": 11
+    "gsc_export": 8
   },
-  "party_planner_family_count": 6,
-  "anchored_to_admitted_route_count": 13,
+  "party_planner_family_count": 4,
+  "anchored_to_admitted_route_count": 10,
   "truth_boundary": "A target query is something this loop intends to observe. Its number is the measurement that admitted it, not evidence of ranking, indexing, surfacing, or citation.",
   "dropped_count": 12,
   "dropped": [
@@ -122,18 +122,38 @@
       "owned_route_is_admitted": true
     },
     {
+      "target_id": "pnp_sq_1596ebef2f9f",
+      "query": "birthday party",
+      "source": "gsc_export",
+      "family": "other_measured",
+      "impressions": 2,
+      "clicks": 0,
+      "average_position": 22.5,
+      "measurement": {
+        "metric": "impressions_28d",
+        "value": 2,
+        "window": "2026-09-29..2026-10-26",
+        "collected_at": "2026-10-29T15:11:32.628830+00:00"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_gsc_query",
+      "expected_owned_route": "/services/birthday-party-planner-memphis",
+      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "owned_route_is_admitted": true
+    },
+    {
       "target_id": "pnp_sq_2fbf83107243",
       "query": "event planning for parties",
       "source": "gsc_export",
       "family": "party_planner",
-      "impressions": 3,
+      "impressions": 2,
       "clicks": 0,
       "average_position": 1,
       "measurement": {
         "metric": "impressions_28d",
-        "value": 3,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
+        "value": 2,
+        "window": "2026-09-29..2026-10-26",
+        "collected_at": "2026-10-29T15:11:32.628830+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -146,39 +166,19 @@
       "query": "event planning for parties near me",
       "source": "gsc_export",
       "family": "party_planner",
-      "impressions": 3,
+      "impressions": 2,
       "clicks": 0,
       "average_position": 1,
       "measurement": {
         "metric": "impressions_28d",
-        "value": 3,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
+        "value": 2,
+        "window": "2026-09-29..2026-10-26",
+        "collected_at": "2026-10-29T15:11:32.628830+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
       "expected_owned_route": "/services/birthday-party-planner-memphis",
       "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "owned_route_is_admitted": true
-    },
-    {
-      "target_id": "pnp_sq_8e1909246e02",
-      "query": "bachelorette party ideas",
-      "source": "gsc_export",
-      "family": "other_measured",
-      "impressions": 1,
-      "clicks": 0,
-      "average_position": 1,
-      "measurement": {
-        "metric": "impressions_28d",
-        "value": 1,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
-      },
-      "intent_class": "commercial",
-      "query_kind": "measured_gsc_query",
-      "expected_owned_route": "/services/party-decor-memphis",
-      "expected_owned_url": "https://porchandparty901.com/services/party-decor-memphis",
       "owned_route_is_admitted": true
     },
     {
@@ -192,8 +192,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
+        "window": "2026-09-29..2026-10-26",
+        "collected_at": "2026-10-29T15:11:32.628830+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -212,53 +212,13 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
+        "window": "2026-09-29..2026-10-26",
+        "collected_at": "2026-10-29T15:11:32.628830+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
       "expected_owned_route": "/faq/how-much-does-a-balloon-garland-cost-in-memphis",
       "expected_owned_url": "https://porchandparty901.com/faq/how-much-does-a-balloon-garland-cost-in-memphis",
-      "owned_route_is_admitted": true
-    },
-    {
-      "target_id": "pnp_sq_1596ebef2f9f",
-      "query": "birthday party",
-      "source": "gsc_export",
-      "family": "other_measured",
-      "impressions": 1,
-      "clicks": 0,
-      "average_position": 44,
-      "measurement": {
-        "metric": "impressions_28d",
-        "value": 1,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
-      },
-      "intent_class": "commercial",
-      "query_kind": "measured_gsc_query",
-      "expected_owned_route": "/services/birthday-party-planner-memphis",
-      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "owned_route_is_admitted": true
-    },
-    {
-      "target_id": "pnp_sq_a97d97ff7d71",
-      "query": "birthday party planner",
-      "source": "gsc_export",
-      "family": "party_planner",
-      "impressions": 1,
-      "clicks": 0,
-      "average_position": 11,
-      "measurement": {
-        "metric": "impressions_28d",
-        "value": 1,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
-      },
-      "intent_class": "commercial",
-      "query_kind": "measured_gsc_query",
-      "expected_owned_route": "/services/birthday-party-planner-memphis",
-      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
       "owned_route_is_admitted": true
     },
     {
@@ -272,8 +232,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
+        "window": "2026-09-29..2026-10-26",
+        "collected_at": "2026-10-29T15:11:32.628830+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -292,33 +252,13 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
+        "window": "2026-09-29..2026-10-26",
+        "collected_at": "2026-10-29T15:11:32.628830+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
       "expected_owned_route": "/",
       "expected_owned_url": "https://porchandparty901.com/",
-      "owned_route_is_admitted": true
-    },
-    {
-      "target_id": "pnp_sq_8340e0ac4fc9",
-      "query": "party planner memphis",
-      "source": "gsc_export",
-      "family": "party_planner",
-      "impressions": 1,
-      "clicks": 0,
-      "average_position": 21,
-      "measurement": {
-        "metric": "impressions_28d",
-        "value": 1,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
-      },
-      "intent_class": "commercial",
-      "query_kind": "measured_gsc_query",
-      "expected_owned_route": "/services/birthday-party-planner-memphis",
-      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
       "owned_route_is_admitted": true
     },
     {
@@ -332,8 +272,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-28..2026-10-25",
-        "collected_at": "2026-10-28T15:11:19.168059+00:00"
+        "window": "2026-09-29..2026-10-26",
+        "collected_at": "2026-10-29T15:11:32.628830+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
