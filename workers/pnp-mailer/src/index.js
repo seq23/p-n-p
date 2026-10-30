@@ -15,7 +15,7 @@
 //   every hour   the ID clock and the 90-day delete (functions/_lib/id-auto.mjs): website-form IDs
 //                delete themselves 90 days after they are ready (R2 binding IDS); Google-form
 //                IDs (Drive) never. Runs before the 7 AM email so its last box is current;
-//   9 AM Memphis every 7th day from 16 Oct 2026 - the owner's Marketplace "Renew listing"
+//   4 PM Memphis every 7th day from 16 Oct 2026 - the owner's Marketplace "Renew listing"
 //                reminder (functions/_lib/marketplace-renew.mjs), claimed per due date.
 import { sendEmailReminders, chicagoHour } from '../../../functions/_lib/reminders.mjs';
 import { expireHolds } from '../../../functions/_lib/holds.mjs';
