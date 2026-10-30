@@ -9,7 +9,7 @@
 // "Room setup line" went red on some days and green on others (2026-10-27/28/30).
 //
 // Read by /Length, and a FlateDecode stream that does not inflate THROWS: a page the
-// decoder cannot read is a broken decoder, never a page to skip.
+// decoder cannot read is a broken decoder, never a page to pass over.
 import zlib from 'node:zlib';
 
 export function pdfStreams(bytes) {

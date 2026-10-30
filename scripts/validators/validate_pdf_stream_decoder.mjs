@@ -6,12 +6,12 @@
 // 10-26 and 10-29 with "Room setup line FAILED (6): PDF: ... note rows are missing".
 // The invoice PDF was fine. Each validator found streams with
 // /stream\r?\n([\s\S]*?)\r?\nendstream/, which drops a stream's last byte when it is
-// 0x0D, so page 1 failed to inflate and was skipped. Whether that happened depended
+// 0x0D, so page 1 failed to inflate and was dropped. Whether that happened depended
 // on the invoice's dates, i.e. on the day the check ran.
 //
 // 1. A pdf-lib-shaped stream whose deflated bytes end in 0x0D decodes to its text.
 //    (The old regex reads nothing from it: proven here, so the case stays real.)
-// 2. A FlateDecode stream that cannot inflate throws instead of being skipped.
+// 2. A FlateDecode stream that cannot inflate throws instead of being dropped.
 // 3. No validator carries its own stream regex again (files scanned > 0).
 import fs from 'node:fs';
 import path from 'node:path';
@@ -27,7 +27,7 @@ const must = (ok, msg) => { if (!ok) errors.push(msg); };
 const legacy = (bytes) => {
   const out = [];
   for (const m of Buffer.from(bytes).toString('latin1').matchAll(/stream\r?\n([\s\S]*?)\r?\nendstream/g)) {
-    try { out.push(zlib.inflateSync(Buffer.from(m[1], 'latin1')).toString('latin1')); } catch { /* the old skip */ }
+    try { out.push(zlib.inflateSync(Buffer.from(m[1], 'latin1')).toString('latin1')); } catch { /* the old behaviour: drop the page */ }
   }
   return out;
 };
@@ -55,7 +55,7 @@ if (found) {
 // 2. A corrupt FlateDecode stream throws.
 const bad = Buffer.from('%PDF-1.7\n1 0 obj\n<< /Length 4 /Filter /FlateDecode >>\nstream\nxxxx\nendstream\nendobj\n', 'latin1');
 let threw = false; try { pdfStreams(bad); } catch { threw = true; }
-must(threw, 'a FlateDecode stream that does not inflate was skipped instead of failing');
+must(threw, 'a FlateDecode stream that does not inflate was dropped instead of failing');
 
 // 3. No validator decodes streams on its own.
 const files = fs.readdirSync(HERE).filter((f) => /\.m?js$/.test(f) && f !== path.basename(fileURLToPath(import.meta.url)));
