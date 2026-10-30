@@ -24,6 +24,11 @@ The guard is `npm run validate:zero-paid-llm`, which runs inside
 document, so the rule is not a wish: delete either, or drop the "nothing paid"
 line above, and the validator fails.
 
+## Email
+
+Every address, how it sends and receives, the DNS records and what to check when mail breaks:
+**[`docs/email-setup.md`](docs/email-setup.md)**.
+
 ## Working here
 
 - Regenerate pages in order: generator → normalize → clarity → related-nav →
