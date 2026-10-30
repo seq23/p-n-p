@@ -1214,7 +1214,7 @@
     }
   ],
   "last_gsc_ingest": {
-    "at": "2026-10-30T15:10:40Z",
+    "at": "2026-10-30T15:47:55Z",
     "site": "sc-domain:porchandparty901.com",
     "window": "2026-07-30..2026-10-28",
     "rows_returned": 28,
@@ -1225,7 +1225,7 @@
     "truth_boundary": "Impressions are this property's measured demand in Google Search Console. They are not market volume, not rank, and not evidence of citation."
   },
   "discovery_gap_pass": {
-    "at": "2026-10-30T15:12:05.699Z",
+    "at": "2026-10-30T15:49:21.367Z",
     "by": "scripts/queries/score_discovery_gap.mjs",
     "why": "The observed set is 22 queries. Every one of them carried demand and nothing else - no read on whether the answer is winnable, and none on whether the searcher is near the quote form. Both are now recorded.",
     "observed_universe_size": 33,

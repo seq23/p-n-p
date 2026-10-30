@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "provider_truth",
-  "generated_at": "2026-10-30T15:10:41.451Z",
+  "generated_at": "2026-10-30T15:47:56.571Z",
   "own_site_google_performance_authority": "google_search_console",
   "provider_state": "OK",
   "provider_states": [
@@ -11,7 +11,7 @@
       "provider_id": "google_search_console",
       "state": "OK",
       "reason": "REAL_EXPORT_INGESTED",
-      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-10-30T15:10:41.451290+00:00 rows={\"by_query\":8,\"by_page\":3,\"by_query_page\":10}"
+      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-10-30T15:47:56.571362+00:00 rows={\"by_query\":8,\"by_page\":3,\"by_query_page\":10}"
     }
   ],
   "overall_status": "OK",
@@ -22,7 +22,7 @@
     "start_date": "2026-09-30",
     "end_date": "2026-10-27"
   },
-  "export_collected_at": "2026-10-30T15:10:41.451290+00:00",
+  "export_collected_at": "2026-10-30T15:47:56.571362+00:00",
   "export_counts": {
     "by_query": 8,
     "by_page": 3,
