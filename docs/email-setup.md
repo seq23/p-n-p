@@ -52,7 +52,7 @@ The 22 Oct 2026 rule in `docs/outreach-sending-plan.md` (cold mail only from a s
 and account) was **retired by the owner on 30 Oct 2026**. Camille's holiday office outreach sends from
 `sequoia@porchandparty901.com` through the Resend API (Pages secret `RESEND_OUTREACH_KEY`), not through
 pnp-mailer, so the invoice sender's quota is never shared with cold mail. Limits, stop rules and the
-do-not-contact list are enforced in the outreach endpoint (`functions/api/outreach/`).
+do-not-contact list are enforced server-side in the outreach send endpoint (added by the holiday office outreach build).
 
 ## When something breaks
 
