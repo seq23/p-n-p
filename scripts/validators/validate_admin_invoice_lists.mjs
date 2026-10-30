@@ -29,7 +29,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import zlib from 'node:zlib';
+import { pdfStreams } from './lib/pdf_streams.mjs';
 import { mod, ROOT } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
 
@@ -148,9 +148,8 @@ must(nq(page).includes('  Balloon garland: $120\n  Banner: $25') && nq(page).inc
 
 // PDF text (decoded from its content streams), with positions.
 async function pdfItems(bytes) {
-  const raw = Buffer.from(bytes).toString('latin1'); const out = [];
-  for (const m of raw.matchAll(/stream\r?\n([\s\S]*?)\r?\nendstream/g)) {
-    let txt = ''; try { txt = zlib.inflateSync(Buffer.from(m[1], 'latin1')).toString('latin1'); } catch { continue; }
+  const out = [];
+  for (const txt of pdfStreams(bytes)) {
     let x = 0; let y = 0;
     for (const t of txt.matchAll(/([\d.-]+) ([\d.-]+) ([\d.-]+) ([\d.-]+) ([\d.-]+) ([\d.-]+) Tm|<([0-9A-Fa-f]*)> Tj/g)) {
       if (t[1] !== undefined) { x = Number(t[5]); y = Number(t[6]); } else out.push({ x, y, s: Buffer.from(t[7], 'hex').toString('latin1') });
