@@ -29,7 +29,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import zlib from 'node:zlib';
+import { pdfTextItems } from './lib/pdf_streams.mjs';
 import { mod, ROOT } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
 
@@ -225,7 +225,7 @@ const mail = E.renderInvoiceEmail({ invoice: invLux, lines: savedLux, settings: 
 const mailHtml = mail.html.replace(/&amp;/g, '&').replace(/&#39;/g, "'");
 const sms = PDF.textMessage({ invoice: invLux, lines: savedLux, settings: { zelle: '901-555-0100' } });
 const pdfRaw = await PDF.renderInvoicePdf({ invoice: invLux, lines: savedLux, settings: {}, contact: {} });
-const pdfTxt = []; for (const m of Buffer.from(pdfRaw).toString('latin1').matchAll(/stream\r?\n([\s\S]*?)\r?\nendstream/g)) { let t = ''; try { t = zlib.inflateSync(Buffer.from(m[1], 'latin1')).toString('latin1'); } catch { continue; } for (const x of t.matchAll(/<([0-9A-Fa-f]*)> Tj/g)) pdfTxt.push(Buffer.from(x[1], 'hex').toString('latin1')); }
+const pdfTxt = pdfTextItems(pdfRaw);
 must(pdfTxt.length > 10, `Rule 0: the PDF decoder read only ${pdfTxt.length} text items`);
 for (const [d, price, note] of WANT.luxury) {
   must(pageLux.includes(d) && note.every((n) => pageLux.includes(`<span>${n}</span>`)), `invoice page: "${d}" or its note rows are missing`);

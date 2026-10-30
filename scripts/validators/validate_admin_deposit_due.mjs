@@ -23,7 +23,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import zlib from 'node:zlib';
+import { pdfTextItems } from './lib/pdf_streams.mjs';
 import { mod, ROOT } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
 
@@ -88,8 +88,8 @@ const surfaces = async (invoice) => {
   const page = nq((await s.get(`/admin/invoices/${invoice.id}`)).text);
   const mail = E.renderInvoiceEmail({ invoice, lines, settings: {}, contact: {}, qrSrc: null });
   const sms = PDF.textMessage({ invoice, lines, settings: { zelle: '901-555-0100' } });
-  const raw = Buffer.from(await PDF.renderInvoicePdf({ invoice, lines, settings: {}, contact: {} })).toString('latin1');
-  const items = []; for (const m of raw.matchAll(/stream\r?\n([\s\S]*?)\r?\nendstream/g)) { let t = ''; try { t = zlib.inflateSync(Buffer.from(m[1], 'latin1')).toString('latin1'); } catch { continue; } for (const x of t.matchAll(/<([0-9A-Fa-f]*)> Tj/g)) items.push(Buffer.from(x[1], 'hex').toString('latin1')); }
+  const raw = await PDF.renderInvoicePdf({ invoice, lines, settings: {}, contact: {} });
+  const items = pdfTextItems(raw);
   return { page, html: nq(mail.html), text: mail.text, sms, pdf: items.join(' '), pdfN: items.length };
 };
 const ps = PS.payStepsOf(inv, lines);
