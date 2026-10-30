@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "provider_truth",
-  "generated_at": "2026-10-29T15:11:32.628Z",
+  "generated_at": "2026-10-30T15:10:41.451Z",
   "own_site_google_performance_authority": "google_search_console",
   "provider_state": "OK",
   "provider_states": [
@@ -11,7 +11,7 @@
       "provider_id": "google_search_console",
       "state": "OK",
       "reason": "REAL_EXPORT_INGESTED",
-      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-10-29T15:11:32.628830+00:00 rows={\"by_query\":8,\"by_page\":3,\"by_query_page\":10}"
+      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-10-30T15:10:41.451290+00:00 rows={\"by_query\":8,\"by_page\":3,\"by_query_page\":10}"
     }
   ],
   "overall_status": "OK",
@@ -19,16 +19,16 @@
   "export_path": "data/search_intelligence/gsc_search_analytics_export.json",
   "export_problem": null,
   "export_window": {
-    "start_date": "2026-09-29",
-    "end_date": "2026-10-26"
+    "start_date": "2026-09-30",
+    "end_date": "2026-10-27"
   },
-  "export_collected_at": "2026-10-29T15:11:32.628830+00:00",
+  "export_collected_at": "2026-10-30T15:10:41.451290+00:00",
   "export_counts": {
     "by_query": 8,
     "by_page": 3,
     "by_query_page": 10
   },
-  "requested_for_date": "2026-10-29",
+  "requested_for_date": "2026-10-30",
   "target_count": 10,
   "targets_with_gsc_rows": 8,
   "total_impressions": 39,
