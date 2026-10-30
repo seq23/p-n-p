@@ -33,6 +33,7 @@ export const SCREENS = [
 
 // The 1-2-3 at the top of each screen.
 export const STEPS = {
+  depositPaid: ['Check the amount and day they paid.', 'Choose how they paid.', 'Tap Yes, record it to save the payment.'],
   requests: ['See who\'s asking.', 'Send a quote or invoice.', 'Plan your day and get paid.'],
   // Calendar & Bookings has five (owner-approved calm calendar, 19 Oct 2026): 1-4 beside the month
   // on a computer, 5 under it; on a phone 1 is the search at the top and 2-5 fold into rows.
@@ -75,6 +76,8 @@ export const STEPS = {
 const H = (screen, label, title, helper, more, warn = '') => ({ screen, label, title, helper, more, warn });
 
 export const HELP = {
+  'pay.theyPaid': H('payment', '✓ They paid the deposit', 'Opens the payment confirmation on their card. Nothing is recorded yet.', '', 'Check the amount and day, choose how they paid, then tap Yes, record it.', 'Money: only record what they have actually paid.'),
+  'pay.recordDeposit': H('payment', 'Yes, record it', 'Records the amount, day and payment method shown above.', '', 'Returns to the same card. A complete deposit removes the waiting reminder; a smaller payment leaves the amount still due.', 'Money: check the amount, day and how they paid before saving.'),
   // On every screen
   'nav.brand': H('every', 'Porch & Party', 'Goes back to the main page (Customers).', '', 'The name at the very top. Tap it any time to get back to the main page.'),
   'nav.requests': H('every', 'Customers (main page)', 'The main page: every request, newest first.', '', 'The main list. New requests from the website form show up here within a minute. The main page has no ← Back because it is home.'),

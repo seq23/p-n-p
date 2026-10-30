@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { PAID_HINT, PAID_LABEL, paidHref } from '../../functions/_lib/deposit-paid.mjs';
 /**
  * Valerie's daily 7 AM to-do email (owner-approved mock, 19 Oct 2026; functions/_lib/todo-email.mjs).
  *  1. Timing: only the hourly cron run that is 7 AM America/Chicago sends (12:00 UTC in daylight
@@ -93,7 +94,7 @@ const S = d.sections;
 // 1. Today's jobs: by time, open only, place / bring / collect / deposit back, card or day link.
 must((S[1].find((x) => /Ivy I/.test(x.t)) || {}).d === 'Bartlett · bring fall urns', 'an install does not say what to bring');
 must(JSON.stringify(titles(S[1])) === JSON.stringify(['10 AM · Alex S. · party takedown', '1 PM · Ivy I. · porch install', '5 PM · Sam R. · games return', 'time not set · Una U. · porch install']), `Today's jobs are ${JSON.stringify(titles(S[1]))}`);
-must(S[1][0].d === 'Germantown · load the ladder and 2 bins · collect $180', `the takedown line is "${S[1][0].d}" (place, what to bring, what to collect)`);
+must(S[1][0].d === `Germantown · load the ladder and 2 bins · collect $180 · ${PAID_HINT}`, `the takedown line is "${S[1][0].d}" (place, what to bring, what to collect, payment hint)`);
 must((S[1].find((x) => /Sam R/.test(x.t)) || {}).d === 'Mt. Moriah Station · Giant Uno, Grab the Mic · give back $50 deposit', `the return line is "${(S[1].find((x) => /Sam R/.test(x.t)) || {}).d}" (place, games, deposit to give back)`);
 must(!titles(S[1]).some((t) => /Don D/.test(t)), 'a job already marked done is in Today\'s jobs');
 must(S[1].every((x) => x.btns.some((b) => b.label === 'Open card' && b.href.startsWith('/admin/'))), 'a job has no Open card link into /admin');
@@ -148,14 +149,14 @@ must(sms && decodeURIComponent(sms.href.split('body=')[1] || '') === "Hi Danesha
 // 5. Money.
 const m5 = S[5];
 // The same numbered payments as the invoice (pay-steps.mjs): Alex's invoice asks nothing now.
-must(m5.some((x) => x.type === 'owed' && x.t === 'Alex S. · $180 due' && x.d === 'Due today, at the takedown · No deposit. ① All of it · by Tue 20 Oct $180'), `Money lacks "Alex S. · $180 due / Due today, at the takedown · No deposit. ① All of it · by Tue 20 Oct $180": ${JSON.stringify(m5.map((x) => [x.t, x.d]))}`);
+must(m5.some((x) => x.type === 'owed' && x.t === 'Alex S. · $180 due' && x.d === `Due today, at the takedown · No deposit. ① All of it · by Tue 20 Oct $180 · ${PAID_HINT}`), `Money lacks "Alex S. · $180 due / Due today, at the takedown · No deposit. ① All of it · by Tue 20 Oct $180": ${JSON.stringify(m5.map((x) => [x.t, x.d]))}`);
 must(m5.some((x) => x.type === 'owed' && x.t === 'Lou L. · $90 due' && /3 days late/.test(x.d)), 'Money lacks the late balance');
 must(!m5.some((x) => /Fay F/.test(x.t)), 'Money lists a balance due tomorrow');
 must(!m5.some((x) => /Sam R/.test(x.t)), 'Money lists a customer who paid everything');
 must(m5.filter((x) => /Dee D/.test(x.t)).length === 1 && m5.some((x) => x.type === 'owed' && x.t === 'Dee D. · $50 due' && /10 days late/.test(x.d) && !/refundable/.test(x.t)), `Money does not list Dee D. (paid $110 of $160) as "$50 due": ${JSON.stringify(m5.filter((x) => /Dee D/.test(x.t)))}`);
 const owedRow = m5.find((x) => /Alex S/.test(x.t));
 must(owedRow && owedRow.btns.some((b) => b.label === 'Text a reminder' && /^sms:/.test(b.href)) && owedRow.btns.some((b) => b.label === 'Mark paid' && b.href === `/admin/invoices/${inv['PNP-T-1']}`), 'the owed line lacks Text a reminder / Mark paid');
-must(m5.some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && x.d === 'Invoice not sent yet' && x.btns.map((b) => b.label).join() === 'Reserve their games longer,Open card' && x.btns[0].solid && x.btns.every((b) => b.href === card(reqB.key))), `Money lacks the hold ending today: ${JSON.stringify(titles(m5))}`);
+must(m5.some((x) => x.type === 'hold' && x.t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && x.d === `Invoice not sent yet · ${PAID_HINT}` && x.btns.map((b) => b.label).join() === `${PAID_LABEL},Reserve their games longer,Open card` && x.btns[0].solid && x.btns[1].solid && x.btns[0].href === paidHref(reqB.key) && x.btns.slice(1).every((b) => b.href === card(reqB.key))), `Money lacks the hold ending today: ${JSON.stringify(titles(m5))}`);
 // A late return is RED (missed.mjs tiers, owner-approved 20 Oct 2026): a question in the red box
 // above section 1, never also in Money. Pat P.'s pickup not ticked is YELLOW: only on Tidy up.
 must(!m5.some((x) => x.type === 'overdue' || /Ollie O/.test(x.t)) && d.missed.filter((m) => /Ollie O/.test(m.t)).length === 1
@@ -164,7 +165,7 @@ must(d.missed.length === 1 && !d.missed.some((m) => /Pat P/.test(m.t)) && JSON.s
 {
   // The rendered email with that hold in it: the new words, the new link text, nothing old.
   const hm = T.renderTodo(await T.todoData(db, TODAY, NOW));
-  must(/Weekend R\. · Waiting for deposit · Games reserved until today 3 PM<\/div>[\s\S]*?>Reserve their games longer<\/a>/.test(hm.html) && hm.text.includes('- Weekend R. · Waiting for deposit · Games reserved until today 3 PM (Invoice not sent yet): https://porchandparty901.com/admin/')
+  must(/Weekend R\. · Waiting for deposit · Games reserved until today 3 PM<\/div>[\s\S]*?>Reserve their games longer<\/a>/.test(hm.html) && hm.text.includes(`- Weekend R. · Waiting for deposit · Games reserved until today 3 PM (Invoice not sent yet · ${PAID_HINT}): https://porchandparty901.com${paidHref(reqB.key)}`)
     && !/Hold longer|[Hh]eld until|held by hand/.test(hm.html) && !/Hold longer|[Hh]eld until|held by hand/.test(hm.text), 'the rendered email still says "Hold longer" / "held until", or the hold line lacks its Reserve their games longer link');
 }
 must(m5.findIndex((x) => x.type === 'owed') > -1 && m5.findIndex((x) => x.type === 'owed') < m5.findIndex((x) => x.type === 'hold') && m5.every((x) => ['owed', 'hold'].includes(x.type)), 'Money is not balances, then holds (a late return is in Missed, never Money)');
@@ -189,7 +190,7 @@ await markCalled(db, reqB.key, { confirm: true, how: 'test' });
 let h3 = (await T.todoData(db, TODAY, NOW)).sections;
 must(!h3[3].some((x) => x.key === reqB.key), `an invoiced-unpaid HELD rental is in Set a time: ${JSON.stringify(titles(h3[3]))}`);
 const wait = h3[5].filter((x) => x.type === 'hold' && x.key === reqB.key);
-must(wait.length === 1 && wait[0].t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && wait[0].d === '$160 due ($110 + $50 refundable deposit) on the invoice' && wait[0].due === 16000 && wait[0].btns.map((b) => b.label).join() === 'Reserve their games longer,Open card', `an invoiced-unpaid held rental is not in Money as waiting for deposit with its amount due: ${JSON.stringify(wait)}`);
+must(wait.length === 1 && wait[0].t === 'Weekend R. · Waiting for deposit · Games reserved until today 3 PM' && wait[0].d === `$160 due ($110 + $50 refundable deposit) on the invoice · ${PAID_HINT}` && wait[0].due === 16000 && wait[0].btns.map((b) => b.label).join() === `${PAID_LABEL},Reserve their games longer,Open card`, `an invoiced-unpaid held rental is not in Money as waiting for deposit with its amount due: ${JSON.stringify(wait)}`);
 // Already in Money (its invoice is due today): listed once, as owed, never twice.
 await run("UPDATE invoices SET due_date = ?2 WHERE id = ?1", inv6, TODAY);
 h3 = (await T.todoData(db, TODAY, NOW)).sections;

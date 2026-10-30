@@ -14,7 +14,8 @@
 // Response, exactly:
 //   {"generated_at": ISO, "range": "day"|"week",
 //    "items": [{"kind": "deadline|money|renewal|id_delete|mark_done|post|other",
-//               "title": str, "detail": str, "due": ISO|null, "link": url|null}]}
+//               "title": str, "detail": str, "due": ISO|null, "link": url|null,
+//               "actions"?: [{"label": str, "href": url}]}]}
 // range=day : the 7 AM email's list for today (red "check these first", sections 1-5, Tomorrow,
 //             Tidy up, the IDs box) + the Marketplace renewal when today is a renew day.
 // range=week: the day list + the "Your week" figures (the Monday box, shown every day here) + the
@@ -35,10 +36,10 @@ const SECTION_KIND = { 1: 'deadline', 2: 'other', 3: 'deadline', 4: 'other', 5: 
 const SELLING = 'https://www.facebook.com/marketplace/you/selling';
 
 const abs = (href) => (href && href.startsWith('/') ? `${SITE}${href}` : (/^https:\/\//.test(href || '') ? href : null));
-// The item's link into /admin: its Open card button, else the first /admin button.
+// Money opens its payment confirmation; other items keep their Open card link.
 const linkOf = (it) => {
   const btns = it.btns || [];
-  const b = btns.find((x) => x.label === 'Open card') || btns.find((x) => String(x.href || '').startsWith('/admin'));
+  const b = btns.find((x) => x.label === '✓ They paid the deposit') || btns.find((x) => x.label === 'Open card') || btns.find((x) => String(x.href || '').startsWith('/admin'));
   return abs(b ? b.href : it.href || '');
 };
 const isoDay = (d) => (/^\d{4}-\d{2}-\d{2}$/.test(String(d || '')) ? d : null);
@@ -54,7 +55,10 @@ export function feedItemsFromTodo(d) {
       if (n === 1) due = d.today;
       else if (n === 3) due = isoDay(it.date);
       else if (n === 5) due = it.type === 'hold' ? (Number.isFinite(it.untilMs) ? new Date(it.untilMs).toISOString() : null) : isoDay(it.dueDate);
-      out.push(item(SECTION_KIND[n], it.t, [it.d, it.p].filter(Boolean).join(' · '), due, linkOf(it)));
+      const entry = item(SECTION_KIND[n], it.t, [it.d, it.p].filter(Boolean).join(' · '), due, linkOf(it));
+      // The feed never exposes contact details through telephone / text-message actions.
+      if ((it.btns || []).some((b) => b.label === '✓ They paid the deposit')) entry.actions = it.btns.filter((b) => b.href.startsWith('/admin')).map((b) => ({ label: b.label, href: abs(b.href) }));
+      out.push(entry);
     }
   }
   for (const j of d.tomorrowJobs || []) out.push(item('deadline', j.t, `Tomorrow, ${dayWords(d.tomorrow)}`, d.tomorrow, linkOf(j)));

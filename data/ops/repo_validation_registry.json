@@ -421,6 +421,14 @@
       ],
       "purpose": "Lane wiring, not script correctness: a dry-run step that aborts the job before the real repair runs, and a workflow that pushes with GITHUB_TOKEN (which raises no push event) without being named in the distribution lane workflow_run trigger. Both were live and both left every individual script correct. Since 2026-09-17 also: every workflow file parses under a real YAML parser with on: and jobs:, some workflow carries an unfiltered on.push reaching main, and some workflow runs on pull_request targeting main - the exact-SHA pre-merge check AGENTS.md requires, and the only trigger that does not depend on GitHub emitting the push event for a merge (it did not, for 1c9c6cb6).",
       "no_repair_reason": "A broken lane is an authored wiring defect in a workflow file. There is no generator that can re-derive the intended trigger graph, and a script that edited .github/workflows/ automatically would be repairing the thing that governs it."
+    },
+    {
+      "id": "admin-deposit-paid",
+      "command": "npm run validate:admin-deposit-paid",
+      "detects": "Deposit shortcuts open a confirm screen without recording; confirmed payments reuse the ledger and history, clear holds, retain partial balances, and agree across the email, feed and day list.",
+      "profiles": [
+        "release"
+      ]
     }
   ]
 }
