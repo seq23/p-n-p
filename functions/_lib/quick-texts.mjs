@@ -6,7 +6,7 @@
 // written "__" so she fills it in before sending (the menu says so).
 // Pure: no D1, no network. views.mjs renders the menu; admin.mjs logs "Texted: <title>".
 
-export const SIGN_OFF = '— Valerie at Porch & Party';
+export const SIGN_OFF = '— Valerie at Porch & Party 901';
 export const BLANK = '__';
 const BUSINESS_LINE = '901-355-1518';
 

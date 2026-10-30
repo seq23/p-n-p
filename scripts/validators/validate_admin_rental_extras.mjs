@@ -136,7 +136,13 @@ const formServed = F.renderForm({ offers: SERVICES, table, today });
 const formReshown = F.renderForm({ offers: SERVICES, table, today, values: { service: ['rentals'], business_delivery: 'yes', business_name: 'Acme Offices', delivery_address: '100 Main St' }, errors: { phone: 'x' } });
 for (const [where, html] of [['request.html', formFile], ['the served form', formServed], ['the re-shown form', formReshown]]) {
   must(html.length > 5000 && /name="games"/.test(html), `${where} is not the request form (${html.length} bytes)`);
-  must(!/business/i.test(formWords(html)), `${where} still mentions business delivery: ${(formWords(html).match(/.{0,60}business.{0,60}/i) || [''])[0]}`);
+  // The holiday office "Who is this for? Home · Business or lobby" choice (30 Oct 2026) is the one
+  // allowed use of the word: exactly one such radio, and nothing else may say business.
+  const lobby = html.match(/<input type="radio" name="audience" value="corporate"[^>]*> <span>Business or lobby<\/span>/g) || [];
+  must(lobby.length === 1, `${where} does not carry exactly one "Business or lobby" choice (${lobby.length})`);
+  must(!/business_delivery|business_name|delivery_address/i.test(html), `${where} still carries a business delivery field`);
+  const rest = formWords(html).replace(/<input type="radio" name="audience" value="corporate"[^>]*> <span>Business or lobby<\/span>/g, '');
+  must(!/business/i.test(rest), `${where} still mentions business delivery: ${(rest.match(/.{0,60}business.{0,60}/i) || [''])[0]}`);
   must(!/name="(business_delivery|business_name|delivery_address)"/.test(html) && !/data-business/.test(html) && !html.includes('Acme Offices') && !html.includes('100 Main St'), `${where} still has a business delivery field`);
   must(!html.includes(BDL) && !/This is for a business/i.test(html) && !/deliver to (us|your business)/i.test(html), `${where} still carries the business delivery line or tick label`);
 }

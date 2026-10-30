@@ -429,6 +429,14 @@
       "profiles": [
         "release"
       ]
+    },
+    {
+      "id": "corporate-outreach",
+      "command": "npm run validate:corporate-outreach",
+      "detects": "Corporate form storage and owner labels; email signatures; token auth; campaign cutoff, paid booking stop, atomic daily limits, suppression, company takeover, do-not-contact and follow-up guards; conservative MIME inbound routing; private deployment sender restrictions.",
+      "profiles": [
+        "release"
+      ]
     }
   ]
 }

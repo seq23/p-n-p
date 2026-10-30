@@ -204,7 +204,9 @@ export function validateSubmission(fields, { offers, table, today, file = null }
     if (value && q.group) answers.push({ group: q.group, label: q.label, value });
     return value;
   };
-  const clean = { services };
+  if (fields.audience && !['home', 'corporate'].includes(fields.audience)) errors.audience = 'Please pick Home or Business or lobby.';
+  const clean = { services, corporate: fields.audience === 'corporate' };
+  answers.push({ group: 'other', label: 'Who is this for?', value: clean.corporate ? 'Business / lobby' : 'Home' });
   for (const k of services.filter((s) => s !== 'rentals')) for (const q of Q[k]) clean[q.name] = ask(q);
   if (services.some((s) => s !== 'rentals')) for (const q of Q.event) clean[q.name] = ask(q);
   if (services.includes('rentals')) {
@@ -327,7 +329,10 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
       : `<input type="checkbox" name="multi" value="${c.key}"${on ? ' checked' : ''}>`;
     return `<label class="rq-tile${type === 'radio' ? ' rq-service' : ' rq-sq'}${on ? ' rq-on' : ''}" data-tile="${c.key}" data-label="${esc(c.label)}" data-says="${esc(c.echo)}">${input}${pic(c, type !== 'radio')}<span class="rq-tile-text"><strong>${esc(c.label)}</strong><span class="rq-what">${c.whatHtml}</span><span class="rq-eg">${esc(c.eg)}</span></span></label>`;
   };
-  const page1 = `<fieldset class="rq-q rq-services${errors.service ? ' rq-bad' : ''}" id="q-service" data-q="service"><legend>What are you planning?${req}</legend>
+  const audience = `<fieldset class="rq-q" id="q-audience"><legend>Who is this for?</legend>
+    ${fieldError('audience', errors)}<label class="rq-choice"><input type="radio" name="audience" value="home"${values.audience !== 'corporate' ? ' checked' : ''}> <span>Home</span></label>
+    <label class="rq-choice"><input type="radio" name="audience" value="corporate"${values.audience === 'corporate' ? ' checked' : ''}> <span>Business or lobby</span></label></fieldset>`;
+  const page1 = `${audience}<fieldset class="rq-q rq-services${errors.service ? ' rq-bad' : ''}" id="q-service" data-q="service"><legend>What are you planning?${req}</legend>
     <p class="rq-help" id="help-service">${esc(SERVICE_HELP)}</p>${fieldError('service', errors)}
     <div class="rq-tiles" data-tiles>${choices.map((c) => tile(c, 'radio')).join('')}</div>
     <label class="rq-more rq-service${svc === 'multi' ? ' rq-on' : ''}"><input type="radio" name="service" value="multi"${svc === 'multi' ? ' checked' : ''} required> <strong>${esc(MULTI_LABEL)}</strong></label>

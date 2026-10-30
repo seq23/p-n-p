@@ -3,7 +3,7 @@
  * Quick texts behind "💬 Text ▾" on every request card (owner-approved mock-up, 20 Oct 2026;
  * docs/admin-console.md "Quick texts"). Fails unless:
  *  1. the words are the approved mock-up's, word for word (pinned HERE, not read from the code),
- *     and every text ends with a new line "— Valerie at Porch & Party"; the blank text is
+ *     and every text ends with a new line "— Valerie at Porch & Party 901"; the blank text is
  *     "Hi <first>! " + that sign-off;
  *  2. a value that is not on file is written "__" ("$__" for money), never "undefined" or empty;
  *  3. the option list per job type: a rental shows Game rentals, Any job, Booking and money (no
@@ -30,7 +30,7 @@ let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
 const Q = await mod('functions/_lib/quick-texts.mjs');
 const VQ = await mod('functions/_lib/views-quick-texts.mjs');
-const SIGN = '\n— Valerie at Porch & Party';
+const SIGN = '\n— Valerie at Porch & Party 901';
 
 // ---- 1. The approved words (made-up customer) ------------------------------------------------
 const c = { first: 'Jordan', day: 'Sat 24 Oct', setupDay: 'Sat 24 Oct', returnDay: 'Sun 25 Oct', takedownDay: 'Sat 7 Nov', amount: '$65', deposit: '$50', dueNow: '$115', invoiceNumber: 'PNP-2026-0099', items: 'Giant Jenga and Connect 4', holdEnds: 'Thu 22 Oct, 5:00 PM' };
@@ -62,9 +62,9 @@ for (const [id, [title, body]] of Object.entries(WORDS)) {
   must(q.t === title, `${id}: title "${q.t}", approved "${title}"`);
   must(Q.fullText(q, c) === body + SIGN, `${id}: words differ from the approved mock-up: ${JSON.stringify(Q.fullText(q, c))}`);
 }
-for (const q of Q.QUICK_TEXTS) must(Q.fullText(q, c).endsWith('\n— Valerie at Porch & Party'), `${q.id}: not signed "— Valerie at Porch & Party" on a new line`);
-must(Q.fullText(null, c) === 'Hi Jordan! \n— Valerie at Porch & Party', `the blank text is ${JSON.stringify(Q.fullText(null, c))}`);
-must(Q.SIGN_OFF === '— Valerie at Porch & Party', 'the sign-off changed');
+for (const q of Q.QUICK_TEXTS) must(Q.fullText(q, c).endsWith('\n— Valerie at Porch & Party 901'), `${q.id}: not signed "— Valerie at Porch & Party 901" on a new line`);
+must(Q.fullText(null, c) === 'Hi Jordan! \n— Valerie at Porch & Party 901', `the blank text is ${JSON.stringify(Q.fullText(null, c))}`);
+must(Q.SIGN_OFF === '— Valerie at Porch & Party 901', 'the sign-off changed');
 
 // ---- 2. "__" for anything not on file -------------------------------------------------------
 const empty = Q.quickCtx({ r: { name: 'Jordan Test', phone: '9015550101' } });
@@ -78,7 +78,7 @@ must(t('hold').includes('until __. Pay the deposit of $__ by'), `missing hold en
 must(t('depback').includes('Your $__ deposit'), `missing deposit: ${t('depback')}`);
 must(t('setup').includes('set up on __?') && t('takedown').includes('down on __?'), 'missing setup / takedown day is not "__"');
 for (const q of Q.QUICK_TEXTS) must(!/undefined|null|NaN| {2}|\$ /.test(Q.fullText(q, empty)), `${q.id} with nothing on file: ${Q.fullText(q, empty)}`);
-must(Q.fullText(null, Q.quickCtx({ r: { name: '' } })) === 'Hi there! \n— Valerie at Porch & Party', 'no name is not "Hi there!"');
+must(Q.fullText(null, Q.quickCtx({ r: { name: '' } })) === 'Hi there! \n— Valerie at Porch & Party 901', 'no name is not "Hi there!"');
 // Filled from the card's facts.
 const filled = Q.quickCtx({
   r: { name: 'Jordan Test', phone: '(901) 555-0101' },
@@ -121,7 +121,7 @@ for (const svc of [['rentals'], ['porch'], ['party'], ['grazing'], ['porch', 're
 }
 
 // ---- 5. The sms: link is the words in the box at tap time -----------------------------------
-const edited = 'Hi Jordan! Changed it: 5 & 10% off? no — just "hi"\n— Valerie at Porch & Party';
+const edited = 'Hi Jordan! Changed it: 5 & 10% off? no — just "hi"\n— Valerie at Porch & Party 901';
 must(Q.smsHref('(901) 555-0101', edited) === `sms:9015550101?&body=${encodeURIComponent(edited)}`, `smsHref: ${Q.smsHref('(901) 555-0101', edited)}`);
 must(Q.smsHref('+1 901 555 0101', 'x') === 'sms:9015550101?&body=x' && Q.smsHref('', 'x') === '', 'smsHref number rule');
 let parsed = true; try { new Function(VQ.QT_JS); } catch { parsed = false; }
@@ -150,7 +150,7 @@ for (const card of cards) {
   const first = String(req.name || '').trim().split(/\s+/)[0] || 'there';
   for (const bit of [`Text ${first}`, '✕ Close', '✏️ Blank text', `Write your own message to ${first}`, 'Best right now (', 'All texts for this job ▾', '← Back to texts', 'Open in Messages to send', 'Open in Messages (Mac linked to iPhone)', 'Copy text', 'Booking and money', 'Any job', '<textarea data-qt-ta']) must(tpl.includes(bit.replace(/&/g, '&amp;')), `card ${req.name}: the menu lacks "${bit}"`);
   must((tpl.match(/class="qtopt best"/g) || []).length === 3, `card ${req.name}: not 3 best texts`);
-  must(tpl.includes(`Hi ${first}! \n— Valerie at Porch &amp; Party`), `card ${req.name}: blank text not filled with the first name`);
+  must(tpl.includes(`Hi ${first}! \n— Valerie at Porch &amp; Party 901`), `card ${req.name}: blank text not filled with the first name`);
   must(!/sms:[^"]*body=/.test(tpl), `card ${req.name}: the menu carries a ready-made sms: body (it must be built at tap time)`);
 }
 must(menus >= 2, `only ${menus} cards with a menu checked`);

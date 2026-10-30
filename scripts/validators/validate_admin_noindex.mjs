@@ -152,7 +152,20 @@ for (const [f, re] of Object.entries(FEED_ROUTES)) {
 }
 if (!/'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'/.test(read(path.join('functions', '_lib', 'owner-feed.mjs'))) || !/return deny\(401, 'unauthorized'\)/.test(read(path.join('functions', '_lib', 'owner-feed.mjs')))) errors.push('owner-feed.mjs must answer no-store + noindex and 401 without the token');
 const outside = routeFiles.filter((f) => !guardedDirs.some((d) => f.startsWith(d + path.sep)));
-for (const f of outside) if (![...icsFiles, ...syncFiles, ...Object.keys(FORM_ROUTES), ...Object.keys(PHOTO_ROUTES), ...Object.keys(FEED_ROUTES)].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed, the sync hook, the owner feed nor a request-form route`);
+// The holiday office outreach API for Boss OS (30 Oct 2026): token-guarded (Bearer PNP_OUTREACH_TOKEN,
+// 401 otherwise), no-store + noindex; validate:corporate-outreach holds its behaviour.
+const OUTREACH_ROUTES = {
+  [path.join('functions', 'api', 'outreach', 'send.js')]: /export const onRequest = \(context\) => handleOutreach\(context, 'send'\);/,
+  [path.join('functions', 'api', 'outreach', 'status.js')]: /export const onRequest = \(context\) => handleOutreach\(context, 'status'\);/,
+};
+for (const [f, re] of Object.entries(OUTREACH_ROUTES)) {
+  if (!fs.existsSync(path.join(ROOT, f))) { errors.push(`${f} is missing (the outreach route)`); continue; }
+  const src = read(f);
+  if (!re.test(src) || !/from '\.\.\/\.\.\/_lib\/outreach\.mjs'/.test(src) || src.trim().split('\n').length !== 2) errors.push(`${f} must be the one-line call into outreach.mjs`);
+}
+{ const o = read(path.join('functions', '_lib', 'outreach.mjs'));
+  if (!/'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'/.test(o) || !/reason: 'Unauthorized\.' \}, 401\)/.test(o) || !/tokenMatches\(token\[1\], env\.PNP_OUTREACH_TOKEN\)/.test(o)) errors.push('outreach.mjs must answer no-store + noindex and 401 without PNP_OUTREACH_TOKEN'); }
+for (const f of outside) if (![...icsFiles, ...syncFiles, ...Object.keys(FORM_ROUTES), ...Object.keys(PHOTO_ROUTES), ...Object.keys(FEED_ROUTES), ...Object.keys(OUTREACH_ROUTES)].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed, the sync hook, the owner feed, the outreach API nor a request-form route`);
 
 if (errors.length) {
   console.error('VALIDATION FAIL: admin console noindex / guard');
