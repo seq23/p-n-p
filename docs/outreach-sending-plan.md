@@ -1,5 +1,9 @@
 # Outreach sending plan: cold email off the invoice domain (22 Oct 2026)
 
+> **Retired 30 Oct 2026 by the owner.** Cold outreach now sends from `sequoia@porchandparty901.com`
+> through Resend (a separate account from the invoice mailer). Current setup: [`docs/email-setup.md`](email-setup.md).
+> The text below is kept as history.
+
 Cold outreach (hotels, HOAs, schools) must never send from the domain, the mailbox or the sending
 account that carries invoices, reminders and Valerie's 7 AM email.
 
