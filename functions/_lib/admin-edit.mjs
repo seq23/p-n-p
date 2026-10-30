@@ -37,6 +37,8 @@ import { takedownState, loadTakedownFacts, TAKEDOWN_KINDS } from './takedown.mjs
 import { tip } from './helptext.mjs';
 import * as V from './views.mjs';
 import { TRACK_TABLE } from './prices.mjs';
+import { depositLeft, depositReceived } from './deposit-paid.mjs';
+import { confirmHold } from './holds.mjs';
 
 export const WHO = 'Valerie';
 export const SECTIONS = ['want', 'customer', 'id', 'answers', 'bookings', 'dates', 'invoice', 'payments', 'status'];
@@ -352,6 +354,37 @@ export async function editPage(env, url) {
   return htmlResponse(editPageHtml(d, { flash: url.searchParams.get('m') || '', error: url.searchParams.get('e') || '', warn: url.searchParams.get('w') || '', at: url.searchParams.get('at') || '' }));
 }
 
+// Manual and takedown invoices may not be the card's current invoice.
+async function loadPaymentCard(env, key, invoiceId) {
+  const d = key ? await loadEdit(env, key) : null;
+  if (!invoiceId) return d;
+  const inv = await env.DB.prepare('SELECT * FROM invoices WHERE id = ?1').bind(invoiceId).first();
+  if (!inv || (inv.request_key || '') !== key) return null;
+  const lines = (await env.DB.prepare('SELECT * FROM invoice_lines WHERE invoice_id = ?1 ORDER BY position, id').bind(invoiceId).all()).results || [];
+  const paid = (await paidByInvoice(env.DB, [invoiceId]))[invoiceId] || 0;
+  return { ...d, r: d?.r || { name: inv.customer_name }, inv, lines, balance: balanceOf(inv, lines, paid), today: chicagoDate() };
+}
+
+// A GET only opens the customer's card confirmation. Saving uses Add payment below.
+export async function depositPage(env, url) {
+  const key = decodeKey(url.searchParams.get('r'));
+  const d = await loadPaymentCard(env, key, Number(url.searchParams.get('invoice')));
+  if (!d) return htmlResponse(V.layout('Not found', '<p>That request was not found.</p>'), 404);
+  const rk = b64urlText(key);
+  const card = key ? `/admin/#c-${rk}` : `/admin/invoices/${d.inv.id}`;
+  const canPay = d.inv && d.inv.status !== 'void' && d.balance.remaining > 0;
+  const body = canPay ? `<p>Check the amount and day. Choose how they paid, then tap <strong>Yes, record it</strong>.</p>
+    <form method="post" action="/admin/requests/edit/deposit-paid">
+    <input type="hidden" name="r" value="${esc(rk)}"><input type="hidden" name="invoice_id" value="${d.inv.id}">
+    <input type="hidden" name="expected_paid" value="${d.balance.paid}">
+    ${field('deposit-amount', 'Amount they paid ($)', `<input id="deposit-amount" name="amount" type="number" inputmode="decimal" min="0.01" step="0.01" max="${(d.balance.remaining / 100).toFixed(2)}" value="${(depositLeft(d.inv, d.balance) / 100).toFixed(2)}" required>`)}
+    ${field('deposit-date', 'Day it came in', `<input id="deposit-date" name="date" type="date" value="${d.today}" required>`)}
+    ${field('deposit-method', 'How did they pay?', `<select id="deposit-method" name="method" required><option value="">Choose how they paid</option>${['zelle', 'cashapp', 'cash', 'other'].map((m) => `<option value="${m}">${METHOD_WORDS[m]}</option>`).join('')}</select>`)}
+    <p><button class="btn" name="confirm" value="yes"${tip('pay.recordDeposit')}>Yes, record it</button></p></form>`
+    : `<p>${!d.inv ? 'No invoice yet. Open the card and make the invoice first, then record what they paid.' : d.inv.status === 'void' ? 'This invoice is void. Open the card to check it first.' : 'Everything on this invoice is already paid.'}</p>`;
+  return htmlResponse(V.layout('They paid the deposit', `<style>${EDIT_CSS}</style><div class="editpage"><section class="card"><h1>They paid the deposit</h1><h2>${esc(d.r.name)}</h2>${d.inv ? `<p>Invoice ${esc(d.inv.number)}</p>` : ''}${body}<a class="btn ghost" href="${card}"${tip('nav.back')}>Back to the card</a></section></div>`, { screen: 'depositPaid', back: { href: card, label: 'Back to the card' } }));
+}
+
 // ---- Saves -----------------------------------------------------------------------------
 
 const back = (rk, section, m, e = false, w = '') => redirect(`/admin/requests/edit?r=${encodeURIComponent(rk)}&${e ? 'e' : 'm'}=${encodeURIComponent(m)}${w ? `&w=${encodeURIComponent(w)}` : ''}&at=${section}#${section}`);
@@ -360,10 +393,10 @@ export async function editRoute(env, request, what) {
   const f = await request.formData();
   const rk = String(f.get('r') || '');
   const key = decodeKey(rk);
-  const d = key ? await loadEdit(env, key) : null;
+  const d = what === 'deposit-paid' ? await loadPaymentCard(env, key, Number(f.get('invoice_id'))) : (key ? await loadEdit(env, key) : null);
   if (!d) return redirect('/admin/?e=That request was not found.');
   const db = env.DB;
-  const H = { 'rental-dates': saveRentalDates, booking: saveBooking, 'booking-remove': removeBooking, dates: saveDates, invoice: saveInvoice, payment: savePayment, 'payment-remove': removePayment, 'payment-add': addPayment, status: saveStatus, customer: saveCustomer, want: saveWant, takedown: saveTakedown }[what];
+  const H = { 'rental-dates': saveRentalDates, booking: saveBooking, 'booking-remove': removeBooking, dates: saveDates, invoice: saveInvoice, payment: savePayment, 'payment-remove': removePayment, 'payment-add': addPayment, 'deposit-paid': confirmDepositPayment, status: saveStatus, customer: saveCustomer, want: saveWant, takedown: saveTakedown }[what];
   if (!H) return back(rk, 'want', 'Nothing to save there.', true);
   return H({ db, f, d, key, rk });
 }
@@ -514,16 +547,52 @@ async function removePayment({ db, f, d, key, rk }) {
   return back(rk, 'payments', 'Payment removed. It stays in the history.');
 }
 
-async function addPayment({ db, f, d, key, rk }) {
+async function addPayment(ctx) {
+  const { db, f, d, key, rk } = ctx;
   if (!d.inv) return back(rk, 'payments', 'There is no invoice to record a payment on.', true);
   const amount = toCents(f.get('amount'));
   if (!(amount > 0)) return back(rk, 'payments', 'Type the amount that came in.', true);
   const date = dateIn(f.get('date')) || d.today;
   const method = Object.keys(METHOD_WORDS).includes(String(f.get('method') || '')) ? String(f.get('method')) : 'other';
-  await db.prepare("INSERT INTO payments (invoice_id, amount_cents, received_on, method, note, kind) VALUES (?1, ?2, ?3, ?4, 'added by hand', 'payment')").bind(d.inv.id, amount, date, method).run();
+  if (ctx.expectedPaid !== undefined) {
+    // A double tap can arrive in two requests before either has read the other's payment.
+    // Check the snapshot inside the INSERT as well, so only one can record that confirmation.
+    const saved = await db.prepare(`INSERT INTO payments (invoice_id, amount_cents, received_on, method, note, kind)
+      SELECT ?1, ?2, ?3, ?4, 'added by hand', 'payment'
+      WHERE (SELECT COALESCE(SUM(amount_cents),0) FROM payments WHERE invoice_id=?1 AND kind='payment' AND voided_at IS NULL)=?5`)
+      .bind(d.inv.id, amount, date, method, ctx.expectedPaid).run();
+    if (!saved.meta.changes) return back(rk, 'payments', 'A payment changed. Check the card first.', true);
+  } else {
+    await db.prepare("INSERT INTO payments (invoice_id, amount_cents, received_on, method, note, kind) VALUES (?1, ?2, ?3, ?4, 'added by hand', 'payment')").bind(d.inv.id, amount, date, method).run();
+  }
+  ctx.recorded = true;
   await syncMoneyStatus(db, d.inv.id);
   await log(db, key, `Payment added: (none) → ${money(amount)} on ${shortDate(date)} (${METHOD_WORDS[method]}) on invoice ${d.inv.number}`);
   return back(rk, 'payments', 'Payment added ✓');
+}
+
+async function confirmDepositPayment(ctx) {
+  const { db, f, d, key, rk } = ctx;
+  const card = key ? '/admin/' : `/admin/invoices/${d.inv.id}`;
+  const anchor = key ? `#c-${rk}` : '';
+  const fail = (m) => redirect(`${card}?e=${encodeURIComponent(m)}${anchor}`);
+  if (f.get('confirm') !== 'yes') return fail('Nothing recorded. Tap They paid, check the details, then Yes, record it.');
+  if (!d.inv || d.inv.status === 'void' || Number(f.get('invoice_id')) !== d.inv.id) return fail('Check the invoice on this card first. Nothing recorded.');
+  if (Number(f.get('expected_paid')) !== d.balance.paid || !f.has('expected_paid')) return fail('A payment changed while this screen was open. Check the card before recording another.');
+  const amount = toCents(f.get('amount'));
+  if (!(amount > 0 && amount <= d.balance.remaining) || !['zelle', 'cashapp', 'cash', 'other'].includes(f.get('method')) || !dateIn(f.get('date')) || Number.isNaN(Date.parse(`${f.get('date')}T12:00:00Z`)) || new Date(`${f.get('date')}T12:00:00Z`).toISOString().slice(0, 10) !== f.get('date')) return fail('Check the amount, day and how they paid. Nothing recorded.');
+  ctx.expectedPaid = d.balance.paid;
+  await addPayment(ctx);
+  if (!ctx.recorded) return fail('A payment changed. Check the card before recording another.');
+  // Add payment writes the existing payment row and request history; only a complete booking
+  // deposit confirms a rental. A smaller payment stays on the waiting list with what is left.
+  const bal = balanceOf(d.inv, d.lines, d.balance.paid + amount);
+  if (d.inv.status === 'draft') {
+    await db.prepare("UPDATE invoices SET status = ?2, updated_at = datetime('now') WHERE id = ?1").bind(d.inv.id, bal.remaining === 0 ? 'paid' : 'deposit_paid').run();
+    if (key) await setStatusRow(db, key, bal.remaining === 0 ? 'paid' : 'deposit_paid', d.inv.id);
+  }
+  if (key && depositReceived(d.inv, bal)) await confirmHold(db, key);
+  return redirect(`${card}?m=${encodeURIComponent('Payment recorded ✓')}${anchor}`);
 }
 
 // Status: any of the six steps or Void. The steps are derived from facts (progress.mjs), so a

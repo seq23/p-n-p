@@ -36,6 +36,7 @@ const L = await mod('functions/_lib/ledger.mjs');
 const PS = await mod('functions/_lib/pay-steps.mjs');
 const PDF = await mod('functions/_lib/pdf.mjs');
 const TODO = await mod('functions/_lib/todo-email.mjs');
+const { PAID_HINT } = await mod('functions/_lib/deposit-paid.mjs');
 const { chicagoDate } = await mod('functions/_lib/reminders.mjs');
 const { todayISO } = s.util;
 const today = chicagoDate();
@@ -172,7 +173,8 @@ for (const c of made) {
   must(npHit === (c.owed > 0), `${L_}: Not paid yet ${npHit ? 'lists' : 'leaves out'} an invoice with ${c.owed} still owed`);
   // 7 AM email: today's pickup line and Money line
   const jobLine = todoLines.find((x) => x.includes(`${c.first} B.`) && /games pickup|pickup/.test(x) && !/^- .* · \$/.test(x)) || '';
-  const col = (jobLine.match(/collect (\$.*?)\)(?::|$)/) || [0, ''])[1].trim();
+  must(jobLine.includes(` · ${PAID_HINT}`) === (c.owed > 0), `${L_}: payment hint must appear exactly when money is still due`);
+  const col = (jobLine.replace(` · ${PAID_HINT}`, '').match(/collect (\$.*?)\)(?::|$)/) || [0, ''])[1].trim();
   const wantCol = dueWords.replace(' due', '');
   must(col === wantCol, `${L_}: 7 AM pickup line collects "${col}" want "${wantCol}" (${jobLine})`);
   const moneyLine = todoLines.find((x) => x.startsWith(`- ${c.first} B. · $`)) || '';

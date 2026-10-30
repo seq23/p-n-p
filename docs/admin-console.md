@@ -1193,3 +1193,27 @@ one, or any image under `assets/` has those bytes. The frozen pages were refroze
   group ≥ 3 pins, every route signed out → sign-in, pinit.js on design pages only, and the page code
   run in a stand-in DOM for every view.
 
+
+
+## Record a deposit from a reminder
+
+The first button on a waiting-for-deposit or money-due item in the morning email,
+owner feed, or Today’s list is **✓ They paid the deposit**. Tap it to open the
+customer’s confirmation screen. Check the amount and day, choose Zelle, Cash App,
+Cash, or Other, then tap **Yes, record it**. Opening the screen saves nothing.
+The deposit amount still needed and today’s Memphis date are filled in; the amount
+can be changed to the payment actually received. After saving, the same card opens.
+
+This uses the existing Add payment path, `payments` table, and `request_events`
+payment history. `money_history` is restricted to tips and expenses by its existing
+schema. No schema migration or existing-data backfill is part of this change.
+A fully recorded booking deposit removes the waiting item on the next list build;
+a partial payment leaves the item with the remaining charges and refundable deposit.
+Any later balance that is due remains a separate money reminder. Missing invoices
+get a plain instruction to open the card and make the invoice before recording money.
+
+Feed items with the shortcut include an optional `actions` array of `{label, href}`
+admin links, with the deposit confirmation first; their `link` also opens that
+confirmation for clients that show a single action. Telephone and SMS actions stay
+out of the feed. `validate:admin-deposit-paid` covers the local confirmation,
+ledger/history, partial balances, list/feed/day parity, duplicate taps, and no email.

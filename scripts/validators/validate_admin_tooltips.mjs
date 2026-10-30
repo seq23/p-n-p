@@ -87,6 +87,7 @@ const tyReq2 = await s.siteRequest({ service: 'party', party_event: 'Birthday', 
 await s.post('/admin/requests/jobdone', { r: s.rk(tyReq2.row.request_key) });
 if (!(heldReq.status === 303 && handReq.status === 303 && tyReq.status === 303 && tyReq2.status === 303)) errors.push('the site-form scenario requests did not go through');
 const screens = [
+  [`/admin/requests/deposit?r=${s.rk(reqB.key)}&invoice=${invB.id}`],
   ['/admin', { auth: false, home: true }],
   ['/admin/', { home: true }],
   [`/admin/?put=${s.rk(reqB.key)}`, { home: true }],

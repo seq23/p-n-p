@@ -974,6 +974,7 @@ async function routeAdmin(context) {
   if (segs[0] === 'requests' && segs[1] === 'note' && method === 'POST') return AS.noteRoute(env, request);
   if (segs[0] === 'requests' && segs[1] === 'delivery' && method === 'POST') return AS.deliveryRoute(env, request);
   // "Change anything on this request" (owner, 18 Oct 2026): one page, one Save per section, at any stage.
+  if (segs[0] === 'requests' && segs[1] === 'deposit' && segs.length === 2 && method === 'GET') return AE.depositPage(env, url);
   if (segs[0] === 'requests' && segs[1] === 'edit') {
     if (segs.length === 2 && method === 'GET') { await RN.markOpened(env.DB, decodeKey(url.searchParams.get('r') || ''), 'edit'); return AE.editPage(env, url); }
     if (segs.length === 3 && method === 'POST') return AE.editRoute(env, request, segs[2]);

@@ -1,3 +1,4 @@
+import { paidHref, PAID_LABEL, PAID_HINT } from './deposit-paid.mjs';
 // Calendar screens for the /admin console: month view with the Unconfirmed requests list,
 // a day view that is also the printable Day sheet, the scheduling form, Move, notes, rental
 // check-in ("Mark returned"), tomorrow's reminders, "Find a customer" and the Google
@@ -582,7 +583,7 @@ export function dayPage({ outRows = [], tdToday = [], requested = [], gamesAsked
     ${u.out.some((w) => w.unnamed) ? `<p class="muted">${esc(u.out.filter((w) => w.unnamed).map((w) => `${firstOf(w.name)}: ${w.unnamed} game${w.unnamed === 1 ? '' : 's'} not picked yet`).join('; '))}</p>` : ''}
     <p class="noprint" style="margin:8px 0 0"><a href="/admin/settings#inventory"${tip('inv.fromGrid')}>Change the items (Inventory)</a></p>
     ${gamesAsked ? `<div class="muted" data-games-asked${tip('cal.gamesAsked')}>${gamesAsked} ${gamesAsked === 1 ? 'game' : 'games'} asked for, not booked yet (not counted as out).</div>` : ''}</section>`;
-  const holdsToday = holds.length ? `<section class="card" data-day-holds><h2>Holds ending this day</h2>${holds.map((h) => `<div><strong>${esc(h.timeLabel)}: ${esc(h.name || 'No name')}</strong> · ${esc(h.items || '')} · deposit not in yet</div>`).join('')}</section>` : '';
+  const holdsToday = holds.length ? `<section class="card" data-day-holds><h2>Holds ending this day</h2>${holds.map((h) => `<div><strong>${esc(h.timeLabel)}: ${esc(h.name || 'No name')}</strong> · ${esc(h.items || '')} · deposit not in yet<p>${esc(PAID_HINT)}</p><a class="btn" href="${esc(paidHref(h.request_key, h.invoice_id))}"${tip('pay.theyPaid')}>${esc(PAID_LABEL)}</a></div>`).join('')}</section>` : '';
   const askedToday = requested.length ? `<section class="card dayonly" data-day-requested><h2>Asked for, not booked yet</h2><div class="reqlist">${requested.map((c) => requestedChip(c, 'a')).join('')}</div></section>` : '';
   // "Load these items" only when two or more jobs load that day (one job's block says it already).
   const loading = rows.filter((r) => r.b.kind === 'rental_pickup');
@@ -597,7 +598,7 @@ export function dayPage({ outRows = [], tdToday = [], requested = [], gamesAsked
     ${rows.map(({ b, c, owe }) => `<div class="job" data-sheet-row="${b.id}"><span class="box" aria-hidden="true"></span><div>
       <div class="jl">${esc([b.time ? prettyTime(b.time) : 'Anytime', (c.delivery && DELIVERY_WORDS[b.kind]) || SHEET_WORDS[b.kind] || KIND_LABELS[b.kind] || 'Booking', firstOf(b.customer_name)].join(' · '))}${c.tentative ? ` <span class="tentpill" data-tentative-pill>${TENT_WORDS}</span>` : ''}</div>
       ${b.items ? `<div class="ji">${esc(b.items)}</div>` : ''}${b.place ? `<div class="muted">${esc(b.place)}</div>` : ''}
-      ${owes(c.bal) ? `<div class="jo" data-still-owed>${esc(dueWords(c.bal))}</div>` : ''}
+      ${owes(c.bal) ? `<div class="jo" data-still-owed>${esc(dueWords(c.bal))}<p>${esc(PAID_HINT)}</p><a class="btn" href="${esc(paidHref(b.request_key, b.invoice_id))}"${tip('pay.theyPaid')}>${esc(PAID_LABEL)}</a></div>` : ''}
       ${(c.notes || []).map((n) => `<div class="jn">${esc(n.body)}</div>`).join('')}</div></div>`).join('') || (outRows.length ? '' : '<p>Nothing booked this day.</p>')}
     </div>
     ${outRows.length ? `<div class="jobs" data-day-out>${outRows.map((w) => `<div class="job" data-rental-out="${esc(w.key)}"><span class="box" aria-hidden="true"></span><div><div class="jl">${esc([OUT_WORDS, firstOf(w.name)].join(' · '))}</div><div class="ji">${esc(namesText(w).join(', ') || '')}</div><div class="muted">Picked up ${esc(shortDate(w.start))}, back ${esc(shortDate(w.end))}</div></div></div>`).join('')}</div>` : ''}

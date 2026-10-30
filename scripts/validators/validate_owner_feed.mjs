@@ -5,7 +5,7 @@
  *  1. ONE list drifts: for the same fixture (a busy Tuesday), the feed's items are not exactly the
  *     7 AM email's items, in the email's order (red box, sections 1-5, Tomorrow, Tidy up, IDs), or
  *     owner-feed.mjs computes its own list instead of mapping todoData() from todo-email.mjs;
- *  2. the shape drifts: anything but {generated_at, range, items[{kind, title, detail, due, link}]},
+ *  2. the shape drifts: anything but {generated_at, range, items[{kind, title, detail, due, link, optional actions}]},
  *     a kind outside deadline|money|renewal|id_delete|mark_done|post|other, a due that is not ISO
  *     or null, a link that is not an https URL or null;
  *  3. range=week lacks the "Your week" figures the Monday email shows (same rows), the jobs of the
@@ -98,7 +98,8 @@ must(/import \{ todoData, WEEK_ROWS \} from '\.\/todo-email\.mjs'/.test(ofSrc) &
 // ---- 2. shape ----------------------------------------------------------------------------------
 const ISO = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}:\d{2}(\.\d{3})?Z)?$/;
 must(JSON.stringify(Object.keys(feed)) === '["generated_at","range","items"]' && feed.range === 'day' && feed.generated_at === NOW.toISOString(), `the feed keys are ${JSON.stringify(Object.keys(feed))}`);
-must(feed.items.every((x) => JSON.stringify(Object.keys(x)) === '["kind","title","detail","due","link"]'), 'an item has other keys than kind, title, detail, due, link');
+must(feed.items.every((x) => JSON.stringify(Object.keys(x)) === (x.actions ? '["kind","title","detail","due","link","actions"]' : '["kind","title","detail","due","link"]')), 'item keys drifted');
+must(feed.items.filter((x) => x.actions).length > 0 && feed.items.filter((x) => x.actions).every((x) => x.actions[0].label === '✓ They paid the deposit' && x.actions[0].href === x.link && x.actions.every((a) => JSON.stringify(Object.keys(a)) === '["label","href"]' && /^https:\/\/porchandparty901\.com\/admin\//.test(a.href))), 'payment actions are missing, malformed or not first');
 must(feed.items.every((x) => OF.FEED_KINDS.includes(x.kind)) && OF.FEED_KINDS.join() === 'deadline,money,renewal,id_delete,mark_done,post,other', 'a kind is outside the contract');
 must(feed.items.every((x) => typeof x.title === 'string' && x.title && typeof x.detail === 'string'), 'a title is empty or a detail is not a string');
 must(feed.items.every((x) => x.due === null || ISO.test(x.due)), `a due is not ISO or null: ${JSON.stringify(feed.items.map((x) => x.due))}`);

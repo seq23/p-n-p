@@ -1,3 +1,4 @@
+import { paidButton, PAID_HINT, depositReceived } from './deposit-paid.mjs';
 // Valerie's daily to-do email (owner-approved mock, 19 Oct 2026). Every day at 7:00 AM
 // America/Chicago from the pnp-mailer hourly cron: 12:00 UTC in daylight time (CDT, UTC-5),
 // 13:00 UTC in standard time (CST, UTC-6); only the run whose Memphis hour is 7 sends, so daylight
@@ -163,7 +164,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
       if (held > 0) bits.push(`give back ${usd(held)} deposit`);
     }
     const ask = needsTime(b);
-    return { svc, t: `${timeOr(b)} · ${who(b)} · ${jobOf(b)}`, d: bits.filter(Boolean).join(' · '), p: ask ? TODAY_SET_TIME_PROMPT : '', btns: [...(ask ? setTimeBtns(b) : []), { label: 'Open card', href: bookingHref(b) }], key: b.request_key || '', id: b.id, invoice: invoiceOf(b), job: jobOf(b) === 'collect' ? 'collection' : jobOf(b) };
+    return { svc, t: `${timeOr(b)} · ${who(b)} · ${jobOf(b)}`, d: [...bits, ...(bal && !bal.void && !bal.draft && bal.remaining > 0 ? [PAID_HINT] : [])].filter(Boolean).join(' · '), p: ask ? TODAY_SET_TIME_PROMPT : '', btns: [...(bal && !bal.void && !bal.draft && bal.remaining > 0 ? [paidButton(b.request_key, invoiceOf(b))] : []), ...(ask ? setTimeBtns(b) : []), { label: 'Open card', href: bookingHref(b) }], key: b.request_key || '', id: b.id, invoice: invoiceOf(b), job: jobOf(b) === 'collect' ? 'collection' : jobOf(b) };
   });
 
   // 2. Call these people back (oldest first).
@@ -222,7 +223,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const body = renderMessage('paymentReminder', { name: row.name, amount: usd(row.remaining), due: row.due ? dayWords(row.due) : '', late: row.tone === 'late', number: row.number }).text;
     const sms = smsLink(row.phone, body);
     moneyItems.push({ type: 'owed', svc: row.services[0] || 'other', key: row.requestKey, owed: row.owed, dueDate: row.due || '', t: `${shortName(row.name)} · ${dueWords(bals[row.id], usd) || `${usd(row.remaining)} due`}`, d: `${row.words}${job ? `, at the ${job.job.split(' ').pop()}` : ''}${(() => { const b = bals[row.id]; const w = b ? payStepsLine(payStepsOf(b.invoice, linesBy[row.id] || [], { paid: b.paid, payments: paysBy[row.id] || [] }), usd) : ''; return w ? ` · ${w}` : ''; })()}`,
-      btns: [...(sms ? [{ label: 'Text a reminder', href: sms }] : []), { label: 'Mark paid', href: `/admin/invoices/${row.id}` }] });
+      btns: [paidButton(row.requestKey, row.id), ...(sms ? [{ label: 'Text a reminder', href: sms }] : []), { label: 'Mark paid', href: `/admin/invoices/${row.id}` }] });
   }
   // Every unpaid rental hold (owner, 20 Oct 2026): waiting for its deposit, with the invoice's
   // amount due, unless Money already lists that request.
@@ -234,10 +235,12 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
     const endDay = timed ? chicagoDate(new Date(h.untilMs)) : '';
     const until = !timed ? 'Reserved by hand (no end date)' : `Games reserved until ${endDay === today ? 'today' : dayWords(endDay)} ${memphisTime(h.untilMs)}`;
     const bal = h.invoice_id ? bals[h.invoice_id] : null;
+    if (bal && depositReceived(bal.invoice, bal)) continue;
     const due = bal && !bal.void && !bal.draft ? bal.owed + bal.depositOwed : 0;
     const d = bal && !bal.void && !bal.draft ? (due > 0 ? `${dueWords(bal, usd)} on the invoice` : 'Deposit not paid yet') : 'Invoice not sent yet';
-    moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, untilMs: timed ? h.untilMs : null, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [{ label: 'Reserve their games longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
+    moneyItems.push({ type: 'hold', svc: 'rentals', key: h.request_key, due, untilMs: timed ? h.untilMs : null, t: `${shortName(h.name)} · Waiting for deposit · ${until}`, d, btns: [paidButton(h.request_key, h.invoice_id), { label: 'Reserve their games longer', href: cardHref(h.request_key), solid: true }, { label: 'Open card', href: cardHref(h.request_key) }] });
   }
+  for (const it of moneyItems) it.d = `${it.d} · ${PAID_HINT}`;
   // A late rental return is a missed job (in the alarm box above section 1), never also here.
 
   const tomorrowJobs = open.filter((b) => b.date === tomorrow).sort(daySort).map((b) => ({ svc: serviceOfKind(b.kind), t: `${timeOr(b)} · ${who(b)} · ${jobOf(b)}`, key: b.request_key || '', date: b.date, href: bookingHref(b) }));
@@ -283,7 +286,7 @@ function itemHtml(it) {
   return `<div data-item${it.hi ? ' data-hi' : ''} style="border-left:4px solid ${BAR[it.svc] || BAR.other};${hi}padding:6px 8px 6px 12px;margin:0 0 8px 38px;">`
     + `<div style="font-weight:700;">${esc(it.t)}</div>${it.d ? `<div style="color:${C.muted};font-size:15px;">${esc(it.d)}</div>` : ''}`
     + `${it.p ? `<div data-set-time style="color:${C.accent};font-size:15px;font-weight:700;">${esc(it.p)}</div>` : ''}`
-    + `${it.btns && it.btns.length ? `<div style="margin-top:6px;">${it.btns.map(btnHtml).join('')}</div>` : ''}</div>`;
+    + `${it.btns && it.btns.length ? `<div style="margin-top:6px;">${it.btns.map((b) => btnHtml(b)).join('')}</div>` : ''}</div>`;
 }
 function headHtml(mark, title, markBg = C.accent) {
   return `<div style="margin:0 0 8px;"><span style="display:inline-block;width:28px;height:28px;line-height:28px;border-radius:14px;background:${markBg};color:#ffffff;text-align:center;font-weight:700;margin-right:10px;vertical-align:middle;">${esc(mark)}</span><span style="font-size:18px;font-weight:700;vertical-align:middle;">${esc(title)}</span></div>`;
@@ -353,6 +356,7 @@ export function renderTodo(d) {
     for (const it of items) {
       const link = (it.btns || []).find((b) => b.href.startsWith('/admin'));
       T.push(`- ${it.t}${it.d ? ` (${it.d})` : ''}${link ? `: ${SITE}${link.href}` : ''}`);
+      if (link && link.label === '✓ They paid the deposit') T.push(`  ${link.label}: ${SITE}${link.href}`);
       if (it.p) T.push(`  ${it.p}`);
     }
   }

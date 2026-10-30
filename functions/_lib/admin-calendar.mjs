@@ -1,3 +1,4 @@
+import { depositReceived } from './deposit-paid.mjs';
 // Routes for the calendar side of /admin (docs/admin-console.md): Calendar, day view / Day
 // sheet, scheduling, Move, notes, rental check-in, Put away, Find a customer, reminders and the
 // private ICS feed token. Auth is enforced before this runs (guard.mjs), except the ICS feed,
@@ -142,7 +143,8 @@ export async function daySheetData(env, date) {
     const c = ctx(b);
     return { ...b, timeLabel: b.time ? C.prettyTime(b.time) : '', owed: c.bal && !c.bal.void ? c.bal.owed : 0, dueWords: c.bal ? dueWords(c.bal) : '', delivery: c.delivery, note: c.notes[0] ? c.notes[0].body : '' };
   });
-  const holds = (await currentHolds(env.DB)).filter((h) => !h.by_hand && h.until && C.chicagoDayOf(h.until) === date)
+  const bals = await balances(env.DB);
+  const holds = (await currentHolds(env.DB)).filter((h) => !bals[h.invoice_id] || !depositReceived(bals[h.invoice_id].invoice, bals[h.invoice_id])).filter((h) => !h.by_hand && h.until && C.chicagoDayOf(h.until) === date)
     .map((h) => ({ ...h, timeLabel: new Date(h.untilMs).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/Chicago' }) }));
   // Rentals out with a customer this day, between their pickup and return (owner, 19 Oct 2026).
   const outRows = C.outBetween(windows, date, chicagoDate());
