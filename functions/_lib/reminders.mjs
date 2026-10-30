@@ -101,7 +101,7 @@ export function reminderEmail(b) {
   const text = reminderText(b);
   const subject = `Reminder from Porch & Party: tomorrow, ${dayWords(b.date)}`;
   const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-  const html = `<div style="font:16px/1.5 Arial,sans-serif;color:#3b302a;max-width:560px">${esc(text).replace(/Reply here/, 'Reply to this email')}<p style="color:#5f5148;font-size:13px">Porch &amp; Party, Memphis. Questions? Call or text ${BUSINESS_PHONE}.</p></div>`;
+  const html = `<div style="font:16px/1.5 Arial,sans-serif;color:#3b302a;max-width:560px">${esc(text).replace(/Reply here/, 'Reply to this email')}<p style="color:#5f5148;font-size:13px">Porch &amp; Party 901, Memphis. Questions? Call or text ${BUSINESS_PHONE}.</p></div>`;
   return { subject, html, text: text.replace(/Reply here/, 'Reply to this email') };
 }
 

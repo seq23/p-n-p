@@ -32,3 +32,8 @@ database_id = "a78e157d-177d-44a0-9418-dcfa6e735bd0"
 [[r2_buckets]]
 binding = "IDS"
 bucket_name = "pnp-ids"
+
+# Raw outreach mail stays private, in the existing R2 bucket, under outreach/raw/.
+[[r2_buckets]]
+binding = "OUTREACH_RAW"
+bucket_name = "pnp-ids"

@@ -40,6 +40,7 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
   const cs = customerSteps(payStepsOf(invoice, lines, { paid, payments }));
   const pay = paymentStatus(settings);
   const business = settings.business_name || 'Porch & Party';
+  const signature = business.replace(/^Porch & Party$/, 'Porch & Party 901');
   const footerLine = settings.business_address || 'Memphis, Tennessee';
   const phone = contact && contact.telephoneDisplay ? contact.telephoneDisplay : '';
   const tag = cashtag(settings.cashapp);
@@ -107,7 +108,7 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
     ${view.notes.length ? `<div style="margin-top:16px;padding-top:12px;border-top:1px solid ${C.line};" data-invoice-notes>${noteHtml(view.notes)}</div>` : ''}
   </td></tr>
   <tr><td style="padding:16px 24px 24px;border-top:1px solid ${C.line};font-family:${SANS};font-size:12px;color:${C.muted};line-height:1.6;">
-    ${esc(business)} &middot; ${esc(footerLine)}<br>
+    ${esc(signature)} &middot; ${esc(footerLine)}<br>
     Questions? Reply to this email or write ${esc(FROM_EMAIL)}${phone ? ` &middot; call or text ${esc(phone)}` : ''}.
   </td></tr>
 </table></td></tr></table></body></html>`;
@@ -135,7 +136,7 @@ export function renderInvoiceEmail({ invoice, lines, settings, contact, qrSrc, p
     `Please put ${invoice.number} in the payment note.`,
     ...(view.notes.length ? ['', noteRowsText(view.notes)] : []),
     '',
-    `${business} - ${footerLine}`,
+    `${signature} - ${footerLine}`,
     `Questions? Reply to this email or write ${FROM_EMAIL}.`,
   ].join('\n');
 

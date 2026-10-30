@@ -22,6 +22,7 @@ import { expireHolds } from '../../../functions/_lib/holds.mjs';
 import { sendThankYous, sendHoldReminders } from '../../../functions/_lib/customer-messages.mjs';
 import { sendTodoEmail, isTodoHour } from '../../../functions/_lib/todo-email.mjs';
 import { sendMarketplaceRenew } from '../../../functions/_lib/marketplace-renew.mjs';
+import { receiveOutreach } from '../../../functions/_lib/outreach-inbound.mjs';
 import { autoDeleteIds } from '../../../functions/_lib/id-auto.mjs';
 
 const FROM = { email: 'hello@porchandparty901.com', name: 'Porch & Party' };
@@ -64,6 +65,8 @@ async function askForSheetResync(env, site = 'https://porchandparty901.com') {
 }
 
 const worker = {
+  // Inbound sequoia@ mail (Email Routing rule -> this Worker): functions/_lib/outreach-inbound.mjs.
+  async email(message, env) { await receiveOutreach(message, env); },
   async scheduled(event, env, ctx) {
     ctx.waitUntil(runReminders(env, new Date(event.scheduledTime)).then((r) => console.log(`reminders: ${JSON.stringify(r)}`)));
   },

@@ -1341,7 +1341,7 @@ function endedCard(r, { stage, st, inv, outs, rk, num, first, svcBadges, ctx, se
   return `<article class="card stepcard ended ${done ? 'isdone' : 'iscancelled'}" data-card="${esc(rk)}" id="c-${esc(rk)}" data-reqcard data-ended="${group}" data-stage="${esc(stage)}" data-services="${esc(services.join(' '))}"${first ? ` style="border-left-color:${first.bar}"` : ''}>
       <span class="wm" aria-hidden="true">${done ? '✓' : '✕'}</span>
       <div class="schead">${quickContact(r)}${num ? `<p class="custno" data-customer-label>Customer ${num}</p>` : ''}<div class="sctags"><span class="svcs" data-badges>${svcBadges}</span></div>
-        <h3 class="who">${esc(r.name || 'No name given')}</h3>${asked ? `<p class="scasked" data-asked-head>${esc(asked)}</p>` : ''}</div>
+        <h3 class="who">${esc(r.name || 'No name given')}</h3>${r.corporate ? '<p class="muted" data-corporate>Business / lobby</p>' : ''}${asked ? `<p class="scasked" data-asked-head>${esc(asked)}</p>` : ''}</div>
       <p class="endlbl ${done ? 'ok' : 'grey'}" data-ended-label>${done ? '✓ DONE' : '✕ CANCELLED'}${day ? ` · ${esc(day)}` : ''}</p>
       <p class="endmoney" data-ended-money>${esc(words)}</p>
       ${r.idDeletedAt && r.idDeletedAuto ? `<p class="endmoney" data-id-auto-deleted>ID: <b>deleted automatically on ${esc(autoDeletedDay(r))}</b></p>` : ''}
@@ -1478,7 +1478,7 @@ export function requestCard(r, o) {
   const moreName = esc(r.name ? who : 'this request');
   return `<article class="card stepcard${red ? ' miss' : (miss ? ' tidy' : '')}" ${archived ? 'data-archived' : 'data-card'}="${esc(rk)}" id="c-${esc(rk)}" data-reqcard${isNew ? ' data-new' : ''}${red ? ` data-missed="${esc(miss.id)}"` : (miss ? ` data-tidy="${esc(miss.id)}"` : '')} data-services="${esc(services.join(' '))}" data-stage="${esc(stage)}" data-current-step="${esc(archived ? 'archived' : s.current)}" data-confirmed="${s.confirmed ? '1' : '0'}"${num ? ` data-customer="${num}" data-first="${esc(firstName(r.name) || 'No name')}"` : ''}${first ? ` style="border-left-color:${first.bar}${num ? `;--cc:${first.bar}` : ''}"` : ''}>
       ${num ? `<span class="cnum" data-customer-num aria-hidden="true">${num}</span>` : ''}${red ? `<span class="mchip" data-missed-tag>⚠ ${esc(miss.tag)}</span>` : (miss ? `<span class="ychip" data-tidy-tag>${esc(miss.tag)}</span>` : '')}<div class="schead">${quickContact(r)}${num ? `<p class="custno" data-customer-label>Customer ${num}</p>` : ''}<div class="sctags">${chips}<span class="svcs" data-badges>${svcBadges}</span></div>
-        <h3 class="who">${esc(r.name || 'No name given')}</h3>${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
+        <h3 class="who">${esc(r.name || 'No name given')}</h3>${r.corporate ? '<p class="muted" data-corporate>Business / lobby</p>' : ''}${(() => { const w = whenLine(r, services, bk); return w ? `<p class="scwhen" data-when>${esc(w)}</p>` : ''; })()}
         ${asked ? `<p class="scasked" data-asked-head>${esc(asked)}</p>` : ''}
         ${bizLine}</div>
       ${step1 ? '' : latest}

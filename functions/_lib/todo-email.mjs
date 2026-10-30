@@ -105,7 +105,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   ]);
   const { results: stRows } = await db.prepare('SELECT * FROM request_status').all();
   const statuses = Object.fromEntries((stRows || []).map((s) => [s.request_key, s]));
-  const { results: reqRows } = await db.prepare('SELECT request_key, name, phone, is_test, takedown_plan FROM requests').all();
+  const { results: reqRows } = await db.prepare('SELECT request_key, name, phone, is_test, corporate, takedown_plan FROM requests').all();
   const reqBy = Object.fromEntries((reqRows || []).map((x) => [x.request_key, x]));
   const invoiceOf = (b) => b.invoice_id || (b.request_key && statuses[b.request_key] && statuses[b.request_key].invoice_id) || null;
   // A booking counts unless its request is put away / void / a test or its invoice is void (missed.mjs).
@@ -254,7 +254,7 @@ export async function todoData(db, today, nowMs = Date.now(), { includeWeek = nu
   // Last box: IDs that delete themselves within 7 days (id-auto.mjs idsDueSoon).
   const ids = (await idsDueSoon(db, today)).map(({ r, day }) => ({ key: r.key, day, t: `${shortName(r.name)} — ${dayWords(day)}`,
     btns: [{ label: 'Keep it longer', href: `/admin/requests/id/keep?r=${b64urlText(r.key)}` }, { label: 'Open card', href: cardHref(r.key) }] }));
-  return { today, tomorrow, monday, missed, tidy, ids, sections: { 1: jobs, 2: callbacks, 3: setTime, 4: decide, 5: moneyItems }, tomorrowJobs, week };
+  return { today, tomorrow, monday, missed, tidy, ids, corporateKeys: (reqRows || []).filter((r) => r.corporate).map((r) => r.request_key), sections: { 1: jobs, 2: callbacks, 3: setTime, 4: decide, 5: moneyItems }, tomorrowJobs, week };
 }
 
 const nothingElse = (d) => !(d.missed || []).length && [1, 2, 3, 4, 5].every((n) => !d.sections[n].length) && !d.tomorrowJobs.length;

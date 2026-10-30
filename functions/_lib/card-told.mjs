@@ -14,7 +14,7 @@ import { shortDate } from './util.mjs';
 import { parseFormDate } from './calendar.mjs';
 import { smsHref } from './quick-texts.mjs';
 
-export const QUESTIONS_SIGN_OFF = '— Valerie, Porch & Party';
+export const QUESTIONS_SIGN_OFF = '— Valerie, Porch & Party 901';
 
 const all = (r) => [...(r.rentals || []), ...(r.decor || []), ...(r.other || [])];
 const ans = (r, re) => { const hit = all(r).find((x) => re.test(String(x.label || ''))); return hit ? String(hit.value == null ? '' : hit.value).trim() : ''; };
@@ -152,7 +152,7 @@ function whatWords(f, services) {
 // The pre-made text, in Valerie's words: "Hi Tiffany! 💕 I'd love to help you create a beautiful
 // hotel room setup for your birthday! To put together your quote, a few quick questions:
 // 1. ... 2. ... Once I have those, I'll put together some options and pricing for you! 💕
-// — Valerie, Porch & Party". Questions are numbered 1, 2, 3 in order, only the missing ones.
+// — Valerie, Porch & Party 901". Questions are numbered 1, 2, 3 in order, only the missing ones.
 export function questionsText(r, services = [], ask = null, bookings = []) {
   const f = facts(r, services, bookings);
   const list = ask || stillToAsk(r, services, bookings);

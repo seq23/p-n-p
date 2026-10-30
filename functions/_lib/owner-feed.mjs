@@ -25,6 +25,7 @@ import { todoData, WEEK_ROWS } from './todo-email.mjs';
 import { weeklyData } from './weekly.mjs';
 import { isRenewDay, LISTINGS } from './marketplace-renew.mjs';
 import { chicagoDate, dayWords, timeWords } from './reminders.mjs';
+import { b64urlText } from './util.mjs';
 import { addDays } from './calendar.mjs';
 import { useInventory } from './inventory.mjs';
 
@@ -64,6 +65,11 @@ export function feedItemsFromTodo(d) {
   for (const j of d.tomorrowJobs || []) out.push(item('deadline', j.t, `Tomorrow, ${dayWords(d.tomorrow)}`, d.tomorrow, linkOf(j)));
   for (const t of d.tidy || []) out.push(item('mark_done', t.t, 'Tidy up: tick it off in the admin', null, `${SITE}/admin/`));
   for (const x of d.ids || []) out.push(item('id_delete', x.t, 'Deletes itself that day. Nothing to do if that is fine.', isoDay(x.day), linkOf(x)));
+  const corporate = (d.corporateKeys || []).map((request_key) => ({ request_key }));
+  for (const it of out) if (corporate.some((r) => {
+    const key = b64urlText(r.request_key);
+    return [it.link, ...(it.actions || []).map((a) => a.href)].some((href) => href && (href.includes(`r=${key}`) || href.endsWith(`#c-${key}`)));
+  })) it.detail = ['Business / lobby', it.detail].filter(Boolean).join(' · ');
   return out;
 }
 

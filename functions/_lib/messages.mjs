@@ -19,7 +19,7 @@ export function wrapEmail({ title, paragraphs, extraHtml = '' }) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#fff;border:1px solid ${C.line};border-radius:12px;">
 <tr><td style="padding:24px 24px 4px;font-family:${SERIF};font-size:28px;font-weight:600;color:${C.ink};">Porch &amp; Party</td></tr>
 <tr><td style="padding:4px 24px 20px;font-family:${SANS};font-size:16px;line-height:1.55;color:${C.ink};">${body}${extraHtml}</td></tr>
-<tr><td style="padding:14px 24px 22px;border-top:1px solid ${C.line};font-family:${SANS};font-size:12px;color:${C.muted};">Porch &amp; Party, Memphis. Questions? Reply to this email or call or text ${BUSINESS_PHONE}.</td></tr>
+<tr><td style="padding:14px 24px 22px;border-top:1px solid ${C.line};font-family:${SANS};font-size:12px;color:${C.muted};">Porch &amp; Party 901, Memphis. Questions? Reply to this email or call or text ${BUSINESS_PHONE}.</td></tr>
 </table></td></tr></table></body></html>`;
 }
 
@@ -37,7 +37,7 @@ export const TEMPLATES = {
       lines.push('We will text you a quote, usually within a day. Your date is held once the 50% deposit is paid by Zelle or Cash App, and the rest is due when we arrive to set up.');
     }
     lines.push(`You agreed to our Rules & Responsibilities when you sent this request: porchandparty901.com/rules`);
-    lines.push(`Questions? Text ${BUSINESS_PHONE}. Thank you! — Valerie, Porch & Party`);
+    lines.push(`Questions? Text ${BUSINESS_PHONE}. Thank you! — Valerie, Porch & Party 901`);
     return { subject: ctx.rentals ? 'Your games are held — Porch & Party' : 'We got your request — Porch & Party', lines };
   },
 };

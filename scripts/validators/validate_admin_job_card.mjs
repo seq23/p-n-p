@@ -83,7 +83,7 @@ must(gq.includes('g_food') && gq.includes('g_diet') && !gq.includes('takedown'),
 
 // ---- 2. pure: the text, numbered, in Valerie's words; the sms: encoding -----------------------
 const text = T.questionsText(tiff, ['party'], tAsk);
-const WANT = "Hi Tia! 💕 I'd love to help you create a beautiful hotel room setup for your birthday!\nTo put together your quote, a few quick questions:\n1. What time do you need it completed on Mon 2 Nov?\n2. Do you have any inspiration photos you can send?\n3. Would you like any add-ons, like champagne, chocolates, gifts or a grazing table?\nOnce I have those, I'll put together some options and pricing for you! 💕\n— Valerie, Porch & Party";
+const WANT = "Hi Tia! 💕 I'd love to help you create a beautiful hotel room setup for your birthday!\nTo put together your quote, a few quick questions:\n1. What time do you need it completed on Mon 2 Nov?\n2. Do you have any inspiration photos you can send?\n3. Would you like any add-ons, like champagne, chocolates, gifts or a grazing table?\nOnce I have those, I'll put together some options and pricing for you! 💕\n— Valerie, Porch & Party 901";
 must(text === WANT, `the pre-made text is not the owner's wording:\n${text}`);
 const nums = [...text.matchAll(/^(\d+)\. /gm)].map((m) => Number(m[1]));
 must(nums.join() === '1,2,3', `the questions are not numbered 1, 2, 3 (${nums})`);
@@ -178,7 +178,7 @@ for (const [svc, row] of Object.entries(made)) {
     must(body === T.questionsText(req, services, ask, bk), `${svc}: the sms body is not the pre-made text`);
     const qs = [...body.matchAll(/^(\d+)\. (.+)$/gm)];
     must(qs.map((q) => Number(q[1])).join() === ask.map((_, i) => i + 1).join() && qs.map((q) => q[2]).join('|') === ask.map((q) => q.question).join('|'), `${svc}: the text is not the missing questions numbered 1..${ask.length}`);
-    must(body.endsWith('— Valerie, Porch & Party') && body.startsWith(`Hi ${first}! 💕`), `${svc}: the text does not open "Hi ${first}! 💕" and sign "— Valerie, Porch & Party"`);
+    must(body.endsWith('— Valerie, Porch & Party 901') && body.startsWith(`Hi ${first}! 💕`), `${svc}: the text does not open "Hi ${first}! 💕" and sign "— Valerie, Porch & Party 901"`);
   }
   // 3. chips = the same missing list; 4. told = answers that exist.
   const chips = [...c.matchAll(/<span class="askchip" data-ask="([a-z_]+)">/g)].map((x) => x[1]);
