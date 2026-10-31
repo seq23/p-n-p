@@ -445,6 +445,24 @@
       "profiles": [
         "release"
       ]
+    },
+    {
+      "id": "entity-graph",
+      "command": "npm run validate:entity-graph",
+      "detects": "A config/entity.json with no @id, name, url, logo or description, a description that is not the brand identity sentence, a sameAs that is not https, duplicated, this site's own host, a Spry Labs or West Peek host, or also pending, a pending profile with no platform or owner action, or a parentOrganization pointing at Spry Labs or West Peek; and on any published page a #business node whose @id, name, url, logo or sameAs differs from config/entity.json (sameAs by equality), whose description replaces rather than extends the entity description, or whose parentOrganization differs; any JSON-LD node listing a forbidden or own-host sameAs. Fails on zero pages or an empty sameAs (authority audit 2026-10-30).",
+      "profiles": [
+        "release",
+        "core"
+      ]
+    },
+    {
+      "id": "entity-backlink-watch-self-test",
+      "command": "npm run self-test:entity-backlink-watch",
+      "detects": "A weekly entity backlink watch that no longer removes a 404 profile, promotes a resolving pending profile, keeps a JS-rendered or robot-blocked profile, names a missing link-back, an unclaimed pending profile or the Google listing's Website field as a named stop, writes config/entity.json without --apply, or exits 0 having examined nothing. Proved offline against a fixture.",
+      "profiles": [
+        "release",
+        "core"
+      ]
     }
   ]
 }

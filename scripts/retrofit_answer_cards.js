@@ -105,7 +105,7 @@ function localBusinessNode(image) {
     email: 'hello@porchandparty901.com',
     ...require('./lib/contact_surface').businessContactFields(),
     brand: { '@type': 'Brand', name: offers.brandName },
-    parentOrganization: { '@type': 'Organization', name: 'Kerseta LLC' },
+    parentOrganization: { ...require('../config/entity.json').parentOrganization },
     makesOffer: Object.values(offers.services).map((s) => ({
       '@type': 'Offer',
       name: s.name,

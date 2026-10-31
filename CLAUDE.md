@@ -40,3 +40,12 @@ Every address, how it sends and receives, the DNS records and what to check when
 - Every fix lands with a registered validator in `scripts/validators/` or
   `scripts/validation/`, wired into `package.json` and reached by
   `npm run validate:release`.
+
+## Entity graph
+
+The business's sameAs, pending profiles and legal parent live in ONE file,
+**[`config/entity.json`](config/entity.json)** (never a Spry Labs parent; Porch &
+Party is not a Spry Labs side business). `npm run validate:entity-graph` holds
+every page to it; the weekly `entity-backlink-watch.yml` checks each profile still
+resolves and links back, and names what only the owner can claim.
+

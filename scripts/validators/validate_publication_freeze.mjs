@@ -47,7 +47,9 @@ const COPY = [
   'data/authority_scale/velocity_decision.json', 'data/authority_scale/citation_yield_contract.json',
   'data/published_manifest/published_manifest.json', 'data/slug_registry/slug_registry.json',
   // The fold list the publisher refuses to republish from (scripts/lib/hub_consolidation.js, 26 Oct 2026).
-  'data/search_intelligence/hub_consolidation.json', 'data/content/hub_folds.json'
+  'data/search_intelligence/hub_consolidation.json', 'data/content/hub_folds.json',
+  // The business entity's sameAs and parent (scripts/lib/contact_surface.js reads it, 30 Oct 2026).
+  'config/entity.json'
 ];
 function sandboxRun({ frozen, measuredRoute, allowance = 5, alsoUnmeasured = false }) {
   const box = fs.mkdtempSync(path.join(os.tmpdir(), 'pnp-freeze-'));
