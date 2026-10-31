@@ -955,6 +955,13 @@ Password. Every form, field and button that was there is still there and saves t
 - **How a save reaches the website.** The **Inventory Poll** workflow (every 5 min) reads
   `GET /api/inventory/pending` and starts Inventory Publish once per change with GitHub's own token.
   Optional Pages secret `PNP_GITHUB_TOKEN` (Actions: write on seq23/p-n-p) starts it instantly.
+  `GET /api/inventory/pending` answers inside `PENDING_BUDGET_MS` (5 s): past it, a plain
+  503 `{ pending: false, error: 'timeout' }` and the next round tries again; a read failure is 503
+  `unavailable`. Nothing waiting is one primary-key read. **The 504s on this path in Cloudflare's
+  analytics are not the poll timing out**: they carry user agent `nginx-ssl early hints` (Cloudflare's
+  own Early Hints probe, one beside every poll, 143 in the 24 h to 31 Oct 2026) while the poll's
+  `curl` requests answered 200 every time. Filter by user agent before calling this endpoint slow.
+  Guard: `npm run validate:inventory-pending-budget`.
   The workflow reports back to `POST /api/inventory/report` (HMAC, `PNP_INVENTORY_REPORT_KEY` on both
   GitHub and Pages). Inventory (and Settings) show "Website updating…", then "Live ✓" only when
   porchandparty901.com/rentals/ carries the new `<meta name="pnp-inventory">` version; a failure
