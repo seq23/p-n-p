@@ -437,6 +437,14 @@
       "profiles": [
         "release"
       ]
+    },
+    {
+      "id": "inventory-pending-budget",
+      "command": "npm run validate:inventory-pending-budget",
+      "detects": "GET /api/inventory/pending: one primary-key read when nothing waits (query plan, 20,000-row history), bounded reads and no outside call when a change waits, a 5 s time budget with a plain 503 timeout/unavailable answer shorter than the poll's curl limit, and the documented Early Hints 504 analytics artifact.",
+      "profiles": [
+        "release"
+      ]
     }
   ]
 }

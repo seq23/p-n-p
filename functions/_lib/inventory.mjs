@@ -464,8 +464,26 @@ export function publishWords(p) {
 
 // Route entry points (functions/api/inventory/pending.js, report.js): no-store, never indexed.
 const PUBLIC_HEADERS = { 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex' };
-export async function handlePending({ env }) {
-  try { return Response.json(await pendingPayload(env), { headers: PUBLIC_HEADERS }); } catch { return Response.json({ pending: false, error: 'unavailable' }, { status: 503, headers: PUBLIC_HEADERS }); }
+// A time budget, so a slow database never leaves a caller hanging: past PENDING_BUDGET_MS the
+// answer is a clear 503 { pending: false, error: 'timeout' } and the next 5-minute round tries
+// again. The normal answer is one primary-key read (latestPublish) and nothing else; no outside
+// call. (The 504s from user agent "nginx-ssl early hints" in Cloudflare's analytics for this path
+// are Cloudflare's own Early Hints probes, not the poll; 30 Oct 2026, docs/admin-console.md.)
+export const PENDING_BUDGET_MS = 5000;
+export async function handlePending({ env }, budgetMs = PENDING_BUDGET_MS) {
+  const started = Date.now();
+  let timer;
+  const late = new Promise((resolve) => { timer = setTimeout(() => resolve('timeout'), budgetMs); });
+  const headers = () => ({ ...PUBLIC_HEADERS, 'Server-Timing': `pending;dur=${Date.now() - started}` });
+  try {
+    const out = await Promise.race([pendingPayload(env), late]);
+    if (out === 'timeout') return Response.json({ pending: false, error: 'timeout', detail: `The inventory database did not answer within ${budgetMs / 1000} seconds; the next round tries again.` }, { status: 503, headers: headers() });
+    return Response.json(out, { headers: headers() });
+  } catch {
+    return Response.json({ pending: false, error: 'unavailable', detail: 'The inventory database could not be read; the next round tries again.' }, { status: 503, headers: headers() });
+  } finally {
+    clearTimeout(timer);
+  }
 }
 export async function handleReportRoute({ request, env }) {
   const res = await handleReport(env, request);
