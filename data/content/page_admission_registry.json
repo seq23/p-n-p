@@ -676,7 +676,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "f620c04cd6c565d881f4852fd29306b20ce0a88161fb65408a8f5d5a0de57bf2"
+      "content_sha256": "c3d073bdcea2bddf0b820046d21235b3b5757b17d2a0c96f74132743190ee059"
     },
     {
       "route": "/services/christmas-porch-decorating",
@@ -712,7 +712,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "31a33cf5a224ddde7a9263146ef7a10c1be403a2596c58521beac27ba32e2ee7"
+      "content_sha256": "75d4cfccc7c1ce16ab6648002f74dcb8c018f9ae8066c876af5aaf1a7f74e2e1"
     },
     {
       "route": "/services/grazing-tables-memphis",
@@ -766,7 +766,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "0eaa7f64e5791e50168dc424016c0414b7e5a8378c288187baf4f743dc1b369d"
+      "content_sha256": "06896b4b00657182d46df346919b0392a96567c7bfa600d1aec53797071c7bec"
     },
     {
       "route": "/services/small-porch-decorating",
