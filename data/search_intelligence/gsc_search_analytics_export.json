@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-09-30",
-  "end_date": "2026-10-27",
-  "collected_at": "2026-10-30T15:47:56.571362+00:00",
+  "start_date": "2026-10-01",
+  "end_date": "2026-10-28",
+  "collected_at": "2026-10-31T15:08:09.168859+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -70,6 +70,15 @@
     },
     {
       "keys": [
+        "graduation party planning"
+      ],
+      "clicks": 0,
+      "impressions": 44,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "halloween events southaven ms"
       ],
       "clicks": 0,
@@ -93,9 +102,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 4,
-      "impressions": 32,
-      "ctr": 0.125,
-      "position": 9.9375
+      "impressions": 76,
+      "ctr": 0.05263157894736842,
+      "position": 4.7631578947368425
     },
     {
       "keys": [
@@ -199,6 +208,16 @@
     },
     {
       "keys": [
+        "graduation party planning",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 44,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "halloween events southaven ms",
         "https://porchandparty901.com/"
       ],
@@ -219,9 +238,9 @@
     }
   ],
   "counts": {
-    "by_query": 8,
+    "by_query": 9,
     "by_page": 3,
-    "by_query_page": 10
+    "by_query_page": 11
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }

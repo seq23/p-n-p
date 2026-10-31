@@ -9,17 +9,17 @@
   "max_targets": 500,
   "measurement_rule": "Every target carries a source (gsc_export | measured_demand) and a positive measured number. Anything unmeasured is dropped, not kept with a null.",
   "gsc_window": {
-    "start_date": "2026-09-30",
-    "end_date": "2026-10-27",
-    "collected_at": "2026-10-30T15:47:56.571362+00:00"
+    "start_date": "2026-10-01",
+    "end_date": "2026-10-28",
+    "collected_at": "2026-10-31T15:08:09.168859+00:00"
   },
-  "target_count": 10,
+  "target_count": 11,
   "targets_by_source": {
     "measured_demand": 2,
-    "gsc_export": 8
+    "gsc_export": 9
   },
-  "party_planner_family_count": 4,
-  "anchored_to_admitted_route_count": 10,
+  "party_planner_family_count": 5,
+  "anchored_to_admitted_route_count": 11,
   "truth_boundary": "A target query is something this loop intends to observe. Its number is the measurement that admitted it, not evidence of ranking, indexing, surfacing, or citation.",
   "dropped_count": 12,
   "dropped": [
@@ -104,6 +104,26 @@
       "owned_route_is_admitted": true
     },
     {
+      "target_id": "pnp_sq_f782db276b9b",
+      "query": "graduation party planning",
+      "source": "gsc_export",
+      "family": "party_planner",
+      "impressions": 44,
+      "clicks": 0,
+      "average_position": 1,
+      "measurement": {
+        "metric": "impressions_28d",
+        "value": 44,
+        "window": "2026-10-01..2026-10-28",
+        "collected_at": "2026-10-31T15:08:09.168859+00:00"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_gsc_query",
+      "expected_owned_route": "/services/birthday-party-planner-memphis",
+      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "owned_route_is_admitted": true
+    },
+    {
       "target_id": "pnp_sq_d4054a8c7790",
       "query": "holiday porch decorating service",
       "source": "measured_demand",
@@ -132,8 +152,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-30..2026-10-27",
-        "collected_at": "2026-10-30T15:47:56.571362+00:00"
+        "window": "2026-10-01..2026-10-28",
+        "collected_at": "2026-10-31T15:08:09.168859+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -152,8 +172,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-30..2026-10-27",
-        "collected_at": "2026-10-30T15:47:56.571362+00:00"
+        "window": "2026-10-01..2026-10-28",
+        "collected_at": "2026-10-31T15:08:09.168859+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -172,8 +192,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-09-30..2026-10-27",
-        "collected_at": "2026-10-30T15:47:56.571362+00:00"
+        "window": "2026-10-01..2026-10-28",
+        "collected_at": "2026-10-31T15:08:09.168859+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -192,8 +212,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-30..2026-10-27",
-        "collected_at": "2026-10-30T15:47:56.571362+00:00"
+        "window": "2026-10-01..2026-10-28",
+        "collected_at": "2026-10-31T15:08:09.168859+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -212,8 +232,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-30..2026-10-27",
-        "collected_at": "2026-10-30T15:47:56.571362+00:00"
+        "window": "2026-10-01..2026-10-28",
+        "collected_at": "2026-10-31T15:08:09.168859+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -232,8 +252,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-30..2026-10-27",
-        "collected_at": "2026-10-30T15:47:56.571362+00:00"
+        "window": "2026-10-01..2026-10-28",
+        "collected_at": "2026-10-31T15:08:09.168859+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -252,8 +272,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-30..2026-10-27",
-        "collected_at": "2026-10-30T15:47:56.571362+00:00"
+        "window": "2026-10-01..2026-10-28",
+        "collected_at": "2026-10-31T15:08:09.168859+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -272,8 +292,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-09-30..2026-10-27",
-        "collected_at": "2026-10-30T15:47:56.571362+00:00"
+        "window": "2026-10-01..2026-10-28",
+        "collected_at": "2026-10-31T15:08:09.168859+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
