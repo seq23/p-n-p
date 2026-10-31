@@ -92,8 +92,8 @@ const popularQuestions = () =>
  * One business entity (owner-approved 2026-10-16): the site, the Google
  * Business Profile and the Facebook Page are the same business. Every page
  * carries exactly ONE full business node with the stable @id
- * https://porchandparty901.com/#business, whose sameAs names the Facebook Page
- * and the Maps cid; every other node that would describe the business
+ * https://porchandparty901.com/#business, whose sameAs is config/entity.json sameAs
+ * (today the Facebook Page and the Maps cid); every other node that would describe the business
  * (a nested Service.provider, Article.about/publisher/author, Offer.seller)
  * is reduced to {"@id": ...}. Values come from data/offers/services.json
  * contact.entity. Guarded by scripts/validators/validate_business_entity.js.
@@ -111,8 +111,14 @@ if (!ENTITY.address || ENTITY.address['@type'] !== 'PostalAddress' || !ENTITY.ad
 if ('streetAddress' in ENTITY.address || 'postalCode' in ENTITY.address) {
   throw new Error('data/offers/services.json contact.entity.address must not carry a streetAddress or postalCode: no street address of hers is public');
 }
+// The one sameAs list (authority audit 2026-10-30): config/entity.json, kept true
+// by the weekly entity backlink watch. Written EXACTLY - never merged with what a
+// page already carried, or a profile the watch removed could never leave a page.
+const GRAPH = require(path.join(__dirname, '../../config/entity.json'));
+if (GRAPH['@id'] !== ENTITY.id) throw new Error(`config/entity.json @id ${GRAPH['@id']} differs from data/offers/services.json contact.entity.id ${ENTITY.id}`);
+if (!Array.isArray(GRAPH.sameAs) || !GRAPH.sameAs.length) throw new Error('config/entity.json sameAs is empty');
 const BUSINESS_ID = ENTITY.id;
-const SAME_AS = [C.facebookPageUrl, C.googleBusinessProfileUrl];
+const SAME_AS = GRAPH.sameAs.slice();
 const AREAS = require(path.join(__dirname, '../../data/service_areas/areas.json')).areas;
 
 const businessRef = () => ({ '@id': BUSINESS_ID });
@@ -148,6 +154,10 @@ function canonicalBusiness(existing = {}) {
     name: offers.brandName,
     url: `${offers.domain}/`,
     ...rest,
+    // One entity, one description (authority audit 2026-10-30): a page may extend the
+    // entity description (the home page adds the served cities) but never replace it -
+    // three service pages had put the service's own description on the business node.
+    ...(rest.description != null ? { description: String(rest.description).startsWith(GRAPH.description) ? rest.description : GRAPH.description } : {}),
     telephone: C.telephone,
     email: 'hello@porchandparty901.com',
     address: { ...ENTITY.address },
@@ -156,7 +166,7 @@ function canonicalBusiness(existing = {}) {
     priceRange: ENTITY.priceRange,
     areaServed: union(existing.areaServed, AREAS),
     hasMap: C.googleBusinessProfileUrl,
-    sameAs: union(SAME_AS, existing.sameAs),
+    sameAs: SAME_AS.slice(),
     additionalType: union(existing.additionalType, T.additionalType)
   };
   return node;

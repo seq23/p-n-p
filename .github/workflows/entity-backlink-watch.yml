@@ -1,0 +1,73 @@
+name: Entity Backlink Watch
+
+# Authority audit, 30 Oct 2026: nothing checked that the Facebook Page and the
+# Google Business Profile the business node lists as sameAs still resolve and
+# link back, and the profiles still to be claimed were named nowhere.
+#
+# Weekly, scripts/entity/entity_backlink_watch.mjs fetches every sameAs and
+# pending profile in config/entity.json:
+#   - a dead profile (404/410/no DNS, twice) is removed from sameAs and a
+#     pending profile that now resolves is promoted. That sameAs is on every
+#     published page, and the pages are frozen accepted outputs, so the run
+#     stops RED with "SELF-HEAL READY", the exact change in the job summary and
+#     the commands that apply it; nothing half-applied reaches main.
+#   - a profile that does not link back, the Google listing's Website field
+#     (a JS-rendered page a robot cannot read) and a profile the owner has not
+#     claimed yet are NAMED STOPS in the job summary and the uploaded report.
+#     They keep the run green: they are owner actions, not a broken watch.
+#
+# It never writes main, so it needs no push lane.
+
+on:
+  schedule:
+    # Wednesdays 15:23 UTC, off the hour and away from self-heal (16:11).
+    - cron: "23 15 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: entity-backlink-watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: "22"
+      - name: Prove the self-heal rules before trusting them
+        run: node scripts/entity/self_test_entity_backlink_watch.mjs
+      - name: Check every profile
+        shell: bash
+        run: set -o pipefail; node scripts/entity/entity_backlink_watch.mjs --apply | tee watch.log
+      - name: Named stops to the job summary
+        if: always()
+        run: |
+          {
+            echo "## Entity backlink watch"
+            grep -E 'NAMED STOP|REMOVED|PROMOTED|\{"examined"' watch.log | sed 's/^\[entity-watch\] /- /' || echo "- nothing to report"
+          } >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: entity-backlink-watch
+          path: reports/entity/backlink_watch.json
+          if-no-files-found: error
+      - name: A sameAs change stops here for one reviewed rebuild
+        run: |
+          if git diff --quiet -- config/entity.json; then
+            echo "sameAs unchanged"; exit 0
+          fi
+          {
+            echo "## SELF-HEAL READY"
+            echo '```diff'; git diff -- config/entity.json; echo '```'
+            echo "Apply on a branch: \`npm run watch:entity-backlinks -- --apply\`, then \`npm run authority:scale:prepare-scope -- <every route>\`, \`npm run contact:install\`, \`npm run authority:scale:freeze\`, \`npm run authority:scale:clear-scope\`, \`npm run validate:release\`; if the Facebook Page or Maps URL itself changed, update data/offers/services.json contact and validate_business_entity.js with it. Land the PR."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::SELF-HEAL READY: config/entity.json sameAs changed; see the job summary"
+          exit 1

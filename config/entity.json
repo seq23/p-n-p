@@ -1,0 +1,55 @@
+{
+  "purpose": "The ONE definition of the Porch & Party business entity (the shared authority piece, entity.json): the @id, name, url, logo, description, sameAs and legal parent the single LocalBusiness node on every published page declares. Read by scripts/lib/contact_surface.js (canonicalBusiness writes sameAs from here, exactly), scripts/retrofit_root_pages.js and scripts/retrofit_answer_cards.js (parentOrganization), scripts/validators/validate_entity_graph.mjs and validate_business_entity.js (the fast checks), and scripts/entity/entity_backlink_watch.mjs (the weekly watch).",
+  "origin": "Authority audit, 30 Oct 2026: the Facebook Page and Google Business Profile sameAs were spread across scripts/lib/contact_surface.js and the retrofit scripts, merged with whatever sameAs a page already carried (a dead profile could never leave), and nothing checked that either profile still resolved or linked back. This file is the one list; the watch keeps it true.",
+  "truth_boundary": "sameAs holds ONLY profiles that really exist and resolve now. Never this site's own host, never a Spry Labs or West Peek host (forbidden_same_as_hosts). A profile named but not yet live goes in profiles_pending with url null and enters sameAs only when the weekly watch sees it resolve - and, where the platform renders server-side, link back. Nobody guesses a URL: a guessed handle can belong to another business.",
+  "@id": "https://porchandparty901.com/#business",
+  "name": "Porch & Party",
+  "url": "https://porchandparty901.com/",
+  "logo": "https://porchandparty901.com/assets/img/icons/icon-512.png",
+  "description": "Porch & Party is a Memphis-based company for porch decorating, party planning & decor, grazing tables, and party game rentals.",
+  "sameAs": [
+    "https://www.facebook.com/porchandparty901",
+    "https://www.google.com/maps?cid=1437103205402862394"
+  ],
+  "profiles_pending": [
+    {
+      "platform": "Bing Places",
+      "url": null,
+      "owner_action": "Claim Porch and Party on Bing Places (bingplaces.com, 'Import from Google Business Profile', one click with your Microsoft login), then put the listing URL here."
+    },
+    {
+      "platform": "Nextdoor business page",
+      "url": null,
+      "owner_action": "Create the free Nextdoor business page for Porch & Party with website https://porchandparty901.com, then put its URL here."
+    },
+    {
+      "platform": "Instagram",
+      "url": null,
+      "owner_action": "None until the Instagram account exists per the Oct 2026 growth plan; then put its profile URL here."
+    },
+    {
+      "platform": "TikTok",
+      "url": null,
+      "owner_action": "None until the TikTok account exists per the Oct 2026 growth plan; then put its profile URL here."
+    }
+  ],
+  "parentOrganization": {
+    "@type": "Organization",
+    "name": "Kerseta LLC"
+  },
+  "parentOrganization_note": "The legal owner, already declared on the legal and root pages (owner-approved 2026-10-18; the visible text names it only on the Terms and the Privacy Policy). Porch & Party is NOT a Spry Labs side business: its parentOrganization never points at the Spry Labs entity home, and the business node carries no founder (no private names in public files).",
+  "own_hosts": [
+    "porchandparty901.com"
+  ],
+  "forbidden_same_as_hosts": [
+    "billionairehighperformancecoach.com",
+    "spryexecutiveos.com",
+    "aplayermode.com",
+    "sprylabs.gumroad.com",
+    "sequoiataylor.com",
+    "westpeek.ventures",
+    "westpeek.com",
+    "joinwestpeek.com",
+    "westpeekproductions.com"
+  ]
+}

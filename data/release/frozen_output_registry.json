@@ -664,9 +664,9 @@
       "route": "/services/celebration-setups",
       "rendered_file": "services/celebration-setups.html",
       "state": "FROZEN",
-      "accepted_sha256": "f620c04cd6c565d881f4852fd29306b20ce0a88161fb65408a8f5d5a0de57bf2",
-      "cache_file": "data/release/frozen_accepted_outputs/f620c04cd6c565d881f4852fd29306b20ce0a88161fb65408a8f5d5a0de57bf2.html.gz",
-      "cache_sha256": "3411f68fb544ff50ba698deef2cc78313c20654c8d189af75a3369a34039dbca",
+      "accepted_sha256": "c3d073bdcea2bddf0b820046d21235b3b5757b17d2a0c96f74132743190ee059",
+      "cache_file": "data/release/frozen_accepted_outputs/c3d073bdcea2bddf0b820046d21235b3b5757b17d2a0c96f74132743190ee059.html.gz",
+      "cache_sha256": "e43a5edb915383e8449a2f4e5d2f35b6fa0a19e4a3b2d4f29c05c63f3a940aeb",
       "accepted_at": "2026-07-24"
     },
     {
@@ -709,9 +709,9 @@
       "route": "/services/grazing-and-event-styling",
       "rendered_file": "services/grazing-and-event-styling.html",
       "state": "FROZEN",
-      "accepted_sha256": "31a33cf5a224ddde7a9263146ef7a10c1be403a2596c58521beac27ba32e2ee7",
-      "cache_file": "data/release/frozen_accepted_outputs/31a33cf5a224ddde7a9263146ef7a10c1be403a2596c58521beac27ba32e2ee7.html.gz",
-      "cache_sha256": "a147e83de2174b64b9597b435640ef2dcce2fefff8cbbf4baefd81929d3f3a06",
+      "accepted_sha256": "75d4cfccc7c1ce16ab6648002f74dcb8c018f9ae8066c876af5aaf1a7f74e2e1",
+      "cache_file": "data/release/frozen_accepted_outputs/75d4cfccc7c1ce16ab6648002f74dcb8c018f9ae8066c876af5aaf1a7f74e2e1.html.gz",
+      "cache_sha256": "eb0710031fce6258e1f8f61a180837b75f97b6878af47834a850e2e273c74dee",
       "accepted_at": "2026-07-24"
     },
     {
@@ -763,9 +763,9 @@
       "route": "/services/porch-decorating",
       "rendered_file": "services/porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "0eaa7f64e5791e50168dc424016c0414b7e5a8378c288187baf4f743dc1b369d",
-      "cache_file": "data/release/frozen_accepted_outputs/0eaa7f64e5791e50168dc424016c0414b7e5a8378c288187baf4f743dc1b369d.html.gz",
-      "cache_sha256": "9cbbc9883ef16240c6cc1328d51b5c331c3542a6181ae34db7e7accad86c405a",
+      "accepted_sha256": "06896b4b00657182d46df346919b0392a96567c7bfa600d1aec53797071c7bec",
+      "cache_file": "data/release/frozen_accepted_outputs/06896b4b00657182d46df346919b0392a96567c7bfa600d1aec53797071c7bec.html.gz",
+      "cache_sha256": "c13658497cee68512ab86f76149a2015ad53e937fc9e2f8f8a18ad24253e52f7",
       "accepted_at": "2026-07-24"
     },
     {
