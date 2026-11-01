@@ -3,7 +3,8 @@
 Repo authority for any agent working here. `AGENTS.md` holds the operating law
 (exact repo/worktree/branch locking, `work/*` isolation, exact-SHA checks before
 merge); `REPO_IDENTITY.md` holds the one public domain this repository owns.
-Read both. This file holds the rules an agent most often breaks.
+Read both. This file holds the rules an agent most often breaks. Repo gotchas (full page re-render chain, asset cache, macOS fanout
+churn, admin settings, Facebook) are in [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
 
 ## Cost: nothing paid
 
@@ -32,7 +33,7 @@ Every address, how it sends and receives, the DNS records and what to check when
 ## Working here
 
 - Regenerate pages in order: generator → normalize → clarity → related-nav →
-  icons → chrome → sitemap → refreeze, or just `npm run validate:release`.
+  icons → porch:install → chrome → sitemap → refreeze (see `docs/OPERATIONS.md`), then `npm run validate:release`.
 - Never hand-edit generated pages. Fix the generator, template or data file; the
   next build overwrites anything else.
 - The owner-facing `/admin` console is operated by a non-technical person. Keep it
