@@ -185,7 +185,9 @@ pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/req
     const p3 = { ...porch, key: 'td|due', name: 'Td due', takedownPlan: 'scheduled' };
     pages.push(['dashboardPage(takedown due)', { home: true, direct: true }, { status: 200, text: views.dashboardPage({ ...base, requests: [p3], statuses: { [p3.key]: { status: 'paid', job_done_at: '2026-10-24 12:00:00' } }, schedule: { [p3.key]: { date: '2026-10-24' } }, kinds: { [p3.key]: ['porch_install', 'porch_takedown'] }, bookings: { [p3.key]: [{ id: 1, kind: 'porch_install', date: '2026-10-24' }, { id: 2, kind: 'porch_takedown', date: '2026-10-25' }] }, today: '2026-10-25' }) }]);
     // The day sheet with a takedown marked done (Undo takedown done), through the real routes.
-    const today = s.util.todayISO ? s.util.todayISO() : new Date().toISOString().slice(0, 10);
+    // Chicago's date, the day the app files holds and bookings under. A UTC date went red every
+    // evening 7–10 pm Chicago (00:00–03:00 UTC), when the two dates differ.
+    const today = F.chicagoToday();
     const tr = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', porch_takedown: 'yes', event_date: '2030-10-24', location: 'Germantown', name: 'Tad Takedown', phone: '901-555-0902', email: 'tad.takedown@example.com' });
     await s.post('/admin/calendar/bookings', { r: s.rk(tr.row.request_key), kind: 'porch_takedown', date: today, customer_name: 'Tad Takedown', phone: '', email: '', place: '', items: 'Porch' });
     const tb = await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind = 'porch_takedown'", tr.row.request_key);
