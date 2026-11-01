@@ -20,7 +20,7 @@ name: Entity Backlink Watch
 
 on:
   schedule:
-    # Wednesdays 10:23 CT, off the hour and away from self-heal (11:11 CT).
+    # Wednesdays 10:23 CT, off the hour and 23 minutes after self-heal (10:00 CT).
     - cron: "23 10 * * 3"  # America/Chicago, all year
       timezone: America/Chicago
   workflow_dispatch:
