@@ -17,8 +17,9 @@ on:
   push:
     branches: [main]
   schedule:
-    # 13:10 UTC daily, after the authority cycle has had its say on main.
-    - cron: "10 13 * * *"
+    # 08:10 CT daily, after the authority cycle has had its say on main.
+    - cron: "10 8 * * *"  # America/Chicago, all year
+      timezone: America/Chicago
   workflow_dispatch:
     inputs:
       sample:

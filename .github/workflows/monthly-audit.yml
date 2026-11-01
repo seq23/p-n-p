@@ -3,7 +3,8 @@ name: Monthly Authority Audit
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 15 1 * *"
+    - cron: "0 10 2 * *"  # America/Chicago, all year
+      timezone: America/Chicago
 
 permissions:
   contents: read
