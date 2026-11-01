@@ -42,3 +42,6 @@ Settings rows can be written directly:
 - Marketplace holds only the six bundle listings, posted from a personal profile (Pages need
   Commerce Manager); listings are edited in place, never deleted, when prices or photos change.
   Marketplace listings are email-only.
+
+## Schedule
+- Every scheduled job, in Central time, is listed in `docs/SCHEDULE.md` (rebalanced 1 Nov 2026).

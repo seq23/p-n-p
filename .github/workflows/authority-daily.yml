@@ -3,7 +3,8 @@ name: Daily Authority Cycle
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 15 * * *"
+    - cron: "0 10 * * *"  # America/Chicago, all year
+      timezone: America/Chicago
 
 permissions:
   contents: write
