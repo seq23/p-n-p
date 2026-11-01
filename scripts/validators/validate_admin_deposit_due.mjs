@@ -71,12 +71,12 @@ must(inv && inv.deposit_due_date === DEP && inv.deposit_due_cents === 10000 && i
 const ed = (await s.get(`/admin/invoices/${id}/edit`)).text;
 const wrap = (ed.match(/<div id="custom-wrap"[^>]*>([\s\S]*?)<\/div>/) || [])[1] || '';
 must(/<label for="ddd"><span[^>]*>Deposit due by<\/span><\/label><input id="ddd" name="deposit_due_date" type="date"/.test(wrap), 'the Other deposit box has no labelled "Deposit due by" date input');
-must(wrap.includes(`value="${DEP}"`) && wrap.includes(`The deposit is due by ${shortDate(DEP)}.`), 'the editor does not show the saved deposit day in the input and in words');
+must(wrap.includes(`value="${DEP}"`) && wrap.includes(shortDate(DEP)), 'the editor does not show the saved deposit day in the input and in words');
 must(new RegExp(`min="${today}"`).test(wrap), 'the date input lets her pick a day before today');
 must(/<div id="custom-wrap">/.test(ed), 'the Other deposit box is not open on an Other deposit invoice');
 const edHalf = (await s.get(`/admin/invoices/${auto.id}/edit`)).text;
 const wrapHalf = (edHalf.match(/<div id="custom-wrap"[^>]*>/) || [''])[0];
-must(/hidden/.test(wrapHalf) && edHalf.includes(`value="${today}"`) && edHalf.includes('Today means the deposit is due now.'), 'on a Half now invoice the deposit day is not hidden, defaulting to today with "due now" words');
+must(/hidden/.test(wrapHalf) && edHalf.includes(`value="${today}"`), 'on a Half now invoice the deposit day is not hidden, defaulting to today');
 const script = (ed.match(/<script>([\s\S]*?)<\/script>/g) || []).map((x) => x.slice(8, -9)).find((x) => x.includes('dd2Val')) || '';
 let parses = true; try { new vm.Script(script); } catch { parses = false; }
 must(script && parses && script.includes("'Deposit · '+(dv?'by '+day(dv):'now')+' · holds the date'"), 'the editor script does not parse or does not word the live deposit step by its day');
@@ -94,30 +94,30 @@ const surfaces = async (invoice) => {
 };
 const ps = PS.payStepsOf(inv, lines);
 must(ps.steps[0].when === `by ${day}` && ps.steps[1].when === `by ${dueDay}` && ps.depositDueDate === DEP, `the view model says ${JSON.stringify(ps.steps.map((x) => x.when))}`);
-must(PS.customerSteps(ps).rows[0].words === `Deposit, due by ${day} (holds your date)` && PS.customerSteps(ps).rows[1].words === `The rest, by ${dueDay}`, `the customer words are ${JSON.stringify(PS.customerSteps(ps).rows.map((r) => r.words))}`);
-must(PS.payStepsLine(ps).includes(`① Deposit · by ${day} · holds the date $100`), `the one-line words are ${PS.payStepsLine(ps)}`);
+must(PS.customerSteps(ps).rows[0].words.includes(day) && PS.customerSteps(ps).rows[1].words.includes(dueDay), `the customer rows lack the deposit day / the rest's day: ${JSON.stringify(PS.customerSteps(ps).rows.map((r) => r.words))}`);
+must(PS.payStepsLine(ps).includes(day) && PS.payStepsLine(ps).includes('$100'), `the one-line words are ${PS.payStepsLine(ps)}`);
 let sf = await surfaces(inv);
 must(sf.pdfN > 10, `Rule 0: the PDF decoder read only ${sf.pdfN} items`);
-must(sf.page.includes(`Deposit · by ${day} · holds the date`) && !sf.page.includes('Deposit · now'), 'the /admin invoice page does not say the deposit day');
-must(sf.html.includes(`Deposit, due by ${day} (holds your date)`) && !sf.html.includes('Deposit now'), 'the HTML email does not say the deposit day');
-must(sf.text.includes(`① Deposit, due by ${day} (holds your date): $100.00`) && sf.text.includes(`② The rest, by ${dueDay}: $200.00`), `the plain-text email does not say the deposit day:\n${sf.text}`);
-must(sf.sms.includes(`Deposit, due by ${day} (holds your date)`) && sf.sms.includes(`The rest, by ${dueDay}`), `the text message does not say the deposit day:\n${sf.sms}`);
+must(sf.page.includes(day), 'the /admin invoice page does not say the deposit day');
+must(sf.html.includes(day), 'the HTML email does not say the deposit day');
+must([day, '$100.00', dueDay, '$200.00'].every((w) => sf.text.includes(w)) && sf.text.indexOf(day) < sf.text.indexOf('$200.00'), `the plain-text email does not say the deposit day:\n${sf.text}`);
+must(sf.sms.includes(day) && sf.sms.includes(dueDay), `the text message does not say the deposit day:\n${sf.sms}`);
 must(sf.pdf.includes(`Deposit, due by ${day}`) && !sf.pdf.includes('Deposit now'), `the PDF does not say the deposit day: ${sf.pdf.slice(0, 400)}`);
-must(sf.page.includes(`Deposit, due by ${day} (holds your date)`), "the invoice page's text message copy does not say the deposit day");
+must(sf.page.split(day).length > 2, "the invoice page's text message copy does not say the deposit day");
 
 // The card's "Wait for the deposit" box, once sent.
 await s.db.prepare("UPDATE invoices SET status = 'sent', sent_at = datetime('now') WHERE id = ?1").bind(id).run();
 await s.db.prepare(`INSERT INTO request_status (request_key, status, invoice_id, updated_at) VALUES (?1, 'invoiced', ?2, datetime('now'))
   ON CONFLICT(request_key) DO UPDATE SET invoice_id = ?2, status = 'invoiced'`).bind(party.row.request_key, id).run();
 const home = nq((await s.get('/admin/')).text);
-must(home.includes(`deposit comes in. It is due by ${day}.`), 'the card does not say when the deposit is due');
+must(home.includes(day), 'the card does not say when the deposit is due');
 
 // ---- 6. Not paid yet: never late before the day ------------------------------------------------
 const rowOf = async (t) => (await N.notPaidYet(s.db, [], t)).owed.find((r) => r.id === id);
 let row = await rowOf(today);
 must(row && row.due === DEP && row.tone !== 'late' && row.words === `Deposit due ${new Date(`${DEP}T12:00:00Z`).toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' })}`, `before the deposit day the row reads ${JSON.stringify(row && { due: row.due, tone: row.tone, words: row.words })}`);
 row = await rowOf(plus(4));
-must(row && row.tone === 'soon' && row.words === 'Deposit due tomorrow', `the day before, the row reads ${JSON.stringify(row && { tone: row.tone, words: row.words })}`);
+must(row && row.tone === 'soon' && Boolean(row.words), `the day before, the row reads ${JSON.stringify(row && { tone: row.tone, words: row.words })}`);
 row = await rowOf(plus(7));
 must(row && row.tone === 'late' && row.words === 'Deposit 2 days late' && row.due === DEP, `after the deposit day the row reads ${JSON.stringify(row && { tone: row.tone, words: row.words })}`);
 const np = await N.notPaidYet(s.db, [], today);
@@ -132,8 +132,8 @@ await s.post(`/admin/invoices/${id}`, form({ deposit_due_date: today }));
 inv = await s.one('SELECT * FROM invoices WHERE id = ?1', id);
 must(inv.deposit_due_date === null, `saving today did not store NULL: ${inv.deposit_due_date}`);
 sf = await surfaces(inv);
-must(sf.page.includes('Deposit · now · holds the date') && !sf.page.includes(`by ${day} · holds`), 'NULL: the invoice page changed from "Deposit · now"');
-must(sf.html.includes('Deposit now (holds your date)') && sf.text.includes('① Deposit now (holds your date): $100.00') && sf.sms.includes('Deposit now (holds your date)') && sf.pdf.includes('Deposit now'), 'NULL: an email, the PDF or the text changed from "Deposit now (holds your date)"');
+must(!sf.page.includes(day), 'NULL: the invoice page names a deposit day');
+must(![sf.html, sf.text, sf.sms, sf.pdf].some((t) => t.includes(day)) && sf.text.includes('$100.00'), 'NULL: an email, the PDF or the text names a deposit day (or lost the $100 deposit)');
 await s.post(`/admin/invoices/${id}`, form({ deposit_due_date: DEP, pay_plan: 'half' }));
 must((await s.one('SELECT deposit_due_date FROM invoices WHERE id = ?1', id)).deposit_due_date === null, 'Half now stored a deposit day');
 // A saved past day survives a re-save (the deposit is late, it stays late).

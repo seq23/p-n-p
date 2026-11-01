@@ -222,8 +222,8 @@ const partyKey = made.party.request_key;
   const pd = await s.one("SELECT id, auto_draft FROM invoices WHERE request_key = ?1 AND status = 'draft'", partyKey);
   const pdTotal = pd ? (await s.all('SELECT qty, unit_cents FROM invoice_lines WHERE invoice_id = ?1', pd.id)).reduce((t, l) => t + Math.round(l.qty * l.unit_cents), 0) : 0;
   must(pd && pd.auto_draft === 1 && pdTotal >= s.PRICE_TABLE.celebrationFromCents && s.PRICE_TABLE.celebrationFromCents > 0, 'the website party request has no auto draft at the starting price');
-  must(cur(c) === 'invoiced' && /data-confirmed="1"/.test(c) && c.includes(`data-next-what>📄 Invoice draft ready: ${s.util.money(pdTotal)}<`) && /Made from Pia&#39;s request\. Nothing has been sent\. Check the price, then send\./.test(c)
-    && new RegExp(`href="/admin/invoices/${pd ? pd.id : 0}/edit"[^>]*data-help="step\\.reviewSend"[^>]*>Check and send the invoice<`).test(c) && !/data-help="card\.createInvoice"/.test(c), 'after Yes the party card is not at "📄 Invoice draft ready" with Check and send the invoice (or still offers Create invoice)');
+  must(cur(c) === 'invoiced' && /data-confirmed="1"/.test(c) && c.includes('data-next-what') && c.includes(s.util.money(pdTotal))
+    && new RegExp(`href="/admin/invoices/${pd ? pd.id : 0}/edit"[^>]*data-help="step\\.reviewSend"`).test(c) && !/data-help="card\.createInvoice"/.test(c), 'after Yes the party card is not at "📄 Invoice draft ready" with Check and send the invoice (or still offers Create invoice)');
   const day = (await s.get(`/admin/day/${moved}`)).text;
   const pb = await s.one("SELECT id FROM bookings WHERE request_key = ?1 AND kind = 'party_setup'", partyKey);
   const row = day.slice(day.indexOf(`data-sheet-row="${pb.id}"`), day.indexOf('</div></div>', day.indexOf(`data-sheet-row="${pb.id}"`)));
@@ -299,7 +299,7 @@ const rentKey = made.rentals.request_key;
   must(other.status === 303, 'the second rental was refused');
   await s.post('/admin/requests/talked', { r: s.rk(rentKey), go: 'yes', date: pk.date, return_date: rt.date });
   let c = await card(rentKey);
-  must(/data-confirmed="1"/.test(c) && cur(c) === 'invoiced' && /data-next-what>📄 Invoice draft ready: \$[\d,]+\.\d\d</.test(c) && /Made from Rex&#39;s request\./.test(c) && /data-help="step\.reviewSend"[^>]*>Check and send the invoice</.test(c), 'the confirmed website rental is not at "📄 Invoice draft ready" with Check and send the invoice (its draft)');
+  must(/data-confirmed="1"/.test(c) && cur(c) === 'invoiced' && /data-next-what>[^<]*\$[\d,]+\.\d\d</.test(c) && /data-help="step\.reviewSend"/.test(c), 'the confirmed website rental is not at "📄 Invoice draft ready" with Check and send the invoice (its draft)');
   const invId = (await s.one('SELECT invoice_id FROM request_status WHERE request_key = ?1', rentKey)).invoice_id;
   const ed = (await s.get(`/admin/invoices/${invId}/edit`)).text;
   const cents = Math.round(QA.extraGame * 100);

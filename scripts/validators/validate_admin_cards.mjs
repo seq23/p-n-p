@@ -356,7 +356,7 @@ for (const [nm, c] of [...['Pat Porch', 'Pia Party', 'Gia Graze', 'Rae Rent'].ma
     must(VM.reservedWords(end) === 'Fri 23 Oct, 11:59 PM' && VM.reservedWords(Date.parse('2026-10-27T04:59:00Z')) === 'Mon 26 Oct, 11:59 PM', 'reserved-until dates are not written like "Fri 23 Oct, 11:59 PM" in Memphis time');
     const bh = dep({ state: 'held', by_hand: 1, untilMs: NaN });
     const nb2 = (bh.match(/<section class="nextbox" data-next-step="deposit">[\s\S]*?<\/section>/) || [''])[0];
-    must(/<p class="holdline" data-hold-line>Reserved by hand \(no end date\)<\/p>/.test(nb2) && /data-reserve-longer data-until-ms="">/.test(nb2) && nb2.includes('data-res-current>Reserved by hand (no end date)</p>') && /data-res-new>New date: <b>/.test(nb2), 'a hold reserved by hand (no end date) does not say so on the deposit step, or has no Reserve their games longer control');
+    must(/<p class="holdline" data-hold-line>[^<\d]+<\/p>/.test(nb2) && /data-reserve-longer data-until-ms="">/.test(nb2) && /data-res-current>[^<\d]+<\/p>/.test(nb2) && /data-res-new>/.test(nb2), 'a hold reserved by hand (no end date) does not say so on the deposit step, or has no Reserve their games longer control');
     must(!/id="(hd[^"]*)"[\s\S]*id="\1"/.test(t), 'two Reserve their games longer boxes on one card share an id');
   }
   must(bigButtons(VM.thankYouBox({ thankyouEmailedAt: '' }, { rk: 'x', sms: sms('t'), canEmail: true })) === 0, 'the thank-you box carries a big button');

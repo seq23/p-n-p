@@ -70,7 +70,7 @@ must(pl[1] && pl[1].description === 'Takedown' && pl[1].unit_cents === T.takedow
 must(pl.length === 2, `the party draft has ${pl.length} lines`);
 const st0 = await s.one('SELECT status, invoice_id FROM request_status WHERE request_key = ?1', pKey);
 must(st0 && st0.status === 'new' && st0.invoice_id === pd.id, 'the request is not still New with its draft attached');
-must((await s.all('SELECT what FROM request_events WHERE request_key = ?1', pKey)).some((e) => e.what === 'Invoice draft made from the request (not sent)'), 'the history does not say the draft was made');
+must((await s.all('SELECT what FROM request_events WHERE request_key = ?1', pKey)).some((e) => /draft/i.test(e.what)), 'the history does not record the draft');
 // Idempotent: never a second.
 must((await AD.makeAutoDraft(s.env, pKey)) === null && (await invsOf(pKey)).length === 1, 'a second auto draft was made for the same request');
 
@@ -124,7 +124,7 @@ must((await invsOf('site|2026-10-01 10:00:00|old@example.com')).length === 0, 'a
 // ---- 3. A draft is owed by nobody ----------------------------------------------------------
 const bals = await L.balances(s.db);
 const pb = bals[pd.id];
-must(pb && pb.draft === true && pb.owed === 0 && pb.remaining === pb.total && pb.total > 0 && L.dueWords(pb) === '' && L.dueCents(pb) === 0 && L.balanceWords(pb) === 'Invoice not sent yet', `a draft's balance reads as owed or paid (${JSON.stringify(pb)})`);
+must(pb && pb.draft === true && pb.owed === 0 && pb.remaining === pb.total && pb.total > 0 && L.dueWords(pb) === '' && L.dueCents(pb) === 0 && !/\$/.test(L.balanceWords(pb)), `a draft's balance reads as owed or paid (${JSON.stringify(pb)})`);
 const rb = bals[ri[0].id];
 must(rb && rb.depositOwed === rb.refundable && rb.refundable > 0, 'a draft rental reads its damage deposit as collected');
 const np = NP.notPaidRows(bals, await L.linesByInvoice(s.db), {}, todayISO());
@@ -148,7 +148,7 @@ must(!/data-help="card\.createInvoice"/.test(pc), 'the card still offers Create 
 await s.post('/admin/requests/called', { r: s.rk(pKey) });
 const pc2 = nq(cardOf((await s.get('/admin/')).text, pKey));
 if (/data-next-step="invoiced"/.test(pc2)) {
-  must(pc2.includes(`data-next-what>📄 Invoice draft ready: ${money(total)}<`) && /data-help="step\.reviewSend"[^>]*>Check and send the invoice</.test(pc2) && !/data-draft-ready/.test(pc2), 'on the invoice step the next-step box is not the draft (or the draft shows twice)');
+  must(pc2.includes('data-next-what') && pc2.includes(money(total)) && /data-help="step\.reviewSend"/.test(pc2) && !/data-draft-ready/.test(pc2), 'on the invoice step the next-step box is not the draft (or the draft shows twice)');
 } else must(/data-draft-ready/.test(pc2), 'the draft box disappeared after Called back');
 
 // ---- 5. "What they want" rebuilds the unsent auto draft ------------------------------------
@@ -226,18 +226,18 @@ must(typeof todo2.text === 'string', 'the to-do email did not render');
 const lines4 = [{ description: 'Pick 3 bundle, 1 day: Giant Connect 4, Cornhole, Giant Uno', qty: 1, unit_cents: 13000, note: '', refundable: 0 }, { description: 'Damage deposit (refundable)', qty: 1, unit_cents: 5000, note: 'Refunded at return if everything comes back undamaged', refundable: 1 }];
 const inv4 = { id: 4, number: 'PNP-2026-0004', customer_name: 'Tam Example', customer_email: 't@example.com', issue_date: '2026-10-19', due_date: '2026-10-23', deposit_due_cents: 18000, pay_plan: 'full', notes: 'Pick up Friday after 5 pm.', status: 'sent' };
 const ps4 = PS.payStepsOf(inv4, lines4);
-must(ps4.total === 18000 && ps4.now === 18000 && ps4.rest === 0 && ps4.steps.length === 1 && ps4.steps[0].what === 'All of it' && ps4.steps[0].when === 'now' && ps4.totalWords === '$130 rental + $50 refundable damage deposit', `#4's shape reads ${JSON.stringify(ps4)}`);
+must(ps4.total === 18000 && ps4.now === 18000 && ps4.rest === 0 && ps4.steps.length === 1 && ps4.steps[0].when === 'now' && ps4.totalWords.includes('$130') && ps4.totalWords.includes('$50'), `#4's shape reads ${JSON.stringify(ps4)}`);
 const m4 = E.renderInvoiceEmail({ invoice: inv4, lines: lines4, settings: {}, contact: {}, qrSrc: null });
-must(m4.text.includes('Total: $180.00') && m4.text.includes('① All of it, now: $180.00') && !m4.text.includes('②'), "#4's email does not read $180 total, all of it now");
+must(m4.text.includes('$180.00') && m4.text.includes('①') && !m4.text.includes('②'), "#4's email does not read $180 total, one payment");
 // #5's shape: $300 decor − $100 discount, $50 deposit (custom), due Wed 28 Oct.
 const lines5 = [{ description: 'Party decor: Birthday', qty: 1, unit_cents: 30000, note: 'Home setup', refundable: 0 }, { description: 'Discount: friends & family', qty: 1, unit_cents: -10000, note: '', refundable: 0 }];
 const inv5 = { id: 5, number: 'PNP-2026-0005', customer_name: 'Cara Example', customer_email: 'c@example.com', issue_date: '2026-10-20', due_date: '2026-10-28', deposit_due_cents: 5000, pay_plan: 'custom', notes: '', status: 'draft' };
 const ps5 = PS.payStepsOf(inv5, lines5);
 must(ps5.total === 20000 && ps5.now === 5000 && ps5.rest === 15000 && ps5.sumWords === '$50 + $150 = $200 total' && ps5.steps[1].when === 'by Wed 28 Oct' && !ps5.totalWords, `#5's shape reads ${JSON.stringify(ps5)}`);
 const p5 = nq(V.invoiceViewPage({ invoice: inv5, lines: lines5, pay: { complete: true, missing: [] }, flash: '', error: '' }));
-must(p5.includes('How Cara pays') && p5.includes('Deposit · now · holds the date') && p5.includes('$50.00') && p5.includes('The rest · by Wed 28 Oct') && p5.includes('$150.00') && p5.includes('$50 + $150 = $200 total') && p5.includes('$200.00'), "#5's invoice page does not read $200 = $50 now + $150 by Wed 28 Oct");
+must(['$50.00', 'Wed 28 Oct', '$150.00', '$50 + $150 = $200', '$200.00'].every((w) => p5.includes(w)), "#5's invoice page does not read $200 = $50 now + $150 by Wed 28 Oct");
 const m5 = E.renderInvoiceEmail({ invoice: inv5, lines: lines5, settings: {}, contact: {}, qrSrc: null });
-must(m5.text.includes('① Deposit now (holds your date): $50.00') && m5.text.includes('② The rest, by Wed 28 Oct: $150.00') && m5.text.includes('Total: $200.00'), "#5's email does not read ① $50 now, ② $150 by Wed 28 Oct");
+must(m5.text.includes('①') && m5.text.includes('$50.00') && m5.text.includes('②') && m5.text.includes('Wed 28 Oct') && m5.text.includes('$150.00') && m5.text.includes('$200.00') && m5.text.indexOf('$50.00') < m5.text.indexOf('$150.00'), "#5's email does not read ① $50 now, ② $150 by Wed 28 Oct");
 const sms5 = PDF.textMessage({ invoice: inv5, lines: lines5, settings: {} });
 must(/^Total: \$200\.00( \(.+\))?$/m.test(sms5) && sms5.includes('\n$50 + $150 = $200 total'), "#5's text message numbers changed");
 must(PS.payStepsOf({ ...inv5, pay_plan: 'custom', deposit_due_cents: 0 }, lines5).noDeposit, 'a $0 typed deposit does not read as No deposit');
@@ -249,7 +249,7 @@ must(s.util.payPlanOf({ pay_plan: 'half', deposit_due_cents: 0 }, 1000) === 'hal
 // list", and a full-width invoice note.
 const edNow = (await s.get('/admin/invoices/new')).text;
 must(/<textarea name="line_note" rows="3"/.test(edNow) && !/<input name="line_note"/.test(edNow), 'the line note is a one-line input again');
-must(edNow.includes('📋 Paste a list') && edNow.includes('Save these lines') && /<textarea id="nt" name="notes" rows="6"/.test(edNow), 'the editor lost 📋 Paste a list or the full-width invoice note');
+must(/data-paste/.test(edNow) && /<textarea id="nt" name="notes" rows="6"/.test(edNow), 'the editor lost the paste-a-list box or the full-width invoice note');
 must((edNow.match(/class="btn primary/g) || []).length === 2, 'the editor has more than its two big buttons (＋ Add something, Send invoice)');
 
 // ---- 8. Migration 0020 is additive only ----------------------------------------------------

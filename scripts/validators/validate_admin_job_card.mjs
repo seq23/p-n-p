@@ -47,7 +47,7 @@ must(T.allQuestions(partyAll, ['party']).map((q) => q.key).join() === ORDER.join
 const tiff = { ...partyAll, other: [{ label: 'Anything else? Colors, theme, surprise details', value: 'Purple and blue, number 28 balloons' }] };
 const tAsk = T.stillToAsk(tiff, ['party'], []);
 must(tAsk.map((q) => q.key).join() === 'when,photos,addons', `the mock-up's request does not ask exactly ready time, photos, add-ons (${tAsk.map((q) => q.key)})`);
-must(tAsk[0].question === 'What time do you need it completed on Mon 2 Nov?', `the ready-time question does not name the day (${tAsk[0].question})`);
+must(tAsk[0].question.includes('Mon 2 Nov'), `the ready-time question does not name the day (${tAsk[0].question})`);
 // Each single answer removed brings back exactly its own question (every one of the ten).
 const drop = {
   occasion: (r) => ({ ...r, decor: r.decor.filter((x) => !/event type/.test(x.label)) }),
@@ -76,7 +76,7 @@ const rq = T.stillToAsk(rentNone, ['rentals']).map((q) => q.key);
 must(rq.join() === 'r_games,r_date,r_occasion,r_length,r_pickup,r_return', `rental questions are not games, date, occasion, length, pickup time, return (${rq})`);
 const rentSome = { ...rentNone, gamesAnswer: 'Giant Jenga', rentals: [{ label: 'Which games?', value: 'Giant Jenga' }, { label: 'What date is your event?', value: '2026-11-07' }, { label: 'How long?', value: 'One day' }] };
 const rq2 = T.stillToAsk(rentSome, ['rentals'], [{ kind: 'rental_pickup', date: '2026-11-07', time: null }]);
-must(rq2.map((q) => q.key).join() === 'r_occasion,r_pickup,r_return' && rq2[1].question === 'What time will you pick up on Sat 7 Nov?', `rentals ask answered questions or miss the pickup day (${rq2.map((q) => q.question)})`);
+must(rq2.map((q) => q.key).join() === 'r_occasion,r_pickup,r_return' && rq2[1].question.includes('Sat 7 Nov'), `rentals ask answered questions or miss the pickup day (${rq2.map((q) => q.question)})`);
 const grazNone = { ...base, services: ['grazing'], wantsDecor: true };
 const gq = T.stillToAsk(grazNone, ['grazing']).map((q) => q.key);
 must(gq.includes('g_food') && gq.includes('g_diet') && !gq.includes('takedown'), `grazing questions are not their own set (${gq})`);

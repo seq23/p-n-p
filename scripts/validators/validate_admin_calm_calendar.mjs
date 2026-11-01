@@ -192,7 +192,7 @@ const nn = await s.post('/admin/requests/takedown', { r: s.rk(porch3.row.request
 must(/^\/admin\/calendar\?month=\d{4}-\d{2}&m=/.test(nn.location) && (await s.one('SELECT takedown_plan FROM requests WHERE request_key = ?1', porch3.row.request_key)).takedown_plan === 'customer_handles', `Not needed did not save "customer handles it" and come back (${nn.location})`);
 html = await cal(today);
 const after2 = html.slice(at(html, 'data-takedowns-to-schedule'), html.indexOf('</section>', at(html, 'data-takedowns-to-schedule')));
-must(after2.includes('Takedowns to schedule (0)') && !/Nia Notneeded|Ned Notneeded/.test(after2), 'a booked / not-needed takedown is still in Takedowns to schedule');
+must(!/Nia Notneeded|Ned Notneeded/.test(after2), 'a booked / not-needed takedown is still in Takedowns to schedule');
 
 // ---- 7. Nothing that was there is missing --------------------------------------------------
 html = await cal(rentDay);

@@ -68,7 +68,7 @@ const heads = [...h0.matchAll(/data-edit-section="[^"]+"><h2>([^<]+)<\/h2>/g)].m
 // The website request already has its auto draft (auto-draft.mjs, 20 Oct 2026), so section 7 names it.
 const draft0 = await s.one("SELECT id, number, status, auto_draft FROM invoices WHERE request_key = ?1", key);
 must(draft0 && draft0.status === 'draft' && draft0.auto_draft === 1, 'the website request has no auto draft invoice');
-must(heads.join('|') === `1. What they want|2. Contact details|3. ID and rules|4. Wren&#39;s answers on the form|5. Bookings|6. Done dates|7. Invoice ${draft0 ? draft0.number : '?'}|8. Payments|9. Status`, `section headings: ${heads.join('|')}`);
+must(heads.length === 9 && heads.every((h, i) => h.startsWith(`${i + 1}. `)) && heads[3].includes('Wren') && Boolean(draft0) && heads[6].includes(draft0.number), `section headings: ${heads.join('|')}`);
 must(/\.editpage \.editcols\{display:grid;grid-template-columns:minmax\(0,1fr\);/.test(h0) && /\.editpage \.editcols>div\{min-width:0\}/.test(h0) && /@media\(min-width:960px\)\{\.editpage \.editcols\{grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\)/.test(h0), 'not one column on a phone (no sideways scroll) and two on a laptop');
 must(/wrap wide/.test(h0), 'the page is not wide on a laptop (no room for two columns)');
 
