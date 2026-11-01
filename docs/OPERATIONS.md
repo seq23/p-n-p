@@ -31,6 +31,10 @@ shards plus `index.json` with no content change (only the gzip OS byte differs f
 a local validation run, `git checkout -- data/authority_scale/fanout_100k/` before committing. The
 real fix is pinning the gzip OS byte and mtime in `scripts/authority_scale/build_max_fanout.mjs`.
 
+## Database migrations
+
+**No migration deletes data by accident** (1 Nov 2026): `npm run validate:migrations-keep-data` (first in `validate:release`) fails a new or changed `migrations/*.sql` that drops a table or column, deletes every row, truncates, or rebuilds a table without one of its columns, unless it carries `-- destructive-ok: <reason> (backed up: <where>)`. Older migrations are grandfathered.
+
 ## Admin settings without logging in
 Settings rows can be written directly:
 `npx wrangler d1 execute pnp-admin --remote --command "INSERT INTO settings(key,value,updated_at) ... ON CONFLICT(key) DO UPDATE ..."`
