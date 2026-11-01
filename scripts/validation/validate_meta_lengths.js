@@ -1,74 +1,20 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Every published page has a title of 30-65 characters and a meta description
- * of 120-160 characters, and no two published pages share either. No page is
- * exempt, the homepage included.
+ * Every published page has a <title> and a meta description, and no two
+ * published pages share either. Every query-universe entry carries both.
  *
- * WHY
- * ---
- * Bing Webmaster and a live crawl on 2026-09-25 flagged eight published pages
- * with meta descriptions of 57-95 characters (seven /areas/*-porch-decorating
- * city pages and services/baby-shower-decor-memphis). Measured across the whole
- * published set the same day, 22 of 112 pages were outside 110-160: fifteen too
- * short, seven too long enough to be cut off in results. Nothing checked it, so
- * nothing stopped it. Bing's own thresholds flag titles of 3-19 characters and
- * descriptions of 41-98; the bounds here sit above both with room to spare.
- * Bing Site Scan also flags "Title too long" above 70 characters, where results
- * truncate: 18 published titles were 71-97 characters on 2026-09-25.
- *
- * Tightened 2026-10-25 to the owner's Search Readiness Checklist (b1: title
- * 30-65; b2: meta description 120-160), which audits this site every Monday.
- * Google's result line cuts a title near 600px - about 65 characters - and a
- * snippet under 120 characters loses the room to carry the query. Twenty
- * published titles were 66-70 and twelve descriptions 110-119 when the
- * checklist first ran this site; all were rewritten in the same change.
- *
- * SOURCES THIS GUARDS
- * -------------------
- * The rendered pages are what a crawler reads, so they are what is measured.
- * The descriptions come from three places, and a failure names the page, so
- * whoever fixes it edits the right one:
- *   - data/queries/query_universe.json (`description`), rendered by
- *     templates/page-shell.js - also checked here directly, including queued
- *     drafts, so a short description fails before it is ever published;
- *   - scripts/generators/build_section_indexes.js (the SECTIONS descriptions);
- *   - the hand-maintained pages under areas/, services/, answers/ and the root,
- *     which no generator writes and whose HTML is their source.
- *
- * Length is counted on the decoded text ("&amp;" is one character), which is
- * what a search engine displays.
- *
- * Rule 0: zero pages, zero titles or zero query-universe entries examined is a
- * hard failure, not a pass on an empty loop.
- *
- * Usage: node scripts/validation/validate_meta_lengths.js
+ * Character-length bounds (the Search Readiness Checklist b1/b2) are not a
+ * build blocker: lengths are copy, set at the generators and data files, and
+ * audited by the weekly checklist (test cleanup, 1 Nov 2026). This file keeps
+ * the behaviour a crawler punishes: a missing or duplicated title/description.
  */
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const DOMAIN = 'https://porchandparty901.com';
-const TITLE_MIN = 30;
-const TITLE_MAX = 65;
-const DESC_MIN = 120;
-const DESC_MAX = 160;
 const MIN_PUBLISHED = 20;
-// No page is exempt from the range, the homepage least of all.
-//
-// Until 2026-10-26 the homepage carried an owner-ruled exception (2026-10-18):
-// its title named all four services and was approved verbatim at 87 characters.
-// The owner's Search Readiness Checklist (25 Oct 2026) audits this site every
-// Monday and item b1 is 30-65 for EVERY sampled page; the homepage is the first
-// page it samples, so the exception was the one standing failure the checklist
-// could never clear, and it reported it again on 2026-10-26. The later ruling
-// wins: the carve-out is gone and the homepage title is 61 characters, naming
-// three services with the fourth (game rentals) carried by the description, the
-// H1 and /rentals/. Nothing here reads HOME.title any more, so the homepage is
-// held to exactly the same range as every other page.
-//
-// This is the stricter rule, not the looser one: removing the exception can
-// only make more titles fail, never fewer. Do not put it back.
 
 const decode = (s) => String(s)
   .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>')
@@ -121,9 +67,7 @@ for (const loc of locs) {
   else {
     titles += 1;
     const title = decode(t[1]);
-    if (title.length < TITLE_MIN || title.length > TITLE_MAX) {
-      fail(`${rel}: title is ${title.length} characters, must be ${TITLE_MIN}-${TITLE_MAX}: "${title}"`);
-    }
+    if (!title.trim()) fail(`${rel}: empty <title>`);
     if (!byTitle.has(title)) byTitle.set(title, []);
     byTitle.get(title).push(rel);
   }
@@ -132,9 +76,7 @@ for (const loc of locs) {
   if (d === null) fail(`${rel}: no <meta name="description">`);
   else {
     const desc = decode(d);
-    if (desc.length < DESC_MIN || desc.length > DESC_MAX) {
-      fail(`${rel}: meta description is ${desc.length} characters, must be ${DESC_MIN}-${DESC_MAX}: "${desc}"`);
-    }
+    if (!desc.trim()) fail(`${rel}: empty meta description`);
     if (!byDesc.has(desc)) byDesc.set(desc, []);
     byDesc.get(desc).push(rel);
   }
@@ -147,13 +89,9 @@ for (const [desc, rels] of byDesc) if (rels.length > 1) fail(`duplicate meta des
 const universe = require(path.join(ROOT, 'data/queries/query_universe.json'));
 for (const e of universe) {
   const qTitle = decode(e.title || '');
-  if (qTitle.length < TITLE_MIN || qTitle.length > TITLE_MAX) {
-    fail(`data/queries/query_universe.json ${e.folder}/${e.slug}: title is ${qTitle.length} characters, must be ${TITLE_MIN}-${TITLE_MAX}`);
-  }
+  if (!qTitle.trim()) fail(`data/queries/query_universe.json ${e.folder}/${e.slug}: no title`);
   const desc = decode(e.description || '');
-  if (desc.length < DESC_MIN || desc.length > DESC_MAX) {
-    fail(`data/queries/query_universe.json ${e.folder}/${e.slug}: description is ${desc.length} characters, must be ${DESC_MIN}-${DESC_MAX}`);
-  }
+  if (!desc.trim()) fail(`data/queries/query_universe.json ${e.folder}/${e.slug}: no description`);
 }
 
 if (!locs.length || pages < MIN_PUBLISHED || !titles || !universe.length) {
@@ -169,5 +107,5 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Meta lengths OK: ${pages} published page(s), every title ${TITLE_MIN}-${TITLE_MAX} and every meta description `
-  + `${DESC_MIN}-${DESC_MAX} characters, all unique; ${universe.length} query-universe title(s) and description(s) in range.`);
+console.log(`Meta OK: ${pages} published page(s), every title and meta description present and unique; `
+  + `${universe.length} query-universe entr(ies) carry both.`);

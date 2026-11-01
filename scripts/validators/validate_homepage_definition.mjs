@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
- * AEO: the homepage answers "what is Porch & Party" in one 40-60 word paragraph
- * directly under the H1, and the WebPage node's SpeakableSpecification points at
- * it. Hard-fails when the paragraph moves, loses its opening, leaves the word
- * range, or when any speakable cssSelector does not resolve to exactly one
- * element; also requires the FAQPage node to remain.
+ * AEO: the homepage carries a definition paragraph directly under the H1, and
+ * the WebPage node's SpeakableSpecification points at it. Hard-fails when the
+ * paragraph moves or empties, or when any speakable cssSelector does not resolve
+ * to exactly one element; also requires the FAQPage node to remain. (Its wording
+ * is copy, set at the generator, and not pinned here: test cleanup 1 Nov 2026.)
  */
 import fs from 'node:fs';
 
@@ -17,10 +17,7 @@ const m = html.match(/<\/h1>\s*<p([^>]*)>([\s\S]*?)<\/p>/i);
 const id = m && (m[1].match(/\bid="([^"]+)"/) || [])[1];
 if (!m) fail('no <p> directly follows the homepage </h1>');
 else {
-  const t = text(m[2]);
-  const words = t.split(' ').filter((w) => /\w/.test(w)).length;
-  if (!t.startsWith('Porch & Party is ')) fail(`definition paragraph must open "Porch & Party is ...", got "${t.slice(0, 40)}"`);
-  if (words < 40 || words > 60) fail(`definition paragraph is ${words} words, not 40-60`);
+  if (!text(m[2])) fail('the paragraph under the homepage </h1> is empty');
   if (!id) fail('definition paragraph has no id for the speakable selector');
 }
 

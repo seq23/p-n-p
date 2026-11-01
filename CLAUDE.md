@@ -25,9 +25,9 @@ The full policy, what used to be paid, and how to refresh the free model list ar
 in **[`docs/cost/zero-paid-llm.md`](docs/cost/zero-paid-llm.md)**.
 
 The guard is `npm run validate:zero-paid-llm`, which runs inside
-`npm run validate:release` on every pull request. It reads this file and that
-document, so the rule is not a wish: delete either, or drop the "nothing paid"
-line above, and the validator fails.
+`npm run validate:release` on every pull request. It reads the code, the routing
+config and the workflows (not this prose): a model call outside the free router,
+a scheduled paid lane or a paid fallback fails it.
 
 ## Email
 

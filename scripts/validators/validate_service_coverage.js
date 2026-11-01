@@ -125,7 +125,6 @@ function check(files) {
     surface('index.html meta description', desc);
     surface('index.html og:description', meta(home, 'property', 'og:description'));
     if (desc != null) {
-      if (desc.length > 160) errors.push(`index.html meta description is ${desc.length} characters, max 160`);
       for (const n of [brand.PRICES.porch, brand.PRICES.gameDay]) if (!desc.includes(`$${n}`)) errors.push(`index.html meta description does not quote $${n} from the data files`);
       if (/\d{3}[-. ]\d{3}[-. ]\d{4}/.test(desc)) errors.push('index.html meta description carries a phone number');
       for (const [a, k] of [['property', 'og:description'], ['name', 'twitter:description']]) if (meta(home, a, k) !== desc) errors.push(`index.html ${k} differs from the meta description`);

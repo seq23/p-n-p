@@ -904,7 +904,7 @@ Guarded by `validate:admin-phone-fixes` (scripts/validators/validate_admin_phone
   the card's own NEW). A name jumps to `#c-<key>`. More than 6: the newest 6, then "+K more" to the
   first card not named. Phone: names on the line under the count; from 900 px one line with "|".
   Quiet week: "This week: no new requests · last week M".
-- Proof: `npm run validate:admin-main-page`.
+- The wording and layout above are copy, set in `views.mjs`; no validator pins them (test cleanup, 1 Nov 2026).
 - **Actions land on the card.** A POST that redirects to Requests (`/admin/?m=…`) with no anchor gets
   `#c-<key>` of the card it came from (the form's `r`, else the invoice's or booking's request):
   `cardAnchorFor` / `toRequestsWithoutAnchor` in `admin.mjs`. The "Confirmed" screen's Done goes to the card too.
@@ -916,7 +916,8 @@ Guarded by `validate:admin-phone-fixes` (scripts/validators/validate_admin_phone
 
 ## Quick texts behind 💬 Text ▾ (owner-approved mock-up, 20 Oct 2026)
 Code: `functions/_lib/quick-texts.mjs` (the words, the stage -> best 3 rule, the filled-in values),
-`functions/_lib/views-quick-texts.mjs` (the menu + page script); pinned by `validate:admin-quick-texts`.
+`functions/_lib/views-quick-texts.mjs` (the menu + page script). `validate:admin-quick-texts` proves the menu rules, the `sms:` link and the
+"Texted:" log; the words live only in `quick-texts.mjs` and are not pinned.
 - **💬 Text ▾** (top right of every card with a phone number) opens the quick texts. Phone: a bottom
   sheet, "Text <first name>" + the number and **✕ Close**. Laptop (900 px and wider): a panel under
   the button, the list left and the chosen text right.
