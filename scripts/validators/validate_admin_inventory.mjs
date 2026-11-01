@@ -290,7 +290,7 @@ const poll = fs.readFileSync(path.join(ROOT, '.github/workflows/inventory-poll.y
 must(/cron: "\*\/5 \* \* \* \*"/.test(poll) && /\/api\/inventory\/pending/.test(poll) && /grep -qx "Inventory publish #\$id"/.test(poll) && /gh workflow run inventory-publish\.yml/.test(poll) && /actions: write/.test(poll), 'the Inventory Poll workflow does not poll every 5 minutes, skip a started change and start Inventory Publish');
 const pubWf = fs.readFileSync(path.join(ROOT, '.github/workflows/inventory-publish.yml'), 'utf8');
 must(pubWf.includes('run-name: "Inventory publish #${{ inputs.publish_id }}"') && /scripts\/inventory\/apply_publish\.mjs/.test(pubWf) && /scripts\/inventory\/regenerate\.mjs/.test(pubWf) && /npm run validate:release/.test(pubWf) && /report\.sh failed/.test(pubWf), 'the Inventory Publish workflow lacks its run name, apply, regenerate, validate:release or failure report');
-must(fs.readFileSync(path.join(ROOT, '.github/workflows/deploy-distribution.yml'), 'utf8').includes('"Inventory Publish"]'), 'deploy-distribution does not validate and announce Inventory Publish commits');
+must((/workflow_run:\s*\n\s*workflows:\s*\n?\s*\[([^\]]*)\]/.exec(fs.readFileSync(path.join(ROOT, '.github/workflows/deploy-distribution.yml'), 'utf8')) || [])[1]?.split(',').map((w) => w.trim()).includes('"Inventory Publish"'), 'deploy-distribution does not validate and announce Inventory Publish commits');
 // The signed report.
 s.env.PNP_INVENTORY_REPORT_KEY = 'test-report-key';
 const crypto = await import('node:crypto');

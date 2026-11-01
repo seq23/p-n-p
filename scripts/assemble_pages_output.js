@@ -20,18 +20,7 @@ const path = require('path');
 const root = path.resolve(__dirname, '..');
 const dist = path.join(root, '.pages-output');
 
-const EXCLUDE = new Set([
-  '.pages-output', 'dist', 'node_modules', '.build', '.git', '.github', '.gitignore',
-  'scripts', 'distribution_scripts', 'tests', 'test', 'docs', 'reports',
-  'artifacts', 'validation', 'data', 'prompts', 'content-bank',
-  'content-recipes', '.wrangler', '.astro', 'coverage',
-  'package.json', 'package-lock.json', 'AGENTS.md', 'README.md',
-  'ARTIFACT_MANIFEST.md', 'REPO_VALIDATION_MATRIX.md',
-  // The /admin console's server code and config (docs/admin-console.md). Pages
-  // reads functions/ and wrangler.toml from the repo root at build time; a copy
-  // in the output would publish their source as static files.
-  'functions', 'migrations', 'workers', 'wrangler.toml',
-]);
+const { EXCLUDE } = require('./lib/unpublished');
 const EXCLUDE_EXT = new Set(['.md']);
 
 let copied = 0;

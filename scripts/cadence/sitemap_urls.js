@@ -57,8 +57,32 @@ function newSinceLedger(urls, ledgerUrls) {
   return [...(urls || [])].filter((u) => !known.has(pageIdentity(u)));
 }
 
+/**
+ * URLs the shared search engine owns (seq23/search-loop, search-loop.config.json
+ * output.url_prefix, including its section index). Owner ruling 1 Nov 2026: those
+ * pages publish straight away, paced by the engine itself (10 a day to start, +5 a
+ * week while most are indexed in 14 days, cap 30, halved when indexing falls), and
+ * the engine checks, strengthens, undoes or merges each one at 2/4/8 weeks and 90
+ * days. So the weekly cap, staleness and library ceiling here govern the site's own
+ * authority pages only; counting engine pages would block the authority cycle and
+ * Deploy Distribution on the first engine day.
+ */
+function engineOwnedPrefix(ROOT) {
+  try {
+    const cfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'search-loop.config.json'), 'utf8'));
+    const prefix = cfg && cfg.output && cfg.output.url_prefix;
+    return typeof prefix === 'string' && prefix.startsWith('/') && prefix.length > 1 ? prefix : null;
+  } catch { return null; }
+}
+
 function sitemapUrls(ROOT) {
   const found = new Map();
+  const prefix = engineOwnedPrefix(ROOT);
+  const engineOwned = (loc) => {
+    if (!prefix) return false;
+    let p; try { p = new URL(loc).pathname; } catch { p = String(loc); }
+    return p === prefix || p === prefix.replace(/\/$/, '') || p.startsWith(prefix);
+  };
   const walk = (dir, depth = 0) => {
     if (depth > 4) return;
     let ents; try { ents = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
@@ -70,7 +94,7 @@ function sitemapUrls(ROOT) {
         const xml = fs.readFileSync(full, 'utf8');
         for (const m of xml.matchAll(/<url>([\s\S]*?)<\/url>/g)) {
           const loc = (m[1].match(/<loc>(.*?)<\/loc>/) || [])[1];
-          if (!loc) continue;
+          if (!loc || engineOwned(loc)) continue;
           const lm = (m[1].match(/<lastmod>(\d{4}-\d{2}-\d{2})/) || [])[1] || null;
           const prev = found.get(loc);
           if (prev === undefined || (lm && (!prev || lm > prev))) found.set(loc, lm);
@@ -84,6 +108,7 @@ function sitemapUrls(ROOT) {
 
 module.exports = {
   sitemapUrls,
+  engineOwnedPrefix,
   pageIdentity,
   identitySet,
   newSinceLedger,

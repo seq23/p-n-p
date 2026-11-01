@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const root = path.resolve(__dirname, '..', '..');
+const { EXCLUDE } = require('../lib/unpublished');
 const domain = 'https://porchandparty901.com';
 function walk(dir, acc = []) {
   for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -9,6 +10,9 @@ function walk(dir, acc = []) {
     // /.pages-output/ prefix that does not exist on the live site - which the
     // assembler then correctly refused to publish.
     if (item.name === 'node_modules' || item.name === '.pages-output' || item.name === 'dist' || item.name.startsWith('.git')) continue;
+    // Top-level names the deploy never publishes (scripts/lib/unpublished.js): data/,
+    // scripts/, the search engine checkout... An .html under them is not a page.
+    if (dir === root && EXCLUDE.has(item.name)) continue;
     const full = path.join(dir, item.name);
     if (item.isDirectory()) walk(full, acc);
     else if (item.isFile() && item.name.endsWith('.html')) acc.push(full);

@@ -23,3 +23,7 @@ __pycache__/
 
 # GSC URL-inspection carry-over state (restored/saved via actions/cache in deploy-distribution.yml).
 .gsc-inspection-state/
+
+# Shared search engine (seq23/search-loop) checkout and run log.
+.search-loop-engine/
+.search-loop-run.log

@@ -85,9 +85,13 @@ for (const rel of requiredFiles) {
   if (!fs.existsSync(path.join(root, rel))) fail(`missing required file ${rel}`);
 }
 
+const { EXCLUDE: UNPUBLISHED } = require('../lib/unpublished');
 function walk(dir, acc = []) {
   for (const item of fs.readdirSync(dir, { withFileTypes: true })) {
     if (['.pages-output', 'node_modules', '.git'].includes(item.name)) continue;
+    // Top-level names the deploy never publishes (scripts/lib/unpublished.js), e.g. the
+    // search engine's undo snapshots under data/search-loop/snapshots/: not pages.
+    if (dir === root && UNPUBLISHED.has(item.name)) continue;
     const full = path.join(dir, item.name);
     if (item.isDirectory()) walk(full, acc);
     else if (item.isFile() && item.name.endsWith('.html')) acc.push(full);
