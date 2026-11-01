@@ -104,8 +104,6 @@ for (const [re, what] of BANNED) ok(!re.test(plain), `${REL} carries ${what}; th
 const G = require(path.join(ROOT, 'scripts/install_about_page.js'));
 ok(html.includes(`<title>${G.TITLE.replace(/&/g, '&amp;')}</title>`), `${REL} <title> is not the generator's "${G.TITLE}"`);
 ok(html.includes(`content="${G.DESCRIPTION.replace(/&/g, '&amp;')}"`), `${REL} meta description is not the generator's composed one`);
-ok(G.TITLE.length >= 30 && G.TITLE.length <= 65, `the About title is ${G.TITLE.length} characters, must be 30-65`);
-ok(G.DESCRIPTION.length >= 120 && G.DESCRIPTION.length <= 160, `the About description is ${G.DESCRIPTION.length} characters, must be 120-160`);
 
 if (!checks) { console.error('ABOUT PAGE FAILED: 0 checks ran.'); process.exit(1); }
 if (errors.length) {

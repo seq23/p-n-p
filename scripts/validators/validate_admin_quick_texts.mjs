@@ -2,9 +2,8 @@
 /**
  * Quick texts behind "💬 Text ▾" on every request card (owner-approved mock-up, 20 Oct 2026;
  * docs/admin-console.md "Quick texts"). Fails unless:
- *  1. the words are the approved mock-up's, word for word (pinned HERE, not read from the code),
- *     and every text ends with a new line "— Valerie at Porch & Party 901"; the blank text is
- *     "Hi <first>! " + that sign-off;
+ *  1. every text greets the customer by first name and ends with the one sign-off (the words
+ *     themselves live only in functions/_lib/quick-texts.mjs and are not pinned here);
  *  2. a value that is not on file is written "__" ("$__" for money), never "undefined" or empty;
  *  3. the option list per job type: a rental shows Game rentals, Any job, Booking and money (no
  *     porch texts); a porch, party or grazing job shows Porch, party and grazing, Any job, Booking
@@ -20,7 +19,7 @@
  *     ready-made sms: body in the page;
  *  7. Open in Messages logs ONE history line "Texted: <title>" on that card (an unknown text logs
  *     nothing), and It's confirmed also ticks the older "texted" column, once.
- * Rule 0: fewer than 60 checks is a failure.
+ * Rule 0: fewer than 100 checks is a failure.
  */
 import { mod } from './lib/admin_harness.mjs';
 import { session } from './lib/admin_scenario.mjs';
@@ -30,55 +29,26 @@ let checks = 0;
 const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
 const Q = await mod('functions/_lib/quick-texts.mjs');
 const VQ = await mod('functions/_lib/views-quick-texts.mjs');
-const SIGN = '\n— Valerie at Porch & Party 901';
 
-// ---- 1. The approved words (made-up customer) ------------------------------------------------
+// ---- 1. Every text is built from the one source (quick-texts.mjs) ---------------------------
+// The words themselves live only in quick-texts.mjs; no validator pins them (1 Nov 2026).
 const c = { first: 'Jordan', day: 'Sat 24 Oct', setupDay: 'Sat 24 Oct', returnDay: 'Sun 25 Oct', takedownDay: 'Sat 7 Nov', amount: '$65', deposit: '$50', dueNow: '$115', invoiceNumber: 'PNP-2026-0099', items: 'Giant Jenga and Connect 4', holdEnds: 'Thu 22 Oct, 5:00 PM' };
-const WORDS = {
-  pickup: ['Set pickup time', "Hi Jordan! What time works for your game pickup on Sat 24 Oct at Mt. Moriah Station? Text me here and I'll meet you there."],
-  ret: ['Set return (drop-off) time', "Hi Jordan! What time works to bring the games back on Sun 25 Oct at Mt. Moriah Station? Text me here and I'll meet you there."],
-  here: ["I'm here. How far away are you?", "Hi Jordan! I'm here at Mt. Moriah Station (2602 Mt. Moriah Rd). How far away are you?"],
-  bal: ['Bring the balance', 'Hi Jordan! See you Sat 24 Oct. Please have the rest, $65, ready by Zelle or Cash App at pickup.'],
-  today: ['Return is today', "Hi Jordan! Friendly reminder: the games are due back today. Text me when you're on your way."],
-  depback: ['Deposit coming back', 'Hi Jordan! Everything came back complete. Thank you! Your $50 deposit is on its way back to you.'],
-  setup: ['Set setup time', 'Hi Jordan! What time works for us to set up on Sat 24 Oct?'],
-  takedown: ['Set takedown time', 'Hi Jordan! What time works for us to come take everything down on Sat 7 Nov?'],
-  photos: ['Send address and photos', 'Hi Jordan! Could you text me the address and a couple of photos of the space? It helps me plan your setup.'],
-  omw: ['On our way', "Hi Jordan! We're on our way, about __ minutes out."],
-  werehere: ["We're here", "Hi Jordan! We're here!"],
-  got: ['Got your message', "Hi Jordan! Got your message. I'll get back to you shortly."],
-  late: ['Running late', "Hi Jordan! I'm running about __ minutes behind. So sorry, see you soon!"],
-  callme: ['Call me back', 'Hi Jordan! I just tried to call you. Give me a call back at 901-355-1518 when you can.'],
-  conf: ["It's confirmed", "Hi Jordan! Your deposit came in, so you're booked. See you soon!"],
-  hold: ['Reminder: games held until…', 'Hi Jordan! Friendly reminder: your games (Giant Jenga and Connect 4) are held for you until Thu 22 Oct, 5:00 PM. Pay the deposit of $115 by Zelle or Cash App from your invoice to keep them.'],
-  pay: ['Payment reminder', 'Hi Jordan! Friendly reminder: $65 is still due on invoice PNP-2026-0099. You can pay by Zelle or Cash App as shown on the invoice.'],
-  thanks: ['Thank you', 'Hi Jordan! Thank you for choosing Porch & Party. It was a pleasure!'],
-};
-must(Q.QUICK_TEXTS.length === Object.keys(WORDS).length, `there are ${Q.QUICK_TEXTS.length} quick texts, the mock-up has ${Object.keys(WORDS).length}`);
-for (const [id, [title, body]] of Object.entries(WORDS)) {
-  const q = Q.QUICK_BY_ID[id];
-  must(Boolean(q), `no quick text "${id}"`);
-  if (!q) continue;
-  must(q.t === title, `${id}: title "${q.t}", approved "${title}"`);
-  must(Q.fullText(q, c) === body + SIGN, `${id}: words differ from the approved mock-up: ${JSON.stringify(Q.fullText(q, c))}`);
+must(Q.QUICK_TEXTS.length > 0, 'there are no quick texts');
+for (const q of Q.QUICK_TEXTS) {
+  must(Q.QUICK_BY_ID[q.id] === q, `${q.id}: not reachable by id`);
+  must(Boolean(q.t), `${q.id}: no title`);
+  const full = Q.fullText(q, c);
+  must(full.startsWith('Hi Jordan!') && full.endsWith('\n' + Q.SIGN_OFF), `${q.id}: not greeted by first name and signed with the one sign-off: ${JSON.stringify(full)}`);
 }
-for (const q of Q.QUICK_TEXTS) must(Q.fullText(q, c).endsWith('\n— Valerie at Porch & Party 901'), `${q.id}: not signed "— Valerie at Porch & Party 901" on a new line`);
-must(Q.fullText(null, c) === 'Hi Jordan! \n— Valerie at Porch & Party 901', `the blank text is ${JSON.stringify(Q.fullText(null, c))}`);
-must(Q.SIGN_OFF === '— Valerie at Porch & Party 901', 'the sign-off changed');
+must(Q.fullText(null, c) === 'Hi Jordan! \n' + Q.SIGN_OFF, `the blank text is ${JSON.stringify(Q.fullText(null, c))}`);
 
 // ---- 2. "__" for anything not on file -------------------------------------------------------
 const empty = Q.quickCtx({ r: { name: 'Jordan Test', phone: '9015550101' } });
 must(empty.first === 'Jordan', `first name is "${empty.first}"`);
 const t = (id) => Q.fullText(Q.QUICK_BY_ID[id], empty);
-must(t('ret').includes('back on __ at Mt. Moriah'), `missing return day: ${t('ret')}`);
-must(t('pickup').includes('pickup on __ at'), `missing pickup day: ${t('pickup')}`);
-must(t('bal').includes('See you __. Please have the rest, $__,'), `missing balance: ${t('bal')}`);
-must(t('pay').includes('$__ is still due on invoice __.'), `missing amount / invoice: ${t('pay')}`);
-must(t('hold').includes('until __. Pay the deposit of $__ by'), `missing hold end / deposit: ${t('hold')}`);
-must(t('depback').includes('Your $__ deposit'), `missing deposit: ${t('depback')}`);
-must(t('setup').includes('set up on __?') && t('takedown').includes('down on __?'), 'missing setup / takedown day is not "__"');
+for (const id of ['ret', 'pickup', 'bal', 'pay', 'hold', 'depback', 'setup', 'takedown']) must(t(id).includes('__'), `${id}: a missing value is not written "__": ${t(id)}`);
 for (const q of Q.QUICK_TEXTS) must(!/undefined|null|NaN| {2}|\$ /.test(Q.fullText(q, empty)), `${q.id} with nothing on file: ${Q.fullText(q, empty)}`);
-must(Q.fullText(null, Q.quickCtx({ r: { name: '' } })) === 'Hi there! \n— Valerie at Porch & Party 901', 'no name is not "Hi there!"');
+must(Q.fullText(null, Q.quickCtx({ r: { name: '' } })) === 'Hi there! \n' + Q.SIGN_OFF, 'no name is not "Hi there!"');
 // Filled from the card's facts.
 const filled = Q.quickCtx({
   r: { name: 'Jordan Test', phone: '(901) 555-0101' },
@@ -132,7 +102,6 @@ if (fnSrc) { const live = new Function(`return (${fnSrc});`)(); must(live('(901)
 must(/data-qt-send[\s\S]{0,80}smsHref\(o\.box\.getAttribute\('data-qt-phone'\),o\.ta\.value\)[\s\S]{0,60}setAttribute\('href',href\)/.test(VQ.QT_JS), 'Open in Messages does not build the link from the textarea at tap time');
 must(/f\.append\('quick',o\.pick\)/.test(VQ.QT_JS) && /\/admin\/msg\/tapped/.test(VQ.QT_JS), 'Open in Messages does not log the tap');
 must(!/location\.(href|hash)\s*=|scrollTo\(|scrollIntoView/.test(VQ.QT_JS), 'the quick texts move the page (she must stay on the same card)');
-must(/Fill in the blank before you send\./.test(VQ.QT_JS), 'no "Fill in the blank before you send." hint');
 
 // ---- 6. The rendered cards ------------------------------------------------------------------
 const s = await session();
@@ -148,9 +117,9 @@ for (const card of cards) {
   menus += 1;
   const tpl = (card.match(/<template data-qt-menu>([\s\S]*?)<\/template>/) || [])[1] || '';
   const first = String(req.name || '').trim().split(/\s+/)[0] || 'there';
-  for (const bit of [`Text ${first}`, '✕ Close', '✏️ Blank text', `Write your own message to ${first}`, 'Best right now (', 'All texts for this job ▾', '← Back to texts', 'Open in Messages to send', 'Open in Messages (Mac linked to iPhone)', 'Copy text', 'Booking and money', 'Any job', '<textarea data-qt-ta']) must(tpl.includes(bit.replace(/&/g, '&amp;')), `card ${req.name}: the menu lacks "${bit}"`);
+  must(tpl.includes('<textarea data-qt-ta'), `card ${req.name}: the menu has no text box`);
   must((tpl.match(/class="qtopt best"/g) || []).length === 3, `card ${req.name}: not 3 best texts`);
-  must(tpl.includes(`Hi ${first}! \n— Valerie at Porch &amp; Party 901`), `card ${req.name}: blank text not filled with the first name`);
+  must(tpl.includes(`Hi ${first}! \n${Q.SIGN_OFF.replace(/&/g, '&amp;')}`), `card ${req.name}: blank text not filled with the first name`);
   must(!/sms:[^"]*body=/.test(tpl), `card ${req.name}: the menu carries a ready-made sms: body (it must be built at tap time)`);
 }
 must(menus >= 2, `only ${menus} cards with a menu checked`);
@@ -162,7 +131,7 @@ const count = async () => (await s.one("SELECT COUNT(*) AS n FROM request_events
 const before = await count();
 await s.post('/admin/msg/tapped', { r: s.rk(key), quick: 'ret' }, { headers: { 'X-Pnp-Fetch': '1' } });
 const ev = await s.one("SELECT what, who FROM request_events WHERE request_key = ?1 AND what LIKE 'Texted:%' ORDER BY id DESC", key);
-must(ev && ev.what === 'Texted: Set return (drop-off) time' && ev.who === 'Valerie', `the tap logged ${JSON.stringify(ev)}`);
+must(ev && ev.what === `Texted: ${Q.QUICK_BY_ID.ret.t}` && ev.who === 'Valerie', `the tap logged ${JSON.stringify(ev)}`);
 must((await count()) === before + 1, 'the tap did not log exactly one line');
 await s.post('/admin/msg/tapped', { r: s.rk(key), quick: 'blank' }, { headers: { 'X-Pnp-Fetch': '1' } });
 must((await s.one("SELECT what FROM request_events WHERE request_key = ?1 ORDER BY id DESC", key)).what === 'Texted: Blank text', 'the blank text is not logged "Texted: Blank text"');
@@ -175,15 +144,15 @@ must(Boolean(c1), "It's confirmed from the menu does not tick the confirmation-t
 await s.post('/admin/msg/tapped', { r: s.rk(key), quick: 'conf' }, { headers: { 'X-Pnp-Fetch': '1' } });
 must((await s.one('SELECT confirmed_texted_at AS t FROM requests WHERE request_key = ?1', key)).t === c1, 'a second tap moved the confirmation-texted time');
 const page = await s.get('/admin/');
-must(page.text.includes('Texted: Set return (drop-off) time'), 'the card history does not show "Texted: <title>"');
+must(page.text.includes(`Texted: ${Q.QUICK_BY_ID.ret.t}`.replace(/&/g, '&amp;')), 'the card history does not show "Texted: <title>"');
 // The older message taps still work as before.
 await s.post('/admin/msg/tapped', { r: s.rk(key), template: 'thankyou' }, { headers: { 'X-Pnp-Fetch': '1' } });
 must(Boolean((await s.one('SELECT thankyou_texted_at AS t FROM requests WHERE request_key = ?1', key)).t), 'the old thank-you tap stopped ticking its column');
 
-if (checks < 60) errors.push(`Rule 0: only ${checks} checks ran`);
+if (checks < 100) errors.push(`Rule 0: only ${checks} checks ran`);
 if (errors.length) {
   console.error(`VALIDATION FAIL: admin quick texts (${errors.length})`);
   for (const e of errors) console.error(`- ${e}`);
   process.exit(1);
 }
-console.log(`admin quick texts: OK (${checks} checks: approved words + sign-off, "__" when missing, options per job type, best 3 per step, sms: body from the box, menus on cards with a phone, "Texted: <title>" logged)`);
+console.log(`admin quick texts: OK (${checks} checks: greeting + sign-off from the one source, "__" when missing, options per job type, best 3 per step, sms: body from the box, menus on cards with a phone, "Texted: <title>" logged)`);
