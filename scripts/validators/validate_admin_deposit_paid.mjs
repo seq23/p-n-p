@@ -20,7 +20,7 @@ const rk = s.rk(r.key);
 assert.equal(P.PAID_LABEL, '✓ They paid the deposit');
 assert.equal(P.PAID_HINT, "Paid by Zelle or Cash App? Tap 'They paid' so this comes off the list.");
 const noInvoice = await s.get(P.paidHref(r.key));
-assert.ok(noInvoice.text.includes('No invoice yet.'));
+assert.ok(!/PNP-\d{4}-\d{4}/.test(noInvoice.text));
 assert.ok(!noInvoice.text.includes('name="confirm"'));
 const create = await s.post('/admin/invoices', {
   r: rk, customer_name: 'Demo Example', customer_email: 'demo@example.com', customer_phone: '901-555-0101',

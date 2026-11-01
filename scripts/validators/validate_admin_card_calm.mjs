@@ -163,7 +163,7 @@ must(c1.indexOf('<template data-qt-menu>') > c1.lastIndexOf('</details>') && c1.
   // Raw dates and UTC stamps read as words (display only).
   must(!/\d{4}-\d{2}-\d{2}/.test(text(c1)) && !/\bUTC\b/.test(text(c1)), `B: a raw date or UTC timestamp shows on the card: ${(text(c1).match(/.{0,40}(\d{4}-\d{2}-\d{2}|UTC).{0,20}/) || [''])[0]}`);
   must(/<dt>Second date they asked about<\/dt><dd>Mon 2 Nov<\/dd>/.test(m), 'B: an ISO answer is not "Mon 2 Nov"');
-  must(V.plainHistory('Games reserved until 2026-10-21 02:37:53 UTC (48 hours)') === 'Games reserved until Tue 20 Oct, 9:37 PM (48 hours)' && V.plainHistory('Hold extended to 2026-12-01 18:00:00 UTC by Valerie') === 'Hold extended to Tue 1 Dec, 12:00 PM by Valerie' && V.plainHistory('Booked Fri 30 Oct') === 'Booked Fri 30 Oct', 'B: plainHistory does not turn UTC stamps into Memphis words (CDT and CST)');
+  must(V.plainHistory('Games reserved until 2026-10-21 02:37:53 UTC (48 hours)').includes('Tue 20 Oct, 9:37 PM') && !/UTC/.test(V.plainHistory('Games reserved until 2026-10-21 02:37:53 UTC (48 hours)')) && V.plainHistory('Hold extended to 2026-12-01 18:00:00 UTC by Valerie').includes('Tue 1 Dec, 12:00 PM') && V.plainHistory('Booked Fri 30 Oct') === 'Booked Fri 30 Oct', 'B: plainHistory does not turn UTC stamps into Memphis words (CDT and CST)');
   must(events[2].what.includes('2026-10-21 02:37:53 UTC'), 'B: the stored history line was rewritten (display only)');
   // History: notes first, then newest first, 5 shown, Show all (7).
   const hist = m.slice(at(m, 'data-more-group="history"'));

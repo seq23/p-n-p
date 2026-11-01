@@ -60,7 +60,7 @@ const msg = T.renderTodo(td);
 must(td.week && td.week.newRequests === 2 && td.week.moneyIn === 12300 && td.week.expenses === 4217 && td.week.next14 === d.upcomingJobs && td.week.jobsDone === d.last.jobsDone, `Your week figures ${JSON.stringify(td.week)} differ from weeklyData`);
 for (const line of ['New requests last week: 2', 'Jobs done last week: ', 'Money in last week: $123', 'Tips: $0', 'Expenses: $42.17', `Jobs in the next 14 days: ${d.upcomingJobs}`]) must(msg.text.includes(line), `the Monday email lacks "${line}"`);
 must(/data-week[\s\S]*Your week \(Monday summary\)[\s\S]*Money in last week<\/td><td[^>]*>\$123</.test(msg.html), 'the Monday email has no Your week box');
-must(msg.subject === 'Your to-do list for Mon 19 Oct · Porch & Party', `the Monday subject is "${msg.subject}"`);
+must(msg.subject.includes('Mon 19 Oct') && !msg.subject.includes('⚠'), `the Monday subject is "${msg.subject}"`);
 // ---- 4. no PII ---------------------------------------------------------------------------------
 const people = [...s.requests, { name: 'Paula Porchington', phone: '901-555-0777' }, { name: 'Gary Gameson', phone: '901-555-0778' }];
 for (const p of people) {

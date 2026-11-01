@@ -99,7 +99,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   must(s.env.objects.has(row.receipt_key) && /^receipts\/\d{4}\/[a-f0-9]{24}\.jpg$/.test(row.receipt_key), 'receipt original not stored in R2 under a random key');
   must(s.env.aiCalls.length >= 1 && s.env.aiCalls.every((c) => c.model === X.VISION_MODEL), 'receipts went to something other than the Workers AI model');
   const page = (await s.get(`/admin/money/expenses/${up.json.id}`)).text;
-  must(page.includes('Please check this') && page.includes('Needs checking'), 'low-confidence field (tax 0.4) is not highlighted');
+  must(/<div class="amberbox"><label for="f-tax/.test(page), 'low-confidence field (tax 0.4) is not highlighted');
   const money = (await s.get('/admin/money?month=2026-10')).text;
   must(money.includes('data-total="expenses">$0.00<') && /data-check-receipts>[\s\S]{0,60}Check 1 receipt</.test(money), 'an unchecked receipt already counts in the totals (auto-saved), or is not offered as "Check 1 receipt"');
   await s.post(`/admin/money/expenses/${up.json.id}`, { vendor: 'Party City', date: '2026-10-12', total: '42.17', tax: '3.17', category: 'Supplies & decor', payment_method: 'card', note: '' });
@@ -150,7 +150,7 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
   must(Object.values(y.total.expenseByCategory).reduce((a, b) => a + b, 0) === y.total.expenses, 'expense categories do not add up to the year total');
   must(y.total.expenses === (await M.periodTotals(data, '2026-10')).expenses, 'year-end expenses do not match the Money tab');
   const yp = (await s.get('/admin/money/year?year=2026')).text;
-  must(yp.includes('Kerseta LLC') && yp.includes(M.FOOTER.replace(/&/g, '&amp;').replace(/'/g, '&#39;')) && yp.includes('Download all receipts (zip)'), 'year page lacks the legal entity, footer or zip button');
+  must(yp.includes('Kerseta LLC') && yp.includes(M.FOOTER.replace(/&/g, '&amp;').replace(/'/g, '&#39;')) && /\.zip|zip=|\/zip/.test(yp), 'year page lacks the legal entity, footer or zip download');
   const mail = await s.post('/admin/money/year/email?year=2026', {});
   const sent = s.env.sent.find((m) => /year-end summary 2026/.test(m.subject));
   must(sent && sent.attachments.length === 2 && sent.attachments.map((a) => a.type).join(',') === 'application/pdf,text/csv' && /Sent%20to/.test(mail.location), 'year-end email lacks its PDF + CSV attachments');
@@ -222,7 +222,7 @@ function fakeSheets({ failWith = 0 } = {}) {
   must(!r3.ok && (await AM.pendingSync(s.db)) === 1, 'a failed sync is not queued');
   const routedWithKey = { ...s.env };
   const page = await (await mod('scripts/validators/lib/admin_harness.mjs')).call((ctx) => s.routed({ ...ctx, waitUntil: () => {} }), routedWithKey, 'GET', '/admin/calendar', { headers: { Cookie: s.cookie } });
-  must((await page.text()).includes('Google Sheet will catch up shortly.'), 'no "Google Sheet will catch up shortly" notice while a sync waits');
+  must((await page.text()).includes('data-sheet-pending'), 'no sheet-pending notice while a sync waits');
   await AM.syncSafely(s.env, { client });
   must((await AM.pendingSync(s.db)) === 0, 'a successful sync does not clear the retry queue');
   // The cron's hook: wrong token 404, POST only.

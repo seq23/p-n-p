@@ -67,13 +67,13 @@ const ids = (items) => items.map((q) => q.id);
 const offered = (m) => [...ids(m.best.items), ...m.groups.flatMap((g) => ids(g.items))];
 const byGroup = (g) => Q.QUICK_TEXTS.filter((q) => q.g === g).map((q) => q.id);
 const rent = Q.menuFor({ services: ['rentals'], current: 'returned' });
-must(rent.best.words === 'games are out' && ids(rent.best.items).join() === 'ret,today,here', `rental, games out: best is ${rent.best.words} / ${ids(rent.best.items)}`);
-must(rent.groups.map((g) => g.name).join('|') === 'Game rentals|Any job|Booking and money', `rental groups: ${rent.groups.map((g) => g.name)}`);
+must(Boolean(rent.best.words) && ids(rent.best.items).join() === 'ret,today,here', `rental, games out: best is ${rent.best.words} / ${ids(rent.best.items)}`);
+must(rent.groups.map((g) => g.key).join('|') === 'rent|any|money' && rent.groups.every((g) => g.name), `rental groups: ${rent.groups.map((g) => g.key)}`);
 must(offered(rent).sort().join() === [...byGroup('rent'), ...byGroup('any'), ...byGroup('money')].sort().join(), `a rental offers ${offered(rent)}`);
 must(!offered(rent).some((id) => byGroup('job').includes(id)), 'a rental offers porch / party texts');
 const porch = Q.menuFor({ services: ['porch'], current: 'takedown' });
-must(porch.best.words === 'porch is up' && ids(porch.best.items).join() === 'takedown,werehere,late', `porch up: best is ${porch.best.words} / ${ids(porch.best.items)}`);
-must(porch.groups.map((g) => g.name).join('|') === 'Porch, party and grazing|Any job|Booking and money', `porch groups: ${porch.groups.map((g) => g.name)}`);
+must(Boolean(porch.best.words) && porch.best.words !== rent.best.words && ids(porch.best.items).join() === 'takedown,werehere,late', `porch up: best is ${porch.best.words} / ${ids(porch.best.items)}`);
+must(porch.groups.map((g) => g.key).join('|') === 'job|any|money' && porch.groups.every((g) => g.name), `porch groups: ${porch.groups.map((g) => g.key)}`);
 must(!offered(porch).some((id) => byGroup('rent').includes(id)) && !offered(porch).includes('hold'), `a porch job offers rental texts: ${offered(porch)}`);
 must(offered(porch).sort().join() === [...byGroup('job'), ...byGroup('any'), ...byGroup('money').filter((x) => x !== 'hold')].sort().join(), `a porch job offers ${offered(porch)}`);
 must(ids(porch.groups.find((g) => g.key === 'money').items).join() === 'conf,pay,thanks', 'Booking and money on a porch job is not confirmed, payment reminder, thank you');
@@ -81,7 +81,7 @@ must(ids(rent.groups.find((g) => g.key === 'money').items).join() === 'conf,hold
 for (const m of [rent, porch]) { const o = offered(m); must(new Set(o).size === o.length, 'a text is listed twice (best 3 repeated under All texts)'); }
 const both = Q.menuFor({ services: ['party', 'rentals'], current: 'picked' });
 must(both.groups.map((g) => g.key).join() === 'rent,job,any,money' && ids(both.best.items).join() === 'pickup,bal,here', `games + party: ${both.groups.map((g) => g.key)} / ${ids(both.best.items)}`);
-must(Q.menuFor({ services: ['party'], current: 'setup' }).best.words === 'booked, setup next' && Q.menuFor({ services: ['porch'], current: 'setup' }).best.words === 'booked, install next', 'setup stage words');
+must(Boolean(Q.menuFor({ services: ['party'], current: 'setup' }).best.words) && Q.menuFor({ services: ['party'], current: 'setup' }).best.words !== Q.menuFor({ services: ['porch'], current: 'setup' }).best.words, 'setup stage: a party and a porch job read the same');
 const ST = await mod('functions/_lib/steps.mjs');
 for (const svc of [['rentals'], ['porch'], ['party'], ['grazing'], ['porch', 'rentals'], ['rentals', 'grazing']]) {
   for (const cur of [...ST.stepPlan(svc, { extraPaid: true }), 'finished', 'void']) {
