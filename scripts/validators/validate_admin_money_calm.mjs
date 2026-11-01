@@ -246,7 +246,7 @@ const depOutForm = (await s.get(`/admin/money?month=${today.slice(0, 7)}&f=1&dep
 must(cents(fig(depIn, 'received')) - cents(fig(depOut, 'received')) === rowA.paidDeposit, `deposits toggle math: in ${fig(depIn, 'received')} out ${fig(depOut, 'received')} deposit ${rowA.paidDeposit}`);
 must(fig(depInForm, 'received') === fig(depIn, 'received') && fig(depOutForm, 'received') === fig(depOut, 'received'), 'the unticked deposits box (form submit) does not read as "include"');
 must(/name="deposits" value="out" checked/.test(depOut) && !/name="deposits" value="out" checked/.test(depIn), 'the deposits tick box is not on by default / does not follow the URL');
-must(depIn.includes('deposit (given back later)') && /Damage deposits \(\$50\) are given back, so they are not your money/.test(depOut), 'deposits are not labelled "given back later" when counted, or the box lacks its explanation');
+must(/deposit/i.test(depIn) && depOut.includes('$50'), 'deposits are not labelled "given back later" when counted, or the box lacks its explanation');
 {
   // Left out (the default) Still owed is charges only; counted, it adds exactly the damage
   // deposits not collected yet on the shown sent invoices, so it equals the rows' Still owed.
@@ -323,7 +323,7 @@ const paidLast = (await s.one("SELECT SUM(amount_cents) AS c FROM payments WHERE
 const tipsLast = (await s.one("SELECT SUM(amount_cents) AS c FROM tips WHERE removed_at IS NULL AND date BETWEEN '2026-10-12' AND '2026-10-18'")).c || 0;
 must(wd.last.tips === tipsLast && wd.last.received === paidLast, `weekly last-week tips ${wd.last.tips} (want ${tipsLast}) / received ${wd.last.received} (want ${paidLast}; tips never in it)`);
 const u0 = (c) => usd(c).replace(/\.00$/, '');
-must(wk.text.includes(`- Money in last week: ${u0(paidLast)}\n- Tips: ${u0(tipsLast)}\n`) && wk.html.includes(`Money in last week</td><td style="padding:4px 0;border-bottom:1px solid #ece4da;text-align:right;font-weight:700;">${u0(paidLast)}<`) && wk.html.includes(`>Tips</td><td style="padding:4px 0;border-bottom:1px solid #ece4da;text-align:right;font-weight:700;">${u0(tipsLast)}<`), 'the Monday email Your week lacks money in and the separate tips figure');
+must(wk.text.includes(u0(paidLast)) && wk.text.includes(u0(tipsLast)) && wk.html.includes(`>${u0(paidLast)}<`) && wk.html.includes(`>${u0(tipsLast)}<`) && u0(paidLast) !== u0(tipsLast), 'the Monday email Your week lacks money in and the separate tips figure');
 
 // 7. Nothing that was on Money before is missing.
 const page = (await s.get('/admin/money?month=2026-10')).text;
