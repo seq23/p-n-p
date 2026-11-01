@@ -6,6 +6,10 @@ merge); `REPO_IDENTITY.md` holds the one public domain this repository owns.
 Read both. This file holds the rules an agent most often breaks. Repo gotchas (full page re-render chain, asset cache, macOS fanout
 churn, admin settings, Facebook) are in [`docs/OPERATIONS.md`](docs/OPERATIONS.md).
 
+## Company brain
+
+Read `~/Brains/porch-and-party.md` before any work (business facts, priorities, voice, settled decisions). New business facts go to the brain via Boss OS, not into this repo or memory. Repo how-tos stay in `docs/`.
+
 ## Cost: nothing paid
 
 **Nothing paid.** No model call, search provider call or probe in this repository
