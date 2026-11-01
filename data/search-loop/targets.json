@@ -1,0 +1,1738 @@
+{
+  "schema": "search-loop-targets-v1",
+  "site": "porchandparty901.com",
+  "week": "2026-W44",
+  "generated_at": "2026-11-01T17:30:27.802Z",
+  "sources": {
+    "search_console": "ok: 11 rows",
+    "bing_webmaster": "ok: 14 rows",
+    "suggestqueries.google.com": "ok",
+    "api.bing.com": "ok",
+    "relevance_screen": "not read: the free model did not return {\"keep\":[...]} (lexical floor only)"
+  },
+  "targets": [
+    {
+      "query": "birthday party planner near me",
+      "variants": [
+        "birthday party planning near me",
+        "birthday party planners near me",
+        "best birthday party planners near me"
+      ],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "gsc_position": 21,
+        "gsc_impressions": 1,
+        "gsc_page": "https://www.porchandparty901.com/",
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 60.4,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party",
+      "variants": [
+        "birthday party ideas",
+        "how to birthday party",
+        "what is birthday party",
+        "why birthday party",
+        "is birthday party",
+        "the birthday party",
+        "what to do at a birthday party",
+        "good ideas for a birthday party",
+        "ideas for birthday party"
+      ],
+      "signals": {
+        "words": 2,
+        "question": false,
+        "gsc_position": 22.5,
+        "gsc_impressions": 2,
+        "gsc_page": "https://porchandparty901.com/",
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 50,
+      "kind": "new"
+    },
+    {
+      "query": "how to plan birthday party",
+      "variants": [
+        "how to plan a birthday party"
+      ],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 45,
+      "kind": "new"
+    },
+    {
+      "query": "is birthday party a noun",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 45,
+      "kind": "new"
+    },
+    {
+      "query": "is birthday party capitalized",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": true,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 45,
+      "kind": "new"
+    },
+    {
+      "query": "how to become a birthday party planner",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": true,
+        "bing_suggest": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 45,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning checklist",
+      "variants": [
+        "planning a graduation party checklist"
+      ],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning template free",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning template",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning timeline",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning list",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning checklist printable",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party places near me",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party food ideas",
+      "variants": [
+        "what is birthday party food"
+      ],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "kids party planner near me",
+      "variants": [
+        "kids party planning near me",
+        "party planners near me for kids"
+      ],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party event planner near me",
+      "variants": [
+        "birthday party event planners near me",
+        "event planner near me for birthday party"
+      ],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "kids birthday party planner near me",
+      "variants": [
+        "kid birthday party planner near me",
+        "birthday party planners near me for kids"
+      ],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "event planner for small parties",
+      "variants": [
+        "event planning for small parties"
+      ],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 40,
+      "kind": "new"
+    },
+    {
+      "query": "halloween events southaven ms",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "gsc_position": 18,
+        "gsc_impressions": 1,
+        "gsc_page": "https://porchandparty901.com/",
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 35.8,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning",
+      "variants": [
+        "graduation party planning guide",
+        "graduation party planning tips",
+        "planning a graduation party"
+      ],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party invitations",
+      "variants": [
+        "how to birthday party invitation"
+      ],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party places",
+      "variants": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party decorations",
+      "variants": [
+        "what is birthday party decoration"
+      ],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party themes",
+      "variants": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party games",
+      "variants": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to birthday party sims 4",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to decor birthday party",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to surprise birthday party",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to dress birthday party",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to wear birthday party",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to have birthday party",
+      "variants": [
+        "why have a birthday party"
+      ],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to book birthday party",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "what is birthday party by ajr about",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "what is birthday party in spanish",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "what is birthday party on snapchat",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "what is birthday party reservation in mlbb",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "what is birthday party in hindi",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "what is birthday party ice cream",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "what is birthday party for kids",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "when should you stop having birthday parties",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "is it ok to have a birthday party after your birthday",
+      "variants": [],
+      "signals": {
+        "words": 11,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "can am birthday party",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "can yaman birthday party",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "can a birthday party be a gala",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "can club birthday party",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "can can wonderland birthday party",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "can i have birthday party at park",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "is birthday party haram in islam",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "is birthday party a common noun",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "is birthday party haram",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "is birthday party allowed in islam",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to make balloon party decorations",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to do balloon decoration for birthday party",
+      "variants": [],
+      "signals": {
+        "words": 8,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "how to make balloon arch for birthday party",
+      "variants": [],
+      "signals": {
+        "words": 8,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "event planning parties",
+      "variants": [
+        "event planner parties",
+        "event planner ideas for parties",
+        "event planning ideas parties",
+        "event planner for parties",
+        "parties event planning"
+      ],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 30,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning spreadsheet",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning checklist pdf",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "how to throw a birthday party",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "how to throw birthday party sims 4",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "what is a 15 birthday party in spanish",
+      "variants": [],
+      "signals": {
+        "words": 8,
+        "question": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "what is a 15th birthday party in spanish",
+      "variants": [],
+      "signals": {
+        "words": 8,
+        "question": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "watering can birthday party",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "trash can birthday party",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "two can birthday party",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "best place to birthday party",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "best place to birthday party near me",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "best way to throw a birthday party on mars",
+      "variants": [],
+      "signals": {
+        "words": 9,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "best place to do birthday party for kids",
+      "variants": [],
+      "signals": {
+        "words": 8,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "best place to give birthday party",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "best place to host birthday party",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "best place to organise birthday party",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "how to make birthday party",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "balloon party decorations near me",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "how to make balloon decorations for parties",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party planner nyc",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party organisers near me",
+      "variants": [
+        "best birthday party organisers near me"
+      ],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party coordinator near me",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "first birthday party planner near me",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "baby birthday party planner near me",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "event planning for childrens parties",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "event planner for kids parties",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "event planners for birthday parties",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "why is party planning important",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 25,
+      "kind": "new"
+    },
+    {
+      "query": "balloon party",
+      "variants": [],
+      "signals": {
+        "words": 2,
+        "question": false,
+        "gsc_position": 19,
+        "gsc_impressions": 1,
+        "gsc_page": "https://www.porchandparty901.com/",
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 24,
+      "kind": "new"
+    },
+    {
+      "query": "graduation party planning for sam",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "planning a graduation party at home",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "best event planning for a graduation party",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "planning a high school graduation party",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "planning a graduation party on a budget",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "planning a grad party",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party clip art",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party invitations free template",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party arrangements listening answers",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "kids birthday party places",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "things to do for birthday party",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "fun things to do for birthday party",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "activities to do at a birthday party",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "stuff to do at a birthday party",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party ideas to do at home",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "balloon party giant dinosaur",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "balloon party decor near me delivery",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "balloon party decor near me reviews",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party planner near me reviews",
+      "variants": [
+        "birthday party planning near me reviews"
+      ],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party planner near me packages",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "party planner near me",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "planners near me for birthdays",
+      "variants": [
+        "birthday planners near me"
+      ],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "online birthday party planner",
+      "variants": [
+        "birthday party online planner"
+      ],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "birthday event planners near me",
+      "variants": [
+        "birthday event planner near me"
+      ],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party planners near me rates",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party event planner",
+      "variants": [
+        "best event planning for a birthday party"
+      ],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "kids birthday party planner",
+      "variants": [
+        "party planner for kids birthday"
+      ],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "event planner needed for birthday party",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "party planners in my area",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "planning a birthday party",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "event planning app for parties",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "event planning for private parties",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "event planning solution for birthday parties",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "event planning system for birthday parties",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "virtual event planning services for parties",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "event planning tool for birthday parties",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "party planning events ideas",
+      "variants": [
+        "party and event planner",
+        "party planning events tips",
+        "party and event planning"
+      ],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "event plannings on offer for themed parties",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "party planning events companies",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "fall party event planning",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "party planning events near me",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "party planning events themes",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "best event planning for farewell parties",
+      "variants": [],
+      "signals": {
+        "words": 6,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "party and event planner description",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 20,
+      "kind": "new"
+    },
+    {
+      "query": "wills birthday party",
+      "variants": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 15,
+      "kind": "new"
+    },
+    {
+      "query": "balloon party decor",
+      "variants": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 15,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party images",
+      "variants": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 10,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party supplies",
+      "variants": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 10,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party invites",
+      "variants": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 10,
+      "kind": "new"
+    },
+    {
+      "query": "birthday party film",
+      "variants": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 10,
+      "kind": "new"
+    },
+    {
+      "query": "balloon party decorations",
+      "variants": [
+        "balloon decoration in party"
+      ],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "score": 10,
+      "kind": "new"
+    }
+  ],
+  "strengthen": []
+}
