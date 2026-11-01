@@ -40,10 +40,13 @@ const { DOMAIN, sitePathForFile, isRedirectingForm } = require('../lib/site_url'
 
 const ROOT = path.resolve(__dirname, '../..');
 const SKIP = new Set(['node_modules', '.git', '.pages-output', '.build', 'dist', '.clarity']);
+// Top-level names the deploy never publishes (scripts/lib/unpublished.js), e.g. the search
+// engine's undo snapshots in data/search-loop/snapshots/*.html: not pages, no canonical.
+const { EXCLUDE: UNPUBLISHED } = require('../lib/unpublished');
 
 function walk(dir, out = []) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-    if (SKIP.has(entry.name)) continue;
+    if (SKIP.has(entry.name) || (dir === ROOT && UNPUBLISHED.has(entry.name))) continue;
     const full = path.join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
     else if (entry.isFile() && entry.name.endsWith('.html')) out.push(full);

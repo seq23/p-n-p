@@ -18,7 +18,8 @@ const fs = require('fs');
 const path = require('path');
 
 const SECTION_DIRS = ['authority', 'answers', 'areas', 'comparisons', 'corporate',
-  'events', 'faq', 'guides', 'hubs', 'local', 'rentals', 'seasonal', 'services'];
+  'events', 'faq', 'guides', 'hubs', 'local', 'questions', 'rentals', 'seasonal', 'services'];
+// 'questions': the shared search engine's pages (search-loop.config.json output.dir, 1 Nov 2026).
 
 const TERRITORIES = {
   seasonal_porch_decorating: {

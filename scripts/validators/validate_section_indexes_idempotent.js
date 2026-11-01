@@ -47,7 +47,11 @@ const indexes = (registry.routes || []).filter((r) => r.endsWith('/index.html'))
 // Exactly the three section indexes left after local/ and events/ were retired on 26 Oct 2026
 // (their pages were folded into service hubs; scripts/lib/hub_consolidation.js), and never a
 // retired one. Was "at least 5" while five existed.
-const EXPECTED_INDEXES = ['areas/index.html', 'faq/index.html', 'services/index.html'];
+// Plus questions/index.html exactly when the shared search engine has published a page
+// under questions/ (search-loop.config.json output.dir; build_section_indexes.js minPages 1).
+const enginePages = fs.existsSync(path.join(ROOT, 'questions'))
+  ? fs.readdirSync(path.join(ROOT, 'questions')).filter((f) => f.endsWith('.html') && f !== 'index.html').length : 0;
+const EXPECTED_INDEXES = ['areas/index.html', 'faq/index.html', ...(enginePages ? ['questions/index.html'] : []), 'services/index.html'];
 if (JSON.stringify([...indexes].sort()) !== JSON.stringify(EXPECTED_INDEXES)) errors.push(`data/cadence/section_indexes.json lists [${indexes.join(', ')}], expected exactly [${EXPECTED_INDEXES.join(', ')}]`);
 const HCx = require('../lib/hub_consolidation');
 for (const rel of indexes) if (HCx.isRetiredFile(rel)) errors.push(`${rel} is listed as a section index but was retired (it 301s)`);

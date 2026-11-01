@@ -71,7 +71,8 @@ function readPage(rel) {
   return { rel, url: `/${rel}`, h1: stripTags(h1[1]), lead: lead ? stripTags(lead[1]) : '' };
 }
 
-const pagesIn = (dir) => fs.readdirSync(path.join(ROOT, dir))
+// questions/ exists only once the shared search engine has published a page.
+const pagesIn = (dir) => (fs.existsSync(path.join(ROOT, dir)) ? fs.readdirSync(path.join(ROOT, dir)) : [])
   .filter((f) => f.endsWith('.html') && f !== 'index.html')
   .sort()
   .map((f) => readPage(`${dir}/${f}`));
@@ -224,6 +225,29 @@ const SECTIONS = [
     groups: faqContent.SECTIONS,
     faq: faqContent.flat(),
     related: ['/areas/index.html', '/pricing.html', '/services/index.html', '/how-it-works.html']
+  },
+  {
+    // The shared search engine's pages (seq23/search-loop; owner ruling 1 Nov 2026: new
+    // question pages publish straight away). This index, listed on /sitemap, is the link
+    // that keeps every one of them reachable even before any site page ranks it related.
+    // No prices here or on the pages: the exact quote comes from /request.
+    dir: 'questions',
+    eyebrow: 'Questions',
+    crumb: 'Questions',
+    h1: 'Porch &amp; Party answers to common planning questions',
+    title: 'Porch &amp; Party Questions | Memphis Porch, Party &amp; Grazing Answers',
+    description: 'Answers to the questions Memphis-area hosts ask before booking porch decorating, party decor, grazing tables or party game rentals with Porch & Party.',
+    lead: 'Short, direct answers to the questions people ask before booking porch decorating, party planning and decor, grazing tables or party game rentals. Every page ends with a quote request, because the exact price depends on your date, your place and the setup you want.',
+    summary: 'Open the question closest to yours. For an exact quote, send a request with your date, city and the setup you have in mind.',
+    minPages: 1,
+    group: (pages) => (pages.length ? [{ heading: 'Questions and answers', blurb: '', pages }] : []),
+    faq: [
+      ['Where do these answers come from?',
+        'Each page answers one question people search before booking Porch &amp; Party, in plain words, with the source named for any fact it states. Prices are not quoted on these pages: the exact quote comes from a short request with your date, city and the setup you want.'],
+      ['How do I get an exact quote?',
+        'Send a request with the occasion, the date, the city and the kind of setup you want. Porch &amp; Party replies with the exact quote. You give us the date and the place; we bring everything and set it up.']
+    ],
+    related: ['/services/index.html', '/faq/index.html', '/areas/index.html', '/contact.html']
   }
 ];
 
@@ -251,6 +275,8 @@ const SOCIAL = {
     'Collierville Christmas porch decorating with wreaths, garland, and front door holiday styling'],
   faq: ['/assets/img/celebrations/romantic-bedroom-experience.jpg',
     'Celebration setup in a hotel room with balloons and candles'],
+  questions: ['/assets/img/og/porch-and-party-og.jpg',
+    'Front porch decorated for fall with pumpkins, mums, lanterns and a wreath'],
   local: ['/assets/img/celebrations/birthday-entry-celebration.jpg',
     'Birthday balloon arch with a Happy Birthday sign and wrapped gifts'],
   events: ['/assets/img/grazing/grazing-table-corporate.jpg',

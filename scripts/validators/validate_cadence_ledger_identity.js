@@ -241,6 +241,25 @@ if (ledgerUrls && ledgerUrls.length && sitemap.length) {
   }
 }
 
+// Engine-owned pages (search-loop.config.json output.url_prefix) are outside the cap:
+// the shared search engine paces them itself (owner ruling 1 Nov 2026). Proved on a
+// temp tree both ways, so the exclusion can neither vanish nor swallow site pages.
+{
+  const os = require('os');
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'cadence-engine-'));
+  const xml = `<urlset><url><loc>${DOMAIN}/services/porch-decorating</loc><lastmod>2026-11-01</lastmod></url>`
+    + `<url><loc>${DOMAIN}/questions/</loc><lastmod>2026-11-01</lastmod></url>`
+    + `<url><loc>${DOMAIN}/questions/how-early-to-book</loc><lastmod>2026-11-01</lastmod></url></urlset>`;
+  fs.writeFileSync(path.join(tmp, 'sitemap.xml'), xml);
+  const without = [...sitemapUrls(tmp).keys()];
+  fs.writeFileSync(path.join(tmp, 'search-loop.config.json'), JSON.stringify({ output: { url_prefix: '/questions/' } }));
+  const withCfg = [...sitemapUrls(tmp).keys()];
+  fs.rmSync(tmp, { recursive: true, force: true });
+  counters.fixture_cases += 2;
+  if (without.length !== 3) failures.push(`engine_exclusion_negative: with no search-loop.config.json the inventory read ${without.length} of 3 URLs; nothing may be excluded without the engine config.`);
+  if (withCfg.length !== 1 || !withCfg[0].endsWith('/services/porch-decorating')) failures.push(`engine_exclusion: with output.url_prefix /questions/ the inventory read ${JSON.stringify(withCfg)}; engine pages (and their index) must be left out and site pages kept.`);
+}
+
 const receipt = {
   validator: 'cadence_ledger_identity',
   status: failures.length ? 'FAIL' : 'PASS',

@@ -7,6 +7,8 @@ const root = path.resolve(__dirname, '..', '..');
 
 const allowedRootFiles = new Set([
   '.gitignore',
+  // The shared search engine's site config (seq23/search-loop, 1 Nov 2026).
+  'search-loop.config.json',
   // Cloudflare Pages serves this for unmatched paths. Without it Pages
   // falls back to index.html under a 200, so every nonexistent URL became
   // an indexable duplicate of the homepage.
@@ -57,6 +59,8 @@ const allowedRootFiles = new Set([
 ]);
 
 const allowedRootDirs = new Set([
+  // Question pages the shared search engine publishes (search-loop.config.json output.dir).
+  'questions',
   // Gitignored Cloudflare Pages deploy output. Pages published the repo root,
   // which served README.md, package.json, AGENTS.md and scripts/ as raw text
   // on the live domain; scripts/assemble_pages_output.js builds a copy that
@@ -121,8 +125,8 @@ const errors = [];
   if (tracked) errors.push(`node_modules is tracked in git (${tracked.split('\n').length} files); it must stay out of the repository`);
   const ignore = fs.existsSync(path.join(root, '.gitignore')) ? fs.readFileSync(path.join(root, '.gitignore'), 'utf8') : '';
   if (!/^node_modules\/?$/m.test(ignore)) errors.push('.gitignore does not ignore node_modules');
-  const assemble = fs.readFileSync(path.join(root, 'scripts/assemble_pages_output.js'), 'utf8');
-  if (!/'node_modules'/.test(assemble)) errors.push('scripts/assemble_pages_output.js no longer excludes node_modules from the publish root');
+  // The publish deny-list is scripts/lib/unpublished.js (read by the assembler and the sitemap).
+  if (!require(path.join(root, 'scripts/lib/unpublished.js')).EXCLUDE.has('node_modules')) errors.push('scripts/lib/unpublished.js no longer excludes node_modules from the publish root');
   if (fs.existsSync(path.join(root, '.pages-output', 'node_modules'))) errors.push('node_modules was copied into the publish root .pages-output');
 }
 

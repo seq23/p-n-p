@@ -20,6 +20,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const errors = [];
@@ -66,11 +67,12 @@ const publicRules = (guard.match(/\(m, p\) =>/g) || []).length;
 if (publicRules !== 2) errors.push(`functions/_lib/guard.mjs has ${publicRules} unauthenticated routes; only GET /admin and POST /admin/login may be open`);
 
 if (fs.existsSync(path.join(ROOT, 'admin'))) errors.push('a static admin/ directory exists; it would publish around the guard');
-const assemble = read('scripts/assemble_pages_output.js');
+// The deny-list lives in scripts/lib/unpublished.js (shared with the sitemap); the
+// assembler must read it, and it must hold the server-side names.
+const { EXCLUDE } = createRequire(import.meta.url)('../lib/unpublished.js');
+if (!/require\('\.\/lib\/unpublished'\)/.test(read('scripts/assemble_pages_output.js'))) errors.push('scripts/assemble_pages_output.js does not read the shared deny-list scripts/lib/unpublished.js');
 for (const name of ['functions', 'migrations', 'workers', 'wrangler.toml']) {
-  if (!new RegExp(`'${name.replace('.', '\\.')}'`).test(assemble.split('const EXCLUDE')[1].split(']);')[0])) {
-    errors.push(`scripts/assemble_pages_output.js does not exclude ${name}; its source would be served as static files`);
-  }
+  if (!EXCLUDE.has(name)) errors.push(`scripts/lib/unpublished.js does not exclude ${name}; its source would be served as static files`);
 }
 
 // 5. The private ICS feed (/api/calendar/<token>.ics) is the ONE admin route outside the

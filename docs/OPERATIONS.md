@@ -49,3 +49,15 @@ Settings rows can be written directly:
 
 ## Schedule
 - Every scheduled job, in Central time, is listed in `docs/SCHEDULE.md` (rebalanced 1 Nov 2026).
+
+## Search loop (shared engine, 1 Nov 2026)
+New question pages come from the shared engine `seq23/search-loop@v1`
+(`.github/workflows/search-loop.yml`, daily 07:29 CT; config `search-loop.config.json`;
+ledger `data/search-loop/`). Pages land in `questions/` and publish straight away; the one
+action is the quote request (`/request`); pages never state prices. When the engine
+published, `.github/scripts/search_loop_post_build.sh` runs the re-render chain above for
+them (section index `/questions/`, business node, related nav + link-in with a mutation
+scope, finish passes, sitemap, refreeze). Engine pages are outside the cadence cap
+(`scripts/cadence/sitemap_urls.js` reads `output.url_prefix`). A branch run is a proof run:
+it uploads `search-loop-pages` and commits nothing. Throttle every site at once with
+`gh variable set SEARCH_LOOP_MODE --body slow -R seq23/search-loop`.

@@ -48,7 +48,13 @@ function meta(html, attr, name) {
 }
 const decode = (s) => String(s).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 const declaresArticle = (html) => meta(html, 'property', 'og:type') === 'article';
-const canonicalOf = (html) => { const m = /<link\s+rel="canonical"\s+href="([^"]+)"/i.exec(html); return m ? m[1] : ''; };
+// Either attribute order: the shared search engine's pages (questions/) are
+// serialised href-first, and a canonical read as '' made every one of them fail.
+const canonicalOf = (html) => {
+  const tag = /<link\b(?=[^>]*\brel="canonical")[^>]*>/i.exec(html);
+  const m = tag && /\bhref="([^"]+)"/i.exec(tag[0]);
+  return m ? m[1] : '';
+};
 
 function headlineOf(html) {
   const h1 = /<h1\b[^>]*>([\s\S]*?)<\/h1>/i.exec(html);

@@ -46,9 +46,11 @@ on:
   # are built from.
   # "Inventory Publish" (Settings -> Inventory in /admin) pushes the rebuilt rentals pages the
   # same way, so its commits are validated and announced here too.
+  # "Search Loop" (the shared search engine, search-loop.yml) pushes its daily question
+  # pages with GITHUB_TOKEN as well (1 Nov 2026).
   workflow_run:
     workflows:
-      ["Daily Authority Cycle", "Bounded Self-Healing", "Search Intelligence Cycle", "Paid Citation Probe", "Inventory Publish"]
+      ["Daily Authority Cycle", "Bounded Self-Healing", "Search Intelligence Cycle", "Paid Citation Probe", "Inventory Publish", "Search Loop"]
     types: [completed]
 
 permissions:
