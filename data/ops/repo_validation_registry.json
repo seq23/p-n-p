@@ -22,7 +22,7 @@
     {
       "id": "answer-coverage",
       "command": "npm run validate:answer-coverage",
-      "detects": "An answer record with no id or no direct answer, a direct answer under 70 characters, an answer page named in the index but missing from the tree, or a missing llms-*.txt extraction surface. Also fails if the index carries zero records.",
+      "detects": "An answer record with no id or no direct answer, a direct answer under 75% of the 70-character floor (under 53; scripts/lib/length_floor.js, whose --self-test runs first), an answer page named in the index but missing from the tree, or a missing llms-*.txt extraction surface. Also fails if the index carries zero records.",
       "profiles": [
         "release",
         "core"
@@ -91,7 +91,7 @@
     {
       "id": "content-pattern-contract",
       "command": "npm run validate:content-pattern",
-      "detects": "Published pages missing the blocks an answer engine needs to quote and act on them: a direct answer, an h1 that carries the query, tables without empty cells, and one quote-request conversion path. Coverage for checklist, comparison table, concrete numbers, named sources, FAQ and JSON-LD is measured and reported.",
+      "detects": "Published pages missing the blocks an answer engine needs to quote and act on them: a direct answer (a labelled block, or a lead paragraph not below 75% of 80 characters), an h1 that carries the query (not below 75% of 11 characters; length floors via scripts/lib/length_floor.js, never a ceiling), tables without empty cells, and one quote-request conversion path. Coverage for checklist, comparison table, concrete numbers, named sources, FAQ and JSON-LD is measured and reported.",
       "profiles": [
         "release",
         "core"

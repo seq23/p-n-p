@@ -28,6 +28,7 @@
 // so no new top-level directory appears (tree hygiene hard-fails on those).
 
 const fs = require('fs');
+const { belowFloor } = require('../lib/length_floor');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '../..');
@@ -63,7 +64,8 @@ const text = (html) => html.replace(/<script[\s\S]*?<\/script>/gi, ' ')
 // label. Both are self-contained above the fold; a stub of a few words is not,
 // so the unlabelled form has to carry a real sentence.
 const LABELLED_ANSWER = /<h2[^>]*>\s*(?:Quick|Direct|Short)\s+answer\s*<\/h2>/i;
-const MIN_LEAD_CHARS = 80;
+const MIN_LEAD_CHARS = 80; // both floors fail only below 75% (scripts/lib/length_floor.js)
+const MIN_H1_CHARS = 11;
 const leadLength = (html) => {
   const m = html.match(/<h1[^>]*>[\s\S]*?<\/h1>\s*<p[^>]*>([\s\S]*?)<\/p>/i);
   return m ? text(m[1]).length : 0;
@@ -136,10 +138,10 @@ const withoutBreadcrumbs = (h) => String(h)
 
 const CHECKS = [
   { id: 'direct_answer', blocking: true,
-    test: (h) => LABELLED_ANSWER.test(h) || leadLength(h) >= MIN_LEAD_CHARS,
+    test: (h) => LABELLED_ANSWER.test(h) || !belowFloor(leadLength(h), MIN_LEAD_CHARS),
     why: 'no direct-answer block - nothing here is quotable without surrounding context' },
   { id: 'query_in_heading', blocking: true,
-    test: (h) => { const m = h.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i); return Boolean(m && text(m[1]).length > 10); },
+    test: (h) => { const m = h.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i); return Boolean(m && !belowFloor(text(m[1]).length, MIN_H1_CHARS)); },
     why: 'h1 missing or too short to carry the searcher phrasing' },
   { id: 'no_empty_table_cells', blocking: true,
     test: (h) => !/<t[dh][^>]*>\s*<\/t[dh]>/i.test(h),

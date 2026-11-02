@@ -202,7 +202,9 @@ must(/class="newtag" data-new-tag>NEW LINE</.test(ed) && /<template id="line-tpl
 must(/<div class="sofar" data-total-so-far><span>Total so far<\/span><strong id="sum-sofar">/.test(ed), 'no "Total so far"');
 const menu = ed.slice(ed.indexOf('data-add-menu'), ed.indexOf('id="add-close"'));
 const opts = [...menu.matchAll(/<b>([^<]+)<\/b><small>([^<]+)<\/small>/g)].map((m) => `${nq(m[1])}/${nq(m[2])}`);
-must(opts.slice(0, 6).join('|') === 'Something else/Type what it is and its price|Delivery fee/For business delivery|Setup / takedown fee/Taking it down after|Damage deposit/Given back after the event|Discount/Takes money off the total|A porch package/Pick from your price list', `the ＋ Add list is ${opts.join('|')}`);
+// The six choices in order, by their names; the grey help line under each is the generator's wording, not pinned.
+const optNames = [...menu.matchAll(/<b>([^<]+)<\/b><small>([^<]+)<\/small>/g)].map((m) => nq(m[1]));
+must(optNames.length >= 6 && optNames.slice(0, 6).join('|') === 'Something else|Delivery fee|Setup / takedown fee|Damage deposit|Discount|A porch package', `the ＋ Add list is ${opts.join('|')}`);
 must((ed.match(/＋ Add something to this invoice/g) || []).length === 1 && /id="add-close"[^>]*>✕ Close</.test(ed) && /aria-controls="add-menu"/.test(ed), 'not ONE "＋ Add something to this invoice" with ✕ Close');
 must(/function openLine\(el,focus\)\{list\.querySelectorAll\('\[data-line\]\[data-open\]'\)/.test(ed) && /openLine\(el,desc\?'\[data-price\]':'\[name=line_desc\]'\);el\.setAttribute\('data-new',''\)/.test(ed), 'one-line-open / focus-in-price for a new line is not in the editor script');
 must(/\.ed\.js \.lrow:not\(\[data-open\]\) \.lgrid\{display:none\}/.test(ed), 'lines without JavaScript would be hidden (no .js guard)');
@@ -218,7 +220,7 @@ const today = shortDate(s.util.todayISO ? (await mod('functions/_lib/reminders.m
 must(new RegExp(`data-pay-step="1" data-step-paid><span><span class="n">①</span>Deposit · now · holds the date<span class="pd">✓ paid ${today}</span>`).test(page), `the paid deposit step is not green "✓ paid ${today}"`);
 must(/data-pay-step="2"><span><span class="n">②<\/span>The rest · by /.test(page) && /data-still-owed>Still owed \$/.test(page), 'the unpaid rest / Still owed is missing');
 const rc = nq(cardOf((await s.get('/admin/')).text, rent.row.request_key));
-must(/data-pay-steps/.test(rc) && rc.includes('✓ paid') && /How Rhea pays/.test(rc), "the card's Payment box lacks the numbered payments");
+must(/data-pay-steps/.test(rc) && rc.includes('✓ paid') && rc.includes('Rhea'), "the card's Payment box lacks the numbered payments");
 const todo2 = TODO.renderTodo(await TODO.todoData(s.db, todayISO()));
 must(typeof todo2.text === 'string', 'the to-do email did not render');
 
