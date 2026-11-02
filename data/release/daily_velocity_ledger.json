@@ -52,6 +52,15 @@
       },
       "publication_frozen": true,
       "updated_at": "2026-10-26T16:37:39.632Z"
+    },
+    "2026-11-02": {
+      "new_pages": 1,
+      "ceiling": 3,
+      "routes": [
+        "/guides/graduation-party-decorations-at-home-memphis"
+      ],
+      "publication_frozen": false,
+      "updated_at": "2026-11-02T16:08:29.508Z"
     }
   }
 }

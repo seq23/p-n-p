@@ -29,7 +29,7 @@
       "status": "STRONG_BASELINE"
     },
     "party_decor": {
-      "public_surface_count": 37,
+      "public_surface_count": 38,
       "sample_routes": [
         "/areas/arlington-tn-party-decor.html",
         "/areas/bartlett-tn-party-decor.html",
@@ -81,7 +81,7 @@
       "status": "STRONG_BASELINE"
     },
     "grazing_table_styling": {
-      "public_surface_count": 26,
+      "public_surface_count": 27,
       "sample_routes": [
         "/areas/arlington-tn-grazing-tables.html",
         "/areas/arlington-tn-party-decor.html",
