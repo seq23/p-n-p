@@ -2,11 +2,11 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W45",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-02T13:33:04.043Z",
-  "state": "slow",
+  "generated_at": "2026-11-02T14:45:57.034Z",
+  "state": "running",
   "published": 0,
   "indexed": 0,
-  "pace": 3,
+  "pace": 10,
   "ai_visitors": "not read: CLOUDFLARE_API_TOKEN is not set",
   "ai_bot_hits": "not read: CLOUDFLARE_API_TOKEN is not set",
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
@@ -14,10 +14,8 @@
   "undone": 0,
   "merged": 0,
   "notes": [
-    "NAMED NOTE [FREE_MODEL_RATE_LIMITED] the free model route is rate-limited or exhausted (every free lane is out — workers: engine share of Workers AI used today (527.7181754112244/600 neurons; account 527.7181754112244/9000); gemini:gemini-2.5-flash: free daily quota used (skipped this run); openrouter:nvidia/nemotron-3-ultra-550b-a55b:free: timed out after 60s (skipped this run); openrouter:nvidia/nemotron-3.5-lightning:free: timed out after 60s (skipped this run); openrouter:google/gemma-4-26b-a4b-it:free: timed out after 60s (skipped this run); openrouter:dots-studio/dots-3-note-preview:free: timed out after 60s (skipped this run); openrouter:nvidia/nemotron-3.5-super-vl:free: timed out after 0s (skipped this run) (gemini:gemini-2.5-flash-lite:http_404, openrouter:gemma-4-31b-it:free:http_429, openrouter:dots-3-note-preview:free:timeout, openrouter:xing4.0-29b-a4b:free:http_429, openrouter:nemotron-3.5-super-vl:free:timeout, all::call budget 240s used)); this run dropped itself to slow for today",
-    "BUILD stopped early: the free model route failed twice in a row",
-    "BUILD published 0 of quota 3: 0 draft(s) failed the gate and were dropped; 1 got no answer from the free model and stay queued",
-    "CHECK runs weekly in mode=slow; last ran 2026-11-01"
+    "BUILD published 0 of quota 10: 22 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued",
+    "pace: held at 10/day: indexing not read (no pages old enough to measure)"
   ],
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/41453890042"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/41465022731"
 }

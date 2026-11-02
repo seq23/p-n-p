@@ -1,5 +1,224 @@
 {
   "schema": "search-loop-pages-v1",
   "pages": [],
-  "dropped": []
+  "dropped": [
+    {
+      "query": "birthday party planner near me",
+      "at": "2026-11-02",
+      "reason": [
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "birthday party",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 31 words (needs 40-60): \"What areas do you serve for birthday parties?\"",
+        "b5 FAQ answer is 24 words (needs 40-60): \"Do you offer delivery for party game rentals?\"",
+        "b5 FAQ answer is 33 words (needs 40-60): \"How does the party setup process work?\"",
+        "b5 FAQ answer is 29 words (needs 40-60): \"How do I find out what my birthday setup will cost\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "kids party planner near me",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 27 words (needs 40-60): \"What areas do you serve for kids party planning?\"",
+        "b5 FAQ answer is 27 words (needs 40-60): \"How do party game rentals work?\"",
+        "b5 FAQ answer is 19 words (needs 40-60): \"How do I find out how much my party decor will cos\"",
+        "b5 FAQ answer is 21 words (needs 40-60): \"What other services do you offer besides birthday \"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "birthday party event planner near me",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 39 words (needs 40-60): \"Do you offer game rentals with your party planning\"",
+        "b5 FAQ answer is 37 words (needs 40-60): \"What is included in your party decor setups?\"",
+        "b5 FAQ answer is 39 words (needs 40-60): \"How do I get a price quote for my birthday party?\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "kid birthday party planner near me",
+      "at": "2026-11-02",
+      "reason": [
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "event planner for small parties",
+      "at": "2026-11-02",
+      "reason": [
+        "b4 direct answer under the H1 is 34 words (needs 40-60)",
+        "b5 FAQ answer is 32 words (needs 40-60): \"What areas do you serve?\"",
+        "b5 FAQ answer is 29 words (needs 40-60): \"Do you deliver party game rentals?\"",
+        "b5 FAQ answer is 28 words (needs 40-60): \"How much do your event planning services cost?\"",
+        "b5 FAQ answer is 24 words (needs 40-60): \"What types of events do you style?\""
+      ]
+    },
+    {
+      "query": "halloween events southaven ms",
+      "at": "2026-11-02",
+      "reason": [
+        "off-audience: This search is for public Halloween events and festivals in Southaven, MS, whereas Porch & Party provides private party "
+      ]
+    },
+    {
+      "query": "party rentals memphis",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 35 words (needs 40-60): \"What areas do you serve for party and decor servic\"",
+        "b5 FAQ answer is 32 words (needs 40-60): \"How do I find out the cost of my party rentals?\"",
+        "b5 FAQ answer is 34 words (needs 40-60): \"What types of events do you style?\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "birthday party decorations",
+      "at": "2026-11-02",
+      "reason": [
+        "off-audience: This search is too broad for our specific Memphis party planning, grazing tables, and game rental services."
+      ]
+    },
+    {
+      "query": "how to book birthday party",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 34 words (needs 40-60): \"What areas do you serve for birthday parties?\"",
+        "b5 FAQ answer is 35 words (needs 40-60): \"How do I pick up my party game rentals?\"",
+        "b5 FAQ answer is 39 words (needs 40-60): \"How do I find out the cost of my birthday setup?\"",
+        "b5 FAQ answer is 35 words (needs 40-60): \"What happens on the day of the party?\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "balloon party decorations near me",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 35 words (needs 40-60): \"Do you deliver balloon party decorations to my hom\"",
+        "b5 FAQ answer is 30 words (needs 40-60): \"What areas do you serve for party decor and setup?\"",
+        "b5 FAQ answer is 34 words (needs 40-60): \"Can I pick up party game rentals from you?\"",
+        "b5 FAQ answer is 37 words (needs 40-60): \"How do I find out the exact quote for balloon deco\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "birthday party organisers near me",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 39 words (needs 40-60): \"What areas do you serve for birthday parties?\"",
+        "b5 FAQ answer is 39 words (needs 40-60): \"Do you provide food as part of the decor?\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "birthday party coordinator near me",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 22 words (needs 40-60): \"What areas do you serve for birthday party coordin\"",
+        "b5 FAQ answer is 28 words (needs 40-60): \"How do party game rentals work?\"",
+        "b5 FAQ answer is 31 words (needs 40-60): \"Do you stay and manage the party during the event?\"",
+        "b5 FAQ answer is 23 words (needs 40-60): \"How do I find out the cost for my birthday party s\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "first birthday party planner near me",
+      "at": "2026-11-02",
+      "reason": [
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "baby birthday party planner near me",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 27 words (needs 40-60): \"What areas do you serve for party planning?\"",
+        "b5 FAQ answer is 30 words (needs 40-60): \"How do party game rentals work?\"",
+        "b5 FAQ answer is 30 words (needs 40-60): \"How does pricing work for baby birthday planning?\"",
+        "b5 FAQ answer is 26 words (needs 40-60): \"Can you help with seasonal porch decorating too?\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "adult birthday party planners near me",
+      "at": "2026-11-02",
+      "reason": [
+        "b4 direct answer under the H1 is 37 words (needs 40-60)",
+        "b5 FAQ answer is 30 words (needs 40-60): \"What areas do you serve for adult birthday parties\"",
+        "b5 FAQ answer is 32 words (needs 40-60): \"How do I find out the exact cost for my birthday p\"",
+        "b5 FAQ answer is 31 words (needs 40-60): \"Do you offer party game rentals for birthdays?\"",
+        "b5 FAQ answer is 30 words (needs 40-60): \"What is included in your adult birthday decor serv\""
+      ]
+    },
+    {
+      "query": "balloon party",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 26 words (needs 40-60): \"Do you deliver and set up the balloons?\"",
+        "b5 FAQ answer is 16 words (needs 40-60): \"What areas do you serve for balloon decor?\"",
+        "b5 FAQ answer is 21 words (needs 40-60): \"Can I rent party games along with my balloon decor\"",
+        "b5 FAQ answer is 21 words (needs 40-60): \"How do I find out the exact pricing for my party?\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "balloon party decor near me delivery",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 37 words (needs 40-60): \"Can I get food with my balloon decor delivery?\"",
+        "b5 FAQ answer is 37 words (needs 40-60): \"Can I pick up party items myself?\"",
+        "b5 FAQ answer is 36 words (needs 40-60): \"How do I find out the cost of my event setup?\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "balloon party decor near me reviews",
+      "at": "2026-11-02",
+      "reason": [
+        "off-audience: Reviews and star ratings are not used on this site."
+      ]
+    },
+    {
+      "query": "birthday party planner near me reviews",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 39 words (needs 40-60): \"Can I pick up party game rentals from your locatio\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "birthday party planner near me packages",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 28 words (needs 40-60): \"What areas do you serve for birthday party setups?\"",
+        "b5 FAQ answer is 29 words (needs 40-60): \"Do you deliver party game rentals?\"",
+        "b5 FAQ answer is 27 words (needs 40-60): \"What is included in party planning and decor?\"",
+        "b5 FAQ answer is 29 words (needs 40-60): \"How do I get a price for my birthday party package\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target"
+      ]
+    },
+    {
+      "query": "birthday event planners near me",
+      "at": "2026-11-02",
+      "reason": [
+        "b5 FAQ answer is 39 words (needs 40-60): \"What areas do you serve for birthday event plannin\"",
+        "b5 FAQ answer is 38 words (needs 40-60): \"Where do I pick up party game rentals for my birth\"",
+        "b5 FAQ answer is 34 words (needs 40-60): \"Do you decorate office spaces for employee birthda\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
+      ]
+    }
+  ]
 }
