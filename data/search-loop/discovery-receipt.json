@@ -1,8 +1,8 @@
 {
   "schema": "search-loop-discovery-v1",
   "site": "porchandparty901.com",
-  "week": "2026-W44",
-  "generated_at": "2026-11-01T17:30:27.802Z",
+  "week": "2026-W45",
+  "generated_at": "2026-11-02T13:33:04.043Z",
   "paid_calls": 0,
   "cost_usd": 0,
   "hosts": {
@@ -32,19 +32,19 @@
     }
   },
   "sources": {
-    "search_console": "ok: 11 rows",
+    "search_console": "ok: 12 rows",
     "bing_webmaster": "ok: 14 rows",
     "suggestqueries.google.com": "ok",
     "api.bing.com": "ok",
-    "relevance_screen": "not read: the free model did not return {\"keep\":[...]} (lexical floor only)"
+    "relevance_screen": "ok: kept 27 of 137 (free model)"
   },
   "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)",
   "notes": [
     "autocomplete stopped at its budget of 80 calls"
   ],
   "counts": {
-    "candidates": 135,
-    "targets": 135,
+    "candidates": 137,
+    "targets": 27,
     "strengthen_candidates": 0,
     "dropped_shared_audience": 0
   }
