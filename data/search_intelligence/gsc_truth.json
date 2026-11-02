@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "provider_truth",
-  "generated_at": "2026-11-01T16:06:01.528Z",
+  "generated_at": "2026-11-02T16:06:55.839Z",
   "own_site_google_performance_authority": "google_search_console",
   "provider_state": "OK",
   "provider_states": [
@@ -11,7 +11,7 @@
       "provider_id": "google_search_console",
       "state": "OK",
       "reason": "REAL_EXPORT_INGESTED",
-      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-11-01T16:06:01.528789+00:00 rows={\"by_query\":9,\"by_page\":3,\"by_query_page\":11}"
+      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-11-02T16:06:55.839479+00:00 rows={\"by_query\":9,\"by_page\":3,\"by_query_page\":11}"
     }
   ],
   "overall_status": "OK",
@@ -19,24 +19,24 @@
   "export_path": "data/search_intelligence/gsc_search_analytics_export.json",
   "export_problem": null,
   "export_window": {
-    "start_date": "2026-10-02",
-    "end_date": "2026-10-29"
+    "start_date": "2026-10-03",
+    "end_date": "2026-10-30"
   },
-  "export_collected_at": "2026-11-01T16:06:01.528789+00:00",
+  "export_collected_at": "2026-11-02T16:06:55.839479+00:00",
   "export_counts": {
     "by_query": 9,
     "by_page": 3,
     "by_query_page": 11
   },
-  "requested_for_date": "2026-11-01",
+  "requested_for_date": "2026-11-02",
   "target_count": 11,
   "targets_with_gsc_rows": 9,
-  "total_impressions": 83,
+  "total_impressions": 84,
   "total_clicks": 4,
   "site_totals": {
     "basis": "by_page rows of the Search Console export (complete; by_query omits anonymised queries)",
     "clicks": 4,
-    "impressions": 83,
+    "impressions": 84,
     "pages_with_impressions": 3,
     "queries_with_impressions": 9,
     "query_row_impressions": 55,
@@ -67,12 +67,6 @@
         "gsc_average_position": 1
       },
       {
-        "query": "balloon business",
-        "impressions": 1,
-        "clicks": 0,
-        "gsc_average_position": 36
-      },
-      {
         "query": "balloon party",
         "impressions": 1,
         "clicks": 0,
@@ -95,6 +89,12 @@
         "impressions": 1,
         "clicks": 0,
         "gsc_average_position": 41
+      },
+      {
+        "query": "party rentals memphis",
+        "impressions": 1,
+        "clicks": 0,
+        "gsc_average_position": 14
       }
     ]
   },
@@ -103,23 +103,6 @@
   "unavailable_note": null,
   "truth_boundary": "Google Search Console is the only authority for own-site Google impressions, clicks, CTR, average position, and indexation in this repo.",
   "per_target": [
-    {
-      "target_id": "pnp_sq_06604ff9e92d",
-      "query": "balloon business",
-      "expected_owned_url": "https://porchandparty901.com/faq/how-much-does-a-balloon-garland-cost-in-memphis",
-      "truth_source": "google_search_console",
-      "truth_state": "GSC_ROW_PRESENT",
-      "query_metrics": {
-        "gsc_query": "balloon business",
-        "clicks": 0,
-        "impressions": 1,
-        "ctr": 0,
-        "gsc_average_position": 36
-      },
-      "page_metrics": null,
-      "own_site_performance_basis": "google_search_console",
-      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
-    },
     {
       "target_id": "pnp_sq_10488c0a79c5",
       "query": "birthday party planner near me",
@@ -215,9 +198,9 @@
       "page_metrics": {
         "url": "https://www.porchandparty901.com/",
         "clicks": 0,
-        "impressions": 6,
+        "impressions": 5,
         "ctr": 0,
-        "gsc_average_position": 19.833333333333332
+        "gsc_average_position": 16.6
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -264,6 +247,29 @@
       "truth_state": "GSC_NO_ROW_FOR_TARGET",
       "query_metrics": null,
       "page_metrics": null,
+      "own_site_performance_basis": "google_search_console",
+      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
+    },
+    {
+      "target_id": "pnp_sq_ebcd49e6b23b",
+      "query": "party rentals memphis",
+      "expected_owned_url": "https://porchandparty901.com/",
+      "truth_source": "google_search_console",
+      "truth_state": "GSC_ROW_PRESENT",
+      "query_metrics": {
+        "gsc_query": "party rentals memphis",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "gsc_average_position": 14
+      },
+      "page_metrics": {
+        "url": "https://www.porchandparty901.com/",
+        "clicks": 0,
+        "impressions": 5,
+        "ctr": 0,
+        "gsc_average_position": 16.6
+      },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
     },

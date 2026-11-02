@@ -8,21 +8,12 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-02",
-  "end_date": "2026-10-29",
-  "collected_at": "2026-11-01T16:06:01.528789+00:00",
+  "start_date": "2026-10-03",
+  "end_date": "2026-10-30",
+  "collected_at": "2026-11-02T16:06:55.839479+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
-    {
-      "keys": [
-        "balloon business"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 36
-    },
     {
       "keys": [
         "balloon party"
@@ -94,6 +85,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 41
+    },
+    {
+      "keys": [
+        "party rentals memphis"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 14
     }
   ],
   "by_page": [
@@ -102,9 +102,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 4,
-      "impressions": 76,
-      "ctr": 0.05263157894736842,
-      "position": 4.7631578947368425
+      "impressions": 78,
+      "ctr": 0.05128205128205128,
+      "position": 4.935897435897436
     },
     {
       "keys": [
@@ -120,22 +120,12 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 6,
+      "impressions": 5,
       "ctr": 0,
-      "position": 19.833333333333332
+      "position": 16.6
     }
   ],
   "by_query_page": [
-    {
-      "keys": [
-        "balloon business",
-        "https://www.porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 36
-    },
     {
       "keys": [
         "balloon party",
@@ -235,6 +225,16 @@
       "impressions": 1,
       "ctr": 0,
       "position": 41
+    },
+    {
+      "keys": [
+        "party rentals memphis",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 14
     }
   ],
   "counts": {
