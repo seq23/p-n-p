@@ -79,7 +79,7 @@
     "selfheal:dry": "node scripts/selfheal/heal_until_clean.mjs --dry-run",
     "validate:all": "node scripts/validation/validate.js && npm run validate:demand-backed-pages && npm run validate:local-scope && npm run validate:answer-coverage && npm run validate:internal-links && npm run validate:link-reachability && npm run validate:meta-lengths && npm run validate:no-orphan-scripts",
     "validate:migrations-keep-data": "node scripts/validators/validate_migrations_keep_data.mjs && node scripts/validators/validate_migrations_keep_data.mjs --self-test",
-    "validate:answer-coverage": "node scripts/validation/validate_answer_coverage.js",
+    "validate:answer-coverage": "node scripts/lib/length_floor.js --self-test && node scripts/validation/validate_answer_coverage.js",
     "validate:atlas-units": "node scripts/validators/validate_atlas_units.js",
     "validate:authority-scale": "node scripts/authority_scale/validate_authority_scale.mjs && npm run authority:scale:status",
     "validate:backlog-reaches-builder": "node scripts/validators/validate_backlog_reaches_builder.mjs",

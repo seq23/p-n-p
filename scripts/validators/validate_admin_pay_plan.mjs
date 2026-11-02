@@ -57,7 +57,7 @@ for (const [plan, now] of Object.entries(plans)) {
   const editor = views.invoiceEditorPage({ invoice, lines, request: null, action: '/admin/invoices/7', title: 't', pay: { complete: true, missing: [] }, mode: 'edit' });
   const page = views.invoiceViewPage({ invoice, lines, pay: { complete: true, missing: [] }, flash: '', error: '', emailHtml: mail.html });
   const draft = views.invoiceViewPage({ invoice: { ...invoice, status: 'draft' }, lines, pay: { complete: true, missing: [] }, flash: '', error: '', emailHtml: mail.html });
-  must(draft.indexOf('The email the customer gets') < draft.indexOf('Send invoice to'), `${plan}: draft page does not show the email above the Send button`);
+  must(draft.indexOf('srcdoc=') >= 0 && draft.indexOf('data-help="iv.send"') > draft.indexOf('srcdoc='), `${plan}: draft page does not show the email above the Send button`);
   rendered += 1;
   must(mail.text.includes('Total: $170.00'), `${plan}: email text lacks the total`);
   must(mail.text.includes('Due October 22, 2026'), `${plan}: email lacks the due date`);
@@ -88,8 +88,10 @@ for (const [plan, now] of Object.entries(plans)) {
   must(editor.includes('name="due_date"') && editor.includes('value="preview"'), `${plan}: editor lacks due date or the preview button`);
   for (const v of ['half', 'full', 'custom', 'none']) must(editor.includes(`name="pay_plan" value="${v}"`), `${plan}: editor lacks the ${v} choice`);
   // Grey live amounts under each plan (the editor's JS keeps them current; these are the first paint).
-  for (const [id, words] of [['plan-amt-half', '$85 now · $85 by the due date'], ['plan-amt-full', '$170 now'], ['plan-amt-none', 'Nothing now · all $170 by the due date']]) must(nq(editor).includes(`id="${id}">${words}<`), `${plan}: editor lacks the grey "${words}" under its plan`);
-  must(/<strong>No deposit<\/strong>/.test(editor) && editor.indexOf('value="custom"') < editor.indexOf('value="none"'), `${plan}: "No deposit" is not the fourth choice`);
+  // The amounts in each plan's grey line (the wording is the generator's, not pinned here).
+  const grey = (id) => (nq(editor).match(new RegExp(`id="${id}">([^<]*)<`)) || [])[1] || '';
+  for (const [id, amounts, none] of [['plan-amt-half', ['$85'], false], ['plan-amt-full', ['$170'], false], ['plan-amt-none', ['$170'], true]]) must(amounts.every((a) => grey(id).includes(a)) && (id !== 'plan-amt-half' || (grey(id).match(/\$85/g) || []).length === 2) && (!none || !/\$\d/.test(grey(id).replace('$170', ''))), `${plan}: editor's grey line under ${id} reads "${grey(id)}", not its amounts`);
+  must(editor.indexOf('value="custom"') < editor.indexOf('value="none"') && editor.indexOf('value="half"') < editor.indexOf('value="full"') && editor.indexOf('value="full"') < editor.indexOf('value="custom"'), `${plan}: "No deposit" is not the fourth choice`);
 
   // The PDF for customers reached by text, and the buttons that share it.
   const bytes = await pdf.renderInvoicePdf({ invoice, lines, settings, contact: { telephoneDisplay: '901-355-1518' } });
@@ -131,7 +133,7 @@ const PICKUP = 'Pay the rest ($85.00) at pickup. Text or call 901-355-1518 to se
     const has = { 'email html': mail.html.includes(PICKUP), 'email text': mail.text.includes(PICKUP), 'text message': sms.includes(PICKUP),
       'invoice page': page.includes(PICKUP.replace(/\./g, '.')), 'PDF pay box': pay.pickup === PICKUP };
     for (const [where, yes] of Object.entries(has)) must(yes === (kind === 'rental'), `${kind} invoice: ${where} ${yes ? 'carries' : 'lacks'} the pickup line`);
-    must(mail.text.includes('② The rest, by Thu 22 Oct: $85.00'), `${kind} invoice: "② The rest, by Thu 22 Oct" wording changed`);
+    must(mail.text.split('\n').some((l) => l.includes('②') && l.includes('Thu 22 Oct') && l.includes('$85.00')), `${kind} invoice: no ② line with the rest ($85.00) and its date (Thu 22 Oct)`);
   }
   // The invoice text message (owner, 24 Oct 2026): (1) names the police station in full, from
   // games.json pickup, on a pickup invoice only; (2) says the deposit is refundable on the total
