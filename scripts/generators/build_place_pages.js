@@ -62,6 +62,7 @@ const RETROFIT_MARKERS = [
 ];
 /** The cities line every page-shell page carries, from the one source. */
 const CITIES = require(path.join(ROOT, 'data/service_areas/areas.json')).areas;
+const SHAPE = require(path.join(ROOT, 'scripts/lib/page_shape.js'));
 
 /**
  * Titles and descriptions are bounded, and a long hotel name must not blow the
@@ -107,13 +108,15 @@ function neighborhoodEntry(n) {
       `Party decor in ${n.name}, Memphis: birthday, shower and anniversary setups from ${money(PRESET_FROM)}, styled on site and quoted before anything is booked.`,
       `Party decor in ${n.name}, Memphis: birthday and celebration setups from ${money(PRESET_FROM)}, styled on site and quoted up front.`
     ]),
-    intro: `${n.name} is ${n.where}. Porch & Party styles celebrations there the same way it does anywhere in Memphis: birthdays, showers, anniversaries, surprise setups and home celebrations, built on site and left ready.`,
+    intro: SHAPE.assertLead(
+      `Party decor in ${n.name}, Memphis is balloon work, a backdrop and styled tables that Porch & Party designs, brings and sets up for you, for a birthday, a shower, an anniversary or a surprise at home. ${n.name} setups start at ${money(PRESET_FROM)}, quoted before anything is booked.`,
+      `areas/${n.slug}-party-decor lead`),
     quickAnswer: `${n.name} is part of Memphis, so it is on the included service area and there is no travel fee. Setups start at ${money(PRESET_FROM)} and are quoted on the date, the occasion and how much of the room is being styled.`,
     forWho: `This page is for ${n.name} hosts who want a celebration set up for them rather than assembled on the day.`,
     includes: CELEB.includes.concat([`Setup at a ${n.name} address, inside Memphis, with no travel fee`]),
     practical: `What changes the price is the size of the setup and how much of the room is styled, not which part of Memphis it is in. ${CELEB.notes[0]}`,
     authority: `This page exists because ${n.name} is a named part of the Memphis service area and the site publishes one page per place it serves, rather than one Memphis page standing in for all of them.`,
-    localContext: `${n.name} is ${n.where}, so a setup there is a drive inside the city from Porch & Party's own base in Memphis.`,
+    localContext: `${n.name} is ${n.where}, so a setup there is a drive inside the city from Porch & Party's own base in Memphis, with no travel fee.`,
     beforeBook: `Have the date, the occasion, whether it is a home or a rented space, and roughly how much of the room you want styled. ${CELEB.notes[1]}`,
     nextStep: `Use the quote form with your ${n.name} address and the date, and the setup is priced against what you actually want styled.`,
     faqQuestion: `Do you set up party decor in ${n.name}?`,
@@ -134,6 +137,11 @@ function neighborhoodEntry(n) {
  * a page the hotel endorses unless it says otherwise, and no hotel has.
  */
 function anchorEntry(a) {
+  // Said in FULL exactly once, in the FAQ that asks it ("Are you partnered with
+  // X?"), with the lead carrying a short version in its own words. It used to be
+  // repeated verbatim four times on one page, which is what the owner's weekly
+  // quality sample reads as template filler - and four copies of a disclaimer are
+  // no more honest than one a reader can find.
   const NOT_AFFILIATED = `Porch & Party is not affiliated with ${a.name} and is not one of its vendors or partners. The room is booked by you, and permission to decorate it is yours to arrange with the hotel.`;
   return {
     slug: `${a.slug}-hotel-room-decor`,
@@ -151,17 +159,19 @@ function anchorEntry(a) {
       `Hotel room setups for ${a.name} guests: balloons, petals, LED candle styling and signage from ${money(PRESET_FROM)}, set up before you reach the room.`,
       `Room setups for ${a.name} guests in Memphis: balloons, petals, LED candles and signage from ${money(PRESET_FROM)}, ready before you arrive.`
     ]),
-    intro: `${a.name} is in ${a.where}. Porch & Party styles guest rooms there for birthdays, anniversaries, proposals and surprises: balloons, a petal walkway, LED candle styling, signage and a styled bed, set up in the room you have booked. ${NOT_AFFILIATED}`,
+    intro: SHAPE.assertLead(
+      `A hotel room setup at ${a.name} is a guest room Porch &amp; Party styles before you walk into it: balloons, a petal walkway, LED candle styling, signage and a styled bed, in the room you booked yourself. Setups start at ${money(PRESET_FROM)}. We are not one of the hotel's vendors.`,
+      `areas/${a.slug}-hotel-room-decor lead`),
     quickAnswer: `A room setup at ${a.name} starts at ${money(PRESET_FROM)} and is quoted on the date, the occasion and how much of the room is styled. The hotel is in Memphis, which is on the included list, so there is no travel fee. You book the room and clear the decorating with the hotel; Porch & Party styles it.`,
     forWho: `This page is for guests who have booked, or are about to book, a room at ${a.name} and want it styled before they walk in.`,
     includes: CELEB.includes.concat(['Setup inside the guest room you have booked', 'A finish timed to your check-in rather than to our schedule']),
     practical: `Two things decide whether a hotel setup works: how long the room is available before you need it, and what the hotel allows inside it. ${CELEB.notes[0]}`,
     authority: `This page exists because ${a.name} is a named anchor in this site's Memphis coverage and guests search by the hotel's name, not by "hotel room decor". It makes no claim on the hotel's behalf.`,
     localContext: `${a.name} is in ${a.where}, inside Memphis, so there is no travel fee on a setup there.`,
-    beforeBook: `Check with ${a.name} what may be brought into the room and when it can be accessed, then share the date, the room's check-in time and the occasion. ${NOT_AFFILIATED}`,
+    beforeBook: `Check with ${a.name} what may be brought into the room and when it can be accessed - that permission is yours to get, as the guest whose name the room is in - then share the date, the room's check-in time and the occasion.`,
     nextStep: `Send the date, the occasion and the check-in time through the quote form, and the setup is priced against what you want in the room.`,
     faqQuestion: `Can you decorate a room at ${a.name}?`,
-    faqAnswer: `Yes, for a room you have booked, with the hotel's permission. ${NOT_AFFILIATED} ${CELEB.notes[1]}`,
+    faqAnswer: `Yes, for a room you have booked, with the hotel's permission. ${CELEB.notes[1]}`,
     faqs: [
       { q: `Are you partnered with ${a.name}?`, a: NOT_AFFILIATED },
       { q: 'Who asks the hotel for permission?', a: `You do, as the guest whose name the room is in. Hotels differ on what may be brought in and when a room can be accessed, and the answer is theirs to give, not ours.` },

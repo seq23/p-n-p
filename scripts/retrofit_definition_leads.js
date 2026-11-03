@@ -1,0 +1,136 @@
+#!/usr/bin/env node
+'use strict';
+/**
+ * The definition lead, installed into the pages that have no generator.
+ *
+ * WHY
+ * ---
+ * Her Search Readiness Checklist item b4 (a 40-60 word "X is ..." definition
+ * under the h1) and item d1 (the answer to the page's own question inside the
+ * first 100 words). The weekly quality sample on 3 Nov 2026 failed 87 of the 99
+ * published pages on b4 and named it on all five pages it sampled - 25, 28, 28,
+ * 38 and 50 words, each of them naming services rather than defining one.
+ *
+ * WHY A DATA FILE AND NOT A GENERATOR
+ * -----------------------------------
+ * Every page a generator renders was fixed in that generator: the 52 city x
+ * service pages in build_area_pages.js, the 12 place pages in
+ * build_place_pages.js, the two focused pages in lib/focus_pages.js. These
+ * fifteen are the ones data/content/page_admission_registry.json records as
+ * `source: legacy_public_authority_baseline` - published by the April and May
+ * 2026 baseline, frozen, and re-rendered by nothing in this repository. For them
+ * the page IS the source, so the lead is authored once per page in
+ * data/content/definition_leads.json and installed here, which is the same
+ * shape scripts/retrofit_thin_pages.js and scripts/retrofit_answer_cards.js
+ * already use on these same pages.
+ *
+ * NO PRICE IS TYPED IN THE DATA FILE. A lead names a price with a token
+ * ({celebFrom}, {grazeFrom}, {fallFrom}, {christmasFrom}, {porchFrom},
+ * {rentalDay}, {rentalWeekend}) resolved here from data/offers/services.json,
+ * data/offers/porch_packages.json and data/rentals/games.json - the only places
+ * prices live (CLAUDE.md). A price that moves in the data moves on the next
+ * build and cannot drift out of a page.
+ *
+ * WHAT IT WRITES
+ * --------------
+ * The lead replaces the first paragraph under the h1 - never the date line or
+ * the byline, which carry data-page-* - and that paragraph's own text is kept as
+ * the paragraph after it, so no words are lost. Idempotent: a second run sees
+ * its own lead and writes nothing. Every lead is measured by
+ * scripts/lib/page_shape.js AFTER its tokens resolve, so a lead out of shape
+ * fails the build and names the page. Rule 0: zero pages or zero leads is a hard
+ * failure, not a quiet pass.
+ *
+ * Runs in build:finish, before install_page_dates. Guarded by
+ * npm run validate:page-shape.
+ *
+ *   node scripts/retrofit_definition_leads.js [--check]
+ */
+const fs = require('fs');
+const path = require('path');
+
+const ROOT = path.resolve(__dirname, '..');
+const SHAPE = require(path.join(ROOT, 'scripts/lib/page_shape.js'));
+const offers = require(path.join(ROOT, 'data/offers/services.json'));
+const PK = require(path.join(ROOT, 'data/offers/porch_packages.json'));
+const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
+const RENTALS = INV.resolve(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8')));
+const DATA = path.join(ROOT, 'data/content/definition_leads.json');
+
+const CHECK = process.argv.includes('--check');
+const money = (n) => `$${Number(n).toLocaleString('en-US')}`;
+const seasonFrom = (short) => {
+  const s = PK.seasons.find((x) => (x.short || x.name || '').toLowerCase().startsWith(short));
+  if (!s) throw new Error(`data/offers/porch_packages.json has no "${short}" season to price a lead from`);
+  return Math.min(...Object.values(s.tiers).map((t) => t.from));
+};
+
+/** The only prices a lead may name, each read from the file that owns it. */
+function prices() {
+  const porchFrom = Math.min(...PK.seasons.flatMap((s) => Object.values(s.tiers).map((t) => t.from)));
+  return {
+    porchFrom: money(porchFrom),
+    fallFrom: money(seasonFrom('fall')),
+    christmasFrom: money(seasonFrom('christmas')),
+    celebFrom: money(Number(String(offers.services.celebration.price).replace(/[^0-9]/g, ''))),
+    grazeFrom: money(Math.min(...offers.services.grazing.tiers.map((t) => t.from))),
+    rentalDay: money(RENTALS.rates.day),
+    rentalWeekend: money(RENTALS.rates.weekend),
+  };
+}
+
+function resolve(text, P, rel) {
+  return String(text).replace(/\{(\w+)\}/g, (_, k) => {
+    if (!(k in P)) throw new Error(`${rel}: lead names {${k}}, which is not a price this repo publishes (${Object.keys(P).join(', ')})`);
+    return P[k];
+  });
+}
+
+// The first paragraph under the h1 that is not one of the provenance lines
+// (data-page-dates, data-page-byline, scripts/lib/page_provenance.js).
+const LEAD_RE = /(<\/h1>\s*)(<p(?![^>]*\bdata-page-)[^>]*>)([\s\S]*?)(<\/p>)/i;
+
+function install(html, lead, rel) {
+  const m = LEAD_RE.exec(html);
+  if (!m) throw new Error(`${rel}: no paragraph under the h1 to put the definition in`);
+  if (m[3].trim() === lead.trim()) return html;
+  return html.replace(LEAD_RE, (_, afterH1, open, inner) => `${afterH1}<p>${lead}</p><p data-definition-kept>${inner.trim()}</p>`);
+}
+
+function main() {
+  const { leads } = JSON.parse(fs.readFileSync(DATA, 'utf8'));
+  const rels = Object.keys(leads);
+  if (rels.length < 10) {
+    console.error(`definition-leads FAILED: data/content/definition_leads.json holds ${rels.length} lead(s). The read is broken, not the site.`);
+    process.exit(1);
+  }
+  const P = prices();
+  const written = [];
+  const stale = [];
+  let checked = 0;
+  for (const rel of rels) {
+    const abs = path.join(ROOT, rel);
+    if (!fs.existsSync(abs)) {
+      console.error(`definition-leads FAILED: ${rel} is listed but not published`);
+      process.exit(1);
+    }
+    const lead = SHAPE.assertLead(resolve(leads[rel], P, rel), `${rel} lead (data/content/definition_leads.json)`);
+    checked += 1;
+    const before = fs.readFileSync(abs, 'utf8');
+    const after = install(before, lead, rel);
+    if (after === before) continue;
+    if (CHECK) { stale.push(rel); continue; }
+    fs.writeFileSync(abs, after);
+    written.push(rel);
+  }
+  if (!checked) { console.error('definition-leads FAILED: zero leads measured'); process.exit(1); }
+  if (stale.length) {
+    console.error(`definition-leads: ${stale.length} page(s) do not carry their lead: ${stale.join(', ')}`);
+    console.error('  repair: node scripts/retrofit_definition_leads.js');
+    process.exit(1);
+  }
+  console.log(`definition leads: ${checked} authored lead(s), every one 40-60 words with a definition, ${written.length} page(s) written`);
+}
+
+module.exports = { install, prices, resolve, LEAD_RE };
+if (require.main === module) main();

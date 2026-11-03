@@ -38,6 +38,7 @@ const PICK = RENTALS.pickup;
 const RATE = RENTALS.rates;
 const BUNDLES = INV.offeredBundles(RENTALS);
 const LAWN = SP.lawnGames;
+const SHAPE = require(path.join(ROOT, 'scripts/lib/page_shape.js'));
 
 function faq(id, q, as) {
   const FAQ = require(path.join(ROOT, 'scripts/lib/faq_content.js'));
@@ -58,7 +59,10 @@ const PAGES = [
     eyebrow: 'Hotel Room Setups', h1: 'Hotel room setups in Memphis',
     crumb: 'Hotel Room Setups',
     targets: ['hotel room decoration memphis', 'romantic hotel room setup memphis', 'anniversary hotel room decor memphis', 'proposal hotel room decor memphis', 'birthday hotel room decor memphis'],
-    answer: `Porch &amp; Party decorates Memphis-area hotel rooms for anniversaries, proposals, birthdays and romantic surprises, from ${money(SP.partyFrom)}. Rose petals and candles, balloons by the bed, a bouquet and styled touches, set up and ready before your person walks in.`,
+    answer: SHAPE.assertLead(
+      `A hotel room setup in Memphis is a room Porch &amp; Party styles before your person walks into it: rose petals and candles, balloons by the headboard, a bouquet on the pillows and styled touches, for an anniversary, a proposal or a birthday. Setups start at ${money(SP.partyFrom)}.`,
+      'services/hotel-room-decor-memphis answer'),
+    faqH2: 'What do people ask about hotel room setups?',
     serviceName: 'Hotel room setups in Memphis', serviceType: 'Hotel room decoration',
     sections: () => [
       { id: 'romantic-hotel-room-setup', h2: 'Romantic and anniversary hotel room setups',
@@ -87,7 +91,10 @@ const PAGES = [
     eyebrow: 'Giant Lawn Games', h1: 'Giant lawn game rentals in Memphis',
     crumb: 'Giant Lawn Games',
     targets: ['lawn game rentals memphis', 'giant yard games memphis', 'giant connect four rental memphis', 'cornhole rental memphis'],
-    answer: `Porch &amp; Party rents giant lawn games in Memphis for ${money(RATE.day)} a game per day or ${money(RATE.weekend)} for the weekend: ${esc(INV.joinAnd(LAWN.map((g) => g.name)))}. You pick up and return at ${esc(PICK.place)}, a safe exchange zone, with your photo ID.`,
+    answer: SHAPE.assertLead(
+      `Giant lawn game rentals in Memphis are oversized yard games you collect, play and return: ${esc(INV.joinAnd(LAWN.map((g) => g.name)))}. Each game is ${money(RATE.day)} a day or ${money(RATE.weekend)} for the whole weekend, picked up and returned at ${esc(PICK.place.split(',')[0])} with your photo ID.`,
+      'rentals/giant-lawn-games-memphis answer'),
+    faqH2: 'What do people ask about renting giant lawn games?',
     serviceName: 'Giant lawn game rentals in Memphis', serviceType: 'Party equipment rental',
     sections: () => [
       { id: 'giant-yard-games', h2: 'Giant yard games you can rent',

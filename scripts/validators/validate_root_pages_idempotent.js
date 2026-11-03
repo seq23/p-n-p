@@ -39,6 +39,10 @@ const CHAIN = [
   // idempotent without them and not with them is still a page the next build
   // rewrites.
   'scripts/install_social_tags.js',
+  // The definition lead each page with no generator carries (checklist item b4,
+  // 3 Nov 2026). It runs in build:finish too, so a page that is idempotent
+  // without it and not with it is still a page the next build rewrites.
+  'scripts/retrofit_definition_leads.js',
   'scripts/install_page_dates.js'
 ];
 const SKIP = new Set(['node_modules', '.git', '.pages-output', '.wrangler', '.claude']);

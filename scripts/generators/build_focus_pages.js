@@ -84,7 +84,7 @@ function render(p) {
         </div>
         <div class="content-stack" style="margin-top:28px;">${secs}</div>
         ${SP.gallery(p.key)}
-        <div class="answer-block" id="service-faq" style="margin-top:40px;"><span class="eyebrow">FAQ</span><h2>${esc(p.crumb)} questions</h2></div>
+        <div class="answer-block" id="service-faq" style="margin-top:40px;"><span class="eyebrow">FAQ</span><h2>${esc(p.faqH2)}</h2></div>
         <div class="faq-list">${faqs.map(([q, a]) => `<div class="faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></div>`).join('')}</div>
         <div class="btn-row centered-cta-row" style="margin-top:24px;">${SP.bookButton(p.request, 'after-faq')}<a href="${parent.url}" class="btn-secondary" data-parent-link>All ${esc(parent.name.toLowerCase())}</a></div>
         <p class="muted" style="text-align:center;">Request a Quote: pick your date on the booking form and we reply within one business day.</p>
