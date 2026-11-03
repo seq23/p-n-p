@@ -24,6 +24,7 @@ import { sendTodoEmail, isTodoHour } from '../../../functions/_lib/todo-email.mj
 import { sendMarketplaceRenew } from '../../../functions/_lib/marketplace-renew.mjs';
 import { receiveOutreach } from '../../../functions/_lib/outreach-inbound.mjs';
 import { autoDeleteIds } from '../../../functions/_lib/id-auto.mjs';
+import { mailerCallerOk } from '../../../functions/_lib/mailer-auth.mjs';
 
 const FROM = { email: 'hello@porchandparty901.com', name: 'Porch & Party' };
 
@@ -72,6 +73,9 @@ const worker = {
   },
   async fetch(request, env) {
     if (request.method !== 'POST') return new Response('method not allowed', { status: 405 });
+    // Only the Pages Functions (and this Worker's own cron, through mailEnv) hold the shared secret.
+    // A missing secret on this Worker refuses every send rather than sending for anyone.
+    if (!mailerCallerOk(request, env)) return Response.json({ ok: false, error: 'unauthorized' }, { status: 401 });
     let msg;
     try { msg = await request.json(); } catch { return Response.json({ ok: false, error: 'bad json' }, { status: 400 }); }
     if (!msg || !msg.to || !msg.subject || !msg.html) {

@@ -50,6 +50,7 @@ import { liveChecklistSource } from './checklist-source.mjs';
 import { renderPrintPage, prefillFromRequest, renderOnlineSections, checklistState, invoiceFromChecklist, fieldIndex } from './checklist.mjs';
 import * as QT from './quick-texts.mjs';
 
+import { mailerHeaders } from './mailer-auth.mjs';
 const MAX_PHOTOS = 10;
 const PHOTO_MAX_BYTES = 1500000;
 
@@ -481,7 +482,7 @@ async function deliver(env, id, test) {
   };
   let out = {};
   try {
-    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: mailerHeaders(env), body: JSON.stringify(payload) });
     try { out = await res.json(); } catch { out = { ok: false, error: `mailer answered ${res.status}` }; }
     if (!res.ok) out.ok = false;
   } catch (e) { out = { ok: false, error: String(e && e.message ? e.message : e) }; }
@@ -1294,7 +1295,7 @@ function sectionOfForm(form) {
 function viaMailer(env) {
   return async (m) => {
     if (!env.MAILER) throw new Error('Email is not connected on this copy of the site.');
-    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(m) });
+    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: mailerHeaders(env), body: JSON.stringify(m) });
     const out = await res.json().catch(() => ({}));
     return res.ok && out.ok;
   };
