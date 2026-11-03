@@ -2,18 +2,18 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-10-03..2026-10-30",
-  "coverage_collected_at": "2026-11-02T16:08:18.255535+00:00",
-  "url_count": 99,
+  "gsc_window": "2026-10-04..2026-10-31",
+  "coverage_collected_at": "2026-11-03T16:07:15.488102+00:00",
+  "url_count": 100,
   "roles": {
-    "candidate": 72,
+    "candidate": 73,
     "section_index": 4,
     "root": 6,
     "hub": 17
   },
   "candidates_with_impressions": 1,
   "candidates_by_hub": {
-    "/services/celebration-setups-memphis": 38,
+    "/services/celebration-setups-memphis": 39,
     "/services/porch-decorating": 14,
     "/services/grazing-tables-memphis": 13,
     "/services/hotel-room-decor-memphis": 6,
@@ -104,7 +104,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 441,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
     },
@@ -789,6 +789,17 @@
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
+    },
+    {
+      "url": "https://porchandparty901.com/guides/graduation-party-decorations-at-home-memphis",
+      "file": "guides/graduation-party-decorations-at-home-memphis.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 927,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
     },
     {
       "url": "https://porchandparty901.com/guides/holiday-porch-decorating-service-memphis",

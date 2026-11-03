@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-03",
-  "end_date": "2026-10-30",
-  "collected_at": "2026-11-02T16:06:55.839479+00:00",
+  "start_date": "2026-10-04",
+  "end_date": "2026-10-31",
+  "collected_at": "2026-11-03T16:05:50.857025+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -28,9 +28,9 @@
         "birthday party"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 3,
       "ctr": 0,
-      "position": 22.5
+      "position": 16.666666666666664
     },
     {
       "keys": [
@@ -79,6 +79,24 @@
     },
     {
       "keys": [
+        "halloween party near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 20
+    },
+    {
+      "keys": [
+        "halloween rentals near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 9
+    },
+    {
+      "keys": [
         "party planners near me"
       ],
       "clicks": 0,
@@ -102,9 +120,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 4,
-      "impressions": 78,
-      "ctr": 0.05128205128205128,
-      "position": 4.935897435897436
+      "impressions": 82,
+      "ctr": 0.04878048780487805,
+      "position": 5.121951219512195
     },
     {
       "keys": [
@@ -142,9 +160,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 3,
       "ctr": 0,
-      "position": 22.5
+      "position": 16.666666666666664
     },
     {
       "keys": [
@@ -218,6 +236,26 @@
     },
     {
       "keys": [
+        "halloween party near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 20
+    },
+    {
+      "keys": [
+        "halloween rentals near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 9
+    },
+    {
+      "keys": [
         "party planners near me",
         "https://www.porchandparty901.com/"
       ],
@@ -238,9 +276,9 @@
     }
   ],
   "counts": {
-    "by_query": 9,
+    "by_query": 11,
     "by_page": 3,
-    "by_query_page": 11
+    "by_query_page": 13
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }

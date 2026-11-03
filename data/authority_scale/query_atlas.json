@@ -543,31 +543,6 @@
       "publishable": true
     },
     {
-      "query": "bachelorette party planner",
-      "evidence_tier": "T1",
-      "source_type": "gsc_search_analytics",
-      "search_volume": null,
-      "impressions_90d": 2,
-      "demand_basis": "impressions_90d",
-      "rank_band": "own_impressions",
-      "keyword_difficulty": null,
-      "weak_incumbent_score": 0.5,
-      "intent": null,
-      "intent_method": null,
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "party decor",
-        "topic_confidence": 0.57,
-        "audience": null,
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "party-decor"
-      },
-      "rank_score": 1,
-      "publishable": true
-    },
-    {
       "query": "balloon artist near me",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
@@ -644,6 +619,31 @@
     },
     {
       "query": "bachelorette party ideas",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 1,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "party decor",
+        "topic_confidence": 0.57,
+        "audience": null,
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "party-decor"
+      },
+      "rank_score": 0.5,
+      "publishable": true
+    },
+    {
+      "query": "bachelorette party planner",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
