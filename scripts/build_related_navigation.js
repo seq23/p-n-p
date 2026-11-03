@@ -21,7 +21,8 @@
  *     now shared through scripts/lib/topics.js;
  *   - every link label is the target page's own <h1>, read out of the published
  *     file, the same convention scripts/generators/build_section_indexes.js
- *     already follows;
+ *     already follows - cut back to its first clause when the whole heading is
+ *     too long to be a link (navLabel, and the comment on it);
  *   - ordering is deterministic - same-subject pages in other sections first,
  *     then the rest of the territory - so a rerun writes byte-identical output.
  *
@@ -105,6 +106,42 @@ function h1Of(rel, html) {
   const m = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   if (!m) throw new Error(`${rel} has no <h1> to take a link label from`);
   return stripTags(m[1]);
+}
+
+/**
+ * A link label: the target page's own h1, cut back to its first clause when the
+ * whole heading is too long to be a link.
+ *
+ * WHY. Eight of this site's h1s read "<City> party decor, hotel-room decor, and
+ * grazing table styling", and five more "Hotel room decor for guests at <hotel>".
+ * A related-pages block that lists all eight repeats "party decor, hotel-room
+ * decor, and grazing table styling" eight times in one page's body, which the
+ * owner's weekly quality sample reads - correctly - as template filler: on
+ * 3 Nov 2026 it failed 32 of the 99 published pages on exactly that, and named
+ * the phrase in the brief for /services/grazing-tables-memphis and
+ * /services/baby-shower-decor-memphis ("7 times").
+ *
+ * The h1s themselves stay as they are: the long page titles are the owner's call
+ * (porch-and-party brain, OpenSEO project standing decision), and they are the
+ * right title for each page. What was wrong is using a whole sentence as a link
+ * label eight times over. A nav label is a name, not a sentence.
+ *
+ * The cut is at a clause boundary (a comma or a colon) and nowhere else, so a
+ * label is never a sentence chopped mid-phrase: "Arlington party decor",
+ * "Holiday porch decorating service in Memphis", "Memphis porch decorating". A
+ * heading with no clause boundary short enough to use is left whole - those are
+ * already distinct from each other, which is what the check is about.
+ */
+const LABEL_MAX_WORDS = 8;
+const wordsOf = (s) => String(s).split(/\s+/).filter(Boolean);
+function navLabel(h1) {
+  const full = String(h1).trim();
+  if (wordsOf(full).length <= LABEL_MAX_WORDS) return full;
+  const cut = full.search(/[,:]/);
+  if (cut < 0) return full;
+  const head = full.slice(0, cut).trim().replace(/\s+&amp;$/, '');
+  const n = wordsOf(head).length;
+  return n >= 3 && n <= LABEL_MAX_WORDS ? head : full;
 }
 
 function linkTargets(html) {
@@ -235,7 +272,7 @@ const pages = [...topics.classifiedPages(ROOT), ...rootPages]
       dir: p.dir,
       url: servedPath(p.rel),
       territories,
-      title: h1Of(p.rel, p.html),
+      title: navLabel(h1Of(p.rel, p.html)),
       slug: path.basename(p.rel, '.html')
     };
   });
