@@ -192,7 +192,9 @@ const SECTIONS = [
     // Owner-approved 2026-10-18: the four services (scripts/lib/brand.js) in the title and description.
     title: 'Memphis Porch, Party, Grazing &amp; Game Rentals | Porch &amp; Party',
     description: `Porch & Party services in Memphis: ${brand.SERVICES[0].label} from $${brand.PRICES.porch}, ${brand.SERVICES[1].label} from $${brand.PRICES.party}, ${brand.SERVICES[2].label} from $${brand.PRICES.grazing}, and ${brand.SERVICES[3].label} from $${brand.PRICES.gameDay}.`,
-    lead: `Porch &amp; Party offers four services: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}, and party game rentals from $${rentalRates.day} a game per day. Every styling page below sits inside one of the first three, so start with the family that matches the setup you need and open the page that names it. Party game rentals are listed last.`,
+    lead: SHAPE.assertLead(
+      `Porch &amp; Party is a Memphis decorating company with four services: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}, and party game rentals at $${rentalRates.day} a game a day. Every page below sits inside one of them.`,
+      'services/index lead'),
     summary: 'Pick the service family first - porch, celebration, or grazing - then open the page for the specific setup. Starting prices are published on each page and the exact quote depends on scope, date, location, and materials.',
     group: groupServices,
     faq: [
@@ -212,7 +214,9 @@ const SECTIONS = [
     // Owner-approved 21 Oct 2026: every served city has a page for each of the four services
     // (scripts/generators/build_area_pages.js); validate:area-pages holds the index to it.
     description: 'Porch & Party service areas: porch decorating, party decor, grazing tables and party game rentals, with a page for each service in every Memphis-metro city.',
-    lead: `Porch &amp; Party serves ${CITY_LIST}. Every city below has four pages, one for each service: porch decorating, party decor, grazing tables and party game rentals.`,
+    lead: SHAPE.assertLead(
+      `Porch &amp; Party's service area is the Memphis metro, and these are the cities in it: ${CITY_LIST}. Every one has four pages, one per service - porch decorating, party decor, grazing tables and party game rentals.`,
+      'areas/index lead'),
     // No summary line under each card here. This index lists 65 city x service
     // pages, four per city, and every page in a service family describes the same
     // service - so a summary per card repeated the same sentence thirteen times
@@ -239,7 +243,9 @@ const SECTIONS = [
     heroH1: 'Frequently asked questions',
     title: 'Porch &amp; Party FAQ | Pricing, Setup Time &amp; Booking Questions',
     description: 'Questions asked most before booking Porch & Party: what setups cost, how long they take, how far ahead to book, and what grazing-table pricing covers.',
-    lead: 'Every question we get, in one place, sectioned by service: booking and payment, porch decor, party and room decor, grazing tables and party game rentals. The grazing estimator and the Price my porch calculator give you a starting price before you ask.',
+    lead: SHAPE.assertLead(
+      'This is every question Porch &amp; Party is asked before a booking, in one place, sectioned by service: booking and payment, porch decor, party and room decor, grazing tables and party game rentals. The grazing estimator and the Price my porch calculator give you a starting price first.',
+      'faq/index lead'),
     heroNote: 'Use the estimator below for a starting price before you ask.',
     summary: 'Jump to your service below. Setup and styling prices are firm starting points from our price list; food for grazing tables is always a separate rough estimate until the menu is confirmed.',
     // The longer answer pages that used to be listed here were folded into their service hubs on
@@ -363,6 +369,14 @@ function faqMapHtml(groups) {
 
 const FAQ_NAV_SCRIPT = `<script>(function(){var nav=document.querySelector('.faq-jump');if(!nav||!('IntersectionObserver' in window))return;var links={};Array.prototype.forEach.call(nav.querySelectorAll('a[href^="#"]'),function(a){links[a.getAttribute('href').slice(1)]=a;});var set=function(id){Object.keys(links).forEach(function(k){var a=links[k];if(k===id){a.classList.add('is-active');a.setAttribute('aria-current','true');if(nav.scrollWidth>nav.clientWidth)nav.scrollLeft=Math.max(0,a.offsetLeft-nav.firstElementChild.offsetWidth-24);}else{a.classList.remove('is-active');a.removeAttribute('aria-current');}});};var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting)set(e.target.id);});},{rootMargin:'-170px 0px -55% 0px'});Object.keys(links).forEach(function(id){var el=document.getElementById(id);if(el)io.observe(el);});})();</script>`;
 
+/**
+ * Each section ends with the quote button and a link to the next section. It used
+ * to end with "Request a Quote - Back to top - Next: ..." as well, five times on
+ * one page, which repeated the same eight words four times over and is what the
+ * owner's weekly quality sample reads as template filler. "Back to top" is the
+ * part that said nothing the jump nav at the top of the page does not already do,
+ * so it is the part that went; the CTA and the next-section link stay.
+ */
 function groupedFaqHtml(groups) {
   const jump = `<nav class="faq-jump" aria-label="FAQ sections"><span class="faq-jump__label">Jump to:</span>${groups.map((g) => `<a href="#${g.id}">${esc(g.title)}</a>`).join('')}</nav>`;
   const sections = groups.map((g, i) => {
@@ -373,7 +387,7 @@ function groupedFaqHtml(groups) {
           <div class="answer-block"><span class="eyebrow">${esc(g.eyebrow)}</span><h2>${esc(g.title)}</h2><p>${esc(g.intro)}</p></div>${tool}
           <div class="faq-list">${g.qa.map(([q, a], j) => `<details class="faq-item"${j === 0 ? ' open' : ''}><summary><h3>${esc(q)}</h3></summary><p>${esc(a)}</p></details>`).join('')}</div>
           <p class="faq-cta"><a ${QUOTE_LINK} class="btn-primary">Request a Quote</a></p>
-          <p class="faq-next"><a href="#top">&uarr; Back to top</a>${next ? `<a href="#${next.id}">Next: ${esc(next.title)} &rarr;</a>` : ''}</p>
+          ${next ? `<p class="faq-next"><a href="#${next.id}">Next: ${esc(next.title)} &rarr;</a></p>` : ''}
         </section>`;
   }).join('');
   return `${jump}${sections}

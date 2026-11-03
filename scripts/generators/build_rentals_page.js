@@ -20,6 +20,7 @@ const fs = require('fs');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const PROV = require(path.join(ROOT, 'scripts/lib/page_provenance.js'));
+const SHAPE = require(path.join(ROOT, 'scripts/lib/page_shape.js'));
 const { nav, footer, quoteEventScript } = require(path.join(ROOT, 'templates/page-shell.js'));
 const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
@@ -96,7 +97,7 @@ const header = nav('/rentals/');
 const foot = footer();
 
 const PICKUP_RULES = [
-  ['Where', `Pick up and return at ${PICK.place}, ${PICK.address}, a safe exchange zone. Home and personal rentals are picked up and returned there. ${BDL}`],
+  ['Where', `Pick up and return at ${PICK.place}, a safe exchange zone - the full address is under <a href="#pickup">Pick up and return</a>. Home and personal rentals are picked up and returned there. ${BDL}`],
   ['When', `After payment, text or call ${PICK.phone} to set your pickup time. One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday.`],
   ['Pay', `${money(data.damageDeposit)} refundable damage deposit + ${data.holdPercent}% of the rental holds your date, by Zelle or Cash App from your invoice. The rest is paid at pickup by Zelle or Cash App on the spot (never cash). The deposit is refunded at return.`],
   ['Bring', `Your government photo ID (the name must match the invoice) and a car. Every game fits an SUV or a sedan with the seats down${has('inflatable-movie-screen') ? '; the movie screen fits a trunk' : ''}.`]
@@ -137,7 +138,7 @@ const STEPS = [
 const TERMS = [
   `<strong>Rental period:</strong> One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday. The price is the same whichever days you pick.`,
   `<strong>Price:</strong> ${money(RATE.day)} per game per day, ${money(RATE.weekend)} per game for a weekend; no minimum order.`,
-  `<strong>Pickup and return:</strong> ${esc(PICK.place)}, ${esc(PICK.address)}. Pickup time is set by text or call to ${PICK.phone} after payment. ${esc(BDL)}`,
+  `<strong>Pickup and return:</strong> ${esc(PICK.place)} in Memphis (<a href="#pickup">the address, and business delivery</a>). Pickup time is set by text or call to ${PICK.phone} after payment.`,
   `<strong>Holding the date:</strong> ${money(data.damageDeposit)} refundable damage deposit + ${data.holdPercent}% of the rental, by Zelle or Cash App from the invoice.`,
   '<strong>The rest:</strong> paid at pickup by Zelle or Cash App on the spot. No cash.',
   `<strong>Damage deposit:</strong> ${money(data.damageDeposit)}, refunded at return.`,
@@ -150,7 +151,7 @@ const TERMS = [
 
 function itemCard(i) {
   const qty = i.quantity > 1 ? ` ${i.quantity} available.` : '';
-  return `<article class="card" id="${i.slug}"><div class="card-media"><img src="/assets/rentals/${i.slug}.webp" alt="${esc(i.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(i.name)}</h3><p>${esc(i.blurb)}</p><ul><li><strong>Size:</strong> ${esc(i.size)}</li><li><strong>Use:</strong> ${useLabel(i.use)}</li><li><strong>Price:</strong> ${money(i.dayPrice)} a day &middot; ${money(i.weekendPrice)} a weekend</li>${i.deposit !== data.damageDeposit ? `<li><strong>Refundable deposit:</strong> ${money(i.deposit)}</li>` : ''}</ul><p class="muted">Available now.${qty}</p><p><a href="${FORM_URL}" data-quote-cta="rentals-item-${i.slug}">Book the ${esc(i.name)}</a></p></div></article>`;
+  return `<article class="card" id="${i.slug}"><div class="card-media"><img src="/assets/rentals/${i.slug}.webp" alt="${esc(i.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(i.name)}</h3><p>${esc(i.blurb)}</p><ul><li><strong>Size:</strong> ${esc(i.size)}</li><li><strong>Use:</strong> ${useLabel(i.use)}</li><li><strong>Price:</strong> ${esc(i.name)} is ${money(i.dayPrice)} a day &middot; ${money(i.weekendPrice)} a weekend</li>${i.deposit !== data.damageDeposit ? `<li><strong>Refundable deposit:</strong> ${money(i.deposit)}</li>` : ''}</ul><p class="muted">Available now.${qty}</p><p><a href="${FORM_URL}" data-quote-cta="rentals-item-${i.slug}">Book the ${esc(i.name)}</a></p></div></article>`;
 }
 
 function bundleCard(b) {
@@ -233,7 +234,7 @@ function render() {
         <div class="page-intro">
           <span class="eyebrow">Party Game Rentals in Memphis</span>
           <h1>${H1}</h1>
-          <p id="what-are-porch-and-party-rentals">Porch &amp; Party rents ${esc(INV.rentalsPhrase(data))} for backyard parties, birthdays, family reunions, church and school events in Memphis, Olive Branch and Southaven. You pick up and return at ${esc(PICK.place)}, a safe exchange zone. Every game is ${money(RATE.day)} a day${PICK3 ? `, or pick 3 for ${money(PICK3.dayPrice)}` : ''}, with no minimum order.</p>
+          <p id="what-are-porch-and-party-rentals">${SHAPE.assertLead(`Party game rentals from Porch &amp; Party are oversized yard games you collect, play and return yourself: ${esc(INV.rentalsPhrase(data))}. Every game is ${money(RATE.day)} a day or ${money(RATE.weekend)} for the whole weekend, with no minimum order, picked up at ${esc(PICK.place.split(",")[0])} in Memphis.`, 'rentals/index lead')}</p>
           <div class="btn-row hero-centered-cta"><a href="${FORM_URL}" class="btn-primary btn-book" data-quote-cta="rentals-top" data-book-online="hero">Book online</a><a href="#games" class="btn-secondary">See the Rentals</a></div>
           <p class="muted book-online-line" data-book-online-line>Book your games: pick your games and dates on the booking form; it shows what is free and your exact total.</p>
           <p class="muted" style="margin-top: 14px;"><a href="${C.telHref}">Call or text ${C.telephoneDisplay}</a></p>
@@ -289,7 +290,7 @@ function render() {
 
     <section class="section" id="faq">
       <div class="container">
-        <div class="answer-block"><span class="eyebrow">FAQ</span><h2>Party game rental questions</h2><p>Every question for every service, with the grazing and porch estimators, is on the <a href="/faq/#rentals">FAQ page</a>.</p></div>
+        <div class="answer-block"><span class="eyebrow">FAQ</span><h2>What do people ask before renting party games?</h2><p>Every question for every service, with the grazing and porch estimators, is on the <a href="/faq/#rentals">FAQ page</a>.</p></div>
         <div class="faq-list">${FAQ.map(([q, a]) => `<div class="faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></div>`).join('')}</div>
         <div class="btn-row centered-cta-row"><a href="${FORM_URL}" class="btn-primary btn-book" data-quote-cta="rentals-faq" data-book-online="after-faq">Book online</a><a href="/pricing" class="btn-secondary">See Pricing</a></div>
       </div>
