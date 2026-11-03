@@ -346,16 +346,20 @@ function partyContent(city, i) {
     lead: SHAPE.assertLead(
       `Party decor in ${esc(city.name)}, ${city.state} is balloon work, a backdrop and styled tables that Porch &amp; Party designs, brings and sets up for you, in a home or in a hotel room. ${esc(city.name)} birthday, shower and anniversary setups start at ${presetFrom}.`,
       `${relOf(city, 'party-decor')} lead`),
-    second: `${esc(city.name)} is ${esc(city.where)}. ${esc(CELEB.notes[0])} ${esc(CELEB.notes[1])}${local.length ? ` In Memphis, see also ${local.join(' and ')}.` : ''}`,
+    second: `${esc(city.name)} is ${esc(city.where)}. ${esc(CELEB.notes[1])}${local.length ? ` In Memphis, see also ${local.join(' and ')}.` : ''}`,
     primary: { href: '/request?service=party', label: 'Request a Quote' },
     secondary: { href: '/pricing', label: 'View Pricing' },
     panels: rotate(panels, i + 2),
-    aside: [photoCard('/assets/img/celebrations/romantic-bedroom-experience.jpg', `${city.name} party decor and celebration setup styling`, `Setups from ${presetFrom}`, esc(CELEB.notes[0]))],
+    // The price caveat (CELEB.notes[0]) is stated ONCE on the page, in the price
+    // panel. It used to appear here, in the lead's second paragraph and in the
+    // cost FAQ as well - four times in one body, which is what the owner's
+    // weekly quality sample reads as template filler.
+    aside: [photoCard('/assets/img/celebrations/romantic-bedroom-experience.jpg', `${city.name} party decor and celebration setup styling`, `Setups from ${presetFrom}`, `Quoted on the date, the occasion and how much of the room is styled.`)],
     image: '/assets/img/celebrations/romantic-bedroom-experience.jpg',
     imageAlt: `${city.name} party decor and celebration setup styling`,
     faqs: [
       [`Do you set up party decor in ${city.name}?`, travelAnswer(city)],
-      ['How much does a party setup cost?', `${presets.map((x) => `${x.name} is ${money(x.total)}`).join(', ')}. ${CELEB.notes[0]}`],
+      ['How much does a party setup cost?', `${presets.map((x) => `${x.name} is ${money(x.total)}`).join(', ')}. What moves a quote is how much of the room is styled, and how far the setup has to travel.`],
       ['Is takedown included?', TAKEDOWN],
       ['Can you decorate a hotel room?', `Yes. Hotel rooms are one of the settings this service covers; see /services/hotel-room-decor-memphis. ${CELEB.notes[1]}`],
     ],

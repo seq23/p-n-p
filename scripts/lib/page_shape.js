@@ -68,7 +68,42 @@ function assertLead(text, where) {
   return text;
 }
 
-module.exports = { MIN_WORDS, MAX_WORDS, ANSWER, DEFINES, words, wordCount, checkLead, assertLead };
+/**
+ * A LINK label for a page: its own h1, cut back to its first clause when the
+ * whole heading is too long to be a link.
+ *
+ * WHY. Eight of this site's h1s read "<City> party decor, hotel-room decor, and
+ * grazing table styling". Any block that lists all eight - a related-pages nav,
+ * the /areas/ index - repeated "party decor, hotel-room decor, and grazing table
+ * styling" eight times in one page's body, which the owner's weekly quality
+ * sample reads, correctly, as template filler: on 3 Nov 2026 it failed 32 of the
+ * 99 published pages on exactly that, and named this phrase in the brief for two
+ * of the five pages it sampled ("7 times").
+ *
+ * The h1s themselves stay as they are: the long page titles are the owner's call
+ * (porch-and-party brain, the standing OpenSEO decision), and they are the right
+ * title for each page. What was wrong was using a whole sentence as a link label
+ * eight times over. A link label is a name, not a sentence.
+ *
+ * The cut is at a clause boundary (a comma or a colon) and nowhere else, so a
+ * label is never a sentence chopped mid-phrase: "Arlington party decor",
+ * "Holiday porch decorating service in Memphis", "Memphis porch decorating". A
+ * heading with no clause boundary short enough to use is left whole - those are
+ * already distinct from one another, which is what the check is about.
+ */
+const LABEL_MAX_WORDS = 8;
+function linkLabel(h1) {
+  const full = String(h1).trim();
+  const w = (t) => String(t).split(/\s+/).filter(Boolean).length;
+  if (w(full) <= LABEL_MAX_WORDS) return full;
+  const cut = full.search(/[,:]/);
+  if (cut < 0) return full;
+  const head = full.slice(0, cut).trim().replace(/\s+&amp;$/, '').replace(/\s+&$/, '');
+  const n = w(head);
+  return n >= 3 && n <= LABEL_MAX_WORDS ? head : full;
+}
+
+module.exports = { MIN_WORDS, MAX_WORDS, LABEL_MAX_WORDS, ANSWER, DEFINES, words, wordCount, checkLead, assertLead, linkLabel };
 
 // --- self-test: the counting itself, proven negatively ------------------------
 if (require.main === module && process.argv.includes('--self-test')) {
@@ -87,9 +122,16 @@ if (require.main === module && process.argv.includes('--self-test')) {
     ['40 words with no is/are fails', forty.replace(' is ', ' and '), false],
   ];
   for (const [name, text, want] of cases) if (checkLead(text).ok !== want) bad.push(`${name}: got ${checkLead(text).ok}`);
+  const labels = [
+    ['a short heading is left whole', 'Party game rentals in Arlington, TN', 'Party game rentals in Arlington, TN'],
+    ['a long heading is cut at its first comma', 'Arlington party decor, hotel-room decor, and grazing table styling', 'Arlington party decor'],
+    ['a long heading with no clause boundary is left whole', 'Hotel room decor for guests at The Guest House at Graceland', 'Hotel room decor for guests at The Guest House at Graceland'],
+    ['a first clause that is itself too long leaves the heading whole', 'Seasonal porch decorating in Memphis that makes your entry feel warm, polished, and photo-ready.', 'Seasonal porch decorating in Memphis that makes your entry feel warm, polished, and photo-ready.'],
+  ];
+  for (const [name, h1, want] of labels) if (linkLabel(h1) !== want) bad.push(`${name}: got "${linkLabel(h1)}"`);
   let threw = false;
   try { assertLead('too short', 'probe'); } catch { threw = true; }
   if (!threw) bad.push('assertLead did not throw on a short lead');
   if (bad.length) { console.error(`page-shape self-test FAILED:\n- ${bad.join('\n- ')}`); process.exit(1); }
-  console.log(`page-shape self-test OK: ${probes.length + cases.length + 1} probes, every bad lead refused.`);
+  console.log(`page-shape self-test OK: ${probes.length + cases.length + labels.length + 1} probes, every bad lead and every over-long link label refused.`);
 }

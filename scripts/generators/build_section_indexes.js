@@ -35,6 +35,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const PROV = require(path.join(ROOT, 'scripts/lib/page_provenance.js'));
+const SHAPE = require(path.join(ROOT, 'scripts/lib/page_shape.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const brand = require(path.join(ROOT, 'scripts/lib/brand.js'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
@@ -63,13 +64,27 @@ const unesc = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt
   .replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ')
   .replace(/&(?:mdash|ndash);/g, '-');
 
-/** The page's own h1 and the paragraph directly beneath it. No rewriting. */
+/**
+ * The page's own h1, its meta description and the paragraph directly beneath the
+ * h1. No rewriting.
+ *
+ * The card shows the DESCRIPTION, and falls back to the lead paragraph only when
+ * a page has none. The lead is now a definition of the service (checklist item
+ * b4), which is deliberately the same sentence about the same service on every
+ * city's page - so an index of 65 city pages that quoted the lead repeated "is
+ * balloon work, a backdrop and styled tables" nineteen times in one body, which
+ * the owner's weekly quality sample reads as template filler. A page's
+ * description is written per page and names its city, its price and its travel
+ * answer, which is what a card wants anyway.
+ */
 function readPage(rel) {
   const html = fs.readFileSync(path.join(ROOT, rel), 'utf8');
   const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   const lead = html.match(/<h1[^>]*>[\s\S]*?<\/h1>\s*<p[^>]*>([\s\S]*?)<\/p>/i);
+  const desc = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i);
   if (!h1) throw new Error(`${rel} has no <h1> to take a link label from`);
-  return { rel, url: `/${rel}`, h1: stripTags(h1[1]), lead: lead ? stripTags(lead[1]) : '' };
+  const leadText = lead ? stripTags(lead[1]) : '';
+  return { rel, url: `/${rel}`, h1: stripTags(h1[1]), lead: desc ? stripTags(desc[1]) : leadText };
 }
 
 // questions/ exists only once the shared search engine has published a page.
@@ -198,6 +213,14 @@ const SECTIONS = [
     // (scripts/generators/build_area_pages.js); validate:area-pages holds the index to it.
     description: 'Porch & Party service areas: porch decorating, party decor, grazing tables and party game rentals, with a page for each service in every Memphis-metro city.',
     lead: `Porch &amp; Party serves ${CITY_LIST}. Every city below has four pages, one for each service: porch decorating, party decor, grazing tables and party game rentals.`,
+    // No summary line under each card here. This index lists 65 city x service
+    // pages, four per city, and every page in a service family describes the same
+    // service - so a summary per card repeated the same sentence thirteen times
+    // in one body (the owner's weekly quality sample reads that as template
+    // filler) and told a reader nothing the heading had not. The heading names
+    // the city and the service, which is what this index is for; the page itself
+    // holds the detail.
+    cardSummaries: false,
     summary: `Open your city, then the service. Seasonal porch decorating starts at ${offers.services.porch.price}, party decor and celebration setups at ${offers.services.celebration.price}, grazing-table styling at ${offers.services.grazing.price}, and party game rentals at $${rentalRates.day} a game per day (pickup at Mt. Moriah Station). ${offers.travel.line}`,
     group: groupAreas,
     faq: [
@@ -373,8 +396,8 @@ function render(section, groups) {
     + (g.blurb ? `<p>${esc(g.blurb)}</p>` : '')
     + `</div><div class="cards-grid">`
     + g.pages.map((p) => `<article class="card"><div class="card-body">`
-      + `<h3><a href="${p.url}">${esc(p.h1)}</a></h3>`
-      + (p.lead ? `<p class="muted">${esc(p.lead)}</p>` : '')
+      + `<h3><a href="${p.url}">${esc(SHAPE.linkLabel(p.h1))}</a></h3>`
+      + (section.cardSummaries === false || !p.lead ? '' : `<p class="muted">${esc(p.lead)}</p>`)
       + `</div></article>`).join('')
     + `</div>`).join('\n');
 
