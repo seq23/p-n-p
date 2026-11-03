@@ -12,8 +12,8 @@
  *
  * Fourteen of those (party decor for all 8 cities, porch decorating for 6) were published by
  * the 29 Apr 2026 baseline and are frozen (data/release/frozen_output_registry.json). This
- * generator does not re-render them (LEGACY below); it only stamps the sibling-services block
- * into them. Every other city x service page is rendered here, from data only:
+ * generator does not re-render them (LEGACY below); it stamps the sibling-services block and
+ * the definition lead (stampLead) into them, and keeps their own opening sentence after it. Every other city x service page is rendered here, from data only:
  *   - prices and games: data/rentals/games.json (availableNow items only, via scripts/lib/inventory.js),
  *     data/offers/services.json (grazing tiers, travel, renter photo ID line, takedown),
  *     data/offers/porch_packages.json (porch packages, via scripts/lib/porch_packages.js);
@@ -48,6 +48,7 @@ const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js')
 const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js'));
 const { nav, footer } = require(path.join(ROOT, 'templates/page-shell.js'));
 const BO = require(path.join(ROOT, 'scripts/lib/book_online.js'));
+const SHAPE = require(path.join(ROOT, 'scripts/lib/page_shape.js'));
 
 const DOMAIN = offers.domain;
 const RENTALS = INV.resolve(JSON.parse(fs.readFileSync(path.join(ROOT, 'data/rentals/games.json'), 'utf8')));
@@ -201,11 +202,10 @@ function rentalsContent(city, i) {
     panel('Games available now', gameCards),
     panel(`Pickup and return for ${esc(city.name)}`, `<p>No delivery: every rental is picked up and returned at ${esc(PICK.place)}, ${esc(PICK.address)}, a police safe exchange zone. ${esc(city.pickupNote)} The pickup time is set by text or call after payment.</p><p>${esc(SAFETY)}</p>`),
   ];
-  const intro = pick([
-    `${esc(city.name)} is ${esc(city.where)}. Porch &amp; Party rents ${esc(INV.rentalsPhrase(RENTALS))} to ${esc(city.name)} hosts for backyard birthdays, family reunions, church and school events.`,
-    `Hosting in ${esc(city.name)}, ${city.state}? Porch &amp; Party rents ${esc(INV.rentalsPhrase(RENTALS))} for ${esc(city.county)} parties, picked up in Memphis and played in your own yard.`,
-    `Giant yard games for ${esc(city.name)} parties: ${esc(gameNames.join(', '))}, each ${money(RATE.day)} a day or ${money(RATE.weekend)} for the weekend.`,
-  ], i);
+  const intro = SHAPE.assertLead(
+    `Party game rentals in ${esc(city.name)}, ${city.state} are giant yard games you book by the day: ${esc(INV.joinAnd(gameNames))}. Each game is ${money(RATE.day)} for one day or ${money(RATE.weekend)} for the whole weekend, and every rental is picked up and returned in Memphis.`,
+    `${relOf(city, 'party-game-rentals')} lead`);
+  const localColour = `${esc(city.name)} is ${esc(city.where)}. ${esc(city.pickupNote)}`;
   const faqs = [
     [`Do you deliver party games to ${city.name}?`, `No. Party game rentals are pickup only: you pick up and return at ${PICK.place}, ${PICK.address}. ${city.pickupNote}`],
     ['How much does a party game rental cost?', `Every game is ${money(RATE.day)} for one day or ${money(RATE.weekend)} for the whole weekend (Friday, Saturday and Sunday). Bundles start at ${money(bundleFrom)}.`],
@@ -219,7 +219,7 @@ function rentalsContent(city, i) {
     title: `${city.name}, ${city.state} Party Game Rentals | Porch & Party`,
     description: `${city.name} party game rentals: ${games.length} giant yard games at ${money(RATE.day)} a game per day or ${money(RATE.weekend)} a weekend, picked up at Mt. Moriah Station in Memphis.`,
     lead: intro,
-    second: `Prices come straight from the rentals list: ${money(RATE.day)} a game per day, ${money(RATE.weekend)} a game for the weekend, bundles from ${money(bundleFrom)}.`,
+    second: `${localColour} Prices come straight from the rentals list: ${money(RATE.day)} a game per day, ${money(RATE.weekend)} a game for the weekend, bundles from ${money(bundleFrom)}.`,
     primary: { href: '/request?service=rentals', label: 'Book your games' },
     secondary: { href: '/rentals/', label: 'See every game' },
     panels: rotate(panels, i),
@@ -251,12 +251,10 @@ function grazingContent(city, i) {
     h1: pick([`Grazing tables in ${city.name}, ${city.state}`, `${city.name} grazing tables and styled boards`, `Grazing table styling for ${city.name}, ${city.state}`], i),
     title: `${city.name}, ${city.state} Grazing Tables | From ${money(grazeFrom)} | Porch & Party`,
     description: `Grazing tables in ${city.name}, ${city.state}: styled boards from ${money(grazeFrom)} and full tables from ${money(GRAZE.tiers[2].from)}, food quoted separately, ${travelClause(city)}.`,
-    lead: pick([
-      `${esc(city.name)} is ${esc(city.where)}. Porch &amp; Party styles grazing boards and tables there for showers, birthdays, office gatherings and small events, starting at ${money(grazeFrom)} for a board.`,
-      `A grazing table for a ${esc(city.name)} shower, birthday or office lunch starts at ${money(grazeFrom)} for a board and ${money(GRAZE.tiers[1].from)} for a small table, styled on site.`,
-      `Porch &amp; Party brings grazing-table styling to ${esc(city.name)}, ${esc(city.stateName)}: boards, small tables and full tables, priced by size, with food quoted on its own.`,
-    ], i),
-    second: `${esc(GRAZE.notes[0])} ${esc(GRAZE.notes[1])}${local.length ? ` In Memphis, see also ${local.join(' and ')}.` : ''}`,
+    lead: SHAPE.assertLead(
+      `Grazing tables in ${esc(city.name)}, ${city.state} are styled spreads of cheeses, meats, fruit and bread that Porch &amp; Party lays out and arranges on your own table, on site. Styling for a ${esc(city.name)} shower, birthday or office gathering starts at ${money(grazeFrom)} for a board.`,
+      `${relOf(city, 'grazing-tables')} lead`),
+    second: `${esc(city.name)} is ${esc(city.where)}. ${esc(GRAZE.notes[0])} ${esc(GRAZE.notes[1])}${local.length ? ` In Memphis, see also ${local.join(' and ')}.` : ''}`,
     primary: { href: '/request?service=grazing', label: 'Request a Quote' },
     secondary: { href: '/pricing', label: 'View Pricing' },
     panels: rotate(panels, i + 1),
@@ -287,8 +285,10 @@ function porchContent(city, i) {
     h1: pick([`${city.name} porch decorating and seasonal front-entry styling`, `Porch decorating in ${city.name}, ${city.state}`], i),
     title: `${city.name}, ${city.state} Porch Decorating | From ${money(porchFrom)} | Porch & Party`,
     description: `${city.name}, ${city.state} porch decorating for fall and Christmas: Stoop, Classic, Grand and Showstopper packages from ${money(porchFrom)}, ${travelClause(city)}.`,
-    lead: `${esc(city.name)} is ${esc(city.where)}. Porch &amp; Party decorates ${esc(city.name)} front porches for fall, Halloween, Thanksgiving and Christmas, from a simple stoop to the works: porch, steps and walkway.`,
-    second: `Packages start at ${money(porchFrom)}. ${esc(PK.estimateLine)}`,
+    lead: SHAPE.assertLead(
+      `Porch decorating in ${esc(city.name)}, ${esc(city.stateName)} is a seasonal front-entry setup Porch &amp; Party designs, brings and installs for you: a wreath, planters, pumpkins or greenery, lanterns and lights, across the porch, the steps and the walkway. Fall and Christmas packages start at ${money(porchFrom)}.`,
+      `${relOf(city, 'porch-decorating')} lead`),
+    second: `${esc(city.name)} is ${esc(city.where)}. ${esc(PK.estimateLine)}`,
     primary: { href: '/request?service=porch#request-form', label: 'Request a porch quote' },
     secondary: { href: '/pricing', label: 'View Pricing' },
     panels: rotate(panels, i),
@@ -343,8 +343,10 @@ function partyContent(city, i) {
     ], i),
     title: `${city.name}, ${city.state} Party Decor | From ${presetFrom} | Porch & Party`,
     description: `Party decor and celebration setups in ${city.name}, ${city.state}: birthday, hotel-room and home setups from ${presetFrom}, styled on site, quoted before anything is booked.`,
-    lead: `${esc(city.name)} is ${esc(city.where)}. Porch &amp; Party styles ${esc(city.name)} birthdays, showers, anniversaries, hotel rooms and home celebrations, from a single focal moment to a fully styled room, starting at ${presetFrom}.`,
-    second: `${esc(CELEB.notes[0])} ${esc(CELEB.notes[1])}${local.length ? ` In Memphis, see also ${local.join(' and ')}.` : ''}`,
+    lead: SHAPE.assertLead(
+      `Party decor in ${esc(city.name)}, ${city.state} is balloon work, a backdrop and styled tables that Porch &amp; Party designs, brings and sets up for you, in a home or in a hotel room. ${esc(city.name)} birthday, shower and anniversary setups start at ${presetFrom}.`,
+      `${relOf(city, 'party-decor')} lead`),
+    second: `${esc(city.name)} is ${esc(city.where)}. ${esc(CELEB.notes[0])} ${esc(CELEB.notes[1])}${local.length ? ` In Memphis, see also ${local.join(' and ')}.` : ''}`,
     primary: { href: '/request?service=party', label: 'Request a Quote' },
     secondary: { href: '/pricing', label: 'View Pricing' },
     panels: rotate(panels, i + 2),
@@ -462,6 +464,31 @@ function llmsSection() {
   return lines.join('\n');
 }
 
+/**
+ * The definition lead, stamped into a baseline page.
+ *
+ * The fourteen baseline city pages are frozen and this generator does not
+ * re-render them - it stamps the sibling block into them. Their opening
+ * paragraph was 25 to 38 words and named services instead of defining one,
+ * which is what the owner's weekly quality sample reads as item b4 ("opening
+ * paragraph is 28 words and defines nothing") and, through it, item d1. Every
+ * one of them had the same gap, because one template wrote them all.
+ *
+ * So the lead they get is the SAME definition the generated pages get, from the
+ * same CONTENT[svc] function - one definition of what a lead is - and their own
+ * opening sentence is kept as the paragraph after it, so no words are lost.
+ * Idempotent: a second run sees its own lead and writes nothing.
+ */
+const LEAD_RE = /(<\/h1>\s*)(<p(?![^>]*\bdata-page-)[^>]*>)([\s\S]*?)(<\/p>)/i;
+function stampLead(html, city, svc, i, rel) {
+  if (!CONTENT[svc]) throw new Error(`${rel}: no generator for service ${svc}, so no lead to stamp`);
+  const lead = CONTENT[svc](city, i).lead;
+  const m = LEAD_RE.exec(html);
+  if (!m) throw new Error(`${rel}: no lead paragraph under the h1 to put the definition in`);
+  if (m[3].trim() === lead.trim()) return html;
+  return html.replace(LEAD_RE, (_, afterH1, open, inner) => `${afterH1}<p>${lead}</p><p data-area-intro>${inner.trim()}</p>`);
+}
+
 // --- main ----------------------------------------------------------------------------
 
 function plan() {
@@ -474,7 +501,7 @@ function plan() {
       let html;
       if (LEGACY.has(slugOf(city, svc))) {
         if (onDisk == null) throw new Error(`${rel} is a baseline page and is missing`);
-        html = BO.applyBookOnline(stampSiblings(onDisk, city, svc, rel), REQUEST_KEY[svc], rel);
+        html = BO.applyBookOnline(stampLead(stampSiblings(onDisk, city, svc, rel), city, svc, i, rel), REQUEST_KEY[svc], rel);
       } else {
         if (!CONTENT[svc]) throw new Error(`${rel}: no generator for service ${svc}`);
         html = renderPage(city, svc, i);

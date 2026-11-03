@@ -207,7 +207,6 @@ function claimedDates(html) {
  */
 function applyPageDates(html, rel) {
   if (declaresArticle(html)) return html;
-  if (claimedDates(html).size) return html;
   const url = canonicalOf(html) || siteUrlForFile(rel);
   const dates = datesFor(url);
   let done = false;
@@ -219,7 +218,11 @@ function applyPageDates(html, rel) {
     const visit = (n) => {
       if (Array.isArray(n)) return n.map(visit);
       if (!n || typeof n !== 'object') return n;
-      if (isPageNode(n) && !done) { done = true; touched = true; return { ...n, ...dates }; }
+      // Set, not fill in: dateModified has to follow the ledger when the content
+      // moves, exactly as applyArticleSchema rewrites an Article's dates on every
+      // run. Leaving a stale date here made a rebuilt page disagree with the
+      // committed one and the idempotency validators read it as drift.
+      if (isPageNode(n) && !done) { done = true; touched = touched || JSON.stringify({ ...n, ...dates }) !== JSON.stringify(n); return { ...n, ...dates }; }
       const o = {};
       for (const [k, v] of Object.entries(n)) o[k] = visit(v);
       return o;
@@ -232,6 +235,9 @@ function applyPageDates(html, rel) {
     return `${open}${lead}${pretty ? JSON.stringify(next, null, pretty[1].length) : JSON.stringify(next)}${trail}${close}`;
   });
   if (done) return out;
+  // A page with no WebPage-family node but a date somewhere else is left alone:
+  // that date is someone else's to keep true.
+  if (claimedDates(html).size) return html;
 
   // No node on the page can carry a date: the three service pages declare
   // LocalBusiness + Service + BreadcrumbList + FAQPage and nothing that stands
