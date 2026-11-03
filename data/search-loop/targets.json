@@ -392,5 +392,33 @@
       "kind": "new"
     }
   ],
-  "strengthen": []
+  "strengthen": [
+    {
+      "query": "kids birthday party planner",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 20,
+      "from": "distinct-gate",
+      "matched_by": "same 3 intent words plus modifiers",
+      "at": "2026-11-03"
+    },
+    {
+      "query": "birthday party event planner",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 20,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-03"
+    },
+    {
+      "query": "birthday party planners near me rates",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 20,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-03"
+    }
+  ]
 }

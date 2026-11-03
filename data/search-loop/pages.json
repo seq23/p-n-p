@@ -219,6 +219,56 @@
         "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
         "links: https://www.facebook.com/porchandparty901 is not an allowed link target"
       ]
+    },
+    {
+      "query": "fall party event planning",
+      "at": "2026-11-03",
+      "reason": [
+        "b5 FAQ answer is 23 words (aim 40-60): \"Can I rent party games for my fall gathering?\"",
+        "b5 FAQ answer is 28 words (aim 40-60): \"What is included in grazing tables and styled even\"",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0)"
+      ]
+    },
+    {
+      "query": "birthday party games",
+      "at": "2026-11-03",
+      "reason": [
+        "the answer was not the JSON object asked for, with every key filled"
+      ]
+    }
+  ],
+  "redirected": [
+    {
+      "query": "birthday party planners near me rates",
+      "at": "2026-11-03",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "birthday party event planner",
+      "at": "2026-11-03",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "kids birthday party planner",
+      "at": "2026-11-03",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "same 3 intent words plus modifiers",
+      "matched_text": "Birthday party planner in Memphis for kids, adult and hotel-room parties",
+      "stage": "search"
     }
   ]
 }
