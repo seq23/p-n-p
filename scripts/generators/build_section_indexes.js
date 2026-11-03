@@ -34,6 +34,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
+const PROV = require(path.join(ROOT, 'scripts/lib/page_provenance.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const brand = require(path.join(ROOT, 'scripts/lib/brand.js'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
@@ -558,16 +559,10 @@ for (const section of SECTIONS) {
   // again with no mutation scope - the chain never reached a fixed point.
   const social = ((before && before.match(SOCIAL_RE)) || []).filter((tag) => !html.includes(tag));
   if (social.length) html = html.replace(/(<meta\b[^>]*\bproperty="og:image"[^>]*>)/i, `$1\n${social.join('\n')}`);
-  const dates = before && before.match(DATES_RE);
-  if (dates && !DATES_RE.test(html)) {
-    const h1 = /<h1[^>]*>[\s\S]*?<\/h1>/i.exec(html);
-    if (h1) {
-      const afterH1 = h1.index + h1[0].length;
-      const lead = /^\s*<p[^>]*>[\s\S]*?<\/p>/i.exec(html.slice(afterH1));
-      const at = afterH1 + (lead ? lead[0].length : 0);
-      html = html.slice(0, at) + dates[0] + html.slice(at);
-    }
-  }
+  // The two provenance lines - the visible date line and the byline (checklist
+  // items c6 and d4) - plus the dates in this page's own structured data, all
+  // from the ONE definition in scripts/lib/page_provenance.js.
+  html = PROV.carry(html, before, `${section.dir}/index.html`);
   if (before === html) { written.push(`${section.dir}/index.html (unchanged, ${pages.length} pages)`); continue; }
   if (CHECK) { console.error(`would rewrite ${section.dir}/index.html`); process.exitCode = 1; continue; }
   fs.writeFileSync(out, html);

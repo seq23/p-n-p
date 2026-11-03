@@ -20,6 +20,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const { nav, footer, quoteEventScript } = require(path.join(ROOT, 'templates/page-shell.js'));
 const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js'));
+const PROV = require(path.join(ROOT, 'scripts/lib/page_provenance.js'));
 const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js'));
 const siteIcons = require(path.join(ROOT, 'scripts/lib/site_icons.js'));
 const SP = require(path.join(ROOT, 'scripts/lib/service_pages.js'));
@@ -122,9 +123,12 @@ function finalHtml(p, before) {
   const FOLDS = /<!--hub-folds-->[\s\S]*?<!--\/hub-folds-->/;
   const folds = before && before.match(FOLDS);
   if (folds && !FOLDS.test(html)) html = html.replace('<!--/focus-page-->', () => `<!--/focus-page-->${folds[0]}`);
-  const DATES = /<p class="page-dates" data-page-dates>[\s\S]*?<\/p>/;
-  const dates = before && before.match(DATES);
-  if (dates && !DATES.test(html)) html = html.replace(/<\/h1>/i, () => `</h1>${dates[0]}`);
+  // The two provenance lines - the visible date line and the byline (checklist
+  // items c6 and d4) - plus the dates in this page's own structured data, all
+  // from the ONE definition in scripts/lib/page_provenance.js. Re-applying the
+  // dates here, rather than carrying the stamped JSON-LD across, is what makes a
+  // fresh render byte-identical to the committed page.
+  html = PROV.carry(html, before, p.file);
   return html;
 }
 

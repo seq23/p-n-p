@@ -19,6 +19,7 @@
 const fs = require('fs');
 const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
+const PROV = require(path.join(ROOT, 'scripts/lib/page_provenance.js'));
 const { nav, footer, quoteEventScript } = require(path.join(ROOT, 'templates/page-shell.js'));
 const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
@@ -335,18 +336,10 @@ function finalHtml(before) {
   const SOCIAL = /<meta property="og:(?:site_name|image:width|image:height)" content="[^"]*" \/>/g;
   const social = ((before && before.match(SOCIAL)) || []).filter((tag) => !html.includes(tag));
   if (social.length) html = html.replace(/(<meta\b[^>]*\bproperty="og:image"[^>]*>)/i, `$1\n${social.join('\n')}`);
-  const DATES = /<p class="page-dates" data-page-dates>[\s\S]*?<\/p>/;
-  const dates = before && before.match(DATES);
-  if (dates && !DATES.test(html)) {
-    const h1 = /<h1[^>]*>[\s\S]*?<\/h1>/i.exec(html);
-    if (h1) {
-      const afterH1 = h1.index + h1[0].length;
-      const lead = /^\s*<p[^>]*>[\s\S]*?<\/p>/i.exec(html.slice(afterH1));
-      const at = afterH1 + (lead ? lead[0].length : 0);
-      html = html.slice(0, at) + dates[0] + html.slice(at);
-    }
-  }
-  return html;
+  // The two provenance lines - the visible date line and the byline (checklist
+  // items c6 and d4) - plus the dates in this page's own structured data, all
+  // from the ONE definition in scripts/lib/page_provenance.js.
+  return PROV.carry(html, before, 'rentals/index.html');
 }
 
 module.exports = { finalHtml, data, OUT, ITEMS, GAMES, EXTRAS, BUNDLES, bundleValue, FAQ, INVENTORY_VERSION };
