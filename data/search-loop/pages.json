@@ -228,14 +228,19 @@
         "b5 FAQ answer is 28 words (aim 40-60): \"What is included in grazing tables and styled even\"",
         "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
         "links: https://www.facebook.com/porchandparty901 is not an allowed link target",
-        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0)"
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0)",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)",
+        "invented: a named person or quote \"Memphis Request a quote from \""
       ]
     },
     {
       "query": "birthday party games",
       "at": "2026-11-03",
       "reason": [
-        "the answer was not the JSON object asked for, with every key filled"
+        "the answer was not the JSON object asked for, with every key filled",
+        "links: https://www.google.com/maps?cid=1437103205402862394 is not an allowed link target",
+        "links: https://www.facebook.com/porchandparty901 is not an allowed link target",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0)"
       ]
     }
   ],

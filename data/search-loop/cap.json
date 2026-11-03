@@ -17,6 +17,19 @@
       "from": 20,
       "to": 22,
       "reason": "up from 20 to 22: Google impressions 87 in the last 28 days beat 77 in the 28 before"
+    },
+    {
+      "at": "2026-11-03T15:27:06.645Z",
+      "from": null,
+      "to": 20,
+      "reason": "started at 20: the site's 0 distinct live engine page(s), raised to the starting floor of 20"
+    },
+    {
+      "at": "2026-11-03T15:09:06.431Z",
+      "week": "2026-W45",
+      "from": 20,
+      "to": 22,
+      "reason": "up from 20 to 22: Google impressions 87 in the last 28 days beat 77 in the 28 before"
     }
   ],
   "held": {},
