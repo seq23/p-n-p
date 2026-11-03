@@ -75,3 +75,33 @@ scope, finish passes, sitemap, refreeze). Engine pages are outside the cadence c
 (`scripts/cadence/sitemap_urls.js` reads `output.url_prefix`). A branch run is a proof run:
 it uploads `search-loop-pages` and commits nothing. Throttle every site at once with
 `gh variable set SEARCH_LOOP_MODE --body slow -R seq23/search-loop`.
+
+**The secrets it needs** are repository secrets, each mapped to the engine's own name in the
+`secrets:` block of `.github/workflows/search-loop.yml`. Every value lives in the Boss OS vault
+(`cd ~/GitHub/boss-os && npm run -s vault:status`); a missing one is a NAMED NOTE and the stages
+that need it write "not read" in the weekly report, so the run stays green and the next one retries.
+
+| Repository secret | Engine name | Vault key it must hold |
+| --- | --- | --- |
+| `SEARCH_LOOP_CF_USAGE_TOKEN` | `CLOUDFLARE_API_TOKEN` | `CLOUDFLARE_ANALYTICS_READ_TOKEN` |
+| `SEARCH_LOOP_CF_ACCOUNT_ID` | `CLOUDFLARE_ACCOUNT_ID` | `CLOUDFLARE_ACCOUNT_ID` |
+| `SEARCH_LOOP_CF_WORKERS_AI_TOKEN` | `CLOUDFLARE_WORKERS_AI_TOKEN` | Workers AI token |
+| `GSC_SERVICE_ACCOUNT_JSON`, `GSC_SITE_URL` | same | same |
+
+The Cloudflare one is the trap. AI-referral visits and AI-bot reads (Search Readiness item f11)
+are read from the zone's own analytics, which needs **Zone Analytics Read** — plus **Account
+Analytics Read** for Web Analytics, because a free zone's plan has no referrer field. The general
+Cloudflare token (`CLOUDFLARE_API_TOKEN` in the vault) does NOT carry
+`com.cloudflare.api.account.zone.analytics.read`: with it the GraphQL query is refused and the
+weekly report says `ai_visitors: "not read: ..."`. Only the vault's
+`CLOUDFLARE_ANALYTICS_READ_TOKEN` reads both (proved 3 Nov 2026: 24 AI-bot reads, 0 AI-referral
+visits in the 24 hours to 15:07 UTC). Set it without putting the value on a command line:
+
+```sh
+cd ~/GitHub/boss-os && npm run -s vault:run -- node -e \
+  'require("child_process").spawnSync("gh",["secret","set","SEARCH_LOOP_CF_USAGE_TOKEN","--repo","seq23/p-n-p"],{input:process.env.CLOUDFLARE_ANALYTICS_READ_TOKEN,stdio:["pipe","inherit","inherit"]})'
+```
+
+A day the engine could not read is kept in `data/search-loop/ai-daily.json` with its reason and is
+read again on the next run, so a fixed token backfills the week by itself.
+
