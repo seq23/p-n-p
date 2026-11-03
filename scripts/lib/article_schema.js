@@ -164,7 +164,106 @@ function applyArticleSchema(html, rel) {
   return out;
 }
 
+// The page's own node, never its FAQ: scripts/install_service_pages.js rewrites
+// the FAQPage block from the owner-approved /faq/ answers on every run, so a date
+// stamped there is erased on the next install and validate:service-pages reads the
+// page as drifted from a fresh install.
+const PAGE_TYPES = ['WebPage', 'CollectionPage', 'AboutPage', 'ItemPage', 'ProfilePage'];
+const isPageNode = (n) => !!n && typeof n === 'object' && typesOf(n).some((t) => PAGE_TYPES.includes(t));
+
+/** Every datePublished / dateModified this page already claims, anywhere in its JSON-LD. */
+function claimedDates(html) {
+  const out = new Set();
+  for (const m of html.matchAll(JSONLD)) {
+    const walk = (n) => {
+      if (Array.isArray(n)) return n.forEach(walk);
+      if (!n || typeof n !== 'object') return;
+      for (const k of ['datePublished', 'dateModified']) if (typeof n[k] === 'string') out.add(n[k].slice(0, 10));
+      Object.values(n).forEach(walk);
+    };
+    try { walk(JSON.parse(m[2])); } catch { /* validate:structured-data owns unparseable JSON-LD */ }
+  }
+  return out;
+}
+
+/**
+ * Dates for a page that is not an article.
+ *
+ * WHY: checklist item d4 wants a visible published/updated date on every content
+ * page, and scripts/install_page_dates.js prints only dates the page's own
+ * structured data states - so a page with no Article node showed no date at all.
+ * On 3 Nov 2026 that was 18 of the 99 published pages (/pricing, /about,
+ * /how-it-works, /services/, /rentals/ and the two focus pages among them).
+ * Those pages are not articles and must not pretend to be; a WebPage,
+ * CollectionPage or AboutPage node carries datePublished and dateModified in
+ * schema.org just as an Article does, so the date goes there.
+ *
+ * The dates are the same two this module gives an article - datePublished from
+ * data/seo/article_published.json (first seen, then never moved) and
+ * dateModified from data/cadence/lastmod_ledger.json - so nothing is invented
+ * and a build on a timer moves neither. A page that already claims a date is
+ * returned untouched, and so is one with no WebPage-family node to date.
+ * Idempotent.
+ */
+function applyPageDates(html, rel) {
+  if (declaresArticle(html)) return html;
+  if (claimedDates(html).size) return html;
+  const url = canonicalOf(html) || siteUrlForFile(rel);
+  const dates = datesFor(url);
+  let done = false;
+  const out = html.replace(JSONLD, (whole, open, body, close) => {
+    if (done) return whole;
+    let data;
+    try { data = JSON.parse(body); } catch (e) { throw new Error(`${rel}: unparseable JSON-LD block (${e.message})`); }
+    let touched = false;
+    const visit = (n) => {
+      if (Array.isArray(n)) return n.map(visit);
+      if (!n || typeof n !== 'object') return n;
+      if (isPageNode(n) && !done) { done = true; touched = true; return { ...n, ...dates }; }
+      const o = {};
+      for (const [k, v] of Object.entries(n)) o[k] = visit(v);
+      return o;
+    };
+    const next = visit(data);
+    if (!touched) return whole;
+    const lead = body.match(/^\s*/)[0];
+    const trail = body.match(/\s*$/)[0];
+    const pretty = /^\{\s*\n(\s+)"/.exec(body.trim());
+    return `${open}${lead}${pretty ? JSON.stringify(next, null, pretty[1].length) : JSON.stringify(next)}${trail}${close}`;
+  });
+  if (done) return out;
+
+  // No node on the page can carry a date: the three service pages declare
+  // LocalBusiness + Service + BreadcrumbList + FAQPage and nothing that stands
+  // for the page itself. Give them the one node that does. A WebPage is what the
+  // page IS, so this adds a fact rather than a claim, and isPartOf points at the
+  // same single business node every other page already declares.
+  // Same shape the focused pages already publish (scripts/lib/focus_pages.js) and
+  // the shape scripts/install_contact_surface.js leaves alone: name, url and the
+  // one business node as publisher. Anything it would add later has to be here, or
+  // the next pipeline run rewrites the page and the idempotency validators fail.
+  const node = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: headlineOf(html),
+    url,
+    publisher: { '@id': BUSINESS_ID },
+    ...dates,
+  };
+  const block = `<script type="application/ld+json">${JSON.stringify(node)}</script>`;
+  const blocks = [...html.matchAll(JSONLD)];
+  const last = blocks[blocks.length - 1];
+  if (last) {
+    const at = html.indexOf(last[0]) + last[0].length;
+    return html.slice(0, at) + '\n' + block + html.slice(at);
+  }
+  const head = html.indexOf('</head>');
+  if (head < 0) throw new Error(`${rel}: no </head> to carry the WebPage JSON-LD`);
+  return html.slice(0, head) + block + '\n' + html.slice(head);
+}
+
 module.exports = {
   applyArticleSchema, savePublished, declaresArticle, canonicalOf, isArticle, typesOf,
+  applyPageDates, claimedDates, isPageNode, PAGE_TYPES,
   ARTICLE_TYPES, HEADLINE_MAX, BUSINESS_ID, DATE, JSONLD,
 };

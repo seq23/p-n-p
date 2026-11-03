@@ -2,7 +2,8 @@
 'use strict';
 /**
  * Structured-data pass: every page that declares og:type article gets its one
- * complete Article node (scripts/lib/article_schema.js). Chained by
+ * complete Article node, and every other published page gets datePublished and
+ * dateModified on its own WebPage-family node (scripts/lib/article_schema.js). Chained by
  * `npm run build:sitemap` right after the lastmod ledger is written, so
  * dateModified always equals the sitemap <lastmod>.
  *
@@ -16,7 +17,7 @@
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
-const { applyArticleSchema, savePublished } = require('./lib/article_schema');
+const { applyArticleSchema, applyPageDates, savePublished } = require('./lib/article_schema');
 const { publishedPages } = require('./install_contact_surface');
 
 const ROOT = path.resolve(__dirname, '..');
@@ -39,7 +40,11 @@ function main() {
   for (const rel of pages) {
     const abs = path.join(ROOT, rel);
     const html = fs.readFileSync(abs, 'utf8');
-    const out = applyArticleSchema(html, rel);
+    // An article gets its Article node; any other page gets datePublished /
+    // dateModified on its own WebPage-family node, so checklist item d4 has a
+    // date to show on a page that is not an article (/pricing, /about, the two
+    // focus pages). Both read the same two date sources.
+    const out = applyPageDates(applyArticleSchema(html, rel), rel);
     if (out === html) continue;
     if (frozen.has(rel) && withoutJsonLd(out) !== withoutJsonLd(html)) { refused.push(rel); continue; }
     fs.writeFileSync(abs, out);
