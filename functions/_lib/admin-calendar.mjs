@@ -26,6 +26,7 @@ import { serviceOfKind, serviceInfo } from './kinds.mjs';
 import * as MS from './missed.mjs';
 import { shortName } from './requested.mjs';
 
+import { mailerHeaders } from './mailer-auth.mjs';
 const decodeKey = (v) => { try { return fromB64urlText(v); } catch { return ''; } };
 const wantsJson = (request) => request.headers.get('X-Pnp-Fetch') === '1';
 const okJson = () => Response.json({ ok: true });
@@ -181,7 +182,7 @@ export async function emailDay(env, url, date) {
   if (!env.MAILER) return redirect(`/admin/day/${date}?e=${encodeURIComponent('Email is not connected on this copy of the site, so nothing was sent.')}`);
   let ok = false; let err = '';
   try {
-    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to, replyTo: FROM_EMAIL, subject: `Day list: ${shortDate(date)}`, html, text }) });
+    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: mailerHeaders(env), body: JSON.stringify({ to, replyTo: FROM_EMAIL, subject: `Day list: ${shortDate(date)}`, html, text }) });
     const out = await res.json().catch(() => ({}));
     ok = res.ok && out.ok; err = out.error || String(res.status);
   } catch (e) { err = String(e && e.message ? e.message : e); }

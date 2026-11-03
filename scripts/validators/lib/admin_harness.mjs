@@ -87,6 +87,8 @@ export function applyMigration(d1, number) {
 
 export const aiReply = { value: '{"vendor":"Party City","date":"2026-10-12","total":42.17,"tax":3.17,"suggested_category":"Supplies & decor","line_items":[],"confidence":{"vendor":0.95,"date":0.9,"total":0.95,"tax":0.4}}' };
 
+export const HARNESS_MAILER_SECRET = 'test-only-mailer-secret-thirty-two-plus-chars';
+
 // An env like production's, with a fake mailer that records what it was asked to send.
 export function makeEnv(db) {
   const sent = [];
@@ -95,7 +97,14 @@ export function makeEnv(db) {
   const idObjects = new Map();
   return {
     DB: db, PNP_SHEET_FIXTURE: '1', PNP_ADMIN_PASSWORD: 'local-test-pass', PNP_ADMIN_SESSION_KEY: 'test-session-key',
-    MAILER: { fetch: async (_u, init) => { sent.push(JSON.parse(init.body)); return Response.json({ ok: true, messageId: 'x' }); } },
+    PNP_MAILER_SECRET: HARNESS_MAILER_SECRET,
+    // Like the real pnp-mailer, the fake refuses a call without the shared-secret header, so every
+    // validator that sends mail also proves its caller sends the header (functions/_lib/mailer-auth.mjs).
+    MAILER: { fetch: async (_u, init) => {
+      const h = new Headers(init && init.headers);
+      if (h.get('x-pnp-mailer-secret') !== HARNESS_MAILER_SECRET) return Response.json({ ok: false, error: 'unauthorized' }, { status: 401 });
+      sent.push(JSON.parse(init.body)); return Response.json({ ok: true, messageId: 'x' });
+    } },
     // A private R2 bucket in memory (binding RECEIPTS).
     RECEIPTS: {
       put: async (key, bytes, opts) => { objects.set(key, { bytes: new Uint8Array(bytes), type: opts && opts.httpMetadata ? opts.httpMetadata.contentType : '' }); },

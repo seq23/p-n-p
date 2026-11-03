@@ -6,6 +6,7 @@
 import { esc, FROM_EMAIL, ownerCopy } from './util.mjs';
 import { smsLink, hasEmail, BUSINESS_PHONE } from './reminders.mjs';
 
+import { mailerHeaders } from './mailer-auth.mjs';
 const first = (name) => String(name || '').trim().split(/\s+/)[0] || 'there';
 const C = { cream: '#faf7f2', ink: '#3b302a', accent: '#b85f40', line: '#e8dfd4', muted: '#5f5148' };
 const SANS = "Inter, 'Helvetica Neue', Arial, sans-serif";
@@ -156,7 +157,7 @@ async function deliver(env, to, kind, msg) {
   try {
     const full = msg.images && msg.images.length ? await attachImages(msg, env.SITE_ORIGIN || 'https://porchandparty901.com', env.FETCH || fetch) : { ...msg, attachments: [] };
     const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: mailerHeaders(env),
       body: JSON.stringify({ to, ...ownerCopy(kind), replyTo: FROM_EMAIL, subject: full.subject, html: full.html, text: full.emailText || full.text, attachments: full.attachments }),
     });
     const out = await res.json().catch(() => ({ ok: false }));

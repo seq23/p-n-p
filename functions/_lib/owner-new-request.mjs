@@ -9,6 +9,7 @@
 import { esc, getSettings, FROM_EMAIL, b64urlText } from './util.mjs';
 import { wrapEmail } from './messages.mjs';
 
+import { mailerHeaders } from './mailer-auth.mjs';
 export const SERVICE_NAMES = { porch: 'Porch decorating', party: 'Party planning & decor', grazing: 'Grazing tables', rentals: 'Party game rentals' };
 export const SENT_EVENT = 'New-request email sent to Valerie';
 const SITE = 'https://porchandparty901.com';
@@ -89,7 +90,7 @@ export async function sendNewRequestEmail(env, key, { log } = {}) {
     const mail = newRequestEmail(row, { site: env.SITE_ORIGIN || SITE });
     let ok = false; let err = '';
     try {
-      const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to, replyTo: row.email || FROM_EMAIL, subject: mail.subject, html: mail.html, text: mail.text }) });
+      const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: mailerHeaders(env), body: JSON.stringify({ to, replyTo: row.email || FROM_EMAIL, subject: mail.subject, html: mail.html, text: mail.text }) });
       const out = await res.json().catch(() => ({}));
       ok = res.ok && out.ok; err = out.error || String(res.status);
     } catch (e) { err = String(e && e.message ? e.message : e); }

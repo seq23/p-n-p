@@ -19,6 +19,7 @@ import { renderYearPdf } from './pdf-year.mjs';
 import { makeZip } from './zip.mjs';
 import * as VM from './views-money.mjs';
 
+import { mailerHeaders } from './mailer-auth.mjs';
 const rentalLine = (l) => isRentalInvoice([l], PRICE_TABLE);
 export const moneyData = (db) => M.loadMoneyData(db, { rentalLine });
 const okMonth = (m) => (/^\d{4}-(0[1-9]|1[0-2])$/.test(String(m || '')) ? m : chicagoDate().slice(0, 7));
@@ -132,7 +133,7 @@ export async function yearEmail(env, url) {
     ],
   };
   try {
-    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const res = await env.MAILER.fetch('https://pnp-mailer.internal/send', { method: 'POST', headers: mailerHeaders(env), body: JSON.stringify(payload) });
     const out = await res.json().catch(() => ({}));
     if (!res.ok || !out.ok) return back('e', `The email did not go out. Please try again in a minute. (${out.error || res.status})`);
   } catch (e) { return back('e', `The email did not go out. Please try again in a minute. (${e.message || e})`); }

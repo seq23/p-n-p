@@ -1142,7 +1142,7 @@ email's last box (`todo-email.mjs`). Proof: `npm run validate:admin-id-auto-dele
 | D1 | `pnp-admin`, binding `DB`, schema in `migrations/`. Pages deploys do NOT apply migrations: after a merge that adds one, run `npm run admin:migrate` (additive migrations only) |
 | Receipts | R2 bucket `pnp-receipts` (binding `RECEIPTS`, private), Workers AI binding `AI` (wrangler.toml) |
 | Mailer cron | `workers/pnp-mailer` `scheduled` handler, hourly `0 * * * *`; each job gates on the Memphis hour (`chicagoHour`): the 7 AM to-do email, 10 AM reminders, hold expiry; every hour the ID clock and the 90-day ID delete (`id-auto.mjs`). D1 binding `DB`, R2 binding `IDS` (`pnp-ids`). Redeploy with `npm run mailer:deploy` after any change to code it imports |
-| Email | Cloudflare Email Service. Pages cannot hold `send_email`, so the private Worker `workers/pnp-mailer` holds it and Pages calls it through the `MAILER` service binding (`npm run mailer:deploy`) |
+| Email | Cloudflare Email Service. Pages cannot hold `send_email`, so the private Worker `workers/pnp-mailer` holds it and Pages calls it through the `MAILER` service binding (`npm run mailer:deploy`). Every call carries the shared secret `PNP_MAILER_SECRET` (secret on the Pages project, production and preview, and on the Worker; value in the Boss OS vault) in `x-pnp-mailer-secret` via `functions/_lib/mailer-auth.mjs`; the Worker answers 401 without it and refuses every send if its own copy is missing. Guard: `npm run validate:mailer-auth` |
 | Secrets (Pages, production) | `PNP_ADMIN_PASSWORD` (bootstrap password), `PNP_ADMIN_SESSION_KEY` (cookie signing), `GOOGLE_SA_JSON` (service-account key), `PNP_GITHUB_TOKEN` (optional: starts the inventory publish workflow at once) |
 
 ## Rules the code enforces
