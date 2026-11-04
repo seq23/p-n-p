@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "validator": "retrofit-integrity",
-  "generated_at": "2026-11-03T16:08:02.308Z",
-  "sitemap_urls": 100,
-  "pages_checked": 100,
+  "generated_at": "2026-11-04T11:04:28.264Z",
+  "sitemap_urls": 34,
+  "pages_checked": 34,
   "unresolved_sitemap_urls": [],
   "status": "PASS",
   "blocks": {

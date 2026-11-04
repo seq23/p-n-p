@@ -205,6 +205,7 @@
   {
     "slug": "holiday-porch-decorating-service-memphis",
     "folder": "guides",
-    "status": "published"
+    "status": "folded",
+    "folded_into": "/services/porch-decorating"
   }
 ]

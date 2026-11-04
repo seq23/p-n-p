@@ -112,10 +112,15 @@ for (const loc of locs) {
   const rel = [`${bare}.html`, `${bare}/index.html`].find((c) => fs.existsSync(path.join(ROOT, c)));
   if (!rel) continue;
   pages += 1;
-  const text = plain(fs.readFileSync(path.join(ROOT, rel), 'utf8'));
+  const html = fs.readFileSync(path.join(ROOT, rel), 'utf8');
+  const text = plain(html);
   for (const e of claimProblems(rel, text, feePaying)) errors.push(e);
   for (const area of feePaying) {
     const name = cityName(area);
+    if (rel === 'areas/index.html') {
+      const rows = [...html.matchAll(/<tr>[\s\S]*?<\/tr>/g)].map(m=>plain(m[0]));
+      if (rows.some(row=>row.includes(area) && row.includes(`$${TRAVEL.extendedFee} travel fee`))) sawFee.add(area);
+    }
     if (rel.startsWith('areas/') && rel.includes(area.toLowerCase().replace(/,\s*/, '-').replace(/\s+/g, '-'))
       && new RegExp(`\\$${TRAVEL.extendedFee} travel fee`, 'i').test(text)) sawFee.add(area);
   }

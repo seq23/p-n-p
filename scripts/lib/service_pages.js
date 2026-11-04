@@ -27,6 +27,7 @@ const PK = require(path.join(ROOT, 'data/offers/porch_packages.json'));
 const AI = require(path.join(ROOT, 'data/offers/service_ai_images.json'));
 const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
 const RENTALS = INV.resolve(require(path.join(ROOT, 'data/rentals/games.json')));
+const SHAPE = require(path.join(ROOT, 'scripts/lib/page_shape.js'));
 
 const money = (n) => `$${Number(n).toLocaleString('en-US')}`;
 const esc = (s) => String(s).replace(/&(?!#?[a-z0-9]+;)/gi, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -37,6 +38,13 @@ const TRAVEL = offers.travel;
 const QUOTE = offers.quoteUrl;
 
 const porchFrom = Math.min(...PK.seasons.flatMap((s) => Object.values(s.tiers).map((t) => t.from)));
+const seasonFrom = (short) => {
+  const season = PK.seasons.find((x) => (x.short || x.name || '').toLowerCase().startsWith(short));
+  if (!season) throw new Error(`service_pages: data/offers/porch_packages.json has no "${short}" season`);
+  return Math.min(...Object.values(season.tiers).map((t) => t.from));
+};
+const fallFrom = seasonFrom('fall');
+const christmasFrom = seasonFrom('christmas');
 const partyFrom = Number(String(S.celebration.price).replace(/[^0-9]/g, ''));
 const grazeFrom = Math.min(...S.grazing.tiers.map((t) => t.from));
 const games = INV.publicGames(RENTALS);
@@ -62,7 +70,9 @@ const PAGES = [
     key: 'porch', file: 'services/porch-decorating.html', url: '/services/porch-decorating', request: 'porch', area: 'porch-decorating',
     name: 'Porch decorating', from: porchFrom, fromText: `from ${money(porchFrom)}`,
     targets: ['porch decorating memphis', 'seasonal porch decor memphis', 'fall porch decor memphis', 'christmas porch decor memphis'],
-    answer: `Porch &amp; Party decorates Memphis-area front porches for fall, Halloween, Thanksgiving and Christmas, with packages from ${money(porchFrom)}. We design it, bring everything and set it up (wreath, planters, pumpkins or greenery, lanterns and lights), and ${TD.line.charAt(0).toLowerCase()}${TD.line.slice(1)}`,
+    answer: SHAPE.assertLead(
+      `Porch decorating in Memphis is a seasonal front-entry install Porch &amp; Party designs, brings and sets up for you: a wreath, planters, pumpkins or greenery, lanterns and lights, arranged across the porch, the steps and the walkway. Fall packages start at ${money(fallFrom)} and Christmas at ${money(christmasFrom)}.`,
+      'services/porch-decorating answer'),
     sections: () => [
       { id: 'seasonal-porch-decor', h2: 'Fall, Halloween and Christmas porch decor in Memphis',
         body: `<p>Pick the season and the size: ${PK.tierOrder.map((t) => PK.tiers[t].name).join(', ')}. ${esc(PK.estimateLine)} ${esc(PK.bundle.line)}</p><p>${esc(faq('porch', 'Which seasons do you decorate?')[1])} ${esc(faq('porch', 'Will it hold up in weather?')[1])}</p>` },
@@ -81,7 +91,9 @@ const PAGES = [
     name: 'Party planning and decor', from: partyFrom, fromText: `from ${money(partyFrom)}`,
     title: 'Party Decorations &amp; Hotel Room Setups in Memphis | Porch &amp; Party',
     targets: ['party decorations memphis', 'birthday party decor memphis', 'hotel room decoration memphis', 'balloon arch memphis'],
-    answer: `Porch &amp; Party plans and sets up party decorations in Memphis homes, hotel rooms and venues, from ${money(partyFrom)}: birthdays, anniversaries, proposals, showers and surprises. Balloon arches and garlands, backdrops, rose petals and candles and table styling, set up before your guests arrive.`,
+    answer: SHAPE.assertLead(
+      `A celebration setup in Memphis is party decor Porch &amp; Party designs, brings and installs before your guests arrive: balloon arches and garlands, a backdrop, rose petals and candles and styled tables, in a home, a hotel room or a venue. Setups start at ${money(partyFrom)}.`,
+      'services/celebration-setups answer'),
     sections: () => [
       { id: 'hotel-room-setups', h2: 'Hotel Room Setups',
         body: `<p>Romantic, anniversary, proposal and birthday hotel room setups in Memphis, from ${money(partyFrom)}: rose petals and candles, balloons by the bed and a bouquet, ready before your person walks in.</p><p><a href="${FOCUS.hotel}" data-focus-link="hotel">See hotel room setups &rarr;</a></p>` },
@@ -103,10 +115,12 @@ const PAGES = [
     name: 'Grazing tables', from: grazeFrom, fromText: `from ${money(grazeFrom)}`,
     title: 'Grazing &amp; Charcuterie Tables in Memphis | Porch &amp; Party',
     targets: ['grazing table memphis', 'charcuterie table memphis'],
-    answer: `Porch &amp; Party styles grazing and charcuterie tables in Memphis from ${money(grazeFrom)} for a board, ${money(S.grazing.tiers[1].from)} for a small table and ${money(S.grazing.tiers[2].from)} for a full table. We bring the boards, risers and styling and lay out cheeses, charcuterie, fruit, breads and sweets; food is quoted separately at about ${money(S.grazing.foodPerHead.low)} to ${money(S.grazing.foodPerHead.high)} a guest.`,
+    answer: SHAPE.assertLead(
+      `Grazing tables in Memphis are styled spreads of cheese, charcuterie, fruit, bread and sweets that Porch &amp; Party brings, lays out and arranges on site, with its own boards and risers. Styling starts at ${money(grazeFrom)} for a board; the food is quoted separately, by guest count.`,
+      'services/grazing-and-event-styling answer'),
     sections: () => [
       { id: 'grazing-table-sizes', h2: 'Grazing and charcuterie table sizes and prices',
-        body: `<ul>${S.grazing.tiers.map((t) => `<li><strong>${esc(t.name)}</strong>: styling from ${money(t.from)}, feeds ${t.feedsSnack[0]} to ${t.feedsSnack[1]} as a snack or ${t.feedsMeal[0]} to ${t.feedsMeal[1]} as a meal.</li>`).join('')}</ul><p>${esc(S.grazing.notes.join(' '))}</p>` },
+        body: `<ul>${S.grazing.tiers.map((t) => `<li><strong>${esc(t.name)}</strong>: styling from ${money(t.from)}, feeds ${t.feedsSnack[0]} to ${t.feedsSnack[1]} as a snack or ${t.feedsMeal[0]} to ${t.feedsMeal[1]} as a meal.</li>`).join('')}</ul><p>Each size is priced on the styling. <a href="#service-faq">What the price covers, and what food costs</a>.</p>` },
     ],
     faq: () => [
       faq('grazing', 'What is a grazing table?'),

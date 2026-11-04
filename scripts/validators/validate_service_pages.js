@@ -30,6 +30,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const SP = require(path.join(ROOT, 'scripts/lib/service_pages.js'));
 const BO = require(path.join(ROOT, 'scripts/lib/book_online.js'));
+const HC = require('../lib/hub_consolidation');
 const G = require(path.join(ROOT, 'scripts/generators/build_area_pages.js'));
 const chrome = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
 const { servicePage } = require(path.join(ROOT, 'scripts/install_service_pages.js'));
@@ -147,11 +148,21 @@ for (const rel of ['index.html', 'services/index.html']) {
 // are generated from, so it cannot go stale again, and the floor below keeps
 // Rule 0: a shrinking or empty city list is still a hard failure.
 const WANT_AREA_PAGES = G.cities().length * G.SERVICE_KEYS.length;
-const MIN_AREA_PAGES = 32;
+const MIN_AREA_PAGES = JSON.parse(read('data/search_intelligence/page_quality_kept.json')).city_service_intents.length;
+ok(MIN_AREA_PAGES > 0, 'Rule 0: no city/service intents');
 let areaPages = 0;
 for (const city of G.cities()) {
   for (const svc of G.SERVICE_KEYS) {
     const rel = G.relOf(city, svc);
+    if (HC.isRetiredFile(rel)) {
+      areaPages += 1;
+      const target = HC.foldTarget(G.urlOf(city, svc)).to;
+      ok(!fs.existsSync(path.join(ROOT, rel)), `${rel}: retired variant re-created`);
+      ok(sitemap.includes(`<loc>${offers.domain}${target}</loc>`), `${rel}: redirect target unpublished`);
+      const directory = hrefs(read('areas/index.html'));
+      for (const u of [...urls, SP.FOCUS.hotel, SP.FOCUS.lawn]) ok(directory.includes(u), `coverage directory lacks ${u}`);
+      continue;
+    }
     if (!fs.existsSync(path.join(ROOT, rel))) { ok(false, `${rel}: missing`); continue; }
     areaPages += 1;
     const html = read(rel);

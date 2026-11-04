@@ -33,6 +33,10 @@ const CHAIN = [
   // The last two passes in build:all (added 2026-10-25 for her Search Readiness
   // Checklist items b6 and d4).
   'scripts/install_social_tags.js',
+  // The definition lead each page with no generator carries (checklist item b4,
+  // 3 Nov 2026). It runs in build:finish too, so a page that is idempotent
+  // without it and not with it is still a page the next build rewrites.
+  'scripts/retrofit_definition_leads.js',
   'scripts/install_page_dates.js'
 ];
 const MARKER = 'data-nav="related-pages"';
@@ -84,7 +88,8 @@ try {
     }
   };
   walk(tmp);
-  if (compared < 100) errors.push(`compared only ${compared} file(s); the temp copy is broken`);
+  const keptCount = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/search_intelligence/page_quality_kept.json'), 'utf8')).kept.length;
+  if (!keptCount || compared < keptCount) errors.push(`compared only ${compared} file(s); expected at least ${keptCount} kept sitemap pages; the temp copy is broken`);
 } catch (e) {
   errors.push(`rebuild failed: ${(e.stderr || e.message).toString().slice(0, 400)}`);
 } finally {

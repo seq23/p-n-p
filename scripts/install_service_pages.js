@@ -36,6 +36,7 @@ const REC_RE = /<div class="info-panel recommendation-summary"[^>]*>[\s\S]*?<\/d
 const HERO_DIV_RE = /<div><span class="eyebrow">[^<]*<\/span><h1>[\s\S]*?<\/h1>[\s\S]*?<\/div><\/div>/;
 const FAQ_LD_RE = /<script type="application\/ld\+json">\{"@context":"https:\/\/schema.org","@type":"FAQPage"[\s\S]*?<\/script>/;
 const CTA = '<section class="section cta-band">';
+const DATES_RE = /<p class="page-dates" data-page-dates>[\s\S]*?<\/p>/;
 
 function must(cond, msg) { if (!cond) throw new Error(msg); }
 
@@ -55,6 +56,12 @@ function servicePage(p, html) {
   const sn = SERVICE_NAMES[p.key];
   if (sn) html = html.split(`"name":"${sn[0]}"`).join(`"name":"${sn[1]}"`);
   // 2. Hero: direct answer + Book online, above the recommendation summary.
+  // The visible date line sits between the answer paragraph and the button row
+  // (scripts/install_page_dates.js puts it after the lead), inside what HERO_RE
+  // replaces. It is written after this pass in build:all, so carry it across -
+  // otherwise re-installing a committed page drops it and
+  // validate:service-pages reads the page as drifted from a fresh install.
+  const dates = html.match(DATES_RE);
   if (HERO_RE.test(html)) html = html.replace(HERO_RE, () => SP.heroBlock(p));
   else {
     const m = html.match(HERO_DIV_RE);
@@ -62,6 +69,10 @@ function servicePage(p, html) {
     const inner = m[0].replace(/(<\/h1>)[\s\S]*?(<\/div><\/div>)$/, (_, a) => `${a}${SP.heroBlock(p)}</div>`);
     must(inner !== m[0], `${rel}: hero intro + button row not found`);
     html = html.replace(m[0], () => inner);
+  }
+  if (dates && !DATES_RE.test(html)) {
+    html = html.replace(/(<p class="service-answer"[^>]*>[\s\S]*?<\/p>)/, (_, lead) => `${lead}${dates[0]}`);
+    must(DATES_RE.test(html), `${rel}: the date line could not be put back after the answer paragraph`);
   }
   const rec = html.match(REC_RE);
   const hero = html.match(/<div><span class="eyebrow">[^<]*<\/span><h1>[\s\S]*?<!--\/service-hero--><\/div>/);

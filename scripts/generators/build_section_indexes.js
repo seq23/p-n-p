@@ -34,6 +34,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
+const PROV = require(path.join(ROOT, 'scripts/lib/page_provenance.js'));
+const SHAPE = require(path.join(ROOT, 'scripts/lib/page_shape.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const brand = require(path.join(ROOT, 'scripts/lib/brand.js'));
 const areasData = require(path.join(ROOT, 'data/service_areas/areas.json'));
@@ -62,13 +64,27 @@ const unesc = (s) => s.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt
   .replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&nbsp;/g, ' ')
   .replace(/&(?:mdash|ndash);/g, '-');
 
-/** The page's own h1 and the paragraph directly beneath it. No rewriting. */
+/**
+ * The page's own h1, its meta description and the paragraph directly beneath the
+ * h1. No rewriting.
+ *
+ * The card shows the DESCRIPTION, and falls back to the lead paragraph only when
+ * a page has none. The lead is now a definition of the service (checklist item
+ * b4), which is deliberately the same sentence about the same service on every
+ * city's page - so an index of 65 city pages that quoted the lead repeated "is
+ * balloon work, a backdrop and styled tables" nineteen times in one body, which
+ * the owner's weekly quality sample reads as template filler. A page's
+ * description is written per page and names its city, its price and its travel
+ * answer, which is what a card wants anyway.
+ */
 function readPage(rel) {
   const html = fs.readFileSync(path.join(ROOT, rel), 'utf8');
   const h1 = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   const lead = html.match(/<h1[^>]*>[\s\S]*?<\/h1>\s*<p[^>]*>([\s\S]*?)<\/p>/i);
+  const desc = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i);
   if (!h1) throw new Error(`${rel} has no <h1> to take a link label from`);
-  return { rel, url: `/${rel}`, h1: stripTags(h1[1]), lead: lead ? stripTags(lead[1]) : '' };
+  const leadText = lead ? stripTags(lead[1]) : '';
+  return { rel, url: `/${rel}`, h1: stripTags(h1[1]), lead: desc ? stripTags(desc[1]) : leadText };
 }
 
 // questions/ exists only once the shared search engine has published a page.
@@ -142,6 +158,11 @@ const MEMPHIS_PLACES = new Set([
   ...placesData.anchors.map((a) => a.slug)
 ]);
 function groupAreas(pages) {
+  if (!pages.length) return [{heading: 'Which service do you need in your city?', blurb: `${CITY_LIST}. ${offers.travel.line}`, pages: [
+    readPage('services/porch-decorating.html'), readPage('services/celebration-setups.html'),
+    readPage('services/grazing-and-event-styling.html'), readPage('rentals/index.html'),
+    readPage('services/hotel-room-decor-memphis.html'), readPage('rentals/giant-lawn-games-memphis.html')
+  ]}];
   const cityKey = (slug) => {
     // An anchor slug carries no -tn-/-ms- marker, so match it before the regex.
     for (const place of MEMPHIS_PLACES) if (slug === place || slug.startsWith(`${place}-`)) return 'memphis';
@@ -176,7 +197,9 @@ const SECTIONS = [
     // Owner-approved 2026-10-18: the four services (scripts/lib/brand.js) in the title and description.
     title: 'Memphis Porch, Party, Grazing &amp; Game Rentals | Porch &amp; Party',
     description: `Porch & Party services in Memphis: ${brand.SERVICES[0].label} from $${brand.PRICES.porch}, ${brand.SERVICES[1].label} from $${brand.PRICES.party}, ${brand.SERVICES[2].label} from $${brand.PRICES.grazing}, and ${brand.SERVICES[3].label} from $${brand.PRICES.gameDay}.`,
-    lead: `Porch &amp; Party offers four services: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}, and party game rentals from $${rentalRates.day} a game per day. Every styling page below sits inside one of the first three, so start with the family that matches the setup you need and open the page that names it. Party game rentals are listed last.`,
+    lead: SHAPE.assertLead(
+      `Porch &amp; Party is a Memphis decorating company with four services: ${offers.services.porch.name} from ${offers.services.porch.price}, ${offers.services.celebration.name} from ${offers.services.celebration.price}, ${esc(offers.services.grazing.name)} from ${offers.services.grazing.price}, and party game rentals at $${rentalRates.day} a game a day. Every page below sits inside one of them.`,
+      'services/index lead'),
     summary: 'Pick the service family first - porch, celebration, or grazing - then open the page for the specific setup. Starting prices are published on each page and the exact quote depends on scope, date, location, and materials.',
     group: groupServices,
     faq: [
@@ -189,21 +212,32 @@ const SECTIONS = [
   },
   {
     dir: 'areas',
+    minPages: 0, // Coverage directory links the service hubs after locality consolidation.
     eyebrow: 'Service Areas',
     crumb: 'Service Areas',
     h1: 'Porch &amp; Party service areas across the Memphis metro',
     title: 'Porch &amp; Party Service Areas | Memphis Metro Party &amp; Porch Decor',
     // Owner-approved 21 Oct 2026: every served city has a page for each of the four services
     // (scripts/generators/build_area_pages.js); validate:area-pages holds the index to it.
-    description: 'Porch & Party service areas: porch decorating, party decor, grazing tables and party game rentals, with a page for each service in every Memphis-metro city.',
-    lead: `Porch &amp; Party serves ${CITY_LIST}. Every city below has four pages, one for each service: porch decorating, party decor, grazing tables and party game rentals.`,
-    summary: `Open your city, then the service. Seasonal porch decorating starts at ${offers.services.porch.price}, party decor and celebration setups at ${offers.services.celebration.price}, grazing-table styling at ${offers.services.grazing.price}, and party game rentals at $${rentalRates.day} a game per day (pickup at Mt. Moriah Station). ${offers.travel.line}`,
+    description: 'Porch & Party service areas: porch decorating, party decor, grazing tables and party game rentals, with one coverage directory for Memphis-metro cities.',
+    lead: SHAPE.assertLead(
+      `Porch &amp; Party's service area is Memphis and the surrounding Tennessee and north Mississippi cities listed below. Porch decorating, celebration setups and grazing-table styling are arranged at your location, subject to access and availability. Rental games are collected and returned at Mt. Moriah Station; they are not delivered.`,
+      'areas/index lead'),
+    // No summary line under each card here. This index lists 65 city x service
+    // pages, four per city, and every page in a service family describes the same
+    // service - so a summary per card repeated the same sentence thirteen times
+    // in one body (the owner's weekly quality sample reads that as template
+    // filler) and told a reader nothing the heading had not. The heading names
+    // the city and the service, which is what this index is for; the page itself
+    // holds the detail.
+    cardSummaries: false,
+    summary: `Choose your service and include your city in the request. Seasonal porch decorating starts at ${offers.services.porch.price}, party decor and celebration setups at ${offers.services.celebration.price}, grazing-table styling at ${offers.services.grazing.price}, and party game rentals at $${rentalRates.day} a game per day (pickup at Mt. Moriah Station). ${offers.travel.line}`,
     group: groupAreas,
     faq: [
       ['Which cities does Porch &amp; Party serve?',
         `${CITY_LIST} and the greater Memphis metro area.`],
-      ['Why does each city have four pages?',
-        'Porch decorating, party decor, grazing tables and party game rentals are separate services with separate scope and separate starting prices, so each city has one page per service, and every city page links to the other three.']
+      ['Where can I find the service details for my city?',
+        'The service pages below cover the whole service area. Read the setup details there and include your city, date and access information in your request. Rental games are pickup and return only.']
     ],
     related: ['/services/index.html', '/faq/index.html', '/pricing.html', '/contact.html']
   },
@@ -215,7 +249,9 @@ const SECTIONS = [
     heroH1: 'Frequently asked questions',
     title: 'Porch &amp; Party FAQ | Pricing, Setup Time &amp; Booking Questions',
     description: 'Questions asked most before booking Porch & Party: what setups cost, how long they take, how far ahead to book, and what grazing-table pricing covers.',
-    lead: 'Every question we get, in one place, sectioned by service: booking and payment, porch decor, party and room decor, grazing tables and party game rentals. The grazing estimator and the Price my porch calculator give you a starting price before you ask.',
+    lead: SHAPE.assertLead(
+      'This is every question Porch &amp; Party is asked before a booking, in one place, sectioned by service: booking and payment, porch decor, party and room decor, grazing tables and party game rentals. The grazing estimator and the Price my porch calculator give you a starting price first.',
+      'faq/index lead'),
     heroNote: 'Use the estimator below for a starting price before you ask.',
     summary: 'Jump to your service below. Setup and styling prices are firm starting points from our price list; food for grazing tables is always a separate rough estimate until the menu is confirmed.',
     // The longer answer pages that used to be listed here were folded into their service hubs on
@@ -372,8 +408,8 @@ function render(section, groups) {
     + (g.blurb ? `<p>${esc(g.blurb)}</p>` : '')
     + `</div><div class="cards-grid">`
     + g.pages.map((p) => `<article class="card"><div class="card-body">`
-      + `<h3><a href="${p.url}">${esc(p.h1)}</a></h3>`
-      + (p.lead ? `<p class="muted">${esc(p.lead)}</p>` : '')
+      + `<h3><a href="${p.url}">${esc(SHAPE.linkLabel(p.h1))}</a></h3>`
+      + (section.cardSummaries === false || !p.lead ? '' : `<p class="muted">${esc(p.lead)}</p>`)
       + `</div></article>`).join('')
     + `</div>`).join('\n');
 
@@ -479,7 +515,7 @@ ${section.groups ? `        <div class="page-intro" id="top">
           <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary"${QUOTE_ATTRS}>Request a Quote</a><a href="/pricing.html" class="btn-secondary">See Pricing</a></div>
         </div>
         <div class="info-panel recommendation-summary" data-content-block="recommendation_summary" id="recommendation-summary">
-          <h2>What this page recommends</h2>
+          <h2>What should you know before choosing a service?</h2>
           <p class="recommendation-summary__answer">${esc(section.summary)}</p>
           <ul class="recommendation-summary__points">
             <li><strong>Pages in this section:</strong> ${listItems.length}</li>
@@ -492,6 +528,7 @@ ${section.groups ? `        <div class="page-intro" id="top">
 
     <section class="section section-soft${section.groups ? ' faq-body' : ''}">
       <div class="container">
+${section.dir === 'areas' ? `<div class="info-panel"><h2>What travel fee applies to your city?</h2><table><thead><tr><th>City</th><th>Setup travel</th></tr></thead><tbody>${areasData.areas.map(area => `<tr><td>${esc(area)}</td><td>${offers.travel.includedAreas.includes(area) ? 'Included' : `$${offers.travel.extendedFee} travel fee`}</td></tr>`).join('')}</tbody></table><p>Travel applies to on-site decor and styling. Rental games are pickup and return only at Mt. Moriah Station.</p><p>Source: <a href="/pricing">Porch &amp; Party service prices and travel terms</a>.</p></div>` : ''}
 ${section.groups ? faqHtml : cards}
       </div>
     </section>
@@ -558,16 +595,10 @@ for (const section of SECTIONS) {
   // again with no mutation scope - the chain never reached a fixed point.
   const social = ((before && before.match(SOCIAL_RE)) || []).filter((tag) => !html.includes(tag));
   if (social.length) html = html.replace(/(<meta\b[^>]*\bproperty="og:image"[^>]*>)/i, `$1\n${social.join('\n')}`);
-  const dates = before && before.match(DATES_RE);
-  if (dates && !DATES_RE.test(html)) {
-    const h1 = /<h1[^>]*>[\s\S]*?<\/h1>/i.exec(html);
-    if (h1) {
-      const afterH1 = h1.index + h1[0].length;
-      const lead = /^\s*<p[^>]*>[\s\S]*?<\/p>/i.exec(html.slice(afterH1));
-      const at = afterH1 + (lead ? lead[0].length : 0);
-      html = html.slice(0, at) + dates[0] + html.slice(at);
-    }
-  }
+  // The two provenance lines - the visible date line and the byline (checklist
+  // items c6 and d4) - plus the dates in this page's own structured data, all
+  // from the ONE definition in scripts/lib/page_provenance.js.
+  html = PROV.carry(html, before, `${section.dir}/index.html`);
   if (before === html) { written.push(`${section.dir}/index.html (unchanged, ${pages.length} pages)`); continue; }
   if (CHECK) { console.error(`would rewrite ${section.dir}/index.html`); process.exitCode = 1; continue; }
   fs.writeFileSync(out, html);

@@ -86,10 +86,16 @@ const CHROME = /<(script|style|nav|footer|header|head|svg)\b[\s\S]*?<\/\1>/gi;
  * last ledger before that PR, which restored all 126 dates from a committed
  * ledger without estimating one.
  *
+ * The byline line (data-page-byline, scripts/install_page_dates.js) is stripped
+ * for the same reason: it is identical on every page, it says nothing about what
+ * this page says, and letting it into the hash would have advanced all 93
+ * lastmod values to the day it was installed - the uniform_lastmod bump this
+ * module exists to remove.
+ *
  * Same reason <header> joined CHROME after PR #25: a line that appears on every
  * page and says nothing about what the page says is not the page's content.
  */
-const DERIVED = /<p\b[^>]*\bdata-page-dates\b[^>]*>[\s\S]*?<\/p>/gi;
+const DERIVED = /<p\b[^>]*\bdata-page-(?:dates|byline)\b[^>]*>[\s\S]*?<\/p>/gi;
 const TAG = /<[^>]+>/g;
 
 /**

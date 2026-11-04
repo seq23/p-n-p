@@ -1,0 +1,57 @@
+{
+  "sitemap_count": 100,
+  "sample": [
+    {
+      "url": "https://porchandparty901.com/areas/arlington-tn-party-decor",
+      "words": 515,
+      "shared_5gram_pct": 85.6
+    },
+    {
+      "url": "https://porchandparty901.com/areas/arlington-tn-porch-decorating",
+      "words": 567,
+      "shared_5gram_pct": 92.4
+    },
+    {
+      "url": "https://porchandparty901.com/areas/bartlett-tn-party-decor",
+      "words": 518,
+      "shared_5gram_pct": 85.1
+    },
+    {
+      "url": "https://porchandparty901.com/areas/bartlett-tn-porch-decorating",
+      "words": 567,
+      "shared_5gram_pct": 92.4
+    },
+    {
+      "url": "https://porchandparty901.com/areas/collierville-tn-party-decor",
+      "words": 518,
+      "shared_5gram_pct": 85.1
+    },
+    {
+      "url": "https://porchandparty901.com/areas/collierville-tn-porch-decorating",
+      "words": 567,
+      "shared_5gram_pct": 92.4
+    },
+    {
+      "url": "https://porchandparty901.com/areas/cooper-young-memphis-tn-party-decor",
+      "words": 724,
+      "shared_5gram_pct": 36.0
+    },
+    {
+      "url": "https://porchandparty901.com/areas/cordova-tn-party-decor",
+      "words": 541,
+      "shared_5gram_pct": 36.3
+    },
+    {
+      "url": "https://porchandparty901.com/guides/graduation-party-decorations-at-home-memphis",
+      "words": 1000,
+      "shared_5gram_pct": 17.4
+    },
+    {
+      "url": "https://porchandparty901.com/guides/holiday-porch-decorating-service-memphis",
+      "words": 1510,
+      "shared_5gram_pct": 12.8
+    }
+  ],
+  "mean_shared_pct": 63.5,
+  "method": "Percent unique five-word sequences in main content also present on another sampled page; navigation/footer excluded."
+}

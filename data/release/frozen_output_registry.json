@@ -1,789 +1,195 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-07-24T00:00:00.000Z",
-  "count": 87,
+  "count": 21,
   "pages": [
-    {
-      "route": "/areas/arlington-tn-grazing-tables",
-      "rendered_file": "areas/arlington-tn-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "1ded396ea73e9fb31cf33c2aca6d01b3a87f4a534f0674153f01c6c663a4f42e",
-      "cache_file": "data/release/frozen_accepted_outputs/1ded396ea73e9fb31cf33c2aca6d01b3a87f4a534f0674153f01c6c663a4f42e.html.gz",
-      "cache_sha256": "4220f676557a3eb3e6e0063509811b876e6a15f157ac654dcb606823183a2e21",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/arlington-tn-party-decor",
-      "rendered_file": "areas/arlington-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "7ea6fd7c49a8fb0de885aef24831d0ff03ded12a3b8689684f8c5cc9b1005cdc",
-      "cache_file": "data/release/frozen_accepted_outputs/7ea6fd7c49a8fb0de885aef24831d0ff03ded12a3b8689684f8c5cc9b1005cdc.html.gz",
-      "cache_sha256": "81498ec832f95aeb4dcf7ac56354d120e04f7bcfbd2a3b3a69bf812cb6dd59d7",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/arlington-tn-party-game-rentals",
-      "rendered_file": "areas/arlington-tn-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "26ada48ccfde2a62e140f73015b1f42c431e1cb234d20064ace008668acf347a",
-      "cache_file": "data/release/frozen_accepted_outputs/26ada48ccfde2a62e140f73015b1f42c431e1cb234d20064ace008668acf347a.html.gz",
-      "cache_sha256": "5e0d4ccedace4f918538dcf3ecfcd93e303687153ec3e453b141ef114d40d312",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/arlington-tn-porch-decorating",
-      "rendered_file": "areas/arlington-tn-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "29d4d8c29393f582a29002772418b2c5e02726407ed5e9eb84d5b3f000ac5e8e",
-      "cache_file": "data/release/frozen_accepted_outputs/29d4d8c29393f582a29002772418b2c5e02726407ed5e9eb84d5b3f000ac5e8e.html.gz",
-      "cache_sha256": "777ba962ad651dd6b54a9c3f0d82ffe3b017632dfd3e57aefa48ce549c309667",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/bartlett-tn-grazing-tables",
-      "rendered_file": "areas/bartlett-tn-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "cd506aa3e5d522ad68d6dbcfd4a340fb5d4246d00e2d30c9d84dd20c713b1c4d",
-      "cache_file": "data/release/frozen_accepted_outputs/cd506aa3e5d522ad68d6dbcfd4a340fb5d4246d00e2d30c9d84dd20c713b1c4d.html.gz",
-      "cache_sha256": "5498c6a16538991681ec70943a01e006f18fde288b941900c2f955d88da207ed",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/bartlett-tn-party-decor",
-      "rendered_file": "areas/bartlett-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "c027b5600842e1dab2ea107f443fde740b5db832204390da58890226a5ccbe48",
-      "cache_file": "data/release/frozen_accepted_outputs/c027b5600842e1dab2ea107f443fde740b5db832204390da58890226a5ccbe48.html.gz",
-      "cache_sha256": "5f78301149f9a189fc6698363d23f5408c49fab5ecba02404276120a37836650",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/bartlett-tn-party-game-rentals",
-      "rendered_file": "areas/bartlett-tn-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "fd8f7ef3cbd89c87ac725e4b2654576e49fc7eca94d77a56151eb9a14eb41d7b",
-      "cache_file": "data/release/frozen_accepted_outputs/fd8f7ef3cbd89c87ac725e4b2654576e49fc7eca94d77a56151eb9a14eb41d7b.html.gz",
-      "cache_sha256": "5f49e70d8cbaa4f65a5ad8cc98dc6d62c99c1f04bbf17efccf6d769a09f8d437",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/bartlett-tn-porch-decorating",
-      "rendered_file": "areas/bartlett-tn-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "b3268267707a6aaaeb768667bbf7ee9403418ca3782caf2c908434eac5f8dba1",
-      "cache_file": "data/release/frozen_accepted_outputs/b3268267707a6aaaeb768667bbf7ee9403418ca3782caf2c908434eac5f8dba1.html.gz",
-      "cache_sha256": "280d18d215e86ef8694386def07bf9a9776095bed1a7accb7b0853036364c36e",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/collierville-tn-grazing-tables",
-      "rendered_file": "areas/collierville-tn-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "cb4a1c374bed39d072996fe2248b955d4deef2759c83439098fb90330914074d",
-      "cache_file": "data/release/frozen_accepted_outputs/cb4a1c374bed39d072996fe2248b955d4deef2759c83439098fb90330914074d.html.gz",
-      "cache_sha256": "55a3a470c4728a16767f47bb6c2b47d753fae1199fdabc82ba56bf74d05a5d53",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/collierville-tn-party-decor",
-      "rendered_file": "areas/collierville-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "3218f9158754eb76c0f449c003b7c6ac324c65f1c484dc91a69239f9bc74db43",
-      "cache_file": "data/release/frozen_accepted_outputs/3218f9158754eb76c0f449c003b7c6ac324c65f1c484dc91a69239f9bc74db43.html.gz",
-      "cache_sha256": "a4d063665f71c4d2b23cae4832e91d894cce797e44173831bfda65f17f5a8b0c",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/collierville-tn-party-game-rentals",
-      "rendered_file": "areas/collierville-tn-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "95d0af3e3a069a42bd160fc55997f581725e81939173044d268fc24e993153fc",
-      "cache_file": "data/release/frozen_accepted_outputs/95d0af3e3a069a42bd160fc55997f581725e81939173044d268fc24e993153fc.html.gz",
-      "cache_sha256": "ac396e0287615a273934ab4ebbe428d1a531500209b03fdce795c130c33a7175",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/collierville-tn-porch-decorating",
-      "rendered_file": "areas/collierville-tn-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "ebdd053d056408c1453640bff2f9c2e43e8cebbbf8b7bd2f091dcba0cf816a67",
-      "cache_file": "data/release/frozen_accepted_outputs/ebdd053d056408c1453640bff2f9c2e43e8cebbbf8b7bd2f091dcba0cf816a67.html.gz",
-      "cache_sha256": "2e5b3f722e611c5bbb13cf944d289c31a9160aa8885e5a9396a76ed356bd5a06",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/cooper-young-memphis-tn-party-decor",
-      "rendered_file": "areas/cooper-young-memphis-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "076dc8a7261f8aaea9d7210e53d2b791b9f2b5ca6fda2b8bec1d3a186c298c9c",
-      "cache_file": "data/release/frozen_accepted_outputs/076dc8a7261f8aaea9d7210e53d2b791b9f2b5ca6fda2b8bec1d3a186c298c9c.html.gz",
-      "cache_sha256": "8e230a75e97a034cab2efd9ec0e6c1da8f0081a51093bc677c0b419bf5f6bdaa",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/cordova-tn-grazing-tables",
-      "rendered_file": "areas/cordova-tn-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "a760704f335be3075e999c94ac7bd1edf69922ed27d8fc1138fdfe29830e9209",
-      "cache_file": "data/release/frozen_accepted_outputs/a760704f335be3075e999c94ac7bd1edf69922ed27d8fc1138fdfe29830e9209.html.gz",
-      "cache_sha256": "0d353853194ae1d9c5f353d1e292624b2242f8d0037187f007cc39489d66d392",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/cordova-tn-party-decor",
-      "rendered_file": "areas/cordova-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "577fd5144a91af2a1c4dcec9cf1170175eae20b4524aff56c587a1df8bdf60bd",
-      "cache_file": "data/release/frozen_accepted_outputs/577fd5144a91af2a1c4dcec9cf1170175eae20b4524aff56c587a1df8bdf60bd.html.gz",
-      "cache_sha256": "f787d72222ce743f57a91979029be23e5785e8eeba1097fef2bb17690f041043",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/cordova-tn-party-game-rentals",
-      "rendered_file": "areas/cordova-tn-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "2a19ccac91a47d3733ff9e74124e31d017f69f5f77a770bcf3ae5ee87d1fe7c0",
-      "cache_file": "data/release/frozen_accepted_outputs/2a19ccac91a47d3733ff9e74124e31d017f69f5f77a770bcf3ae5ee87d1fe7c0.html.gz",
-      "cache_sha256": "375d40c88c4adc5da71fa36b1d0809bbbbdb18b9d3cfdc995ef49d3cae7676e3",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/cordova-tn-porch-decorating",
-      "rendered_file": "areas/cordova-tn-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "28c7ac5c0445d9dc5f613f731cdec7ef9b8e4cf2c76610652cceebdda3b1c7b9",
-      "cache_file": "data/release/frozen_accepted_outputs/28c7ac5c0445d9dc5f613f731cdec7ef9b8e4cf2c76610652cceebdda3b1c7b9.html.gz",
-      "cache_sha256": "42d5bc107831849e8d0ab955f4a79d3def4a6737034d1efb55c3c4ed6262d7ed",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/downtown-memphis-tn-party-decor",
-      "rendered_file": "areas/downtown-memphis-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "d0ce9bace6ff65382e3c17d1af55d13f9d90891bf3ee12314509d9c6ed20d644",
-      "cache_file": "data/release/frozen_accepted_outputs/d0ce9bace6ff65382e3c17d1af55d13f9d90891bf3ee12314509d9c6ed20d644.html.gz",
-      "cache_sha256": "3fbfcc3686bd5d8fc36487e698fdc50bae404a6dbee7bbdd41a403628ea56fe6",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/east-memphis-tn-party-decor",
-      "rendered_file": "areas/east-memphis-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "7b9ab18270bd06eed88d0b5a682828f3565bc9c14311178ae6e791ce13026d36",
-      "cache_file": "data/release/frozen_accepted_outputs/7b9ab18270bd06eed88d0b5a682828f3565bc9c14311178ae6e791ce13026d36.html.gz",
-      "cache_sha256": "1c545c6268f1bb8cf1e4f68ddcbacbfc13dac0eb1bd7ba54073dc04d6f782d04",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/east-memphis-tn-porch-styling",
-      "rendered_file": "areas/east-memphis-tn-porch-styling.html",
-      "state": "FROZEN",
-      "accepted_sha256": "30b3fb2489d85294ec66e9e15c849f279af02215c943c26aa176f63148cd260d",
-      "cache_file": "data/release/frozen_accepted_outputs/30b3fb2489d85294ec66e9e15c849f279af02215c943c26aa176f63148cd260d.html.gz",
-      "cache_sha256": "91202f3d697bdb2bc5d945b7d24580256d1e0bbd1f9c9e60f686d133b157ba20",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/germantown-tn-grazing-tables",
-      "rendered_file": "areas/germantown-tn-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "6aceed173c7320fd3bda61ba1a4325f4c08b8baa11650cc0622e48b362ce1f15",
-      "cache_file": "data/release/frozen_accepted_outputs/6aceed173c7320fd3bda61ba1a4325f4c08b8baa11650cc0622e48b362ce1f15.html.gz",
-      "cache_sha256": "f23c43a53701b38ff596ff10832c494c981f2a8e0580cf64bb82dcaac9daf2a6",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/germantown-tn-party-decor",
-      "rendered_file": "areas/germantown-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "8e114f9776cfb94050a6ab1501e0047c5dd234c22d83ea360a02f7203ba2c932",
-      "cache_file": "data/release/frozen_accepted_outputs/8e114f9776cfb94050a6ab1501e0047c5dd234c22d83ea360a02f7203ba2c932.html.gz",
-      "cache_sha256": "e7bfcd8ae780b227e652fdda0cc4318b730dfcab6e1cf85d83a2b8aa1721cb13",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/germantown-tn-party-game-rentals",
-      "rendered_file": "areas/germantown-tn-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "57b9d969b145766a51583688b448d0f5bfb3182c56bba6df145aa6366f72b362",
-      "cache_file": "data/release/frozen_accepted_outputs/57b9d969b145766a51583688b448d0f5bfb3182c56bba6df145aa6366f72b362.html.gz",
-      "cache_sha256": "be0cbd7a41ca9715bbf5aca108abe6898a079110305466831a598357179cdfb2",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/germantown-tn-porch-decorating",
-      "rendered_file": "areas/germantown-tn-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "b807111d6c316064b2a18c931f7277ce78fc925d83f5e63b035b3db4a8179898",
-      "cache_file": "data/release/frozen_accepted_outputs/b807111d6c316064b2a18c931f7277ce78fc925d83f5e63b035b3db4a8179898.html.gz",
-      "cache_sha256": "6ab139c3f2b7f863cd5c364737a75357ba1fd7d7bee391d7fc18dd0f622972f7",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/guest-house-at-graceland-hotel-room-decor",
-      "rendered_file": "areas/guest-house-at-graceland-hotel-room-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "ea57e3868cc0f91d341703aebb1201e3a261ae92ac4705564f251b84dd9c1b00",
-      "cache_file": "data/release/frozen_accepted_outputs/ea57e3868cc0f91d341703aebb1201e3a261ae92ac4705564f251b84dd9c1b00.html.gz",
-      "cache_sha256": "2e7c2bbe0aded8f3b22beb09e3e30428a86001a7d86a5bb58ba8d4b221032390",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/hernando-ms-grazing-tables",
-      "rendered_file": "areas/hernando-ms-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "275800f7f4d783901da03412658d15c53522622a3111735c18c6bf7f48190bd2",
-      "cache_file": "data/release/frozen_accepted_outputs/275800f7f4d783901da03412658d15c53522622a3111735c18c6bf7f48190bd2.html.gz",
-      "cache_sha256": "b5f4384b5e2953821d422f856e5f4d03e646eb4f525f5d59cf49b32877348779",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/hernando-ms-party-decor",
-      "rendered_file": "areas/hernando-ms-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "3950659ca16fdd19a782f9f2bb6b9de8998fc77fcae883d5e7a3294763428727",
-      "cache_file": "data/release/frozen_accepted_outputs/3950659ca16fdd19a782f9f2bb6b9de8998fc77fcae883d5e7a3294763428727.html.gz",
-      "cache_sha256": "f5a65b5e7dad273d441b994887b868ce81d848ffd40ed5ddee6ea0f11db5ef21",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/hernando-ms-party-game-rentals",
-      "rendered_file": "areas/hernando-ms-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "3a9f682f05d675bf97402a18c8c5497e5e967ad0637ea304f9ce3e1f615a439a",
-      "cache_file": "data/release/frozen_accepted_outputs/3a9f682f05d675bf97402a18c8c5497e5e967ad0637ea304f9ce3e1f615a439a.html.gz",
-      "cache_sha256": "5c3190460334a9a52fce90aa4c3fec6468f25e0a23a86b699f3e293e201f2ed8",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/hernando-ms-porch-decorating",
-      "rendered_file": "areas/hernando-ms-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "5536b28c82b267e219975118ab9980d9cc896de6ce7b4f549511b3e3ddc54e00",
-      "cache_file": "data/release/frozen_accepted_outputs/5536b28c82b267e219975118ab9980d9cc896de6ce7b4f549511b3e3ddc54e00.html.gz",
-      "cache_sha256": "4e3256faa5c38aada7ce7821a7a7e0bf6df5c80d39bc58584d28eba801b78c0c",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/horn-lake-ms-grazing-tables",
-      "rendered_file": "areas/horn-lake-ms-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "ffaeebb16b523ac8069d6ac44c79f004b5d03a304071a6a199040df9bbd77957",
-      "cache_file": "data/release/frozen_accepted_outputs/ffaeebb16b523ac8069d6ac44c79f004b5d03a304071a6a199040df9bbd77957.html.gz",
-      "cache_sha256": "fa969c9320bada42eb077328faf090d9f55a7bacae80eb51937bcf718250d484",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/horn-lake-ms-party-decor",
-      "rendered_file": "areas/horn-lake-ms-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "fae1545c351399d291aca69ded53de4030f162ad3a340016edc98754b1f20255",
-      "cache_file": "data/release/frozen_accepted_outputs/fae1545c351399d291aca69ded53de4030f162ad3a340016edc98754b1f20255.html.gz",
-      "cache_sha256": "cfcfe8dc09741b1ce881436193cc78294779a7b7c5f6b13a75fd98037844eee0",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/horn-lake-ms-party-game-rentals",
-      "rendered_file": "areas/horn-lake-ms-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "0411e0a35db9df76b0aef73ecd2f7825a061f071dfeba30b944b86913e6b053c",
-      "cache_file": "data/release/frozen_accepted_outputs/0411e0a35db9df76b0aef73ecd2f7825a061f071dfeba30b944b86913e6b053c.html.gz",
-      "cache_sha256": "38e96fa9fc7d01582a3512abfefcc9f3223d3e2b3694510ce4665f969b25f847",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/horn-lake-ms-porch-decorating",
-      "rendered_file": "areas/horn-lake-ms-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "a7447a25608bb4af697076b2d1220e19f47bdbbb5c96fbfdc871cc2602a791ed",
-      "cache_file": "data/release/frozen_accepted_outputs/a7447a25608bb4af697076b2d1220e19f47bdbbb5c96fbfdc871cc2602a791ed.html.gz",
-      "cache_sha256": "1358c387bf701b60689288b8b821c07f16de21e94a0929065fb8a2dae6f3c4f0",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/hu-hotel-memphis-hotel-room-decor",
-      "rendered_file": "areas/hu-hotel-memphis-hotel-room-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "3d61a8654da701a7a9903fbf6436208d5a4c8c06397f5596033b657fd72df4c6",
-      "cache_file": "data/release/frozen_accepted_outputs/3d61a8654da701a7a9903fbf6436208d5a4c8c06397f5596033b657fd72df4c6.html.gz",
-      "cache_sha256": "17dafb066b6be945cea4a294b0ebc63ac26e9140c15544abce208ab0ef7b11a2",
-      "accepted_at": "2026-07-24"
-    },
     {
       "route": "/areas/index",
       "rendered_file": "areas/index.html",
       "state": "FROZEN",
-      "accepted_sha256": "810c9cc4ba9cf10d638b864fc9df943e46fdb42962b92bc390bc75ff58be04a4",
-      "cache_file": "data/release/frozen_accepted_outputs/810c9cc4ba9cf10d638b864fc9df943e46fdb42962b92bc390bc75ff58be04a4.html.gz",
-      "cache_sha256": "622ea2836978125295f612988ed6ecca0d59cc6116745bb5cd6f3a72021e737d",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/lakeland-tn-grazing-tables",
-      "rendered_file": "areas/lakeland-tn-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "0b9a311322fc2e0c2da9af0725647cfe545550a2317139f303ab131907b53d05",
-      "cache_file": "data/release/frozen_accepted_outputs/0b9a311322fc2e0c2da9af0725647cfe545550a2317139f303ab131907b53d05.html.gz",
-      "cache_sha256": "55aa452c5ee95ea1f7cfaf3ae7f1baeb6c81513d636c5d7ecea4dbd07c84be6c",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/lakeland-tn-party-decor",
-      "rendered_file": "areas/lakeland-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "65f9fbf6107a248210be6a457528e69b1f39311f0d6692122a3923b712049335",
-      "cache_file": "data/release/frozen_accepted_outputs/65f9fbf6107a248210be6a457528e69b1f39311f0d6692122a3923b712049335.html.gz",
-      "cache_sha256": "b6dd3594ec01d12d11d42eeb7f68f20ec932a8094ae72f7e552a56403024db96",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/lakeland-tn-party-game-rentals",
-      "rendered_file": "areas/lakeland-tn-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "3e328e02c0a43fcb33e01ea3e5106bac5f6fdf448d99c5b9221c8036a92502bf",
-      "cache_file": "data/release/frozen_accepted_outputs/3e328e02c0a43fcb33e01ea3e5106bac5f6fdf448d99c5b9221c8036a92502bf.html.gz",
-      "cache_sha256": "ec3afd4bb45bc77d7f7c0e174bd0c736ccf4ec2cfaa25a204b0a6cc29b8cb80d",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/lakeland-tn-porch-decorating",
-      "rendered_file": "areas/lakeland-tn-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "2adb0084e841d91b1663ca6380a34eff937f3d6806b636e0d4d07be44b7353e7",
-      "cache_file": "data/release/frozen_accepted_outputs/2adb0084e841d91b1663ca6380a34eff937f3d6806b636e0d4d07be44b7353e7.html.gz",
-      "cache_sha256": "5673e1c463ce1c37fd6cff1e04d04abe7cabd5ae44ee70158ee64779c8952e74",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/memphis-tn-grazing-tables",
-      "rendered_file": "areas/memphis-tn-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "0b7ba580214f5ac8210ba05f1e3d668462923f15cb0a4b2608cd1b8cc1b55a76",
-      "cache_file": "data/release/frozen_accepted_outputs/0b7ba580214f5ac8210ba05f1e3d668462923f15cb0a4b2608cd1b8cc1b55a76.html.gz",
-      "cache_sha256": "92a5135cdb4b7ccdf750087654f702c86a759a4550e65bf3331ef8d4a68654f9",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/memphis-tn-party-decor",
-      "rendered_file": "areas/memphis-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "d0c232454692fcc3f05c573046f1b6f8a875e50ad68ebfbc76845a02c6432246",
-      "cache_file": "data/release/frozen_accepted_outputs/d0c232454692fcc3f05c573046f1b6f8a875e50ad68ebfbc76845a02c6432246.html.gz",
-      "cache_sha256": "ea329f34700b735eac9b84e8ac9b8f73e77a5dc0e6431ce8c0caed5c8edd9134",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/memphis-tn-party-game-rentals",
-      "rendered_file": "areas/memphis-tn-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "cbc7d07419b757e418aed87535e00090bff74b6645367ad144aa1b5d225f4bea",
-      "cache_file": "data/release/frozen_accepted_outputs/cbc7d07419b757e418aed87535e00090bff74b6645367ad144aa1b5d225f4bea.html.gz",
-      "cache_sha256": "00c2d4edd92a85cc7fcd9400f76dc7e8fde42a26e9cad154f5e76500f31b3f83",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/memphis-tn-porch-decorating",
-      "rendered_file": "areas/memphis-tn-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "47c861dbf184c4453ea6b35100879110d9efc0d734868713bcd9767885a4c944",
-      "cache_file": "data/release/frozen_accepted_outputs/47c861dbf184c4453ea6b35100879110d9efc0d734868713bcd9767885a4c944.html.gz",
-      "cache_sha256": "8c9bfbefd256ffa135b520d8ae0062766919f28fa8a8427f5841b48f9dd599c5",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/midtown-memphis-tn-party-decor",
-      "rendered_file": "areas/midtown-memphis-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "050c048d6d797ae41c6ee5f731d7ac5ea1e837feefb24076de76c30ce6ab51cc",
-      "cache_file": "data/release/frozen_accepted_outputs/050c048d6d797ae41c6ee5f731d7ac5ea1e837feefb24076de76c30ce6ab51cc.html.gz",
-      "cache_sha256": "59bde4381965318160fd102cb613b87a58e55b1ad8db8f79b0eeff324557af3d",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/millington-tn-grazing-tables",
-      "rendered_file": "areas/millington-tn-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "f6762009a49b77b46e7d46a7f4358dd3331006005456a3ad7de8a64798c76b19",
-      "cache_file": "data/release/frozen_accepted_outputs/f6762009a49b77b46e7d46a7f4358dd3331006005456a3ad7de8a64798c76b19.html.gz",
-      "cache_sha256": "131a3411215183c826a99f2c7af75cc04710d6f5b2e5bf49c71844541b187a0c",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/millington-tn-party-decor",
-      "rendered_file": "areas/millington-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "da69f51c1a03e11ae81c6e3cd13c0e9966e3def60eb16026ec70592a0704694f",
-      "cache_file": "data/release/frozen_accepted_outputs/da69f51c1a03e11ae81c6e3cd13c0e9966e3def60eb16026ec70592a0704694f.html.gz",
-      "cache_sha256": "1dba25205d483c40116a3fed2bd2d4fe77bc53c05bf1b8705ecbdf25089f4d52",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/millington-tn-party-game-rentals",
-      "rendered_file": "areas/millington-tn-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "9c2e7a436b9f7d28cdb12568fbaeca5cc8b1f378ad406b7c0e2645c54f625434",
-      "cache_file": "data/release/frozen_accepted_outputs/9c2e7a436b9f7d28cdb12568fbaeca5cc8b1f378ad406b7c0e2645c54f625434.html.gz",
-      "cache_sha256": "e7bbfdff4fc8f0f0bdca45c72c1d053197c1d7f36ab369e5acd0a4bd67b6fd22",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/millington-tn-porch-decorating",
-      "rendered_file": "areas/millington-tn-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "b88b7513b0c8e36283d5436f79d8425fd32bb4af897c00b4c6241fb92f8a25f3",
-      "cache_file": "data/release/frozen_accepted_outputs/b88b7513b0c8e36283d5436f79d8425fd32bb4af897c00b4c6241fb92f8a25f3.html.gz",
-      "cache_sha256": "7981a29f7e60520a07959fba933bac30ca3bccc0771a59cad4a2f353a9219202",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/oakland-tn-grazing-tables",
-      "rendered_file": "areas/oakland-tn-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "eff68cef9ef82325ed1b764199832e61bd7d1653bf385fb6b1afa60bfa1fdd29",
-      "cache_file": "data/release/frozen_accepted_outputs/eff68cef9ef82325ed1b764199832e61bd7d1653bf385fb6b1afa60bfa1fdd29.html.gz",
-      "cache_sha256": "a2eab4767f873cc017291e78e161b27999a1d1d7dd1ff647f32b67ecc1be4022",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/oakland-tn-party-decor",
-      "rendered_file": "areas/oakland-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "2424e0fae7b22b30d4bd4eb15721866c0c7a5d9c2bae9c9facb1179ee782ce6c",
-      "cache_file": "data/release/frozen_accepted_outputs/2424e0fae7b22b30d4bd4eb15721866c0c7a5d9c2bae9c9facb1179ee782ce6c.html.gz",
-      "cache_sha256": "ac3b672f20e9551f1385fb83451c7443bd0c9c800cdd364dde300ecda7e98939",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/oakland-tn-party-game-rentals",
-      "rendered_file": "areas/oakland-tn-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "d5acd8b3bbc302e32d5a55890061534429a8a016a11c0c800f0a16e741bfa322",
-      "cache_file": "data/release/frozen_accepted_outputs/d5acd8b3bbc302e32d5a55890061534429a8a016a11c0c800f0a16e741bfa322.html.gz",
-      "cache_sha256": "09097c096d000ce0a07398924661612cf4d545ee3bad21b5c518776e0daed36a",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/oakland-tn-porch-decorating",
-      "rendered_file": "areas/oakland-tn-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "a0a1fa04d2f7c15d365f8821149e2916bc77153d084b4951b30a7c5b27a2ce45",
-      "cache_file": "data/release/frozen_accepted_outputs/a0a1fa04d2f7c15d365f8821149e2916bc77153d084b4951b30a7c5b27a2ce45.html.gz",
-      "cache_sha256": "88085183a2d42f7dcdfc1664f41ddbf3c384560585d9cc817e9925d991205a77",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/olive-branch-ms-grazing-tables",
-      "rendered_file": "areas/olive-branch-ms-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "1f034334e41f05816126b515e17578b5a85fc95cf5817d720f201d78310ed31d",
-      "cache_file": "data/release/frozen_accepted_outputs/1f034334e41f05816126b515e17578b5a85fc95cf5817d720f201d78310ed31d.html.gz",
-      "cache_sha256": "187090f489704a6f86ba73e70b2b6fc9aef88b5e2a1e35e143c3aa5c7bd9e673",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/olive-branch-ms-party-decor",
-      "rendered_file": "areas/olive-branch-ms-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "274e85d5d5484d1f4d8e86f595ef33d1c70c85f56a5e55655c17fe07c4f0f866",
-      "cache_file": "data/release/frozen_accepted_outputs/274e85d5d5484d1f4d8e86f595ef33d1c70c85f56a5e55655c17fe07c4f0f866.html.gz",
-      "cache_sha256": "10368a94ad1524d2c4337a49c4d7e958c86053828273c0606e4271e938e38dd4",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/olive-branch-ms-party-game-rentals",
-      "rendered_file": "areas/olive-branch-ms-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "2428cf627d1a72d030f3211113f51d64a5f69f0b9397bac9b8ab4a7de0a13d67",
-      "cache_file": "data/release/frozen_accepted_outputs/2428cf627d1a72d030f3211113f51d64a5f69f0b9397bac9b8ab4a7de0a13d67.html.gz",
-      "cache_sha256": "40697a3a50ec7d9041bb18c61381bbaf683bfea61a5ca6eaeea3c468a08138ab",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/olive-branch-ms-porch-decorating",
-      "rendered_file": "areas/olive-branch-ms-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "114fb352e75d908cb5c1b313a06fd37e9491e7562db57a65054bd6acc3cb6aca",
-      "cache_file": "data/release/frozen_accepted_outputs/114fb352e75d908cb5c1b313a06fd37e9491e7562db57a65054bd6acc3cb6aca.html.gz",
-      "cache_sha256": "32119de0335545778391018004f17e986a7be1d73864eca27ad46457b1869128",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/raleigh-memphis-tn-party-decor",
-      "rendered_file": "areas/raleigh-memphis-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "94042263bf72536f2720fddc74e0d8d7306cccba6d4d74d7d106df8c396ab704",
-      "cache_file": "data/release/frozen_accepted_outputs/94042263bf72536f2720fddc74e0d8d7306cccba6d4d74d7d106df8c396ab704.html.gz",
-      "cache_sha256": "dbcca6265bb7cea3f01fdfb2e4d935fcff42f1c2bbcae2ecc04ffe1d7398ef99",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/southaven-ms-grazing-tables",
-      "rendered_file": "areas/southaven-ms-grazing-tables.html",
-      "state": "FROZEN",
-      "accepted_sha256": "e0b3f5786185fd7f12a58e25708ce9b1486342cda78f34e7029fd6b542bca440",
-      "cache_file": "data/release/frozen_accepted_outputs/e0b3f5786185fd7f12a58e25708ce9b1486342cda78f34e7029fd6b542bca440.html.gz",
-      "cache_sha256": "8c8b74cc5406678a25731224c2c3d3060d1f3f1a355e06d5f57a9ec24b563e4e",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/southaven-ms-party-decor",
-      "rendered_file": "areas/southaven-ms-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "7d18cef03a366f94f939472ceeb4cb82c16e8872d77761f4cddb89c9bc482fd5",
-      "cache_file": "data/release/frozen_accepted_outputs/7d18cef03a366f94f939472ceeb4cb82c16e8872d77761f4cddb89c9bc482fd5.html.gz",
-      "cache_sha256": "807e44a89695b4724c491514482b5643023e42a3b93b5efc3f641548f4520393",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/southaven-ms-party-game-rentals",
-      "rendered_file": "areas/southaven-ms-party-game-rentals.html",
-      "state": "FROZEN",
-      "accepted_sha256": "0b8fb1dba0ad3d1f09689fc28e0d102d0e43d0d7635e77677b74bf3105059c3d",
-      "cache_file": "data/release/frozen_accepted_outputs/0b8fb1dba0ad3d1f09689fc28e0d102d0e43d0d7635e77677b74bf3105059c3d.html.gz",
-      "cache_sha256": "00d440a69c032a72b8a2b3c5c556b7b97cd11ab01c388c9774648f21aaa2f909",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/southaven-ms-porch-decorating",
-      "rendered_file": "areas/southaven-ms-porch-decorating.html",
-      "state": "FROZEN",
-      "accepted_sha256": "140f608f4c96e098dc4b4b63c0b9f71a59b3ffea292e7f2882a07a9acc4b8c4e",
-      "cache_file": "data/release/frozen_accepted_outputs/140f608f4c96e098dc4b4b63c0b9f71a59b3ffea292e7f2882a07a9acc4b8c4e.html.gz",
-      "cache_sha256": "b62329acf346e5d4b309df55085acb106511732d7d16d67e2fdbc8972e94527f",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/the-central-station-memphis-hotel-room-decor",
-      "rendered_file": "areas/the-central-station-memphis-hotel-room-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "6a3e62f2f96aecf8a42ff40da43d6f60d0b68e1a0b5882f763cbe86c6de0575c",
-      "cache_file": "data/release/frozen_accepted_outputs/6a3e62f2f96aecf8a42ff40da43d6f60d0b68e1a0b5882f763cbe86c6de0575c.html.gz",
-      "cache_sha256": "da9867f1814e30d774954d3c681e1f088067cbe97470d2830fcf63a1dd215205",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/the-madison-hotel-memphis-hotel-room-decor",
-      "rendered_file": "areas/the-madison-hotel-memphis-hotel-room-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "6700f571d5b1380dcb5f218db06e2b1cfd2cf2a5a6bde4d3382f2839cbab99b9",
-      "cache_file": "data/release/frozen_accepted_outputs/6700f571d5b1380dcb5f218db06e2b1cfd2cf2a5a6bde4d3382f2839cbab99b9.html.gz",
-      "cache_sha256": "51ecb71636cac5653d27385dc825cd6e8b1513d645d3b344f22670711bb2aa01",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/the-peabody-memphis-hotel-room-decor",
-      "rendered_file": "areas/the-peabody-memphis-hotel-room-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "9b3b011274ff01428bd7b373493dc93e67d5ce0729990b8e54766336d8e20c57",
-      "cache_file": "data/release/frozen_accepted_outputs/9b3b011274ff01428bd7b373493dc93e67d5ce0729990b8e54766336d8e20c57.html.gz",
-      "cache_sha256": "0767c1e6c03979cc1e4adcbdcfdf973492cdbc5c40a40b7e79b4cd4077399870",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/westin-memphis-beale-street-hotel-room-decor",
-      "rendered_file": "areas/westin-memphis-beale-street-hotel-room-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "cc4f1b514a99bb1bf905b09218a27c39981f01a589c9e24daac960314999b39d",
-      "cache_file": "data/release/frozen_accepted_outputs/cc4f1b514a99bb1bf905b09218a27c39981f01a589c9e24daac960314999b39d.html.gz",
-      "cache_sha256": "3d8c107ba741fbaafddcd5ba92479a280a6d51f3ad35997a73d8674798369e44",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/areas/whitehaven-memphis-tn-party-decor",
-      "rendered_file": "areas/whitehaven-memphis-tn-party-decor.html",
-      "state": "FROZEN",
-      "accepted_sha256": "622243c60abf9d84a2aab52513fb9ed92a5706ba60194efb23acc44537c8d63e",
-      "cache_file": "data/release/frozen_accepted_outputs/622243c60abf9d84a2aab52513fb9ed92a5706ba60194efb23acc44537c8d63e.html.gz",
-      "cache_sha256": "2d1429edab027fbf0d14ddaaa02aa20bd6f41c4211d0e83527dad711d07cec7b",
+      "accepted_sha256": "f603735560c1aa7593f9bef165d53f78da3510b694365f326ea2fd340ebc35cd",
+      "cache_file": "data/release/frozen_accepted_outputs/f603735560c1aa7593f9bef165d53f78da3510b694365f326ea2fd340ebc35cd.html.gz",
+      "cache_sha256": "29467c3ac5f2790e947691542a0b053f93e3ca8109b0799b9aeaf929aca87c21",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/faq/index",
       "rendered_file": "faq/index.html",
       "state": "FROZEN",
-      "accepted_sha256": "1ddbff3980a769e3a4147fef409c14e7e43ac6bc739b78f6eddc4e61582918d6",
-      "cache_file": "data/release/frozen_accepted_outputs/1ddbff3980a769e3a4147fef409c14e7e43ac6bc739b78f6eddc4e61582918d6.html.gz",
-      "cache_sha256": "bc85133daa6b9ab99c3a7826d2cbf6d5371a141947acd0a68b263b08ef25c860",
+      "accepted_sha256": "657931104c9010102f1057f3b89550afa6eab4e9b145227ec42412d193cc8ce8",
+      "cache_file": "data/release/frozen_accepted_outputs/657931104c9010102f1057f3b89550afa6eab4e9b145227ec42412d193cc8ce8.html.gz",
+      "cache_sha256": "19abd7ace53a0a1ef1df0415cabaa204d4f97f3999a18ca9bb4854e6a5659ad1",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/guides/graduation-party-decorations-at-home-memphis",
       "rendered_file": "guides/graduation-party-decorations-at-home-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "cb0da1d1e1deafad42ca6e2020daa9e664bab36518da01572e105e54b7e33d3c",
-      "cache_file": "data/release/frozen_accepted_outputs/cb0da1d1e1deafad42ca6e2020daa9e664bab36518da01572e105e54b7e33d3c.html.gz",
-      "cache_sha256": "b3a7c7c2d2b9d50abd6c538964ca0fa701ab10bea6b553c6fd5a039dc7ca88a3",
-      "accepted_at": "2026-07-24"
-    },
-    {
-      "route": "/guides/holiday-porch-decorating-service-memphis",
-      "rendered_file": "guides/holiday-porch-decorating-service-memphis.html",
-      "state": "FROZEN",
-      "accepted_sha256": "2ae4d2e66ff7903ca1c087dc747cf88d1190a5501856b4d29c51cf9ac2cead4d",
-      "cache_file": "data/release/frozen_accepted_outputs/2ae4d2e66ff7903ca1c087dc747cf88d1190a5501856b4d29c51cf9ac2cead4d.html.gz",
-      "cache_sha256": "0c071a613ecf236296a05536b57f6d86cd2d360367effe4af9008597ad4b249b",
+      "accepted_sha256": "448a00e2451943be5cd53915267338ae53bf39657893eae1b937b429a4ec5ac9",
+      "cache_file": "data/release/frozen_accepted_outputs/448a00e2451943be5cd53915267338ae53bf39657893eae1b937b429a4ec5ac9.html.gz",
+      "cache_sha256": "19ed6c1e64704601ebc5a6346ec831990a40f62d192361d4c5a9bb54d3fc8992",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/baby-shower-decor-memphis",
       "rendered_file": "services/baby-shower-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "625e7dd431795ee297028d8676b5684e90188f1e1c74163ecd73bcf6d6d31ba3",
-      "cache_file": "data/release/frozen_accepted_outputs/625e7dd431795ee297028d8676b5684e90188f1e1c74163ecd73bcf6d6d31ba3.html.gz",
-      "cache_sha256": "f91f33f23df128df30fd7ccc62c1a73c82b53d18c60e86fa07b757516de5006d",
+      "accepted_sha256": "684fa5f1fb99ab6a3d073823ee3e699be06729b8e0003f1eb2e9a1b62b7ce46c",
+      "cache_file": "data/release/frozen_accepted_outputs/684fa5f1fb99ab6a3d073823ee3e699be06729b8e0003f1eb2e9a1b62b7ce46c.html.gz",
+      "cache_sha256": "e493c984e4ced8df820ac43ef018a90ae90792ea84b143a16d0aed0874bf69b2",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/birthday-party-decor-memphis",
       "rendered_file": "services/birthday-party-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "46f379b746bd7045c342ee883503772595af3450547c8682c950cd8dd2c00f6a",
-      "cache_file": "data/release/frozen_accepted_outputs/46f379b746bd7045c342ee883503772595af3450547c8682c950cd8dd2c00f6a.html.gz",
-      "cache_sha256": "39fb2c07ec7868b8b82dbf211b32219f62df3e03ecb45e6fd58becab39b42054",
+      "accepted_sha256": "49f9ebaf7ddf54dea5c8c30df558defd4cca5573e2a9af02835e84501c4fbf46",
+      "cache_file": "data/release/frozen_accepted_outputs/49f9ebaf7ddf54dea5c8c30df558defd4cca5573e2a9af02835e84501c4fbf46.html.gz",
+      "cache_sha256": "e1149cbaf970ef983880fe6ff9a85f237d550f836bf992299f38ad4241c9be16",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/birthday-party-planner-memphis",
       "rendered_file": "services/birthday-party-planner-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "b33c7292d35ac928590ed36de4ecaa5caa5383f55604447ddd2b8c20df643509",
-      "cache_file": "data/release/frozen_accepted_outputs/b33c7292d35ac928590ed36de4ecaa5caa5383f55604447ddd2b8c20df643509.html.gz",
-      "cache_sha256": "a5fbe2cdc2ae8622cb2f02b427d2ef450e1ba19d1ebf9625accbb0a58bea8e85",
+      "accepted_sha256": "db938a9def61459b02061684cef2b4896b68a6e341caef4cc750c1876bb9dabf",
+      "cache_file": "data/release/frozen_accepted_outputs/db938a9def61459b02061684cef2b4896b68a6e341caef4cc750c1876bb9dabf.html.gz",
+      "cache_sha256": "e70a83aae50ccdbc066ad694ce1e04110fdddceb35f583cfaaadb654031b22da",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/bridal-shower-decor-memphis",
       "rendered_file": "services/bridal-shower-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "0131903f42e075a10d3919f130dd5c1ef87b9abe01a57d3e6ba8f48107d87321",
-      "cache_file": "data/release/frozen_accepted_outputs/0131903f42e075a10d3919f130dd5c1ef87b9abe01a57d3e6ba8f48107d87321.html.gz",
-      "cache_sha256": "d91a8544623789e1952f09f8872dbddd873fb0e421e56f3a281acee88af6f771",
+      "accepted_sha256": "385687dffecc6fadce47e57eecaa703e67aeb2346f39fa7eb5ad45f4b3cb44cd",
+      "cache_file": "data/release/frozen_accepted_outputs/385687dffecc6fadce47e57eecaa703e67aeb2346f39fa7eb5ad45f4b3cb44cd.html.gz",
+      "cache_sha256": "10bb473e7e75cfe01bb0d3a0f90bc5f13f0b007682efb05304439a352f6fef99",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/budget-party-decor-memphis",
       "rendered_file": "services/budget-party-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "ff3b5f74e927af8ea23c0d5b001bca2bd59d60b3dc0ed8d9126aaf475486a805",
-      "cache_file": "data/release/frozen_accepted_outputs/ff3b5f74e927af8ea23c0d5b001bca2bd59d60b3dc0ed8d9126aaf475486a805.html.gz",
-      "cache_sha256": "8315f4a1b473d816eeae05ca667527b47ed3dc6548fdddd0b8666879067f1415",
+      "accepted_sha256": "7abe10a173b41d7c21e3d7d57f60dc705daf28bd87473f0e91719218ae2758ca",
+      "cache_file": "data/release/frozen_accepted_outputs/7abe10a173b41d7c21e3d7d57f60dc705daf28bd87473f0e91719218ae2758ca.html.gz",
+      "cache_sha256": "e767322aea90afc5725eeedcbeb786c6fde789665516287d43f54aa455c06e98",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/celebration-setups",
       "rendered_file": "services/celebration-setups.html",
       "state": "FROZEN",
-      "accepted_sha256": "c3d073bdcea2bddf0b820046d21235b3b5757b17d2a0c96f74132743190ee059",
-      "cache_file": "data/release/frozen_accepted_outputs/c3d073bdcea2bddf0b820046d21235b3b5757b17d2a0c96f74132743190ee059.html.gz",
-      "cache_sha256": "e43a5edb915383e8449a2f4e5d2f35b6fa0a19e4a3b2d4f29c05c63f3a940aeb",
+      "accepted_sha256": "7e5f117b98acd41cfcf0b00cb2f781beaf22bdfdbe0ac88fe8fcc3aeac4d07ac",
+      "cache_file": "data/release/frozen_accepted_outputs/7e5f117b98acd41cfcf0b00cb2f781beaf22bdfdbe0ac88fe8fcc3aeac4d07ac.html.gz",
+      "cache_sha256": "823382d70b60ed5bb9d5fca0d9fb63b15742271e4ff7924c2d7caccb99af9da3",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/celebration-setups-memphis",
       "rendered_file": "services/celebration-setups-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "8f73e4ac639075b00195530abe3c1d86cbf8db09e3bd41b58c92114d9d3f6f79",
-      "cache_file": "data/release/frozen_accepted_outputs/8f73e4ac639075b00195530abe3c1d86cbf8db09e3bd41b58c92114d9d3f6f79.html.gz",
-      "cache_sha256": "0b2928a93be5ac8a24dc8b2611ab7c6cb6bb5e6533dbd6d4ecba2534a0c4282a",
+      "accepted_sha256": "d1833fb29f27537de7f0607d7e1cf9a5c7572d23a1eb4bfe14dfeec1b2e29212",
+      "cache_file": "data/release/frozen_accepted_outputs/d1833fb29f27537de7f0607d7e1cf9a5c7572d23a1eb4bfe14dfeec1b2e29212.html.gz",
+      "cache_sha256": "5b35ed219d509587ebd01c65bb08b54178a182a3ec259a2ab4df9b3b3cd36b7f",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/christmas-porch-decorating",
       "rendered_file": "services/christmas-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "e7bc14e2c06c12e579a984cec6b99760d20203ffacca7bf0421fe55ccf5f050d",
-      "cache_file": "data/release/frozen_accepted_outputs/e7bc14e2c06c12e579a984cec6b99760d20203ffacca7bf0421fe55ccf5f050d.html.gz",
-      "cache_sha256": "554e1efd94954b1d757585953422d2ac45193377fc0ad35a61f26c6e4897c919",
+      "accepted_sha256": "28a190d5cdb48e0981ebfb07a095f65f1e62374db5a61c89c73394814bccf582",
+      "cache_file": "data/release/frozen_accepted_outputs/28a190d5cdb48e0981ebfb07a095f65f1e62374db5a61c89c73394814bccf582.html.gz",
+      "cache_sha256": "b3f2363b87c7b509f5a332ced8c92933a0c07f8154841dbfc1e1a6d7085abec3",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/fall-porch-decorating",
       "rendered_file": "services/fall-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "bf2fdfde2c7ca6d25dafa24bd9340c7aa8ba0b6b9fec12e28cea082b2775030f",
-      "cache_file": "data/release/frozen_accepted_outputs/bf2fdfde2c7ca6d25dafa24bd9340c7aa8ba0b6b9fec12e28cea082b2775030f.html.gz",
-      "cache_sha256": "a87b61cb55dfea0255e4e58eb0574d7579acf04c46cd50ee0b43ec90bc257d5b",
+      "accepted_sha256": "d43fc0adb039a8810f4992542b105dc68e4f35c7eb435e267cf85532174a5178",
+      "cache_file": "data/release/frozen_accepted_outputs/d43fc0adb039a8810f4992542b105dc68e4f35c7eb435e267cf85532174a5178.html.gz",
+      "cache_sha256": "9586f4eb2e06f5d86c2ff89c93433b3a49549cffb78f09eead1e9854b79a7c10",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/front-door-styling",
       "rendered_file": "services/front-door-styling.html",
       "state": "FROZEN",
-      "accepted_sha256": "d074fa2e3f8d61f91b700f46ec7fc787d3f61a16b178f24be544e6b1c6d88256",
-      "cache_file": "data/release/frozen_accepted_outputs/d074fa2e3f8d61f91b700f46ec7fc787d3f61a16b178f24be544e6b1c6d88256.html.gz",
-      "cache_sha256": "a87c0de2c7d4b112328b7f98f686435ffda972f5e009c01bbaa87ab16632b325",
+      "accepted_sha256": "38537ecdb3a10f9a560de928f104b11ed73167b22727a7616bd5030115e5f0fb",
+      "cache_file": "data/release/frozen_accepted_outputs/38537ecdb3a10f9a560de928f104b11ed73167b22727a7616bd5030115e5f0fb.html.gz",
+      "cache_sha256": "35dd83092ea7c4c7689250bb4fb5bceff9fd914a0dc3a37c9530a793b4cb6f12",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/grazing-and-event-styling",
       "rendered_file": "services/grazing-and-event-styling.html",
       "state": "FROZEN",
-      "accepted_sha256": "1a39e028971e41bcbecb1d596f75bc8da5eed702d9d690c4776190e95925f840",
-      "cache_file": "data/release/frozen_accepted_outputs/1a39e028971e41bcbecb1d596f75bc8da5eed702d9d690c4776190e95925f840.html.gz",
-      "cache_sha256": "8d1032d1bfd20c2621829f9430f858421b60e0d691eaa552afc725fbb74c4754",
+      "accepted_sha256": "ee760780e11d8b54a4b404ba98cae894d5185cb116fbfbe08e1eb755f0f4d5b2",
+      "cache_file": "data/release/frozen_accepted_outputs/ee760780e11d8b54a4b404ba98cae894d5185cb116fbfbe08e1eb755f0f4d5b2.html.gz",
+      "cache_sha256": "5120024520c3adfa7a2ef15281de198227c4fda6534b7159404209e383d4e9d3",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/grazing-tables-memphis",
       "rendered_file": "services/grazing-tables-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "951bf0559a86e9136754f5635c6a6d3361eff7cf2fd69a3b2607d67c26878e0b",
-      "cache_file": "data/release/frozen_accepted_outputs/951bf0559a86e9136754f5635c6a6d3361eff7cf2fd69a3b2607d67c26878e0b.html.gz",
-      "cache_sha256": "2b838147a9fd2ee93cb3af82420466b18f32be256ad8f7bfd7db8a08de8dc561",
+      "accepted_sha256": "4e487db01c0e194ce9042604e69b3279f116114c1839b12f7d32773f8ff87887",
+      "cache_file": "data/release/frozen_accepted_outputs/4e487db01c0e194ce9042604e69b3279f116114c1839b12f7d32773f8ff87887.html.gz",
+      "cache_sha256": "55a252d858995aa0d196665e77006cfdaafbcd7ef0d4f861b2d530d5d738103d",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/hotel-room-decor-memphis",
       "rendered_file": "services/hotel-room-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "70eaecd79ed26dd6302ba118de24eeca6650be0a594a85248183a1153d21f588",
-      "cache_file": "data/release/frozen_accepted_outputs/70eaecd79ed26dd6302ba118de24eeca6650be0a594a85248183a1153d21f588.html.gz",
-      "cache_sha256": "397b1bb7264ee895c3727c53bc26af953fa2746e57e79574b81f18dc40711a84",
+      "accepted_sha256": "584f3d1f449373499e6dc36d64bd46b8d668b711c9eb3c9c087f01e0c954504f",
+      "cache_file": "data/release/frozen_accepted_outputs/584f3d1f449373499e6dc36d64bd46b8d668b711c9eb3c9c087f01e0c954504f.html.gz",
+      "cache_sha256": "42df793e17f9c77b190baaf76a43c73504d1f9007ea90a32287981343d6485f8",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/index",
       "rendered_file": "services/index.html",
       "state": "FROZEN",
-      "accepted_sha256": "603265150c23d91f79dd630cf479750385e1e26effd86ce9bbf004749bed6e11",
-      "cache_file": "data/release/frozen_accepted_outputs/603265150c23d91f79dd630cf479750385e1e26effd86ce9bbf004749bed6e11.html.gz",
-      "cache_sha256": "972c4dbc2d30dd3e2269cbadd89b604a083a61b06f72dba7d0ca928392a5b65d",
+      "accepted_sha256": "28845fbe4b8ec54dce202feb71161d9971b33e903e338f7e52c012905edde821",
+      "cache_file": "data/release/frozen_accepted_outputs/28845fbe4b8ec54dce202feb71161d9971b33e903e338f7e52c012905edde821.html.gz",
+      "cache_sha256": "9be788d222eb89503324e79ebb95363dbb1a4c7f885ae6e4749865da35225b43",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/luxury-party-decor-memphis",
       "rendered_file": "services/luxury-party-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "c356c49d4e5f0206f0ef7951c4be468b02d85e6f443fc95bc91fffe80c9f56f5",
-      "cache_file": "data/release/frozen_accepted_outputs/c356c49d4e5f0206f0ef7951c4be468b02d85e6f443fc95bc91fffe80c9f56f5.html.gz",
-      "cache_sha256": "72bbe2175b1fc6fa2bd63daa545c014960d574506cd523c3bceb03188e6656ba",
+      "accepted_sha256": "61b6e0e269abe2cfc3632dea65530a0bbd894b7e440343bad726e9a84571fea3",
+      "cache_file": "data/release/frozen_accepted_outputs/61b6e0e269abe2cfc3632dea65530a0bbd894b7e440343bad726e9a84571fea3.html.gz",
+      "cache_sha256": "8de362e2a3782ff40b21a302997f7ea2e25730736f814caa36d24a3d041310c2",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/party-decor-memphis",
       "rendered_file": "services/party-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "cbd2fc1ba54be5152f28d95294b8b991b1118b9ad35cf2652119acc47cfa3633",
-      "cache_file": "data/release/frozen_accepted_outputs/cbd2fc1ba54be5152f28d95294b8b991b1118b9ad35cf2652119acc47cfa3633.html.gz",
-      "cache_sha256": "512a9d5d2206939317678054a11bc9686d9e8dad09e11e1075b38765b4f304d5",
+      "accepted_sha256": "f8ebf575879bf4176ea370e90039bfcb7dc57084cb08104ce110f738dd518cba",
+      "cache_file": "data/release/frozen_accepted_outputs/f8ebf575879bf4176ea370e90039bfcb7dc57084cb08104ce110f738dd518cba.html.gz",
+      "cache_sha256": "37f53050f8704f431ae52573ba2ee41250cdb835180a9ba4f9e23350000ba3a1",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/porch-decorating",
       "rendered_file": "services/porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "06896b4b00657182d46df346919b0392a96567c7bfa600d1aec53797071c7bec",
-      "cache_file": "data/release/frozen_accepted_outputs/06896b4b00657182d46df346919b0392a96567c7bfa600d1aec53797071c7bec.html.gz",
-      "cache_sha256": "c13658497cee68512ab86f76149a2015ad53e937fc9e2f8f8a18ad24253e52f7",
+      "accepted_sha256": "f58bfdc8c96d14a84a2c611fb817baaa32039cff163a2a20add9bdfa251b2c5c",
+      "cache_file": "data/release/frozen_accepted_outputs/f58bfdc8c96d14a84a2c611fb817baaa32039cff163a2a20add9bdfa251b2c5c.html.gz",
+      "cache_sha256": "6d9d546c0f0e789fa359947208523809236588a340a6f417ffe224d189107bef",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/small-porch-decorating",
       "rendered_file": "services/small-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "04c53ce8a2cdb41080233f4db160eb7d6bc2d3eb1b4bc50b0dcc73b55227df38",
-      "cache_file": "data/release/frozen_accepted_outputs/04c53ce8a2cdb41080233f4db160eb7d6bc2d3eb1b4bc50b0dcc73b55227df38.html.gz",
-      "cache_sha256": "a4ab1e1b9fb73e89316e2536b1b90f141c73d6862a1c5fb1bdef7bade19a9dfc",
+      "accepted_sha256": "947687547141bb3161a81df68d43c1cfdad728e231dcc5a5ca00a4ca06f93371",
+      "cache_file": "data/release/frozen_accepted_outputs/947687547141bb3161a81df68d43c1cfdad728e231dcc5a5ca00a4ca06f93371.html.gz",
+      "cache_sha256": "fdb0e8fe2da5caf498eb9aff40029af3ce8aa5b13b14479163497b53e8ed68ee",
       "accepted_at": "2026-07-24"
     }
   ]

@@ -374,7 +374,7 @@ function renderPage(input, opts = {}) {
   const opt = (block, indent = '          ') => (block ? `\n${indent}${block}` : '');
   const topCta = `<div class="btn-row"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('top')}${siteChrome.QUOTE_ATTRS}>Request a Quote</a><a href="${service.slug}" class="btn-secondary">View ${service.name}</a></div>`;
   const midCta = `<div class="btn-row"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('mid')}${siteChrome.QUOTE_ATTRS}>Request a Quote</a></div>`;
-  const bottomCta = `<section class="section cta-band"><div class="container"><span class="eyebrow">Request a Quote</span><h2>Need a clearer next step for this setup?</h2><p>Use the Porch &amp; Party quote form to share your date, city, budget range, and setup notes. That makes it easier to respond with scope, pricing direction, and availability.</p><div class="btn-row hero-centered-cta"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('band')}${siteChrome.QUOTE_ATTRS}>Request a Quote</a></div><p class="muted" style="margin-top: 14px;"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p></div></section>`;
+  const bottomCta = `<section class="section cta-band"><div class="container"><span class="eyebrow">Request a Quote</span><h2>Need a clearer next step for this setup?</h2><p>${entry.nextStep}</p><div class="btn-row hero-centered-cta"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('band')}${siteChrome.QUOTE_ATTRS}>Request a Quote</a></div><p class="muted" style="margin-top: 14px;"><a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a></p></div></section>`;
 
   return `<!doctype html>
 <html lang="en">
@@ -414,9 +414,9 @@ function renderPage(input, opts = {}) {
         <div class="page-intro">
           <span class="eyebrow">${entry.eyebrow || service.name}</span>
           <h1>${entry.h1}</h1>
-          <p>${entry.intro}</p>
+          <p>${entry.quickAnswer}</p>
           <p class="muted">Service area focus: ${cityList} and the greater Memphis metro area.</p>
-          ${topCta}
+
         </div>
       </div>
     </section>
@@ -432,8 +432,8 @@ function renderPage(input, opts = {}) {
                summary. Placed first so it falls inside the opening third of the
                page, where most AI Overview citations are drawn from. -->
           <div class="info-panel recommendation-summary" data-content-block="recommendation_summary" id="recommendation-summary">
-            <h2>What this page recommends</h2>
-            <p class="recommendation-summary__answer">${entry.quickAnswer}</p>
+            <h2>What should you plan for this setup?</h2>
+            <p class="recommendation-summary__answer">${entry.intro}</p>
             <ul class="recommendation-summary__points">
               <li><strong>Best for:</strong> ${entry.forWho}</li>
               <li><strong>Service area:</strong> ${cityList} and the greater Memphis metro area.</li>
@@ -441,17 +441,17 @@ function renderPage(input, opts = {}) {
             </ul>
           </div>
           <div class="info-panel">
-            <h2>What this includes</h2>
+            <h2>What does the setup include?</h2>
             <ul>${entry.includes.map(i => `<li>${i}</li>`).join('')}</ul>
             <p class="muted" style="margin-top:16px;">${service.name} starts at ${service.price}. ${service.notes.join(' ')}</p>
           </div>${opt(definitionCallout(entry.definition))}${opt(costTable(entry.costTable))}${opt(protocol(entry.protocol))}
           <div class="info-panel">
-            <h2>What this means in practice</h2>
+            <h2>How does this work in practice?</h2>
             <p>${entry.practical}</p>
           </div>
-          ${entry.authority ? `<div class="info-panel"><h2>Why this page exists</h2><p>${entry.authority}</p></div>` : ''}${opt(faqList(entry.faqs))}${opt(sourceBlock(entry.sources))}
+${opt(faqList([{q: entry.faqQuestion, a: entry.faqAnswer}, ...(entry.faqs || [])]))}${opt(sourceBlock(entry.sources || [{url: "/pricing", label: "Porch &amp; Party published starting prices"}, {url: "/rules", label: "Setup and rental responsibilities"}]))}
           ${relatedLinks(entry.related)}
-          ${midCta}
+
         </div>
         <div class="content-stack">
           <div class="info-card">
@@ -466,11 +466,7 @@ function renderPage(input, opts = {}) {
             <h3>Before you book</h3>
             <p>${entry.beforeBook}</p>
           </div>${opt(trustBlock(entry.trust))}
-          <div class="info-card">
-            <h3>What to do next</h3>
-            <p>${entry.nextStep}</p>
-            <div class="btn-row"><a href="${siteChrome.QUOTE.href}" class="btn-primary"${tag('aside')}${siteChrome.QUOTE_ATTRS}>Request a Quote</a></div>
-          </div>
+
         </div>
       </div>
     </section>

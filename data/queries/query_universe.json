@@ -1475,7 +1475,7 @@
     "serviceKey": "celebration",
     "intent": "informational",
     "intro": "A graduation party at home is decorated for guests who arrive in waves over an afternoon, walk through the front door, find the graduate, take a photo and eat. The decor that matters follows that path. Everything else is optional.",
-    "quickAnswer": "Decorate a home graduation party along the route guests take: style the front porch or entry in the school colours, build one photo backdrop, set up a display table for the graduate's photos and memorabilia, and style the food table. Put the budget into the entry and the photo spot, because those are what guests see and what the photos keep.",
+    "quickAnswer": "Graduation party decor at home is a setup arranged around the way guests move: an entry welcome, a photo spot for the graduate and a place to eat. Porch & Party styles these focal areas in Memphis; the host confirms the guest flow, available space and setup access before booking.",
     "forWho": "Families hosting a high school or college graduation party at home or in a backyard in the Memphis area.",
     "definition": {
       "term": "Why home graduation decor follows the guest route",
@@ -1488,7 +1488,7 @@
       "What to settle before requesting a decor quote"
     ],
     "protocol": {
-      "title": "Decorating a graduation party at home, in order",
+      "title": "How should you decorate a graduation party at home?",
       "steps": [
         {
           "step": "Fix the format and the guest route.",

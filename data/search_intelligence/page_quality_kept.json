@@ -1,0 +1,419 @@
+{
+  "decided": "2026-11-04",
+  "domain": "porchandparty901.com",
+  "protected": "All operational, legal, menu and service pages retained.",
+  "kept": [
+    "/about",
+    "/accessibility",
+    "/areas/",
+    "/contact",
+    "/faq/",
+    "/guides/graduation-party-decorations-at-home-memphis",
+    "/how-it-works",
+    "/",
+    "/pricing",
+    "/privacy-policy",
+    "/rentals/giant-lawn-games-memphis",
+    "/rentals/",
+    "/request",
+    "/rules",
+    "/services/baby-shower-decor-memphis",
+    "/services/birthday-party-decor-memphis",
+    "/services/birthday-party-planner-memphis",
+    "/services/bridal-shower-decor-memphis",
+    "/services/budget-party-decor-memphis",
+    "/services/celebration-setups-memphis",
+    "/services/celebration-setups",
+    "/services/christmas-porch-decorating",
+    "/services/fall-porch-decorating",
+    "/services/front-door-styling",
+    "/services/grazing-and-event-styling",
+    "/services/grazing-tables-memphis",
+    "/services/hotel-room-decor-memphis",
+    "/services/",
+    "/services/luxury-party-decor-memphis",
+    "/services/party-decor-memphis",
+    "/services/porch-decorating",
+    "/services/small-porch-decorating",
+    "/sitemap",
+    "/terms-and-conditions"
+  ],
+  "new_redirects": [
+    {
+      "from": "/guides/holiday-porch-decorating-service-memphis",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/arlington-tn-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/arlington-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/arlington-tn-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/arlington-tn-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/bartlett-tn-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/bartlett-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/bartlett-tn-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/bartlett-tn-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/collierville-tn-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/collierville-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/collierville-tn-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/collierville-tn-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/cooper-young-memphis-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/cordova-tn-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/cordova-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/cordova-tn-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/cordova-tn-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/downtown-memphis-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/east-memphis-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/east-memphis-tn-porch-styling",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/germantown-tn-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/germantown-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/germantown-tn-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/germantown-tn-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/guest-house-at-graceland-hotel-room-decor",
+      "to": "/services/hotel-room-decor-memphis"
+    },
+    {
+      "from": "/areas/hernando-ms-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/hernando-ms-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/hernando-ms-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/hernando-ms-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/horn-lake-ms-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/horn-lake-ms-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/horn-lake-ms-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/horn-lake-ms-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/hu-hotel-memphis-hotel-room-decor",
+      "to": "/services/hotel-room-decor-memphis"
+    },
+    {
+      "from": "/areas/lakeland-tn-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/lakeland-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/lakeland-tn-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/lakeland-tn-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/memphis-tn-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/memphis-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/memphis-tn-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/memphis-tn-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/midtown-memphis-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/millington-tn-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/millington-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/millington-tn-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/millington-tn-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/oakland-tn-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/oakland-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/oakland-tn-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/oakland-tn-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/olive-branch-ms-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/olive-branch-ms-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/olive-branch-ms-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/olive-branch-ms-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/raleigh-memphis-tn-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/southaven-ms-grazing-tables",
+      "to": "/services/grazing-and-event-styling"
+    },
+    {
+      "from": "/areas/southaven-ms-party-decor",
+      "to": "/services/celebration-setups"
+    },
+    {
+      "from": "/areas/southaven-ms-party-game-rentals",
+      "to": "/rentals/giant-lawn-games-memphis"
+    },
+    {
+      "from": "/areas/southaven-ms-porch-decorating",
+      "to": "/services/porch-decorating"
+    },
+    {
+      "from": "/areas/the-central-station-memphis-hotel-room-decor",
+      "to": "/services/hotel-room-decor-memphis"
+    },
+    {
+      "from": "/areas/the-madison-hotel-memphis-hotel-room-decor",
+      "to": "/services/hotel-room-decor-memphis"
+    },
+    {
+      "from": "/areas/the-peabody-memphis-hotel-room-decor",
+      "to": "/services/hotel-room-decor-memphis"
+    },
+    {
+      "from": "/areas/westin-memphis-beale-street-hotel-room-decor",
+      "to": "/services/hotel-room-decor-memphis"
+    },
+    {
+      "from": "/areas/whitehaven-memphis-tn-party-decor",
+      "to": "/services/celebration-setups"
+    }
+  ],
+  "territories": {
+    "seasonal_porch_decorating": [
+      "/areas/index.html",
+      "/services/christmas-porch-decorating.html",
+      "/services/fall-porch-decorating.html",
+      "/services/front-door-styling.html",
+      "/services/index.html",
+      "/services/porch-decorating.html",
+      "/services/small-porch-decorating.html"
+    ],
+    "party_decor": [
+      "/areas/index.html",
+      "/guides/graduation-party-decorations-at-home-memphis.html",
+      "/services/baby-shower-decor-memphis.html",
+      "/services/birthday-party-decor-memphis.html",
+      "/services/birthday-party-planner-memphis.html",
+      "/services/bridal-shower-decor-memphis.html",
+      "/services/budget-party-decor-memphis.html",
+      "/services/celebration-setups-memphis.html",
+      "/services/celebration-setups.html",
+      "/services/grazing-tables-memphis.html",
+      "/services/hotel-room-decor-memphis.html",
+      "/services/luxury-party-decor-memphis.html",
+      "/services/party-decor-memphis.html"
+    ],
+    "hotel_room_decor": [
+      "/services/birthday-party-decor-memphis.html",
+      "/services/birthday-party-planner-memphis.html",
+      "/services/budget-party-decor-memphis.html",
+      "/services/celebration-setups-memphis.html",
+      "/services/celebration-setups.html",
+      "/services/hotel-room-decor-memphis.html",
+      "/services/luxury-party-decor-memphis.html",
+      "/services/party-decor-memphis.html"
+    ],
+    "grazing_table_styling": [
+      "/areas/index.html",
+      "/guides/graduation-party-decorations-at-home-memphis.html",
+      "/services/baby-shower-decor-memphis.html",
+      "/services/grazing-and-event-styling.html",
+      "/services/grazing-tables-memphis.html",
+      "/services/index.html"
+    ]
+  },
+  "city_service_intents": [
+    "/areas/memphis-tn-porch-decorating",
+    "/areas/memphis-tn-party-decor",
+    "/areas/memphis-tn-grazing-tables",
+    "/areas/memphis-tn-party-game-rentals",
+    "/areas/germantown-tn-porch-decorating",
+    "/areas/germantown-tn-party-decor",
+    "/areas/germantown-tn-grazing-tables",
+    "/areas/germantown-tn-party-game-rentals",
+    "/areas/collierville-tn-porch-decorating",
+    "/areas/collierville-tn-party-decor",
+    "/areas/collierville-tn-grazing-tables",
+    "/areas/collierville-tn-party-game-rentals",
+    "/areas/bartlett-tn-porch-decorating",
+    "/areas/bartlett-tn-party-decor",
+    "/areas/bartlett-tn-grazing-tables",
+    "/areas/bartlett-tn-party-game-rentals",
+    "/areas/lakeland-tn-porch-decorating",
+    "/areas/lakeland-tn-party-decor",
+    "/areas/lakeland-tn-grazing-tables",
+    "/areas/lakeland-tn-party-game-rentals",
+    "/areas/arlington-tn-porch-decorating",
+    "/areas/arlington-tn-party-decor",
+    "/areas/arlington-tn-grazing-tables",
+    "/areas/arlington-tn-party-game-rentals",
+    "/areas/southaven-ms-porch-decorating",
+    "/areas/southaven-ms-party-decor",
+    "/areas/southaven-ms-grazing-tables",
+    "/areas/southaven-ms-party-game-rentals",
+    "/areas/olive-branch-ms-porch-decorating",
+    "/areas/olive-branch-ms-party-decor",
+    "/areas/olive-branch-ms-grazing-tables",
+    "/areas/olive-branch-ms-party-game-rentals",
+    "/areas/cordova-tn-porch-decorating",
+    "/areas/cordova-tn-party-decor",
+    "/areas/cordova-tn-grazing-tables",
+    "/areas/cordova-tn-party-game-rentals",
+    "/areas/millington-tn-porch-decorating",
+    "/areas/millington-tn-party-decor",
+    "/areas/millington-tn-grazing-tables",
+    "/areas/millington-tn-party-game-rentals",
+    "/areas/oakland-tn-porch-decorating",
+    "/areas/oakland-tn-party-decor",
+    "/areas/oakland-tn-grazing-tables",
+    "/areas/oakland-tn-party-game-rentals",
+    "/areas/horn-lake-ms-porch-decorating",
+    "/areas/horn-lake-ms-party-decor",
+    "/areas/horn-lake-ms-grazing-tables",
+    "/areas/horn-lake-ms-party-game-rentals",
+    "/areas/hernando-ms-porch-decorating",
+    "/areas/hernando-ms-party-decor",
+    "/areas/hernando-ms-grazing-tables",
+    "/areas/hernando-ms-party-game-rentals"
+  ],
+  "place_intents": [
+    "/areas/east-memphis-tn-party-decor",
+    "/areas/midtown-memphis-tn-party-decor",
+    "/areas/downtown-memphis-tn-party-decor",
+    "/areas/cooper-young-memphis-tn-party-decor",
+    "/areas/whitehaven-memphis-tn-party-decor",
+    "/areas/raleigh-memphis-tn-party-decor",
+    "/areas/the-peabody-memphis-hotel-room-decor",
+    "/areas/guest-house-at-graceland-hotel-room-decor",
+    "/areas/the-central-station-memphis-hotel-room-decor",
+    "/areas/hu-hotel-memphis-hotel-room-decor",
+    "/areas/westin-memphis-beale-street-hotel-room-decor",
+    "/areas/the-madison-hotel-memphis-hotel-room-decor"
+  ]
+}

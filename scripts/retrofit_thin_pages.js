@@ -31,6 +31,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..');
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const siteFaqs = require(path.join(ROOT, 'data/faqs/faqs.json'));
+const HC = require(path.join(ROOT, 'scripts/lib/hub_consolidation.js'));
 
 const DOMAIN = offers.domain;
 
@@ -104,13 +105,39 @@ function candidatePairs(service, serviceKey) {
   return out;
 }
 
-/** Candidates the page does not already ask, in order. */
-function selectPairs(candidates, existingQuestions) {
+/** A sentence-level key, so the same sentence is recognised through small edits. */
+const sentenceKey = (t) => norm(t).join(' ');
+const SENTENCE_SPLIT = /(?<=[.!?])\s+/;
+const sentencesOf = (t) => String(t).split(SENTENCE_SPLIT).map(sentenceKey).filter(Boolean);
+
+/**
+ * Candidates the page does not already ask, with every sentence the page already
+ * says removed from the answer, in order.
+ *
+ * WHY THE SENTENCES AND NOT JUST THE QUESTIONS. The service notes go into more
+ * than one candidate answer by design, and the page usually already answers the
+ * same thing in its own words. On /services/grazing-tables-memphis that put
+ * "Base pricing covers styling only. Food is not included by default and can be
+ * sourced for an additional fee." into five separate answers, and the owner's
+ * weekly quality sample read it, correctly, as template filler - it named that
+ * phrase, four times over, in the 3 Nov 2026 brief for that page.
+ *
+ * Only the already-said sentences go. Whatever an answer says that is new to the
+ * page stays, and a candidate left with nothing new is not asked at all, because
+ * a question whose answer the page has already given is not an answer, it is
+ * padding.
+ */
+function selectPairs(candidates, existingQuestions, existingAnswers = []) {
   const out = [];
+  const said = new Set(existingAnswers.flatMap(sentencesOf));
   for (const c of candidates) {
     if (existingQuestions.some((q) => overlaps(q, c.question))) continue;
     if (out.some((p) => overlaps(p.question, c.question))) continue;
-    out.push(c);
+    const kept = String(c.answer).split(SENTENCE_SPLIT).filter((x) => sentenceKey(x) && !said.has(sentenceKey(x)));
+    if (!kept.length) continue;
+    const answer = kept.join(' ').trim();
+    for (const k of sentencesOf(answer)) said.add(k);
+    out.push({ ...c, answer });
   }
   return out;
 }
@@ -124,9 +151,19 @@ function itemHtml(p) {
 
 const apply = !process.argv.includes('--check');
 const report = [];
+const retired = [];
 
 for (const [rel, key] of Object.entries(SERVICE_BY_PAGE)) {
   const abs = path.join(ROOT, rel);
+  // A page folded into a hub (scripts/lib/hub_consolidation.js, 26 Oct 2026)
+  // 301s to that hub and is no longer published, so there is nothing to retrofit.
+  // The nine answers/ pages were retired that day and this map was not updated,
+  // so this pass has thrown "missing page
+  // answers/how-much-does-a-grazing-table-cost-in-memphis.html" on every run
+  // since - a registered script (npm run retrofit:thin-pages) that could not
+  // run at all. A page that is neither published nor retired is still a hard
+  // failure: that is a map pointing at nothing.
+  if (HC.isRetiredFile(rel)) { retired.push(rel); continue; }
   if (!fs.existsSync(abs)) throw new Error(`missing page ${rel}`);
   const service = offers.services[key];
   let html = fs.readFileSync(abs, 'utf8');
@@ -154,7 +191,21 @@ for (const [rel, key] of Object.entries(SERVICE_BY_PAGE)) {
     h1
   ].filter((q) => !candidateNames.has(q.replace(/&amp;/g, '&')));
 
-  const pairs = selectPairs(candidates, existing);
+  // Answers the page already gives, visibly and in schema, for the same reason as
+  // the questions above: the retrofit must not say again what the page has said.
+  // And for the same reason it excludes this script's own previous output -
+  // stripped from the visible page above, but still in the FAQPage node until it
+  // is rebuilt below. Counting it would make a second run strip every sentence
+  // the first run added, which is not idempotence, it is erasure.
+  const existingAnswers = [
+    ...[...html.matchAll(/<div class="faq-item"[^>]*><h3>[\s\S]*?<\/h3>\s*<p>([\s\S]*?)<\/p>/g)].map((m) => m[1].replace(/<[^>]+>/g, ' ')),
+    ...[...html.matchAll(/"@type":"Question","name":"((?:[^"\\]|\\.)*)","acceptedAnswer":\{"@type":"Answer","text":"((?:[^"\\]|\\.)*)"/g)]
+      .filter((m) => !candidateNames.has(m[1].replace(/&amp;/g, '&').replace(/\\"/g, '"')))
+      .map((m) => m[2].replace(/\\"/g, '"')),
+    ...[...html.matchAll(/<div class="info-panel"[^>]*>[\s\S]*?<\/h2>\s*<p>([\s\S]*?)<\/p>/g)].map((m) => m[1].replace(/<[^>]+>/g, ' ')),
+  ];
+
+  const pairs = selectPairs(candidates, existing, existingAnswers);
 
   // --- visible Q&A -------------------------------------------------------
   if (/<div class="faq-list">/.test(html)) {
