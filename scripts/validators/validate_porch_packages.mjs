@@ -231,7 +231,9 @@ const RETIRED = [/Small stoop/, /Standard porch/, /Large or wraparound porch/, /
 const SKIP = new Set(['node_modules', '.git', '.pages-output', '.wrangler', '.claude', 'reports', 'data', 'scripts', 'docs', 'functions', 'templates']);
 const published = (dir = ROOT, acc = []) => { for (const e of fs.readdirSync(dir, { withFileTypes: true })) { if (SKIP.has(e.name) || e.name.startsWith('.')) continue; const abs = path.join(dir, e.name); if (e.isDirectory()) published(abs, acc); else if (/\.(html|txt)$/.test(e.name)) acc.push(abs); } return acc; };
 const pub = published();
-if (pub.length < 100) fail(`Rule 0: only ${pub.length} published files scanned for retired wording`);
+const kept = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/search_intelligence/page_quality_kept.json'), 'utf8')).kept;
+const keptFiles = kept.map(u => path.join(ROOT, u === '/' ? 'index.html' : u.endsWith('/') ? u.slice(1) + 'index.html' : u.slice(1) + '.html'));
+if (!kept.length || keptFiles.some(f => !pub.includes(f))) fail(`Rule 0: only ${pub.length} published files scanned for retired wording`);
 for (const abs of pub) { const h = fs.readFileSync(abs, 'utf8'); for (const re of RETIRED) if (re.test(h)) fail(`${path.relative(ROOT, abs)}: still says "${h.match(re)[0]}" (retired porch tiers)`); }
 
 // ---- 7. porch price articles (owner-approved 18 Oct 2026) ---------------------------

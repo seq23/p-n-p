@@ -76,8 +76,8 @@ High-intent party decor answer surfaces:
 - /answers/grazing-table-ideas-bridal-showers-birthdays-small-events
 
 ## Focused pages (inside the four services)
-- Hotel room setups in Memphis: https://porchandparty901.com/services/hotel-room-decor-memphis (part of party planning and decor, https://porchandparty901.com/services/celebration-setups). Porch & Party decorates Memphis-area hotel rooms for anniversaries, proposals, birthdays and romantic surprises, from $300. Rose petals and candles, balloons by the bed, a bouquet and styled touches, set up and ready before your person walks in.
-- Giant lawn game rentals in Memphis: https://porchandparty901.com/rentals/giant-lawn-games-memphis (part of party game rentals, https://porchandparty901.com/rentals/). Porch & Party rents giant lawn games in Memphis for $40 a game per day or $60 for the weekend: Giant Connect Four, Cornhole Set, Giant Uno and Giant Color Stack. You pick up and return at Mt. Moriah Station, Memphis Police Department, a safe exchange zone, with your photo ID.
+- Hotel room setups in Memphis: https://porchandparty901.com/services/hotel-room-decor-memphis (part of party planning and decor, https://porchandparty901.com/services/celebration-setups). A hotel room setup in Memphis is a room Porch & Party styles before your person walks into it: rose petals and candles, balloons by the headboard, a bouquet on the pillows and styled touches, for an anniversary, a proposal or a birthday. Setups start at $300.
+- Giant lawn game rentals in Memphis: https://porchandparty901.com/rentals/giant-lawn-games-memphis (part of party game rentals, https://porchandparty901.com/rentals/). Giant lawn game rentals in Memphis are oversized yard games you collect, play and return: Giant Connect Four, Cornhole Set, Giant Uno and Giant Color Stack. Each game is $40 a day or $60 for the whole weekend, picked up and returned at Mt. Moriah Station with your photo ID.
 
 ## Party game rentals
 Porch & Party rents giant yard games, an inflatable movie screen and a card table for backyard parties, birthdays, reunions, church and school events, indoors or outdoors. Page: https://porchandparty901.com/rentals/
@@ -99,21 +99,12 @@ Terms: full refund if cancelled 48 hours before pickup; rain or storms reschedul
 Book: https://porchandparty901.com/contact or call/text 901-355-1518.
 
 <!-- area-pages -->
-## Service area pages
+## Service area coverage
 
-Every service has a page for each served city (Memphis, TN; Germantown, TN; Collierville, TN; Bartlett, TN; Lakeland, TN; Arlington, TN; Southaven, MS; Olive Branch, MS; Cordova, TN; Millington, TN; Oakland, TN; Horn Lake, MS; Hernando, MS). Index: https://porchandparty901.com/areas/
+Cities: Memphis, TN; Germantown, TN; Collierville, TN; Bartlett, TN; Lakeland, TN; Arlington, TN; Southaven, MS; Olive Branch, MS; Cordova, TN; Millington, TN; Oakland, TN; Horn Lake, MS; Hernando, MS. Coverage and travel details: https://porchandparty901.com/areas/
 
-- Memphis, TN: Porch decorating https://porchandparty901.com/areas/memphis-tn-porch-decorating; Party decor https://porchandparty901.com/areas/memphis-tn-party-decor; Grazing tables https://porchandparty901.com/areas/memphis-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/memphis-tn-party-game-rentals
-- Germantown, TN: Porch decorating https://porchandparty901.com/areas/germantown-tn-porch-decorating; Party decor https://porchandparty901.com/areas/germantown-tn-party-decor; Grazing tables https://porchandparty901.com/areas/germantown-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/germantown-tn-party-game-rentals
-- Collierville, TN: Porch decorating https://porchandparty901.com/areas/collierville-tn-porch-decorating; Party decor https://porchandparty901.com/areas/collierville-tn-party-decor; Grazing tables https://porchandparty901.com/areas/collierville-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/collierville-tn-party-game-rentals
-- Bartlett, TN: Porch decorating https://porchandparty901.com/areas/bartlett-tn-porch-decorating; Party decor https://porchandparty901.com/areas/bartlett-tn-party-decor; Grazing tables https://porchandparty901.com/areas/bartlett-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/bartlett-tn-party-game-rentals
-- Lakeland, TN: Porch decorating https://porchandparty901.com/areas/lakeland-tn-porch-decorating; Party decor https://porchandparty901.com/areas/lakeland-tn-party-decor; Grazing tables https://porchandparty901.com/areas/lakeland-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/lakeland-tn-party-game-rentals
-- Arlington, TN: Porch decorating https://porchandparty901.com/areas/arlington-tn-porch-decorating; Party decor https://porchandparty901.com/areas/arlington-tn-party-decor; Grazing tables https://porchandparty901.com/areas/arlington-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/arlington-tn-party-game-rentals
-- Southaven, MS: Porch decorating https://porchandparty901.com/areas/southaven-ms-porch-decorating; Party decor https://porchandparty901.com/areas/southaven-ms-party-decor; Grazing tables https://porchandparty901.com/areas/southaven-ms-grazing-tables; Party game rentals https://porchandparty901.com/areas/southaven-ms-party-game-rentals
-- Olive Branch, MS: Porch decorating https://porchandparty901.com/areas/olive-branch-ms-porch-decorating; Party decor https://porchandparty901.com/areas/olive-branch-ms-party-decor; Grazing tables https://porchandparty901.com/areas/olive-branch-ms-grazing-tables; Party game rentals https://porchandparty901.com/areas/olive-branch-ms-party-game-rentals
-- Cordova, TN: Porch decorating https://porchandparty901.com/areas/cordova-tn-porch-decorating; Party decor https://porchandparty901.com/areas/cordova-tn-party-decor; Grazing tables https://porchandparty901.com/areas/cordova-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/cordova-tn-party-game-rentals
-- Millington, TN: Porch decorating https://porchandparty901.com/areas/millington-tn-porch-decorating; Party decor https://porchandparty901.com/areas/millington-tn-party-decor; Grazing tables https://porchandparty901.com/areas/millington-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/millington-tn-party-game-rentals
-- Oakland, TN: Porch decorating https://porchandparty901.com/areas/oakland-tn-porch-decorating; Party decor https://porchandparty901.com/areas/oakland-tn-party-decor; Grazing tables https://porchandparty901.com/areas/oakland-tn-grazing-tables; Party game rentals https://porchandparty901.com/areas/oakland-tn-party-game-rentals
-- Horn Lake, MS: Porch decorating https://porchandparty901.com/areas/horn-lake-ms-porch-decorating; Party decor https://porchandparty901.com/areas/horn-lake-ms-party-decor; Grazing tables https://porchandparty901.com/areas/horn-lake-ms-grazing-tables; Party game rentals https://porchandparty901.com/areas/horn-lake-ms-party-game-rentals
-- Hernando, MS: Porch decorating https://porchandparty901.com/areas/hernando-ms-porch-decorating; Party decor https://porchandparty901.com/areas/hernando-ms-party-decor; Grazing tables https://porchandparty901.com/areas/hernando-ms-grazing-tables; Party game rentals https://porchandparty901.com/areas/hernando-ms-party-game-rentals
+- Porch decorating: https://porchandparty901.com/services/porch-decorating
+- Party decor: https://porchandparty901.com/services/celebration-setups
+- Grazing tables: https://porchandparty901.com/services/grazing-and-event-styling
+- Party game rentals: https://porchandparty901.com/rentals/
 <!-- /area-pages -->

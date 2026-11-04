@@ -50,6 +50,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
+const HC = require('../lib/hub_consolidation');
 const G = require(path.join(ROOT, 'scripts/generators/build_place_pages.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 
@@ -90,8 +91,8 @@ if (!neighborhoods.length || !anchors.length) {
 /** The two sentences an anchor page must carry, in its own words. */
 function anchorHonesty(name, text) {
   return [
-    { what: 'the non-affiliation sentence', present: text.includes(`Porch & Party is not affiliated with ${name}`) },
-    { what: 'that it is not one of the hotel\'s vendors or partners', present: text.includes('is not one of its vendors or partners') },
+    { what: 'the non-affiliation sentence', present: text.includes(`Porch & Party is not affiliated with ${name}`) || text.includes("Porch & Party is not affiliated with the hotels") },
+    { what: 'that it is not one of the hotel\'s vendors or partners', present: text.includes('is not one of its vendors or partners') || text.includes('is not one of their vendors or partners') },
     { what: 'who arranges the hotel\'s permission', present: /permission to decorate it is yours to arrange with the hotel/i.test(text) || /You do, as the guest whose name the room is in/i.test(text) }
   ];
 }
@@ -100,12 +101,25 @@ const sitemap = read('sitemap.xml');
 const indexLinks = hrefs(read('areas/index.html'));
 const fresh = new Map(G.plan().map((x) => [x.rel, x.after]));
 let pages = 0;
+let redirected = 0;
 
 for (const [kind, list] of [['neighborhood', neighborhoods], ['anchor', anchors]]) {
   for (const place of list) {
     const slug = kind === 'neighborhood' ? `${place.slug}-party-decor` : `${place.slug}-hotel-room-decor`;
     const rel = `areas/${slug}.html`;
     const url = `/areas/${slug}`;
+    if (HC.isRetiredFile(rel)) {
+      redirected += 1;
+      const target = HC.foldTarget(url).to;
+      ok(!fs.existsSync(path.join(ROOT, rel)), `${rel}: retired variant re-created`);
+      ok(!sitemap.includes(`<loc>${offers.domain}${url}</loc>`), `${rel}: redirect source submitted`);
+      ok(sitemap.includes(`<loc>${offers.domain}${target}</loc>`), `${rel}: redirect target not published`);
+      ok(indexLinks.has(target), `${rel}: coverage directory must link its replacement`);
+      ok(!fresh.has(rel), `${rel}: generator would recreate retired page`);
+      ok(HC.redirectRules().some(r => r.from === url && r.to === target), `${rel}: missing direct redirect`);
+      if (kind === 'anchor') for (const h of anchorHonesty(place.name, plain(read(target.slice(1) + '.html')))) ok(h.present, `${target}: missing ${h.what}`);
+      continue;
+    }
     if (!fs.existsSync(path.join(ROOT, rel))) { ok(false, `${rel}: missing (every ${kind} on the coverage list needs its page)`); continue; }
     pages += 1;
     const html = read(rel);
@@ -133,17 +147,21 @@ for (const [kind, list] of [['neighborhood', neighborhoods], ['anchor', anchors]
     }
   }
 }
-if (!pages) errors.push('zero place pages examined; the read is broken, not the site.');
+const reviewed = JSON.parse(read('data/search_intelligence/page_quality_kept.json')).place_intents;
+const configured = [...neighborhoods.map(G.neighborhoodEntry), ...anchors.map(G.anchorEntry)].map(e=>`/areas/${e.slug}`);
+ok(reviewed.length > 0 && configured.length === reviewed.length && reviewed.every(u=>configured.includes(u)), 'place coverage differs from the reviewed intent ledger');
+if (!pages && !redirected) errors.push('zero place pages examined; the read is broken, not the site.');
 
 // Self-test: each broken copy must fail.
 const probeName = anchors[0].name;
-const soundText = plain(read(`areas/${anchors[0].slug}-hotel-room-decor.html`));
+const anchorTarget = HC.foldTarget(`/areas/${anchors[0].slug}-hotel-room-decor`);
+const soundText = plain(read(anchorTarget ? anchorTarget.to.slice(1) + '.html' : `areas/${anchors[0].slug}-hotel-room-decor.html`));
 if (anchorHonesty(probeName, soundText).some((h) => !h.present)) {
   errors.push('self-test: the committed anchor page fails its own honesty rule, so the rule is unreachable.');
 }
 const probes = {
-  'an anchor page without the non-affiliation sentence': soundText.split(`Porch & Party is not affiliated with ${probeName}`).join('X'),
-  'an anchor page without the vendor/partner denial': soundText.split('is not one of its vendors or partners').join('X'),
+  'an anchor page without the non-affiliation sentence': soundText.split(`Porch & Party is not affiliated with ${probeName}`).join('X').split('Porch & Party is not affiliated with the hotels').join('X'),
+  'an anchor page without the vendor/partner denial': soundText.split('is not one of its vendors or partners').join('X').split('is not one of their vendors or partners').join('X'),
   'an anchor page without the permission answer': soundText
     .split('permission to decorate it is yours to arrange with the hotel').join('X')
     .split('You do, as the guest whose name the room is in').join('X')

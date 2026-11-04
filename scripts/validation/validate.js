@@ -79,7 +79,7 @@ for (const rel of requiredFiles) {
     const hubRel = `${t.to.replace(/^\//, '')}.html`;
     if (fs.existsSync(path.join(root, rel))) fail(`${rel} was folded into ${t.to} but is still on disk`);
     else if (!fs.existsSync(path.join(root, hubRel))) fail(`${rel} was folded into ${hubRel}, which is missing`);
-    else if (!fs.readFileSync(path.join(root, hubRel), 'utf8').includes(`id="${t.hash.slice(1)}"`)) fail(`${hubRel} does not carry ${t.hash}, where links to the folded ${rel} land`);
+    else if (t.hash && !fs.readFileSync(path.join(root, hubRel), 'utf8').includes(`id="${t.hash.slice(1)}"`)) fail(`${hubRel} does not carry ${t.hash}, where links to the folded ${rel} land`);
     continue;
   }
   if (!fs.existsSync(path.join(root, rel))) fail(`missing required file ${rel}`);

@@ -84,7 +84,9 @@ must(!/forms\.gle/.test(page) && !/forms\.gle/.test(rules), 'request.html or rul
   const walk = (d, acc = []) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) { if (['node_modules', '.git', '.pages-output', 'reports', 'data', 'scripts', 'functions', 'docs', 'templates', 'workers', '.wrangler'].includes(e.name) || e.name.startsWith('.')) continue; const a = path.join(d, e.name); if (e.isDirectory()) walk(a, acc); else if (/\.(html|txt|xml|webmanifest)$/.test(e.name)) acc.push(a); } return acc; };
   const files = walk(ROOT);
   const left = files.filter((f) => /forms\.gle|docs\.google\.com\/forms/.test(fs.readFileSync(f, 'utf8')));
-  must(files.length > 100 && !left.length, `published files still link the Google Form: ${left.slice(0, 5).map((f) => path.relative(ROOT, f)).join(', ')}`);
+  const kept = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/search_intelligence/page_quality_kept.json'), 'utf8')).kept;
+  const keptFiles = kept.map(u => path.join(ROOT, u === '/' ? 'index.html' : u.endsWith('/') ? u.slice(1) + 'index.html' : u.slice(1) + '.html'));
+  must(kept.length > 0 && keptFiles.every(f => files.includes(f)) && !left.length, `published files still link the Google Form: ${left.slice(0, 5).map((f) => path.relative(ROOT, f)).join(', ')}`);
   const rentalsPage = fs.readFileSync(path.join(ROOT, 'rentals/index.html'), 'utf8');
   // Owner ruling 2026-10-21: the hero and after-FAQ buttons read "Book online"; the bundle, steps and form buttons keep "Book your games". All open the rentals path.
   must((rentalsPage.match(/href="\/request\?service=rentals"[^>]*>Book your games<\/a>/g) || []).length >= 3 && (rentalsPage.match(/href="\/request\?service=rentals"[^>]*data-book-online="(?:hero|after-faq)">Book online<\/a>/g) || []).length === 2, 'the rentals page buttons do not read "Book online" (hero + after FAQ) and "Book your games" (3+), all opening the rentals path');

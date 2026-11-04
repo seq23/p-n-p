@@ -32,3 +32,21 @@
 - Validation must not change source files
 - Safe repairs should be run as explicit operator actions after reviewing the exact failure
 - Pricing, offer scope, public claims, real-project image claims, and external provider submissions require operator review
+
+## Page-quality consolidation (4 Nov 2026)
+
+`data/search_intelligence/page_quality_kept.json` records the 34 reviewed sitemap
+URLs and 66 newly redirected pages. All service, menu, booking, operational and
+legal pages stay. Locality variants now use the relevant service hub; `/areas/`
+lists coverage, travel terms and service links without a page per city/service.
+The existing hub-consolidation registry owns redirects and generator exclusions.
+The release gate checks exact kept-ledger membership, direct published redirect
+targets and absence of retired pages/links. Admission and territory floors follow
+the reviewed kept set, with zero-items failures retained.
+
+The supplied temporary `page-shape.md` was unavailable on resume. The implemented
+shape follows the task brief: authored answer-first definitions, question headings,
+visible FAQ, lists/tables, linked business source terms, a business publisher byline,
+content-based dates and one next-step section. No new blocking wording validator.
+Legacy source pages receive definitions from `data/content/definition_leads.json`
+through `scripts/retrofit_definition_leads.js`; generated pages use their templates.

@@ -74,6 +74,12 @@ function check({ files, sitemapXml, redirects, read }) {
   // 2. sitemap
   const submitted = sitemapPaths(sitemapXml);
   const submittedSet = new Set(submitted.map((p) => HC.bare(p)));
+  const kept = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/search_intelligence/page_quality_kept.json'), 'utf8')).kept;
+  if (!kept.length || !submitted.length) errors.push('Rule 0: empty kept ledger or sitemap');
+  const actual = new Set(submitted);
+  if (submitted.length !== actual.size || actual.size !== kept.length || kept.some(p => !actual.has(p))) errors.push('sitemap differs from the reviewed kept ledger');
+  for (const r of HC.redirectRules()) if (HC.isRetiredUrl(r.to)) errors.push(`redirect chain: ${r.from} -> ${r.to}`);
+
   for (const p of submitted) if (HC.isRetiredUrl(p)) errors.push(`sitemap.xml still submits ${p}, which 301s to ${HC.foldTarget(p).to}`);
 
   // 3. internal links
@@ -125,6 +131,9 @@ function main() {
   const folded = HC.load().plan.folds[0];
   const hub = HC.hubs()[0];
   const probes = {
+    'a sitemap missing a kept URL': {...base, sitemapXml: base.sitemapXml.replace(/<url>[\s\S]*?<\/url>/, '')},
+    'a duplicate sitemap URL': {...base, sitemapXml: base.sitemapXml.replace('</urlset>', (base.sitemapXml.match(/<url>[\s\S]*?<\/url>/) || [''])[0] + '</urlset>')},
+
     'a sitemap that still submits a folded URL': { ...base, sitemapXml: `${base.sitemapXml}<url><loc>${DOMAIN}${HC.bare(folded.from)}</loc></url>` },
     'a page that still links a folded URL': { ...base, read: (rel) => (rel === 'index.html' ? `${base.read(rel)}<a href="${folded.from}">x</a>` : base.read(rel)) },
     'a _redirects without one of the rules': { ...base, redirects: base.redirects.split('\n').filter((l) => !l.startsWith(`${HC.bare(folded.from)} `)).join('\n') },

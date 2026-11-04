@@ -58,8 +58,10 @@ Settings rows can be written directly:
 - **Two search pages kept out of the menu:** `/services/hotel-room-decor-memphis` and
   `/rentals/giant-lawn-games-memphis`. They are not in the header or footer, but they are in the
   sitemap and every suburb page links to them.
-- **32 suburb pages** come from `scripts/generators/build_area_pages.js` and
-  `data/service_areas/city_profiles.json` (checks: `validate:area-pages`, `validate:service-pages`).
+- **Service coverage:** `/areas/` lists all served cities and links the four service
+  families plus the hotel and lawn-game detail pages. The 65 former city/service,
+  neighborhood and hotel variants redirect directly to service hubs; the existing
+  consolidation registry prevents the area/place generators recreating them.
 - **Service pictures** are registered in `data/offers/service_ai_images.json` (made by
   `scripts/generators/build_service_ai_images.mjs`, Workers AI, $0); the file's `_why` holds the
   picture rules, and owner photos are registered there by hash too.

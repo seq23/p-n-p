@@ -518,6 +518,13 @@
       "to": "/services/fall-porch-decorating",
       "coverage_state_25_oct": "URL is unknown to Google",
       "impressions_28d": 0
+    },
+    {
+      "from": "/guides/holiday-porch-decorating-service-memphis",
+      "file": "guides/holiday-porch-decorating-service-memphis.html",
+      "to": "/services/porch-decorating",
+      "reason": "Same seasonal package selection intent as the porch hub; latest GSC page export has no row for this URL.",
+      "evidence": "data/search_intelligence/gsc_search_analytics_export.json (2026-10-03 through 2026-10-30)"
     }
   ],
   "retired_sections": [
@@ -538,6 +545,396 @@
       "file": "events/index.html",
       "to": "/services/",
       "why": "Listed only folded pages; an index needs at least four (build_section_indexes MIN_PAGES)."
+    },
+    {
+      "file": "areas/arlington-tn-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/arlington-tn-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/arlington-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/arlington-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/arlington-tn-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/arlington-tn-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/arlington-tn-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/arlington-tn-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/bartlett-tn-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/bartlett-tn-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/bartlett-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/bartlett-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/bartlett-tn-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/bartlett-tn-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/bartlett-tn-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/bartlett-tn-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/collierville-tn-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/collierville-tn-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/collierville-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/collierville-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/collierville-tn-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/collierville-tn-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/collierville-tn-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/collierville-tn-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/cooper-young-memphis-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/cooper-young-memphis-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/cordova-tn-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/cordova-tn-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/cordova-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/cordova-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/cordova-tn-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/cordova-tn-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/cordova-tn-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/cordova-tn-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/downtown-memphis-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/downtown-memphis-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/east-memphis-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/east-memphis-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/east-memphis-tn-porch-styling.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/east-memphis-tn-porch-styling",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/germantown-tn-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/germantown-tn-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/germantown-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/germantown-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/germantown-tn-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/germantown-tn-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/germantown-tn-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/germantown-tn-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/guest-house-at-graceland-hotel-room-decor.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "from": "/areas/guest-house-at-graceland-hotel-room-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/hernando-ms-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/hernando-ms-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/hernando-ms-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/hernando-ms-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/hernando-ms-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/hernando-ms-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/hernando-ms-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/hernando-ms-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/horn-lake-ms-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/horn-lake-ms-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/horn-lake-ms-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/horn-lake-ms-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/horn-lake-ms-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/horn-lake-ms-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/horn-lake-ms-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/horn-lake-ms-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/hu-hotel-memphis-hotel-room-decor.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "from": "/areas/hu-hotel-memphis-hotel-room-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/lakeland-tn-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/lakeland-tn-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/lakeland-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/lakeland-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/lakeland-tn-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/lakeland-tn-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/lakeland-tn-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/lakeland-tn-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/memphis-tn-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/memphis-tn-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/memphis-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/memphis-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/memphis-tn-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/memphis-tn-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/memphis-tn-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/memphis-tn-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/midtown-memphis-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/midtown-memphis-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/millington-tn-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/millington-tn-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/millington-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/millington-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/millington-tn-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/millington-tn-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/millington-tn-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/millington-tn-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/oakland-tn-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/oakland-tn-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/oakland-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/oakland-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/oakland-tn-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/oakland-tn-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/oakland-tn-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/oakland-tn-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/olive-branch-ms-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/olive-branch-ms-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/olive-branch-ms-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/olive-branch-ms-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/olive-branch-ms-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/olive-branch-ms-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/olive-branch-ms-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/olive-branch-ms-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/raleigh-memphis-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/raleigh-memphis-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/southaven-ms-grazing-tables.html",
+      "to": "/services/grazing-and-event-styling",
+      "from": "/areas/southaven-ms-grazing-tables",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/southaven-ms-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/southaven-ms-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/southaven-ms-party-game-rentals.html",
+      "to": "/rentals/giant-lawn-games-memphis",
+      "from": "/areas/southaven-ms-party-game-rentals",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/southaven-ms-porch-decorating.html",
+      "to": "/services/porch-decorating",
+      "from": "/areas/southaven-ms-porch-decorating",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/the-central-station-memphis-hotel-room-decor.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "from": "/areas/the-central-station-memphis-hotel-room-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/the-madison-hotel-memphis-hotel-room-decor.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "from": "/areas/the-madison-hotel-memphis-hotel-room-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/the-peabody-memphis-hotel-room-decor.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "from": "/areas/the-peabody-memphis-hotel-room-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/westin-memphis-beale-street-hotel-room-decor.html",
+      "to": "/services/hotel-room-decor-memphis",
+      "from": "/areas/westin-memphis-beale-street-hotel-room-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
+    },
+    {
+      "file": "areas/whitehaven-memphis-tn-party-decor.html",
+      "to": "/services/celebration-setups",
+      "from": "/areas/whitehaven-memphis-tn-party-decor",
+      "reason": "Same service intent; city/hotel substitution does not justify a separate page."
     }
   ],
   "excluded": [
@@ -560,44 +957,7 @@
     {
       "file": "rentals/giant-lawn-games-memphis.html",
       "why": "Owner-approved focused landing page (21 Oct 2026, scripts/lib/focus_pages.js) for the fourth service; the ledger would fold it into a party-decor hub, which is the wrong service."
-    },
-    {
-      "files": [
-        "areas/arlington-tn-grazing-tables.html",
-        "areas/arlington-tn-party-decor.html",
-        "areas/arlington-tn-party-game-rentals.html",
-        "areas/arlington-tn-porch-decorating.html",
-        "areas/bartlett-tn-grazing-tables.html",
-        "areas/bartlett-tn-party-decor.html",
-        "areas/bartlett-tn-party-game-rentals.html",
-        "areas/bartlett-tn-porch-decorating.html",
-        "areas/collierville-tn-grazing-tables.html",
-        "areas/collierville-tn-party-decor.html",
-        "areas/collierville-tn-party-game-rentals.html",
-        "areas/collierville-tn-porch-decorating.html",
-        "areas/east-memphis-tn-porch-styling.html",
-        "areas/germantown-tn-grazing-tables.html",
-        "areas/germantown-tn-party-decor.html",
-        "areas/germantown-tn-party-game-rentals.html",
-        "areas/germantown-tn-porch-decorating.html",
-        "areas/lakeland-tn-grazing-tables.html",
-        "areas/lakeland-tn-party-decor.html",
-        "areas/lakeland-tn-party-game-rentals.html",
-        "areas/lakeland-tn-porch-decorating.html",
-        "areas/memphis-tn-grazing-tables.html",
-        "areas/memphis-tn-party-decor.html",
-        "areas/memphis-tn-party-game-rentals.html",
-        "areas/memphis-tn-porch-decorating.html",
-        "areas/olive-branch-ms-grazing-tables.html",
-        "areas/olive-branch-ms-party-decor.html",
-        "areas/olive-branch-ms-party-game-rentals.html",
-        "areas/olive-branch-ms-porch-decorating.html",
-        "areas/southaven-ms-grazing-tables.html",
-        "areas/southaven-ms-party-decor.html",
-        "areas/southaven-ms-party-game-rentals.html",
-        "areas/southaven-ms-porch-decorating.html"
-      ],
-      "why": "City x service and neighborhood/anchor coverage pages. The owner Search Readiness Checklist item j9 (25 Oct 2026) requires one per town and service, validate:place-pages and validate:area-pages hold them, and the Monday checklist run re-creates any that go missing (it added 32 on 26 Oct, #147). Folding them here would start a loop between two automated systems; they stay until j9 changes."
     }
-  ]
+  ],
+  "page_quality_review": "2026-11-04: consolidate generated locality variants; keep all operational, menu, service and legal pages."
 }

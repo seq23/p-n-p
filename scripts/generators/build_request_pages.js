@@ -23,6 +23,7 @@ const path = require('path');
 const { pathToFileURL } = require('url');
 
 const ROOT = path.resolve(__dirname, '../..');
+const PROV = require(path.join(ROOT, 'scripts/lib/page_provenance.js'));
 const { nav, footer, quoteEventScript } = require(path.join(ROOT, 'templates/page-shell.js'));
 const { normalizeHtmlUrls } = require(path.join(ROOT, 'scripts/lib/site_url.js'));
 const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js'));
@@ -177,6 +178,8 @@ function finalHtml(html, rel, before) {
   const RELATED = /<section[^>]+data-nav="related-pages"[\s\S]*?<\/section>/i;
   const related = before && before.match(RELATED);
   if (related) out = out.replace('</main>', () => `${related[0]}</main>`);
+  // The provenance lines (byline + dates, scripts/lib/page_provenance.js).
+  out = PROV.carry(out, before, rel);
   return out;
 }
 

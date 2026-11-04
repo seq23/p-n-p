@@ -79,14 +79,14 @@ const counters = {
 const FIXTURE_LEDGER = [
   `${DOMAIN}/index.html`,
   `${DOMAIN}/services/index.html`,
-  `${DOMAIN}/areas/memphis-tn-grazing-tables.html`,
+  `${DOMAIN}/services/grazing-and-event-styling.html`,
   `${DOMAIN}/faq/index.html`,
   `${DOMAIN}/pricing.html`,
 ];
 const RESPELLED = [
   `${DOMAIN}/`,
   `${DOMAIN}/services/`,
-  `${DOMAIN}/areas/memphis-tn-grazing-tables`,
+  `${DOMAIN}/services/grazing-and-event-styling`,
   `${DOMAIN}/faq/`,
   `${DOMAIN}/pricing`,
 ];
@@ -107,6 +107,13 @@ for (let i = 0; i < FIXTURE_LEDGER.length; i += 1) {
 }
 
 const fixtureCases = [
+  {
+    name: 'consolidation_is_not_publication',
+    urls: [`${DOMAIN}/services/grazing-and-event-styling`],
+    ledger: [`${DOMAIN}/areas/memphis-tn-grazing-tables`],
+    expect: 0,
+    why: 'A retired locality URL and its direct kept replacement represent one existing service intent.'
+  },
   {
     name: 'respelling_is_not_publication',
     urls: RESPELLED,

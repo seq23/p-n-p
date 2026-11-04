@@ -67,3 +67,5 @@ This is the required structural/repository release gate. It does not claim live 
 - A provider that is unavailable or degraded never produces a green search result.
 - A passing search-intelligence validator does not mean any provider was reachable.
 - Search intelligence never changes the publishing cadence.
+
+Page-quality review (4 Nov 2026): `validate:hub-consolidation` holds the sitemap to the nonempty reviewed kept ledger, checks every retired source is absent and redirects directly to a published target, and rejects missing or duplicate sitemap members. `validate:area-pages` and `validate:place-pages` account for every configured locality through its kept page or direct replacement; hotel affiliation/permission negative fixtures remain. Admission and territory floors now require exact reviewed ledger membership. No new wording gate.

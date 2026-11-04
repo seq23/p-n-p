@@ -39,6 +39,10 @@ const CHAIN = [
   // idempotent without them and not with them is still a page the next build
   // rewrites.
   'scripts/install_social_tags.js',
+  // The definition lead each page with no generator carries (checklist item b4,
+  // 3 Nov 2026). It runs in build:finish too, so a page that is idempotent
+  // without it and not with it is still a page the next build rewrites.
+  'scripts/retrofit_definition_leads.js',
   'scripts/install_page_dates.js'
 ];
 const SKIP = new Set(['node_modules', '.git', '.pages-output', '.wrangler', '.claude']);
@@ -69,7 +73,8 @@ try {
     }
   };
   walk(tmp);
-  if (compared < 100) errors.push(`compared only ${compared} file(s); the temp copy is broken`);
+  const keptCount = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/search_intelligence/page_quality_kept.json'), 'utf8')).kept.length;
+  if (!keptCount || compared < keptCount) errors.push(`compared only ${compared} file(s); expected at least ${keptCount} kept sitemap pages; the temp copy is broken`);
   if (!errors.length) console.log(`root-pages-idempotent: ${CHAIN.length} scripts run on a temp copy, ${compared} files compared, zero diff`);
 } catch (e) {
   errors.push(`pipeline failed: ${(e.stderr || e.message).toString().slice(0, 400)}`);

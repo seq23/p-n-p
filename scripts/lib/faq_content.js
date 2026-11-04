@@ -38,7 +38,11 @@ const [board, small, full, extra] = grazingTiers;
 
 const SECTIONS = [
   {
-    id: 'booking', title: 'Booking & payment', eyebrow: 'Every service',
+    // The heading is the question the section answers, not a topic label. The
+    // checklist (item b3) wants a question heading on a page, and the owner's
+    // weekly quality sample found none of the FAQ page's seven H2s was one -
+    // on the page whose whole job is answering questions.
+    id: 'booking', title: 'How does booking and payment work?', eyebrow: 'Every service',
     lead: 'How to book, what holds your date, and how you pay.',
     intro: 'How a booking works, what holds your date, and how you pay. These apply to porches, party and room decor, grazing tables and rentals.',
     qa: [

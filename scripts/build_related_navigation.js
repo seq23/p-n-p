@@ -21,7 +21,8 @@
  *     now shared through scripts/lib/topics.js;
  *   - every link label is the target page's own <h1>, read out of the published
  *     file, the same convention scripts/generators/build_section_indexes.js
- *     already follows;
+ *     already follows - cut back to its first clause when the whole heading is
+ *     too long to be a link (scripts/lib/page_shape.js linkLabel);
  *   - ordering is deterministic - same-subject pages in other sections first,
  *     then the rest of the territory - so a rerun writes byte-identical output.
  *
@@ -46,6 +47,9 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const topics = require('./lib/topics');
+// The link-label rule lives in scripts/lib/page_shape.js, shared with the
+// section indexes, so a label is cut the same way wherever one is written.
+const { linkLabel } = require('./lib/page_shape');
 const { sitePathForFile } = require('./lib/site_url');
 
 const DOMAIN = 'https://porchandparty901.com';
@@ -235,7 +239,7 @@ const pages = [...topics.classifiedPages(ROOT), ...rootPages]
       dir: p.dir,
       url: servedPath(p.rel),
       territories,
-      title: h1Of(p.rel, p.html),
+      title: linkLabel(h1Of(p.rel, p.html)),
       slug: path.basename(p.rel, '.html')
     };
   });
@@ -366,6 +370,10 @@ for (const page of pages) {
   } else {
     after = before;
   }
+
+  // A newly added related block belongs before the publisher byline, so the
+  // provenance installer remains idempotent after navigation is rebuilt.
+  if (before.includes('data-page-byline')) after = require('./lib/page_provenance').installByline(after).html;
 
   // The baseline is the page with this block removed - the links the page owns
   // rather than the ones a previous run of this script gave it. Comparing

@@ -21,6 +21,7 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
+const HC = require('../lib/hub_consolidation');
 const G = require(path.join(ROOT, 'scripts/generators/build_area_pages.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
@@ -43,11 +44,23 @@ const sitemap = read('sitemap.xml');
 const index = read('areas/index.html');
 const indexLinks = hrefs(index);
 let pages = 0;
+let redirected = 0;
 
 for (const city of cities) {
   for (const svc of G.SERVICE_KEYS) {
     const rel = G.relOf(city, svc);
     const url = G.urlOf(city, svc);
+    if (HC.isRetiredFile(rel)) {
+      redirected += 1;
+      const target = HC.foldTarget(url).to;
+      ok(!fs.existsSync(path.join(ROOT, rel)), `${rel}: retired variant re-created`);
+      ok(!sitemap.includes(`<loc>${offers.domain}${url}</loc>`), `${rel}: redirected source in sitemap`);
+      ok(sitemap.includes(`<loc>${offers.domain}${target}</loc>`), `${rel}: target missing from sitemap`);
+      ok(indexLinks.has(target), `${rel}: coverage directory must link target ${target}`);
+      ok(!G.plan().some(w => w.rel === rel), `${rel}: generator plans retired page`);
+      ok(HC.redirectRules().some(r => r.from === url && r.to === target), `${rel}: missing direct redirect`);
+      continue;
+    }
     if (!fs.existsSync(path.join(ROOT, rel))) { ok(false, `${rel}: missing (every city needs a ${svc} page)`); continue; }
     pages += 1;
     const html = read(rel);
@@ -98,8 +111,11 @@ for (const w of G.plan()) {
   ok(main(w.before) === main(w.after), `${w.rel}: page body differs from the generator; run node scripts/generators/build_area_pages.js`);
 }
 
-const expected = cities.length * G.SERVICE_KEYS.length;
-ok(pages === expected, `found ${pages} of ${expected} city x service pages`);
+const reviewed = JSON.parse(read('data/search_intelligence/page_quality_kept.json')).city_service_intents;
+const configured = cities.flatMap(c=>G.SERVICE_KEYS.map(s=>G.urlOf(c,s)));
+const expected = reviewed.length;
+ok(expected > 0 && configured.length === expected && reviewed.every(u=>configured.includes(u)), 'city/service coverage differs from the reviewed intent ledger');
+ok(pages + redirected === expected, `found ${pages} of ${expected} city x service pages`);
 if (errors.length) {
   console.error(`AREA PAGES FAILED (${errors.length} of ${checks} checks)`);
   for (const e of errors.slice(0, 40)) console.error(` - ${e}`);

@@ -131,12 +131,7 @@
   ],
   "pagesWhy": "Every page that carries the full porch package grid + Offer schema (scripts/install_porch_packages.js stamps it; validate:porch-packages checks each one). New porch articles add their path here.",
   "provenance": "Owner, 18 Oct 2026: FINAL prices fall 350/550/750/1,200 and Christmas 450/750/1,050/1,600, seasonal, shown as from-prices. Full grid on website pages and articles (corrected ruling); the request form carries no tier prices, only the from-price + range lines; add-ons named, never priced; 10% off the Christmas package when fall and Christmas are booked together. Replaces the 17 Oct small stoop / standard porch / large porch tiers ($350/$600/$800).",
-  "articles": [
-    {
-      "path": "guides/holiday-porch-decorating-service-memphis.html",
-      "title": "Holiday porch decorating, fall to Christmas"
-    }
-  ],
+  "articles": [],
   "foldedArticles": [
     {
       "path": "answers/how-much-does-porch-decorating-cost-in-memphis.html",
@@ -148,6 +143,10 @@
     },
     {
       "path": "guides/porch-decorating-packages-memphis.html",
+      "hub": "services/porch-decorating.html"
+    },
+    {
+      "path": "guides/holiday-porch-decorating-service-memphis.html",
       "hub": "services/porch-decorating.html"
     }
   ],

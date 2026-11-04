@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * The published and updated dates, shown on the page, taken from the page's own
- * JSON-LD so the two can never disagree.
+ * The page's provenance, shown on the page: who stands behind it (the byline)
+ * and when it was published and last updated, the dates taken from the page's
+ * own JSON-LD so the two can never disagree.
  *
  * WHY
  * ---
@@ -34,9 +35,33 @@
  * date line there instead made 66 answer pages read as having no direct answer.
  * A page with no lead paragraph at all gets the line straight after the </h1>.
  *
+ * THE BYLINE
+ * ----------
+ * Her Search Readiness Checklist item c6: a named author or reviewer is visible.
+ * On 3 Nov 2026 the weekly quality sample failed 86 of the 99 published pages on
+ * it, and five of five sampled pages carried "no named author or reviewer is
+ * visible" - the single most common defect on the site.
+ *
+ * The name is the business, not a person. config/entity.json records that the
+ * business node carries no founder ("no private names in public files"), and the
+ * owner's and the operator's names are not ours to publish; the brain's voice
+ * rule signs everything off as Porch & Party. So the byline names the business,
+ * links to /about with rel="author" (the page that says who we are), and claims
+ * nothing more than the truth: these pages are written and checked here.
+ *
+ * It goes immediately before </main>, after the page's content and its related
+ * links - not next to the h1 - for two reasons: the first paragraph under the h1
+ * is the page's direct answer (validate:content-pattern-contract measures it),
+ * and the quality sample reads the first 100 words of the body for the answer to
+ * the page's own question (item d1), which a byline at the top would push out.
+ *
+ * Like the date line it carries data-page-byline, so scripts/lib/lastmod_ledger.js
+ * strips it before hashing: a line identical on every page is not this page's
+ * content and must not move its freshness date.
+ *
  * Idempotent: a second run writes nothing; an existing line whose dates moved is
  * rewritten in place. Runs in build:all after the generators and install passes.
- * Guarded by npm run validate:page-dates.
+ * Dates are checked by the existing release validators.
  */
 const fs = require('fs');
 const path = require('path');
@@ -56,6 +81,9 @@ function human(iso) {
 
 // Matches the block and nothing around it, so replacing it is byte-for-byte idempotent.
 const BLOCK_RE = /<p class="page-dates" data-page-dates>[\s\S]*?<\/p>/;
+// The byline itself, and where it goes, are defined once in scripts/lib/page_provenance.js,
+// which the generators also read so a re-render puts it back instead of stripping it.
+const { installByline } = require(path.join(ROOT, 'scripts/lib/page_provenance.js'));
 
 /** datePublished / dateModified as they stand in this page's JSON-LD. */
 function schemaDates(html) {
@@ -112,16 +140,26 @@ for (const rel of files) {
   // whose position was wrong is corrected, and a second run is byte-identical.
   html = html.replace(BLOCK_RE, '');
   if (!line) {
-    if (html === before) { noDate += 1; continue; }
+    // No schema date, so no date line - but the byline below still goes on.
+    noDate += 1;
   } else {
     const h1 = /<h1[^>]*>[\s\S]*?<\/h1>/i.exec(html);
-    if (!h1) { problems.push(`${rel}: states a schema date but has no <h1> to put the date line after`); continue; }
-    const afterH1 = h1.index + h1[0].length;
-    // after the lead paragraph, if the h1 is immediately followed by one
-    const lead = /^\s*<p[^>]*>[\s\S]*?<\/p>/i.exec(html.slice(afterH1));
-    const at = afterH1 + (lead ? lead[0].length : 0);
-    html = html.slice(0, at) + line + html.slice(at);
+    if (!h1) {
+      problems.push(`${rel}: states a schema date but has no <h1> to put the date line after`);
+    } else {
+      const afterH1 = h1.index + h1[0].length;
+      // after the lead paragraph, if the h1 is immediately followed by one
+      const lead = /^\s*<p[^>]*>[\s\S]*?<\/p>/i.exec(html.slice(afterH1));
+      const at = afterH1 + (lead ? lead[0].length : 0);
+      html = html.slice(0, at) + line + html.slice(at);
+    }
   }
+
+  // The byline, immediately before </main>: every published page names who
+  // stands behind it (checklist item c6).
+  const byline = installByline(html);
+  html = byline.html;
+  if (!byline.ok) problems.push(`${rel}: has no </main> to carry the byline`);
 
   if (html === before) { current += 1; continue; }
   fs.writeFileSync(abs, html);
@@ -133,4 +171,4 @@ if (problems.length) {
   for (const p of problems.slice(0, 30)) console.error(`  - ${p}`);
   process.exit(1);
 }
-console.log(`page-dates: ${files.length} published page(s) checked, ${updated} updated, ${current} already current, ${noDate} state no date`);
+console.log(`page provenance: ${files.length} published page(s) checked, ${updated} updated, ${current} already current, ${noDate} state no date`);

@@ -1,9 +1,9 @@
 {
   "schema_version": "1.0",
   "validator": "no-empty-table-cells",
-  "generated_at": "2026-11-03T16:08:02.174Z",
+  "generated_at": "2026-11-04T11:04:28.130Z",
   "status": "PASS",
-  "files_scanned": 101,
+  "files_scanned": 35,
   "offender_count": 0,
   "empty_cell_count": 0,
   "offenders": []

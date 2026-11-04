@@ -69,7 +69,8 @@ for (const loc of locs) {
   const rel = [`${bare}.html`, `${bare}/index.html`].find((c) => fs.existsSync(path.join(ROOT, c)));
   if (rel && rel !== REL && !linkRe.test(read(rel))) unlinked.push(rel);
 }
-ok(locs.length > 20, `sitemap advertises ${locs.length} page(s); the read is broken, not the site`);
+const kept = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/search_intelligence/page_quality_kept.json'), 'utf8')).kept;
+ok(kept.length > 0 && locs.length === kept.length && kept.every(u=>locs.includes(DOMAIN+u)), `sitemap advertises ${locs.length} page(s); the read is broken, not the site`);
 ok(!unlinked.length, `${unlinked.length} published page(s) do not link to /about (e.g. ${unlinked.slice(0, 5).join(', ')})`);
 
 // who is speaking, checkable off-site

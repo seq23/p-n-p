@@ -1,0 +1,14 @@
+{
+  "validated_at": "2026-11-04T11:05:40.723975+00:00",
+  "base": "a6f223fae6c18972393ca02777879a3144604818",
+  "command": "npm run validate:release",
+  "exit_code": 0,
+  "site": "porchandparty901.com",
+  "kept": 34,
+  "new_redirects": 66,
+  "published_link_errors": 0,
+  "redirect_chains": 0,
+  "deploy_assembly": "116 files; 34 sitemap URLs verified",
+  "merged": false,
+  "deployed": false
+}
