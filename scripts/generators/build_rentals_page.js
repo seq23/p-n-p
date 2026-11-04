@@ -45,7 +45,7 @@ const C = offers.contact;
 // The site's request form, opened on its rentals path (a booking, not a quote).
 const FORM_URL = '/request?service=rentals';
 const MAILTO = 'mailto:hello@porchandparty901.com?subject=Party%20game%20rental%20inquiry';
-const TITLE = 'Party Game Rentals in Memphis | Porch and Party';
+const TITLE = 'Party Game Rentals in Memphis | Porch and Party 901';
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 const RATE = data.rates;
 const PICK = data.pickup;
