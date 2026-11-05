@@ -268,7 +268,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 ## Whole Yard bundle
 
-**Title:** RENTAL ONLY: Whole Yard Bundle, Giant Connect Four, Cornhole, Uno + 3 more, $195/day, Memphis pickup  
+**Title:** RENTAL ONLY: Whole Yard Bundle, Connect Four, Cornhole, Uno + 3 more, $195/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $195 (per day)  
 **Photo:** `assets/rentals/bundles/bundle-whole-yard.jpg`
