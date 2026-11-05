@@ -69,7 +69,7 @@ export function feedItemsFromTodo(d) {
   for (const it of out) if (corporate.some((r) => {
     const key = b64urlText(r.request_key);
     return [it.link, ...(it.actions || []).map((a) => a.href)].some((href) => href && (href.includes(`r=${key}`) || href.endsWith(`#c-${key}`)));
-  })) it.detail = ['Business / lobby', it.detail].filter(Boolean).join(' · ');
+  })) it.detail = ['Business', it.detail].filter(Boolean).join(' · ');
   return out;
 }
 
