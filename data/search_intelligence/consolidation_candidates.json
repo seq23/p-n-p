@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-10-05..2026-11-01",
-  "coverage_collected_at": "2026-11-04T16:06:49.752305+00:00",
+  "gsc_window": "2026-10-06..2026-11-02",
+  "coverage_collected_at": "2026-11-05T16:06:48.038463+00:00",
   "url_count": 34,
   "roles": {
     "candidate": 7,
@@ -56,7 +56,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 335,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -97,7 +97,7 @@
       "url": "https://porchandparty901.com/",
       "file": "index.html",
       "role": "root",
-      "impressions_28d": 5,
+      "impressions_28d": 1,
       "clicks_28d": 0,
       "word_count": 1477,
       "coverage_state": "Submitted and indexed",
@@ -232,7 +232,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 891,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -243,7 +243,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 824,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },

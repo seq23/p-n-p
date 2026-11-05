@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-05",
-  "end_date": "2026-11-01",
-  "collected_at": "2026-11-04T16:06:18.091539+00:00",
+  "start_date": "2026-10-06",
+  "end_date": "2026-11-02",
+  "collected_at": "2026-11-05T16:06:15.432619+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -34,19 +34,19 @@
     },
     {
       "keys": [
-        "birthday party planner near me"
+        "event management near me"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 21
+      "position": 1
     },
     {
       "keys": [
         "event planning for parties"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 1
     },
@@ -55,7 +55,7 @@
         "event planning for parties near me"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 1,
       "ctr": 0,
       "position": 1
     },
@@ -97,12 +97,12 @@
     },
     {
       "keys": [
-        "party planners near me"
+        "local event planners"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 41
+      "position": 2
     },
     {
       "keys": [
@@ -120,9 +120,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 4,
-      "impressions": 82,
-      "ctr": 0.04878048780487805,
-      "position": 5.121951219512195
+      "impressions": 84,
+      "ctr": 0.047619047619047616,
+      "position": 5.035714285714286
     },
     {
       "keys": [
@@ -138,9 +138,9 @@
         "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 5,
+      "impressions": 1,
       "ctr": 0,
-      "position": 16.6
+      "position": 19
     }
   ],
   "by_query_page": [
@@ -166,13 +166,13 @@
     },
     {
       "keys": [
-        "birthday party planner near me",
-        "https://www.porchandparty901.com/"
+        "event management near me",
+        "https://porchandparty901.com/"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 21
+      "position": 1
     },
     {
       "keys": [
@@ -186,28 +186,8 @@
     },
     {
       "keys": [
-        "event planning for parties",
-        "https://www.porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 1
-    },
-    {
-      "keys": [
         "event planning for parties near me",
         "https://porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 1
-    },
-    {
-      "keys": [
-        "event planning for parties near me",
-        "https://www.porchandparty901.com/"
       ],
       "clicks": 0,
       "impressions": 1,
@@ -256,13 +236,13 @@
     },
     {
       "keys": [
-        "party planners near me",
-        "https://www.porchandparty901.com/"
+        "local event planners",
+        "https://porchandparty901.com/"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
-      "position": 41
+      "position": 2
     },
     {
       "keys": [
@@ -278,7 +258,7 @@
   "counts": {
     "by_query": 11,
     "by_page": 3,
-    "by_query_page": 13
+    "by_query_page": 11
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
