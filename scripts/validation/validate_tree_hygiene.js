@@ -39,6 +39,8 @@ const allowedRootFiles = new Set([
   'request.html',
   'rules.html',
   'how-it-works.html',
+  // /hotels: the owner's romantic hotel rooms guide (scripts/install_hotels_page.js, 5 Nov 2026).
+  'hotels.html',
   'index.html',
   'llms-answers.txt',
   'llms-entities.txt',

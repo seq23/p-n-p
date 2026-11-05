@@ -1,0 +1,218 @@
+{
+  "_why": "The owner's guide \"Romantic Memphis Hotel Rooms - Photo Edition\" (Nov 2026), copied word for word for /hotels (owner, 5 Nov 2026). No third-party photo is embedded or hotlinked (risk R-REPO-04: images only with a licence): each photoUrl is linked as \"See the room photos\", opening in a new tab, and the photo credit is kept. Rendered by scripts/install_hotels_page.js; guarded by scripts/validation/validate.js (npm run validate:all).",
+  "source": "Memphis_Romantic_Hotels_Photo_Edition.html (owner, 5 Nov 2026)",
+  "eyebrow": "THE MEMPHIS EDIT • NOVEMBER 2026",
+  "headline": "ROMANTIC HOTEL ROOMS",
+  "subhead": "A picture-first guide to memorable Memphis stays",
+  "areas": "DOWNTOWN · HARBOR TOWN · MIDTOWN · EAST MEMPHIS",
+  "introHeading": "Find your kind of romantic.",
+  "intro": "15 hotel options, with downtown and nearby neighborhoods first. Each property has an authentic room-photo link and official booking page.",
+  "bestFor": [
+    [
+      "Best for soaking tubs",
+      "Big Cypress Lodge, The James Lee House"
+    ],
+    [
+      "Best classic luxury",
+      "The Peabody Memphis"
+    ],
+    [
+      "Best quiet retreat",
+      "River Inn of Harbor Town"
+    ],
+    [
+      "Best design-led",
+      "ARRIVE Memphis, Central Station"
+    ]
+  ],
+  "disclaimer": "Rates below are examples or advertised starting prices, not live availability. Verify exact room type, applicable fees, and cancellation policy. Photographs are linked to their original hosts and remain the owners’ intellectual property.",
+  "labels": {
+    "bestFor": "BEST FOR",
+    "roomToRequest": "ROOM TO REQUEST",
+    "whyItWorks": "WHY IT WORKS",
+    "priceGuidance": "PRICE GUIDANCE",
+    "booking": "VIEW ROOMS & BOOK"
+  },
+  "hotels": [
+    {
+      "zone": "01 / DOWNTOWN / THE PYRAMID",
+      "name": "Big Cypress Lodge",
+      "address": "1 Bass Pro Drive · Memphis, TN",
+      "photoUrl": "https://big-cypress.com/wp-content/uploads/2022/12/TreehouseQueen-01-web-768x512.jpg",
+      "photoCredit": "Photo: Big Cypress Lodge official room photo",
+      "bestFor": "dramatic suite + bath",
+      "roomToRequest": "Treehouse Suite or King Cabin with air/jetted tub",
+      "whyItWorks": "Immersive rustic luxury inside the Pyramid: fireplaces, warm timber finishes and select rooms with private air tubs. Ideal when the ROOM itself should feel like the occasion.",
+      "priceGuidance": "From $246/night in a Nov 8-9 third-party example; other listings from $299. Room upgrades extra.",
+      "bookingUrl": "https://big-cypress.com/accommodations/suites/"
+    },
+    {
+      "zone": "02 / DOWNTOWN / HISTORIC CORE",
+      "name": "The Peabody Memphis",
+      "address": "149 Union Avenue · Memphis, TN",
+      "photoUrl": "https://image-tc.galaxy.tf/wijpeg-5huhqh5voymbvjhjos4biz2he/the-celebrity-suite-bedroom-club-floor-at-the-peabody-memphis_standard.jpg?crop=32%2C0%2C1236%2C927",
+      "photoCredit": "Photo: Peabody official Celebrity Suite photo",
+      "bestFor": "classic anniversary luxury",
+      "roomToRequest": "Premium King, Junior Suite, Brinkley or Celebrity Suite",
+      "whyItWorks": "Memphis landmark luxury with elegant guest rooms, classic lobby and on-site dining. The higher-tier suites are a special-occasion splurge.",
+      "priceGuidance": "Official posted rates: traditional rooms from $199; Premium King from $294; Junior Suite from $630; Brinkley from $799; Celebrity from $1,219.",
+      "bookingUrl": "https://www.peabodymemphis.com/rooms/"
+    },
+    {
+      "zone": "03 / HARBOR TOWN / NEAR DOWNTOWN",
+      "name": "River Inn of Harbor Town",
+      "address": "50 Harbor Town Square · Memphis, TN",
+      "photoUrl": "https://images.letgroup.com/iYOSdWEO0K/jqg_1772670004.jpg",
+      "photoCredit": "Photo: River Inn official Superior Room listing photo",
+      "bestFor": "peaceful waterfront escape",
+      "roomToRequest": "Superior King or select river-view room / suite",
+      "whyItWorks": "Quiet, refined riverfront boutique atmosphere with four-poster beds, intimate dining and sunset potential. Request a river-facing room explicitly.",
+      "priceGuidance": "Example $261/night base; $308/night with taxes/fees for Dec 5-6 on third-party listing.",
+      "bookingUrl": "https://www.riverinnmemphis.com/"
+    },
+    {
+      "zone": "04 / VICTORIAN VILLAGE / NEAR DOWNTOWN",
+      "name": "The James Lee House",
+      "address": "690 Adams Avenue · Memphis, TN",
+      "photoUrl": "https://images.squarespace-cdn.com/content/v1/5ca6ead6b10f257242776eb9/1555824779927-CP3JKZ0NJPSKXBVTAFWO/ajz_0457779x550_2x.jpg",
+      "photoCredit": "Photo: James Lee House official Lee Suite bath photo",
+      "bestFor": "romantic private bathtub",
+      "roomToRequest": "The Lee Suite (freestanding tub) or Goyer Suite (clawfoot tub)",
+      "whyItWorks": "Gorgeous restored Victorian mansion with distinctive suites. The Lee Suite has a standalone soaking tub in a bright tower bathroom; Goyer features a historic clawfoot tub.",
+      "priceGuidance": "Date-specific quote required; no dependable public base rate confirmed.",
+      "bookingUrl": "https://www.jamesleehouse.com/room-gallery"
+    },
+    {
+      "zone": "05 / DOWNTOWN / BEALE STREET",
+      "name": "Hyatt Centric Beale Street",
+      "address": "33 Beale Street · Memphis, TN",
+      "photoUrl": "https://assets.hyatt.com/content/dam/hyatt/hyattdam/images/2021/05/26/1311/MEMCT-P0025-Beale-Street-Suite-Parlor.jpg/MEMCT-P0025-Beale-Street-Suite-Parlor.16x9.jpg",
+      "photoCredit": "Photo: Hyatt official Beale Street Suite parlor",
+      "bestFor": "nightlife + views",
+      "roomToRequest": "River View Suite with Balcony, Big River Suite or Premier Suite",
+      "whyItWorks": "Contemporary rooms, oversized windows and access to rooftop cocktails. Book the River View Balcony Suite specifically if a private river-facing balcony matters.",
+      "priceGuidance": "Date-specific quote required; suite/view categories command a premium.",
+      "bookingUrl": "https://www.hyatt.com/hyatt-centric/en-US/memct-hyatt-centric-beale-street-memphis/rooms"
+    },
+    {
+      "zone": "06 / DOWNTOWN / SOUTH MAIN",
+      "name": "ARRIVE Memphis",
+      "address": "477 South Main Street · Memphis, TN",
+      "photoUrl": "https://www.datocms-assets.com/138679/1741001033-69_arrive_memphis_property.jpg",
+      "photoCredit": "Photo: ARRIVE official Deluxe Studio photo",
+      "bestFor": "aesthetic boutique stay",
+      "roomToRequest": "Corner Studio with View or Studio with View",
+      "whyItWorks": "Design-led boutique hotel: exposed brick, curated artwork, marble details and cocktail bar downstairs. Strong choice for a stylish couple rather than a traditional spa property.",
+      "priceGuidance": "Date-specific quote required; third-party example from $275 in a recent search snapshot (not stay-specific).",
+      "bookingUrl": "https://www.arrivehotels.com/hotels/memphis"
+    },
+    {
+      "zone": "07 / DOWNTOWN / SOUTH MAIN",
+      "name": "The Central Station Memphis",
+      "address": "545 South Main Street · Memphis, TN",
+      "photoUrl": "https://images.squarespace-cdn.com/content/v1/5cc0b2f370468062c326d70b/1578690557017-KF44S0MCMGHU99SO8WEM/MEMCU_Loft_Specialty_Suite_3_02.jpg?format=2500w",
+      "photoCredit": "Photo: Central Station official Loft Suite photo",
+      "bestFor": "unique architectural suite",
+      "roomToRequest": "Loft Specialty Suite or Main Line Specialty Suite",
+      "whyItWorks": "Beautifully repurposed historic train station with distinctive suites, large windows, curated music and a celebrated lobby lounge.",
+      "priceGuidance": "Hilton listings showed select base rooms from $118; suites not priced publicly in the cited snapshot.",
+      "bookingUrl": "https://centralstationmemphis.com/rooms"
+    },
+    {
+      "zone": "08 / DOWNTOWN / SOUTH MAIN",
+      "name": "Hotel Pontotoc",
+      "address": "69 East Pontotoc Avenue · Memphis, TN",
+      "photoUrl": "https://images.trvl-media.com/lodging/119000000/118290000/118284900/118284805/939d60d1.jpg",
+      "photoCredit": "Photo: Hotel Pontotoc suite photo via Hotels.com",
+      "bestFor": "intimate hidden gem",
+      "roomToRequest": "Grand Suite (589 sq ft) or Suite (450 sq ft)",
+      "whyItWorks": "Very intimate historic boutique lodging. Grand Suite has king bed, wet bar, large windows and generous lounge space; an excellent memorable small-hotel choice.",
+      "priceGuidance": "Date-specific quote required; confirm Grand Suite pricing and availability.",
+      "bookingUrl": "https://hotelpontotoc.com/memphis-hotel-rooms/"
+    },
+    {
+      "zone": "09 / DOWNTOWN / UNION AVENUE",
+      "name": "Canopy by Hilton Memphis Downtown",
+      "address": "164 Union Avenue · Memphis, TN",
+      "photoUrl": "https://dynamic-media-cdn.tripadvisor.com/media/photo-o/1c/07/5b/65/canopy-by-hilton-memphis.jpg?h=-1&s=1&w=700",
+      "photoCredit": "Photo: Canopy room photo via TripAdvisor",
+      "bestFor": "polished downtown value",
+      "roomToRequest": "King room with view or available suite",
+      "whyItWorks": "Fresh contemporary downtown rooms steps from major dining and entertainment; appealing for convenient city-date-night plans.",
+      "priceGuidance": "Hilton advertised from $134 for select base rooms in an undated search result; not a suite quote.",
+      "bookingUrl": "https://www.hilton.com/en/hotels/memcdpy-canopy-memphis-downtown-beale-street/"
+    },
+    {
+      "zone": "10 / DOWNTOWN / MADISON AVENUE",
+      "name": "Hu. Hotel",
+      "address": "79 Madison Avenue · Memphis, TN",
+      "photoUrl": "https://huhotelmemphis.com/wp-content/uploads/2018/10/HuHotel_Photography_GuestRoom_JrSuite2-1920x0-c-default.jpg",
+      "photoCredit": "Photo: Hu. Hotel official Junior Suite photo",
+      "bestFor": "rooftop-date-night vibe",
+      "roomToRequest": "King Junior Suite",
+      "whyItWorks": "Characterful urban boutique property with spacious suite layouts and a popular skyline-view rooftop. Best for travelers comfortable with an older historic hotel.",
+      "priceGuidance": "Date-specific quote required.",
+      "bookingUrl": "https://huhotelmemphis.com/rooms/king-junior-suite/"
+    },
+    {
+      "zone": "11 / DOWNTOWN / BEALE STREET",
+      "name": "The Westin Memphis Beale Street",
+      "address": "170 Lt George W Lee Avenue · Memphis, TN",
+      "photoUrl": "https://cache.marriott.com/content/dam/marriott-renditions/MEMWI/memwi-executive-suite-7099-hor-clsc.jpg?downsize=1215px%3A%2A&interpolation=progressive-bilinear&output-quality=70",
+      "photoCredit": "Photo: Westin official Executive Suite photo",
+      "bestFor": "concert weekend",
+      "roomToRequest": "Executive Suite or other available king suite",
+      "whyItWorks": "An upscale downtown stay with a stronger emphasis on comfort, contemporary suites and walking access to concerts and dining than boutique novelty.",
+      "priceGuidance": "Date-specific quote required.",
+      "bookingUrl": "https://www.marriott.com/en-us/hotels/memwi-the-westin-memphis-beale-street/overview/"
+    },
+    {
+      "zone": "12 / MIDTOWN / OVERTON SQUARE",
+      "name": "The Memphian",
+      "address": "21 Cooper Street · Memphis, TN",
+      "photoUrl": "https://cache.marriott.com/content/dam/marriott-renditions/MEMTD/memtd-king-guestroom-4699-hor-clsc.jpg?downsize=1215px%3A%2A&interpolation=progressive-bilinear&output-quality=70",
+      "photoCredit": "Photo: Marriott official king guest room photo",
+      "bestFor": "upscale Midtown date night",
+      "roomToRequest": "King room or available suite",
+      "whyItWorks": "Art-forward boutique hotel with vibrant nightlife and dining at Overton Square, plus the Tiger & Peacock rooftop lounge. One of the best non-downtown style picks.",
+      "priceGuidance": "Date-specific quote required; a third-party hotel discovery listing showed from $371, not a confirmed quote for an exact stay.",
+      "bookingUrl": "https://www.marriott.com/en-us/hotels/memtd-the-memphian-a-tribute-portfolio-hotel/overview/"
+    },
+    {
+      "zone": "13 / EAST MEMPHIS / SANDERLIN",
+      "name": "DoubleTree by Hilton Memphis",
+      "address": "5069 Sanderlin Avenue · Memphis, TN",
+      "photoUrl": "https://assets.simpleviewinc.com/simpleview/image/upload/c_fit%2Cw_1600%2Ch_1200/crm/memphis/200-3-8767_jpeg-416d7e015056a36_416e0f57-5056-a36f-233fc38824010144.jpg",
+      "photoCredit": "Photo: Memphis Travel DoubleTree East room photo",
+      "bestFor": "convenient East Memphis",
+      "roomToRequest": "King room or available suite",
+      "whyItWorks": "Convenient East Memphis base with on-site dining, a glass-domed pool and free parking. Better for a relaxed neighborhood stay than a destination romantic suite.",
+      "priceGuidance": "Date-specific quote required; do not treat an unrelated $394 search listing as normal pricing.",
+      "bookingUrl": "https://www.hilton.com/en/hotels/memehdt-doubletree-memphis/"
+    },
+    {
+      "zone": "14 / EAST MEMPHIS / POPLAR CORRIDOR",
+      "name": "Marriott Memphis East",
+      "address": "5795 Poplar Avenue · Memphis, TN",
+      "photoUrl": "https://images.trvl-media.com/lodging/1000000/10000/7000/6917/6d6ba402.jpg?h=800&impolicy=fcrop&quality=medium&w=1200",
+      "photoCredit": "Photo: Marriott East guest room via Travelocity",
+      "bestFor": "full-service East Memphis",
+      "roomToRequest": "King guest room or available suite",
+      "whyItWorks": "Polished full-service option with marble baths, indoor pool and restaurant. Solid East Memphis alternative when location and reliable hotel amenities matter.",
+      "priceGuidance": "Date-specific quote required.",
+      "bookingUrl": "https://www.marriott.com/en-us/hotels/memmm-marriott-memphis-east/overview/"
+    },
+    {
+      "zone": "15 / WHITEHAVEN / DESTINATION HOTEL",
+      "name": "The Guest House at Graceland",
+      "address": "3600 Elvis Presley Boulevard · Memphis, TN",
+      "photoUrl": "https://pix10.agoda.net/hotelImages/245/2454256/2454256_20031110030089300197.jpg?ca=10&ce=1&s=1024x768",
+      "photoCredit": "Photo: Guest House room via Agoda",
+      "bestFor": "destination-themed getaway",
+      "roomToRequest": "Specialty themed suite or deluxe king",
+      "whyItWorks": "Elvis-inspired destination resort with dining, entertainment and specialty suites. Fun for an Elvis-loving couple but a significant drive from downtown date-night plans.",
+      "priceGuidance": "Third-party example from $217/night ($264 total with taxes/fees) for Nov 8-9; specialty suites extra.",
+      "bookingUrl": "https://guesthousegraceland.com/"
+    }
+  ]
+}

@@ -232,5 +232,31 @@ for (const href of ['/services/', '/rentals/', '/pricing', '/faq/', '/how-it-wor
 for (const href of ['/answers/', '/local/', '/events/']) if (sitemapPage.includes(`href="${href}"`)) fail(`sitemap.html still links ${href}, a retired section that 301s`);
 for (const rel of ['llms.txt', 'llms-full.txt', 'llms-entities.txt', 'llms-answers.txt', 'llms-services.txt', 'site.webmanifest']) if (/\binsured\b/i.test(readRoot(rel))) fail(`${rel} says "insured"; the business is not insured`);
 
+// /hotels: the owner's romantic hotel rooms guide (5 Nov 2026, scripts/install_hotels_page.js).
+// Behaviour: the page exists, lists all 15 hotels each with its official booking link, embeds no
+// off-site picture (risk R-REPO-04: the room photos belong to the hotels; they are linked, never
+// shown), and every photo and booking link opens in a new tab with rel="noopener".
+{
+  const hotelsHtml = readRoot('hotels.html');
+  const hotelsData = require(path.join(root, 'data/guides/memphis_romantic_hotels.json')).hotels;
+  if (!hotelsHtml) fail('hotels.html does not exist; /hotels is the owner\'s romantic hotel rooms guide');
+  else {
+    const cards = hotelsHtml.match(/<article class="info-panel" id="hotel-\d\d" data-hotel="\d\d">[\s\S]*?<\/article>/g) || [];
+    if (hotelsData.length !== 15 || cards.length !== 15) fail(`hotels.html shows ${cards.length} hotel(s) from ${hotelsData.length} in data/guides/memphis_romantic_hotels.json; the guide has 15`);
+    const decode = (s) => s.replace(/&amp;/g, '&');
+    cards.forEach((card, i) => {
+      const h = hotelsData[i] || {};
+      const booking = card.match(/<a\b[^>]*data-hotel-booking[^>]*>/);
+      const photo = card.match(/<a\b[^>]*data-hotel-photo[^>]*>/);
+      if (!card.includes(`<h2>${String(h.name).replace(/&/g, '&amp;')}</h2>`)) fail(`hotels.html card ${i + 1} is not ${h.name}`);
+      if (!booking || !/^https:\/\/[^/]+\//.test(h.bookingUrl || '') || decode((booking[0].match(/href="([^"]+)"/) || [])[1] || '') !== h.bookingUrl) fail(`hotels.html: ${h.name} has no official booking link to ${h.bookingUrl}`);
+      if (!photo || decode((photo[0].match(/href="([^"]+)"/) || [])[1] || '') !== h.photoUrl) fail(`hotels.html: ${h.name} has no "See the room photos" link to its original photo`);
+      for (const a of [booking, photo]) if (a && !(/target="_blank"/.test(a[0]) && /rel="noopener"/.test(a[0]))) fail(`hotels.html: a link for ${h.name} does not open in a new tab with rel="noopener"`);
+    });
+    for (const m of hotelsHtml.matchAll(/<img\b[^>]*\bsrc="([^"]*)"/g)) if (!m[1].startsWith('/') || m[1].startsWith('//')) fail(`hotels.html embeds an off-site picture (${m[1]}); hotel photos are linked, never shown (R-REPO-04)`);
+    if (/<(?:source|image)\b[^>]*(?:src|srcset|href)="(?:https?:)?\/\//.test(hotelsHtml) || /url\((['"]?)(?:https?:)?\/\//.test(hotelsHtml)) fail('hotels.html loads an off-site picture through <source>, <image> or CSS url()');
+  }
+}
+
 if (failed) process.exit(1);
 console.log(`Core validation OK: ${htmlFiles.length} HTML files checked with simplified matrix.`);
