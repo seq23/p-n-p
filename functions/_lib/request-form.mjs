@@ -57,6 +57,16 @@ export const SERVICE_KEYS = ['porch', 'party', 'grazing', 'rentals'];
 const EVENT_TYPES = ['Birthday', 'Anniversary', 'Proposal', 'Baby or bridal shower', 'Graduation', 'Holiday or other'];
 const TAKEDOWN = (price) => [['yes', `Yes, take it down (from $${price})`], ['no', "No, I'll handle it"], ['not_sure', 'Not sure yet']];
 export const TAKEDOWN_PLAN = { yes: 'scheduled', no: 'customer_handles', not_sure: 'not_sure' };
+// Hotel setups happen around check-in (owner, 5 Nov 2026).
+export const HOTEL_WINDOW = 'Hotel rooms: we generally need to be there from 3 to 6 PM, around check-in time.';
+export const LOCATION_LATER = 'No hotel booked yet? Leave this blank and text us the hotel when you have it.';
+export const DECOR_STYLES = [['picked', 'I have colors and accents in mind'], ['freestyle', 'Freestyle: you pick the look']];
+export const DECOR_COLORS = ['Pink', 'Red', 'Gold', 'Rose gold', 'Silver', 'White', 'Black', 'Blue', 'Purple', 'Green', 'Pastels', 'Neutrals (cream, beige, tan)'];
+export const DECOR_ACCENTS = ['Balloons', 'Flowers', 'Rose petals', 'Candles (flameless)', 'String lights', 'Banner or name letters', 'Photo backdrop'];
+// What each budget buys (owner, 5 Nov 2026): the lowest is simple decor, $1,000+ is very heavy
+// decor that fills the whole room. The hint is on the form only; the saved answer stays the plain range.
+export const BUDGET_HELP = 'The lower budget is simple decor. $1,000 and up is very heavy decor that fills the whole room.';
+export const PARTY_BUDGETS = [['$300–$500', '$300–$500 (simple decor)'], ['$500–$1,000', '$500–$1,000 (fuller decor)'], ['$1,000+', '$1,000+ (very heavy decor, the full room)'], ['Not sure yet', 'Not sure yet']];
 export const HEARD = ['Facebook', 'Google', 'Instagram', 'Friend or family', 'Saw your work', 'Other'];
 // Rental length and the pickup/return choices (owner, 19 Oct 2026; calendar.mjs rentalSpan).
 export const DURATIONS = RENTAL_LENGTHS;
@@ -88,11 +98,11 @@ export function questions(offers, table) {
     porch: porchQuestions(table.porchPackages, td),
     party: [
       { name: 'party_event', label: "What's the event type?", type: 'radio', required: true, group: 'decor', choices: EVENT_TYPES },
-      { name: 'party_where', label: 'Where is it?', type: 'radio', required: true, group: 'decor', choices: ['Hotel room', 'Home', 'Event space or venue', 'Backyard or outdoors', 'Not sure yet'] },
+      { name: 'party_where', label: 'Where is it?', type: 'radio', required: true, group: 'decor', help: HOTEL_WINDOW, choices: ['Hotel room', 'Home', 'Event space or venue', 'Backyard or outdoors', 'Not sure yet'] },
       { name: 'party_guests', label: 'How many guests?', type: 'radio', group: 'decor', choices: ['Just the two of us', 'Under 15', '15–40', '40+'] },
       { name: 'party_grazing', label: 'Add a grazing table?', type: 'radio', group: 'decor', choices: [`Yes (styling from $${dollars(offers.services.grazing.price)}, food extra)`, 'No', 'Maybe'] },
       { name: 'party_takedown', label: 'Want us to take it down afterwards?', type: 'radio', group: 'decor', choices: TAKEDOWN(td) },
-      { name: 'party_budget', label: 'Budget', type: 'radio', group: 'decor', choices: ['$300–$500', '$500–$1,000', '$1,000+', 'Not sure yet'] },
+      { name: 'party_budget', label: 'Budget', type: 'radio', group: 'decor', help: BUDGET_HELP, choices: PARTY_BUDGETS, saveValue: true },
     ],
     grazing: [
       { name: 'grazing_event', label: "What's the event type?", type: 'radio', required: true, group: 'decor', choices: EVENT_TYPES },
@@ -107,10 +117,21 @@ export function questions(offers, table) {
       { name: 'pickup_when', label: PICKUP_LABEL, type: 'radio', required: true, group: 'rentals', byLength: PICKUP_CHOICES, choices: [...PICKUP_CHOICES.day, ...PICKUP_CHOICES.weekend] },
       { name: 'return_when', label: RETURN_LABEL, type: 'radio', required: true, group: 'rentals', byLength: RETURN_CHOICES, choices: [...RETURN_CHOICES.day, ...RETURN_CHOICES.weekend] },
       { name: 'occasion', label: "What's the occasion?", type: 'text', group: 'rentals', optionalNote: true },
+      { name: 'rental_notes', label: 'Anything else about your rental?', type: 'textarea', group: 'other' },
     ],
     event: [
       { name: 'event_date', label: 'Event date', type: 'date', required: true, group: 'decor', help: 'Best guess is fine.' },
-      { name: 'location', label: 'Location (hotel name, address or neighborhood)', type: 'text', required: true, group: 'decor', help: offers.travel ? offers.travel.line : '' },
+      // Optional (owner, 5 Nov 2026: "sometimes people do not have their hotel booked yet").
+      // A request without it still saves; the admin card asks "Which hotel (or address)?" (card-told.mjs).
+      { name: 'location', label: 'Location (hotel name, address or neighborhood)', type: 'text', group: 'decor', help: [LOCATION_LATER, offers.travel ? offers.travel.line : ''].filter(Boolean).join(' ') },
+      // The look (owner, 5 Nov 2026): pick or type colors and accents, or let us freestyle.
+      { name: 'decor_style', label: 'How should we style it?', type: 'radio', group: 'decor', choices: DECOR_STYLES },
+      { name: 'decor_colors', label: 'Colors', type: 'checks', group: 'decor', help: 'Tick any you like. Skip this if you picked freestyle.', choices: DECOR_COLORS },
+      { name: 'decor_colors_other', label: 'Other colors or exact shades', type: 'text', group: 'decor', help: 'For example: sage green and cream, or your team colors.' },
+      { name: 'decor_accents', label: 'Accents', type: 'checks', group: 'decor', help: 'Tick anything you would love to see. We price extras with your quote.', choices: DECOR_ACCENTS },
+      { name: 'decor_notes', label: 'Notes about the decor you want', type: 'textarea', group: 'decor', help: 'A theme, a name or age to show, a vibe, or a link to a photo you love.' },
+      // Last in the section, after the style and accent questions (owner, 5 Nov 2026).
+      { name: 'notes', label: 'Anything else? Surprise details, timing or questions', type: 'textarea', group: 'other' },
     ],
     contact: [
       { name: 'name', label: 'Your full name', type: 'text', required: true, autocomplete: 'name' },
@@ -119,7 +140,6 @@ export function questions(offers, table) {
       { name: 'dob', label: 'Date of birth', type: 'date', required: true, autocomplete: 'bday' },
       { name: 'social', label: 'Social media link', type: 'text', help: 'Optional. Helps us confirm who we are working with.' },
       { name: 'heard', label: 'How did you hear about us?', type: 'radio', choices: HEARD },
-      { name: 'notes', label: 'Anything else? Colors, theme, surprise details', type: 'textarea', group: 'other' },
     ],
   };
 }
@@ -193,7 +213,8 @@ export function validateSubmission(fields, { offers, table, today, file = null }
     if (q.type === 'radio') {
       const v = choiceValue(q, value);
       if (v === null) { errors[q.name] = 'Please pick one of the choices.'; return; }
-      value = v;
+      // saveValue: the hint in the label is for the customer; the request, card and invoice keep the plain value.
+      if (!q.saveValue) value = v;
     }
     if (q.required && !value) { errors[q.name] = `Please answer "${q.label.replace(/\?$/, '')}".`; return; }
     if (q.type === 'date' && value) {
