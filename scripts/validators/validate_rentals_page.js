@@ -259,7 +259,11 @@ pricesOnlyFromData(blocks.join('## '), 'facebook-marketplace.md', listingErrors)
 // Line 2 of every live Marketplace description points at the site request page;
 // listings are edited in place, never deleted and re-added.
 const RENTAL_L1 = 'RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.';
-const RENTAL_L2 = "Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.";
+// The hold length comes from the rentals page itself, so the listing copy cannot drift from it
+// (listings said 24 hours for weeks after the site moved to 48 h holds on 19 Oct 2026).
+const HOLD_HOURS = (read('rentals/index.html').match(/Your games are held for (\d+) hours/) || [])[1];
+if (!HOLD_HOURS) errors.push('rentals/index.html no longer says "Your games are held for N hours"; the Marketplace hold line cannot be checked');
+const RENTAL_L2 = `Reserve your date at porchandparty901.com/request. See what's free and hold it for ${HOLD_HOURS} hours.`;
 const DECOR_L2 = 'Request your date at porchandparty901.com/request. We reply with a quote.';
 const decorBlocks = (listing.split(/^## /m)[0].split(/^### Decor: /m)).slice(1);
 if (decorBlocks.length !== 2) errors.push(`facebook-marketplace.md has ${decorBlocks.length} decor service listings, Marketplace has 2 (porch decor, room decor)`);
