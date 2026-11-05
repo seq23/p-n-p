@@ -50,6 +50,7 @@ function facts(r, services, bookings = []) {
     readyBy: setupB && setupB.time ? setupB.time : '',
     guests: real(ans(r, /how many guests/i)),
     budget: real(ans(r, /^budget/i)),
+    space: real(ans(r, /^what should we decorate/i)),
     notes: notes(r),
     inspoCount: (r.inspo || []).length,
     grazing: real(ans(r, /^add a grazing table/i)),
@@ -78,6 +79,7 @@ export function toldFacts(r, services = [], bookings = []) {
     add('where', 'Where', [f.placeKind, f.location].filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(', '));
     if (f.readyBy) add('ready', 'Ready by', prettyTime(f.readyBy));
     add('guests', 'Guests', f.guests);
+    add('space', 'What to decorate', f.space);
     add('budget', 'Budget', f.budget);
     if (f.kind === 'porch') add('decor', 'Porch', f.porchDecor);
   }
