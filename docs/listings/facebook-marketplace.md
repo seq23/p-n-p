@@ -10,7 +10,7 @@
 
 ### Live on Marketplace (18 Oct 2026)
 
-Marketplace holds only the six bundle listings below plus the two decor service listings in this section (single-item listings were removed on the owner's word, 15 Oct 2026; the item blocks below stay as reference copy). Every live listing is edited in place, never deleted and re-added. Line 2 of every description sends people to the site request page, https://porchandparty901.com/request (owner-approved wording, 18 Oct 2026): bundles hold a date for 24 hours there; decor gets a quote. Bundle titles start "RENTAL ONLY:" and their description opens with the rental-not-sale line.
+Marketplace holds only the six bundle listings below plus the two decor service listings in this section (single-item listings were removed on the owner's word, 15 Oct 2026; the item blocks below stay as reference copy). Every live listing is edited in place, never deleted and re-added. Line 2 of every description sends people to the site request page, https://porchandparty901.com/request (owner-approved wording, 18 Oct 2026): bundles hold a date for 48 hours there; decor gets a quote. Bundle titles start "RENTAL ONLY:" and their description opens with the rental-not-sale line.
 
 ### Decor: Porch Decor, Fall & Winter
 
@@ -222,7 +222,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Description:**
 
 RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
-Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 48 hours.
 
 Pick 3 bundle: any 3 games, $110 a day. You save $10 on day prices ($120 separately).
 
@@ -249,7 +249,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Description:**
 
 RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
-Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 48 hours.
 
 Pick 5 bundle: any 5 games, $175 a day. You save $25 on day prices ($200 separately).
 
@@ -268,7 +268,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 ## Whole Yard bundle
 
-**Title:** RENTAL ONLY: Whole Yard Bundle, all 6 games, $195/day, Memphis pickup  
+**Title:** RENTAL ONLY: Whole Yard Bundle, Connect Four, Cornhole, Uno + 3 more, $195/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $195 (per day)  
 **Photo:** `assets/rentals/bundles/bundle-whole-yard.jpg`
@@ -276,7 +276,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Description:**
 
 RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
-Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 48 hours.
 
 Whole Yard bundle: all 6 games (the Giant Color Stack set counts as 2), $195 a day. You save $45 on day prices ($240 separately).
 
@@ -303,7 +303,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Description:**
 
 RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
-Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 48 hours.
 
 Movie Night bundle: the inflatable movie screen + any 2 games, $110 a day. You save $20 on day prices ($130 separately).
 
@@ -330,7 +330,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Description:**
 
 RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
-Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 48 hours.
 
 Game Night bundle: the card table + any 2 games, $85 a day. You save $10 on day prices ($95 separately).
 
@@ -357,7 +357,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 **Description:**
 
 RENTAL ONLY. This is a rental, not a sale. The items come back to us after your event.
-Reserve your date at porchandparty901.com/request. See what's free and hold it for 24 hours.
+Reserve your date at porchandparty901.com/request. See what's free and hold it for 48 hours.
 
 The Whole Party bundle: all 6 games (the Giant Color Stack set counts as 2), the movie screen and the card table, $235 a day or $350 for a weekend. You save $70 on day prices ($305 separately); a weekend saves $110 ($460 separately).
 
