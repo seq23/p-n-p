@@ -270,6 +270,7 @@ export const HELP = {
   'req.new': H('requests', 'NEW', 'This request came in and you have not opened it yet. Tap the badge to mark it seen.', '', 'The badge also goes away by itself once you tap anything on the card, open Edit or More, or send an invoice.'),
   'req.weekJump': H('requests', 'A name in this week\'s list', 'Jumps down to that request\'s card on this page.', '', 'NEW beside a name means you have not opened it yet.'),
   'req.weekMore': H('requests', '+ more (this week)', 'Jumps down to the first of this week\'s requests not named in the banner.', '', 'The banner names the newest 6. Every request is still in the list below, newest first.'),
+  'card.inspoPhoto': H('card', 'Open photo', 'Shows an inspiration photo the customer added on the request form, on top of their card.', '', 'Tap ✕ Close, press Escape or tap outside the photo, and you are back on the same card.'),
   'card.idPhoto': H('card', 'Open ID photo', 'Shows the photo ID this customer uploaded, on top of their card.', '', 'It opens over the card. Tap ✕ Close, press Escape, tap outside the photo or swipe down, and you are back on the same card.'),
   'card.idClose': H('card', '✕ Close (photo ID)', 'Closes the photo ID and puts you back on the same card.', '', 'Escape, tapping outside the photo or swiping down closes it too.'),
   'card.idBack': H('card', 'Back to the card', 'Goes back to this customer\'s card on Requests.', '', 'Only shows on the photo page a phone opens when the photo cannot open over the card.'),

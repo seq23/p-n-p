@@ -222,7 +222,9 @@ if (!/<h2 id="text-messages">/.test(terms) || !/Reply STOP to opt out/.test(term
 if (!/governed by the laws of the State of Tennessee/.test(terms)) fail('terms-and-conditions.html lacks the Tennessee governing-law clause');
 const privacy = readRoot('privacy-policy.html');
 if (!/<h2 id="privacy-choices">/.test(privacy) || !/Microsoft Clarity/.test(privacy) || !/opt out/i.test(privacy)) fail('privacy-policy.html lacks the #privacy-choices section (Microsoft Clarity, how to opt out)');
-for (const rel of ['terms-and-conditions.html', 'privacy-policy.html']) if (!/Kerseta LLC \("Porch &amp; Party"\)<br>/.test(readRoot(rel)) || !readRoot(rel).includes('hello@porchandparty901.com')) fail(`${rel} contact block does not name Kerseta LLC with hello@porchandparty901.com`);
+// Contact block names a person (owner, 5 Nov 2026: "Valerie at Porch & Party 901"); the legal
+// party, Kerseta LLC, is still named in each page's opening line (checked above).
+for (const rel of ['terms-and-conditions.html', 'privacy-policy.html']) if (!/<h2 id="contact">Contact<\/h2><p>Valerie at Porch &amp; Party 901<br>/.test(readRoot(rel)) || !readRoot(rel).includes('hello@porchandparty901.com')) fail(`${rel} contact block does not name Valerie at Porch & Party 901 with hello@porchandparty901.com`);
 if (!/WCAG\) 2\.1 at level AA/.test(readRoot('accessibility.html'))) fail('accessibility.html does not state the WCAG 2.1 AA target');
 const sitemapPage = readRoot('sitemap.html');
 for (const href of ['/services/', '/rentals/', '/pricing', '/faq/', '/how-it-works', '/contact', '/areas/', '/sitemap.xml']) if (!sitemapPage.includes(`href="${href}"`)) fail(`sitemap.html does not link ${href}`);

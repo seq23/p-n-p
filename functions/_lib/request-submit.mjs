@@ -81,7 +81,7 @@ async function formPage(env, url, { values = {}, errors = {}, status = 200, refe
 }
 
 // Fields where a customer can tick more than one box; every other field keeps one value.
-const MULTI_FIELDS = new Set(['multi', 'games', 'porch_addons', 'decor_colors', 'decor_accents']);
+const MULTI_FIELDS = new Set(['multi', 'games', 'porch_addons']);
 
 function fieldsOf(form) {
   const out = {};
@@ -178,6 +178,17 @@ async function submit(context) {
     image = cleanImage(new Uint8Array(await file.arrayBuffer()), file.type);
     if (!image) errors.id_photo = 'That file is not a photo we can use. Take a photo with your phone camera, or upload a JPG or PNG.';
   }
+  // Inspiration photos (owner, 5 Nov 2026): optional, up to MAX_INSPO, cleaned like the ID photo,
+  // kept private in the same bucket under inspo/. A bad file names itself; nothing is guessed.
+  const inspo = [];
+  const inspoFiles = form.getAll('inspo_photos').filter((x) => x && typeof x === 'object' && x.size > 0).slice(0, F.MAX_INSPO);
+  for (const x of inspoFiles) {
+    if (errors.inspo_photos) break;
+    if (x.size > 10 * 1024 * 1024) { errors.inspo_photos = 'One of your inspiration photos is too large (over 10 MB). Please pick a smaller one.'; break; }
+    const img = cleanImage(new Uint8Array(await x.arrayBuffer()), x.type === 'application/octet-stream' ? '' : x.type);
+    if (!img) errors.inspo_photos = 'One of your inspiration photos is not a photo we can use. Please use a JPG or PNG, or a screenshot.';
+    else inspo.push(img);
+  }
   const services = clean.services;
   let quote = null;
   if (services.includes('rentals') && clean.games && clean.games.length && clean.pickup_date && clean.return_date && clean.duration && !errors.rental_date && !errors.pickup_when && !errors.return_when) {
@@ -200,6 +211,12 @@ async function submit(context) {
   const ext = image.type === 'image/png' ? 'png' : 'jpg';
   const idObject = `ids/${randomId()}.${ext}`;
   await env.IDS.put(idObject, image.bytes, { httpMetadata: { contentType: image.type } });
+  const inspoObjects = [];
+  for (const img of inspo) {
+    const k = `inspo/${randomId()}.${img.type === 'image/png' ? 'png' : 'jpg'}`;
+    await env.IDS.put(k, img.bytes, { httpMetadata: { contentType: img.type } });
+    inspoObjects.push(k);
+  }
   const refIn = [fields.ref, cookie(request, REF_COOKIE)].find((c) => CODE_RE.test(String(c || ''))) || '';
   let referredBy = null;
   if (refIn) { const who = await env.DB.prepare('SELECT request_key FROM requests WHERE referral_code = ?1').bind(refIn).first(); if (who) referredBy = refIn; }
@@ -208,11 +225,11 @@ async function submit(context) {
   const extra = [];
   // The pickup and return days are answers of their own (request-form.mjs, from the event date).
   await env.DB.prepare(`INSERT INTO requests (request_key, source, submitted_at, services, name, email, phone, dob, social, heard, answers, id_object, id_type, id_size,
-      agreed_at, rules_version, agreed_name, agreed_ip, takedown_plan, referral_code, referred_by, receipt_id, robot_check, name_norm, phone_digits, source_tag, corporate)
-    VALUES (?1, 'site', ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?2, ?14, ?4, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24)`)
+      agreed_at, rules_version, agreed_name, agreed_ip, takedown_plan, referral_code, referred_by, receipt_id, robot_check, name_norm, phone_digits, source_tag, corporate, inspo_objects)
+    VALUES (?1, 'site', ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?2, ?14, ?4, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)`)
     .bind(key, submitted, JSON.stringify(services), clean.name, clean.email, clean.phone, clean.dob, clean.social || '', clean.heard || '',
       JSON.stringify([...answers, ...extra]), idObject, image.type, image.bytes.length, F.RULES_VERSION, ip, clean.takedown_plan || null, code, referredBy, receipt,
-      robot.used ? 'turnstile' : 'no-js', C.normName(clean.name), C.digitsOf(clean.phone), F.cleanSrc(fields.src), clean.corporate ? 1 : 0).run();
+      robot.used ? 'turnstile' : 'no-js', C.normName(clean.name), C.digitsOf(clean.phone), F.cleanSrc(fields.src), clean.corporate ? 1 : 0, inspoObjects.length ? JSON.stringify(inspoObjects) : null).run();
   await logEvent(env.DB, key, `Agreed to the Rules & Responsibilities (version ${F.RULES_VERSION}) and the Terms & Conditions, as "${clean.name}"`, 'website form');
   // A takedown date on the request books the takedown at once (takedown.mjs autoTakedownRow:
   // porch/party, "yes", a real date, never a duplicate). "Not sure" / "No" book nothing.

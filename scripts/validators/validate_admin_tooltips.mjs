@@ -247,7 +247,9 @@ pages.push(['/admin/requests/edit (nothing booked)', {}, await s.get(`/admin/req
   if (ri && ri.invoice_id) { const ed = await s.get(`/admin/invoices/${ri.invoice_id}/edit`); if (!/data-quick-game-pick/.test(ed.text)) errors.push(`the rental invoice editor has no game picker: ${(ed.text.match(/data-quick-game>[\s\S]{0,300}/) || [''])[0]}`); pages.push([`/admin/invoices/${ri.invoice_id}/edit (extra game)`, {}, ed]); }
   else errors.push('the held rental has no draft invoice, so + Extra game goes untested');
   // The invoice editor's "Room setup presets" (a hotel-room party request's draft).
-  const room = await s.siteRequest({ service: 'party', party_event: 'Anniversary', party_where: 'Hotel room', party_guests: 'Just the two of us', party_budget: '$300–$500', party_takedown: 'no', event_date: dplus(20), location: 'Memphis', name: 'Tip Example', phone: '901-555-0794', email: 'tip.example@example.com' });
+  const room = await s.siteRequest({ service: 'party', party_event: 'Anniversary', party_where: 'Hotel room', party_guests: 'Just the two of us', party_budget: '$300–$500', party_takedown: 'no', event_date: dplus(20), location: 'Memphis', inspo_photos: new File([new Uint8Array([0xff, 0xd8, 0xff, 0xda, 0, 2, 0xff, 0xd9])], 'look.jpg', { type: 'image/jpeg' }), name: 'Tip Example', phone: '901-555-0794', email: 'tip.example@example.com' });
+  // Its card carries an inspiration photo link (owner, 5 Nov 2026), so "Open photo" is rendered and checked.
+  pages.push(['/admin/ (card with an inspiration photo)', { home: true }, await s.get('/admin/')]);
   const roomInv = room.row ? await s.one('SELECT id FROM invoices WHERE request_key = ?1', room.row.request_key) : null;
   if (roomInv) { const ed = await s.get(`/admin/invoices/${roomInv.id}/edit`); if (!/data-room-presets>/.test(ed.text)) errors.push('the room setup invoice editor has no Room setup presets'); pages.push([`/admin/invoices/${roomInv.id}/edit (room setup presets)`, {}, ed]); }
   else errors.push('the hotel-room request has no draft invoice, so the room setup presets go untested');

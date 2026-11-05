@@ -441,6 +441,12 @@ export function idCell(r, rk, { from = '' } = {}) {
   return r.idFile ? r.idFile.split(/,\s*/).map((u, i) => link(u, i ? `Open ID photo ${i + 1}` : 'Open ID photo', 'card.idPhoto')).join('<br>') : '';
 }
 
+// Inspiration photos (owner, 5 Nov 2026): each opens over the card like the ID photo.
+export function inspoLinks(r, rk) {
+  const n = (r.inspo || []).length;
+  return Array.from({ length: n }, (_, i) => `<a href="/admin/requests/inspo?r=${esc(rk)}&amp;i=${i}" data-id-open data-src="/admin/requests/inspo?r=${esc(rk)}&amp;i=${i}" data-who="${esc(`${r.name || 'Customer'} · inspiration ${i + 1} of ${n}`)}"${tip('card.inspoPhoto')}>Open photo ${i + 1}</a>`).join(' · ');
+}
+
 // "Open ID photo" (owner, 20 Oct 2026): opens over the card (ID_VIEWER), never a new tab that
 // strands her. Without JS it is a normal same-tab page with the top bar and a Back to the card.
 // The image itself still comes from the private, no-store route /admin/requests/id.
@@ -1442,7 +1448,8 @@ export function requestCard(r, o) {
   // step 1 the "Still to ask" chips (only the questions the request did not answer) and "After the
   // call: are you taking this job?" with Yes, book it / Not yet / No, put it away.
   const told = toldFacts(r, services, bk);
-  const toldHtml = told.length ? `<section class="told" data-told><p class="tlbl">What ${esc(r.name ? who : 'they')} told us</p><dl>${told.map((f) => `<dt>${esc(f.label)}</dt><dd data-told-item="${esc(f.key)}">${esc(f.value)}</dd>`).join('')}</dl></section>` : '';
+  const inspoDd = inspoLinks(r, rk);
+  const toldHtml = told.length || inspoDd ? `<section class="told" data-told><p class="tlbl">What ${esc(r.name ? who : 'they')} told us</p><dl>${told.map((f) => `<dt>${esc(f.label)}</dt><dd data-told-item="${esc(f.key)}">${esc(f.value)}</dd>`).join('')}${inspoDd ? `<dt>Inspiration photos</dt><dd data-told-item="inspo">${inspoDd}</dd>` : ''}</dl></section>` : '';
   const step1 = s.current === 'called' && !archived && !pr.void && !miss;
   const ask = step1 ? stillToAsk(r, services, bk) : [];
   const askHtml = ask.length ? `<section class="stillask" data-still-to-ask><p class="tlbl">Still to ask</p><div class="askchips">${ask.map((q) => `<span class="askchip" data-ask="${esc(q.key)}">${esc(q.chip)}</span>`).join('')}</div></section>` : '';

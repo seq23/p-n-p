@@ -60,9 +60,10 @@ export const TAKEDOWN_PLAN = { yes: 'scheduled', no: 'customer_handles', not_sur
 // Hotel setups happen around check-in (owner, 5 Nov 2026).
 export const HOTEL_WINDOW = 'Hotel rooms: we generally need to be there from 3 to 6 PM, around check-in time.';
 export const LOCATION_LATER = 'No hotel booked yet? Leave this blank and text us the hotel when you have it.';
+// Inspiration photos (owner, 5 Nov 2026): optional, up to 5, each cleaned like the ID photo.
+export const MAX_INSPO = 5;
+export const INSPO_TYPES = ['image/jpeg', 'image/png'];
 export const DECOR_STYLES = [['picked', 'I have colors and accents in mind'], ['freestyle', 'Freestyle: you pick the look']];
-export const DECOR_COLORS = ['Pink', 'Red', 'Gold', 'Rose gold', 'Silver', 'White', 'Black', 'Blue', 'Purple', 'Green', 'Pastels', 'Neutrals (cream, beige, tan)'];
-export const DECOR_ACCENTS = ['Balloons', 'Flowers', 'Rose petals', 'Candles (flameless)', 'String lights', 'Banner or name letters', 'Photo backdrop'];
 // What each budget buys (owner, 5 Nov 2026): the lowest is simple decor, $1,000+ is very heavy
 // decor that fills the whole room. The hint is on the form only; the saved answer stays the plain range.
 export const BUDGET_HELP = 'The lower budget is simple decor. $1,000 and up is very heavy decor that fills the whole room.';
@@ -124,12 +125,11 @@ export function questions(offers, table) {
       // Optional (owner, 5 Nov 2026: "sometimes people do not have their hotel booked yet").
       // A request without it still saves; the admin card asks "Which hotel (or address)?" (card-told.mjs).
       { name: 'location', label: 'Location (hotel name, address or neighborhood)', type: 'text', group: 'decor', help: [LOCATION_LATER, offers.travel ? offers.travel.line : ''].filter(Boolean).join(' ') },
-      // The look (owner, 5 Nov 2026): pick or type colors and accents, or let us freestyle.
+      // The look (owner, 5 Nov 2026): freestyle or not, then one notes box for colors and accents
+      // (owner: "just let that all be described in the notes"), and inspiration photos.
       { name: 'decor_style', label: 'How should we style it?', type: 'radio', group: 'decor', choices: DECOR_STYLES },
-      { name: 'decor_colors', label: 'Colors', type: 'checks', group: 'decor', help: 'Tick any you like. Skip this if you picked freestyle.', choices: DECOR_COLORS },
-      { name: 'decor_colors_other', label: 'Other colors or exact shades', type: 'text', group: 'decor', help: 'For example: sage green and cream, or your team colors.' },
-      { name: 'decor_accents', label: 'Accents', type: 'checks', group: 'decor', help: 'Tick anything you would love to see. We price extras with your quote.', choices: DECOR_ACCENTS },
-      { name: 'decor_notes', label: 'Notes about the decor you want', type: 'textarea', group: 'decor', help: 'A theme, a name or age to show, a vibe, or a link to a photo you love.' },
+      { name: 'decor_notes', label: 'Notes about the decor you want', type: 'textarea', group: 'decor', help: 'Colors, accents (balloons, flowers, candles, a banner), a theme, a name or age to show, or the vibe. Picked freestyle? Tell us anything we should know.' },
+      { name: 'inspo_photos', label: 'Inspiration photos', type: 'photos', group: 'decor', help: `Have a look you love? Add up to ${MAX_INSPO} photos or screenshots.` },
       // Last in the section, after the style and accent questions (owner, 5 Nov 2026).
       { name: 'notes', label: 'Anything else? Surprise details, timing or questions', type: 'textarea', group: 'other' },
     ],
@@ -201,7 +201,7 @@ export function validateSubmission(fields, { offers, table, today, file = null }
   else if (fields.service === 'multi' && !services.length) errors.multi = 'Tick the services you want.';
   const ask = (q) => {
     const raw = fields[q.name];
-    if (q.type === 'games') return;
+    if (q.type === 'games' || q.type === 'photos') return;
     if (q.type === 'checks') {
       const picked = (Array.isArray(raw) ? raw : [raw]).filter(Boolean).map(String).filter((v) => q.choices.includes(v));
       const value = picked.join(', ');
@@ -297,6 +297,9 @@ function renderQuestion(q, values, errors) {
   if (q.type === 'check') {
     return `<div class="rq-q" id="q-${esc(q.name)}" data-q="${esc(q.name)}"><label class="rq-choice"><input type="checkbox" name="${esc(q.name)}" value="yes"${v === 'yes' ? ' checked' : ''}${describedBy(q.name, q, errors)}> <span><strong>${esc(q.label)}</strong></span></label>${help}</div>`;
   }
+  if (q.type === 'photos') {
+    return `<div class="rq-q${errors[q.name] ? ' rq-bad' : ''}" id="q-${esc(q.name)}" data-q="${esc(q.name)}"><label for="f-${esc(q.name)}">${esc(q.label)}${opt}</label>${help}${fieldError(q.name, errors)}<input type="file" id="f-${esc(q.name)}" name="${esc(q.name)}" accept="image/jpeg,image/png,image/*" multiple${describedBy(q.name, q, errors)}><p class="rq-help" data-inspo-status aria-live="polite"></p></div>`;
+  }
   if (q.type === 'checks') {
     const picked = Array.isArray(v) ? v : (v ? [v] : []);
     const boxes = q.choices.map((c) => `<label class="rq-choice"><input type="checkbox" name="${esc(q.name)}" value="${esc(c)}"${picked.includes(c) ? ' checked' : ''}> <span>${esc(c)}</span></label>`).join('');
@@ -374,7 +377,9 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
     <div class="rq-q${errors.id_photo ? ' rq-bad' : ''}" id="q-id_photo" data-q="id_photo"><label for="f-id_photo">Government photo ID${req}</label><p class="rq-help">Take a photo of the front of your ID.</p>${fieldError('id_photo', errors)}
     <input type="file" id="f-id_photo" name="id_photo" accept="image/jpeg,image/png,image/*" required aria-describedby="help-id_photo${errors.id_photo ? ' err-id_photo' : ''}"><p class="rq-help" data-id-status aria-live="polite"></p></div>`);
   const agree = section('agree', 'Last step', `<div class="rq-q${errors.agree ? ' rq-bad' : ''}" id="q-agree" data-q="agree">${fieldError('agree', errors)}
-    <label class="rq-choice rq-agree"><input type="checkbox" name="agree" value="yes" required${values.agree === 'yes' ? ' checked' : ''}> <span>I have read and agree to Porch &amp; Party's <a href="${RULES_PATH}" target="_blank" rel="noopener">Rules &amp; Responsibilities</a> and <a href="${TERMS_PATH}" target="_blank" rel="noopener">Terms &amp; Conditions</a>${req}</span></label>
+    <p class="rq-legal" data-legal-links>Please read both before you tick the box. Each opens in a new tab.</p>
+    <ul class="rq-legal-links"><li><a href="${RULES_PATH}" target="_blank" rel="noopener">Rules &amp; Responsibilities<span class="rq-newtab" aria-hidden="true"> ↗</span><span class="rq-sr"> (opens in a new tab)</span></a></li><li><a href="${TERMS_PATH}" target="_blank" rel="noopener">Terms &amp; Conditions<span class="rq-newtab" aria-hidden="true"> ↗</span><span class="rq-sr"> (opens in a new tab)</span></a></li></ul>
+    <label class="rq-choice rq-agree"><input type="checkbox" name="agree" value="yes" required${values.agree === 'yes' ? ' checked' : ''}> <span>I have read and agree to Porch &amp; Party's Rules &amp; Responsibilities and Terms &amp; Conditions${req}</span></label>
     <input type="hidden" name="rules_version" value="${RULES_VERSION}"></div>
     ${sitekey ? `<div class="cf-turnstile" data-sitekey="${esc(sitekey)}" data-size="flexible"></div>` : ''}
     <button type="submit" class="btn-primary rq-submit" data-quote-cta="request-form">Send my request</button>
@@ -392,7 +397,7 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
 const FORM_CSS = `.rq-range{font-weight:600;color:#3b302a}.rq-wrap{max-width:680px;margin:0 auto}.rq-form{display:block}.rq-section{background:#fff;border:1px solid #e8dfd4;border-radius:16px;padding:18px 16px;margin:16px 0}
 .rq-section h2{font-size:1.5rem;margin:0 0 8px}.rq-for{font-size:.95rem;font-weight:400;color:#6b5c52}.rq-q{border:0;margin:0 0 18px;padding:0;min-width:0}
 .rq-q legend,.rq-q>label{display:block;font-weight:600;font-size:1.05rem;margin-bottom:6px;padding:0}.rq-req{color:#a8442b;margin-left:3px}.rq-opt{font-weight:400;color:#6b5c52;font-size:.95rem}
-.rq-help{margin:2px 0 8px;color:#5f5148;font-size:.95rem}.rq-note{font-weight:400;color:#5f5148}.rq-choice{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:8px 10px;border:1px solid #e8dfd4;border-radius:10px;margin:0 0 8px;cursor:pointer;font-size:1rem;line-height:1.35}
+.rq-legal{margin:0 0 6px;color:#5f5148}.rq-legal-links{list-style:none;padding:0;margin:0 0 12px;display:flex;flex-direction:column;gap:6px}.rq-legal-links a{display:inline-flex;align-items:center;min-height:44px;color:#7a4b1f;font-weight:600;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:2px}.rq-legal-links a:hover,.rq-legal-links a:focus{color:#5a3412}.rq-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}.rq-help{margin:2px 0 8px;color:#5f5148;font-size:.95rem}.rq-note{font-weight:400;color:#5f5148}.rq-choice{display:flex;gap:10px;align-items:flex-start;min-height:44px;padding:8px 10px;border:1px solid #e8dfd4;border-radius:10px;margin:0 0 8px;cursor:pointer;font-size:1rem;line-height:1.35}
 .rq-choice input{width:22px;height:22px;margin:2px 0 0;flex:none;accent-color:#a8442b}.rq-q input[type=text],.rq-q input[type=tel],.rq-q input[type=email],.rq-q input[type=date],.rq-q textarea{width:100%;box-sizing:border-box;font:inherit;font-size:16px;padding:12px;border:1px solid #c9b8a8;border-radius:10px;background:#fff;color:#3b302a}
 .rq-q input[type=file]{font-size:16px;width:100%}.rq-bad input,.rq-bad textarea,.rq-bad .rq-choice{border-color:#a8442b}.rq-error{color:#a8442b;font-weight:600;margin:4px 0 8px}
 .rq-summary{border:2px solid #a8442b;border-radius:14px;padding:14px 16px;background:#fff6f3;margin:12px 0}.rq-summary h2{font-size:1.3rem;margin:0 0 6px}.rq-summary a{color:#a8442b}
@@ -432,6 +437,10 @@ var file=f.querySelector('input[name=id_photo]'),st=f.querySelector('[data-id-st
 if(file&&window.DataTransfer&&window.HTMLCanvasElement)file.addEventListener('change',function(){var src=file.files&&file.files[0];if(!src||!/^image\\//.test(src.type))return;st.textContent='Getting your photo ready…';var url=URL.createObjectURL(src),img=new Image();
 img.onload=function(){var max=1600,w=img.naturalWidth,h=img.naturalHeight,k=Math.min(1,max/Math.max(w,h));var c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
 c.toBlob(function(b){if(!b){st.textContent='';return;}var dt=new DataTransfer();dt.items.add(new File([b],'id-photo.jpg',{type:'image/jpeg'}));file.files=dt.files;st.textContent='Photo ready ✓';},'image/jpeg',0.85);};img.onerror=function(){st.textContent='';URL.revokeObjectURL(url);};img.src=url;});
+var ins=f.querySelector('input[name=inspo_photos]'),ist=f.querySelector('[data-inspo-status]');
+if(ins&&window.DataTransfer&&window.HTMLCanvasElement)ins.addEventListener('change',function(){var src=[].slice.call(ins.files||[]).filter(function(x){return /^image\//.test(x.type);});if(src.length>${MAX_INSPO}){ist.textContent='Only the first ${MAX_INSPO} photos will be sent.';src=src.slice(0,${MAX_INSPO});}if(!src.length)return;ist.textContent='Getting your photos ready…';var out=[],n=0;
+src.forEach(function(s,ix){var url=URL.createObjectURL(s),img=new Image();img.onload=function(){var max=1600,w=img.naturalWidth,h=img.naturalHeight,k=Math.min(1,max/Math.max(w,h));var c=document.createElement('canvas');c.width=Math.round(w*k);c.height=Math.round(h*k);c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);c.toBlob(function(b){out[ix]=b?new File([b],'inspiration-'+(ix+1)+'.jpg',{type:'image/jpeg'}):s;done();},'image/jpeg',0.85);};img.onerror=function(){URL.revokeObjectURL(url);out[ix]=s;done();};img.src=url;});
+function done(){n+=1;if(n<src.length)return;var dt=new DataTransfer();out.forEach(function(x){if(x)dt.items.add(x);});ins.files=dt.files;ist.textContent=out.length+(out.length===1?' photo':' photos')+' ready ✓';}});
 f.addEventListener('submit',function(e){var bad=null;[].slice.call(f.querySelectorAll('[required]')).forEach(function(i){if(bad)return;var s=i.closest('[data-section]');if(s&&s.hidden)return;if(i.type==='radio'||i.type==='checkbox'){if(i.type==='radio'&&!f.querySelector('input[name='+i.name+']:checked'))bad=i;if(i.type==='checkbox'&&!i.checked)bad=i;}else if(!i.value)bad=i;});
 if(picked().indexOf('rentals')>=0&&!f.querySelector('input[name=games]:checked'))bad=bad||f.querySelector('input[name=games]');if(bad){e.preventDefault();var q=bad.closest('.rq-q');if(q){q.classList.add('rq-bad');q.scrollIntoView({block:'center'});}try{bad.focus({preventScroll:true});}catch(x){}return;}
 var b=f.querySelector('.rq-submit');if(b){b.disabled=true;b.textContent='Sending…';}});

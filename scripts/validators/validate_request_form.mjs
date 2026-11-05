@@ -145,22 +145,34 @@ for (const [p, fields] of Object.entries(PATHS)) {
   must(ev.some((e) => e.what.includes(`version ${F.RULES_VERSION}`)), `${p}: the agreement is not logged with its version`);
   must(row && JSON.parse(row.services).length >= 1, `${p}: services not stored`);
 }
-// ---- No hotel yet + the look (owner, 5 Nov 2026) ------------------------------------------
-// Location is optional (the hotel may not be booked yet); colors, accents, freestyle and decor
-// notes are kept as answers on the request; the hotel 3-6 PM check-in note is on the form.
+// ---- No hotel yet + the look + inspiration photos (owner, 5 Nov 2026) ---------------------
+// Location is optional (the hotel may not be booked yet); freestyle and the decor notes are kept
+// as answers; inspiration photos (up to 5) are cleaned of EXIF and stored privately under inspo/;
+// a bad one is refused by name; the colors/accents tick boxes are gone (one notes box instead).
 {
   const { location: _drop, ...noPlace } = PATHS.party;
-  const look = await send({ ...noPlace, ...contact(47), decor_style: 'freestyle', decor_colors: ['Gold', 'Pink'], decor_colors_other: 'sage green', decor_accents: ['Balloons', 'Rose petals'], decor_notes: 'Happy 30th, Jade' });
-  must(look.status === 303, `a party request with no location was refused (${look.status}) ${look.text.slice(look.text.indexOf('rq-summary'), look.text.indexOf('rq-summary') + 300)}`);
-  const lr = await s.one('SELECT answers FROM requests WHERE email = ?1', 'path47@example.com');
+  const pic = (n) => new File([JPEG_EXIF], `look${n}.jpg`, { type: 'image/jpeg' });
+  const look = await send({ ...noPlace, ...contact(47), decor_style: 'freestyle', decor_notes: 'Gold and pink, balloons, Happy 30th Jade', inspo_photos: [pic(1), pic(2), pic(3), pic(4), pic(5), pic(6)] });
+  must(look.status === 303, `a party request with no location and photos was refused (${look.status}) ${look.text.slice(look.text.indexOf('rq-summary'), look.text.indexOf('rq-summary') + 300)}`);
+  const lr = await s.one('SELECT answers, inspo_objects FROM requests WHERE email = ?1', 'path47@example.com');
   const la = lr ? JSON.parse(lr.answers) : [];
   const got = (label) => (la.find((a) => a.label === label) || {}).value || '';
-  must(/Freestyle/.test(got('How should we style it?')) && got('Colors') === 'Gold, Pink' && got('Other colors or exact shades') === 'sage green' && got('Accents') === 'Balloons, Rose petals' && got('Notes about the decor you want') === 'Happy 30th, Jade', 'the style, colors, accents or decor notes were not stored on the request');
+  must(/Freestyle/.test(got('How should we style it?')) && got('Notes about the decor you want') === 'Gold and pink, balloons, Happy 30th Jade', 'the style or decor notes were not stored on the request');
   must(!la.some((a) => /^location/i.test(a.label)), 'a blank location was stored as an answer');
-  const bogus = await send({ ...noPlace, ...contact(48), decor_style: 'whatever' });
+  const keys = lr && lr.inspo_objects ? JSON.parse(lr.inspo_objects) : [];
+  must(keys.length === F.MAX_INSPO && F.MAX_INSPO === 5 && keys.every((k) => /^inspo\/[a-f0-9]+\.jpg$/.test(k)), `inspiration photos were not stored as 5 private inspo/ objects (${JSON.stringify(keys)})`);
+  for (const k of keys) { const o = await env.IDS.get(k); const b = o ? new Uint8Array(await o.arrayBuffer()) : null; must(b && !Buffer.from(b).includes(Buffer.from('Exif')), `inspiration photo ${k} is missing or kept its EXIF`); }
+  const none = await send({ ...noPlace, ...contact(49) });
+  const nr = await s.one('SELECT inspo_objects FROM requests WHERE email = ?1', 'path49@example.com');
+  must(none.status === 303 && nr && nr.inspo_objects === null, 'a request with no inspiration photos did not save cleanly');
+  const junk = await send({ ...noPlace, ...contact(48), inspo_photos: [new File([new Uint8Array([1, 2, 3, 4])], 'x.jpg', { type: 'image/jpeg' })] });
+  must(junk.status === 400 && junk.text.includes('id="err-inspo_photos"'), 'a broken inspiration photo was accepted');
+  const bogus = await send({ ...noPlace, ...contact(46), decor_style: 'whatever' });
   must(bogus.status === 400 && bogus.text.includes('id="err-decor_style"'), 'an unknown style choice was accepted');
   const page = await (await handler({ request: new Request('https://porchandparty901.com/request'), env, params: {} })).text();
   must(page.includes(F.HOTEL_WINDOW) && page.includes(F.LOCATION_LATER) && !/name="location"[^>]*required/.test(page) && page.includes('value="freestyle"') && page.includes(F.BUDGET_HELP) && page.includes('(very heavy decor, the full room)'), 'the form does not show the budget explanation, the hotel check-in note, the optional location or the freestyle choice');
+  must(/<input type="file" id="f-inspo_photos" name="inspo_photos"[^>]* multiple/.test(page) && !/name="decor_colors|name="decor_accents/.test(page), 'the form does not offer multi-photo inspiration upload, or still shows the colors/accents boxes');
+  must((page.match(/<a href="\/rules" target="_blank" rel="noopener">/g) || []).length === 1 && (page.match(/<a href="\/terms-and-conditions" target="_blank" rel="noopener">/g) || []).length === 1 && /\.rq-legal-links a\{[^}]*text-decoration:underline/.test(page), 'Rules and Terms are not two separate underlined links that open a new tab');
 }
 must(made.porch && made.party && made.porch.takedown_plan === 'not_sure' && made.party.takedown_plan === 'scheduled', 'the takedown answer does not map into takedown_plan');
 must(made.multi && JSON.stringify(JSON.parse(made.multi.services)) === JSON.stringify(['party', 'rentals']), 'the "more than one" path did not store both services');
