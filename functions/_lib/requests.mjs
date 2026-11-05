@@ -90,7 +90,7 @@ export function fromRow(row) {
   const common = {
     source: row.source, corporate: Boolean(row.corporate), services: parse(row.services, []), agreedAt: row.agreed_at || '', rulesVersion: row.rules_version || '',
     agreedName: row.agreed_name || '', referredBy: row.referred_by || '', referralCode: row.referral_code || '', robotCheck: row.robot_check || '',
-    idObject: row.id_object || '', idDeletedAt: row.id_deleted_at || '', idDeletedAuto: Boolean(row.id_deleted_auto),
+    inspo: parse(row.inspo_objects, []), idObject: row.id_object || '', idDeletedAt: row.id_deleted_at || '', idDeletedAuto: Boolean(row.id_deleted_auto),
     idReadySince: row.id_ready_since || '', idKeepUntil: row.id_keep_until || '', idKeepForever: Boolean(row.id_keep_forever), isTest: Boolean(row.is_test), submittedAt: row.submitted_at,
     takedownPlan: row.takedown_plan || '', takedownNote: row.takedown_note || '', takedownDate: row.takedown_date || '',
     confirmEmailedAt: row.confirm_emailed_at || '', confirmedTextedAt: row.confirmed_texted_at || '', thankyouEmailedAt: row.thankyou_emailed_at || '',

@@ -29,13 +29,16 @@ const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
 const T = await mod('functions/_lib/card-told.mjs');
 const V = await mod('functions/_lib/views.mjs');
 const K = await mod('functions/_lib/cards.mjs');
-// The look from /request (owner, 5 Nov 2026) reaches "What they told us" and quiets the colors/decor asks.
+// The look from /request (owner, 5 Nov 2026): freestyle + decor notes reach "What they told us";
+// inspiration photos are linked there and quiet the "inspiration photos" ask.
 {
-  const r = { decor: [{ group: 'decor', label: 'How should we style it?', value: 'Freestyle: you pick the look' }, { group: 'decor', label: 'Colors', value: 'Gold, Pink' }, { group: 'decor', label: 'Accents', value: 'Balloons' }, { group: 'decor', label: 'Notes about the decor you want', value: 'Happy 30th' }] };
+  const r = { inspo: ['inspo/a.jpg', 'inspo/b.jpg'], name: 'Jade', decor: [{ group: 'decor', label: 'How should we style it?', value: 'Freestyle: you pick the look' }, { group: 'decor', label: 'Notes about the decor you want', value: 'Gold and pink balloons, Happy 30th' }] };
   const told = T.toldFacts(r, ['party']).find((x) => x.key === 'notes');
-  must(told && /Freestyle/.test(told.value) && /Colors: Gold, Pink/.test(told.value) && /Accents: Balloons/.test(told.value) && /Happy 30th/.test(told.value), `the style, colors, accents and decor notes do not reach the card (${JSON.stringify(told)})`);
+  must(told && /Freestyle/.test(told.value) && /Happy 30th/.test(told.value), `freestyle and the decor notes do not reach the card (${JSON.stringify(told)})`);
   const asks = T.stillToAsk(r, ['party']).map((q) => q.key);
-  must(!asks.includes('colors') && !asks.includes('decor'), `the card still asks for colors or decorations the customer gave (${asks})`);
+  must(!asks.includes('colors') && !asks.includes('decor') && !asks.includes('photos'), `the card still asks for what the customer gave (${asks})`);
+  const links = V.inspoLinks(r, 'KEY');
+  must((links.match(/href="\/admin\/requests\/inspo\?r=KEY&amp;i=[01]" data-id-open/g) || []).length === 2 && V.inspoLinks({}, 'KEY') === '', `the card does not link each inspiration photo over the card (${links})`);
 }
 const HT = await mod('functions/_lib/helptext.mjs');
 

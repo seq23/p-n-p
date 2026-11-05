@@ -614,6 +614,18 @@ async function idPhoto(env, url) {
   return new Response(obj.body, { headers: { 'Content-Type': row.id_type || 'image/jpeg', 'Cache-Control': 'private, no-store', 'Content-Disposition': 'inline; filename="photo-id"' } });
 }
 
+// Inspiration photos from /request (owner, 5 Nov 2026), same private bucket and rules as the ID.
+async function inspoPhoto(env, url) {
+  const key = decodeKey(url.searchParams.get('r') || '');
+  const i = Number(url.searchParams.get('i') || 0);
+  const row = key ? await env.DB.prepare('SELECT inspo_objects FROM requests WHERE request_key = ?1').bind(key).first() : null;
+  let list = []; try { list = JSON.parse((row && row.inspo_objects) || '[]'); } catch { list = []; }
+  const k = Number.isInteger(i) && i >= 0 ? list[i] : null;
+  const obj = k && env.IDS ? await env.IDS.get(k) : null;
+  if (!obj) return htmlResponse(V.layout('No photo', '<p>That inspiration photo is not on file.</p>', { screen: 'notfound', back: { href: '/admin/', label: 'Back to main page' } }), 404);
+  return new Response(obj.body, { headers: { 'Content-Type': /\.png$/.test(k) ? 'image/png' : 'image/jpeg', 'Cache-Control': 'private, no-store', 'Content-Disposition': `inline; filename="inspiration-${i + 1}"` } });
+}
+
 // The no-JS fallback for "Open ID photo" (the card normally opens it over itself): a same-tab
 // page with the admin bar and Back to the card. Never cached, like the photo.
 async function idPhotoView(env, url) {
@@ -980,6 +992,7 @@ async function routeAdmin(context) {
     if (segs.length === 2 && method === 'GET') { await RN.markOpened(env.DB, decodeKey(url.searchParams.get('r') || ''), 'edit'); return AE.editPage(env, url); }
     if (segs.length === 3 && method === 'POST') return AE.editRoute(env, request, segs[2]);
   }
+  if (segs[0] === 'requests' && segs[1] === 'inspo' && segs.length === 2 && method === 'GET') return inspoPhoto(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs.length === 2 && method === 'GET') return idPhoto(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'view' && method === 'GET') return idPhotoView(env, url);
   if (segs[0] === 'requests' && segs[1] === 'id' && segs[2] === 'delete' && method === 'POST') return deleteId(env, request);
