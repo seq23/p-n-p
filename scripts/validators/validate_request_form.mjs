@@ -171,6 +171,11 @@ for (const [p, fields] of Object.entries(PATHS)) {
   must(bogus.status === 400 && bogus.text.includes('id="err-decor_style"'), 'an unknown style choice was accepted');
   const page = await (await handler({ request: new Request('https://porchandparty901.com/request'), env, params: {} })).text();
   must(page.includes(F.HOTEL_WINDOW) && page.includes(F.LOCATION_LATER) && !/name="location"[^>]*required/.test(page) && page.includes('value="freestyle"') && page.includes(F.BUDGET_HELP) && page.includes('(very heavy decor, the full room)'), 'the form does not show the budget explanation, the hotel check-in note, the optional location or the freestyle choice');
+  // The form's own script must parse (5 Nov 2026: one bad regex stopped every section from
+  // showing only its own questions, and every unit check still passed).
+  const formJs = [...page.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]).filter((js) => js.includes('rq-form'));
+  must(formJs.length === 1, `the request page should carry exactly one form script (${formJs.length})`);
+  for (const js of formJs) { try { new Function(js); } catch (e) { must(false, `the request form script does not parse (${e.message}), so sections stop showing and hiding`); } }
   must(/<input type="file" id="f-inspo_photos" name="inspo_photos"[^>]* multiple/.test(page) && !/name="decor_colors|name="decor_accents/.test(page), 'the form does not offer multi-photo inspiration upload, or still shows the colors/accents boxes');
   must((page.match(/<a href="\/rules" target="_blank" rel="noopener">/g) || []).length === 1 && (page.match(/<a href="\/terms-and-conditions" target="_blank" rel="noopener">/g) || []).length === 1 && /\.rq-legal-links a\{[^}]*text-decoration:underline/.test(page), 'Rules and Terms are not two separate underlined links that open a new tab');
 }
