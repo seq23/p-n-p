@@ -29,6 +29,14 @@ const must = (ok, msg) => { checks += 1; if (!ok) errors.push(msg); };
 const T = await mod('functions/_lib/card-told.mjs');
 const V = await mod('functions/_lib/views.mjs');
 const K = await mod('functions/_lib/cards.mjs');
+// The look from /request (owner, 5 Nov 2026) reaches "What they told us" and quiets the colors/decor asks.
+{
+  const r = { decor: [{ group: 'decor', label: 'How should we style it?', value: 'Freestyle: you pick the look' }, { group: 'decor', label: 'Colors', value: 'Gold, Pink' }, { group: 'decor', label: 'Accents', value: 'Balloons' }, { group: 'decor', label: 'Notes about the decor you want', value: 'Happy 30th' }] };
+  const told = T.toldFacts(r, ['party']).find((x) => x.key === 'notes');
+  must(told && /Freestyle/.test(told.value) && /Colors: Gold, Pink/.test(told.value) && /Accents: Balloons/.test(told.value) && /Happy 30th/.test(told.value), `the style, colors, accents and decor notes do not reach the card (${JSON.stringify(told)})`);
+  const asks = T.stillToAsk(r, ['party']).map((q) => q.key);
+  must(!asks.includes('colors') && !asks.includes('decor'), `the card still asks for colors or decorations the customer gave (${asks})`);
+}
 const HT = await mod('functions/_lib/helptext.mjs');
 
 // ---- 1. pure: questions only for missing answers --------------------------------------------

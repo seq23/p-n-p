@@ -80,11 +80,14 @@ async function formPage(env, url, { values = {}, errors = {}, status = 200, refe
   return new Response(html, { status, headers: HEADERS });
 }
 
+// Fields where a customer can tick more than one box; every other field keeps one value.
+const MULTI_FIELDS = new Set(['multi', 'games', 'porch_addons', 'decor_colors', 'decor_accents']);
+
 function fieldsOf(form) {
   const out = {};
   for (const [k, v] of form.entries()) {
     if (typeof v !== 'string') continue;
-    if (k === 'multi' || k === 'games' || k === 'porch_addons') (out[k] = out[k] || []).push(v);
+    if (MULTI_FIELDS.has(k)) (out[k] = out[k] || []).push(v);
     else out[k] = v;
   }
   return out;

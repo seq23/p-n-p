@@ -20,7 +20,14 @@ const all = (r) => [...(r.rentals || []), ...(r.decor || []), ...(r.other || [])
 const ans = (r, re) => { const hit = all(r).find((x) => re.test(String(x.label || ''))); return hit ? String(hit.value == null ? '' : hit.value).trim() : ''; };
 // "Not sure yet" (and blanks) count as not answered: the question is still worth asking.
 const real = (v) => (v && !/^not sure/i.test(v) ? v : '');
-const notes = (r) => [ans(r, /^anything else/i), ans(r, /^notes about your porch/i), ans(r, /^notes$/i)].filter(Boolean).join(' · ');
+// The look (owner, 5 Nov 2026): style, colors, accents and decor notes from /request join the notes.
+const look = (r) => {
+  const style = ans(r, /^how should we style it/i);
+  const colors = [ans(r, /^colors$/i), ans(r, /^other colors/i)].filter(Boolean).join(', ');
+  const accents = ans(r, /^accents$/i);
+  return [/freestyle/i.test(style) ? 'Freestyle (we pick the look)' : '', colors ? `Colors: ${colors}` : '', accents ? `Accents: ${accents}` : '', ans(r, /^notes about the decor/i)];
+};
+const notes = (r) => [...look(r), ans(r, /^anything else/i), ans(r, /^notes about your porch/i), ans(r, /^notes$/i)].filter(Boolean).join(' · ');
 const said = (r, re) => re.test(notes(r));
 const COLOR_RE = /\b(colou?rs?|theme|red|pink|purple|blue|green|gold|silver|black|white|ivory|cream|yellow|orange|teal|navy|lavender|lilac|burgundy|maroon|rose ?gold|pastel|neutral|boho|blush)\b/i;
 const DECOR_RE = /\b(balloons?|rose petals?|petals|flowers?|candles?|sign|banner|garland|backdrop|marquee|neon)\b/i;

@@ -145,6 +145,23 @@ for (const [p, fields] of Object.entries(PATHS)) {
   must(ev.some((e) => e.what.includes(`version ${F.RULES_VERSION}`)), `${p}: the agreement is not logged with its version`);
   must(row && JSON.parse(row.services).length >= 1, `${p}: services not stored`);
 }
+// ---- No hotel yet + the look (owner, 5 Nov 2026) ------------------------------------------
+// Location is optional (the hotel may not be booked yet); colors, accents, freestyle and decor
+// notes are kept as answers on the request; the hotel 3-6 PM check-in note is on the form.
+{
+  const { location: _drop, ...noPlace } = PATHS.party;
+  const look = await send({ ...noPlace, ...contact(47), decor_style: 'freestyle', decor_colors: ['Gold', 'Pink'], decor_colors_other: 'sage green', decor_accents: ['Balloons', 'Rose petals'], decor_notes: 'Happy 30th, Jade' });
+  must(look.status === 303, `a party request with no location was refused (${look.status}) ${look.text.slice(look.text.indexOf('rq-summary'), look.text.indexOf('rq-summary') + 300)}`);
+  const lr = await s.one('SELECT answers FROM requests WHERE email = ?1', 'path47@example.com');
+  const la = lr ? JSON.parse(lr.answers) : [];
+  const got = (label) => (la.find((a) => a.label === label) || {}).value || '';
+  must(/Freestyle/.test(got('How should we style it?')) && got('Colors') === 'Gold, Pink' && got('Other colors or exact shades') === 'sage green' && got('Accents') === 'Balloons, Rose petals' && got('Notes about the decor you want') === 'Happy 30th, Jade', 'the style, colors, accents or decor notes were not stored on the request');
+  must(!la.some((a) => /^location/i.test(a.label)), 'a blank location was stored as an answer');
+  const bogus = await send({ ...noPlace, ...contact(48), decor_style: 'whatever' });
+  must(bogus.status === 400 && bogus.text.includes('id="err-decor_style"'), 'an unknown style choice was accepted');
+  const page = await (await handler({ request: new Request('https://porchandparty901.com/request'), env, params: {} })).text();
+  must(page.includes(F.HOTEL_WINDOW) && page.includes(F.LOCATION_LATER) && !/name="location"[^>]*required/.test(page) && page.includes('value="freestyle"') && page.includes(F.BUDGET_HELP) && page.includes('(very heavy decor, the full room)'), 'the form does not show the budget explanation, the hotel check-in note, the optional location or the freestyle choice');
+}
 must(made.porch && made.party && made.porch.takedown_plan === 'not_sure' && made.party.takedown_plan === 'scheduled', 'the takedown answer does not map into takedown_plan');
 must(made.multi && JSON.stringify(JSON.parse(made.multi.services)) === JSON.stringify(['party', 'rentals']), 'the "more than one" path did not store both services');
 // ---- Channel source tags (owner, 22 Oct 2026; migration 0023, request-form.mjs cleanSrc) ------
