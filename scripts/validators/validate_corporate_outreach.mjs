@@ -233,16 +233,16 @@ for (const [text, opts, kind] of [
   const s = await session(); const F = await mod('functions/_lib/request-form.mjs');
   const offers = JSON.parse(fs.readFileSync(`${ROOT}/data/offers/services.json`));
   const html = F.renderForm({offers,table:s.PRICE_TABLE,values:{audience:'corporate'}});
-  assert.match(html,/<legend>Who is this for\?<\/legend>/);assert.match(html,/value="corporate" checked/);assert.match(html,/>Home</);assert.match(html,/>Business or lobby</);
+  assert.match(html,/<legend>Who is this for\?<\/legend>/);assert.match(html,/value="corporate" checked/);assert.match(html,/>Me \(Personal\)</);assert.match(html,/>Business</);assert.doesNotMatch(html,/name="audience" value="(?!home\b|corporate\b)/);
   const day = new Date(Date.now()+10*86400000).toISOString().slice(0,10);
   const fields = {name:'Avery Example',email:'avery@example.com',phone:'202-555-0100',service:'party',party_event:'Birthday',party_where:'Home',party_takedown:'not_sure',event_date:day,location:'Fictional office',audience:'corporate'};
   const made = await s.siteRequest(fields); assert.equal(made.status,303,made.text);assert.equal(made.row.corporate,1);
   const R = await mod('functions/_lib/requests.mjs'); assert.equal(R.fromRow(made.row).corporate,true);
-  const page = await s.get('/admin/');assert.match(page.text,/data-corporate>Business \/ lobby<\/p>/);
+  const page = await s.get('/admin/');assert.match(page.text,/data-corporate>Business<\/p>/);
   const { buildOwnerFeed } = await mod('functions/_lib/owner-feed.mjs');
-  const feed = await buildOwnerFeed(s.env,'day');assert.ok(feed.items.some((it) => it.detail.includes('Business / lobby')));
+  const feed = await buildOwnerFeed(s.env,'day');assert.ok(feed.items.some((it) => it.detail.includes('Business')));
   const home = await s.siteRequest({...fields,email:'home@example.com',audience:'home'});assert.equal(home.status,303,home.text);assert.equal(home.row.corporate,0);
-  assert.equal(F.validateSubmission({...fields,audience:'invalid'},{offers,table:s.PRICE_TABLE,today:day}).errors.audience,'Please pick Home or Business or lobby.');
+  assert.equal(F.validateSubmission({...fields,audience:'invalid'},{offers,table:s.PRICE_TABLE,today:day}).errors.audience,'Please pick Me (Personal) or Business.');
 }
 // Signatures change, body text/logo stay. Stored sent invoices are never updated.
 {

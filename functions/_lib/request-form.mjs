@@ -41,7 +41,7 @@ export function serviceChoices(offers, table) {
   return [
     { key: 'porch', label: 'Porch decorating', whatHtml: 'We decorate the <b>outside</b> of your home.', eg: 'e.g. fall pumpkins, Christmas front door',
       alt: 'A front porch decorated for fall with pumpkins, mums and a wreath', echo: "We'll decorate the outside of your home.", price: dollars(offers.services.porch.price) },
-    { key: 'party', label: 'Party & decor', whatHtml: 'We decorate <b>for an event</b>: a room, a hall or a backyard.', eg: 'e.g. birthday balloons, a baby shower, a proposal',
+    { key: 'party', label: 'Party & Hotel Decor', whatHtml: 'We decorate <b>for an event</b>: a room, a hall or a backyard.', eg: 'e.g. birthday balloons, a baby shower, a proposal',
       alt: 'A birthday balloon arch, and a hotel room decorated with red heart balloons and candles', echo: "We'll decorate for your event.", price: dollars(offers.services.celebration.price) },
     { key: 'grazing', label: 'Grazing table', whatHtml: 'A styled table of food for guests.', eg: 'e.g. charcuterie, fruit, sweets',
       alt: 'A styled grazing table of meats, cheese and fruit', echo: "We'll style a table of food for your guests.", price: dollars(offers.services.grazing.price) },
@@ -225,9 +225,9 @@ export function validateSubmission(fields, { offers, table, today, file = null }
     if (value && q.group) answers.push({ group: q.group, label: q.label, value });
     return value;
   };
-  if (fields.audience && !['home', 'corporate'].includes(fields.audience)) errors.audience = 'Please pick Home or Business or lobby.';
+  if (fields.audience && !['home', 'corporate'].includes(fields.audience)) errors.audience = 'Please pick Me (Personal) or Business.';
   const clean = { services, corporate: fields.audience === 'corporate' };
-  answers.push({ group: 'other', label: 'Who is this for?', value: clean.corporate ? 'Business / lobby' : 'Home' });
+  answers.push({ group: 'other', label: 'Who is this for?', value: clean.corporate ? 'Business' : 'Personal' });
   for (const k of services.filter((s) => s !== 'rentals')) for (const q of Q[k]) clean[q.name] = ask(q);
   if (services.some((s) => s !== 'rentals')) for (const q of Q.event) clean[q.name] = ask(q);
   if (services.includes('rentals')) {
@@ -351,8 +351,8 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
     return `<label class="rq-tile${type === 'radio' ? ' rq-service' : ' rq-sq'}${on ? ' rq-on' : ''}" data-tile="${c.key}" data-label="${esc(c.label)}" data-says="${esc(c.echo)}">${input}${pic(c, type !== 'radio')}<span class="rq-tile-text"><strong>${esc(c.label)}</strong><span class="rq-what">${c.whatHtml}</span><span class="rq-eg">${esc(c.eg)}</span></span></label>`;
   };
   const audience = `<fieldset class="rq-q" id="q-audience"><legend>Who is this for?</legend>
-    ${fieldError('audience', errors)}<label class="rq-choice"><input type="radio" name="audience" value="home"${values.audience !== 'corporate' ? ' checked' : ''}> <span>Home</span></label>
-    <label class="rq-choice"><input type="radio" name="audience" value="corporate"${values.audience === 'corporate' ? ' checked' : ''}> <span>Business or lobby</span></label></fieldset>`;
+    ${fieldError('audience', errors)}<label class="rq-choice"><input type="radio" name="audience" value="home"${values.audience !== 'corporate' ? ' checked' : ''}> <span>Me (Personal)</span></label>
+    <label class="rq-choice"><input type="radio" name="audience" value="corporate"${values.audience === 'corporate' ? ' checked' : ''}> <span>Business</span></label></fieldset>`;
   const page1 = `${audience}<fieldset class="rq-q rq-services${errors.service ? ' rq-bad' : ''}" id="q-service" data-q="service"><legend>What are you planning?${req}</legend>
     <p class="rq-help" id="help-service">${esc(SERVICE_HELP)}</p>${fieldError('service', errors)}
     <div class="rq-tiles" data-tiles>${choices.map((c) => tile(c, 'radio')).join('')}</div>
@@ -363,9 +363,9 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
   </fieldset>`;
   const sections = [
     section('porch', 'Your porch <span class="rq-for">(if you picked porch decorating)</span>', Q.porch.map((q) => renderQuestion(q, values, errors)).join('')),
-    section('party', 'Your celebration <span class="rq-for">(if you picked party &amp; decor)</span>', `<p class="rq-help" data-section-price="party">${esc(PARTY_PARENTHETICAL.slice(1, -1))[0].toUpperCase()}${esc(PARTY_PARENTHETICAL.slice(2, -1))}. Party decor starts at $${choices[1].price}; your quote shows the exact price.</p>${Q.party.map((q) => renderQuestion(q, values, errors)).join('')}`),
+    section('party', 'Your celebration <span class="rq-for">(if you picked party &amp; hotel decor)</span>', `<p class="rq-help" data-section-price="party">${esc(PARTY_PARENTHETICAL.slice(1, -1))[0].toUpperCase()}${esc(PARTY_PARENTHETICAL.slice(2, -1))}. Party decor starts at $${choices[1].price}; your quote shows the exact price.</p>${Q.party.map((q) => renderQuestion(q, values, errors)).join('')}`),
     section('grazing', 'Your grazing table <span class="rq-for">(if you picked grazing table)</span>', Q.grazing.map((q) => renderQuestion(q, values, errors)).join('')),
-    section('event', 'Date and place <span class="rq-for">(porch, party &amp; decor, grazing)</span>', Q.event.map((q) => renderQuestion(q, values, errors)).join('')),
+    section('event', 'Date and place <span class="rq-for">(porch, party &amp; hotel decor, grazing)</span>', Q.event.map((q) => renderQuestion(q, values, errors)).join('')),
     section('rentals', 'Your games <span class="rq-for">(if you picked game rentals)</span>', `<p class="rq-help">Booking, not a quote: we hold your games for ${esc(String(offers.rentalHolds.defaultHours))} hours while you pay the deposit.</p>${renderGames(table, values, errors)}${Q.rentals.filter((q) => q.type !== 'games').map((q) => renderQuestion(q, values, errors)).join('')}
       <div class="rq-total" data-total aria-live="polite"><noscript><p class="rq-help">Your exact total is shown on the next screen.</p></noscript></div>`),
   ].join('');

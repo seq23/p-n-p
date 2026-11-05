@@ -52,7 +52,7 @@ const brand = JSON.parse(execFileSync(process.execPath, ['-e', `const b=require(
 const choices = F.serviceChoices(offers, PRICE_TABLE);
 must(JSON.stringify(choices.map((c) => c.key)) === JSON.stringify(brand.SERVICES.map((s) => s.key)), 'page-1 services are not in the canonical brand order');
 // Picture tiles (owner-approved mock-up, 20 Oct 2026): the approved words per tile, in brand order.
-const TILE_WORDS = { porch: ['Porch decorating', 'We decorate the <b>outside</b> of your home.', 'e.g. fall pumpkins, Christmas front door'], party: ['Party & decor', 'We decorate <b>for an event</b>: a room, a hall or a backyard.', 'e.g. birthday balloons, a baby shower, a proposal'],
+const TILE_WORDS = { porch: ['Porch decorating', 'We decorate the <b>outside</b> of your home.', 'e.g. fall pumpkins, Christmas front door'], party: ['Party & Hotel Decor', 'We decorate <b>for an event</b>: a room, a hall or a backyard.', 'e.g. birthday balloons, a baby shower, a proposal'],
   grazing: ['Grazing table', 'A styled table of food for guests.', 'e.g. charcuterie, fruit, sweets'], rentals: ['Game rentals', 'Giant yard games to <b>borrow</b>.', `e.g. ${PRICE_TABLE.items.slice(0, 3).map((i) => i.name.replace(/ Set$/, '')).join(', ')}`] };
 must(choices.every((c) => TILE_WORDS[c.key] && c.label === TILE_WORDS[c.key][0] && c.whatHtml === TILE_WORDS[c.key][1] && c.eg === TILE_WORDS[c.key][2] && c.alt.length > 15 && c.echo), `page-1 tiles drift from the approved words: ${choices.map((c) => c.label).join(' / ')}`);
 must(F.PARTY_PARENTHETICAL === '(hotel-room surprises, home celebrations, showers, event spaces — big or small)', 'the owner party parenthetical changed');
