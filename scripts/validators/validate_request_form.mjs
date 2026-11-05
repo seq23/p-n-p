@@ -107,6 +107,7 @@ const plus = (n) => { const d = new Date(`${today}T12:00:00Z`); d.setUTCDate(d.g
 const JPEG_EXIF = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 16, 0x4a, 0x46, 0x49, 0x46, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0,
   0xff, 0xe1, 0, 22, 0x45, 0x78, 0x69, 0x66, 0, 0, 0x47, 0x50, 0x53, 0x2d, 0x4c, 0x41, 0x54, 0x3d, 0x33, 0x35, 0x2e, 0x31, 0x34, 0x39,
   0xff, 0xda, 0, 8, 1, 1, 0, 0, 0x3f, 0, 0x12, 0x34, 0xff, 0xd9]);
+const T = await import(new URL('../../functions/_lib/card-told.mjs', import.meta.url));
 const handler = (ctx) => RS.handleRequestPage(ctx);
 async function send(fields, { file = JPEG_EXIF, type = 'image/jpeg', ip = null, ts = null, cookie = '' } = {}) {
   const fd = new FormData();
@@ -178,6 +179,20 @@ for (const [p, fields] of Object.entries(PATHS)) {
   for (const js of formJs) { try { new Function(js); } catch (e) { must(false, `the request form script does not parse (${e.message}), so sections stop showing and hiding`); } }
   must(/<input type="file" id="f-inspo_photos" name="inspo_photos"[^>]* multiple/.test(page) && !/name="decor_colors|name="decor_accents/.test(page), 'the form does not offer multi-photo inspiration upload, or still shows the colors/accents boxes');
   must((page.match(/<a href="\/rules" target="_blank" rel="noopener">/g) || []).length === 1 && (page.match(/<a href="\/terms-and-conditions" target="_blank" rel="noopener">/g) || []).length === 1 && /\.rq-legal-links a\{[^}]*text-decoration:underline/.test(page), 'Rules and Terms are not two separate underlined links that open a new tab');
+}
+// ---- Business + party: "just the lobby?" (owner, 5 Nov 2026) ------------------------------
+{
+  const biz = await send({ ...PATHS.party, ...contact(81), audience: 'corporate', party_lobby: 'lobby' });
+  const br = await s.one('SELECT answers, corporate FROM requests WHERE email = ?1', 'path81@example.com');
+  const ba = br ? JSON.parse(br.answers) : [];
+  must(biz.status === 303 && br && br.corporate === 1 && ba.some((a) => a.label === 'What should we decorate?' && a.value === 'Just the lobby'), 'a business party request did not keep "Just the lobby"');
+  const home = await send({ ...PATHS.party, ...contact(82), audience: 'home', party_lobby: 'lobby' });
+  const hr = await s.one('SELECT answers FROM requests WHERE email = ?1', 'path82@example.com');
+  must(home.status === 303 && hr && !/What should we decorate/.test(hr.answers), 'a personal request stored the business-only lobby answer');
+  const told = T.toldFacts({ decor: ba }, ['party']).find((x) => x.key === 'space');
+  must(told && told.value === 'Just the lobby', 'Valerie\'s card does not show what the business wants decorated');
+  const pg = await (await handler({ request: new Request('https://porchandparty901.com/request'), env, params: {} })).text();
+  must(/<div data-lobby-q hidden><fieldset class="rq-q" id="q-party_lobby"/.test(pg) && pg.includes("querySelectorAll('[data-lobby-q]')"), 'the lobby question is not hidden until Business is picked');
 }
 must(made.porch && made.party && made.porch.takedown_plan === 'not_sure' && made.party.takedown_plan === 'scheduled', 'the takedown answer does not map into takedown_plan');
 must(made.multi && JSON.stringify(JSON.parse(made.multi.services)) === JSON.stringify(['party', 'rentals']), 'the "more than one" path did not store both services');

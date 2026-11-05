@@ -63,6 +63,8 @@ export const LOCATION_LATER = 'No hotel booked yet? Leave this blank and text us
 // Inspiration photos (owner, 5 Nov 2026): optional, up to 5, each cleaned like the ID photo.
 export const MAX_INSPO = 5;
 export const INSPO_TYPES = ['image/jpeg', 'image/png'];
+// A business picking party & hotel decor (owner, 5 Nov 2026): ask if it is just the lobby.
+export const LOBBY_CHOICES = [['lobby', 'Just the lobby'], ['lobby_room', 'The lobby and an event room or space'], ['room', 'An event room or space, not the lobby'], ['not_sure', 'Not sure yet']];
 export const DECOR_STYLES = [['picked', 'I have colors and accents in mind'], ['freestyle', 'Freestyle: you pick the look']];
 // What each budget buys (owner, 5 Nov 2026): the lowest is simple decor, $1,000+ is very heavy
 // decor that fills the whole room. The hint is on the form only; the saved answer stays the plain range.
@@ -98,6 +100,7 @@ export function questions(offers, table) {
   return {
     porch: porchQuestions(table.porchPackages, td),
     party: [
+      { name: 'party_lobby', label: 'What should we decorate?', type: 'radio', group: 'decor', companyOnly: true, help: 'Just your lobby, or an event room or space too.', choices: LOBBY_CHOICES },
       { name: 'party_event', label: "What's the event type?", type: 'radio', required: true, group: 'decor', choices: EVENT_TYPES },
       { name: 'party_where', label: 'Where is it?', type: 'radio', required: true, group: 'decor', help: HOTEL_WINDOW, choices: ['Hotel room', 'Home', 'Event space or venue', 'Backyard or outdoors', 'Not sure yet'] },
       { name: 'party_guests', label: 'How many guests?', type: 'radio', group: 'decor', choices: ['Just the two of us', 'Under 15', '15–40', '40+'] },
@@ -228,7 +231,7 @@ export function validateSubmission(fields, { offers, table, today, file = null }
   if (fields.audience && !['home', 'corporate'].includes(fields.audience)) errors.audience = 'Please pick Me (Personal) or Business.';
   const clean = { services, corporate: fields.audience === 'corporate' };
   answers.push({ group: 'other', label: 'Who is this for?', value: clean.corporate ? 'Business' : 'Personal' });
-  for (const k of services.filter((s) => s !== 'rentals')) for (const q of Q[k]) clean[q.name] = ask(q);
+  for (const k of services.filter((s) => s !== 'rentals')) for (const q of Q[k]) if (!q.companyOnly || clean.corporate) clean[q.name] = ask(q);
   if (services.some((s) => s !== 'rentals')) for (const q of Q.event) clean[q.name] = ask(q);
   if (services.includes('rentals')) {
     const items = rentalItems(table);
@@ -366,7 +369,7 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
   </fieldset>`;
   const sections = [
     section('porch', 'Your porch <span class="rq-for">(if you picked porch decorating)</span>', Q.porch.map((q) => renderQuestion(q, values, errors)).join('')),
-    section('party', 'Your celebration <span class="rq-for">(if you picked party &amp; hotel decor)</span>', `<p class="rq-help" data-section-price="party">${esc(PARTY_PARENTHETICAL.slice(1, -1))[0].toUpperCase()}${esc(PARTY_PARENTHETICAL.slice(2, -1))}. Party decor starts at $${choices[1].price}; your quote shows the exact price.</p>${Q.party.map((q) => renderQuestion(q, values, errors)).join('')}`),
+    section('party', 'Your celebration <span class="rq-for">(if you picked party &amp; hotel decor)</span>', `<p class="rq-help" data-section-price="party">${esc(PARTY_PARENTHETICAL.slice(1, -1))[0].toUpperCase()}${esc(PARTY_PARENTHETICAL.slice(2, -1))}. Party decor starts at $${choices[1].price}; your quote shows the exact price.</p>${Q.party.map((q) => q.companyOnly ? `<div data-lobby-q${values.audience === 'corporate' ? '' : ' hidden'}>${renderQuestion(q, values, errors)}</div>` : renderQuestion(q, values, errors)).join('')}`),
     section('grazing', 'Your grazing table <span class="rq-for">(if you picked grazing table)</span>', Q.grazing.map((q) => renderQuestion(q, values, errors)).join('')),
     section('event', 'Date and place <span class="rq-for">(porch, party &amp; hotel decor, grazing)</span>', Q.event.map((q) => renderQuestion(q, values, errors)).join('')),
     section('rentals', 'Your games <span class="rq-for">(if you picked game rentals)</span>', `<p class="rq-help">Booking, not a quote: we hold your games for ${esc(String(offers.rentalHolds.defaultHours))} hours while you pay the deposit.</p>${renderGames(table, values, errors)}${Q.rentals.filter((q) => q.type !== 'games').map((q) => renderQuestion(q, values, errors)).join('')}
@@ -444,4 +447,6 @@ function done(){n+=1;if(n<src.length)return;var dt=new DataTransfer();out.forEac
 f.addEventListener('submit',function(e){var bad=null;[].slice.call(f.querySelectorAll('[required]')).forEach(function(i){if(bad)return;var s=i.closest('[data-section]');if(s&&s.hidden)return;if(i.type==='radio'||i.type==='checkbox'){if(i.type==='radio'&&!f.querySelector('input[name='+i.name+']:checked'))bad=i;if(i.type==='checkbox'&&!i.checked)bad=i;}else if(!i.value)bad=i;});
 if(picked().indexOf('rentals')>=0&&!f.querySelector('input[name=games]:checked'))bad=bad||f.querySelector('input[name=games]');if(bad){e.preventDefault();var q=bad.closest('.rq-q');if(q){q.classList.add('rq-bad');q.scrollIntoView({block:'center'});}try{bad.focus({preventScroll:true});}catch(x){}return;}
 var b=f.querySelector('.rq-submit');if(b){b.disabled=true;b.textContent='Sending…';}});
+function biz(){var c=f.querySelector('input[name=audience][value=corporate]');var on=!!(c&&c.checked);[].slice.call(f.querySelectorAll('[data-lobby-q]')).forEach(function(d){d.hidden=!on;if(!on)[].slice.call(d.querySelectorAll('input')).forEach(function(i){i.checked=false;});});}
+[].slice.call(f.querySelectorAll('input[name=audience]')).forEach(function(i){i.addEventListener('change',biz);});biz();
 var es=document.getElementById('rq-errors');if(es)es.focus();lens();sync();})();`;
