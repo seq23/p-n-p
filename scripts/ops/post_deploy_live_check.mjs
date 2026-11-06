@@ -26,7 +26,9 @@
  *      og:site_name, twitter:card and its visible date line where the committed
  *      file has one;
  *   8. every destination in _redirects answers 200 after following the hop, and
- *      every source actually redirects rather than serving a page.
+ *      every source actually redirects rather than serving a page;
+ *   9. the duplicate host p-n-p.pages.dev answers X-Robots-Tag: noindex and the
+ *      real domain does not.
  *
  * Rule 0: it hard-fails on zero checks, and it hard-fails if the committed
  * sitemap is empty, so "nothing looked" can never read as "nothing wrong".
@@ -233,6 +235,22 @@ for (const line of read('_redirects').split('\n')) {
   check(dest.status === 200, `_redirects destination ${to} answered ${dest.status}`);
 }
 
+// --- 9. the duplicate Pages host is noindex, the real domain is not ----------
+// _headers marks exactly https://p-n-p.pages.dev/* noindex (found indexed 6 Nov 2026).
+
+if (HOST === offers.domain.replace(/^https?:\/\//, '')) {
+  const robotsHeader = async (url) => {
+    for (let i = 0; i < RETRIES; i += 1) {
+      try { const r = await fetch(url, { redirect: 'manual', headers: { 'user-agent': UA } }); return { status: r.status, tag: r.headers.get('x-robots-tag') || '' }; } catch { await sleep(RETRY_DELAY_MS); }
+    }
+    return { status: 0, tag: '' };
+  };
+  const dup = await robotsHeader('https://p-n-p.pages.dev/');
+  check(dup.status === 200 && /noindex/i.test(dup.tag), `https://p-n-p.pages.dev/ answered ${dup.status} without X-Robots-Tag noindex; the duplicate host stays indexable`);
+  const real = await robotsHeader(`${BASE}/`);
+  check(!/noindex/i.test(real.tag), `${BASE}/ answers X-Robots-Tag ${real.tag}; the real domain must stay indexable`);
+}
+
 // --- verdict ----------------------------------------------------------------
 
 if (!checks) {
@@ -245,4 +263,4 @@ if (failures.length) {
   if (failures.length > 40) console.error(`  ...and ${failures.length - 40} more`);
   process.exit(1);
 }
-console.log(`POST-DEPLOY LIVE CHECK PASS: ${checks} checks against ${BASE} - robots, sitemap (${committedLocs.length} URLs), the IndexNow key, llms.txt, ${siteIcons.ICON_FILES.length} icons, ${ogImages.size} og:images, ${sample.length} sampled pages and every _redirects rule.`);
+console.log(`POST-DEPLOY LIVE CHECK PASS: ${checks} checks against ${BASE} - robots, sitemap (${committedLocs.length} URLs), the IndexNow key, llms.txt, ${siteIcons.ICON_FILES.length} icons, ${ogImages.size} og:images, ${sample.length} sampled pages, every _redirects rule and the noindex on p-n-p.pages.dev.`);
