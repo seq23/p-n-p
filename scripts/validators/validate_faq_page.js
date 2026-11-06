@@ -83,7 +83,8 @@ const ITEM = /<details class="faq-item"( open)?><summary><h3>([\s\S]*?)<\/h3><\/
 function checkNavigation(html) {
   const css = read('assets/css/styles.css');
   if (/recommendation-summary|What this page recommends/i.test(html)) fail('faq/index.html: still carries the "What this page recommends" block');
-  const hero = html.match(/<div class="page-intro" id="top">([\s\S]*?)<\/div>\s*<\/div>|<div class="page-intro" id="top">([\s\S]*?<div class="btn-row[^"]*">[\s\S]*?<\/div>)/);
+  // The hero runs from the intro to the page map (the price-tool line under its button is part of it).
+  const hero = html.match(/<div class="page-intro" id="top">([\s\S]*?)<nav class="faq-map"/);
   if (!hero) fail('faq/index.html: no hero with id="top"');
   else {
     const h = hero[1] || hero[2];

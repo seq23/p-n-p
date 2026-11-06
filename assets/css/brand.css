@@ -1,0 +1,322 @@
+/* Porch & Party brand layer (approved design system, 6 Nov 2026:
+   https://claude.ai/artifact/CQE2ok8Mha6jq21LaAqXiu).
+   A Southern front porch: cotton ground, porch-step plum words, ONE marigold
+   button, haint-blue plaque / price panel / tags. Fraunces 800 (SOFT 100,
+   WONK 1) for the wordmark and every heading; Figtree for everything else.
+   scripts/lib/site_chrome.js links this file LAST in every page's <head>, so
+   it wins over styles.css, site-nav.css and each page's own inline <style>
+   (request, pricing, porch pages, legal pages) without touching their words.
+   Style only: no heading, link, answer paragraph or schema depends on it. */
+:root {
+  --cotton: #fbf6ee; --cotton-deep: #f3eadb; --card: #fffdf8;
+  --plum: #2a1a28; --plum-muted: #6a5468;
+  --marigold: #f2b01e; --on-marigold: #2a1a28; --edge: #2a1a28;
+  --haint: #cfe8e6; --haint-deep: #2f6866;
+  --line: rgba(42, 26, 40, 0.12); --line-strong: #8a7787;
+  --focus: #2a1a28; --brick: #b3261e;
+  --shadow-sign: 0 3px 0 #2a1a28; --shadow-card: 0 8px 24px rgba(42, 26, 40, 0.08);
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* the live token names, remapped so every old rule picks up the new look */
+  --bg-main: var(--cotton); --bg-soft: var(--cotton-deep); --bg-card: var(--card);
+  --text-main: var(--plum); --text-muted: var(--plum-muted); --text-strong: var(--plum);
+  --accent-primary: var(--haint-deep); --accent-primary-hover: var(--plum); --accent-secondary: var(--haint-deep);
+  --border-soft: var(--line); --shadow-soft: var(--shadow-card);
+  --radius-sm: 10px; --radius-md: 14px; --radius-lg: 18px;
+}
+html { overflow-x: hidden; }
+body { background: var(--cotton); color: var(--plum); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+
+/* ---------- type ---------- */
+h1, h2, h3, h4, .hero-lead, .footer-title, .pnp-panel-nav a {
+  font-family: var(--font-display); font-variation-settings: "SOFT" 100, "WONK" 1; color: var(--plum);
+}
+h1, .hero-lead { font-weight: 800; font-size: 28px; line-height: 1.08; letter-spacing: -0.015em; }
+h2 { font-weight: 800; font-size: 26px; line-height: 1.12; letter-spacing: -0.01em; }
+h3 { font-weight: 700; font-size: 20px; line-height: 1.2; letter-spacing: 0; }
+h4 { font-weight: 700; font-size: 18px; line-height: 1.25; }
+@media (min-width: 1024px) {
+  h1, .hero-lead { font-size: 56px; }
+  h2 { font-size: 38px; }
+  .faq-section .answer-block h2 { font-size: 30px; }
+}
+.eyebrow, .nf-code { font: 700 13px/1.3 var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--plum-muted); opacity: 1; }
+.muted, .pkg-covers, .pkg-estimate, .rq-for, .rq-opt, .rq-eg, .rq-left, .rq-help, .rq-note, .rq-unsure, .rq-legal { color: var(--plum-muted); }
+.hero-definition, .page-intro > p:first-of-type { font-size: 18px; line-height: 1.45; }
+a { text-underline-offset: 3px; }
+main p a:not([class]), main li a:not([class]), .footer-list a, .legal-links a {
+  color: var(--plum); text-decoration: underline; text-decoration-color: var(--haint-deep); text-decoration-thickness: 2px;
+}
+main p a:not([class]) strong { font-weight: 700; }
+.brand-script, .hero-brand-script { font-family: var(--font-display); font-weight: 800; font-variation-settings: "SOFT" 100, "WONK" 1; color: var(--plum); }
+
+/* ---------- the logo: wordmark + 901 house-number plaque ---------- */
+.pp-wordmark {
+  display: inline-flex; align-items: center; gap: .28em; font: 800 26px/1 var(--font-display);
+  font-variation-settings: "SOFT" 100, "WONK" 1; letter-spacing: -0.01em; color: var(--plum); white-space: nowrap;
+}
+.pp-wordmark i { font-style: normal; font-weight: 800; }
+.pp-plaque {
+  display: inline-flex; align-items: center; justify-content: center; background: var(--haint); color: var(--plum);
+  border: 2px solid var(--edge); border-radius: 999px; box-shadow: var(--shadow-sign);
+  font: 800 .52em/1 var(--font-body); letter-spacing: .04em; padding: .26em .42em; font-variation-settings: normal;
+}
+.pnp-header .pnp-logo { min-height: 44px; }
+.pnp-header .pp-wordmark { font-size: 22px; }
+@media (min-width: 1024px) and (max-width: 1279px) { .pnp-header .pp-wordmark { font-size: 21px; } }
+@media (min-width: 1280px) { .pnp-header .pp-wordmark { font-size: 26px; } }
+@media (max-width: 430px) { .pnp-header .pp-wordmark { font-size: 19px; } }
+@media (max-width: 359px) { .pnp-header .pp-wordmark { font-size: 16px; } }
+
+/* ---------- header ---------- */
+.pnp-header { background: var(--cotton); border-bottom: 1px solid var(--line); font-family: var(--font-body); }
+.pnp-header :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+@media (min-width: 1024px) {
+  .pnp-header .pnp-nav a { color: var(--plum-muted); font-weight: 600; }
+  .pnp-header .pnp-nav a:hover, .pnp-header .pnp-nav a[aria-current="page"] { color: var(--plum); }
+  .pnp-header .pnp-nav a::after { background: var(--haint-deep); }
+  .pnp-header .pnp-call { color: var(--haint-deep); }
+}
+.pnp-header .pnp-quote, .pnp-header .pnp-book-m, .pnp-header .pnp-panel-quote {
+  background: var(--marigold); color: var(--on-marigold); border: 2px solid var(--edge); box-shadow: var(--shadow-sign);
+  border-radius: var(--radius-md); font-family: var(--font-body); font-weight: 700;
+}
+.pnp-header .pnp-book-m { min-height: 44px; }
+.pnp-header .pnp-quote:hover, .pnp-header .pnp-book-m:hover, .pnp-header .pnp-panel-quote:hover,
+.pnp-header .pnp-quote[aria-current="page"] { background: var(--marigold); color: var(--on-marigold); }
+.pnp-header .pnp-quote:active, .pnp-header .pnp-book-m:active, .pnp-header .pnp-panel-quote:active { transform: translateY(2px); box-shadow: none; }
+.pnp-header .pnp-icon-call { color: var(--haint-deep); background: var(--card); border: 1.5px solid var(--line-strong); }
+.pnp-header .pnp-icon-call:hover, .pnp-header .pnp-toggle:hover { background: var(--cotton-deep); }
+.pnp-header .pnp-toggle { color: var(--plum); }
+.pnp-panel { background: var(--cotton); }
+.pnp-panel-nav a { font-weight: 800; font-size: 26px; }
+.pnp-panel-nav a:hover, .pnp-panel-nav a[aria-current="page"] { color: var(--plum); }
+.pnp-panel-nav a[aria-current="page"]::before { background: var(--haint-deep); }
+.pnp-panel-call { color: var(--haint-deep); }
+.pnp-backdrop { background: rgba(42, 26, 40, 0.32); }
+@media (max-width: 430px) {
+  .pnp-header-inner { gap: 6px; }
+  .pnp-header .pnp-book-m { font-size: 14px; padding: 0 10px; }
+}
+
+/* ---------- buttons: the marigold porch sign, and the quiet secondary ---------- */
+.btn-primary, .rq-submit, .nf-home {
+  background: var(--marigold); color: var(--on-marigold); border: 2px solid var(--edge); box-shadow: var(--shadow-sign);
+  border-radius: var(--radius-md); font: 700 18px/1.1 var(--font-body); min-height: 52px; padding: 0 22px;
+  display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
+}
+.btn-primary:hover, .rq-submit:hover { background: var(--marigold); color: var(--on-marigold); }
+.btn-primary:active, .rq-submit:active { transform: translateY(2px); box-shadow: none; }
+.btn-secondary {
+  background: var(--card); color: var(--plum); border: 1.5px solid var(--line-strong); border-radius: var(--radius-md);
+  font: 700 18px/1.1 var(--font-body); min-height: 52px; padding: 0 22px;
+}
+.btn-secondary:hover { background: var(--cotton-deep); }
+.btn-primary:focus-visible, .btn-secondary:focus-visible, .rq-submit:focus-visible, a:focus-visible, summary:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--focus); outline-offset: 2px;
+}
+@media (max-width: 640px) {
+  .btn-row { flex-direction: column; align-items: stretch; }
+  .btn-row > .btn-primary, .btn-row > .btn-secondary { width: 100%; }
+}
+
+/* ---------- home hero: her real setup leads ---------- */
+.hero-minimal { padding: 18px 0 56px; }
+.hero-photo-real { position: relative; width: 100%; max-width: 560px; margin: 0 auto 20px; border-radius: var(--radius-lg); overflow: hidden; }
+.hero-photo-real img { display: block; width: 100%; aspect-ratio: 1 / 1; object-fit: cover; object-position: 50% 0; }
+.pp-tag { position: absolute; left: 12px; bottom: 12px; background: var(--haint); color: var(--plum); border-radius: 999px; padding: 5px 11px; font: 600 13px/1.2 var(--font-body); }
+.hero-brandline { font: 600 18px/1.4 var(--font-body); color: var(--plum-muted); margin: 0 0 14px; }
+.hero-lead { max-width: 22ch; margin: 6px auto 14px; }
+.hero-subtle { color: var(--plum); }
+@media (min-width: 1024px) {
+  .hero-minimal { padding: 40px 0 80px; }
+  .hero-minimal-inner { max-width: 1080px; display: grid; grid-template-columns: 1fr 1.05fr; column-gap: 48px; text-align: left; align-items: start; }
+  .hero-minimal-inner > * { grid-column: 2; }
+  .hero-minimal-inner > .hero-photo-real { grid-column: 1; grid-row: 1 / span 9; margin: 0; max-width: none; position: sticky; top: 100px; }
+  .hero-lead { font-size: 46px; max-width: none; margin-left: 0; }
+  .hero-definition, .hero-subtle { margin-left: 0; }
+  .hero-minimal-inner .hero-centered-cta { justify-content: flex-start; }
+}
+
+/* ---------- sections, cards, prices ---------- */
+.section { padding: 40px 0; }
+@media (min-width: 1024px) { .section { padding: 72px 0; } }
+.section-soft, .cta-band { background: var(--cotton-deep); }
+.container { width: min(var(--container, 1080px), calc(100% - 36px)); }
+.card, .pricing-card, .faq-item, .step, .info-panel, .info-card, .faq-map__card, .new-badge, .pkg-tier, .rq-section, .rq-tile {
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card);
+}
+.card { overflow: hidden; }
+.card-media img, .hero-photo { border-radius: 0; }
+.card-body, .pricing-card, .step, .info-panel, .info-card { padding: 18px; }
+.price, .pkg-price { color: var(--plum); font-family: var(--font-body); font-weight: 700; }
+.price { display: inline-block; font-size: 22px; background: var(--haint); border-radius: 999px; padding: 4px 14px; }
+.pkg-tier { border-top: 1px solid var(--line); }
+.pkg-tier h4 { font-family: var(--font-display); }
+.pkg-price { font-size: 20px; background: var(--haint); border-radius: 999px; padding: 2px 12px; align-self: flex-start; }
+.pkg-request, .faq-map__go { color: var(--plum); text-decoration: underline; text-decoration-color: var(--haint-deep); text-decoration-thickness: 2px; }
+.pkg-toggle label { background: var(--card); border: 1.5px solid var(--line-strong); }
+.pkg-toggle input, .rq-choice input, .rq-tile input, .rq-more input { accent-color: var(--haint-deep); }
+.step-number { background: var(--haint); color: var(--plum); font: 800 16px var(--font-body); }
+.new-badge__chip { background: var(--haint); color: var(--plum); }
+.faq-map__card:hover, .faq-map__card:focus-visible { border-color: var(--haint-deep); }
+.faq-map__card--tool { background: var(--haint); border-color: var(--haint-deep); }
+.faq-jump { background: var(--cotton-deep); }
+.faq-jump a { min-height: 44px; background: var(--card); }
+.faq-jump a.is-active, .faq-jump a[aria-current] { background: var(--haint); border-color: var(--edge); color: var(--plum); }
+details.faq-item summary { min-height: 44px; }
+details.faq-item summary h3 { font-family: var(--font-display); font-variation-settings: "SOFT" 100, "WONK" 1; font-size: 18px; font-weight: 700; line-height: 1.3; }
+details.faq-item summary:hover { color: var(--plum); }
+.breadcrumb, .breadcrumb a { color: var(--plum-muted); }
+.site-footer { background: var(--cotton-deep); border-top: 1px solid var(--line); }
+.footer-title { font-weight: 800; font-size: 22px; }
+.footer-list { color: var(--plum-muted); }
+.footer-list a, .legal-links a { display: inline-flex; align-items: center; min-height: 44px; }
+.legal { color: var(--plum-muted); }
+.estimator-form input, .estimator-form select { border: 1.5px solid var(--line-strong); background: var(--card); min-height: 48px; }
+
+/* ---------- /request: the form shell ---------- */
+.rq-range { color: var(--plum); }
+.rq-section { padding: 18px; }
+.rq-section h2 { font-size: 24px; }
+.rq-q input[type=text], .rq-q input[type=tel], .rq-q input[type=email], .rq-q input[type=date], .rq-q textarea, select {
+  border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--card); color: var(--plum); min-height: 48px;
+}
+.rq-choice { border: 1.5px solid var(--line-strong); background: var(--card); }
+.rq-tile { border: 2px solid var(--line-strong); box-shadow: none; }
+.rq-tile.rq-on, .rq-tile:has(input:checked), .rq-more.rq-on, .rq-more:has(input:checked) { border-color: var(--edge); background: var(--haint); }
+.rq-more { border-color: var(--line-strong); }
+.rq-tile:focus-within, .rq-more:focus-within { outline: 3px solid var(--focus); }
+.rq-req, .rq-error, .rq-summary a { color: var(--brick); }
+.rq-bad input, .rq-bad textarea, .rq-bad .rq-choice, .rq-summary { border-color: var(--brick); }
+.rq-summary { background: var(--card); }
+.rq-idnote { background: var(--haint); border-left-color: var(--haint-deep); }
+.rq-total { background: var(--haint); }
+.rq-legal-links a { color: var(--plum); text-decoration-color: var(--haint-deep); }
+.rq-js .rq-back1 { border-color: var(--line-strong); background: var(--card); color: var(--plum); }
+.rq-submit { width: 100%; }
+
+/* ---------- legal pages carry their own inline header styles; keep them on brand ---------- */
+.site-header { background: var(--cotton); backdrop-filter: none; }
+.site-nav a { color: var(--plum); }
+
+@media (prefers-reduced-motion: reduce) { .btn-primary:active, .rq-submit:active { transform: none; } }
+
+/* ---------- hostile review at 390 px (6 Nov) ---------- */
+/* phones: the hero reads left-aligned like the approved home page, buttons full width */
+@media (max-width: 1023px) {
+  .hero-minimal-inner { text-align: left; align-items: stretch; }
+  .hero-minimal-inner .eyebrow, .hero-lead, .hero-definition, .hero-subtle { margin-left: 0; max-width: none; }
+  .hero-minimal-inner .hero-centered-cta { justify-content: stretch; width: 100%; }
+  .book-online-line { text-align: left; }
+}
+/* every tap target 44 px */
+.pkg-request { display: inline-flex; align-items: center; min-height: 44px; }
+th[scope="row"] a, .faq-longer a { display: inline-flex; align-items: center; min-height: 44px; }
+@media (min-width: 1024px) { .pnp-header .pnp-nav a { height: 44px; } }
+/* radios and checkboxes on the form: haint, never the old brick */
+.rq-q input[type=radio], .rq-q input[type=checkbox], .pkg-toggle input, .estimator-form input[type=radio] { accent-color: var(--haint-deep); }
+main .breadcrumb li a:not([class]) { text-decoration: none; color: var(--plum-muted); }
+
+/* ---------- price tools (top of /pricing) and the links to them ---------- */
+.price-tools { padding-top: 8px; }
+.price-tool-grid { display: grid; gap: 18px; }
+@media (min-width: 900px) { .price-tool-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+.price-tool { background: var(--card); border: 2px solid var(--edge); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px; scroll-margin-top: 84px; }
+.price-tool h3 { font-size: 24px; margin: 0 0 4px; }
+.price-tool-lead { color: var(--plum-muted); margin: 0 0 12px; }
+.pt-form { margin: 0; }
+.pt-q { border: 0; padding: 0; margin: 0 0 14px; min-width: 0; }
+.pt-q legend, .pt-label { display: block; font: 600 15px/1.3 var(--font-body); margin: 0 0 8px; padding: 0; }
+.pt-choices { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+.pt-choice { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 12px; border: 1.5px solid var(--line-strong); border-radius: var(--radius-md); background: var(--card); cursor: pointer; font: 600 15px/1.25 var(--font-body); }
+.pt-choice small { display: block; font-weight: 400; color: var(--plum-muted); font-size: 13px; }
+.pt-choice input { width: 22px; height: 22px; flex: none; margin: 0; accent-color: var(--haint-deep); }
+.pt-choice:has(input:checked) { border: 2px solid var(--edge); background: var(--haint); }
+.pt-choice:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.pt-q input[type=number] { width: 100%; min-height: 52px; font: 600 20px var(--font-body); padding: 0 14px; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--card); color: var(--plum); }
+.pt-result { background: var(--haint); border-radius: var(--radius-lg); padding: 14px 16px; margin: 4px 0 10px; }
+.pt-price { font: 600 17px/1.35 var(--font-body); margin: 0 0 6px; }
+.pt-price strong { display: block; font: 800 30px/1.1 var(--font-display); font-variation-settings: "SOFT" 100, "WONK" 1; }
+.pt-incl, .pt-money { margin: 0 0 8px; font-size: 15px; }
+.pt-go { width: 100%; margin-top: 4px; }
+.pt-more { margin: 6px 0 0; font-size: 15px; }
+.price-tools-line, .guide-line { margin: 14px 0 0; font: 600 16px/1.4 var(--font-body); color: var(--plum); }
+.price-tools-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
+.hero-minimal-inner .price-tools-line, .page-intro .price-tools-line, .page-intro .guide-line { justify-content: center; }
+@media (max-width: 1023px) { .hero-minimal-inner .price-tools-line { justify-content: flex-start; } }
+.price-tool-link, .guide-line a { display: inline-flex; align-items: center; min-height: 44px; color: var(--plum); text-decoration: underline; text-decoration-color: var(--haint-deep); text-decoration-thickness: 2px; text-underline-offset: 3px; font-weight: 700; }
+.faq-next-step { margin: 0; padding: 0 16px 12px; display: flex; flex-wrap: wrap; gap: 0 14px; }
+
+/* ---------- cards: the title and the photo open the service ---------- */
+a.card-media { display: block; }
+.card-title-link { color: var(--plum); text-decoration: none; }
+.card-title-link:hover { text-decoration: underline; text-decoration-color: var(--haint-deep); }
+.cards-grid--two { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 980px) { .cards-grid--two { grid-template-columns: 1fr; } }
+
+/* ---------- service area photo (the one stock photo, credited) ---------- */
+.area-photo { margin: 22px auto 0; max-width: 720px; }
+.area-photo img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-lg); }
+.area-photo figcaption { margin-top: 8px; font-size: 13px; color: var(--plum-muted); text-align: left; }
+.area-photo figcaption a { color: inherit; }
+
+/* ---------- footer: four columns with Memphis guides ---------- */
+@media (min-width: 981px) { .footer-grid { grid-template-columns: 1.3fr 0.9fr 1fr 0.9fr; } }
+
+/* ---------- first screen on a phone: price in one tap ---------- */
+@media (max-width: 1023px) { .hero-photo-real img { aspect-ratio: 4 / 3; object-position: 50% 30%; } }
+.hero-minimal-inner .price-tools-line { margin: 4px 0 14px; }
+.pnp-panel-prices { display: grid; gap: 4px; margin: 0 0 16px; }
+.pnp-panel-prices a { display: flex; align-items: center; min-height: 48px; padding: 0 14px; border-radius: var(--radius-md); background: var(--haint); color: var(--plum); font: 700 17px/1.2 var(--font-body); text-decoration: none; }
+/* Phones: the price links show straight under the H1 on the first screen (visual order only;
+   in the HTML the answer paragraph still follows the H1 first, for search and screen readers). */
+@media (max-width: 1023px) {
+  .hero-minimal-inner { display: flex; flex-direction: column; }
+  .hero-minimal-inner > * { order: 4; }
+  .hero-minimal-inner > .hero-photo-real { order: 0; }
+  .hero-minimal-inner > .eyebrow { order: 1; }
+  .hero-minimal-inner > .hero-lead { order: 2; }
+  .hero-minimal-inner > .price-tools-line { order: 3; margin: 0 0 10px; }
+  .hero-photo-real img { aspect-ratio: 16 / 10; }
+}
+
+/* ---------- home service-area section: the bridge banner (the one stock photo, credited) ---------- */
+.area-banner { margin: 22px auto 0; max-width: 1080px; }
+.area-banner img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: 50% 45%; border-radius: var(--radius-lg); }
+@media (min-width: 900px) { .area-banner img { aspect-ratio: 21 / 8; } }
+.area-banner figcaption { margin-top: 8px; font-size: 13px; line-height: 1.4; color: var(--plum-muted); text-align: left; }
+.area-banner figcaption a { color: inherit; display: inline; min-height: 0; }
+
+/* ---------- button rows follow their section's text (owner, 6 Nov 2026) ----------
+   Centred sections (page intros, answer blocks, CTA bands, the centred row classes) centre their
+   buttons at every width; the home hero is the one left-aligned hero (text and buttons left).
+   Guarded by scripts/validators/validate_cta_alignment.js. */
+.page-intro .btn-row, .answer-block .btn-row, .cta-band .btn-row, .service-area-centered .btn-row,
+.hero-centered-cta, .centered-cta-row { justify-content: center; }
+.hero-minimal-inner .hero-centered-cta { justify-content: flex-start; }
+@media (max-width: 640px) {
+  .page-intro .btn-row, .answer-block .btn-row, .cta-band .btn-row, .hero-centered-cta, .centered-cta-row { align-items: stretch; }
+}
+.faq-section .faq-cta { text-align: left; }
+
+/* ---------- home: "What to know before booking", four fold-out panels (work without JS) ---------- */
+.know-eyebrow { display: block; text-align: center; }
+.know-panels { display: grid; gap: 10px; max-width: 1080px; margin: 0 auto; }
+.know-panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }
+.know-panel > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 8px 18px; cursor: pointer; font: 800 20px/1.2 var(--font-display); font-variation-settings: "SOFT" 100, "WONK" 1; color: var(--plum); border-radius: var(--radius-lg); }
+.know-panel > summary::-webkit-details-marker { display: none; }
+.know-panel > summary::after { content: "Show ▾"; flex: none; font: 600 14px var(--font-body); color: var(--plum-muted); }
+.know-panel[open] > summary::after { content: "Show less ▴"; }
+.know-panel[open] > summary { background: var(--haint); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.know-panel > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.know-body { padding: 18px; }
+.know-body .answer-block { text-align: left; margin: 0 0 18px; max-width: none; }
+.know-body h3 { font-size: 22px; margin: 0 0 10px; }
+.know-lines { margin: 0 0 8px; padding-left: 20px; }
+.know-lines li { margin-bottom: 8px; }
+.know-links { display: flex; flex-wrap: wrap; gap: 0 18px; margin: 12px 0 0; }
+@media (min-width: 900px) { .price-tool-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) and (max-width: 1199px) { .price-tool-grid { grid-template-columns: 1fr 1fr; } .price-tool-grid > #price-my-party-room { grid-column: 1 / -1; } }
+.pt-tiers { list-style: none; padding: 0; margin: 8px 0 12px; display: grid; gap: 8px; }
+.pt-tiers li { background: var(--haint); border-radius: var(--radius-md); padding: 12px 14px; font: 700 17px/1.3 var(--font-body); }

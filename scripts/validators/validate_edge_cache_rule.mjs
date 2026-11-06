@@ -77,6 +77,11 @@ if (fs.existsSync(path.join(fnDir, '_middleware.js'))) {
     const { res, nexts } = await drive(u, m);
     if (res.status !== 301 || res.headers.get('location') !== want || nexts !== 0) fail(`${m} ${u} answered ${res.status} -> ${res.headers.get('location')} (next() ${nexts}x); want one 301 to ${want}`);
   }
+  // A branch preview never writes: the request form, /admin and every API refuse POST there.
+  for (const u of ['https://preview-pnp-rebrand.p-n-p.pages.dev/request', 'https://abc123.p-n-p.pages.dev/api/request/submit', 'https://abc123.p-n-p.pages.dev/admin/login']) {
+    const { res, nexts } = await drive(u, 'POST');
+    if (res.status !== 403 || nexts !== 0) fail(`POST ${u} answered ${res.status} (next() ${nexts}x); a preview host must refuse every write with 403`);
+  }
 }
 const routesJson = path.join(ROOT, '_routes.json');
 if (fs.existsSync(routesJson)) {
@@ -95,4 +100,4 @@ if (errors.length) {
   for (const e of errors) console.error(`  - ${e}`);
   process.exit(1);
 }
-console.log(`edge-cache-rule: ${routes.length} Function route(s) (${routes.join(', ')}) excluded; public HTML edge TTL ${EDGE_TTL_SECONDS}s, browser TTL from origin; root middleware driven with ${mwCases} requests (only p-n-p.pages.dev moves)`);
+console.log(`edge-cache-rule: ${routes.length} Function route(s) (${routes.join(', ')}) excluded; public HTML edge TTL ${EDGE_TTL_SECONDS}s, browser TTL from origin; root middleware driven with ${mwCases} requests (only p-n-p.pages.dev moves; preview hosts refuse writes)`);

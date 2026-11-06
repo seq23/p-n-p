@@ -345,7 +345,11 @@ must((await s.all('SELECT what FROM request_events WHERE request_key = ?1', rent
 const rentSt = await s.one('SELECT status FROM request_status WHERE request_key = ?1', rent.request_key);
 must(rentSt && rentSt.status === 'new', 'an expired hold did not leave the request New');
 // A confirmed hold never expires.
-must((await H.expireHolds(s.db, Date.now() + 30 * 86400000)) === 0 && (await s.all('SELECT id FROM bookings WHERE request_key = ?1', multiKey)).length >= 2, 'a confirmed booking expired');
+// Judged on the confirmed request itself: other test requests' holds are written by background
+// work (waitUntil) that can land after the expiry above, so a global "expired 0" count raced and
+// failed about half the runs while the confirmed booking was untouched.
+await H.expireHolds(s.db, Date.now() + 30 * 86400000);
+must((await s.one('SELECT state FROM holds WHERE request_key = ?1', multiKey)).state === 'confirmed' && (await s.all('SELECT id FROM bookings WHERE request_key = ?1', multiKey)).length >= 2, 'a confirmed booking expired');
 // Settings: automatic expiry off -> held by hand, no end time.
 await s.db.prepare("INSERT INTO settings (key, value) VALUES ('hold_auto_expire', '0')").run();
 const byHand = await send({ service: 'rentals', games: ['cornhole'], duration: 'day', rental_date: plus(25), pickup_when: 'morning', return_when: 'after', ...contact(21) });

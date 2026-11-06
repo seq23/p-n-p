@@ -304,6 +304,13 @@ const RELATED_LABELS = {
   '/how-it-works.html': 'How Porch & Party Works'
 };
 
+// The one stock photo on the site, by the owner's request (6 Nov 2026): the Hernando de Soto
+// Bridge on the service-area page. Public domain (U.S. Army Corps of Engineers, Wikimedia
+// Commons); credited anyway. Everywhere else the site shows only its own photos.
+const SECTION_PHOTO = {
+  areas: '<figure class="area-photo"><img src="/assets/img/areas/hernando-de-soto-bridge-memphis.webp" alt="The Hernando de Soto Bridge over the Mississippi River with the downtown Memphis skyline behind it" width="1200" height="1151" loading="lazy"/><figcaption>Hernando de Soto Bridge, Memphis. Photo: Larry Donald, U.S. Army Corps of Engineers, public domain, via <a href="https://commons.wikimedia.org/wiki/File:Hernando_de_Soto_Bridge_Memphis.jpg" rel="noopener">Wikimedia Commons</a>.</figcaption></figure>'
+};
+
 const SOCIAL = {
   services: ['/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg',
     'Memphis fall front porch decorating with pumpkins and layered seasonal styling'],
@@ -334,6 +341,21 @@ const PP = require('../lib/porch_packages');
 function porchPickerHtml() {
   return `
         ${PP.calculatorHtml(faqContent.porchPackages)}`;
+}
+
+// A price or cost question's best next step is the matching price tool on /pricing (owner,
+// 6 Nov 2026), not more answers: one line under the answer, the tool's own name as the link.
+const PRICE_NEXT = Object.freeze([
+  { re: /^Where do your prices start\?$/, tools: ['porch', 'grazing', 'party'] },
+  { re: /^(How much does a porch cost\?|Which porch package do I need\?|What add-ons can I ask for\?)$/, tools: ['porch'] },
+  { re: /^(How big a grazing table do I need\?|How much does the styling cost\?|How much does the food cost\?|How many people does a table feed\?)$/, tools: ['grazing'] },
+  { re: /^(How much does party or room decor cost\?|Home, hotel or venue\?)$/, tools: ['party'] }
+]);
+function priceNextStep(q) {
+  const hit = PRICE_NEXT.find((r) => r.re.test(q));
+  if (!hit) return '';
+  const T = require('../lib/site_chrome').PRICE_TOOLS;
+  return `<p class="faq-next-step">${hit.tools.map((k) => `<a class="price-tool-link" href="${T[k].href}">${T[k].label} &rsaquo;</a>`).join(' ')}</p>`;
 }
 
 function grazingEstimatorHtml() {
@@ -383,7 +405,7 @@ function groupedFaqHtml(groups) {
     return `
         <section class="faq-section" id="${g.id}">
           <div class="answer-block"><span class="eyebrow">${esc(g.eyebrow)}</span><h2>${esc(g.title)}</h2><p>${esc(g.intro)}</p></div>${tool}
-          <div class="faq-list">${g.qa.map(([q, a], j) => `<details class="faq-item"${j === 0 ? ' open' : ''}><summary><h3>${esc(q)}</h3></summary><p>${esc(a)}</p></details>`).join('')}</div>
+          <div class="faq-list">${g.qa.map(([q, a], j) => `<details class="faq-item"${j === 0 ? ' open' : ''}><summary><h3>${esc(q)}</h3></summary><p>${esc(a)}</p>${priceNextStep(q)}</details>`).join('')}</div>
           <p class="faq-cta"><a ${QUOTE_LINK} class="btn-primary">Request a Quote</a></p>
           <p class="faq-next"><a href="#top">&uarr; Back to top</a>${next ? `<a href="#${next.id}">Next: ${esc(next.title)} &rarr;</a>` : ''}</p>
         </section>`;
@@ -490,9 +512,9 @@ function render(section, groups) {
   <meta name="theme-color" content="#faf7f2" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  ${require("../lib/site_chrome").fontsLink()}
   <link rel="stylesheet" href="/assets/css/styles.css" />
-  <link rel="stylesheet" href="/assets/css/site-nav.css" data-site-chrome="css" />
+  <link rel="stylesheet" href="/assets/css/site-nav.css" data-site-chrome="css" />${require("../lib/site_chrome").brandLink()}
   ${jsonldHtml}
 </head>
 <body>
@@ -512,7 +534,7 @@ ${section.groups ? `        <div class="page-intro" id="top">
           <span class="eyebrow">${section.eyebrow}</span>
           <h1>${section.h1}</h1>
           <p>${section.lead}</p>
-          <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary"${QUOTE_ATTRS}>Request a Quote</a><a href="/pricing.html" class="btn-secondary">See Pricing</a></div>
+          <div class="btn-row hero-centered-cta"><a href="${QUOTE.href}" class="btn-primary"${QUOTE_ATTRS}>Request a Quote</a><a href="/pricing.html" class="btn-secondary">See Pricing</a></div>${SECTION_PHOTO[section.dir] || ''}
         </div>
         <div class="info-panel recommendation-summary" data-content-block="recommendation_summary" id="recommendation-summary">
           <h2>What should you know before choosing a service?</h2>
@@ -599,6 +621,9 @@ for (const section of SECTIONS) {
   // items c6 and d4) - plus the dates in this page's own structured data, all
   // from the ONE definition in scripts/lib/page_provenance.js.
   html = PROV.carry(html, before, `${section.dir}/index.html`);
+  // The chrome pass (Memphis guides footer, price-tool line) runs after this in build:all; applying
+  // it here keeps a fresh render equal to the committed page, so the lastmod hash holds.
+  html = require('../lib/site_chrome').applySiteChrome(html, `${section.dir}/index.html`);
   if (before === html) { written.push(`${section.dir}/index.html (unchanged, ${pages.length} pages)`); continue; }
   if (CHECK) { console.error(`would rewrite ${section.dir}/index.html`); process.exitCode = 1; continue; }
   fs.writeFileSync(out, html);

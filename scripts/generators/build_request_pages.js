@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+const siteChromeBrand = require('../lib/site_chrome');
 /**
  * Renders the two site pages of the request form (owner-approved 2026-10-18):
  *
@@ -65,9 +66,9 @@ function head({ title, description, url, image, imageAlt, ld }) {
   ${siteIcons.HEAD_ICON_LINKS}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  ${siteChromeBrand.fontsLink()}
   <link rel="stylesheet" href="/assets/css/styles.css" />
-  <link rel="stylesheet" href="/assets/css/site-nav.css" data-site-chrome="css" />
+  <link rel="stylesheet" href="/assets/css/site-nav.css" data-site-chrome="css" />${siteChromeBrand.brandLink()}
   ${ld.map((o) => `<script type="application/ld+json">${JSON.stringify(o)}</script>`).join('\n  ')}
 </head>`;
 }

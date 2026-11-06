@@ -110,7 +110,24 @@ function checkPage(html, rel) {
   if (RETIRED.test(html)) errs.push(`${rel}: the retired Google Form address appears on the page`);
   const head = html.slice(0, html.indexOf('</head>'));
   if (!head.includes(`href="${chrome.CSS_HREF}"`)) errs.push(`${rel}: <head> does not link ${chrome.CSS_HREF}`);
-  if (!/fonts\.googleapis\.com\/css2\?family=Cormorant/.test(head)) errs.push(`${rel}: <head> does not load the site fonts (Inter, Cormorant Garamond, Great Vibes)`);
+  const fontLinks = head.match(/fonts\.googleapis\.com\/css2\?[^"]*/g) || [];
+  if (fontLinks.length !== 1 || !/family=Fraunces/.test(fontLinks[0]) || !/family=Figtree/.test(fontLinks[0])) errs.push(`${rel}: <head> must load the brand fonts (Fraunces + Figtree) in exactly one Google Fonts link, found ${fontLinks.length}`);
+  if (fontLinks.some((l) => /Great\+Vibes|Cormorant/.test(l))) errs.push(`${rel}: <head> still loads a retired face (Great Vibes / Cormorant)`);
+  // The fonts link sets no rules, so only page stylesheets and inline styles have to come first.
+  const styles = (head.match(/<link\b[^>]*rel="stylesheet"[^>]*>|<\/style>/g) || []).filter((t) => !t.includes(chrome.MARK.fonts));
+  if (!(styles.pop() || '').includes(`href="${chrome.BRAND_CSS_HREF}"`)) errs.push(`${rel}: ${chrome.BRAND_CSS_HREF} is not the last stylesheet in <head>, so a page style could override the brand`);
+  if (!/class="pp-wordmark"[^>]*>Porch <i>&amp;<\/i> Party <span class="pp-plaque">901<\/span>/.test(h)) errs.push(`${rel}: header logo is not the Porch & Party wordmark with the 901 plaque`);
+  // Memphis guides (owner, 6 Nov 2026): the hotels guide in the footer of every page, never in a
+  // service page's related list; price talk links the /pricing tools.
+  const guides = (html.match(/<div data-site-chrome="footer-guides">[\s\S]*?<\/div><\/div>/) || [''])[0];
+  for (const g of chrome.GUIDES) if (!guides.includes(`<a href="${g.href}">${g.label}</a>`)) errs.push(`${rel}: footer Memphis guides column lacks ${g.href}`);
+  const related = (html.match(/<nav class="related-pages"[\s\S]*?<\/nav>/) || [''])[0];
+  if (/href="\/hotels"/.test(related)) errs.push(`${rel}: the hotels guide sits in the related service list (it belongs in Memphis guides)`);
+  const wantTools = chrome.priceToolsFor(rel);
+  const line = (html.match(/<p class="price-tools-line" data-site-chrome="price-tools">[\s\S]*?<\/p>/g) || []);
+  if (wantTools.length && line.length !== 1) errs.push(`${rel}: ${line.length} price-tool lines, want 1 linking ${wantTools.join(' + ')}`);
+  for (const k of wantTools) if (line.length && !line[0].includes(`href="${chrome.PRICE_TOOLS[k].href}"`)) errs.push(`${rel}: price-tool line lacks ${chrome.PRICE_TOOLS[k].href}`);
+  if (!wantTools.length && line.length) errs.push(`${rel}: carries a price-tool line it should not`);
   const ex = chrome.EXPLORE_RE.exec(html);
   if (!ex) errs.push(`${rel}: footer has no Explore list`);
   else {
@@ -135,7 +152,13 @@ const broken = {
   'an in-body quote CTA on /contact': sample.replace('</main>', '<a href="/contact.html" class="btn-primary">Request a Quote</a></main>'),
   'a link to the retired Google Form': sample.replace('</main>', '<a href="https://forms.gle/vHjfKtRRAnGV3HxFA" class="btn-primary">Check My Date</a></main>'),
   'no phone-width Book online': sample.replace(`<a href="${FORM}" class="pnp-book-m">Book online</a>`, ''),
-  'the request form opening a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary" target="_blank" rel="noopener">Request a Quote</a></main>`)
+  'the request form opening a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary" target="_blank" rel="noopener">Request a Quote</a></main>`),
+  'the retired script face back in <head>': sample.replace('</head>', '<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet"/></head>'),
+  'a page style after the brand layer': sample.replace('</head>', '<link rel="stylesheet" href="/assets/css/styles.css"/></head>'),
+  'an inline style after the brand layer': sample.replace('</head>', '<style>h1{font-family:serif}</style></head>'),
+  'no Memphis guides column': sample.replace(/<div data-site-chrome="footer-guides">[\s\S]*?<\/div><\/div>/, ''),
+  'the hotels guide back in a related list': sample.replace(/(<nav class="related-pages"[^>]*>[\s\S]*?<ul>)/, '$1<li><a href="/hotels">ROMANTIC HOTEL ROOMS</a></li>'),
+  'the old script logo': sample.replace(/<span class="pp-wordmark"[\s\S]*?<span class="pp-plaque">901<\/span><\/span>/, '<span class="brand-script">Porch &amp; Party</span>')
 };
 for (const [what, html] of Object.entries(broken)) {
   if (html === sample) errors.push(`self-test: could not build the "${what}" fixture (pricing.html shape changed)`);

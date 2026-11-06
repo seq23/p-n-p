@@ -401,9 +401,9 @@ function renderPage(input, opts = {}) {
   ${siteIcons.HEAD_ICON_LINKS}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  ${siteChrome.fontsLink()}
   <link rel="stylesheet" href="/assets/css/styles.css" />
-  ${siteChrome.cssLink()}
+  ${siteChrome.cssLink()}${siteChrome.brandLink()}
   ${pageJsonLd(fullUrl, entry.h1, entry.description, entry.faqQuestion, entry.faqAnswer, pathUrl, socialImage.url, { faqs: entry.faqs, speakable: entry.speakable })}
 </head>
 <body>

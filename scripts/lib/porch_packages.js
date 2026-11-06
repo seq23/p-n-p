@@ -152,7 +152,7 @@ function gridHtml(pk, { links = false, heading = 'h3' } = {}) {
 
 /** The block the installer stamps into porch pages, /pricing and porch articles. */
 function pageBlockHtml(pk) {
-  return `<!--porch-packages--><section class="section" data-porch-packages><div class="container"><style>${GRID_CSS}</style><div class="answer-block"><span class="eyebrow">Porch packages</span><h2>Porch decorating packages and prices</h2><p>Four packages for each season: ${tierKeys(pk).map((t) => pk.tiers[t].name).join(', ')}. Pick the look closest to what you want; every package is customized to your porch. <a href="${pk.form.examplesHref}">Price my porch</a>.</p></div>${gridHtml(pk, { links: true })}<p class="btn-row"><a class="btn-primary" href="/request?service=porch#request-form" data-quote-cta="porch-packages">Request a porch quote</a></p></div></section><!--/porch-packages-->`;
+  return `<!--porch-packages--><section class="section" id="porch-packages" data-porch-packages><div class="container"><style>${GRID_CSS}</style><div class="answer-block"><span class="eyebrow">Porch packages</span><h2>Porch decorating packages and prices</h2><p>Four packages for each season: ${tierKeys(pk).map((t) => pk.tiers[t].name).join(', ')}. Pick the look closest to what you want; every package is customized to your porch. <a href="${pk.form.examplesHref}">Price my porch</a>.</p></div>${gridHtml(pk, { links: true })}<p class="btn-row"><a class="btn-primary" href="/request?service=porch#request-form" data-quote-cta="porch-packages">Request a porch quote</a></p></div></section><!--/porch-packages-->`;
 }
 
 /** The FAQ "Price my porch" calculator (first block of /faq/#porch). */

@@ -38,6 +38,9 @@ async function hmac(secret, message) {
   return b64url(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(message)));
 }
 export async function signTs(env, now = Date.now()) {
+  // No key (a branch preview has no Pages secrets): an empty stamp, which checkTs already treats
+  // as 'missing', instead of an HMAC over a zero-length key that throws and 500s the form page.
+  if (!formKey(env)) return '';
   const t = String(Math.floor(now / 1000));
   return `${t}.${await hmac(formKey(env), `request-form:${t}`)}`;
 }

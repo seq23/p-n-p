@@ -17,9 +17,9 @@
  *   pricing.html pricing cards: exactly four, their headings together
  *                naming all four services, the Party Game Rentals card
  *                quoting the data-file prices and linking /rentals/.
- * pricing.html also links the FAQ page's two tools ("Price my porch" ->
- * /faq/#porch-picker, "Estimate my grazing table" -> /faq/#grazing-estimator)
- * as btn-secondary links, and both ids exist in faq/index.html.
+ * pricing.html carries the two price tools at its top (owner, 6 Nov 2026: "Price my porch"
+ * #price-my-porch and "Price my grazing table" #price-my-grazing-table, scripts/lib/price_tools.js)
+ * and its pricing cards link them as btn-secondary links on the same page.
  * THE HOMEPAGE <title> IS THE ONE SURFACE NOT HELD TO ALL FOUR, because at the
  * length a search result shows it cannot be. The owner's Search Readiness
  * Checklist (25 Oct 2026) holds every sampled page's title to 30-65 characters
@@ -93,8 +93,8 @@ function titleProblems(title) {
   return bad;
 }
 const PRICING_TOOLS = Object.freeze([
-  Object.freeze({ label: 'Price my porch', id: 'porch-picker' }),
-  Object.freeze({ label: 'Estimate my grazing table', id: 'grazing-estimator' })
+  Object.freeze({ label: 'Price my porch', id: 'price-my-porch' }),
+  Object.freeze({ label: 'Price my grazing table', id: 'price-my-grazing-table' })
 ]);
 const decode = (s) => String(s).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'");
 const text = (s) => decode(String(s || '').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
@@ -146,7 +146,7 @@ function check(files) {
     if (biz && !String(biz.description).startsWith(brand.IDENTITY_SENTENCE)) errors.push('index.html Organization JSON-LD description does not open with brand.IDENTITY_SENTENCE');
     surface('index.html WebPage JSON-LD description', (nodes.find((n) => n['@type'] === 'WebPage') || {}).description);
     const card = (home.match(/<article class="card" data-brand="rentals-card">[\s\S]*?<\/article>/) || [])[0] || '';
-    if (!/<h3>Party Game Rentals<\/h3>/.test(card) || !card.includes(`$${brand.PRICES.gameDay} a game per day`) || !card.includes('href="/rentals/"')) errors.push('index.html lacks the fourth service card (Party Game Rentals, $/game/day, /rentals/)');
+    if (!/<h3>(?:<a class="card-title-link" href="\/rentals\/">)?Party Game Rentals(?:<\/a>)?<\/h3>/.test(card) || !card.includes(`$${brand.PRICES.gameDay} a game per day`) || !card.includes('href="/rentals/"')) errors.push('index.html lacks the fourth service card (Party Game Rentals, $/game/day, /rentals/)');
     if (!/<div class="pricing-card" data-brand="rentals-price"><h3>Party Game Rentals<\/h3><span class="price">\$\d+<\/span>/.test(home)) errors.push('index.html Starting Pricing lacks the Party Game Rentals card');
     const faq = nodes.find((n) => n['@type'] === 'FAQPage');
     if (!faq || !(faq.mainEntity || []).some((q) => q.name === HOME.rentalsQ && q.acceptedAnswer.text === HOME.rentalsA) || !home.includes('data-brand="rentals-faq"')) errors.push('index.html FAQ (visible and JSON-LD) lacks the rentals question');
@@ -189,9 +189,22 @@ function check(files) {
     if (!/<h2>Party Game Rentals<\/h2>/.test(rc) || !rc.includes(`$${brand.PRICES.gameDay} a game per day`) || !rc.includes(`Bundles from $${brand.PRICES.bundleFrom}`) || !rc.includes('href="/rentals/"')) errors.push(`pricing.html lacks the Party Game Rentals pricing card ($${brand.PRICES.gameDay} a game per day, bundles from $${brand.PRICES.bundleFrom}, /rentals/)`);
     const faqPage = files['faq/index.html'];
     for (const t of PRICING_TOOLS) {
-      if (!new RegExp(`<a class="btn-secondary" href="/faq/#${t.id}">${t.label}</a>`).test(pricing)) errors.push(`pricing.html lacks the "${t.label}" btn-secondary link to /faq/#${t.id}`);
-      if (faqPage == null || !new RegExp(`\\bid="${t.id}"`).test(faqPage)) errors.push(`faq/index.html has no id="${t.id}" for the pricing page's "${t.label}" link`);
+      if (!new RegExp(`<a class="btn-secondary" href="#${t.id}">${t.label}</a>`).test(pricing)) errors.push(`pricing.html lacks the "${t.label}" btn-secondary link to #${t.id}`);
+      if (!new RegExp(`<article class="price-tool" id="${t.id}"`).test(pricing)) errors.push(`pricing.html has no "${t.label}" tool (id="${t.id}") for its pricing card's link`);
+      if (faqPage == null) errors.push('faq/index.html is missing');
     }
+    // The tools' deposit words are the live FAQ's own, never a derived amount (coordinator check, 6 Nov 2026).
+    const { DEPOSIT_LINE } = require('../lib/price_tools');
+    if (!pricing.includes(DEPOSIT_LINE.replace(/&/g, '&amp;'))) errors.push('pricing.html price tools lack the published deposit line');
+    for (const part of ['50% of the quote', 'Cancel 48 hours or more before and the deposit comes back in full', 'by the time we arrive to set up']) {
+      if (!DEPOSIT_LINE.includes(part) || faqPage == null || !faqPage.includes(part)) errors.push(`price tools deposit words "${part}" are not what /faq/ publishes`);
+    }
+    if (/holds (?:the|your) date \(from \$/.test(pricing)) errors.push('pricing.html states a derived deposit amount');
+    // Party and hotel room budgets: the request form's own words, from the one shared module.
+    const PARTY = require('../lib/party_pricing');
+    const party = (pricing.match(/<article class="price-tool" id="price-my-party-room"[\s\S]*?<\/article>/) || [''])[0];
+    const want = [...PARTY.PARTY_BUDGETS.filter(([v]) => /^\$/.test(v)).map(([, l]) => l), PARTY.HOTEL_WINDOW, 'Just the lobby', 'href="/request?service=party#request-form"'];
+    for (const w of want) if (!party.includes(w.replace(/&/g, '&amp;'))) errors.push(`pricing.html party and hotel room block lacks "${w}"`);
   }
   if (checked === 0) errors.push('zero surfaces checked');
   return { errors, checked };
@@ -237,10 +250,12 @@ const probes = {
   'homepage without the fourth card': { ...files, 'index.html': files['index.html'].replace(/<article class="card" data-brand="rentals-card">[\s\S]*?<\/article>/, '') },
   'pricing description without game rentals': { ...files, 'pricing.html': files['pricing.html'].replace(/(name="description"|content=")([^"]*?)party game rentals/, '$1$2') },
   'pricing page with three pricing cards': { ...files, 'pricing.html': files['pricing.html'].replace(/<div class="pricing-card" data-brand="rentals-price">[\s\S]*?<\/div>/, '') },
-  'pricing page without the porch tool link': { ...files, 'pricing.html': files['pricing.html'].replace('href="/faq/#porch-picker"', 'href="/faq/"') },
-  'pricing page without the grazing tool link': { ...files, 'pricing.html': files['pricing.html'].replace(/<a class="btn-secondary" href="\/faq\/#grazing-estimator">[^<]*<\/a>/, '') },
-  'faq page without the porch-picker id': { ...files, 'faq/index.html': files['faq/index.html'].replace(/\bid="porch-picker"/, 'id="porch-picker-old"') },
-  'faq page without the grazing-estimator id': { ...files, 'faq/index.html': files['faq/index.html'].replace(/\bid="grazing-estimator"/, 'id="x"') },
+  'pricing page without the porch tool link': { ...files, 'pricing.html': files['pricing.html'].replace('href="#price-my-porch">Price my porch', 'href="/faq/">Price my porch') },
+  'pricing page without the grazing tool link': { ...files, 'pricing.html': files['pricing.html'].replace(/<a class="btn-secondary" href="#price-my-grazing-table">[^<]*<\/a>/, '') },
+  'pricing page without the porch tool': { ...files, 'pricing.html': files['pricing.html'].replace(/<article class="price-tool" id="price-my-porch"/, '<article class="price-tool" id="x"') },
+  'pricing page without the grazing tool': { ...files, 'pricing.html': files['pricing.html'].replace(/<article class="price-tool" id="price-my-grazing-table"/, '<article class="price-tool" id="y"') },
+  'pricing tools with a derived deposit amount': { ...files, 'pricing.html': files['pricing.html'].replace('50% of the quote holds your date.', '50% of the quote holds your date (from $375).') },
+  'pricing without the party room budgets': { ...files, 'pricing.html': files['pricing.html'].replace('$500–$1,000 (fuller decor)', '$500–$1,000') },
   'no files at all': {}
 };
 for (const [label, broken] of Object.entries(probes)) if (!check(broken).errors.length) result.errors.push(`self-test: "${label}" passed when it should fail`);

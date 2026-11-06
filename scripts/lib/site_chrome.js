@@ -74,11 +74,84 @@ const MARK = Object.freeze({
   footerAboutPage: 'data-footer-link="about"',
   footerAbout: 'data-site-chrome="footer-about"',
   footerCity: 'data-site-chrome="footer-city"',
-  legal: 'data-site-chrome="legal"'
+  legal: 'data-site-chrome="legal"',
+  brand: 'data-site-chrome="brand"',
+  guides: 'data-site-chrome="footer-guides"',
+  priceTools: 'data-site-chrome="price-tools"'
 });
 
+/*
+ * Memphis guides (owner, 6 Nov 2026 preview review): the hotels guide is a GUIDE, not a service,
+ * so it lives in a "Memphis guides" footer column on every page (and the home page's guides
+ * section and the hotel-surprise service pages), not in the service pages' related lists
+ * (scripts/build_related_navigation.js GUIDE_PAGES). Its URL, canonical and page are unchanged.
+ */
+const GUIDES = Object.freeze([
+  { href: '/hotels', label: 'Romantic hotel rooms in Memphis' },
+  { href: '/guides/graduation-party-decorations-at-home-memphis', label: 'Graduation party decorations at home' }
+]);
+const footerGuides = () => `<div ${MARK.guides}><div class="footer-title">Memphis guides</div><div class="footer-list">${GUIDES.map((g) => `<a href="${g.href}">${g.label}</a>`).join('')}</div></div>`;
+const FOOTER_GUIDES_RE = /<div data-site-chrome="footer-guides"><div class="footer-title">Memphis guides<\/div><div class="footer-list">[\s\S]*?<\/div><\/div>/g;
+
+/*
+ * The two price tools on /pricing (owner, 6 Nov 2026: "the modules that help people the most"),
+ * linked from every page where a person is thinking about price: the home page, the services
+ * index and every service page, the FAQ and the request form intro. Porch pages link the porch
+ * tool, grazing pages the grazing tool, party and hotel pages the party-room block, the rest all three. One line under the page's first
+ * call-to-action row (or its dates line when it has none).
+ */
+const PRICE_TOOLS = Object.freeze({
+  porch: { href: '/pricing#price-my-porch', label: 'Price my porch' },
+  grazing: { href: '/pricing#price-my-grazing-table', label: 'Price my grazing table' },
+  party: { href: '/pricing#price-my-party-room', label: 'Price my party or hotel room' }
+});
+function priceToolsFor(rel) {
+  const r = String(rel).replace(/\\/g, '/');
+  const home = ['index.html', 'faq/index.html', 'request.html', 'services/index.html'];
+  if (!home.includes(r) && !r.startsWith('services/')) return [];
+  if (/porch|front-door/.test(r)) return ['porch'];
+  if (/grazing/.test(r)) return ['grazing'];
+  if (r.startsWith('services/') && r !== 'services/index.html') return ['party'];
+  return ['porch', 'grazing', 'party'];
+}
+const priceToolsLine = (keys) => `<p class="price-tools-line" ${MARK.priceTools}><span>Want a price first?</span> ${keys.map((k) => `<a class="price-tool-link" href="${PRICE_TOOLS[k].href}">${PRICE_TOOLS[k].label} &rsaquo;</a>`).join(' ')}</p>`;
+const PRICE_TOOLS_RE = /<p class="price-tools-line" data-site-chrome="price-tools">[\s\S]*?<\/p>/g;
+// The hotels guide, linked in context from the services that fit a hotel-room surprise.
+const HOTEL_GUIDE_PAGES = new Set(['services/hotel-room-decor-memphis.html', 'services/celebration-setups.html', 'services/celebration-setups-memphis.html']);
+const guideLine = () => `<p class="guide-line" data-site-chrome="guide-link">Planning a hotel surprise? Our guide: <a href="/hotels">Romantic hotel rooms in Memphis &rsaquo;</a></p>`;
+const GUIDE_LINE_RE = /<p class="guide-line" data-site-chrome="guide-link">[\s\S]*?<\/p>/g;
+function withPriceTools(html, rel) {
+  let out = html.replace(PRICE_TOOLS_RE, '').replace(GUIDE_LINE_RE, '');
+  const keys = priceToolsFor(rel);
+  if (!keys.length) return out;
+  const main = out.indexOf('<main');
+  const h1 = out.indexOf('<h1', main < 0 ? 0 : main);
+  if (h1 < 0) return out;
+  let at = -1;
+  const row = /<(div|p) class="btn-row[^"]*"[^>]*>/g; row.lastIndex = h1;
+  const m = row.exec(out);
+  const dates = out.indexOf('data-page-dates', h1);
+  // The home page shows it straight under its answer and dates, so it sits on the first screen.
+  if (rel === 'index.html' && dates >= 0) at = out.indexOf('</p>', dates) + 4;
+  else if (m && (dates < 0 || m.index - dates < 1500)) at = out.indexOf(`</${m[1]}>`, m.index) + m[1].length + 3;
+  else if (dates >= 0) at = out.indexOf('</p>', dates) + 4;
+  if (at < 4) return out;
+  const guide = HOTEL_GUIDE_PAGES.has(String(rel).replace(/\\/g, '/')) ? guideLine() : '';
+  return out.slice(0, at) + priceToolsLine(keys) + guide + out.slice(at);
+}
+
 const CSS_HREF = '/assets/css/site-nav.css';
-const FONTS_HREF = 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap';
+// Brand approved 6 Nov 2026 (design system https://claude.ai/artifact/CQE2ok8Mha6jq21LaAqXiu):
+// Fraunces 800 (SOFT 100, WONK 1) for the wordmark and every heading, Figtree for everything
+// else. Replaces Cormorant Garamond, Great Vibes (retired: no script faces) and Inter.
+const FONTS_HREF = 'https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,700..800,0..100,0..1&family=Figtree:wght@400;600;700;800&display=swap';
+// The brand layer, linked LAST in <head> so it wins over styles.css, site-nav.css and every
+// page's own inline <style> (assets/css/brand.css).
+const BRAND_CSS_HREF = '/assets/css/brand.css';
+// Any Google Fonts stylesheet link a page carries (the old Cormorant/Great Vibes/Inter one, or
+// this module's own): the chrome replaces it with exactly one fontsLink().
+const ANY_FONTS_LINK_RE = /<link\b[^>]*href="https:\/\/fonts\.googleapis\.com\/css2\?[^"]*"[^>]*>/g;
+const BRAND_LINK_RE = /<link\b[^>]*data-site-chrome="brand"[^>]*>/g;
 const RENTALS_FOOTER = `<a href="/rentals/" ${MARK.footerRentals}>Party Game Rentals</a>`;
 // Owner ruling 2026-10-17: the consolidated FAQ page is in the header and the footer of every page.
 const FAQ_FOOTER = `<a href="/faq/" ${MARK.footerFaq}>FAQ</a>`;
@@ -142,7 +215,7 @@ function header(currentPath) {
   const items = NAV_ITEMS.map((i) => `<a href="${i.href}"${cur(i.href, currentPath)}>${i.label}</a>`).join('');
   const quote = (cls) => `<a href="${QUOTE.href}" class="${cls}"${QUOTE_ATTRS}>${QUOTE.label}</a>`;
   return `<header class="site-header pnp-header" ${MARK.header}><div class="pnp-header-inner">`
-    + `<a class="pnp-logo" href="/" aria-label="Porch &amp; Party home"><span class="brand-script">Porch &amp; Party</span></a>`
+    + `<a class="pnp-logo" href="/" aria-label="Porch &amp; Party home"><span class="pp-wordmark" aria-hidden="true">Porch <i>&amp;</i> Party <span class="pp-plaque">901</span></span></a>`
     + `<nav class="site-nav pnp-nav" aria-label="Primary navigation">${items}</nav>`
     + `<div class="pnp-actions">${quote('btn-primary pnp-quote')}`
     + `<a href="${C.telHref}" class="header-call pnp-call" data-contact="header-call">${PHONE_SVG}<span class="pnp-call-lead">Call or text </span><span class="pnp-call-num">${C.telephoneDisplay}</span></a></div>`
@@ -152,6 +225,7 @@ function header(currentPath) {
     + `<button type="button" class="pnp-toggle" aria-expanded="false" aria-controls="site-menu" aria-label="Open menu" hidden>${BURGER_SVG}</button>`
     + `</div>`
     + `<div class="pnp-panel" id="site-menu"><nav class="pnp-panel-nav" aria-label="Menu">${items}</nav>`
+    + `<p class="pnp-panel-prices">${Object.values(PRICE_TOOLS).map((t) => `<a href="${t.href}">${t.label} &rsaquo;</a>`).join('')}</p>`
     + `${quote('btn-primary pnp-panel-quote')}`
     + `<a href="${C.telHref}" class="pnp-panel-call">${PHONE_SVG}${CALL_LABEL}</a>`
     + `<a href="#" class="pnp-panel-close">Close menu</a></div>`
@@ -161,6 +235,29 @@ function header(currentPath) {
 
 const cssLink = () => `<link rel="stylesheet" href="${CSS_HREF}" ${MARK.css} />`;
 const fontsLink = () => `<link href="${FONTS_HREF.replace(/&/g, '&amp;')}" rel="stylesheet" ${MARK.fonts} />`;
+const brandLink = () => `<link rel="stylesheet" href="${BRAND_CSS_HREF}" ${MARK.brand} />`;
+
+/**
+ * The brand's <head>: exactly one Google Fonts link (Fraunces + Figtree), where the page's
+ * first fonts link was, and exactly one brand.css link straight after the page's last
+ * stylesheet (a <link rel="stylesheet"> or an inline <style>), so it wins over all of them.
+ * Generators call it on their own output, so a fresh render equals the chrome pass. Idempotent.
+ */
+function brandHead(html) {
+  const end = html.indexOf('</head>');
+  if (end < 0) return html;
+  let head = html.slice(0, end).replace(BRAND_LINK_RE, '');
+  const first = head.search(ANY_FONTS_LINK_RE);
+  const stripped = head.replace(ANY_FONTS_LINK_RE, '');
+  const at = first < 0 ? stripped.length : first;
+  head = stripped.slice(0, at) + fontsLink() + stripped.slice(at);
+  let last = -1;
+  const STYLE_RE = /<link\b[^>]*rel="stylesheet"[^>]*>|<\/style>/g;
+  let m;
+  while ((m = STYLE_RE.exec(head))) if (!m[0].includes(MARK.fonts)) last = m.index + m[0].length;
+  const put = last < 0 ? head.length : last;
+  return head.slice(0, put) + brandLink() + head.slice(put) + html.slice(end);
+}
 
 /** The site path a published file serves at: index.html -> /, rentals/index.html -> /rentals/. */
 function sitePathOf(rel) {
@@ -217,10 +314,8 @@ function applySiteChrome(html, rel) {
   }
   const headEnd = out.indexOf('</head>');
   if (headEnd < 0) throw new Error(`${rel}: no </head>`);
-  if (!out.includes(MARK.css)) {
-    const add = (/fonts\.googleapis\.com\/css2\?family=Cormorant/.test(out.slice(0, headEnd)) || out.includes(MARK.fonts) ? '' : fontsLink()) + cssLink();
-    out = out.slice(0, headEnd) + add + out.slice(headEnd);
-  }
+  if (!out.includes(MARK.css)) out = out.slice(0, headEnd) + cssLink() + out.slice(headEnd);
+  out = brandHead(out);
   const ex = EXPLORE_RE.exec(out);
   if (!ex) throw new Error(`${rel}: footer has no Explore list for the Rentals link`);
   const list = ex[2];
@@ -253,6 +348,14 @@ function applySiteChrome(html, rel) {
     next = next.slice(0, at) + ABOUT_FOOTER + next.slice(at);
     out = out.slice(0, exA.index) + exA[1] + next + exA[3] + out.slice(exA.index + exA[0].length);
   }
+  out = out.replace(FOOTER_GUIDES_RE, '');
+  {
+    const exG = EXPLORE_RE.exec(out);
+    const col = out.indexOf('</div>', exG.index + exG[0].length);
+    if (col < 0) throw new Error(`${rel}: footer Explore column has no end for the Memphis guides column`);
+    out = out.slice(0, col + 6) + footerGuides() + out.slice(col + 6);
+  }
+  out = withPriceTools(out, rel);
   const ex3 = EXPLORE_RE.exec(out);
   if (EXPLORE_LEGAL_RE.test(ex3[2])) {
     out = out.slice(0, ex3.index) + ex3[1] + ex3[2].replace(EXPLORE_LEGAL_RE, '') + ex3[3] + out.slice(ex3.index + ex3[0].length);
@@ -269,7 +372,11 @@ function applySiteChrome(html, rel) {
 function withoutChrome(html) {
   return html
     .replace(HEADER_RE, '')
-    .replace(/<link\b[^>]*data-site-chrome="(?:css|fonts)"[^>]*>/g, '')
+    .replace(/<link\b[^>]*data-site-chrome="(?:css|fonts|brand)"[^>]*>/g, '')
+    .replace(ANY_FONTS_LINK_RE, '')
+    .replace(FOOTER_GUIDES_RE, '')
+    .replace(PRICE_TOOLS_RE, '')
+    .replace(GUIDE_LINE_RE, '')
     .replace(RENTALS_ANY_RE, '')
     .replace(FAQ_ANY_RE, '')
     .replace(ABOUT_ANY_RE, '')
@@ -282,6 +389,6 @@ function withoutChrome(html) {
 
 module.exports = {
   NAV_ITEMS, QUOTE, QUOTE_ATTRS, RETIRED_FORM_RE, CALL_LABEL, MARK, LEGAL_LINKS, LEGAL_YEAR, footerAbout, legal, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, ABOUT_FOOTER, HEADER_RE, EXPLORE_RE,
-  header, cssLink, fontsLink, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
+  header, cssLink, fontsLink, brandLink, brandHead, GUIDES, PRICE_TOOLS, priceToolsFor, footerGuides, withPriceTools, FONTS_HREF, BRAND_CSS_HREF, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
   isQuoteCta, retargetQuoteCtas
 };
