@@ -193,6 +193,13 @@ function check(files) {
       if (!new RegExp(`<article class="price-tool" id="${t.id}"`).test(pricing)) errors.push(`pricing.html has no "${t.label}" tool (id="${t.id}") for its pricing card's link`);
       if (faqPage == null) errors.push('faq/index.html is missing');
     }
+    // The tools' deposit words are the live FAQ's own, never a derived amount (coordinator check, 6 Nov 2026).
+    const { DEPOSIT_LINE } = require('../lib/price_tools');
+    if (!pricing.includes(DEPOSIT_LINE.replace(/&/g, '&amp;'))) errors.push('pricing.html price tools lack the published deposit line');
+    for (const part of ['50% of the quote', 'Cancel 48 hours or more before and the deposit comes back in full', 'by the time we arrive to set up']) {
+      if (!DEPOSIT_LINE.includes(part) || faqPage == null || !faqPage.includes(part)) errors.push(`price tools deposit words "${part}" are not what /faq/ publishes`);
+    }
+    if (/holds (?:the|your) date \(from \$/.test(pricing)) errors.push('pricing.html states a derived deposit amount');
   }
   if (checked === 0) errors.push('zero surfaces checked');
   return { errors, checked };
@@ -242,6 +249,7 @@ const probes = {
   'pricing page without the grazing tool link': { ...files, 'pricing.html': files['pricing.html'].replace(/<a class="btn-secondary" href="#price-my-grazing-table">[^<]*<\/a>/, '') },
   'pricing page without the porch tool': { ...files, 'pricing.html': files['pricing.html'].replace(/<article class="price-tool" id="price-my-porch"/, '<article class="price-tool" id="x"') },
   'pricing page without the grazing tool': { ...files, 'pricing.html': files['pricing.html'].replace(/<article class="price-tool" id="price-my-grazing-table"/, '<article class="price-tool" id="y"') },
+  'pricing tools with a derived deposit amount': { ...files, 'pricing.html': files['pricing.html'].replace('50% of the quote holds your date.', '50% of the quote holds your date (from $375).') },
   'no files at all': {}
 };
 for (const [label, broken] of Object.entries(probes)) if (!check(broken).errors.length) result.errors.push(`self-test: "${label}" passed when it should fail`);

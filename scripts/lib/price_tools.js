@@ -16,6 +16,10 @@ const PP = require('./porch_packages');
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const money = (n) => `$${Math.round(n).toLocaleString('en-US')}`;
 const DEPOSIT_SHARE = 0.5; // "What holds my date?": 50% of the quote (faq_content booking section)
+// The live site's own words, nothing derived (FAQ "What holds my date?", "Can I cancel or move my
+// date?", "When is the rest due?"; the admin invoices default to the same half deposit, and the
+// request confirmation says the same): the deposit is refundable 48 hours or more before.
+const DEPOSIT_LINE = '50% of the quote holds your date. Cancel 48 hours or more before and the deposit comes back in full. The rest is due by the time we arrive to set up.';
 
 function porchConfig() {
   const pk = faq.porchPackages;
@@ -24,6 +28,7 @@ function porchConfig() {
     seasons: pk.seasons.map((s) => ({ key: s.key, name: s.name, short: s.short, tiers: Object.fromEntries(tiers.map((t) => [t, { from: s.tiers[t].from, includes: s.tiers[t].includes }])) })),
     tiers: tiers.map((t) => ({ key: t, name: pk.tiers[t].name, hint: pk.tiers[t].picturing || '' })),
     deposit: DEPOSIT_SHARE,
+    depositLine: DEPOSIT_LINE,
   };
 }
 
@@ -39,14 +44,14 @@ function porchToolHtml() {
     + `<form class="pt-form" onsubmit="return false"><fieldset class="pt-q"><legend>Which season?</legend><div class="pt-choices">${seasonChoices}</div></fieldset>`
     + `<fieldset class="pt-q"><legend>How much decor?</legend><div class="pt-choices">${sizeChoices}</div></fieldset></form>`
     + `<div class="pt-result" aria-live="polite"><p class="pt-price"><span data-out="name"></span> <strong data-out="price"></strong></p><p class="pt-incl" data-out="includes"></p>`
-    + `<p class="pt-money" data-out="deposit"></p>`
+    + `<p class="pt-money" data-out="deposit">${esc(DEPOSIT_LINE)}</p>`
     + `<a class="btn-primary pt-go" data-out="href" href="/request?service=porch#request-form" data-quote-cta="price-my-porch">Request this porch</a></div>`
     + `<noscript><p class="muted">${noscript}</p></noscript>`
     + `<p class="pt-more"><a href="#porch-packages">See all four packages for both seasons</a></p></article>`;
 }
 
 function grazingConfig() {
-  return { tiers: faq.grazingTiers, food: { low: faq.food.low, high: faq.food.high }, deposit: DEPOSIT_SHARE };
+  return { tiers: faq.grazingTiers, food: { low: faq.food.low, high: faq.food.high }, deposit: DEPOSIT_SHARE, depositLine: DEPOSIT_LINE };
 }
 
 function grazingToolHtml() {
@@ -59,7 +64,7 @@ function grazingToolHtml() {
     + `<fieldset class="pt-q"><legend>Serving it as</legend><div class="pt-choices"><label class="pt-choice"><input type="radio" name="pt-style" value="snack" checked> <span>A snack with drinks</span></label><label class="pt-choice"><input type="radio" name="pt-style" value="meal"> <span>The meal</span></label></div></fieldset>`
     + `<fieldset class="pt-q"><legend>Food</legend><div class="pt-choices"><label class="pt-choice"><input type="radio" name="pt-food" value="us" checked> <span>Porch &amp; Party brings the food</span></label><label class="pt-choice"><input type="radio" name="pt-food" value="you"> <span>I supply the food</span></label></div></fieldset></form>`
     + `<div class="pt-result" aria-live="polite"><p class="pt-price"><span data-out="size"></span> <strong data-out="styling"></strong></p><p class="pt-incl" data-out="food"></p>`
-    + `<p class="pt-money" data-out="deposit"></p>`
+    + `<p class="pt-money" data-out="deposit">${esc(DEPOSIT_LINE)}</p>`
     + `<a class="btn-primary pt-go" href="/request?service=grazing#request-form" data-quote-cta="price-my-grazing-table">Request this table</a></div>`
     + `<noscript><p class="muted">${noscript}</p></noscript>`
     + `<p class="pt-more muted">${esc(faq.food.line)}</p></article>`;
@@ -69,12 +74,12 @@ function grazingToolHtml() {
 const SCRIPT = `<script>(function(){var m=function(n){return '$'+Math.round(n).toLocaleString('en-US')};
 var p=document.querySelector('[data-price-tool="porch"]');if(p){var c=JSON.parse(p.getAttribute('data-config'));var f=p.querySelector('form');var o=function(k){return p.querySelector('[data-out="'+k+'"]')};
 var run=function(){var s=f.querySelector('input[name=pt-season]:checked').value,t=f.querySelector('input[name=pt-tier]:checked').value;var se=c.seasons.filter(function(x){return x.key===s})[0];var ti=c.tiers.filter(function(x){return x.key===t})[0];var from=se.tiers[t].from;
-o('name').textContent=se.short+' '+ti.name+':';o('price').textContent='from '+m(from);o('includes').textContent=se.tiers[t].includes;o('deposit').textContent='50% of your quote holds the date (from '+m(from*c.deposit)+'); the rest is due when we arrive to set up.';o('href').setAttribute('href','/request?service=porch&season='+s+'&decor='+t+'#request-form');};
+o('name').textContent=se.short+' '+ti.name+':';o('price').textContent='from '+m(from);o('includes').textContent=se.tiers[t].includes;o('deposit').textContent=c.depositLine;o('href').setAttribute('href','/request?service=porch&season='+s+'&decor='+t+'#request-form');};
 f.addEventListener('change',run);run();}
 var g=document.querySelector('[data-price-tool="grazing"]');if(g){var c2=JSON.parse(g.getAttribute('data-config'));var f2=g.querySelector('form');var o2=function(k){return g.querySelector('[data-out="'+k+'"]')};
 var pick=function(n,st){var key=st==='meal'?'feedsMeal':'feedsSnack';var main=c2.tiers.slice(0,3),extra=c2.tiers[3];for(var i=0;i<main.length;i++){if(n<=main[i][key][1])return {t:main[i],x:0};}var full=main[2];return {t:full,x:Math.max(0,Math.ceil((n-full[key][1])/extra[key][1]))};};
 var run2=function(){var n=Math.max(1,parseInt(f2.guests.value,10)||1);var st=f2.querySelector('input[name=pt-style]:checked').value;var fd=f2.querySelector('input[name=pt-food]:checked').value;var r=pick(n,st);var from=r.t.from+r.x*c2.tiers[3].from;
-o2('size').textContent=r.t.name+(r.x?' + '+r.x+' additional table'+(r.x>1?'s':''):'')+' for '+n+' guests:';o2('styling').textContent='styling from '+m(from);o2('food').textContent=fd==='you'?'Food: $0, you supply it.':'Food: about '+m(n*c2.food.low)+' to '+m(n*c2.food.high)+' ('+m(c2.food.low)+' to '+m(c2.food.high)+' a guest), quoted exactly once the menu is set.';o2('deposit').textContent='50% of your quote holds the date; the rest is due when we arrive to set up.';};
+o2('size').textContent=r.t.name+(r.x?' + '+r.x+' additional table'+(r.x>1?'s':''):'')+' for '+n+' guests:';o2('styling').textContent='styling from '+m(from);o2('food').textContent=fd==='you'?'Food: $0, you supply it.':'Food: about '+m(n*c2.food.low)+' to '+m(n*c2.food.high)+' ('+m(c2.food.low)+' to '+m(c2.food.high)+' a guest), quoted exactly once the menu is set.';o2('deposit').textContent=c2.depositLine;};
 f2.addEventListener('input',run2);f2.addEventListener('change',run2);run2();}})();</script>`;
 
 /** The whole block for the top of /pricing. */
@@ -85,4 +90,4 @@ function pricingBlockHtml() {
     + `<div class="price-tool-grid">${porchToolHtml()}${grazingToolHtml()}</div>${SCRIPT}</div></section><!--/price-tools-->`;
 }
 
-module.exports = { porchConfig, grazingConfig, porchToolHtml, grazingToolHtml, pricingBlockHtml, DEPOSIT_SHARE };
+module.exports = { DEPOSIT_LINE, porchConfig, grazingConfig, porchToolHtml, grazingToolHtml, pricingBlockHtml, DEPOSIT_SHARE };
