@@ -45,7 +45,7 @@ const C = offers.contact;
 // The site's request form, opened on its rentals path (a booking, not a quote).
 const FORM_URL = '/request?service=rentals';
 const MAILTO = 'mailto:hello@porchandparty901.com?subject=Party%20game%20rental%20inquiry';
-const TITLE = 'Party Game Rentals in Memphis | Porch and Party 901';
+const TITLE = 'Party Game Rentals in Memphis | Porch & Party';
 const money = (n) => (Number.isInteger(n) ? `$${n}` : `$${n.toFixed(2)}`);
 const RATE = data.rates;
 const PICK = data.pickup;
@@ -200,11 +200,11 @@ function render() {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${TITLE}</title>
+  <title>${esc(TITLE)}</title>
   <meta name="description" content="${esc(DESCRIPTION)}" />
   <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
   <link rel="canonical" href="${URL}" />
-  <meta property="og:title" content="${TITLE}" />
+  <meta property="og:title" content="${esc(TITLE)}" />
   <meta property="og:description" content="${esc(DESCRIPTION)}" />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="${URL}" />
@@ -213,7 +213,7 @@ function render() {
   <meta property="og:image" content="${DOMAIN}${data.hero.file}" />
   <meta property="og:image:alt" content="${esc(data.hero.alt)}" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="${TITLE}" />
+  <meta name="twitter:title" content="${esc(TITLE)}" />
   <meta name="twitter:description" content="${esc(DESCRIPTION)}" />
   <meta name="twitter:image" content="${DOMAIN}${data.hero.file}" />
   <meta name="theme-color" content="#faf7f2" />

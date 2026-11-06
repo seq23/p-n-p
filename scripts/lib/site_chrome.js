@@ -142,7 +142,7 @@ function header(currentPath) {
   const items = NAV_ITEMS.map((i) => `<a href="${i.href}"${cur(i.href, currentPath)}>${i.label}</a>`).join('');
   const quote = (cls) => `<a href="${QUOTE.href}" class="${cls}"${QUOTE_ATTRS}>${QUOTE.label}</a>`;
   return `<header class="site-header pnp-header" ${MARK.header}><div class="pnp-header-inner">`
-    + `<a class="pnp-logo" href="/" aria-label="Porch and Party home"><span class="brand-script">Porch &amp; Party</span></a>`
+    + `<a class="pnp-logo" href="/" aria-label="Porch &amp; Party home"><span class="brand-script">Porch &amp; Party</span></a>`
     + `<nav class="site-nav pnp-nav" aria-label="Primary navigation">${items}</nav>`
     + `<div class="pnp-actions">${quote('btn-primary pnp-quote')}`
     + `<a href="${C.telHref}" class="header-call pnp-call" data-contact="header-call">${PHONE_SVG}<span class="pnp-call-lead">Call or text </span><span class="pnp-call-num">${C.telephoneDisplay}</span></a></div>`
