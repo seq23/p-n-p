@@ -2,18 +2,19 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-10-06..2026-11-02",
-  "coverage_collected_at": "2026-11-05T16:06:48.038463+00:00",
-  "url_count": 34,
+  "gsc_window": "2026-10-07..2026-11-03",
+  "coverage_collected_at": "2026-11-06T16:06:51.835177+00:00",
+  "url_count": 35,
   "roles": {
-    "candidate": 7,
+    "candidate": 8,
     "section_index": 4,
     "root": 6,
     "hub": 17
   },
   "candidates_with_impressions": 1,
   "candidates_by_hub": {
-    "/services/celebration-setups-memphis": 7
+    "/services/celebration-setups-memphis": 7,
+    "/services/hotel-room-decor-memphis": 1
   },
   "rows": [
     {
@@ -83,6 +84,17 @@
       "fold_rule": "/./"
     },
     {
+      "url": "https://porchandparty901.com/hotels",
+      "file": "hotels.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 1544,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
+      "fold_rule": "/hotel|romantic|anniversary|proposal/"
+    },
+    {
       "url": "https://porchandparty901.com/how-it-works",
       "file": "how-it-works.html",
       "role": "root",
@@ -121,7 +133,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 502,
+      "word_count": 520,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -154,7 +166,7 @@
       "role": "candidate",
       "impressions_28d": 1,
       "clicks_28d": 0,
-      "word_count": 1003,
+      "word_count": 1208,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -221,7 +233,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 728,
-      "coverage_state": "URL is unknown to Google",
+      "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     },
@@ -352,7 +364,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1672,
+      "word_count": 1613,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -385,7 +397,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 611,
+      "word_count": 612,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
