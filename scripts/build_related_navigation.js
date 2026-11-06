@@ -265,6 +265,10 @@ const rank = (dir) => {
  * services/ already mirror each other. After that, the rest of the territory.
  */
 const QUOTE_PAGES = new Set(['contact.html', 'request.html']);
+// Guides are not services (owner, 6 Nov 2026): the hotels guide sits in the "Memphis guides"
+// footer column on every page and in the home page's guides section (scripts/lib/site_chrome.js
+// GUIDES), never in a service page's related list.
+const GUIDE_PAGES = new Set(['hotels.html']);
 
 function relatedTo(page) {
   if (page.slug === 'index') return [];
@@ -273,7 +277,7 @@ function relatedTo(page) {
   // contact surface owns and sends to /request (owner ruling 2026-10-15). They only stayed out of
   // these lists while 73 thin pages filled every slot; after the 26 Oct 2026 hub consolidation
   // /contact surfaced here as "Tell Porch & Party what you're planning." on 42 pages.
-  const pool = pages.filter((o) => o.rel !== page.rel && o.slug !== 'index' && !QUOTE_PAGES.has(o.rel) && shared(o) > 0);
+  const pool = pages.filter((o) => o.rel !== page.rel && o.slug !== 'index' && !QUOTE_PAGES.has(o.rel) && !GUIDE_PAGES.has(o.rel) && shared(o) > 0);
   const sameSubject = pool.filter((o) => o.slug === page.slug);
   const rest = pool.filter((o) => o.slug !== page.slug)
     .sort((a, b) => (shared(b) - shared(a))

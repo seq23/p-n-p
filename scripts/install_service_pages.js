@@ -91,7 +91,9 @@ function servicePage(p, html) {
   // 4. FAQPage JSON-LD = the visible FAQ.
   must(FAQ_LD_RE.test(html), `${rel}: no FAQPage JSON-LD to replace`);
   html = html.replace(FAQ_LD_RE, () => `<script type="application/ld+json">${JSON.stringify(SP.faqJsonLd(p))}</script>`);
-  return html;
+  // 5. The price-tool line under the hero buttons (scripts/lib/site_chrome.js), which the hero
+  // re-render above drops; the chrome pass puts it in the same place.
+  return require('./lib/site_chrome').withPriceTools(html, rel);
 }
 
 function main() {

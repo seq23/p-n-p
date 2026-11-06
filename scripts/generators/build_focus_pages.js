@@ -130,7 +130,9 @@ function finalHtml(p, before) {
   // dates here, rather than carrying the stamped JSON-LD across, is what makes a
   // fresh render byte-identical to the committed page.
   html = PROV.carry(html, before, p.file);
-  return html;
+  // The site chrome pass runs after every generator in build:all (Memphis guides footer column,
+  // the price-tool and guide lines); applying it here keeps a fresh render equal to the page.
+  return siteChromeBrand.applySiteChrome(html, p.file);
 }
 
 // ---- llms: one "Focused pages" section, before "## Party game rentals".

@@ -217,3 +217,55 @@ th[scope="row"] a, .faq-longer a { display: inline-flex; align-items: center; mi
 /* radios and checkboxes on the form: haint, never the old brick */
 .rq-q input[type=radio], .rq-q input[type=checkbox], .pkg-toggle input, .estimator-form input[type=radio] { accent-color: var(--haint-deep); }
 main .breadcrumb li a:not([class]) { text-decoration: none; color: var(--plum-muted); }
+
+/* ---------- price tools (top of /pricing) and the links to them ---------- */
+.price-tools { padding-top: 8px; }
+.price-tool-grid { display: grid; gap: 18px; }
+@media (min-width: 900px) { .price-tool-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+.price-tool { background: var(--card); border: 2px solid var(--edge); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); padding: 18px; scroll-margin-top: 84px; }
+.price-tool h3 { font-size: 24px; margin: 0 0 4px; }
+.price-tool-lead { color: var(--plum-muted); margin: 0 0 12px; }
+.pt-form { margin: 0; }
+.pt-q { border: 0; padding: 0; margin: 0 0 14px; min-width: 0; }
+.pt-q legend, .pt-label { display: block; font: 600 15px/1.3 var(--font-body); margin: 0 0 8px; padding: 0; }
+.pt-choices { display: grid; gap: 8px; grid-template-columns: 1fr 1fr; }
+.pt-choice { display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 8px 12px; border: 1.5px solid var(--line-strong); border-radius: var(--radius-md); background: var(--card); cursor: pointer; font: 600 15px/1.25 var(--font-body); }
+.pt-choice small { display: block; font-weight: 400; color: var(--plum-muted); font-size: 13px; }
+.pt-choice input { width: 22px; height: 22px; flex: none; margin: 0; accent-color: var(--haint-deep); }
+.pt-choice:has(input:checked) { border: 2px solid var(--edge); background: var(--haint); }
+.pt-choice:focus-within { outline: 3px solid var(--focus); outline-offset: 2px; }
+.pt-q input[type=number] { width: 100%; min-height: 52px; font: 600 20px var(--font-body); padding: 0 14px; border: 1.5px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--card); color: var(--plum); }
+.pt-result { background: var(--haint); border-radius: var(--radius-lg); padding: 14px 16px; margin: 4px 0 10px; }
+.pt-price { font: 600 17px/1.35 var(--font-body); margin: 0 0 6px; }
+.pt-price strong { display: block; font: 800 30px/1.1 var(--font-display); font-variation-settings: "SOFT" 100, "WONK" 1; }
+.pt-incl, .pt-money { margin: 0 0 8px; font-size: 15px; }
+.pt-go { width: 100%; margin-top: 4px; }
+.pt-more { margin: 6px 0 0; font-size: 15px; }
+.price-tools-line, .guide-line { margin: 14px 0 0; font: 600 16px/1.4 var(--font-body); color: var(--plum); }
+.price-tools-line { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; }
+.hero-minimal-inner .price-tools-line, .page-intro .price-tools-line, .page-intro .guide-line { justify-content: center; }
+@media (max-width: 1023px) { .hero-minimal-inner .price-tools-line { justify-content: flex-start; } }
+.price-tool-link, .guide-line a { display: inline-flex; align-items: center; min-height: 44px; color: var(--plum); text-decoration: underline; text-decoration-color: var(--haint-deep); text-decoration-thickness: 2px; text-underline-offset: 3px; font-weight: 700; }
+.faq-next-step { margin: 0; padding: 0 16px 12px; display: flex; flex-wrap: wrap; gap: 0 14px; }
+
+/* ---------- cards: the title and the photo open the service ---------- */
+a.card-media { display: block; }
+.card-title-link { color: var(--plum); text-decoration: none; }
+.card-title-link:hover { text-decoration: underline; text-decoration-color: var(--haint-deep); }
+.cards-grid--two { grid-template-columns: repeat(2, 1fr); }
+@media (max-width: 980px) { .cards-grid--two { grid-template-columns: 1fr; } }
+
+/* ---------- service area photo (the one stock photo, credited) ---------- */
+.area-photo { margin: 22px auto 0; max-width: 720px; }
+.area-photo img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: var(--radius-lg); }
+.area-photo figcaption { margin-top: 8px; font-size: 13px; color: var(--plum-muted); text-align: left; }
+.area-photo figcaption a { color: inherit; }
+
+/* ---------- footer: four columns with Memphis guides ---------- */
+@media (min-width: 981px) { .footer-grid { grid-template-columns: 1.3fr 0.9fr 1fr 0.9fr; } }
+
+/* ---------- first screen on a phone: price in one tap ---------- */
+@media (max-width: 1023px) { .hero-photo-real img { aspect-ratio: 4 / 3; object-position: 50% 30%; } }
+.hero-minimal-inner .price-tools-line { margin: 4px 0 14px; }
+.pnp-panel-prices { display: grid; gap: 4px; margin: 0 0 16px; }
+.pnp-panel-prices a { display: flex; align-items: center; min-height: 48px; padding: 0 14px; border-radius: var(--radius-md); background: var(--haint); color: var(--plum); font: 700 17px/1.2 var(--font-body); text-decoration: none; }

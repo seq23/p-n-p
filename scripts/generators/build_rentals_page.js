@@ -341,7 +341,9 @@ function finalHtml(before) {
   // The two provenance lines - the visible date line and the byline (checklist
   // items c6 and d4) - plus the dates in this page's own structured data, all
   // from the ONE definition in scripts/lib/page_provenance.js.
-  return PROV.carry(html, before, 'rentals/index.html');
+  // The chrome pass (Memphis guides footer column) runs after this in build:all; applied here so a
+  // fresh render equals the committed page.
+  return siteChromeBrand.applySiteChrome(PROV.carry(html, before, 'rentals/index.html'), 'rentals/index.html');
 }
 
 module.exports = { finalHtml, data, OUT, ITEMS, GAMES, EXTRAS, BUNDLES, bundleValue, FAQ, INVENTORY_VERSION };
