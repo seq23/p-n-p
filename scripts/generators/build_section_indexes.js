@@ -346,15 +346,15 @@ function porchPickerHtml() {
 // A price or cost question's best next step is the matching price tool on /pricing (owner,
 // 6 Nov 2026), not more answers: one line under the answer, the tool's own name as the link.
 const PRICE_NEXT = Object.freeze([
-  { re: /^Where do your prices start\?$/, tools: ['porch', 'grazing'] },
+  { re: /^Where do your prices start\?$/, tools: ['porch', 'grazing', 'party'] },
   { re: /^(How much does a porch cost\?|Which porch package do I need\?|What add-ons can I ask for\?)$/, tools: ['porch'] },
   { re: /^(How big a grazing table do I need\?|How much does the styling cost\?|How much does the food cost\?|How many people does a table feed\?)$/, tools: ['grazing'] },
-  { re: /^How much does party or room decor cost\?$/, tools: ['all'] }
+  { re: /^(How much does party or room decor cost\?|Home, hotel or venue\?)$/, tools: ['party'] }
 ]);
 function priceNextStep(q) {
   const hit = PRICE_NEXT.find((r) => r.re.test(q));
   if (!hit) return '';
-  const T = { ...require('../lib/site_chrome').PRICE_TOOLS, all: { href: '/pricing#price-tools', label: 'See every starting price' } };
+  const T = require('../lib/site_chrome').PRICE_TOOLS;
   return `<p class="faq-next-step">${hit.tools.map((k) => `<a class="price-tool-link" href="${T[k].href}">${T[k].label} &rsaquo;</a>`).join(' ')}</p>`;
 }
 

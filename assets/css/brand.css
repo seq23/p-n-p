@@ -135,7 +135,7 @@ main p a:not([class]) strong { font-weight: 700; }
   .hero-minimal-inner > .hero-photo-real { grid-column: 1; grid-row: 1 / span 9; margin: 0; max-width: none; position: sticky; top: 100px; }
   .hero-lead { font-size: 46px; max-width: none; margin-left: 0; }
   .hero-definition, .hero-subtle { margin-left: 0; }
-  .hero-centered-cta { justify-content: flex-start; }
+  .hero-minimal-inner .hero-centered-cta { justify-content: flex-start; }
 }
 
 /* ---------- sections, cards, prices ---------- */
@@ -207,7 +207,7 @@ details.faq-item summary:hover { color: var(--plum); }
 @media (max-width: 1023px) {
   .hero-minimal-inner { text-align: left; align-items: stretch; }
   .hero-minimal-inner .eyebrow, .hero-lead, .hero-definition, .hero-subtle { margin-left: 0; max-width: none; }
-  .hero-centered-cta { justify-content: stretch; width: 100%; }
+  .hero-minimal-inner .hero-centered-cta { justify-content: stretch; width: 100%; }
   .book-online-line { text-align: left; }
 }
 /* every tap target 44 px */
@@ -287,3 +287,36 @@ a.card-media { display: block; }
 @media (min-width: 900px) { .area-banner img { aspect-ratio: 21 / 8; } }
 .area-banner figcaption { margin-top: 8px; font-size: 13px; line-height: 1.4; color: var(--plum-muted); text-align: left; }
 .area-banner figcaption a { color: inherit; display: inline; min-height: 0; }
+
+/* ---------- button rows follow their section's text (owner, 6 Nov 2026) ----------
+   Centred sections (page intros, answer blocks, CTA bands, the centred row classes) centre their
+   buttons at every width; the home hero is the one left-aligned hero (text and buttons left).
+   Guarded by scripts/validators/validate_cta_alignment.js. */
+.page-intro .btn-row, .answer-block .btn-row, .cta-band .btn-row, .service-area-centered .btn-row,
+.hero-centered-cta, .centered-cta-row { justify-content: center; }
+.hero-minimal-inner .hero-centered-cta { justify-content: flex-start; }
+@media (max-width: 640px) {
+  .page-intro .btn-row, .answer-block .btn-row, .cta-band .btn-row, .hero-centered-cta, .centered-cta-row { align-items: stretch; }
+}
+.faq-section .faq-cta { text-align: left; }
+
+/* ---------- home: "What to know before booking", four fold-out panels (work without JS) ---------- */
+.know-eyebrow { display: block; text-align: center; }
+.know-panels { display: grid; gap: 10px; max-width: 1080px; margin: 0 auto; }
+.know-panel { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow-card); }
+.know-panel > summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 8px 18px; cursor: pointer; font: 800 20px/1.2 var(--font-display); font-variation-settings: "SOFT" 100, "WONK" 1; color: var(--plum); border-radius: var(--radius-lg); }
+.know-panel > summary::-webkit-details-marker { display: none; }
+.know-panel > summary::after { content: "Show ▾"; flex: none; font: 600 14px var(--font-body); color: var(--plum-muted); }
+.know-panel[open] > summary::after { content: "Show less ▴"; }
+.know-panel[open] > summary { background: var(--haint); border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.know-panel > summary:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.know-body { padding: 18px; }
+.know-body .answer-block { text-align: left; margin: 0 0 18px; max-width: none; }
+.know-body h3 { font-size: 22px; margin: 0 0 10px; }
+.know-lines { margin: 0 0 8px; padding-left: 20px; }
+.know-lines li { margin-bottom: 8px; }
+.know-links { display: flex; flex-wrap: wrap; gap: 0 18px; margin: 12px 0 0; }
+@media (min-width: 900px) { .price-tool-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 900px) and (max-width: 1199px) { .price-tool-grid { grid-template-columns: 1fr 1fr; } .price-tool-grid > #price-my-party-room { grid-column: 1 / -1; } }
+.pt-tiers { list-style: none; padding: 0; margin: 8px 0 12px; display: grid; gap: 8px; }
+.pt-tiers li { background: var(--haint); border-radius: var(--radius-md); padding: 12px 14px; font: 700 17px/1.3 var(--font-body); }

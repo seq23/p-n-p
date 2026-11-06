@@ -12,6 +12,7 @@
  */
 const faq = require('./faq_content');
 const PP = require('./porch_packages');
+const PARTY = require('./party_pricing');
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const money = (n) => `$${Math.round(n).toLocaleString('en-US')}`;
@@ -70,6 +71,21 @@ function grazingToolHtml() {
     + `<p class="pt-more muted">${esc(faq.food.line)}</p></article>`;
 }
 
+// Party and hotel-room decor: what your budget buys (owner, 6 Nov 2026), the request form's own
+// words from scripts/lib/party_pricing.js (never retyped here).
+function partyToolHtml() {
+  const tiers = PARTY.PARTY_BUDGETS.filter(([v]) => /^\$/.test(v));
+  const lobby = PARTY.LOBBY_CHOICES.filter(([v]) => v !== 'not_sure').map(([, l]) => esc(l)).join(' · ');
+  return `<article class="price-tool" id="price-my-party-room" data-price-tool="party">`
+    + `<h3>Hotel room and party room decor: what your budget buys</h3>`
+    + `<ul class="pt-tiers">${tiers.map(([, label]) => `<li>${esc(label)}</li>`).join('')}</ul>`
+    + `<p class="pt-incl">${esc(PARTY.BUDGET_HELP)}</p>`
+    + `<p class="pt-incl">${esc(PARTY.HOTEL_WINDOW)} ${esc(PARTY.LOCATION_LATER)}</p>`
+    + `<p class="pt-incl">For a business, ask for: ${lobby}.</p>`
+    + `<p class="pt-money">${esc(DEPOSIT_LINE)}</p>`
+    + `<a class="btn-primary pt-go" href="/request?service=party#request-form" data-quote-cta="price-my-party-room">Price my party or hotel room &rsaquo;</a></article>`;
+}
+
 // One small script for both tools. Plain words, the same numbers as the data above.
 const SCRIPT = `<script>(function(){var m=function(n){return '$'+Math.round(n).toLocaleString('en-US')};
 var p=document.querySelector('[data-price-tool="porch"]');if(p){var c=JSON.parse(p.getAttribute('data-config'));var f=p.querySelector('form');var o=function(k){return p.querySelector('[data-out="'+k+'"]')};
@@ -86,8 +102,8 @@ f2.addEventListener('input',run2);f2.addEventListener('change',run2);run2();}})(
 function pricingBlockHtml() {
   return `<!--price-tools--><section class="section price-tools" id="price-tools" data-price-tools><div class="container">`
     + `<div class="answer-block"><span class="eyebrow">Price it yourself</span><h2>Get a starting price in under a minute.</h2>`
-    + `<p>Pick your porch or your guest count and see the from-price right away, then send the request with it filled in.</p></div>`
-    + `<div class="price-tool-grid">${porchToolHtml()}${grazingToolHtml()}</div>${SCRIPT}</div></section><!--/price-tools-->`;
+    + `<p>Pick your porch, your guest count or your decor budget and see what it costs, then send the request with it filled in.</p></div>`
+    + `<div class="price-tool-grid">${porchToolHtml()}${grazingToolHtml()}${partyToolHtml()}</div>${SCRIPT}</div></section><!--/price-tools-->`;
 }
 
-module.exports = { DEPOSIT_LINE, porchConfig, grazingConfig, porchToolHtml, grazingToolHtml, pricingBlockHtml, DEPOSIT_SHARE };
+module.exports = { partyToolHtml, DEPOSIT_LINE, porchConfig, grazingConfig, porchToolHtml, grazingToolHtml, pricingBlockHtml, DEPOSIT_SHARE };

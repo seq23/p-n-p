@@ -97,12 +97,13 @@ const FOOTER_GUIDES_RE = /<div data-site-chrome="footer-guides"><div class="foot
  * The two price tools on /pricing (owner, 6 Nov 2026: "the modules that help people the most"),
  * linked from every page where a person is thinking about price: the home page, the services
  * index and every service page, the FAQ and the request form intro. Porch pages link the porch
- * tool, grazing pages the grazing tool, every other one both. One line under the page's first
+ * tool, grazing pages the grazing tool, party and hotel pages the party-room block, the rest all three. One line under the page's first
  * call-to-action row (or its dates line when it has none).
  */
 const PRICE_TOOLS = Object.freeze({
   porch: { href: '/pricing#price-my-porch', label: 'Price my porch' },
-  grazing: { href: '/pricing#price-my-grazing-table', label: 'Price my grazing table' }
+  grazing: { href: '/pricing#price-my-grazing-table', label: 'Price my grazing table' },
+  party: { href: '/pricing#price-my-party-room', label: 'Price my party or hotel room' }
 });
 function priceToolsFor(rel) {
   const r = String(rel).replace(/\\/g, '/');
@@ -110,7 +111,8 @@ function priceToolsFor(rel) {
   if (!home.includes(r) && !r.startsWith('services/')) return [];
   if (/porch|front-door/.test(r)) return ['porch'];
   if (/grazing/.test(r)) return ['grazing'];
-  return ['porch', 'grazing'];
+  if (r.startsWith('services/') && r !== 'services/index.html') return ['party'];
+  return ['porch', 'grazing', 'party'];
 }
 const priceToolsLine = (keys) => `<p class="price-tools-line" ${MARK.priceTools}><span>Want a price first?</span> ${keys.map((k) => `<a class="price-tool-link" href="${PRICE_TOOLS[k].href}">${PRICE_TOOLS[k].label} &rsaquo;</a>`).join(' ')}</p>`;
 const PRICE_TOOLS_RE = /<p class="price-tools-line" data-site-chrome="price-tools">[\s\S]*?<\/p>/g;
