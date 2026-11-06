@@ -112,9 +112,9 @@ function checkPage(html, rel) {
   if (!head.includes(`href="${chrome.CSS_HREF}"`)) errs.push(`${rel}: <head> does not link ${chrome.CSS_HREF}`);
   const fontLinks = head.match(/fonts\.googleapis\.com\/css2\?[^"]*/g) || [];
   if (fontLinks.length !== 1 || !/family=Fraunces/.test(fontLinks[0]) || !/family=Figtree/.test(fontLinks[0])) errs.push(`${rel}: <head> must load the brand fonts (Fraunces + Figtree) in exactly one Google Fonts link, found ${fontLinks.length}`);
-  if (/Great\+Vibes|Cormorant/.test(head)) errs.push(`${rel}: <head> still loads a retired face (Great Vibes / Cormorant)`);
-  const lastLink = (head.match(/<link\b[^>]*>/g) || []).pop() || '';
-  if (!lastLink.includes(`href="${chrome.BRAND_CSS_HREF}"`)) errs.push(`${rel}: ${chrome.BRAND_CSS_HREF} is not the last stylesheet in <head>, so a page style could override the brand`);
+  if (fontLinks.some((l) => /Great\+Vibes|Cormorant/.test(l))) errs.push(`${rel}: <head> still loads a retired face (Great Vibes / Cormorant)`);
+  const styles = head.match(/<link\b[^>]*rel="stylesheet"[^>]*>|<\/style>/g) || [];
+  if (!(styles.pop() || '').includes(`href="${chrome.BRAND_CSS_HREF}"`)) errs.push(`${rel}: ${chrome.BRAND_CSS_HREF} is not the last stylesheet in <head>, so a page style could override the brand`);
   if (!/class="pp-wordmark"[^>]*>Porch <i>&amp;<\/i> Party <span class="pp-plaque">901<\/span>/.test(h)) errs.push(`${rel}: header logo is not the Porch & Party wordmark with the 901 plaque`);
   const ex = chrome.EXPLORE_RE.exec(html);
   if (!ex) errs.push(`${rel}: footer has no Explore list`);
@@ -143,6 +143,7 @@ const broken = {
   'the request form opening a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary" target="_blank" rel="noopener">Request a Quote</a></main>`),
   'the retired script face back in <head>': sample.replace('</head>', '<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet"/></head>'),
   'a page style after the brand layer': sample.replace('</head>', '<link rel="stylesheet" href="/assets/css/styles.css"/></head>'),
+  'an inline style after the brand layer': sample.replace('</head>', '<style>h1{font-family:serif}</style></head>'),
   'the old script logo': sample.replace(/<span class="pp-wordmark"[\s\S]*?<span class="pp-plaque">901<\/span><\/span>/, '<span class="brand-script">Porch &amp; Party</span>')
 };
 for (const [what, html] of Object.entries(broken)) {

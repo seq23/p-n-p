@@ -174,6 +174,28 @@ const cssLink = () => `<link rel="stylesheet" href="${CSS_HREF}" ${MARK.css} />`
 const fontsLink = () => `<link href="${FONTS_HREF.replace(/&/g, '&amp;')}" rel="stylesheet" ${MARK.fonts} />`;
 const brandLink = () => `<link rel="stylesheet" href="${BRAND_CSS_HREF}" ${MARK.brand} />`;
 
+/**
+ * The brand's <head>: exactly one Google Fonts link (Fraunces + Figtree), where the page's
+ * first fonts link was, and exactly one brand.css link straight after the page's last
+ * stylesheet (a <link rel="stylesheet"> or an inline <style>), so it wins over all of them.
+ * Generators call it on their own output, so a fresh render equals the chrome pass. Idempotent.
+ */
+function brandHead(html) {
+  const end = html.indexOf('</head>');
+  if (end < 0) return html;
+  let head = html.slice(0, end).replace(BRAND_LINK_RE, '');
+  const first = head.search(ANY_FONTS_LINK_RE);
+  const stripped = head.replace(ANY_FONTS_LINK_RE, '');
+  const at = first < 0 ? stripped.length : first;
+  head = stripped.slice(0, at) + fontsLink() + stripped.slice(at);
+  let last = -1;
+  const STYLE_RE = /<link\b[^>]*rel="stylesheet"[^>]*>|<\/style>/g;
+  let m;
+  while ((m = STYLE_RE.exec(head))) if (!m[0].includes(MARK.fonts)) last = m.index + m[0].length;
+  const put = last < 0 ? head.length : last;
+  return head.slice(0, put) + brandLink() + head.slice(put) + html.slice(end);
+}
+
 /** The site path a published file serves at: index.html -> /, rentals/index.html -> /rentals/. */
 function sitePathOf(rel) {
   const r = rel.replace(/\\/g, '/');
@@ -230,20 +252,7 @@ function applySiteChrome(html, rel) {
   const headEnd = out.indexOf('</head>');
   if (headEnd < 0) throw new Error(`${rel}: no </head>`);
   if (!out.includes(MARK.css)) out = out.slice(0, headEnd) + cssLink() + out.slice(headEnd);
-  // Fonts: exactly one brand fonts link, where the page's first fonts link was (or before </head>).
-  {
-    const head = out.slice(0, out.indexOf('</head>'));
-    const first = head.search(ANY_FONTS_LINK_RE);
-    const stripped = head.replace(ANY_FONTS_LINK_RE, '');
-    const at = first < 0 ? stripped.length : first;
-    out = stripped.slice(0, at) + fontsLink() + stripped.slice(at) + out.slice(head.length);
-  }
-  // Brand layer: exactly one link, the last thing in <head>.
-  {
-    const end = out.indexOf('</head>');
-    const head = out.slice(0, end).replace(BRAND_LINK_RE, '');
-    out = head + brandLink() + out.slice(end);
-  }
+  out = brandHead(out);
   const ex = EXPLORE_RE.exec(out);
   if (!ex) throw new Error(`${rel}: footer has no Explore list for the Rentals link`);
   const list = ex[2];
@@ -306,6 +315,6 @@ function withoutChrome(html) {
 
 module.exports = {
   NAV_ITEMS, QUOTE, QUOTE_ATTRS, RETIRED_FORM_RE, CALL_LABEL, MARK, LEGAL_LINKS, LEGAL_YEAR, footerAbout, legal, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, ABOUT_FOOTER, HEADER_RE, EXPLORE_RE,
-  header, cssLink, fontsLink, brandLink, FONTS_HREF, BRAND_CSS_HREF, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
+  header, cssLink, fontsLink, brandLink, brandHead, FONTS_HREF, BRAND_CSS_HREF, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
   isQuoteCta, retargetQuoteCtas
 };

@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+const siteChromeBrand = require('../lib/site_chrome');
 /**
  * Renders the two focused landing pages (owner approval 21 Oct 2026; registry and data in
  * scripts/lib/focus_pages.js): services/hotel-room-decor-memphis.html (rebuilt in place, same
@@ -60,9 +61,9 @@ function render(p) {
   ${siteIcons.HEAD_ICON_LINKS}
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  ${siteChromeBrand.fontsLink()}
   <link rel="stylesheet" href="/assets/css/styles.css" />
-  <link rel="stylesheet" href="/assets/css/site-nav.css" data-site-chrome="css" />
+  <link rel="stylesheet" href="/assets/css/site-nav.css" data-site-chrome="css" />${siteChromeBrand.brandLink()}
   ${ld({ '@context': 'https://schema.org', '@type': 'WebPage', name: p.title.replace(/&amp;/g, '&'), description: p.description.replace(/&amp;/g, '&'), url, primaryImageOfPage: `${DOMAIN}/${og.file}`, publisher: { '@id': `${DOMAIN}/#business` } })}
   ${ld(FP.serviceJsonLd(p))}
   ${ld(FP.faqJsonLd(p))}
