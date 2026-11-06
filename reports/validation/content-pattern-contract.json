@@ -2,9 +2,9 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-11-05T16:07:38.181Z",
+  "generated_at": "2026-11-06T16:07:47.284Z",
   "enforcement": "block",
-  "pages_checked": 27,
+  "pages_checked": 28,
   "status": "PASS",
   "blocking_failures": 0,
   "summary": [
@@ -46,8 +46,8 @@
     {
       "id": "comparison_table",
       "blocking": false,
-      "pages_missing": 22,
-      "coverage_pct": 18.5,
+      "pages_missing": 23,
+      "coverage_pct": 17.9,
       "why": "no comparison or cost table (agent request #2, 529 occurrences)"
     },
     {
@@ -67,8 +67,8 @@
     {
       "id": "faq",
       "blocking": false,
-      "pages_missing": 1,
-      "coverage_pct": 96.3,
+      "pages_missing": 2,
+      "coverage_pct": 92.9,
       "why": "no FAQ block or FAQPage schema (agent request #9)"
     },
     {
@@ -81,15 +81,15 @@
     {
       "id": "recommendation_summary",
       "blocking": false,
-      "pages_missing": 8,
-      "coverage_pct": 70.4,
+      "pages_missing": 9,
+      "coverage_pct": 67.9,
       "why": "no recommendation summary - asked for on 913 of 913 agent recommendations, the single most requested block"
     },
     {
       "id": "definition_callout",
       "blocking": false,
-      "pages_missing": 26,
-      "coverage_pct": 3.7,
+      "pages_missing": 27,
+      "coverage_pct": 3.6,
       "why": "no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\""
     },
     {
@@ -109,8 +109,8 @@
     {
       "id": "protocol",
       "blocking": false,
-      "pages_missing": 21,
-      "coverage_pct": 22.2,
+      "pages_missing": 22,
+      "coverage_pct": 21.4,
       "why": "no ordered protocol - ordered steps are what gets lifted for \"how do I\""
     },
     {
@@ -123,13 +123,13 @@
     {
       "id": "prompt_template",
       "blocking": false,
-      "pages_missing": 27,
+      "pages_missing": 28,
       "coverage_pct": 0,
       "why": "no copy-ready prompt - the artifact this audience actually reuses"
     }
   ],
   "spec_producer_parity": {
-    "generator_sources_scanned": 126,
+    "generator_sources_scanned": 127,
     "blocks_in_spec": 10,
     "blocks_required_of_this_repo": 9,
     "orphan_blocks": [],
@@ -158,6 +158,7 @@
     "comparison_table": [
       "faq/index.html",
       "guides/graduation-party-decorations-at-home-memphis.html",
+      "hotels.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
@@ -182,12 +183,14 @@
     "concrete_numbers": [],
     "named_sources": [],
     "faq": [
-      "about.html"
+      "about.html",
+      "hotels.html"
     ],
     "structured_data": [],
     "recommendation_summary": [
       "about.html",
       "faq/index.html",
+      "hotels.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
@@ -199,60 +202,7 @@
       "about.html",
       "areas/index.html",
       "faq/index.html",
-      "how-it-works.html",
-      "index.html",
-      "pricing.html",
-      "rentals/giant-lawn-games-memphis.html",
-      "rentals/index.html",
-      "services/baby-shower-decor-memphis.html",
-      "services/birthday-party-decor-memphis.html",
-      "services/birthday-party-planner-memphis.html",
-      "services/bridal-shower-decor-memphis.html",
-      "services/budget-party-decor-memphis.html",
-      "services/celebration-setups-memphis.html",
-      "services/celebration-setups.html",
-      "services/christmas-porch-decorating.html",
-      "services/fall-porch-decorating.html",
-      "services/front-door-styling.html",
-      "services/grazing-and-event-styling.html",
-      "services/grazing-tables-memphis.html",
-      "services/hotel-room-decor-memphis.html",
-      "services/index.html",
-      "services/luxury-party-decor-memphis.html",
-      "services/party-decor-memphis.html",
-      "services/porch-decorating.html"
-    ],
-    "trust_block": [],
-    "source_block": [],
-    "protocol": [
-      "areas/index.html",
-      "faq/index.html",
-      "how-it-works.html",
-      "index.html",
-      "pricing.html",
-      "rentals/giant-lawn-games-memphis.html",
-      "rentals/index.html",
-      "services/baby-shower-decor-memphis.html",
-      "services/birthday-party-decor-memphis.html",
-      "services/bridal-shower-decor-memphis.html",
-      "services/budget-party-decor-memphis.html",
-      "services/celebration-setups-memphis.html",
-      "services/christmas-porch-decorating.html",
-      "services/fall-porch-decorating.html",
-      "services/front-door-styling.html",
-      "services/grazing-and-event-styling.html",
-      "services/grazing-tables-memphis.html",
-      "services/index.html",
-      "services/luxury-party-decor-memphis.html",
-      "services/party-decor-memphis.html",
-      "services/small-porch-decorating.html"
-    ],
-    "cta_callout": [],
-    "prompt_template": [
-      "about.html",
-      "areas/index.html",
-      "faq/index.html",
-      "guides/graduation-party-decorations-at-home-memphis.html",
+      "hotels.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
@@ -274,6 +224,60 @@
       "services/index.html",
       "services/luxury-party-decor-memphis.html",
       "services/party-decor-memphis.html"
+    ],
+    "trust_block": [],
+    "source_block": [],
+    "protocol": [
+      "areas/index.html",
+      "faq/index.html",
+      "hotels.html",
+      "how-it-works.html",
+      "index.html",
+      "pricing.html",
+      "rentals/giant-lawn-games-memphis.html",
+      "rentals/index.html",
+      "services/baby-shower-decor-memphis.html",
+      "services/birthday-party-decor-memphis.html",
+      "services/bridal-shower-decor-memphis.html",
+      "services/budget-party-decor-memphis.html",
+      "services/celebration-setups-memphis.html",
+      "services/christmas-porch-decorating.html",
+      "services/fall-porch-decorating.html",
+      "services/front-door-styling.html",
+      "services/grazing-and-event-styling.html",
+      "services/grazing-tables-memphis.html",
+      "services/index.html",
+      "services/luxury-party-decor-memphis.html",
+      "services/party-decor-memphis.html",
+      "services/small-porch-decorating.html"
+    ],
+    "cta_callout": [],
+    "prompt_template": [
+      "about.html",
+      "areas/index.html",
+      "faq/index.html",
+      "guides/graduation-party-decorations-at-home-memphis.html",
+      "hotels.html",
+      "how-it-works.html",
+      "index.html",
+      "pricing.html",
+      "rentals/giant-lawn-games-memphis.html",
+      "rentals/index.html",
+      "services/baby-shower-decor-memphis.html",
+      "services/birthday-party-decor-memphis.html",
+      "services/birthday-party-planner-memphis.html",
+      "services/bridal-shower-decor-memphis.html",
+      "services/budget-party-decor-memphis.html",
+      "services/celebration-setups-memphis.html",
+      "services/celebration-setups.html",
+      "services/christmas-porch-decorating.html",
+      "services/fall-porch-decorating.html",
+      "services/front-door-styling.html",
+      "services/grazing-and-event-styling.html",
+      "services/grazing-tables-memphis.html",
+      "services/hotel-room-decor-memphis.html",
+      "services/index.html",
+      "services/luxury-party-decor-memphis.html"
     ]
   },
   "gaps_full": {
@@ -285,6 +289,7 @@
     "comparison_table": [
       "faq/index.html",
       "guides/graduation-party-decorations-at-home-memphis.html",
+      "hotels.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
@@ -309,12 +314,14 @@
     "concrete_numbers": [],
     "named_sources": [],
     "faq": [
-      "about.html"
+      "about.html",
+      "hotels.html"
     ],
     "structured_data": [],
     "recommendation_summary": [
       "about.html",
       "faq/index.html",
+      "hotels.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
@@ -326,6 +333,7 @@
       "about.html",
       "areas/index.html",
       "faq/index.html",
+      "hotels.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
@@ -355,6 +363,7 @@
     "protocol": [
       "areas/index.html",
       "faq/index.html",
+      "hotels.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
@@ -381,6 +390,7 @@
       "areas/index.html",
       "faq/index.html",
       "guides/graduation-party-decorations-at-home-memphis.html",
+      "hotels.html",
       "how-it-works.html",
       "index.html",
       "pricing.html",
