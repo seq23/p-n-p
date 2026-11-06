@@ -110,7 +110,12 @@ function checkPage(html, rel) {
   if (RETIRED.test(html)) errs.push(`${rel}: the retired Google Form address appears on the page`);
   const head = html.slice(0, html.indexOf('</head>'));
   if (!head.includes(`href="${chrome.CSS_HREF}"`)) errs.push(`${rel}: <head> does not link ${chrome.CSS_HREF}`);
-  if (!/fonts\.googleapis\.com\/css2\?family=Cormorant/.test(head)) errs.push(`${rel}: <head> does not load the site fonts (Inter, Cormorant Garamond, Great Vibes)`);
+  const fontLinks = head.match(/fonts\.googleapis\.com\/css2\?[^"]*/g) || [];
+  if (fontLinks.length !== 1 || !/family=Fraunces/.test(fontLinks[0]) || !/family=Figtree/.test(fontLinks[0])) errs.push(`${rel}: <head> must load the brand fonts (Fraunces + Figtree) in exactly one Google Fonts link, found ${fontLinks.length}`);
+  if (/Great\+Vibes|Cormorant/.test(head)) errs.push(`${rel}: <head> still loads a retired face (Great Vibes / Cormorant)`);
+  const lastLink = (head.match(/<link\b[^>]*>/g) || []).pop() || '';
+  if (!lastLink.includes(`href="${chrome.BRAND_CSS_HREF}"`)) errs.push(`${rel}: ${chrome.BRAND_CSS_HREF} is not the last stylesheet in <head>, so a page style could override the brand`);
+  if (!/class="pp-wordmark"[^>]*>Porch <i>&amp;<\/i> Party <span class="pp-plaque">901<\/span>/.test(h)) errs.push(`${rel}: header logo is not the Porch & Party wordmark with the 901 plaque`);
   const ex = chrome.EXPLORE_RE.exec(html);
   if (!ex) errs.push(`${rel}: footer has no Explore list`);
   else {
@@ -135,7 +140,10 @@ const broken = {
   'an in-body quote CTA on /contact': sample.replace('</main>', '<a href="/contact.html" class="btn-primary">Request a Quote</a></main>'),
   'a link to the retired Google Form': sample.replace('</main>', '<a href="https://forms.gle/vHjfKtRRAnGV3HxFA" class="btn-primary">Check My Date</a></main>'),
   'no phone-width Book online': sample.replace(`<a href="${FORM}" class="pnp-book-m">Book online</a>`, ''),
-  'the request form opening a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary" target="_blank" rel="noopener">Request a Quote</a></main>`)
+  'the request form opening a new tab': sample.replace('</main>', `<a href="${FORM}" class="btn-primary" target="_blank" rel="noopener">Request a Quote</a></main>`),
+  'the retired script face back in <head>': sample.replace('</head>', '<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet"/></head>'),
+  'a page style after the brand layer': sample.replace('</head>', '<link rel="stylesheet" href="/assets/css/styles.css"/></head>'),
+  'the old script logo': sample.replace(/<span class="pp-wordmark"[\s\S]*?<span class="pp-plaque">901<\/span><\/span>/, '<span class="brand-script">Porch &amp; Party</span>')
 };
 for (const [what, html] of Object.entries(broken)) {
   if (html === sample) errors.push(`self-test: could not build the "${what}" fixture (pricing.html shape changed)`);
