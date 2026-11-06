@@ -4,12 +4,10 @@
   X-Frame-Options: SAMEORIGIN
   Permissions-Policy: geolocation=(), microphone=(), camera=()
 
-# The production Pages host serves the same site as porchandparty901.com and was
-# found indexed by a web search (6 Nov 2026). Exactly that host answers noindex;
-# its canonicals already name porchandparty901.com. Branch previews
-# (<branch>.p-n-p.pages.dev) and the real domain are not matched. A 301 would need
-# a root Function in front of every public page, which validate:edge-cache-rule
-# forbids; post_deploy_live_check.mjs (9) proves this header live.
+# The production Pages host duplicates porchandparty901.com. The root Function
+# (functions/_lib/host-redirect.mjs) 301s every GET on it to the real domain;
+# this noindex stays as a backstop for anything the Function passes through.
+# Branch previews (<branch>.p-n-p.pages.dev) and the real domain are not matched.
 https://p-n-p.pages.dev/*
   X-Robots-Tag: noindex
 

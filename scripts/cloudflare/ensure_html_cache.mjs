@@ -8,8 +8,9 @@
  * `Cache-Control: public, max-age=0, must-revalidate` and the zone's default
  * cache level never stores HTML, so each request (crawler or visitor) went to
  * the Pages origin. No Function runs on content pages (functions/ holds
- * /admin, /api/, /request and /r/; there is no root _middleware, see
- * scripts/validators/validate_admin_noindex.mjs), so the fix is one zone Cache
+ * /admin, /api/, /request and /r/; the root _middleware only 301s the
+ * p-n-p.pages.dev host and passes every real-domain request through, see
+ * scripts/validators/validate_edge_cache_rule.mjs), so the fix is one zone Cache
  * Rule in the http_request_cache_settings phase.
  *
  * The rule (idempotent; found by its ref and updated in place):

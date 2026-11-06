@@ -48,7 +48,9 @@ for (const f of routeFiles) {
   const reachesAdmin = /^[/\\](api[/\\])?admin/.test(rel) || /\[\[?[^\]]+\]\]?/.test(path.basename(f)) && !inGuarded && /^[/\\](api[/\\])?[^/\\]*$/.test(rel);
   if (inGuarded) { if (!/_middleware\./.test(f)) adminRoutes += 1; continue; }
   if (reachesAdmin) errors.push(`${f} can serve /admin or /api/admin outside the guarded directories`);
-  if (/_middleware\./.test(f) && path.dirname(f) === 'functions') errors.push(`${f}: a root middleware would wrap the public site; admin guards live in functions/admin and functions/api/admin`);
+  // functions/_middleware.js is the duplicate-host 301 only; validate_edge_cache_rule drives it and
+  // fails if it changes any porchandparty901.com request, /admin and /api included.
+  if (/_middleware\./.test(f) && path.dirname(f) === 'functions' && path.basename(f) !== '_middleware.js') errors.push(`${f}: a root middleware would wrap the public site; admin guards live in functions/admin and functions/api/admin`);
 }
 if (adminRoutes === 0) errors.push('no route files under functions/admin or functions/api/admin (Rule 0: the console is missing)');
 for (const d of guardedDirs) {
@@ -167,7 +169,7 @@ for (const [f, re] of Object.entries(OUTREACH_ROUTES)) {
 }
 { const o = read(path.join('functions', '_lib', 'outreach.mjs'));
   if (!/'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow'/.test(o) || !/reason: 'Unauthorized\.' \}, 401\)/.test(o) || !/tokenMatches\(token\[1\], env\.PNP_OUTREACH_TOKEN\)/.test(o)) errors.push('outreach.mjs must answer no-store + noindex and 401 without PNP_OUTREACH_TOKEN'); }
-for (const f of outside) if (![...icsFiles, ...syncFiles, ...Object.keys(FORM_ROUTES), ...Object.keys(PHOTO_ROUTES), ...Object.keys(FEED_ROUTES), ...Object.keys(OUTREACH_ROUTES)].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed, the sync hook, the owner feed, the outreach API nor a request-form route`);
+for (const f of outside) if (![...icsFiles, ...syncFiles, ...Object.keys(FORM_ROUTES), ...Object.keys(PHOTO_ROUTES), ...Object.keys(FEED_ROUTES), ...Object.keys(OUTREACH_ROUTES), path.join('functions', '_middleware.js')].includes(f)) errors.push(`${f} is a route outside the guard that is neither the ICS feed, the sync hook, the owner feed, the outreach API, a request-form route nor the duplicate-host 301 middleware`);
 
 if (errors.length) {
   console.error('VALIDATION FAIL: admin console noindex / guard');
