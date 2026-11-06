@@ -8,9 +8,21 @@
 # sitemap.xml + lastmod, then the frozen-output refreeze. validate:release runs on
 # the pushed commit (Deploy Distribution).
 set -Eeuo pipefail
+# Open the mutation scope on exactly the pages this run changed. build:sitemap
+# runs install_structured_data.js, which calls frozen_outputs freeze, so the
+# scope must be open before it too: without it the engine's related-link edits on
+# frozen pages (/areas, /faq, /services/...) were UNSCOPED_FROZEN_OUTPUT_DRIFT and
+# stopped the first real publish (dispatch run 42311192656, 6 Nov 2026).
+scope_changed() {
+  local routes
+  routes=$(git status --porcelain -- '*.html' | awk '$1=="M"{print $2}' | sed -E 's#(^|/)index\.html$#\1#; s#\.html$##; s#^#/#')
+  # shellcheck disable=SC2086 # routes are space-free site paths, one argument each
+  node scripts/authority_scale/frozen_outputs.mjs prepare-scope $routes
+}
 npm run build:section-indexes
 npm run porch:install
 node scripts/install_search_loop_pages.js
+scope_changed
 # The finish passes read sitemap.xml for the published page list, so the new
 # pages enter it first; the second build:sitemap records their final lastmod.
 npm run build:sitemap
@@ -37,9 +49,7 @@ fi
 # Linking in edits existing (frozen) site pages, so exactly those pages enter the
 # mutation scope before the finish passes refreeze (the same open-scope -> freeze
 # -> clear-scope the daily authority cycle uses), and the scope is closed after.
-routes=$(git status --porcelain -- '*.html' | awk '$1=="M"{print $2}' | sed -E 's#(^|/)index\.html$#\1#; s#\.html$##; s#^#/#')
-# shellcheck disable=SC2086 # routes are space-free site paths, one argument each
-node scripts/authority_scale/frozen_outputs.mjs prepare-scope $routes
+scope_changed
 npm run build:finish
 npm run build:sitemap
 npm run authority:scale:freeze
