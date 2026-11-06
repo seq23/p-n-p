@@ -201,3 +201,19 @@ details.faq-item summary:hover { color: var(--plum); }
 .site-nav a { color: var(--plum); }
 
 @media (prefers-reduced-motion: reduce) { .btn-primary:active, .rq-submit:active { transform: none; } }
+
+/* ---------- hostile review at 390 px (6 Nov) ---------- */
+/* phones: the hero reads left-aligned like the approved home page, buttons full width */
+@media (max-width: 1023px) {
+  .hero-minimal-inner { text-align: left; align-items: stretch; }
+  .hero-minimal-inner .eyebrow, .hero-lead, .hero-definition, .hero-subtle { margin-left: 0; max-width: none; }
+  .hero-centered-cta { justify-content: stretch; width: 100%; }
+  .book-online-line { text-align: left; }
+}
+/* every tap target 44 px */
+.pkg-request { display: inline-flex; align-items: center; min-height: 44px; }
+th[scope="row"] a, .faq-longer a { display: inline-flex; align-items: center; min-height: 44px; }
+@media (min-width: 1024px) { .pnp-header .pnp-nav a { height: 44px; } }
+/* radios and checkboxes on the form: haint, never the old brick */
+.rq-q input[type=radio], .rq-q input[type=checkbox], .pkg-toggle input, .estimator-form input[type=radio] { accent-color: var(--haint-deep); }
+main .breadcrumb li a:not([class]) { text-decoration: none; color: var(--plum-muted); }
