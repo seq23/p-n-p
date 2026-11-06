@@ -280,3 +280,10 @@ a.card-media { display: block; }
   .hero-minimal-inner > .price-tools-line { order: 3; margin: 0 0 10px; }
   .hero-photo-real img { aspect-ratio: 16 / 10; }
 }
+
+/* ---------- home service-area section: the bridge banner (the one stock photo, credited) ---------- */
+.area-banner { margin: 22px auto 0; max-width: 1080px; }
+.area-banner img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: 50% 45%; border-radius: var(--radius-lg); }
+@media (min-width: 900px) { .area-banner img { aspect-ratio: 21 / 8; } }
+.area-banner figcaption { margin-top: 8px; font-size: 13px; line-height: 1.4; color: var(--plum-muted); text-align: left; }
+.area-banner figcaption a { color: inherit; display: inline; min-height: 0; }
