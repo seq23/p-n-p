@@ -200,6 +200,11 @@ function check(files) {
       if (!DEPOSIT_LINE.includes(part) || faqPage == null || !faqPage.includes(part)) errors.push(`price tools deposit words "${part}" are not what /faq/ publishes`);
     }
     if (/holds (?:the|your) date \(from \$/.test(pricing)) errors.push('pricing.html states a derived deposit amount');
+    // Party and hotel room budgets: the request form's own words, from the one shared module.
+    const PARTY = require('../lib/party_pricing');
+    const party = (pricing.match(/<article class="price-tool" id="price-my-party-room"[\s\S]*?<\/article>/) || [''])[0];
+    const want = [...PARTY.PARTY_BUDGETS.filter(([v]) => /^\$/.test(v)).map(([, l]) => l), PARTY.HOTEL_WINDOW, 'Just the lobby', 'href="/request?service=party#request-form"'];
+    for (const w of want) if (!party.includes(w.replace(/&/g, '&amp;'))) errors.push(`pricing.html party and hotel room block lacks "${w}"`);
   }
   if (checked === 0) errors.push('zero surfaces checked');
   return { errors, checked };
@@ -250,6 +255,7 @@ const probes = {
   'pricing page without the porch tool': { ...files, 'pricing.html': files['pricing.html'].replace(/<article class="price-tool" id="price-my-porch"/, '<article class="price-tool" id="x"') },
   'pricing page without the grazing tool': { ...files, 'pricing.html': files['pricing.html'].replace(/<article class="price-tool" id="price-my-grazing-table"/, '<article class="price-tool" id="y"') },
   'pricing tools with a derived deposit amount': { ...files, 'pricing.html': files['pricing.html'].replace('50% of the quote holds your date.', '50% of the quote holds your date (from $375).') },
+  'pricing without the party room budgets': { ...files, 'pricing.html': files['pricing.html'].replace('$500–$1,000 (fuller decor)', '$500–$1,000') },
   'no files at all': {}
 };
 for (const [label, broken] of Object.entries(probes)) if (!check(broken).errors.length) result.errors.push(`self-test: "${label}" passed when it should fail`);

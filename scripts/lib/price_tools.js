@@ -80,7 +80,7 @@ function partyToolHtml() {
     + `<h3>Hotel room and party room decor: what your budget buys</h3>`
     + `<ul class="pt-tiers">${tiers.map(([, label]) => `<li>${esc(label)}</li>`).join('')}</ul>`
     + `<p class="pt-incl">${esc(PARTY.BUDGET_HELP)}</p>`
-    + `<p class="pt-incl">${esc(PARTY.HOTEL_WINDOW)} ${esc(PARTY.LOCATION_LATER)}</p>`
+    + `<p class="pt-incl">${esc(PARTY.HOTEL_WINDOW)}</p>`
     + `<p class="pt-incl">For a business, ask for: ${lobby}.</p>`
     + `<p class="pt-money">${esc(DEPOSIT_LINE)}</p>`
     + `<a class="btn-primary pt-go" href="/request?service=party#request-form" data-quote-cta="price-my-party-room">Price my party or hotel room &rsaquo;</a></article>`;
