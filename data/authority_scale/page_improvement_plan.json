@@ -1,6 +1,6 @@
 {
   "schema_version": "1.1",
-  "generated_for_date": "2026-11-06",
+  "generated_for_date": "2026-11-07",
   "source": "data/authority_scale/candidate_backlog.json",
   "twin_agent_used": false,
   "twin_learning_transfer": [
@@ -15,8 +15,8 @@
   "route_plan_count": 15,
   "content_block_gaps": {
     "measured_by": "reports/validation/content-pattern-contract.json",
-    "measured_at": "2026-11-06T16:06:57.478Z",
-    "pages_checked": 28,
+    "measured_at": "2026-11-07T16:06:01.566Z",
+    "pages_checked": 34,
     "truth_boundary": "These gaps are measured against the pages present when the contract last ran. This builder runs before the publish step in the daily cycle, so a page published later in the same run is measured on the next cycle rather than this one. Over-listing is safe; a route named here is never a route that does not exist.",
     "blocks": [
       {
@@ -33,8 +33,8 @@
         "requested": 913,
         "applies_to_repo": true,
         "named_stop": null,
-        "coverage_pct": 67.9,
-        "pages_missing": 9,
+        "coverage_pct": 58.8,
+        "pages_missing": 14,
         "lane": "gap_needs_content"
       },
       {
@@ -60,8 +60,8 @@
         "requested": 305,
         "applies_to_repo": true,
         "named_stop": null,
-        "coverage_pct": 21.4,
-        "pages_missing": 22,
+        "coverage_pct": 17.6,
+        "pages_missing": 28,
         "lane": "gap_needs_content"
       },
       {
@@ -69,17 +69,17 @@
         "requested": 272,
         "applies_to_repo": true,
         "named_stop": null,
-        "coverage_pct": 100,
-        "pages_missing": 0,
-        "lane": "covered"
+        "coverage_pct": 85.3,
+        "pages_missing": 5,
+        "lane": "gap_needs_content"
       },
       {
         "id": "comparison_table",
         "requested": 258,
         "applies_to_repo": true,
         "named_stop": null,
-        "coverage_pct": 17.9,
-        "pages_missing": 23,
+        "coverage_pct": 14.7,
+        "pages_missing": 29,
         "lane": "gap_needs_content"
       },
       {
@@ -88,7 +88,7 @@
         "applies_to_repo": false,
         "named_stop": "NOT APPLICABLE TO THIS REPO. The 913 recommendations behind this spec were collected across a portfolio whose other members publish technical and advisory content, where a copy-ready prompt is the artifact a reader reuses. Porch & Party publishes event-decor and porch-styling answers for Memphis homeowners; there is no prompt for a reader to copy, and emitting one on 109 decor pages would be scaffolding of exactly the kind the template-share ceiling and the fabricated-content rules exist to prevent. Retired by flag rather than deleted: the block stays in the spec and the detector stays live, so the day this repo does publish a copyable prompt the flag below fails and the entry is reinstated. Reinstate by setting applies_to_repo true and adding an emitter to templates/page-shell.js.",
         "coverage_pct": 0,
-        "pages_missing": 28,
+        "pages_missing": 34,
         "lane": "named_stop"
       },
       {
@@ -105,8 +105,8 @@
         "requested": 196,
         "applies_to_repo": true,
         "named_stop": null,
-        "coverage_pct": 3.6,
-        "pages_missing": 27,
+        "coverage_pct": 2.9,
+        "pages_missing": 33,
         "lane": "gap_needs_content"
       }
     ],
@@ -118,91 +118,91 @@
       "priority_score": 53,
       "opportunities": [
         {
-          "query": "examples of photo ready event styling professional gathering for event hosts in Memphis TN while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "DIY vs hiring help for photo ready event styling romantic for hotel guests in Memphis TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "DIY vs hiring help for small event decor photo ready for busy hosts in Memphis TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "examples of photo ready event styling photo ready for event hosts in Memphis TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "examples of small event decor simple for couples in Memphis TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how does baby shower decor work professional gathering for event hosts in Memphis TN before requesting a quote",
+          "query": "checklist for baby shower decor seasonal for busy hosts in Memphis TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how much does celebration setup cost professional gathering for homeowners in Memphis TN before requesting a quote",
+          "query": "checklist for event decorator professional gathering for hotel guests in Memphis TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
+          "similarity": 0.5
+        },
+        {
+          "query": "checklist for baby shower decor simple for busy hosts in Memphis TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how far in advance to book small event decor last minute for birthday hosts in Memphis TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "who is celebration setup best for small space for couples in Memphis TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what to prepare before photo ready event styling last minute for busy hosts in Memphis TN before requesting a quote",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "when should I book celebration setup premium for families in Memphis TN before requesting a quote",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "examples of photo ready event styling professional gathering for hotel guests in Memphis TN before requesting a quote",
+          "query": "how far in advance to book small event decor 2026 for families in Memphis TN before requesting a quote",
           "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how to choose a provider for surprise celebration setup 2026 for busy hosts in Memphis TN before requesting a quote",
+          "format": "comparison",
+          "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
+          "similarity": 0.5
+        },
+        {
+          "query": "what to prepare before photo ready event styling 2026 for homeowners in Memphis TN before requesting a quote",
+          "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         },
         {
-          "query": "examples of small event decor seasonal for busy hosts in Memphis TN before requesting a quote",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how does baby shower decor work photo ready for event hosts in Memphis TN before requesting a quote",
+          "query": "when should I book celebration setup romantic for couples in Memphis TN before requesting a quote",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how much does celebration setup cost photo ready for homeowners in Memphis TN before requesting a quote",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "what is included in baby shower decor romantic for hotel guests in Memphis TN before requesting a quote",
-          "format": "comparison",
+          "query": "how does baby shower decor work professional gathering for busy hosts in Olive Branch MS while evaluating a local provider",
+          "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         }
       ],
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
-      "opportunity_count": 56,
+      "opportunity_count": 49,
       "missing_content_blocks": [
         "protocol",
         "comparison_table",
@@ -214,91 +214,91 @@
       "priority_score": 53,
       "opportunities": [
         {
-          "query": "what is corporate grazing table small space for small businesses in Memphis TN while evaluating a local provider",
+          "query": "is corporate grazing table worth it seasonal for hotel guests in Memphis TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "what is included in grazing table styling professional gathering for couples in Memphis TN while evaluating a local provider",
+          "query": "what to prepare before grazing table styling premium for shower hosts in Memphis TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how much does corporate grazing table cost simple for shower hosts in Memphis TN while evaluating a local provider",
+          "query": "is corporate grazing table worth it simple for hotel guests in Memphis TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "is corporate grazing table worth it seasonal for corporate teams in Memphis TN before requesting a quote",
           "format": "comparison",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how to plan decor only event support last minute for corporate teams in Memphis TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "what is corporate grazing table family celebration for shower hosts in Memphis TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how much does decor only event support cost premium for hotel guests in Memphis TN before requesting a quote",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "how far in advance to book retreat event styling family celebration for shower hosts in Memphis TN while evaluating a local provider",
+          "query": "what is retreat event styling premium for hotel guests in Memphis TN while evaluating a local provider",
           "format": "checklist",
           "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
           "similarity": 0.6667
         },
         {
-          "query": "how much does decor only event support cost premium for event hosts in Memphis TN while evaluating a local provider",
-          "format": "checklist",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "how much does decor only event support cost romantic for corporate teams in Memphis TN before requesting a quote",
+          "query": "when should I book decor only event support 2026 for event hosts in Memphis TN before requesting a quote",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         },
         {
-          "query": "what is corporate grazing table small space for shower hosts in Memphis TN before requesting a quote",
-          "format": "comparison",
+          "query": "questions to ask before booking decor only event support seasonal for busy hosts in Memphis TN while evaluating a local provider",
+          "format": "direct_answer",
           "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
+          "similarity": 0.75
         },
         {
-          "query": "how far in advance to book retreat event styling small space for small businesses in Memphis TN while evaluating a local provider",
+          "query": "what is retreat event styling romantic for hotel guests in Memphis TN while evaluating a local provider",
           "format": "direct_answer",
           "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
           "similarity": 0.6667
         },
         {
-          "query": "DIY vs hiring help for retreat event styling last minute for shower hosts in Germantown TN while evaluating a local provider",
+          "query": "examples of decor only event support family celebration for homeowners in Memphis TN before requesting a quote",
+          "format": "checklist",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "how long does corporate event decor take professional gathering for small businesses in Collierville TN while evaluating a local provider",
           "format": "decision_matrix",
-          "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
-          "similarity": 0.6667
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how much does decor only event support cost premium for homeowners in Olive Branch MS while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "how to choose a provider for corporate grazing table last minute for corporate teams in Arlington TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
         }
       ],
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
-      "opportunity_count": 37,
+      "opportunity_count": 35,
       "missing_content_blocks": [
         "protocol",
         "comparison_table",
@@ -310,90 +310,89 @@
       "priority_score": 53,
       "opportunities": [
         {
-          "query": "how much does porch decorating installation cost seasonal for birthday hosts in Memphis TN while evaluating a local provider",
+          "query": "when should I book porch decorating installation professional gathering for small businesses in Memphis TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
           "similarity": 0.6667
         },
         {
-          "query": "how much does porch decorating installation cost simple for birthday hosts in Memphis TN while evaluating a local provider",
+          "query": "how far in advance to book party decor romantic for corporate teams in Memphis TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how to plan party decorator photo ready for homeowners in Memphis TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
+          "similarity": 0.5
+        },
+        {
+          "query": "when should I book porch decorating installation photo ready for small businesses in Memphis TN while evaluating a local provider",
           "format": "cost_guide",
           "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
           "similarity": 0.6667
         },
         {
-          "query": "mistakes to avoid with spring porch decorating simple for families in Memphis TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
-          "similarity": 0.6667
-        },
-        {
-          "query": "mistakes to avoid with party decor premium for small businesses in Memphis TN before requesting a quote",
+          "query": "how long does party decor take seasonal for hotel guests in Memphis TN before requesting a quote",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how to choose a provider for party decor 2026 for birthday hosts in Memphis TN before requesting a quote",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "ideas for spring porch decorating small space for families in Memphis TN before requesting a quote",
-          "format": "comparison",
+          "query": "how far in advance to book party decorator family celebration for homeowners in Memphis TN before requesting a quote",
+          "format": "cost_guide",
           "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
-          "similarity": 0.6667
+          "similarity": 0.5
         },
         {
-          "query": "mistakes to avoid with party decor romantic for shower hosts in Memphis TN before requesting a quote",
+          "query": "how long does party decor take simple for hotel guests in Memphis TN before requesting a quote",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "when should I book party decorator seasonal for hotel guests in Memphis TN before requesting a quote",
+          "query": "how to plan spring porch decorating romantic for shower hosts in Memphis TN before requesting a quote",
           "format": "comparison",
           "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
-          "similarity": 0.5
+          "similarity": 0.6667
         },
         {
-          "query": "best way to compare options for party decorator professional gathering for corporate teams in Memphis TN while evaluating a local provider",
-          "format": "framework",
-          "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
-          "similarity": 0.5
-        },
-        {
-          "query": "is party decorator worth it last minute for hotel guests in Arlington TN while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
-          "similarity": 0.5
-        },
-        {
-          "query": "is porch decorating installation worth it family celebration for birthday hosts in Olive Branch MS while evaluating a local provider",
+          "query": "examples of porch decorating installation premium for corporate teams in Olive Branch MS while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
           "similarity": 0.6667
         },
         {
-          "query": "mistakes to avoid with spring porch decorating seasonal for couples in Memphis TN while evaluating a local provider",
-          "format": "framework",
+          "query": "how much does spring porch decorating cost seasonal for shower hosts in Arlington TN while evaluating a local provider",
+          "format": "decision_matrix",
           "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
           "similarity": 0.6667
+        },
+        {
+          "query": "is party decorator worth it last minute for event hosts in Bartlett TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "CLUSTER_OR_SECTION_CANDIDATE",
+          "similarity": 0.5
+        },
+        {
+          "query": "mistakes to avoid with party decor premium for hotel guests in Southaven MS while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
         }
       ],
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
-      "opportunity_count": 33,
+      "opportunity_count": 27,
       "missing_content_blocks": [
         "protocol",
         "definition_callout"
@@ -404,90 +403,91 @@
       "priority_score": 53,
       "opportunities": [
         {
-          "query": "DIY vs hiring help for front porch styling professional gathering for homeowners in Memphis TN while evaluating a local provider",
+          "query": "questions to ask before booking front porch styling small space for families in Memphis TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "who is holiday front door styling best for seasonal for couples in Memphis TN while evaluating a local provider",
-          "format": "decision_matrix",
+          "query": "ideas for front porch styling simple for couples in Memphis TN while evaluating a local provider",
+          "format": "comparison",
           "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
+          "similarity": 1
         },
         {
-          "query": "DIY vs hiring help for front porch styling photo ready for homeowners in Memphis TN while evaluating a local provider",
+          "query": "questions to ask before booking front porch styling family celebration for couples in Memphis TN while evaluating a local provider",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "what affects pricing for holiday front door styling family celebration for couples in Memphis TN before requesting a quote",
+          "query": "ideas for holiday front door styling premium for shower hosts in Memphis TN before requesting a quote",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         },
         {
-          "query": "what affects pricing for holiday front door styling family celebration for families in Memphis TN while evaluating a local provider",
+          "query": "ideas for holiday front door styling premium for small businesses in Memphis TN while evaluating a local provider",
           "format": "checklist",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         },
         {
-          "query": "how does holiday front door styling work seasonal for families in Germantown TN while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "how far in advance to book front porch styling premium for busy hosts in Olive Branch MS while evaluating a local provider",
-          "format": "decision_matrix",
+          "query": "questions to ask before booking front porch styling small space for couples in Memphis TN before requesting a quote",
+          "format": "comparison",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how long does Christmas porch decorating take simple for couples in Memphis TN before requesting a quote",
+          "query": "how does Christmas porch decorating work last minute for birthday hosts in Memphis TN before requesting a quote",
           "format": "checklist",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "is Christmas porch decorating worth it seasonal for busy hosts in Germantown TN while evaluating a local provider",
+          "query": "how far in advance to book front porch styling premium for couples in Arlington TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "what is Christmas porch decorating seasonal for couples in Collierville TN while evaluating a local provider",
+          "query": "how to choose a provider for Christmas porch decorating family celebration for families in Olive Branch MS while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "best way to compare options for front porch styling seasonal for homeowners in Germantown TN while evaluating a local provider",
-          "format": "comparison",
+          "query": "is Christmas porch decorating worth it professional gathering for birthday hosts in Collierville TN while evaluating a local provider",
+          "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "checklist for holiday front door styling small space for families in Collierville TN while evaluating a local provider",
-          "format": "comparison",
+          "query": "questions to ask before booking holiday front door styling photo ready for small businesses in Memphis TN before requesting a quote",
+          "format": "checklist",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
+        },
+        {
+          "query": "what is front porch styling seasonal for families in Olive Branch MS while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
         }
       ],
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
-        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
-      "opportunity_count": 19,
+      "opportunity_count": 24,
       "missing_content_blocks": [
         "protocol",
         "comparison_table",
@@ -496,94 +496,93 @@
     },
     {
       "route": "/services/hotel-room-decor-memphis.html",
-      "priority_score": 53,
+      "priority_score": 52,
       "opportunities": [
         {
-          "query": "DIY vs hiring help for anniversary room decor premium for hotel guests in Memphis TN while evaluating a local provider",
-          "format": "decision_matrix",
+          "query": "what is included in proposal room setup simple for couples in Memphis TN while evaluating a local provider",
+          "format": "comparison",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "DIY vs hiring help for anniversary room decor romantic for corporate teams in Memphis TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "when should I book proposal room setup premium for hotel guests in Memphis TN while evaluating a local provider",
-          "format": "direct_answer",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "best way to compare options for proposal room setup family celebration for hotel guests in Bartlett TN while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how far in advance to book anniversary room decor last minute for hotel guests in Olive Branch MS while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how to choose a provider for anniversary room decor simple for event hosts in Memphis TN before requesting a quote",
+          "query": "what is anniversary room decor professional gathering for homeowners in Memphis TN while evaluating a local provider",
           "format": "checklist",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "best way to compare options for proposal room setup small space for hotel guests in Bartlett TN while evaluating a local provider",
-          "format": "cost_guide",
+          "query": "what is anniversary room decor photo ready for busy hosts in Memphis TN while evaluating a local provider",
+          "format": "direct_answer",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how far in advance to book anniversary room decor 2026 for corporate teams in Olive Branch MS while evaluating a local provider",
-          "format": "cost_guide",
+          "query": "how far in advance to book proposal room setup professional gathering for homeowners in Memphis TN while evaluating a local provider",
+          "format": "operational_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how long does proposal room setup take seasonal for hotel guests in Lakeland TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "ideas for anniversary room decor photo ready for hotel guests in Collierville TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "questions to ask before booking anniversary room decor simple for event hosts in Collierville TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "what affects pricing for anniversary room decor 2026 for corporate teams in Memphis TN while comparing solution approaches",
+          "query": "questions to ask before booking anniversary room decor seasonal for homeowners in Germantown TN while evaluating a local provider",
           "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what affects pricing for proposal room setup premium for busy hosts in Lakeland TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what is included in proposal room setup seasonal for busy hosts in Memphis TN while evaluating a local provider",
+          "format": "framework",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what to prepare before anniversary room decor 2026 for homeowners in Memphis TN before requesting a quote",
+          "format": "checklist",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how does proposal room setup work 2026 for homeowners in Arlington TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "questions to ask before booking anniversary room decor simple for homeowners in Germantown TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what affects pricing for anniversary room decor small space for homeowners in Collierville TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what affects pricing for proposal room setup romantic for homeowners in Lakeland TN while evaluating a local provider",
+          "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         }
       ],
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Add the recommendation_summary block: no recommendation summary - asked for on 913 of 913 agent recommendations, the single most requested block.",
         "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
-      "opportunity_count": 13,
+      "opportunity_count": 16,
       "missing_content_blocks": [
         "recommendation_summary",
         "comparison_table",
@@ -591,77 +590,314 @@
       ]
     },
     {
-      "route": "/services/birthday-party-decor-memphis.html",
+      "route": "/services/porch-decorating.html",
       "priority_score": 52,
       "opportunities": [
         {
-          "query": "best way to compare options for birthday room setup photo ready for corporate teams in Memphis TN while evaluating a local provider",
+          "query": "is Halloween porch decorating worth it 2026 for families in Memphis TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "who is Halloween porch decorating best for photo ready for birthday hosts in Memphis TN before requesting a quote",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how does birthday room setup work family celebration for small businesses in Memphis TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "best way to compare options for birthday room setup professional gathering for small businesses in Memphis TN before requesting a quote",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how to plan hotel room decor last minute for corporate teams in Memphis TN while evaluating a local provider",
-          "format": "checklist",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how to plan hotel room decor 2026 for corporate teams in Memphis TN while evaluating a local provider",
+          "query": "how much does porch decorating take down cost 2026 for small businesses in Memphis TN while evaluating a local provider",
           "format": "direct_answer",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "examples of birthday party decor premium for small businesses in Collierville TN while evaluating a local provider",
+          "query": "how does Halloween porch decorating work seasonal for birthday hosts in Southaven MS while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how does birthday room setup work small space for small businesses in Memphis TN while evaluating a local provider",
+          "query": "how to plan porch decorating take down seasonal for corporate teams in Bartlett TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "is Halloween porch decorating worth it last minute for families in Memphis TN while evaluating a local provider",
           "format": "framework",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how far in advance to book birthday party decor small space for shower hosts in Germantown TN while evaluating a local provider",
+          "query": "what is porch decorating take down premium for hotel guests in Memphis TN while evaluating a local provider",
+          "format": "operational_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "checklist for Halloween porch decorating small space for birthday hosts in Olive Branch MS while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how does Halloween porch decorating work simple for birthday hosts in Southaven MS while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how to plan porch decorating take down simple for corporate teams in Bartlett TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "mistakes to avoid with porch decorating take down small space for corporate teams in Lakeland TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "best way to compare options for Halloween porch decorating romantic for birthday hosts in Southaven MS before requesting a quote",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        }
+      ],
+      "recommended_improvements": [
+        "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
+        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
+      ],
+      "opportunity_count": 12,
+      "missing_content_blocks": [
+        "comparison_table",
+        "definition_callout"
+      ]
+    },
+    {
+      "route": "/services/budget-party-decor-memphis.html",
+      "priority_score": 52,
+      "opportunities": [
+        {
+          "query": "how to choose a provider for budget conscious party decor romantic for shower hosts in Memphis TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "how to choose a provider for budget conscious party decor premium for shower hosts in Memphis TN while evaluating a local provider",
+          "format": "framework",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "how to plan budget conscious party decor professional gathering for birthday hosts in Lakeland TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "is budget conscious party decor worth it last minute for birthday hosts in Memphis TN while evaluating a local provider",
+          "format": "operational_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "best way to compare options for budget conscious party decor romantic for shower hosts in Southaven MS while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "how to plan budget conscious party decor photo ready for birthday hosts in Lakeland TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "mistakes to avoid with budget conscious party decor seasonal for birthday hosts in Arlington TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "DIY vs hiring help for budget conscious party decor last minute for shower hosts in Arlington TN before requesting a quote",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "how to choose a provider for budget conscious party decor romantic for birthday hosts in Memphis TN before requesting a quote",
+          "format": "operational_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        }
+      ],
+      "recommended_improvements": [
+        "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
+      ],
+      "opportunity_count": 9,
+      "missing_content_blocks": [
+        "protocol",
+        "definition_callout"
+      ]
+    },
+    {
+      "route": "/services/celebration-setups.html",
+      "priority_score": 52,
+      "opportunities": [
+        {
+          "query": "is romantic room setup worth it family celebration for homeowners in Memphis TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "is romantic room setup worth it small space for homeowners in Memphis TN before requesting a quote",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how to choose a provider for romantic room setup premium for homeowners in Arlington TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "mistakes to avoid with hotel room decor premium for corporate teams in Germantown TN while evaluating a local provider",
+          "query": "how to plan romantic room setup professional gathering for event hosts in Memphis TN while evaluating a local provider",
+          "format": "operational_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how to choose a provider for romantic room setup romantic for event hosts in Lakeland TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what is romantic room setup 2026 for event hosts in Arlington TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how long does romantic room setup take last minute for event hosts in Bartlett TN before requesting a quote",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "when should I book birthday room setup family celebration for small businesses in Arlington TN while evaluating a local provider",
+          "query": "how to plan romantic room setup photo ready for event hosts in Memphis TN while evaluating a local provider",
+          "format": "faq",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        }
+      ],
+      "recommended_improvements": [
+        "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
+        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
+      ],
+      "opportunity_count": 8,
+      "missing_content_blocks": [
+        "comparison_table",
+        "definition_callout"
+      ]
+    },
+    {
+      "route": "/services/birthday-party-decor-memphis.html",
+      "priority_score": 51,
+      "opportunities": [
+        {
+          "query": "best way to compare options for hotel room decor family celebration for hotel guests in Memphis TN before requesting a quote",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "who is birthday party decor best for romantic for shower hosts in Memphis TN before requesting a quote",
+          "query": "best way to compare options for hotel room decor family celebration for event hosts in Memphis TN while evaluating a local provider",
           "format": "checklist",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "examples of birthday party decor romantic for shower hosts in Collierville TN while evaluating a local provider",
+          "query": "what affects pricing for birthday room setup small space for event hosts in Memphis TN before requesting a quote",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "DIY vs hiring help for birthday room setup premium for event hosts in Arlington TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how far in advance to book birthday party decor seasonal for hotel guests in Collierville TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how long does hotel room decor take seasonal for event hosts in Germantown TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "mistakes to avoid with birthday party decor simple for hotel guests in Memphis TN before requesting a quote",
+          "format": "checklist",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "when should I book hotel room decor 2026 for event hosts in Memphis TN before requesting a quote",
+          "format": "checklist",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "best way to compare options for birthday room setup professional gathering for hotel guests in Southaven MS while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "DIY vs hiring help for birthday party decor small space for hotel guests in Bartlett TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "DIY vs hiring help for birthday room setup romantic for hotel guests in Arlington TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how far in advance to book birthday party decor simple for hotel guests in Collierville TN while evaluating a local provider",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
@@ -670,10 +906,10 @@
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
-        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
@@ -685,195 +921,78 @@
     },
     {
       "route": "/services/grazing-tables-memphis.html",
-      "priority_score": 52,
+      "priority_score": 51,
       "opportunities": [
         {
-          "query": "what affects pricing for styled food table presentation family celebration for families in Memphis TN while evaluating a local provider",
+          "query": "questions to ask before booking styled food table presentation professional gathering for small businesses in Memphis TN before requesting a quote",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "questions to ask before booking styled food table presentation photo ready for small businesses in Memphis TN before requesting a quote",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         },
         {
-          "query": "DIY vs hiring help for styled food table presentation last minute for birthday hosts in Memphis TN before requesting a quote",
+          "query": "DIY vs hiring help for styled food table presentation last minute for small businesses in Southaven MS while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         },
         {
-          "query": "DIY vs hiring help for styled food table presentation 2026 for families in Memphis TN before requesting a quote",
+          "query": "best way to compare options for styled food table presentation premium for small businesses in Olive Branch MS while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "DIY vs hiring help for styled food table presentation 2026 for shower hosts in Southaven MS while evaluating a local provider",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         },
         {
-          "query": "best way to compare options for styled food table presentation premium for shower hosts in Germantown TN while evaluating a local provider",
+          "query": "how does styled food table presentation work photo ready for corporate teams in Collierville TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 0.75
+        },
+        {
+          "query": "how long does styled food table presentation take 2026 for small businesses in Memphis TN while comparing solution approaches",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         },
         {
-          "query": "when should I book styled food table presentation simple for birthday hosts in Southaven MS while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "best way to compare options for styled food table presentation romantic for birthday hosts in Germantown TN while evaluating a local provider",
+          "query": "what affects pricing for styled food table presentation simple for corporate teams in Germantown TN while evaluating a local provider",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         },
         {
-          "query": "how does styled food table presentation work simple for birthday hosts in Germantown TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "how long does styled food table presentation take 2026 for birthday hosts in Collierville TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "how to plan styled food table presentation professional gathering for families in Olive Branch MS while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "mistakes to avoid with styled food table presentation seasonal for birthday hosts in Memphis TN while comparing solution approaches",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "DIY vs hiring help for styled food table presentation 2026 for birthday hosts in Memphis TN while evaluating a local provider",
-          "format": "use_case_guide",
+          "query": "how long does styled food table presentation take last minute for small businesses in Memphis TN while comparing solution approaches",
+          "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 0.75
         }
       ],
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
-        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
-      "opportunity_count": 11,
+      "opportunity_count": 9,
       "missing_content_blocks": [
         "protocol",
         "comparison_table",
-        "definition_callout"
-      ]
-    },
-    {
-      "route": "/services/celebration-setups.html",
-      "priority_score": 52,
-      "opportunities": [
-        {
-          "query": "questions to ask before booking romantic room setup romantic for hotel guests in Memphis TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "ideas for romantic room setup last minute for corporate teams in Memphis TN while evaluating a local provider",
-          "format": "operational_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "questions to ask before booking romantic room setup premium for hotel guests in Memphis TN while evaluating a local provider",
-          "format": "framework",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "what to prepare before romantic room setup family celebration for corporate teams in Lakeland TN while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how far in advance to book romantic room setup seasonal for corporate teams in Arlington TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "what to prepare before romantic room setup small space for corporate teams in Lakeland TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        }
-      ],
-      "recommended_improvements": [
-        "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
-        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
-        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
-      ],
-      "opportunity_count": 6,
-      "missing_content_blocks": [
-        "comparison_table",
-        "definition_callout"
-      ]
-    },
-    {
-      "route": "/services/budget-party-decor-memphis.html",
-      "priority_score": 52,
-      "opportunities": [
-        {
-          "query": "what to prepare before budget conscious party decor small space for families in Memphis TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "ideas for budget conscious party decor last minute for couples in Lakeland TN while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "what is budget conscious party decor premium for couples in Memphis TN while evaluating a local provider",
-          "format": "operational_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "how to plan budget conscious party decor photo ready for families in Southaven MS while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        },
-        {
-          "query": "mistakes to avoid with budget conscious party decor seasonal for families in Olive Branch MS while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 0.75
-        }
-      ],
-      "recommended_improvements": [
-        "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
-        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
-        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
-      ],
-      "opportunity_count": 5,
-      "missing_content_blocks": [
-        "protocol",
         "definition_callout"
       ]
     },
@@ -882,180 +1001,93 @@
       "priority_score": 50,
       "opportunities": [
         {
-          "query": "when should I book fall porch decorating photo ready for homeowners in Memphis TN while evaluating a local provider",
+          "query": "DIY vs hiring help for fall porch decorating family celebration for couples in Memphis TN while evaluating a local provider",
           "format": "checklist",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "who is seasonal porch decorating best for photo ready for event hosts in Memphis TN while evaluating a local provider",
-          "format": "checklist",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "when should I book fall porch decorating professional gathering for homeowners in Memphis TN while evaluating a local provider",
+          "query": "DIY vs hiring help for fall porch decorating small space for families in Memphis TN while evaluating a local provider",
           "format": "direct_answer",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "who is seasonal porch decorating best for professional gathering for event hosts in Memphis TN while evaluating a local provider",
-          "format": "direct_answer",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "best way to compare options for fall porch decorating last minute for busy hosts in Bartlett TN while evaluating a local provider",
+          "query": "how to choose a provider for seasonal porch decorating professional gathering for couples in Lakeland TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "ideas for seasonal porch decorating premium for homeowners in Memphis TN while evaluating a local provider",
-          "format": "operational_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "is fall porch decorating worth it simple for couples in Memphis TN while evaluating a local provider",
-          "format": "operational_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "questions to ask before booking seasonal porch decorating professional gathering for homeowners in Memphis TN while evaluating a local provider",
-          "format": "framework",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "what to prepare before seasonal porch decorating last minute for homeowners in Lakeland TN while evaluating a local provider",
+          "query": "what affects pricing for fall porch decorating professional gathering for families in Bartlett TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "best way to compare options for fall porch decorating 2026 for homeowners in Bartlett TN while evaluating a local provider",
+          "query": "how does fall porch decorating work romantic for families in Lakeland TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how to choose a provider for seasonal porch decorating photo ready for couples in Lakeland TN while evaluating a local provider",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how does fall porch decorating work photo ready for homeowners in Bartlett TN while evaluating a local provider",
+          "query": "how to plan seasonal porch decorating seasonal for busy hosts in Memphis TN before requesting a quote",
+          "format": "direct_answer",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what affects pricing for fall porch decorating photo ready for families in Bartlett TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what is seasonal porch decorating romantic for couples in Arlington TN while evaluating a local provider",
           "format": "comparison",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how far in advance to book seasonal porch decorating small space for homeowners in Arlington TN while evaluating a local provider",
-          "format": "comparison",
+          "query": "examples of fall porch decorating 2026 for families in Memphis TN while evaluating a local provider",
+          "format": "faq",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how long does seasonal porch decorating take premium for couples in Bartlett TN before requesting a quote",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how much does seasonal porch decorating cost family celebration for couples in Memphis TN before requesting a quote",
+          "format": "operational_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         }
       ],
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
-      "opportunity_count": 16,
+      "opportunity_count": 13,
       "missing_content_blocks": [
         "protocol",
-        "comparison_table",
-        "definition_callout"
-      ]
-    },
-    {
-      "route": "/services/porch-decorating.html",
-      "priority_score": 50,
-      "opportunities": [
-        {
-          "query": "how does Halloween porch decorating work simple for couples in Memphis TN before requesting a quote",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "questions to ask before booking porch decorating take down seasonal for birthday hosts in Memphis TN while evaluating a local provider",
-          "format": "direct_answer",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how long does Halloween porch decorating take premium for couples in Southaven MS while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how to plan porch decorating take down small space for birthday hosts in Collierville TN while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "ideas for porch decorating take down premium for shower hosts in Bartlett TN while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "checklist for Halloween porch decorating 2026 for homeowners in Southaven MS while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how long does Halloween porch decorating take romantic for busy hosts in Southaven MS while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how to choose a provider for Halloween porch decorating professional gathering for busy hosts in Olive Branch MS while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "ideas for porch decorating take down romantic for birthday hosts in Bartlett TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "who is porch decorating take down best for professional gathering for birthday hosts in Lakeland TN while evaluating a local provider",
-          "format": "comparison",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "best way to compare options for Halloween porch decorating photo ready for busy hosts in Arlington TN before requesting a quote",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        }
-      ],
-      "recommended_improvements": [
-        "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
-        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
-        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
-        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
-      ],
-      "opportunity_count": 11,
-      "missing_content_blocks": [
         "comparison_table",
         "definition_callout"
       ]
@@ -1065,53 +1097,72 @@
       "priority_score": 50,
       "opportunities": [
         {
-          "query": "is luxury party decor worth it simple for couples in Memphis TN while evaluating a local provider",
+          "query": "examples of luxury party decor last minute for birthday hosts in Memphis TN while evaluating a local provider",
           "format": "checklist",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "is luxury party decor worth it seasonal for couples in Memphis TN while evaluating a local provider",
+          "query": "examples of luxury party decor 2026 for birthday hosts in Memphis TN while evaluating a local provider",
           "format": "direct_answer",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how much does luxury party decor cost professional gathering for busy hosts in Germantown TN while evaluating a local provider",
+          "query": "when should I book luxury party decor premium for birthday hosts in Germantown TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "best way to compare options for luxury party decor 2026 for busy hosts in Bartlett TN while evaluating a local provider",
+          "query": "best way to compare options for luxury party decor small space for shower hosts in Lakeland TN while evaluating a local provider",
           "format": "comparison",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how to plan luxury party decor 2026 for couples in Lakeland TN while evaluating a local provider",
-          "format": "comparison",
+          "query": "checklist for luxury party decor premium for shower hosts in Memphis TN before requesting a quote",
+          "format": "direct_answer",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "when should I book luxury party decor romantic for couples in Bartlett TN while evaluating a local provider",
+          "query": "DIY vs hiring help for luxury party decor simple for shower hosts in Bartlett TN while evaluating a local provider",
           "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how to plan luxury party decor 2026 for families in Collierville TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "examples of luxury party decor 2026 for families in Memphis TN while evaluating a local provider",
+          "format": "use_case_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how far in advance to book luxury party decor professional gathering for birthday hosts in Collierville TN before requesting a quote",
+          "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         }
       ],
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
-      "opportunity_count": 6,
+      "opportunity_count": 9,
       "missing_content_blocks": [
         "protocol",
         "comparison_table",
@@ -1120,106 +1171,41 @@
     },
     {
       "route": "/services/bridal-shower-decor-memphis.html",
-      "priority_score": 48,
+      "priority_score": 49,
       "opportunities": [
         {
-          "query": "how long does bridal shower decor take photo ready for event hosts in Memphis TN before requesting a quote",
-          "format": "checklist",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "what is bridal shower decor professional gathering for event hosts in Collierville TN while evaluating a local provider",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "how long does bridal shower decor take professional gathering for event hosts in Memphis TN before requesting a quote",
+          "query": "how to choose a provider for bridal shower decor seasonal for busy hosts in Memphis TN while evaluating a local provider",
           "format": "direct_answer",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "is bridal shower decor worth it romantic for homeowners in Arlington TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "what is bridal shower decor photo ready for event hosts in Collierville TN while evaluating a local provider",
-          "format": "cost_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "best way to compare options for bridal shower decor simple for homeowners in Memphis TN before requesting a quote",
-          "format": "operational_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "checklist for bridal shower decor last minute for homeowners in Lakeland TN before requesting a quote",
-          "format": "decision_matrix",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        }
-      ],
-      "recommended_improvements": [
-        "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
-        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
-        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
-        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
-        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
-        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
-        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
-        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
-      ],
-      "opportunity_count": 7,
-      "missing_content_blocks": [
-        "protocol",
-        "comparison_table",
-        "definition_callout"
-      ]
-    },
-    {
-      "route": "/services/small-porch-decorating.html",
-      "priority_score": 48,
-      "opportunities": [
-        {
-          "query": "best way to compare options for small porch decorating family celebration for families in Memphis TN while evaluating a local provider",
-          "format": "operational_guide",
-          "disposition": "IMPROVE_EXISTING",
-          "similarity": 1
-        },
-        {
-          "query": "checklist for small porch decorating premium for birthday hosts in Lakeland TN while evaluating a local provider",
+          "query": "is bridal shower decor worth it premium for couples in Bartlett TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "when should I book small porch decorating last minute for birthday hosts in Memphis TN while evaluating a local provider",
-          "format": "framework",
+          "query": "mistakes to avoid with bridal shower decor family celebration for couples in Memphis TN while evaluating a local provider",
+          "format": "operational_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "checklist for small porch decorating romantic for families in Lakeland TN while evaluating a local provider",
+          "query": "examples of bridal shower decor simple for families in Arlington TN while evaluating a local provider",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "is small porch decorating worth it professional gathering for families in Arlington TN while evaluating a local provider",
+          "query": "how much does bridal shower decor cost 2026 for busy hosts in Lakeland TN while evaluating a local provider",
           "format": "comparison",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "best way to compare options for small porch decorating small space for families in Memphis TN while evaluating a local provider",
-          "format": "faq",
+          "query": "is bridal shower decor worth it romantic for busy hosts in Bartlett TN while evaluating a local provider",
+          "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         }
@@ -1227,9 +1213,10 @@
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
         "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
@@ -1246,44 +1233,122 @@
       "priority_score": 48,
       "opportunities": [
         {
-          "query": "examples of grazing table setup last minute for families in Bartlett TN while evaluating a local provider",
+          "query": "how does grazing table setup work last minute for small businesses in Memphis TN while evaluating a local provider",
+          "format": "operational_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how far in advance to book grazing table setup professional gathering for shower hosts in Bartlett TN while evaluating a local provider",
           "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "DIY vs hiring help for grazing table setup seasonal for birthday hosts in Southaven MS while evaluating a local provider",
+          "query": "DIY vs hiring help for grazing table setup seasonal for shower hosts in Lakeland TN while evaluating a local provider",
           "format": "comparison",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "how far in advance to book grazing table setup photo ready for birthday hosts in Arlington TN while evaluating a local provider",
+          "query": "questions to ask before booking grazing table setup 2026 for small businesses in Southaven MS while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what is grazing table setup family celebration for small businesses in Arlington TN while evaluating a local provider",
           "format": "cost_guide",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         },
         {
-          "query": "questions to ask before booking grazing table setup romantic for families in Arlington TN while evaluating a local provider",
-          "format": "comparison",
+          "query": "how much does grazing table setup cost professional gathering for small businesses in Memphis TN before requesting a quote",
+          "format": "framework",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "how to choose a provider for grazing table setup last minute for small businesses in Lakeland TN before requesting a quote",
+          "format": "decision_matrix",
           "disposition": "IMPROVE_EXISTING",
           "similarity": 1
         }
       ],
       "recommended_improvements": [
         "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
+        "Use ordered steps with clear inputs, decisions, and next actions instead of narrative-only explanation.",
         "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
-        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
         "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
         "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
         "Add the recommendation_summary block: no recommendation summary - asked for on 913 of 913 agent recommendations, the single most requested block.",
         "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
         "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
         "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
       ],
-      "opportunity_count": 4,
+      "opportunity_count": 7,
       "missing_content_blocks": [
         "recommendation_summary",
+        "protocol",
+        "comparison_table",
+        "definition_callout"
+      ]
+    },
+    {
+      "route": "/services/small-porch-decorating.html",
+      "priority_score": 48,
+      "opportunities": [
+        {
+          "query": "DIY vs hiring help for small porch decorating professional gathering for small businesses in Memphis TN while evaluating a local provider",
+          "format": "framework",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what affects pricing for small porch decorating premium for small businesses in Memphis TN while evaluating a local provider",
+          "format": "operational_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what is included in small porch decorating seasonal for small businesses in Lakeland TN while evaluating a local provider",
+          "format": "decision_matrix",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "examples of small porch decorating small space for small businesses in Arlington TN while evaluating a local provider",
+          "format": "comparison",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "what is included in small porch decorating simple for small businesses in Lakeland TN while evaluating a local provider",
+          "format": "cost_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        },
+        {
+          "query": "DIY vs hiring help for small porch decorating photo ready for small businesses in Memphis TN before requesting a quote",
+          "format": "operational_guide",
+          "disposition": "IMPROVE_EXISTING",
+          "similarity": 1
+        }
+      ],
+      "recommended_improvements": [
+        "Keep the direct answer extractable near the top and align a heading to the exact user intent.",
+        "Use an explicit comparison or decision structure with boundaries, tradeoffs, and who each option fits.",
+        "Add meaningful persona/use-case guidance only where the situation changes the answer; do not clone city/persona pages.",
+        "State only verified starting-price facts already supported by the site, then explain the concrete scope factors that change a quote.",
+        "Include concrete examples organized by occasion, space, budget/scope, or desired effect without inventing completed client work.",
+        "Add a numbered checklist or booking-preparation sequence that can be extracted without surrounding prose.",
+        "Add the protocol block: no ordered protocol - ordered steps are what gets lifted for \"how do I\".",
+        "Add the comparison_table block: no comparison or cost table (agent request #2, 529 occurrences).",
+        "Add the definition_callout block: no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\"."
+      ],
+      "opportunity_count": 6,
+      "missing_content_blocks": [
         "protocol",
         "comparison_table",
         "definition_callout"

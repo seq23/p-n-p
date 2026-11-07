@@ -2,9 +2,9 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-11-07T01:00:05.246Z",
+  "generated_at": "2026-11-07T16:06:51.981Z",
   "enforcement": "block",
-  "pages_checked": 28,
+  "pages_checked": 34,
   "status": "PASS",
   "blocking_failures": 0,
   "summary": [
@@ -46,15 +46,15 @@
     {
       "id": "comparison_table",
       "blocking": false,
-      "pages_missing": 23,
-      "coverage_pct": 17.9,
+      "pages_missing": 29,
+      "coverage_pct": 14.7,
       "why": "no comparison or cost table (agent request #2, 529 occurrences)"
     },
     {
       "id": "concrete_numbers",
       "blocking": false,
-      "pages_missing": 0,
-      "coverage_pct": 100,
+      "pages_missing": 6,
+      "coverage_pct": 82.4,
       "why": "no concrete cost or timeline figures (agent request #5, 365 occurrences)"
     },
     {
@@ -68,7 +68,7 @@
       "id": "faq",
       "blocking": false,
       "pages_missing": 2,
-      "coverage_pct": 92.9,
+      "coverage_pct": 94.1,
       "why": "no FAQ block or FAQPage schema (agent request #9)"
     },
     {
@@ -81,15 +81,15 @@
     {
       "id": "recommendation_summary",
       "blocking": false,
-      "pages_missing": 9,
-      "coverage_pct": 67.9,
+      "pages_missing": 14,
+      "coverage_pct": 58.8,
       "why": "no recommendation summary - asked for on 913 of 913 agent recommendations, the single most requested block"
     },
     {
       "id": "definition_callout",
       "blocking": false,
-      "pages_missing": 27,
-      "coverage_pct": 3.6,
+      "pages_missing": 33,
+      "coverage_pct": 2.9,
       "why": "no definition callout (agent requested 196 times) - this is what an answer engine lifts for \"what is X\""
     },
     {
@@ -109,27 +109,27 @@
     {
       "id": "protocol",
       "blocking": false,
-      "pages_missing": 22,
-      "coverage_pct": 21.4,
+      "pages_missing": 28,
+      "coverage_pct": 17.6,
       "why": "no ordered protocol - ordered steps are what gets lifted for \"how do I\""
     },
     {
       "id": "cta_callout",
       "blocking": false,
-      "pages_missing": 0,
-      "coverage_pct": 100,
+      "pages_missing": 5,
+      "coverage_pct": 85.3,
       "why": "no next-step callout - the conversion link may exist but nothing frames it as the next action"
     },
     {
       "id": "prompt_template",
       "blocking": false,
-      "pages_missing": 28,
+      "pages_missing": 34,
       "coverage_pct": 0,
       "why": "no copy-ready prompt - the artifact this audience actually reuses"
     }
   ],
   "spec_producer_parity": {
-    "generator_sources_scanned": 130,
+    "generator_sources_scanned": 131,
     "blocks_in_spec": 10,
     "blocks_required_of_this_repo": 9,
     "orphan_blocks": [],
@@ -142,8 +142,8 @@
     ]
   },
   "recommendation_summary_distinctness": {
-    "total_blocks": 19,
-    "distinct_texts": 19,
+    "total_blocks": 20,
+    "distinct_texts": 20,
     "ratio": 1,
     "texts_on_more_than_one_page": 0,
     "pages_carrying_a_repeated_text": 0,
@@ -162,6 +162,12 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/baby-shower-decor-memphis.html",
@@ -174,13 +180,16 @@
       "services/grazing-and-event-styling.html",
       "services/grazing-tables-memphis.html",
       "services/hotel-room-decor-memphis.html",
-      "services/index.html",
-      "services/luxury-party-decor-memphis.html",
-      "services/party-decor-memphis.html",
-      "services/porch-decorating.html",
-      "services/small-porch-decorating.html"
+      "services/index.html"
     ],
-    "concrete_numbers": [],
+    "concrete_numbers": [
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html"
+    ],
     "named_sources": [],
     "faq": [
       "about.html",
@@ -194,6 +203,11 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/hotel-room-decor-memphis.html"
@@ -206,6 +220,12 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/baby-shower-decor-memphis.html",
@@ -217,13 +237,7 @@
       "services/celebration-setups.html",
       "services/christmas-porch-decorating.html",
       "services/fall-porch-decorating.html",
-      "services/front-door-styling.html",
-      "services/grazing-and-event-styling.html",
-      "services/grazing-tables-memphis.html",
-      "services/hotel-room-decor-memphis.html",
-      "services/index.html",
-      "services/luxury-party-decor-memphis.html",
-      "services/party-decor-memphis.html"
+      "services/front-door-styling.html"
     ],
     "trust_block": [],
     "source_block": [],
@@ -234,6 +248,12 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/baby-shower-decor-memphis.html",
@@ -246,12 +266,15 @@
       "services/front-door-styling.html",
       "services/grazing-and-event-styling.html",
       "services/grazing-tables-memphis.html",
-      "services/index.html",
-      "services/luxury-party-decor-memphis.html",
-      "services/party-decor-memphis.html",
-      "services/small-porch-decorating.html"
+      "services/index.html"
     ],
-    "cta_callout": [],
+    "cta_callout": [
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/party-rentals-memphis.html"
+    ],
     "prompt_template": [
       "about.html",
       "areas/index.html",
@@ -261,6 +284,12 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/baby-shower-decor-memphis.html",
@@ -271,13 +300,7 @@
       "services/celebration-setups-memphis.html",
       "services/celebration-setups.html",
       "services/christmas-porch-decorating.html",
-      "services/fall-porch-decorating.html",
-      "services/front-door-styling.html",
-      "services/grazing-and-event-styling.html",
-      "services/grazing-tables-memphis.html",
-      "services/hotel-room-decor-memphis.html",
-      "services/index.html",
-      "services/luxury-party-decor-memphis.html"
+      "services/fall-porch-decorating.html"
     ]
   },
   "gaps_full": {
@@ -293,6 +316,12 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/baby-shower-decor-memphis.html",
@@ -311,7 +340,14 @@
       "services/porch-decorating.html",
       "services/small-porch-decorating.html"
     ],
-    "concrete_numbers": [],
+    "concrete_numbers": [
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html"
+    ],
     "named_sources": [],
     "faq": [
       "about.html",
@@ -325,6 +361,11 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/hotel-room-decor-memphis.html"
@@ -337,6 +378,12 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/baby-shower-decor-memphis.html",
@@ -367,6 +414,12 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/baby-shower-decor-memphis.html",
@@ -384,7 +437,13 @@
       "services/party-decor-memphis.html",
       "services/small-porch-decorating.html"
     ],
-    "cta_callout": [],
+    "cta_callout": [
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/party-rentals-memphis.html"
+    ],
     "prompt_template": [
       "about.html",
       "areas/index.html",
@@ -394,6 +453,12 @@
       "how-it-works.html",
       "index.html",
       "pricing.html",
+      "questions/balloon-party-decorations-near-me.html",
+      "questions/birthday-party-games.html",
+      "questions/birthday-party-organisers-near-me.html",
+      "questions/how-to-book-birthday-party.html",
+      "questions/index.html",
+      "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
       "rentals/index.html",
       "services/baby-shower-decor-memphis.html",
