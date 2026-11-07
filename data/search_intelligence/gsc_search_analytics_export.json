@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-07",
-  "end_date": "2026-11-03",
-  "collected_at": "2026-11-06T16:06:19.037510+00:00",
+  "start_date": "2026-10-08",
+  "end_date": "2026-11-04",
+  "collected_at": "2026-11-07T16:05:18.513773+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -22,6 +22,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 19
+    },
+    {
+      "keys": [
+        "birthday events"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 85
     },
     {
       "keys": [
@@ -120,9 +129,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 4,
-      "impressions": 84,
-      "ctr": 0.047619047619047616,
-      "position": 5.035714285714286
+      "impressions": 86,
+      "ctr": 0.046511627906976744,
+      "position": 5.9186046511627906
     },
     {
       "keys": [
@@ -153,6 +162,16 @@
       "impressions": 1,
       "ctr": 0,
       "position": 19
+    },
+    {
+      "keys": [
+        "birthday events",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 85
     },
     {
       "keys": [
@@ -256,9 +275,9 @@
     }
   ],
   "counts": {
-    "by_query": 11,
+    "by_query": 12,
     "by_page": 3,
-    "by_query_page": 11
+    "by_query_page": 12
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
