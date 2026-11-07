@@ -19,6 +19,11 @@
  *     than one, or one missing headline (<= 110 chars), description, url equal
  *     to the canonical, image, datePublished/dateModified (YYYY-MM-DD,
  *     published <= modified), or author/publisher other than the #business node.
+ *   - Search Readiness c2 (7 Nov 2026, "/hotels has no WebPage"): a page has no
+ *     WebPage node (or a schema.org subtype of WebPage: AboutPage, FAQPage,
+ *     CollectionPage...; an Article is not one), the homepage has no WebSite node,
+ *     or an inner page (anything but the homepage and the 404 page) has no
+ *     BreadcrumbList.
  * Also fails on zero pages, zero nodes or zero article pages examined.
  */
 const fs = require('fs');
@@ -67,7 +72,15 @@ function collectArticles(node, acc) {
   Object.values(node).forEach((v) => collectArticles(v, acc));
 }
 
+function collectTypes(node, acc) {
+  if (Array.isArray(node)) { node.forEach((n) => collectTypes(n, acc)); return; }
+  if (!node || typeof node !== 'object') return;
+  for (const t of A.typesOf(node).map(strip)) acc.add(t);
+  Object.entries(node).forEach(([k, v]) => { if (k !== '@type') collectTypes(v, acc); });
+}
+
 const pages = publishedPages();
+let homeSeen = false;
 if (!pages.length) fail('found 0 published pages');
 let articlePages = 0;
 for (const rel of pages) {
@@ -77,6 +90,11 @@ for (const rel of pages) {
     try { parsed.push(JSON.parse(m[1])); } catch (e) { fail(`${rel}: unparseable JSON-LD (${e.message})`); }
   }
   parsed.forEach((p, i) => check(rel, p, `block${i}`));
+  const present = new Set();
+  collectTypes(parsed, present);
+  if (![...present].some((t) => lineage(t).has('WebPage'))) fail(`${rel}: no WebPage node (or WebPage subtype); c2 needs one on every page`);
+  if (rel === 'index.html') { homeSeen = true; if (!present.has('WebSite')) fail(`${rel}: homepage has no WebSite node`); }
+  else if (rel !== '404.html' && !present.has('BreadcrumbList')) fail(`${rel}: inner page has no BreadcrumbList`);
   if (!A.declaresArticle(html)) continue;
   articlePages += 1;
   const arts = [];
@@ -93,6 +111,7 @@ for (const rel of pages) {
   for (const k of ['author', 'publisher']) if (!a[k] || a[k]['@id'] !== A.BUSINESS_ID) fail(`${rel}: Article ${k} is not {"@id": "${A.BUSINESS_ID}"}`);
 }
 if (!nodes) fail('found 0 typed JSON-LD nodes');
+if (!homeSeen) fail('index.html is not among the published pages; the WebSite rule governs nothing');
 if (!articlePages) fail('found 0 og:type article pages; the article rule governs nothing');
 
 if (errors.length) {
