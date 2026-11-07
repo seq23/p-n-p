@@ -78,5 +78,12 @@ jobs:
             echo "No safe repairs were needed."
           else
             git commit -m "Self-heal: apply bounded validated repairs"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            # main can move during the run (6 Nov 2026: rejected, "fetch first").
+            # Rebase onto it and retry; a conflict stops the job red, never forces.
+            for attempt in 1 2 3; do
+              git push origin "HEAD:$GITHUB_REF_NAME" && exit 0
+              git pull --rebase origin "$GITHUB_REF_NAME" || { echo "NAMED STOP [SELFHEAL_REBASE_CONFLICT]: main changed the same files; repairs not pushed"; exit 1; }
+              npm run validate:all
+            done
+            echo "NAMED STOP [SELFHEAL_PUSH_REJECTED]: main kept moving; repairs not pushed after 3 tries"; exit 1
           fi
