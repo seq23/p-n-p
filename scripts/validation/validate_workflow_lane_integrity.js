@@ -220,6 +220,7 @@ let pushingLanes = 0;
 let branchOps = 0;
 
 let structuralChecked = 0;
+let validatorLanes = 0;
 
 for (const [file, { text, lines }] of wf) {
   const all = steps(lines);
@@ -227,6 +228,19 @@ for (const [file, { text, lines }] of wf) {
   // Rule 0 - the file must be parseable at all.
   structuralChecked += 1;
   for (const f of structuralFaults(lines)) errors.push(`${file}: ${f}`);
+
+  // Rule 0b - a lane that runs the validator suite runs it on the Node the suite
+  // needs. scripts/validators/lib/admin_harness.mjs imports node:sqlite (Node 22+);
+  // self-heal.yml pinned Node 20, so admin-deposit-paid, corporate-outreach,
+  // mailer-auth and inventory-pending-budget failed on every run (4-6 Nov 2026)
+  // while deploy-distribution, on 22, passed the same tree.
+  if (/npm run (?:validate:all|selfheal)\b/.test(text)) {
+    validatorLanes += 1;
+    const versions = [...text.matchAll(/node-version:\s*["']?(\d+)/g)].map((m) => Number(m[1]));
+    if (!versions.length || versions.some((v) => v < 22)) {
+      errors.push(`${file}: runs the validator suite on Node ${versions.length ? versions.join('/') : '(none set)'}; the suite needs Node 22+ (node:sqlite in scripts/validators/lib/admin_harness.mjs).`);
+    }
+  }
 
   // Rule 1 - a fail-fast dry run ahead of the real command.
   for (const step of all) {
@@ -390,6 +404,7 @@ if (parsed && !pullRequestLanes.length) {
   );
 }
 
+if (!validatorLanes) errors.push('no workflow runs `npm run validate:all` or `npm run selfheal`; the Node-version check examined nothing.');
 if (errors.length) {
   console.error(`validate:workflow-lane-integrity FAILED: ${errors.length} lane defect(s).`);
   for (const e of errors) console.error(`  - ${e}`);
@@ -400,5 +415,5 @@ console.log(
   `Workflow lane integrity OK (${files.length} workflow(s) scanned; ${structuralChecked} checked for the duplicate-key and empty-mapping faults that cause a 0s startup failure; `
   + `${dryStepsChecked} dry-run step(s) shadowing a real command, all continue-on-error; `
   + `${pushingLanes} pushing lane(s), each reachable from ${DISTRIBUTION_LANE}; ${branchOps} hardcoded-branch git operation(s); `
-  + `${parsed} parsed by PyYAML (${python}) with on: and jobs:; human push to main reaches ${humanPushLanes.join(', ')}; pull_request to main reaches ${pullRequestLanes.join(', ')})`,
+  + `${validatorLanes} validator-suite lane(s) on Node 22+; ${parsed} parsed by PyYAML (${python}) with on: and jobs:; human push to main reaches ${humanPushLanes.join(', ')}; pull_request to main reaches ${pullRequestLanes.join(', ')})`,
 );
