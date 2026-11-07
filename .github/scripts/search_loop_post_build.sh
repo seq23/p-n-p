@@ -53,5 +53,8 @@ fi
 scope_changed
 npm run build:finish
 npm run build:sitemap
+# The engine's pages are reviewed by its own gate: they join the kept ledger every page
+# validator holds the sitemap to (scripts/keep_search_loop_pages.js, 7 Nov 2026).
+node scripts/keep_search_loop_pages.js
 npm run authority:scale:freeze
 npm run authority:scale:clear-scope

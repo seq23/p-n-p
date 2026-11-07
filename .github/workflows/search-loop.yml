@@ -34,11 +34,13 @@ jobs:
   search-loop:
     uses: seq23/search-loop/.github/workflows/search-loop.yml@v1
     with:
+      open_loops_business: porch-and-party
       engine_ref: v1
       stage: ${{ inputs.stage || 'auto' }}
       setup_command: npm ci
       post_build_command: bash .github/scripts/search_loop_post_build.sh
     secrets:
+      BOSS_OPEN_LOOPS_TOKEN: ${{ secrets.BOSS_OPEN_LOOPS_TOKEN }}  # named stops -> Boss OS Open Loops (search-loop v1.7.0)
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
       GEMINI_API_KEY: ${{ secrets.SEARCH_LOOP_GEMINI_API_KEY }}
       GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
