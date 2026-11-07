@@ -2,13 +2,13 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W45",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-07T01:17:55.831Z",
+  "generated_at": "2026-11-07T13:32:03.597Z",
   "state": "running",
-  "published": 4,
+  "published": 5,
   "indexed": "not read: no page old enough to inspect yet (14 days)",
   "pace": 10,
   "ai_visitors": 0,
-  "ai_bot_hits": 442,
+  "ai_bot_hits": 522,
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
   "wins": 0,
   "undone": 0,
@@ -108,15 +108,11 @@
   ],
   "cap": {
     "max_live_pages": 22,
-    "live": 4,
-    "room": 18,
+    "live": 5,
+    "room": 17,
     "why": "up from 20 to 22: Google impressions 87 in the last 28 days beat 77 in the 28 before"
   },
-  "notes": [
-    "BUILD distinct gate: 12 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
-    "BUILD gate notes (not blocking): 2 published page(s) are outside a length or style aim; each is listed under gate_notes in pages.json",
-    "IndexNow: 4 new page(s) not live yet; submitted when they answer 200"
-  ],
+  "notes": [],
   "lanes": {
     "ratio": {
       "can_be_one": 2,
@@ -129,7 +125,7 @@
       "hit_rate": "not read: no page in this lane has reached its 2-week check yet"
     },
     "striking": {
-      "pages": 4,
+      "pages": 5,
       "measured": 0,
       "top3": 0,
       "hit_rate": "not read: no page in this lane has reached its 2-week check yet"
@@ -143,5 +139,5 @@
     "weight_changes": [],
     "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42323278239"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42377381675"
 }

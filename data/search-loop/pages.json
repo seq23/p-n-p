@@ -46,7 +46,8 @@
         "b5 FAQ answer is 35 words (aim 40-60): \"What areas do you serve for party setups and decor\"",
         "b5 FAQ answer is 34 words (aim 40-60): \"How do I find out the cost of party planning servi\"",
         "b5 FAQ answer is 36 words (aim 40-60): \"What is included in a seasonal porch decorating se\""
-      ]
+      ],
+      "indexnow_at": "2026-11-07"
     },
     {
       "slug": "how-to-book-birthday-party",
@@ -85,7 +86,8 @@
           "after_hash": "75f522c24ac58112889ff64e73b460b1cc4896342f74d0ddd865068107c3ded7"
         }
       ],
-      "checks": {}
+      "checks": {},
+      "indexnow_at": "2026-11-07"
     },
     {
       "slug": "balloon-party-decorations-near-me",
@@ -132,7 +134,8 @@
       ],
       "extra_queries": [
         "balloon party decor near me reviews"
-      ]
+      ],
+      "indexnow_at": "2026-11-07"
     },
     {
       "slug": "birthday-party-organisers-near-me",
@@ -175,7 +178,47 @@
       "extra_queries": [
         "birthday party coordinator near me",
         "birthday party planner near me reviews"
-      ]
+      ],
+      "indexnow_at": "2026-11-07"
+    },
+    {
+      "slug": "birthday-party-games",
+      "query": "birthday party games",
+      "lane": "striking",
+      "score": 10,
+      "reasons": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "bing_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "rel": "questions/birthday-party-games.html",
+      "route": "/questions/birthday-party-games",
+      "url": "https://porchandparty901.com/questions/birthday-party-games",
+      "published_at": "2026-11-07",
+      "status": "live",
+      "hash": "b59f54894a9018e96586fefc2e61bbe4cdeb131c81743497cfdfafb24ea7fbe7",
+      "model": "free-route",
+      "facts": [
+        "https://en.wikipedia.org/wiki/Memphis,_Tennessee",
+        "https://en.wikipedia.org/wiki/Collierville,_Tennessee"
+      ],
+      "linked_from": [
+        {
+          "rel": "services/birthday-party-decor-memphis.html",
+          "route": "/services/birthday-party-decor-memphis",
+          "before_hash": "9a5d53dfc8fc551252fe6167b985757d5eaca770bf727380920375e5a0c66c05",
+          "after_hash": "50aabc270f5179a29662e46baacd65120dcdddce371f80214dfddf4eaca40a13"
+        },
+        {
+          "rel": "services/birthday-party-planner-memphis.html",
+          "route": "/services/birthday-party-planner-memphis",
+          "before_hash": "0de2cb720c9c1351e3a26c6797b525e76a4fde258e1e7b6571c3733ec91c12c2",
+          "after_hash": "fe97aaf274d6bd87273c0c1e4ffd0d941b9611e111d6111eb7bc35fe4cca044a"
+        }
+      ],
+      "checks": {}
     }
   ],
   "dropped": [
@@ -470,6 +513,15 @@
       "reason": [
         "b5 FAQ answer is 28 words (aim 40-60): \"What areas do you serve?\"",
         "b5 FAQ answer is 29 words (aim 40-60): \"What services do you offer?\"",
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
+    },
+    {
+      "query": "fall party event planning",
+      "at": "2026-11-07",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)",
         "invented: a named person or quote \"Memphis Request a quote from \""
       ]
     }
