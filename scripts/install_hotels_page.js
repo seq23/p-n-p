@@ -82,6 +82,11 @@ ${label(L.priceGuidance)}<p>${esc(h.priceGuidance)}</p>
 
 function jsonLd() {
   const blocks = [
+    // Search Readiness c2 (7 Nov 2026: "/hotels has no WebPage"): every page carries a WebPage
+    // node tying it to the site's business, like every sibling page; the Article below is the
+    // guide itself, which schema.org does not count as a WebPage.
+    { '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, description: DESCRIPTION, url: URL,
+      publisher: { '@id': E.id } },
     { '@context': 'https://schema.org', '@type': 'Article', headline: TITLE, description: DESCRIPTION, url: URL, mainEntityOfPage: URL,
       author: { '@id': E.id }, publisher: { '@id': E.id },
       about: { '@type': 'ItemList', name: 'Romantic Memphis hotel rooms', numberOfItems: guide.hotels.length,
