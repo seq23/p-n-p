@@ -34,6 +34,9 @@ const fs = require('fs');
 const path = require('path');
 const HC = require('../lib/hub_consolidation');
 const HF = require('../install_hub_folds');
+const SF = require('../lib/sitemap_floor');
+const readLoopLedger = () => JSON.parse(fs.readFileSync(path.join(ROOT, SF.LOOP_LEDGER), 'utf8'));
+const readLoopConfig = () => JSON.parse(fs.readFileSync(path.join(ROOT, 'search-loop.config.json'), 'utf8'));
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const DOMAIN = 'https://porchandparty901.com';
@@ -74,10 +77,9 @@ function check({ files, sitemapXml, redirects, read }) {
   // 2. sitemap
   const submitted = sitemapPaths(sitemapXml);
   const submittedSet = new Set(submitted.map((p) => HC.bare(p)));
-  const kept = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/search_intelligence/page_quality_kept.json'), 'utf8')).kept;
-  if (!kept.length || !submitted.length) errors.push('Rule 0: empty kept ledger or sitemap');
-  const actual = new Set(submitted);
-  if (submitted.length !== actual.size || actual.size !== kept.length || kept.some(p => !actual.has(p))) errors.push('sitemap differs from the reviewed kept ledger');
+  // Kept ledger + the Search Loop's live question pages, by name (scripts/lib/sitemap_floor.js).
+  const floor = SF.sitemapFloor(ROOT);
+  errors.push(...SF.accountSitemap({ locs: [...sitemapXml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]), kept: floor.kept, ledger: readLoopLedger(), config: readLoopConfig() }).errors);
   for (const r of HC.redirectRules()) if (HC.isRetiredUrl(r.to)) errors.push(`redirect chain: ${r.from} -> ${r.to}`);
 
   for (const p of submitted) if (HC.isRetiredUrl(p)) errors.push(`sitemap.xml still submits ${p}, which 301s to ${HC.foldTarget(p).to}`);
@@ -132,6 +134,7 @@ function main() {
   const hub = HC.hubs()[0];
   const probes = {
     'a sitemap missing a kept URL': {...base, sitemapXml: base.sitemapXml.replace(/<url>[\s\S]*?<\/url>/, '')},
+    'a sitemap URL in neither the kept ledger nor the Search Loop ledger': { ...base, sitemapXml: base.sitemapXml.replace('</urlset>', `<url><loc>${DOMAIN}/not-owned-by-anyone</loc></url></urlset>`) },
     'a duplicate sitemap URL': {...base, sitemapXml: base.sitemapXml.replace('</urlset>', (base.sitemapXml.match(/<url>[\s\S]*?<\/url>/) || [''])[0] + '</urlset>')},
 
     'a sitemap that still submits a folded URL': { ...base, sitemapXml: `${base.sitemapXml}<url><loc>${DOMAIN}${HC.bare(folded.from)}</loc></url>` },
