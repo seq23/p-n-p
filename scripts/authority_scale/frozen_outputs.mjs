@@ -14,6 +14,11 @@ function freeze(){fs.mkdirSync(cacheDir,{recursive:true});const old=new Map((loa
   fs.writeFileSync(regPath,JSON.stringify({schema_version:'1.0',generated_at:'2026-07-24T00:00:00.000Z',count:pages.length,pages:pages.sort((a,b)=>a.route.localeCompare(b.route))},null,2)+'\n');console.log(`PNP FREEZE: ${pages.length} authority routes frozen`);
 }
 function status(){const r=load(),allowed=scope(),drift=[],missing=[];for(const p of r.pages||[]){const f=path.join(ROOT,p.rendered_file);if(!fs.existsSync(f)){missing.push(p.route);continue;}const cur=sha(fs.readFileSync(f));if(cur!==p.accepted_sha256&&!allowed.has(p.route))drift.push(p.route);}const a=admissions();const frozen=new Set((r.pages||[]).map(x=>x.route));const unfrozen=a.filter(x=>!frozen.has(x.route)).map(x=>x.route);const out={ok:!drift.length&&!missing.length&&!unfrozen.length,admitted:a.length,frozen:(r.pages||[]).length,unscoped_drift:drift.length,missing_files:missing.length,admitted_not_frozen:unfrozen.length,sample:{drift:drift.slice(0,10),missing:missing.slice(0,10),unfrozen:unfrozen.slice(0,10)}};console.log(JSON.stringify(out,null,2));if(!out.ok)process.exit(1);}
-function prepareScope(){const routes=process.argv.slice(3);fs.writeFileSync(scopePath,JSON.stringify({schema_version:'1.0',routes},null,2)+'\n');console.log(`PNP MUTATION SCOPE: ${routes.length}`);}
+// prepare-scope takes registry routes ("/areas/index") or rendered files
+// ("areas/index.html"); a file is mapped to its frozen record's route. The search
+// loop post-build passed "/areas/" for areas/index.html (6 Nov 2026), which
+// matched no record, so freeze met the engine's edits as UNSCOPED drift.
+function scopeRoute(arg){const a=String(arg);if(!a.endsWith('.html'))return a;const rel=a.replace(/^\/+/,'');const hit=(load().pages||[]).find(x=>x.rendered_file===rel);return hit?hit.route:'/'+rel.replace(/\.html$/,'');}
+function prepareScope(){const routes=[...new Set(process.argv.slice(3).map(scopeRoute))];fs.writeFileSync(scopePath,JSON.stringify({schema_version:'1.0',routes},null,2)+'\n');console.log(`PNP MUTATION SCOPE: ${routes.length}`);}
 function clearScope(){fs.writeFileSync(scopePath,JSON.stringify({schema_version:'1.0',routes:[]},null,2)+'\n');console.log('PNP MUTATION SCOPE CLEARED');}
 const cmd=process.argv[2]||'status'; if(cmd==='freeze')freeze(); else if(cmd==='status')status(); else if(cmd==='prepare-scope')prepareScope(); else if(cmd==='clear-scope')clearScope(); else throw new Error(`Unknown command ${cmd}`);

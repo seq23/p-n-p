@@ -15,7 +15,8 @@ set -Eeuo pipefail
 # stopped the first real publish (dispatch run 42311192656, 6 Nov 2026).
 scope_changed() {
   local routes
-  routes=$(git status --porcelain -- '*.html' | awk '$1=="M"{print $2}' | sed -E 's#(^|/)index\.html$#\1#; s#\.html$##; s#^#/#')
+  # Changed page files; prepare-scope maps each to its frozen record's route.
+  routes=$(git status --porcelain -- '*.html' | awk '$1=="M"{print $2}')
   # shellcheck disable=SC2086 # routes are space-free site paths, one argument each
   node scripts/authority_scale/frozen_outputs.mjs prepare-scope $routes
 }
