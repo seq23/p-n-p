@@ -9,7 +9,7 @@
       "state": "FROZEN",
       "accepted_sha256": "5084c687480b31771181f686c45e0c12321ba4f4d84b48b80850bebe71da3b51",
       "cache_file": "data/release/frozen_accepted_outputs/5084c687480b31771181f686c45e0c12321ba4f4d84b48b80850bebe71da3b51.html.gz",
-      "cache_sha256": "b3b90caad787a74d26809a535f18eb7a3af0d8c05a557c6ad056ef5014a6fbbe",
+      "cache_sha256": "9e1b457bb0f27e9e07b1aa78fd802bf3e220f2d4cdb3d2b44f2a77d6afddd610",
       "accepted_at": "2026-07-24"
     },
     {
@@ -18,79 +18,79 @@
       "state": "FROZEN",
       "accepted_sha256": "7f3534e2347c323a53a501a13760d4b638767776778b5930be6a66b30bff78c8",
       "cache_file": "data/release/frozen_accepted_outputs/7f3534e2347c323a53a501a13760d4b638767776778b5930be6a66b30bff78c8.html.gz",
-      "cache_sha256": "4d48b54924c96bc0fe7a92d3fc0242d4fa0c2f2f4fa321a5f8cda9fe46e83f9e",
+      "cache_sha256": "1564871a8258b7d8a830cd7ca3e2c2569977d99248b6ea12d87d527162185dbe",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/guides/graduation-party-decorations-at-home-memphis",
       "rendered_file": "guides/graduation-party-decorations-at-home-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "2e07968dfcd3bd181f8ff1e2f5724d8048b45234b3355b4a54ef17ab67394218",
-      "cache_file": "data/release/frozen_accepted_outputs/2e07968dfcd3bd181f8ff1e2f5724d8048b45234b3355b4a54ef17ab67394218.html.gz",
-      "cache_sha256": "a2d622c213b3006e3c3e559eb944a012f61305ea30155f248215213470c88a54",
+      "accepted_sha256": "e72d20dabed8f609c36295e2cf5e2cd9801f8c0ebc929ca67610a674d10f4ef3",
+      "cache_file": "data/release/frozen_accepted_outputs/e72d20dabed8f609c36295e2cf5e2cd9801f8c0ebc929ca67610a674d10f4ef3.html.gz",
+      "cache_sha256": "b5a2b74bc46dea8a0e2227e2569d80991947bc706a37ef769ed24d13d5f65e4e",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/baby-shower-decor-memphis",
       "rendered_file": "services/baby-shower-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "39d4fe22f00dc3777b79ab61520ade4398a5fb8e4fb13c48ccf888487f5f8bdd",
-      "cache_file": "data/release/frozen_accepted_outputs/39d4fe22f00dc3777b79ab61520ade4398a5fb8e4fb13c48ccf888487f5f8bdd.html.gz",
-      "cache_sha256": "4979d428296d4d926b864fd179d49f5139e1b0679f7d9223b18cf6eb72da186c",
+      "accepted_sha256": "c50ebc6100d9be144429ce12b69987cceabf3ed51aee128f319d5d9e180e6168",
+      "cache_file": "data/release/frozen_accepted_outputs/c50ebc6100d9be144429ce12b69987cceabf3ed51aee128f319d5d9e180e6168.html.gz",
+      "cache_sha256": "bbd7262e5e5ba1bc79c6490976441bcf4449ba8901cd35f89ae11fea653f8c08",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/birthday-party-decor-memphis",
       "rendered_file": "services/birthday-party-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "ece1f95c47bfb169d60b3d2aec140b098fd8fd584f7a8e9f050f66bc80d1b673",
-      "cache_file": "data/release/frozen_accepted_outputs/ece1f95c47bfb169d60b3d2aec140b098fd8fd584f7a8e9f050f66bc80d1b673.html.gz",
-      "cache_sha256": "68368c970bc68993d881c776052baeec9f8fc3f89e87b72f63dbea5607d35eb1",
+      "accepted_sha256": "9a5d53dfc8fc551252fe6167b985757d5eaca770bf727380920375e5a0c66c05",
+      "cache_file": "data/release/frozen_accepted_outputs/9a5d53dfc8fc551252fe6167b985757d5eaca770bf727380920375e5a0c66c05.html.gz",
+      "cache_sha256": "9a6ffd61677619927e40dea5f2f225dc8a6314fd65080334e82d1e1fe0b1673d",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/birthday-party-planner-memphis",
       "rendered_file": "services/birthday-party-planner-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "c2d2dfd3a97ef2a549ab651a6e0f626d9e52952bd24fc0d335d42c0c1b92efb9",
-      "cache_file": "data/release/frozen_accepted_outputs/c2d2dfd3a97ef2a549ab651a6e0f626d9e52952bd24fc0d335d42c0c1b92efb9.html.gz",
-      "cache_sha256": "648f096dff845085bde56afaa3d88ce3ceec2985f52d176870d2eaa5bfb7e673",
+      "accepted_sha256": "0de2cb720c9c1351e3a26c6797b525e76a4fde258e1e7b6571c3733ec91c12c2",
+      "cache_file": "data/release/frozen_accepted_outputs/0de2cb720c9c1351e3a26c6797b525e76a4fde258e1e7b6571c3733ec91c12c2.html.gz",
+      "cache_sha256": "d26695f926f154abf149941cc16d5d953a18758559dc5b2cf507aab795a610f2",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/bridal-shower-decor-memphis",
       "rendered_file": "services/bridal-shower-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "795365a45f512b24987036ccb7d8a1144dc95fc570b50e5b696e24f65a11fb0f",
-      "cache_file": "data/release/frozen_accepted_outputs/795365a45f512b24987036ccb7d8a1144dc95fc570b50e5b696e24f65a11fb0f.html.gz",
-      "cache_sha256": "125d2c20be7f7a56063190e82ee36daf5235b56a8730f33907b01658551a86f8",
+      "accepted_sha256": "76631e499b7ed998148cbec92c33c462e5706f3336e78e23ea57bca06710e61b",
+      "cache_file": "data/release/frozen_accepted_outputs/76631e499b7ed998148cbec92c33c462e5706f3336e78e23ea57bca06710e61b.html.gz",
+      "cache_sha256": "0f6c0d6e38fc1dce3c5e3f244c0a13c374f9eb44c54b8364be57e533734ec86a",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/budget-party-decor-memphis",
       "rendered_file": "services/budget-party-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "2fcd9ae9baf416ddf3b42ec5d5cecb39ca6caa48b6d0c95323a17ab8bfa4290e",
-      "cache_file": "data/release/frozen_accepted_outputs/2fcd9ae9baf416ddf3b42ec5d5cecb39ca6caa48b6d0c95323a17ab8bfa4290e.html.gz",
-      "cache_sha256": "66a21a43c9ab3089807f4ce7a06f3b18a9e738dfb5be31e00b2358f37dafd147",
+      "accepted_sha256": "dfbb960db4bde6ed7413cddb06536b752bf602bb0a1a0886b9f2e4612630b5d4",
+      "cache_file": "data/release/frozen_accepted_outputs/dfbb960db4bde6ed7413cddb06536b752bf602bb0a1a0886b9f2e4612630b5d4.html.gz",
+      "cache_sha256": "a126b8f20664696caa55dfb91eb4de946ac5491672ad26e23b2eff19575de04e",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/celebration-setups",
       "rendered_file": "services/celebration-setups.html",
       "state": "FROZEN",
-      "accepted_sha256": "4da8d6966d1a4e38e813cafb6a029cb6cce735c68989f3ddfe6334768e18a0c7",
-      "cache_file": "data/release/frozen_accepted_outputs/4da8d6966d1a4e38e813cafb6a029cb6cce735c68989f3ddfe6334768e18a0c7.html.gz",
-      "cache_sha256": "b779a559371dbcfa45ede6ab469fb78edddd72179457a7c59747c357b7ca84fc",
+      "accepted_sha256": "879f80eedc00777493ba904a036ff7012ae47ca1244284bf3e01ac7d236d9593",
+      "cache_file": "data/release/frozen_accepted_outputs/879f80eedc00777493ba904a036ff7012ae47ca1244284bf3e01ac7d236d9593.html.gz",
+      "cache_sha256": "47e805b3104bbc8abf0c8921ce839c28eef7af5651b2dc78e873766cfb22a71b",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/celebration-setups-memphis",
       "rendered_file": "services/celebration-setups-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "4249570c619b2c7e40f9a1e8a3a42cb5961d40c85fdaa704655f85fa61a6dcfc",
-      "cache_file": "data/release/frozen_accepted_outputs/4249570c619b2c7e40f9a1e8a3a42cb5961d40c85fdaa704655f85fa61a6dcfc.html.gz",
-      "cache_sha256": "a3a75e7d5f653ff7fb10a73f66bcfa500c812a9acd869b70ccac42d145468314",
+      "accepted_sha256": "661f360c16eb7295dec1be1a21ce30023ab71fd8612fa29285445817ebcda2e7",
+      "cache_file": "data/release/frozen_accepted_outputs/661f360c16eb7295dec1be1a21ce30023ab71fd8612fa29285445817ebcda2e7.html.gz",
+      "cache_sha256": "7d850df02a05d9538ddcdefa78e896c1383c90022144b52cb0d6bc32386fcda5",
       "accepted_at": "2026-07-24"
     },
     {
@@ -124,27 +124,27 @@
       "route": "/services/grazing-and-event-styling",
       "rendered_file": "services/grazing-and-event-styling.html",
       "state": "FROZEN",
-      "accepted_sha256": "558f43e9b941a6ef3683fb280eab095376f9227b62134e81e7747785a9278c3c",
-      "cache_file": "data/release/frozen_accepted_outputs/558f43e9b941a6ef3683fb280eab095376f9227b62134e81e7747785a9278c3c.html.gz",
-      "cache_sha256": "72d5db5ac9dac4c5b6fc9bf5727901dc46573fe1a13ba97075d01f0692556829",
+      "accepted_sha256": "7ec00bac00ed7a07b7a08cb9dc65955a8962711b933412cf55ff4774faf90971",
+      "cache_file": "data/release/frozen_accepted_outputs/7ec00bac00ed7a07b7a08cb9dc65955a8962711b933412cf55ff4774faf90971.html.gz",
+      "cache_sha256": "a04c64c0aed24b502fe87af4d4df6a28ba505913826d884d5b9187bf21f6e62b",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/grazing-tables-memphis",
       "rendered_file": "services/grazing-tables-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "5eee2be72a78c1f974f300fbf6f8562a998b64a7b8090efcc44c67b4fe93e4ae",
-      "cache_file": "data/release/frozen_accepted_outputs/5eee2be72a78c1f974f300fbf6f8562a998b64a7b8090efcc44c67b4fe93e4ae.html.gz",
-      "cache_sha256": "18f3c81993540fa5b60276042b6fbb45c9bef4763ff27445d765b3bdad45e503",
+      "accepted_sha256": "b9c9f6887ad0940370fee4996cb9e9c7585309091b26ef6d6f27b6c850f87038",
+      "cache_file": "data/release/frozen_accepted_outputs/b9c9f6887ad0940370fee4996cb9e9c7585309091b26ef6d6f27b6c850f87038.html.gz",
+      "cache_sha256": "09860cb46b4a183a1f27a6246053c0800d28c83daab0e9f161e39d115acfd5e5",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/hotel-room-decor-memphis",
       "rendered_file": "services/hotel-room-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "9389a168dfc8070156dcefccb307c2de91c0c7f09a650a2b7dda80d25b31fdc1",
-      "cache_file": "data/release/frozen_accepted_outputs/9389a168dfc8070156dcefccb307c2de91c0c7f09a650a2b7dda80d25b31fdc1.html.gz",
-      "cache_sha256": "596af2f7603d9f801dae08f8e9a93891bb10657a86f3b980fda20c88d8ca3f1e",
+      "accepted_sha256": "4a3c979fcf24fc1448c550cb597aaec3832cee3e4bb03e8d34ed6afd65ef8d3d",
+      "cache_file": "data/release/frozen_accepted_outputs/4a3c979fcf24fc1448c550cb597aaec3832cee3e4bb03e8d34ed6afd65ef8d3d.html.gz",
+      "cache_sha256": "fc0d91fc0ed261b184a411bccb3daf04809f3a5f1e99e64ef02eae5e2206cb41",
       "accepted_at": "2026-07-24"
     },
     {
@@ -153,25 +153,25 @@
       "state": "FROZEN",
       "accepted_sha256": "7fc607f9e866619c6d831becdb5854bbdb28a4bdecba129607c8bbac6c0adbb6",
       "cache_file": "data/release/frozen_accepted_outputs/7fc607f9e866619c6d831becdb5854bbdb28a4bdecba129607c8bbac6c0adbb6.html.gz",
-      "cache_sha256": "69135f1fa6cbcd497558575203a21436a466824a52b333a97092e359b0e6c51b",
+      "cache_sha256": "c30d83f6b13339060f7c6284d6e3ce5451ea3da81e8094f510987505b0ba38bc",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/luxury-party-decor-memphis",
       "rendered_file": "services/luxury-party-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "8e6c376bedfcee4d507aa8bc11baea0498ac50b2971753f63478c687b5f8dbb4",
-      "cache_file": "data/release/frozen_accepted_outputs/8e6c376bedfcee4d507aa8bc11baea0498ac50b2971753f63478c687b5f8dbb4.html.gz",
-      "cache_sha256": "5acaac786756399388d64ebda0136945ac586b5b0dec507fb24aa6951f08b8e8",
+      "accepted_sha256": "e767e821fa9e5b4eccb6168d03f14ec2ef98cdaf0e59392b035a5153687e3a69",
+      "cache_file": "data/release/frozen_accepted_outputs/e767e821fa9e5b4eccb6168d03f14ec2ef98cdaf0e59392b035a5153687e3a69.html.gz",
+      "cache_sha256": "d145d2ee778cc03ed9863a930f889b7c45ec21b2a4b33958b0cb5235fffd5690",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/party-decor-memphis",
       "rendered_file": "services/party-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "2bbf08d648ff745a171560adb50011711a573c2d75233054f7bbfe1e85e58dd8",
-      "cache_file": "data/release/frozen_accepted_outputs/2bbf08d648ff745a171560adb50011711a573c2d75233054f7bbfe1e85e58dd8.html.gz",
-      "cache_sha256": "6738a2f1ff66da4b061723d6cc4f7a562a6a08a01ae38a64b5ce17fc01183609",
+      "accepted_sha256": "5a4b689a4f8823b2b659c48b881ae75dbc2a3ba10753ac5d489f24fa1c880302",
+      "cache_file": "data/release/frozen_accepted_outputs/5a4b689a4f8823b2b659c48b881ae75dbc2a3ba10753ac5d489f24fa1c880302.html.gz",
+      "cache_sha256": "fc905e54ab9973b01d7dcb9775a94a2ccc1aad97d1c1426215d05fe9dadd3f11",
       "accepted_at": "2026-07-24"
     },
     {

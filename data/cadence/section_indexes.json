@@ -4,6 +4,7 @@
   "routes": [
     "/areas/index.html",
     "/faq/index.html",
+    "/questions/index.html",
     "/services/index.html",
     "/sitemap"
   ]

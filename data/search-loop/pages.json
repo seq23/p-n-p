@@ -1,6 +1,183 @@
 {
   "schema": "search-loop-pages-v1",
-  "pages": [],
+  "pages": [
+    {
+      "slug": "party-rentals-memphis",
+      "query": "party rentals memphis",
+      "lane": "striking",
+      "score": 33.1,
+      "reasons": [],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "gsc_position": 14,
+        "gsc_impressions": 1,
+        "gsc_page": "https://porchandparty901.com/",
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "rel": "questions/party-rentals-memphis.html",
+      "route": "/questions/party-rentals-memphis",
+      "url": "https://porchandparty901.com/questions/party-rentals-memphis",
+      "published_at": "2026-11-06",
+      "status": "live",
+      "hash": "1454ad214ab2b6ed0425122fb1577d82020ccc7f8483facfaa6e302d9f41182e",
+      "model": "free-route",
+      "facts": [
+        "https://en.wikipedia.org/wiki/Memphis,_Tennessee",
+        "https://en.wikipedia.org/wiki/Shelby_County,_Tennessee"
+      ],
+      "linked_from": [
+        {
+          "rel": "services/index.html",
+          "route": "/services/",
+          "before_hash": "7fc607f9e866619c6d831becdb5854bbdb28a4bdecba129607c8bbac6c0adbb6",
+          "after_hash": "c10abf768ae7cdc77668cbc55eb161c28d1eb56b766ed4b309754eff0deb8706"
+        },
+        {
+          "rel": "services/birthday-party-decor-memphis.html",
+          "route": "/services/birthday-party-decor-memphis",
+          "before_hash": "ece1f95c47bfb169d60b3d2aec140b098fd8fd584f7a8e9f050f66bc80d1b673",
+          "after_hash": "2b7daabf6148b3fe48468252d020977d725e168029074f0ae08cac0f9032ae69"
+        }
+      ],
+      "checks": {},
+      "gate_notes": [
+        "b4 direct answer does not define: \"X is ...\"",
+        "b5 FAQ answer is 35 words (aim 40-60): \"What areas do you serve for party setups and decor\"",
+        "b5 FAQ answer is 34 words (aim 40-60): \"How do I find out the cost of party planning servi\"",
+        "b5 FAQ answer is 36 words (aim 40-60): \"What is included in a seasonal porch decorating se\""
+      ]
+    },
+    {
+      "slug": "how-to-book-birthday-party",
+      "query": "how to book birthday party",
+      "lane": "striking",
+      "score": 30,
+      "reasons": [],
+      "signals": {
+        "words": 5,
+        "question": true,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "rel": "questions/how-to-book-birthday-party.html",
+      "route": "/questions/how-to-book-birthday-party",
+      "url": "https://porchandparty901.com/questions/how-to-book-birthday-party",
+      "published_at": "2026-11-06",
+      "status": "live",
+      "hash": "18003d8eb6ab3069a71411f992e51ff98f30c1d5112512e8a1e8fb1b7178490e",
+      "model": "free-route",
+      "facts": [
+        "https://en.wikipedia.org/wiki/Memphis,_Tennessee",
+        "https://en.wikipedia.org/wiki/Germantown,_Tennessee"
+      ],
+      "linked_from": [
+        {
+          "rel": "services/birthday-party-decor-memphis.html",
+          "route": "/services/birthday-party-decor-memphis",
+          "before_hash": "2b7daabf6148b3fe48468252d020977d725e168029074f0ae08cac0f9032ae69",
+          "after_hash": "931fa5b06fec92aa001093f2d67cfdf20418c460ec1bf4b478de126c23be2e60"
+        },
+        {
+          "rel": "services/birthday-party-planner-memphis.html",
+          "route": "/services/birthday-party-planner-memphis",
+          "before_hash": "c2d2dfd3a97ef2a549ab651a6e0f626d9e52952bd24fc0d335d42c0c1b92efb9",
+          "after_hash": "75f522c24ac58112889ff64e73b460b1cc4896342f74d0ddd865068107c3ded7"
+        }
+      ],
+      "checks": {}
+    },
+    {
+      "slug": "balloon-party-decorations-near-me",
+      "query": "balloon party decorations near me",
+      "lane": "striking",
+      "score": 25,
+      "reasons": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "rel": "questions/balloon-party-decorations-near-me.html",
+      "route": "/questions/balloon-party-decorations-near-me",
+      "url": "https://porchandparty901.com/questions/balloon-party-decorations-near-me",
+      "published_at": "2026-11-06",
+      "status": "live",
+      "hash": "18c940a69e527e22f719365ce0899ed13c394d674730e971abc50ad256fe4eb1",
+      "model": "free-route",
+      "facts": [
+        "https://en.wikipedia.org/wiki/Memphis,_Tennessee",
+        "https://en.wikipedia.org/wiki/Collierville,_Tennessee"
+      ],
+      "linked_from": [
+        {
+          "rel": "services/celebration-setups.html",
+          "route": "/services/celebration-setups",
+          "before_hash": "4da8d6966d1a4e38e813cafb6a029cb6cce735c68989f3ddfe6334768e18a0c7",
+          "after_hash": "c671ed55eacc47e52342825f1483ce0b17737a5d5451a0c35475c25d5ba3f76a"
+        },
+        {
+          "rel": "guides/graduation-party-decorations-at-home-memphis.html",
+          "route": "/guides/graduation-party-decorations-at-home-memphis",
+          "before_hash": "2e07968dfcd3bd181f8ff1e2f5724d8048b45234b3355b4a54ef17ab67394218",
+          "after_hash": "d6289d423f8c4c8a14af34fa315506e5753da55189eb2e7b37f786a38c0f582e"
+        }
+      ],
+      "checks": {},
+      "gate_notes": [
+        "b5 FAQ answer is 38 words (aim 40-60): \"What areas do you serve for balloon party decorati\"",
+        "b5 FAQ answer is 38 words (aim 40-60): \"Do you offer game rentals with delivery?\"",
+        "b5 FAQ answer is 34 words (aim 40-60): \"How do I find out the cost for my party decor?\""
+      ],
+      "extra_queries": [
+        "balloon party decor near me reviews"
+      ]
+    },
+    {
+      "slug": "birthday-party-organisers-near-me",
+      "query": "birthday party organisers near me",
+      "lane": "striking",
+      "score": 25,
+      "reasons": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      },
+      "rel": "questions/birthday-party-organisers-near-me.html",
+      "route": "/questions/birthday-party-organisers-near-me",
+      "url": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
+      "published_at": "2026-11-06",
+      "status": "live",
+      "hash": "f3c7ffd52b39573e37bf7b9d43b219cc32504d51ef12a93b51c7f5d630c16e82",
+      "model": "free-route",
+      "facts": [
+        "https://en.wikipedia.org/wiki/Memphis,_Tennessee",
+        "https://en.wikipedia.org/wiki/Shelby_County,_Tennessee"
+      ],
+      "linked_from": [
+        {
+          "rel": "services/birthday-party-decor-memphis.html",
+          "route": "/services/birthday-party-decor-memphis",
+          "before_hash": "931fa5b06fec92aa001093f2d67cfdf20418c460ec1bf4b478de126c23be2e60",
+          "after_hash": "985afe23fe0b4f43082cbe6206884b9d0129e6f96e86f9b8f6e688a0d2a343a4"
+        },
+        {
+          "rel": "services/birthday-party-planner-memphis.html",
+          "route": "/services/birthday-party-planner-memphis",
+          "before_hash": "75f522c24ac58112889ff64e73b460b1cc4896342f74d0ddd865068107c3ded7",
+          "after_hash": "e36e5e8d58417148ae77801133cd29dda5fbc0383b76be58312a436eab57c67f"
+        }
+      ],
+      "checks": {},
+      "extra_queries": [
+        "birthday party coordinator near me",
+        "birthday party planner near me reviews"
+      ]
+    }
+  ],
   "dropped": [
     {
       "query": "birthday party planner near me",
@@ -242,6 +419,59 @@
         "links: https://www.facebook.com/porchandparty901 is not an allowed link target",
         "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0)"
       ]
+    },
+    {
+      "query": "kids party planner near me",
+      "at": "2026-11-06",
+      "gate": 2,
+      "reason": [
+        "b2 meta description is 16 chars (aim 120-160)",
+        "b5 FAQ answer is 22 words (aim 40-60): \"Do you deliver party game rentals?\"",
+        "b5 FAQ answer is 28 words (aim 40-60): \"What is included in celebration setups?\""
+      ]
+    },
+    {
+      "query": "event planner for small parties",
+      "at": "2026-11-06",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 29 words (aim 40-60): \"What is included in grazing tables?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0)"
+      ]
+    },
+    {
+      "query": "halloween events southaven ms",
+      "at": "2026-11-06",
+      "gate": 2,
+      "reason": [
+        "off-audience: This search is for public community events in Southaven, whereas Porch & Party provides private event planning, holiday "
+      ]
+    },
+    {
+      "query": "birthday party decorations",
+      "at": "2026-11-06",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)"
+      ]
+    },
+    {
+      "query": "balloon party",
+      "at": "2026-11-06",
+      "gate": 2,
+      "reason": [
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
+    },
+    {
+      "query": "balloon party decor near me delivery",
+      "at": "2026-11-06",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 28 words (aim 40-60): \"What areas do you serve?\"",
+        "b5 FAQ answer is 29 words (aim 40-60): \"What services do you offer?\"",
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
     }
   ],
   "redirected": [
@@ -274,6 +504,126 @@
       "matched_by": "same 3 intent words plus modifiers",
       "matched_text": "Birthday party planner in Memphis for kids, adult and hotel-room parties",
       "stage": "search"
+    },
+    {
+      "query": "birthday party planner near me",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "birthday party",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "same wording",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "birthday party event planner near me",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "kid birthday party planner near me",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "birthday party coordinator near me",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
+      "route": "/questions/birthday-party-organisers-near-me",
+      "kind": "engine",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "matched_text": "Looking for birthday party organisers near me in Memphis?",
+      "stage": "draft"
+    },
+    {
+      "query": "first birthday party planner near me",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "baby birthday party planner near me",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "same 3 intent words plus modifiers",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "adult birthday party planners near me",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "balloon party decor near me reviews",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/questions/balloon-party-decorations-near-me",
+      "route": "/questions/balloon-party-decorations-near-me",
+      "kind": "engine",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Balloon Party Decorations Near Me in Memphis",
+      "stage": "draft"
+    },
+    {
+      "query": "birthday party planner near me reviews",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
+      "route": "/questions/birthday-party-organisers-near-me",
+      "kind": "engine",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "matched_text": "Looking for birthday party organisers near me in Memphis?",
+      "stage": "draft"
+    },
+    {
+      "query": "birthday party planner near me packages",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "birthday event planners near me",
+      "at": "2026-11-06",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "same 3 intent words plus modifiers",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
     }
   ]
 }

@@ -2,10 +2,10 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W45",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-06T13:32:33.569Z",
+  "generated_at": "2026-11-07T01:17:55.831Z",
   "state": "running",
-  "published": 0,
-  "indexed": 0,
+  "published": 4,
+  "indexed": "not read: no page old enough to inspect yet (14 days)",
   "pace": 10,
   "ai_visitors": 0,
   "ai_bot_hits": 442,
@@ -32,16 +32,90 @@
       "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
       "matched_by": "same 3 intent words plus modifiers",
       "at": "2026-11-03"
+    },
+    {
+      "query": "birthday party planner near me",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "same wording",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party event planner near me",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "kid birthday party planner near me",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party coordinator near me",
+      "strengthen": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "first birthday party planner near me",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "baby birthday party planner near me",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "same 3 intent words plus modifiers",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "adult birthday party planners near me",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "balloon party decor near me reviews",
+      "strengthen": "https://porchandparty901.com/questions/balloon-party-decorations-near-me",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party planner near me reviews",
+      "strengthen": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party planner near me packages",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday event planners near me",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "same 3 intent words plus modifiers",
+      "at": "2026-11-06"
     }
   ],
   "cap": {
     "max_live_pages": 22,
-    "live": 0,
-    "room": 22,
+    "live": 4,
+    "room": 18,
     "why": "up from 20 to 22: Google impressions 87 in the last 28 days beat 77 in the 28 before"
   },
   "notes": [
-    "BUILD published 0 of quota 10: 0 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
+    "BUILD distinct gate: 12 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
+    "BUILD gate notes (not blocking): 2 published page(s) are outside a length or style aim; each is listed under gate_notes in pages.json",
+    "IndexNow: 4 new page(s) not live yet; submitted when they answer 200"
   ],
   "lanes": {
     "ratio": {
@@ -55,7 +129,7 @@
       "hit_rate": "not read: no page in this lane has reached its 2-week check yet"
     },
     "striking": {
-      "pages": 0,
+      "pages": 4,
       "measured": 0,
       "top3": 0,
       "hit_rate": "not read: no page in this lane has reached its 2-week check yet"
@@ -69,5 +143,5 @@
     "weight_changes": [],
     "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42226299092"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42323278239"
 }

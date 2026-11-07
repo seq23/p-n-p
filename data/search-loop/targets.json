@@ -394,6 +394,114 @@
   ],
   "strengthen": [
     {
+      "query": "birthday event planners near me",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 20,
+      "from": "distinct-gate",
+      "matched_by": "same 3 intent words plus modifiers",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party planner near me packages",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 20,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party planner near me reviews",
+      "page": "/questions/birthday-party-organisers-near-me",
+      "url": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
+      "score": 20,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "balloon party decor near me reviews",
+      "page": "/questions/balloon-party-decorations-near-me",
+      "url": "https://porchandparty901.com/questions/balloon-party-decorations-near-me",
+      "score": 20,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "adult birthday party planners near me",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 25,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "baby birthday party planner near me",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 25,
+      "from": "distinct-gate",
+      "matched_by": "same 3 intent words plus modifiers",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "first birthday party planner near me",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 25,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party coordinator near me",
+      "page": "/questions/birthday-party-organisers-near-me",
+      "url": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
+      "score": 25,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "kid birthday party planner near me",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 40,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party event planner near me",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 40,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 50,
+      "from": "distinct-gate",
+      "matched_by": "same wording",
+      "at": "2026-11-06"
+    },
+    {
+      "query": "birthday party planner near me",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 60.4,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "at": "2026-11-06"
+    },
+    {
       "query": "kids birthday party planner",
       "page": "/services/birthday-party-planner-memphis",
       "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
