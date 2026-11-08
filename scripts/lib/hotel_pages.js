@@ -79,7 +79,7 @@ const PAGES = [
     description: `An anniversary hotel room setup in Memphis, ready before you walk in: rose petals, LED candles, balloons and a sign. ${packagesLine()}.`,
     eyebrow: 'Anniversary Hotel Room', h1: 'Anniversary hotel room setup in Memphis', crumb: 'Anniversary Hotel Room Setup',
     targets: ['anniversary hotel room setup memphis', 'anniversary hotel room decorations', 'anniversary room decor memphis'],
-    answer: `An anniversary hotel room setup is a hotel room Porch &amp; Party decorates for your anniversary before the two of you check in: a rose-petal heart on the bed, LED candles, balloons and a "Happy Anniversary" sign. In Memphis, setups start at ${money(BASIC.total)}, and we are usually there between 3 and 6 PM.`,
+    answer: `An anniversary hotel room setup is a hotel room Porch &amp; Party decorates for your anniversary before the two of you walk in: a rose-petal heart on the bed, LED candles, balloons and a "Happy Anniversary" sign. In Memphis, setups start at ${money(BASIC.total)}, and we are usually there between 3 and 6 PM.`,
     serviceName: 'Anniversary hotel room setup in Memphis',
     images: [PHOTO.anniversary, PHOTO.romantic, PHOTO.hallway],
     faqH2: 'What do people ask about anniversary hotel room setups?',

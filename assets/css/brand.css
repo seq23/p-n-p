@@ -328,3 +328,13 @@ a.card-media { display: block; }
 .dfy-block p:last-child { margin: 0; }
 .dfy-links { display: flex; flex-wrap: wrap; gap: 10px 18px; }
 .dfy-links a { font-weight: 700; color: var(--plum); text-decoration: underline; text-underline-offset: 3px; min-height: 44px; display: inline-flex; align-items: center; }
+
+/* Question pages (search-loop format): they shipped flush to the screen edge on a phone
+   (found 8 Nov 2026 at 390 px). One readable column with the 16px side gutter. */
+.search-loop-page { max-width: 760px; margin: 0 auto; padding: 20px 16px 40px; }
+.search-loop-page .breadcrumb { margin-bottom: 12px; }
+
+/* Plain comparison tables on content pages: left-aligned, ruled rows, top-aligned cells. */
+.compare-table, .search-loop-page table { width: 100%; border-collapse: collapse; text-align: left; margin: 12px 0; }
+.compare-table th, .compare-table td, .search-loop-page th, .search-loop-page td { padding: 10px 8px; border-bottom: 1px solid rgba(42, 26, 40, 0.15); vertical-align: top; text-align: left; }
+.compare-table thead th, .search-loop-page thead th { border-bottom: 2px solid var(--plum); }

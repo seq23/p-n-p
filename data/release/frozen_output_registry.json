@@ -52,9 +52,9 @@
       "route": "/services/anniversary-hotel-room-setup-memphis",
       "rendered_file": "services/anniversary-hotel-room-setup-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "51151f77c37ea759cb35cebb23885c90ea98a7d1725517317ec55068a44e7cbd",
-      "cache_file": "data/release/frozen_accepted_outputs/51151f77c37ea759cb35cebb23885c90ea98a7d1725517317ec55068a44e7cbd.html.gz",
-      "cache_sha256": "37a2da7ad831d29dcbd81e18bb28b68b6105b93d87410efcef5858e5130c7caa",
+      "accepted_sha256": "5e70096bb930ebdf946562dd88791f05d20ce97f49148caddf2a1039d2d80880",
+      "cache_file": "data/release/frozen_accepted_outputs/5e70096bb930ebdf946562dd88791f05d20ce97f49148caddf2a1039d2d80880.html.gz",
+      "cache_sha256": "f934ef02899674ee955ea3b321d7ac43a1bcda46ac89e408b77cc03c3b557dac",
       "accepted_at": "2026-07-24"
     },
     {
