@@ -1,5 +1,5 @@
 /* Design Library (/admin/library), owner-approved 22 Oct 2026. Ported from the research preview
-   (~/claude-work/design-library/build/index.html). Each page is its own /admin URL; the server
+   (~/Work/claude-work/design-library/build/index.html). Each page is its own /admin URL; the server
    says which view to draw (data-view / data-sec / data-key on #dl-app), and this file draws it
    from /admin/library/data.json, which only answers behind the admin sign-in.
    Pictures are real Pinterest pins: cards show the pin's oEmbed picture (hotlinked from

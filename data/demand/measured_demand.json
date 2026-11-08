@@ -331,7 +331,7 @@
       "volume": 90,
       "volume_metric": "US monthly search volume",
       "observed_at": "2026-10-18",
-      "measured_by": "DataForSEO, US, measured 18 Oct 2026 (owner-approved JOB D brief, ~/porch-and-party/admin-next-jobs-brief.md)",
+      "measured_by": "DataForSEO, US, measured 18 Oct 2026 (owner-approved JOB D brief, ~/Work/porch-and-party/admin-next-jobs-brief.md)",
       "build": {
         "covered_by": "/services/porch-decorating.html",
         "why": "Folded on 26 Oct 2026 from /guides/porch-decorating-packages-memphis into this hub (data/search_intelligence/hub_consolidation.json): the hub now carries that page's question and answer at #porch-decorating-packages-memphis.",
@@ -347,7 +347,7 @@
       "volume": 20,
       "volume_metric": "US monthly search volume",
       "observed_at": "2026-10-18",
-      "measured_by": "DataForSEO, US, measured 18 Oct 2026 (owner-approved JOB D brief, ~/porch-and-party/admin-next-jobs-brief.md)",
+      "measured_by": "DataForSEO, US, measured 18 Oct 2026 (owner-approved JOB D brief, ~/Work/porch-and-party/admin-next-jobs-brief.md)",
       "build": {
         "covered_by": "/services/porch-decorating.html",
         "why": "The holiday guide was consolidated into this service hub, which carries the seasonal package grid and the distinct holiday answers."
