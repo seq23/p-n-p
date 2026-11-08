@@ -2,7 +2,7 @@
 /**
  * npm run library:sync — re-copies the Design Library data from the research build
  * (~/Work/claude-work/design-library/build/index.html, or LIBRARY_SRC=<dir>) into
- * data/admin/design-library/library.json, which /admin/library serves behind the admin guard.
+ * data/admin/design-library/library.json, which /designs serves behind the admin guard.
  *
  * Pictures: real Pinterest pins are the pictures (owner, 22 Oct 2026). Each design gets its
  * group's pins from data/admin/design-library/pins.json (the source of truth for pins; checked

@@ -4,6 +4,7 @@ import { mod, makeDb, makeEnv, call } from './admin_harness.mjs';
 
 export async function session({ db = makeDb() } = {}) {
   const A = await mod('functions/_lib/admin.mjs');
+  const LIB = await mod('functions/_lib/admin-library.mjs');
   const { guard } = await mod('functions/_lib/guard.mjs');
   const { issueCookie } = await mod('functions/_lib/auth.mjs');
   const { PRICE_TABLE } = await mod('functions/_lib/prices.mjs');
@@ -13,7 +14,7 @@ export async function session({ db = makeDb() } = {}) {
   const env = makeEnv(db);
   const cookie = (await issueCookie(env)).split(';')[0];
   // Through the guard, like production: guard -> router.
-  const routed = (ctx) => guard({ ...ctx, next: () => (new URL(ctx.request.url).pathname.startsWith('/api/admin') ? A.handleApi(ctx) : A.handleAdmin(ctx)) });
+  const routed = (ctx) => guard({ ...ctx, next: () => (new URL(ctx.request.url).pathname.startsWith('/api/admin') ? A.handleApi(ctx) : new URL(ctx.request.url).pathname.startsWith('/designs') ? LIB.handleDesigns(ctx) : A.handleAdmin(ctx)) });
   const get = async (p, { auth = true, headers = {} } = {}) => {
     const r = await call(routed, env, 'GET', p, { headers: { ...(auth ? { Cookie: cookie } : {}), ...headers } });
     return { status: r.status, location: r.headers.get('Location') || '', headers: r.headers, text: await r.text() };

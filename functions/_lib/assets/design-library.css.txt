@@ -1,4 +1,4 @@
-/* Design Library (/admin/library): the console's own colours and type (views.mjs :root tokens),
+/* Design Library (/designs): the console's own colours and type (views.mjs :root tokens),
    every class dl-*. Phone first: one list of picture rows; three or four picture cards across on
    a computer, with the Rules to remember column on the right. */
 .dl h1{font-size:2rem;margin:4px 0 6px}

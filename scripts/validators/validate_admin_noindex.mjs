@@ -40,7 +40,7 @@ function walk(dir) {
   return fs.readdirSync(abs, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]));
 }
 const routeFiles = walk('functions').filter((f) => !f.startsWith(path.join('functions', '_lib')) && /\.(js|mjs|ts)$/.test(f));
-const guardedDirs = [path.join('functions', 'admin'), path.join('functions', 'api', 'admin')];
+const guardedDirs = [path.join('functions', 'admin'), path.join('functions', 'api', 'admin'), path.join('functions', 'designs')]; // designs = the Design Library (owner 8 Nov 2026), same guard
 let adminRoutes = 0;
 for (const f of routeFiles) {
   const inGuarded = guardedDirs.some((d) => f.startsWith(d + path.sep));

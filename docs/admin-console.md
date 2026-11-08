@@ -1172,13 +1172,13 @@ one, or any image under `assets/` has those bytes. The frozen pages were refroze
 (`frozen_outputs.mjs prepare-scope … && freeze && clear-scope`).
 
 ## Design Library (owner-approved 22 Oct 2026)
-- **Where**: `/admin/library` (menu button "Design Library", after Inventory). Every section, design,
-  color set, tips group and collection has its own page: `/admin/library/<porches|rooms|balloons|grazing>/<slug>`,
-  `/admin/library/colors/<slug>`, `/admin/library/tips/<slug>`, `/admin/library/collections/<key>`,
-  `/admin/library/shopping`. Server: `functions/_lib/admin-library.mjs` (shell pages through `layout()`);
-  page code: `functions/_lib/assets/design-library.{js,css}.txt`, served as `/admin/library/app.{js,css}`.
+- **Where**: `/designs` (menu button "Design Library", after Inventory). Every section, design,
+  color set, tips group and collection has its own page: `/designs/<porches|rooms|balloons|grazing>/<slug>`,
+  `/designs/colors/<slug>`, `/designs/tips/<slug>`, `/designs/collections/<key>`,
+  `/designs/shopping`. Server: `functions/_lib/admin-library.mjs` (shell pages through `layout()`);
+  page code: `functions/_lib/assets/design-library.{js,css}.txt`, served as `/designs/app.{js,css}`.
 - **Data**: `data/admin/design-library/library.json`, bundled into the Functions and served only as
-  `/admin/library/data.json` behind the guard (`data/` is never published). Refresh from the research
+  `/designs/data.json` behind the guard (`data/` is never published). Refresh from the research
   build with `npm run library:sync` (reads `~/Work/claude-work/design-library/build/index.html`, or
   `LIBRARY_SRC=<dir>`), then `npm run validate:admin-design-library` and a PR.
 - **Pictures = real Pinterest pins** (owner, 22 Oct 2026). `data/admin/design-library/pins.json` holds

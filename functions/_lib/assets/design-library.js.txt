@@ -1,7 +1,7 @@
-/* Design Library (/admin/library), owner-approved 22 Oct 2026. Ported from the research preview
+/* Design Library (/designs), owner-approved 22 Oct 2026. Ported from the research preview
    (~/Work/claude-work/design-library/build/index.html). Each page is its own /admin URL; the server
    says which view to draw (data-view / data-sec / data-key on #dl-app), and this file draws it
-   from /admin/library/data.json, which only answers behind the admin sign-in.
+   from /designs/data.json, which only answers behind the admin sign-in.
    Pictures are real Pinterest pins: cards show the pin's oEmbed picture (hotlinked from
    Pinterest's own i.pinimg.com, never copied) with its credit and a link to the pin; design pages
    lead with Pinterest's official embed widget (pinit.js, loaded by the server on design pages
@@ -13,7 +13,7 @@
   var root = document.getElementById("dl-app");
   if (!root) return;
   var app = document.getElementById("dl-main");
-  var BASE = "/admin/library";
+  var BASE = "/designs";
   var VIEW = root.getAttribute("data-view") || "home";
   var SEC = root.getAttribute("data-sec") || "";
   var KEY = root.getAttribute("data-key") || "";

@@ -168,7 +168,7 @@ const nav = (pageRes.text.match(/<nav aria-label="Main">([\s\S]*?)<\/nav>/) || [
 const links = [...nav.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g)].map((m) => [m[1], m[2]]);
 // The whole menu, in order (owner: Quick Pricing Summary last, 20 Oct 2026; Design Library after
 // Inventory, 22 Oct 2026).
-const MENU = [['/admin/', 'Customers (main page)'], ['/admin/calendar', 'Calendar &amp; Bookings'], ['/admin/money', 'Money'], ['/admin/inventory', 'Inventory'], ['/admin/library', 'Design Library'], ['/admin/settings', 'Settings'], ['/admin/help', 'Help'], ['/admin/pricing', 'Quick Pricing Summary']];
+const MENU = [['/admin/', 'Customers (main page)'], ['/admin/calendar', 'Calendar &amp; Bookings'], ['/admin/money', 'Money'], ['/admin/inventory', 'Inventory'], ['/designs', 'Design Library'], ['/admin/settings', 'Settings'], ['/admin/help', 'Help'], ['/admin/pricing', 'Quick Pricing Summary']];
 must(JSON.stringify(links) === JSON.stringify(MENU), `the menu is not ${MENU.map((l) => l[1]).join(' · ')} with Quick Pricing Summary last (got ${links.map((l) => l[1]).join(' · ')})`);
 must(/<h1>Quick Pricing Summary<\/h1>/.test(pageRes.text), 'the heading is not "Quick Pricing Summary"');
 const chips = [...(pageRes.text.match(/<nav class="pjump"[^>]*>([\s\S]*?)<\/nav>/) || ['', ''])[1].matchAll(/<a href="#([a-z]+)"[^>]*>([^<]+)<\/a>/g)].map((m) => [m[1], m[2].replace(/&amp;/g, '&')]);
