@@ -35,7 +35,7 @@ const TERRITORIES = {
   hotel_room_decor: {
     label: 'hotel and room setups',
     patterns: [/hotel room/, /hotel-room/, /romantic room/, /anniversary room/,
-      /proposal room/]
+      /proposal room/, /jacuzzi/, /staycation/]
   },
   grazing_table_styling: {
     label: 'grazing tables and styled events',

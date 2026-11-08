@@ -36,6 +36,7 @@ const chrome = require(path.join(ROOT, 'scripts/lib/site_chrome.js'));
 const { servicePage } = require(path.join(ROOT, 'scripts/install_service_pages.js'));
 const FP = require(path.join(ROOT, 'scripts/lib/focus_pages.js'));
 const FG = require(path.join(ROOT, 'scripts/generators/build_focus_pages.js'));
+const HP = require(path.join(ROOT, 'scripts/lib/hotel_pages.js'));
 const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const rentals = require(path.join(ROOT, 'data/rentals/games.json'));
 
@@ -209,7 +210,7 @@ function checkFocus(p, html, parentHtml, navItems = chrome.NAV_ITEMS) {
     if (!/photo ID/.test(text)) e.push(`${rel}: no photo ID line`);
   }
   const money = [...text.matchAll(/\$[0-9]+(?:,[0-9]{3})*/g)].map((m) => m[0]);
-  const allowed = new Set([SP.money(p.from), SP.money(rentals.rates.day), SP.money(rentals.rates.weekend), SP.money(rentals.damageDeposit), ...FP.BUNDLES.flatMap((b) => [SP.money(b.dayPrice), b.weekendPrice ? SP.money(b.weekendPrice) : null]), SP.money(offers.addOns.takedown.fromPrice), SP.money(offers.travel.extendedFee), SP.money(offers.invoiceQuickAdds.deliveryFee)]);
+  const allowed = new Set([SP.money(p.from), SP.money(rentals.rates.day), SP.money(rentals.rates.weekend), SP.money(rentals.damageDeposit), ...FP.BUNDLES.flatMap((b) => [SP.money(b.dayPrice), b.weekendPrice ? SP.money(b.weekendPrice) : null]), SP.money(offers.addOns.takedown.fromPrice), SP.money(offers.travel.extendedFee), SP.money(offers.invoiceQuickAdds.deliveryFee), ...(p.key === 'hotel' ? HP.PRESETS.map((x) => SP.money(x.total)) : [])]);
   for (const m of money) if (!allowed.has(m)) e.push(`${rel}: price ${m} is not from the data files`);
   // FAQ: 5-6 visible = FAQPage JSON-LD.
   const faqHtml = (mainOf(html).match(/<div class="faq-list">([\s\S]*?)<\/div>\s*<div class="btn-row/) || [])[1] || '';
@@ -345,6 +346,64 @@ for (const [what, [p, html]] of Object.entries(probes)) {
   if (!checkFocus(lp, lh, parL).some((x) => x.includes('giant-tumble-tower'))) errors.push('self-test: a lawn picture showing an unavailable game PASSED');
   i.items = saved;
   probeCount += Object.keys(fprobes).length + 1;
+}
+
+
+// ---- the hotel room setups blitz (owner approval 8 Nov 2026; scripts/lib/hotel_pages.js): the hub
+// and its ten pages. Each is published, links back to the hub, quotes only data prices, never says
+// insured / licensed / guaranteed, and offers the done-for-you setup TWICE (owner ruling 8 Nov 2026:
+// near the top and at the end, each with the price tool and the request path).
+const HOTEL_PRICES = new Set([...HP.PRESETS.map((x) => SP.money(x.total)), SP.money(HP.TAKEDOWN)]);
+function checkHotelBlitz(rel, url, html, isHub) {
+  const e = [];
+  const main = mainOf(html);
+  const text = plain(main).replace(/ ([:.,;])/g, '$1');
+  if (!sitemap.includes(`<loc>${offers.domain}${url}</loc>`)) e.push(`${rel}: not in sitemap.xml`);
+  const canon = (html.match(/<link\b[^>]*rel="canonical"[^>]*>/) || [''])[0];
+  if (!canon.includes(`href="${offers.domain}${url}"`)) e.push(`${rel}: canonical is not itself`);
+  const dfy = [...main.matchAll(/<aside class="dfy-block" data-done-for-you="([a-z]+)">([\s\S]*?)<\/aside>/g)];
+  if (dfy.length !== 2) e.push(`${rel}: ${dfy.length} done-for-you blocks (want 2: after the answer and at the end)`);
+  for (const [, where, inner] of dfy) {
+    const h = hrefs(inner);
+    if (!h.includes(HP.PRICE_TOOL) || !/Price my party or hotel room/.test(inner)) e.push(`${rel}: done-for-you (${where}) lacks the "Price my party or hotel room" link`);
+    if (!h.includes(HP.REQUEST)) e.push(`${rel}: done-for-you (${where}) lacks the request link ${HP.REQUEST}`);
+  }
+  if (dfy.length === 2) {
+    const first = main.indexOf(dfy[0][0]);
+    const h2 = main.indexOf('<h2');
+    if (h2 >= 0 && first > h2) e.push(`${rel}: the first done-for-you block is not right after the answer (above the first <h2>)`);
+    // The page's own FAQ (the hub's folded "More answers" section after <!--/focus-page--> is extra reading).
+    const own = main.includes('<!--/focus-page-->') ? main.slice(0, main.indexOf('<!--/focus-page-->')) : main;
+    const faq = Math.max(own.lastIndexOf('faq-item'), own.lastIndexOf('<section class="faq"'));
+    if (main.indexOf(dfy[1][0]) < faq) e.push(`${rel}: the second done-for-you block is not at the end (after the FAQ)`);
+  }
+  if (!isHub && !hrefs(main).includes(HP.HUB)) e.push(`${rel}: does not link back to the hub ${HP.HUB}`);
+  for (const m of text.matchAll(/\$[0-9]+(?:,[0-9]{3})*/g)) if (!HOTEL_PRICES.has(m[0]) && m[0] !== SP.money(SP.partyFrom)) e.push(`${rel}: price ${m[0]} is not a hotel room price from data/offers/services.json`);
+  if (/\b(insured|licensed|guarantee[ds]?)\b/i.test(text)) e.push(`${rel}: says insured, licensed or guaranteed`);
+  return e;
+}
+{
+  const hub = read('services/hotel-room-decor-memphis.html');
+  const hubLinks = hrefs(mainOf(hub));
+  let blitz = 0;
+  for (const x of HP.ALL()) {
+    if (!fs.existsSync(path.join(ROOT, x.file))) { ok(false, `${x.file}: missing`); continue; }
+    blitz += 1;
+    errors.push(...checkHotelBlitz(x.file, x.url, read(x.file), false));
+    ok(hubLinks.includes(x.url), `services/hotel-room-decor-memphis.html: does not link ${x.url}`);
+    checks += 10;
+  }
+  errors.push(...checkHotelBlitz('services/hotel-room-decor-memphis.html', HP.HUB, hub, true));
+  ok(blitz === 10, `Rule 0: ${blitz} hotel blitz pages checked, want 10`);
+  ok(HP.JACUZZI.length > 0 && HP.JACUZZI.every((h) => /^https:\/\//.test(h.source) && /^\d{4}-\d{2}-\d{2}$/.test(h.checked) && h.how), 'jacuzzi list: every hotel needs its own-website source, check date and how it was checked');
+  // Probes: a page with one done-for-you block, or a wrong price, must fail.
+  const q = HP.QUESTIONS[0];
+  const qh = read(q.file);
+  const oneDfy = qh.replace(/<aside class="dfy-block" data-done-for-you="end">[\s\S]*?<\/aside>/, '');
+  if (oneDfy === qh || !checkHotelBlitz(q.file, q.url, oneDfy, false).some((x) => /done-for-you blocks/.test(x))) errors.push('self-test: a hotel page with one done-for-you block PASSED');
+  const badPrice = qh.replace('</main>', '<p>Setups from $250.</p></main>');
+  if (!checkHotelBlitz(q.file, q.url, badPrice, false).some((x) => /\$250/.test(x))) errors.push('self-test: a hotel page with an unpublished price PASSED');
+  probeCount += 2;
 }
 
 if (!pages) errors.push('Rule 0: zero service pages checked');
