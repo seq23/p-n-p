@@ -334,7 +334,10 @@
     "party_decor": [
       "/areas/index.html",
       "/guides/graduation-party-decorations-at-home-memphis.html",
+      "/services/anniversary-hotel-room-setup-memphis.html",
       "/services/baby-shower-decor-memphis.html",
+      "/services/birthday-hotel-room-decorations-for-her-memphis.html",
+      "/services/birthday-hotel-room-decorations-for-him-memphis.html",
       "/services/birthday-party-decor-memphis.html",
       "/services/birthday-party-planner-memphis.html",
       "/services/bridal-shower-decor-memphis.html",
@@ -344,9 +347,13 @@
       "/services/grazing-tables-memphis.html",
       "/services/hotel-room-decor-memphis.html",
       "/services/luxury-party-decor-memphis.html",
-      "/services/party-decor-memphis.html"
+      "/services/party-decor-memphis.html",
+      "/services/proposal-hotel-room-setup-memphis.html"
     ],
     "hotel_room_decor": [
+      "/services/anniversary-hotel-room-setup-memphis.html",
+      "/services/birthday-hotel-room-decorations-for-her-memphis.html",
+      "/services/birthday-hotel-room-decorations-for-him-memphis.html",
       "/services/birthday-party-decor-memphis.html",
       "/services/birthday-party-planner-memphis.html",
       "/services/budget-party-decor-memphis.html",
@@ -354,7 +361,9 @@
       "/services/celebration-setups.html",
       "/services/hotel-room-decor-memphis.html",
       "/services/luxury-party-decor-memphis.html",
-      "/services/party-decor-memphis.html"
+      "/services/party-decor-memphis.html",
+      "/services/proposal-hotel-room-setup-memphis.html",
+      "/services/valentines-day-hotel-room-setup-memphis.html"
     ],
     "grazing_table_styling": [
       "/areas/index.html",
