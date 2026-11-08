@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-11-07T16:06:51.981Z",
+  "generated_at": "2026-11-08T14:26:55.672Z",
   "enforcement": "block",
   "pages_checked": 34,
   "status": "PASS",
@@ -109,8 +109,8 @@
     {
       "id": "protocol",
       "blocking": false,
-      "pages_missing": 28,
-      "coverage_pct": 17.6,
+      "pages_missing": 27,
+      "coverage_pct": 20.6,
       "why": "no ordered protocol - ordered steps are what gets lifted for \"how do I\""
     },
     {
@@ -251,7 +251,6 @@
       "questions/balloon-party-decorations-near-me.html",
       "questions/birthday-party-games.html",
       "questions/birthday-party-organisers-near-me.html",
-      "questions/how-to-book-birthday-party.html",
       "questions/index.html",
       "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
@@ -266,7 +265,8 @@
       "services/front-door-styling.html",
       "services/grazing-and-event-styling.html",
       "services/grazing-tables-memphis.html",
-      "services/index.html"
+      "services/index.html",
+      "services/luxury-party-decor-memphis.html"
     ],
     "cta_callout": [
       "questions/balloon-party-decorations-near-me.html",
@@ -417,7 +417,6 @@
       "questions/balloon-party-decorations-near-me.html",
       "questions/birthday-party-games.html",
       "questions/birthday-party-organisers-near-me.html",
-      "questions/how-to-book-birthday-party.html",
       "questions/index.html",
       "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html",
