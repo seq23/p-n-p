@@ -39,6 +39,7 @@ const RATE = RENTALS.rates;
 const BUNDLES = INV.offeredBundles(RENTALS);
 const LAWN = SP.lawnGames;
 const SHAPE = require(path.join(ROOT, 'scripts/lib/page_shape.js'));
+const HP = require(path.join(ROOT, 'scripts/lib/hotel_pages.js'));
 
 function faq(id, q, as) {
   const FAQ = require(path.join(ROOT, 'scripts/lib/faq_content.js'));
@@ -48,38 +49,45 @@ function faq(id, q, as) {
   return [as || q, hit[1]];
 }
 
-const parentOf = (key) => SP.PAGES.find((p) => p.key === key);
+// The hotel blitz pages (scripts/lib/hotel_pages.js, owner approval 8 Nov 2026) sit under the
+// hotel room setups hub, so their parent is that focused page.
+const HOTEL_HUB = { key: 'hotel', name: 'Hotel room setups', url: SP.FOCUS.hotel, file: 'services/hotel-room-decor-memphis.html' };
+const parentOf = (key) => (key === 'hotel' ? HOTEL_HUB : SP.PAGES.find((p) => p.key === key));
 
 const PAGES = [
   {
     key: 'hotel', file: 'services/hotel-room-decor-memphis.html', url: SP.FOCUS.hotel, parent: 'party', anchor: 'hotel-room-setups',
     request: 'party', areaService: 'party-decor', from: SP.partyFrom,
     title: 'Hotel Room Setups in Memphis | Porch &amp; Party',
-    description: `Romantic, anniversary, proposal and birthday hotel room setups in Memphis, from ${money(SP.partyFrom)}: rose petals, candles, balloons and a bouquet, ready before you arrive.`,
+    description: `Hotel room decoration service in Memphis and nearby: romantic, anniversary, proposal and birthday setups from ${money(SP.partyFrom)}, with rose petals, LED candles and balloons, ready before you arrive.`,
     eyebrow: 'Hotel Room Setups', h1: 'Hotel room setups in Memphis',
     crumb: 'Hotel Room Setups',
-    targets: ['hotel room decoration memphis', 'romantic hotel room setup memphis', 'anniversary hotel room decor memphis', 'proposal hotel room decor memphis', 'birthday hotel room decor memphis'],
+    targets: ['hotel room decoration memphis', 'hotel room decoration service near me', 'romantic hotel room setup memphis', 'anniversary hotel room decor memphis', 'proposal hotel room decor memphis', 'birthday hotel room decor memphis'],
     answer: SHAPE.assertLead(
-      `A hotel room setup in Memphis is a room Porch &amp; Party styles before your person walks into it: rose petals and candles, balloons by the headboard, a bouquet on the pillows and styled touches, for an anniversary, a proposal or a birthday. Setups start at ${money(SP.partyFrom)}.`,
+      `A hotel room setup in Memphis is a room Porch &amp; Party styles before your person walks into it: rose petals and LED candles, balloons by the headboard, a bouquet on the pillows and styled touches, for an anniversary, a proposal or a birthday. Setups start at ${money(SP.partyFrom)}.`,
       'services/hotel-room-decor-memphis answer'),
     faqH2: 'What do people ask about hotel room setups?',
     serviceName: 'Hotel room setups in Memphis', serviceType: 'Hotel room decoration',
     sections: () => [
       { id: 'romantic-hotel-room-setup', h2: 'Romantic and anniversary hotel room setups',
-        body: `<p>A heart of red rose petals on the bed, candles on the nightstands, white, gold or red balloons by the headboard and a bouquet on the pillows: the classic romantic room, for an anniversary, a getaway night or "just because". To match colors, send a photo or a Pinterest link with your request.</p>` },
+        body: `<p>A heart of red rose petals on the bed, LED candles on the nightstands, white, gold or red balloons by the headboard and a bouquet on the pillows: the classic romantic room, for an anniversary, a getaway night or "just because". To match colors, send a photo or a Pinterest link with your request.</p>` },
       { id: 'proposal-hotel-room-setup', h2: 'Proposal hotel room decor',
         body: '<p>A path of rose petals and candles from the door to the bed, roses waiting where the question gets asked. We set it up while you are out and are gone before the two of you walk in.</p>' },
       { id: 'birthday-hotel-room-setup', h2: 'Birthday hotel room decor',
         body: '<p>A balloon garland over the headboard, gifts and a small bouquet on the bed and soft lights: a birthday surprise for a staycation or a night out in Memphis.</p>' },
       { id: 'hotel-access-and-price', h2: 'Hotel access, timing and price',
-        body: `<p>${esc(faq('party', 'Home, hotel or venue?')[1].replace(/^All three\. /, ''))} ${esc(faq('party', 'How long does setup take?')[1])}</p><p>Hotel room setups start at ${money(SP.partyFrom)}. ${esc(faq('party', 'How much does party or room decor cost?')[1].replace(/^From \$[0-9,]+\+?\. /, ''))} ${esc(offers.addOns.takedown.line)}</p>` },
+        body: `<p>${esc(faq('party', 'Home, hotel or venue?')[1].replace(/^All three\. /, ''))} ${esc(faq('party', 'How long does setup take?')[1])} ${HP.windowLine()} ${HP.blankHotel()}</p><p>${HP.packagesLine()}. ${esc(faq('party', 'How much does party or room decor cost?')[1].replace(/^From \$[0-9,]+\+?\. /, ''))}</p>${HP.packagesTable()}<p>${HP.ledLine()} ${HP.takedownLine()}</p>` },
+      { id: 'hotel-room-decoration-service-near-me', h2: 'Is there a hotel room decoration service near me?',
+        body: `<p>If you are in or around Memphis, yes: Porch &amp; Party is a hotel room decoration service for ${HP.cityList()}. ${HP.hotelsLine()}</p>` },
+      { id: 'hotel-room-ideas', h2: 'Hotel room setup ideas and guides',
+        body: `<ul>${HP.ALL().map((x) => `<li><a href="${x.url}">${esc(x.label.replace(/&amp;/g, '&'))}</a></li>`).join('')}</ul>` },
     ],
     faq: () => [
       ['Can you decorate a hotel room before we arrive?', `Yes. Porch & Party is not affiliated with the hotels and is not one of their vendors or partners. You book your own room; permission to decorate it is yours to arrange with the hotel. ${faq('party', 'Home, hotel or venue?')[1].replace(/^All three\. /, '').replace(/; for a venue[^.]*\./, '.')} ${faq('party', 'How long does setup take?')[1]}`],
       faq('party', 'How much does party or room decor cost?', 'How much does a hotel room setup cost?'),
-      faq('party', 'What do you set up?', 'What can a hotel room setup include?'),
+      ['What can a hotel room setup include?', 'Rose petals on the bed and a walkway, LED candles (never an open flame), ceiling balloons, a garland or arch, a banner or sign, and florals. Anniversaries, birthdays, proposals, Valentine\'s Day and "just because" are the usual reasons.'],
       ['How far ahead should I book?', 'Two to three weeks ahead is comfortable for most anniversaries and birthdays, and earlier for weekends in spring and December.'],
-      faq('party', 'What happens afterwards?', 'Do you take it down afterwards?'),
+      ['Do you take it down afterwards?', `You keep it, or we come back for takedown. For a hotel room takedown is optional and ${money(HP.TAKEDOWN)}, and it is included with Signature.`],
       ['How do I pay?', `Your date is held by ${PAY.decorHold}, paid by ${PAY.methods} from your invoice. The rest is due ${PAY.decorBalanceDue}. ${PAY.methods} only; we do not take cash or cards.`],
     ],
   },
@@ -116,6 +124,12 @@ const PAGES = [
 ];
 
 const imagesFor = (key) => SP.imagesFor(key);
+/** A page's pictures: its own registered files (hotel blitz pages) or its key's set. */
+const imagesOf = (p) => (p.images ? p.images.map((f) => {
+  const hit = SP.AI.images.find((i) => i.file === f);
+  if (!hit) throw new Error(`focus_pages: ${p.file} uses ${f}, which is not registered in data/offers/service_ai_images.json`);
+  return hit;
+}) : imagesFor(p.key));
 
 function faqJsonLd(p) {
   return { '@context': 'https://schema.org', '@type': 'FAQPage', mainEntity: p.faq().map(([q, a]) => ({ '@type': 'Question', name: q, acceptedAnswer: { '@type': 'Answer', text: a } })) };
@@ -125,7 +139,7 @@ function serviceJsonLd(p) {
   const C = require(path.join(ROOT, 'scripts/lib/contact_surface.js'));
   const areas = require(path.join(ROOT, 'data/service_areas/areas.json')).areas;
   const parent = parentOf(p.parent);
-  const offer = p.key === 'hotel'
+  const offer = (p.key === 'hotel' || p.family === 'hotel')
     ? { '@type': 'Offer', priceCurrency: 'USD', price: p.from, priceSpecification: { '@type': 'PriceSpecification', minPrice: p.from, priceCurrency: 'USD' }, description: `Hotel room setups from ${money(p.from)}.`, url: `${DOMAIN}${p.url}` }
     : LAWN.map((g) => ({ '@type': 'Offer', name: `${g.name} rental`, price: RATE.day, priceCurrency: 'USD', availability: 'https://schema.org/InStock', url: `${DOMAIN}/rentals/#${g.slug}`,
       priceSpecification: { '@type': 'UnitPriceSpecification', price: RATE.day, priceCurrency: 'USD', unitCode: 'DAY' } }));
@@ -142,4 +156,4 @@ function breadcrumbJsonLd(p) {
     { '@type': 'ListItem', position: 3, name: p.crumb, item: `${DOMAIN}${p.url}` }] };
 }
 
-module.exports = { PAGES, imagesFor, faqJsonLd, serviceJsonLd, breadcrumbJsonLd, parentOf, money, esc, DOMAIN, BUNDLES, LAWN };
+module.exports = { PAGES, HOTEL_PAGES: HP.PAGES, HOTEL_HUB, imagesOf, imagesFor, faqJsonLd, serviceJsonLd, breadcrumbJsonLd, parentOf, money, esc, DOMAIN, BUNDLES, LAWN };

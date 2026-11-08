@@ -325,6 +325,30 @@
       "accepted_urls": [
         "https://porchandparty901.com/hotels"
       ]
+    },
+    {
+      "accepted_at": "2026-11-08",
+      "reason": "Owner approved the hotel room setups search blitz on 8 Nov 2026: the hub plus 10 hotel pages (7 template pages counted here, 3 /questions/ pages outside the cap), published together in one PR.",
+      "urls_total_after": 42,
+      "accepted_count": 7,
+      "accepted_publications": 7,
+      "accepted_section_indexes": 0,
+      "weekly_cap": 1,
+      "publication_allowance": 1,
+      "ledger_baseline_date": "2026-11-06",
+      "accrual_weeks": 1,
+      "over_cap_by": 6,
+      "maintainable_ceiling": 104,
+      "library_over_ceiling_by": 0,
+      "accepted_urls": [
+        "https://porchandparty901.com/guides/couples-staycation-ideas-memphis",
+        "https://porchandparty901.com/guides/memphis-hotels-with-jacuzzi-in-room",
+        "https://porchandparty901.com/services/anniversary-hotel-room-setup-memphis",
+        "https://porchandparty901.com/services/birthday-hotel-room-decorations-for-her-memphis",
+        "https://porchandparty901.com/services/birthday-hotel-room-decorations-for-him-memphis",
+        "https://porchandparty901.com/services/proposal-hotel-room-setup-memphis",
+        "https://porchandparty901.com/services/valentines-day-hotel-room-setup-memphis"
+      ]
     }
   ]
 }

@@ -107,7 +107,10 @@ const SERVICE_FAMILIES = [
     'small-porch-decorating', 'front-door-styling'] },
   { key: 'celebration', slugs: [
     'celebration-setups', 'celebration-setups-memphis', 'party-decor-memphis',
-    'birthday-party-planner-memphis', 'birthday-party-decor-memphis', 'hotel-room-decor-memphis', 'baby-shower-decor-memphis',
+    'birthday-party-planner-memphis', 'birthday-party-decor-memphis', 'hotel-room-decor-memphis',
+    // The hotel blitz pages (scripts/lib/hotel_pages.js, owner approval 8 Nov 2026).
+    ...require('../lib/hotel_pages.js').PAGES.filter((p) => p.file.startsWith('services/')).map((p) => p.file.replace(/^services\/|\.html$/g, '')),
+    'baby-shower-decor-memphis',
     'bridal-shower-decor-memphis', 'luxury-party-decor-memphis', 'budget-party-decor-memphis'] },
   { key: 'grazing', slugs: ['grazing-and-event-styling', 'grazing-tables-memphis'] }
 ];

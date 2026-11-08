@@ -26,6 +26,24 @@ const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js')
 const siteIcons = require(path.join(ROOT, 'scripts/lib/site_icons.js'));
 const SP = require(path.join(ROOT, 'scripts/lib/service_pages.js'));
 const FP = require(path.join(ROOT, 'scripts/lib/focus_pages.js'));
+const HP = require(path.join(ROOT, 'scripts/lib/hotel_pages.js'));
+
+// Every page this generator renders: the two focused pages and the hotel blitz pages
+// (scripts/lib/hotel_pages.js, owner approval 8 Nov 2026) under the hotel room setups hub.
+const ALL_PAGES = () => [...FP.PAGES, ...FP.HOTEL_PAGES];
+const isHotel = (p) => p.key === 'hotel' || p.family === 'hotel';
+
+/** The pictures, with the owner's real photos tagged "Our real setup" (brand rule). */
+function gallery(p) {
+  return `<div class="service-gallery" data-service-gallery="${p.key}" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-top:20px;">${FP.imagesOf(p).map((i) => `<div class="card-media" style="border-radius:16px;overflow:hidden;${i.source === 'owner' ? 'position:relative;' : ''}"><img src="/${i.file}" alt="${esc(i.alt)}" width="${i.width || 1024}" height="${i.height || 768}" loading="lazy" decoding="async" style="width:100%;height:auto;display:block;"/>${i.source === 'owner' ? '<span class="pp-tag">Our real setup</span>' : ''}</div>`).join('')}</div>`;
+}
+
+/** A guide page is an Article, not a Service (page-shape c3: the type the page supports). */
+function articleJsonLd(p, og) {
+  const url = `${DOMAIN}${p.url}`;
+  return { '@context': 'https://schema.org', '@type': 'Article', headline: p.h1, description: p.description.replace(/&amp;/g, '&'), url, mainEntityOfPage: url, image: `${DOMAIN}/${og.file}`,
+    author: { '@id': `${DOMAIN}/#business`, '@type': 'LocalBusiness', name: 'Porch & Party', url: `${DOMAIN}/` }, publisher: { '@id': `${DOMAIN}/#business` }, about: { '@type': 'Service', name: 'Hotel room setups in Memphis', url: `${DOMAIN}${HP.HUB}` } };
+}
 
 const { esc, DOMAIN } = FP;
 const ld = (o) => `<script type="application/ld+json">${JSON.stringify(o)}</script>`;
@@ -33,7 +51,7 @@ const ld = (o) => `<script type="application/ld+json">${JSON.stringify(o)}</scri
 function render(p) {
   const parent = FP.parentOf(p.parent);
   const url = `${DOMAIN}${p.url}`;
-  const imgs = FP.imagesFor(p.key);
+  const imgs = FP.imagesOf(p);
   const og = imgs[0];
   const faqs = p.faq();
   const secs = p.sections().map((s) => `<div class="info-panel" id="${s.id}"><h2>${s.h2}</h2>${s.body}</div>`).join('');
@@ -65,7 +83,7 @@ function render(p) {
   <link rel="stylesheet" href="/assets/css/styles.css" />
   <link rel="stylesheet" href="/assets/css/site-nav.css" data-site-chrome="css" />${siteChromeBrand.brandLink()}
   ${ld({ '@context': 'https://schema.org', '@type': 'WebPage', name: p.title.replace(/&amp;/g, '&'), description: p.description.replace(/&amp;/g, '&'), url, primaryImageOfPage: `${DOMAIN}/${og.file}`, publisher: { '@id': `${DOMAIN}/#business` } })}
-  ${ld(FP.serviceJsonLd(p))}
+  ${ld(p.kind === 'guide' ? articleJsonLd(p, og) : FP.serviceJsonLd(p))}
   ${ld(FP.faqJsonLd(p))}
   ${ld(FP.breadcrumbJsonLd(p))}
 </head>
@@ -81,14 +99,14 @@ function render(p) {
           <p class="service-answer" data-service-answer="${p.key}">${p.answer}</p>
           <div class="btn-row hero-centered-cta">${SP.bookButton(p.request, 'hero')}<a href="/pricing" class="btn-secondary">See Pricing</a></div>
           <p class="muted book-online-line" data-book-online-line>Request a Quote: pick your date on the booking form and we reply within one business day.</p>
-          <p class="muted" data-parent-link>Part of our <a href="${parent.url}">${esc(parent.name.toLowerCase())}</a> service.</p>
+          <p class="muted" data-parent-link>Part of our <a href="${parent.url}">${esc(parent.name.toLowerCase())}</a> service.</p>${isHotel(p) ? `\n          ${HP.doneForYou('top')}` : ''}
         </div>
         <div class="content-stack" style="margin-top:28px;">${secs}</div>
-        ${SP.gallery(p.key)}
+        ${gallery(p)}
         <div class="answer-block" id="service-faq" style="margin-top:40px;"><span class="eyebrow">FAQ</span><h2>${esc(p.faqH2)}</h2></div>
         <div class="faq-list">${faqs.map(([q, a]) => `<div class="faq-item"><h3>${esc(q)}</h3><p>${esc(a)}</p></div>`).join('')}</div>
         <div class="btn-row centered-cta-row" style="margin-top:24px;">${SP.bookButton(p.request, 'after-faq')}<a href="${parent.url}" class="btn-secondary" data-parent-link>All ${esc(parent.name.toLowerCase())}</a></div>
-        <p class="muted" style="text-align:center;">Request a Quote: pick your date on the booking form and we reply within one business day.</p>
+        <p class="muted" style="text-align:center;">Request a Quote: pick your date on the booking form and we reply within one business day.</p>${isHotel(p) ? `\n        ${HP.doneForYou('end', 'Porch &amp; Party can do the whole hotel room for you: you book the room, we bring everything, set it up between 3 and 6 PM and are gone before you walk in.')}` : ''}
       </div>
     </section><!--/focus-page-->
   </main>
@@ -139,7 +157,7 @@ function finalHtml(p, before) {
 const LLMS = ['llms.txt', 'llms-services.txt', 'llms-full.txt'];
 const LLMS_HEAD = '## Focused pages (inside the four services)';
 function llmsSection() {
-  const lines = FP.PAGES.map((p) => {
+  const lines = ALL_PAGES().map((p) => {
     const parent = FP.parentOf(p.parent);
     return `- ${p.h1}: ${DOMAIN}${p.url} (part of ${parent.name.toLowerCase()}, ${DOMAIN}${parent.url}). ${p.answer.replace(/&amp;/g, '&')}`;
   });
@@ -155,7 +173,7 @@ function llmsRender(text, rel) {
 
 function plan() {
   const out = [];
-  for (const p of FP.PAGES) {
+  for (const p of ALL_PAGES()) {
     const abs = path.join(ROOT, p.file);
     const before = fs.existsSync(abs) ? fs.readFileSync(abs, 'utf8') : null;
     out.push([p.file, before, finalHtml(p, before)]);
@@ -167,7 +185,7 @@ function plan() {
   return out;
 }
 
-module.exports = { render, finalHtml, llmsRender, llmsSection, plan };
+module.exports = { ALL_PAGES, render, finalHtml, llmsRender, llmsSection, plan };
 
 if (require.main === module) {
   const check = process.argv.includes('--check');
@@ -177,6 +195,6 @@ if (require.main === module) {
     console.log('focus pages: up to date');
   } else {
     for (const [rel, , after] of changed) { fs.mkdirSync(path.dirname(path.join(ROOT, rel)), { recursive: true }); fs.writeFileSync(path.join(ROOT, rel), after); }
-    console.log(`focus pages: ${FP.PAGES.length} pages + ${LLMS.length} llms files, ${changed.length} written`);
+    console.log(`focus pages: ${ALL_PAGES().length} pages + ${LLMS.length} llms files, ${changed.length} written`);
   }
 }

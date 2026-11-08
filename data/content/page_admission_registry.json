@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "generated_at": "2026-07-24T00:00:00.000Z",
-  "count": 21,
+  "count": 28,
   "admissions": [
     {
       "route": "/areas/index",
@@ -22,13 +22,40 @@
       "content_sha256": "0cb6b5b4c6a5938004bf50b279f9e774b8af1cfc18f58505ba90f500a0ffc0b3"
     },
     {
+      "route": "/guides/couples-staycation-ideas-memphis",
+      "rendered_file": "guides/couples-staycation-ideas-memphis.html",
+      "status": "admitted",
+      "family": "guides",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "55d8a4a3f7f3907dd9b4302475c9e893cfca9bd3964f0eb08490afd303a773d1"
+    },
+    {
       "route": "/guides/graduation-party-decorations-at-home-memphis",
       "rendered_file": "guides/graduation-party-decorations-at-home-memphis.html",
       "status": "admitted",
       "family": "guides",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "4f14ce827b564add48336eea5282cccb92710c0a82c220545d05ef36215d7b53"
+      "content_sha256": "bb2ade7dc6ff85895bf1b05f97479c5658ae5fcaafc6b417683213f3d21f9bdc"
+    },
+    {
+      "route": "/guides/memphis-hotels-with-jacuzzi-in-room",
+      "rendered_file": "guides/memphis-hotels-with-jacuzzi-in-room.html",
+      "status": "admitted",
+      "family": "guides",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "a75b9234108e0da57703e23f05010e02d489f09eadccabcb411cf947838136e0"
+    },
+    {
+      "route": "/services/anniversary-hotel-room-setup-memphis",
+      "rendered_file": "services/anniversary-hotel-room-setup-memphis.html",
+      "status": "admitted",
+      "family": "services",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "5e70096bb930ebdf946562dd88791f05d20ce97f49148caddf2a1039d2d80880"
     },
     {
       "route": "/services/baby-shower-decor-memphis",
@@ -40,13 +67,31 @@
       "content_sha256": "00983e29bf698b0565d79922f80db2a04e168e25a8f334dc175a9a9990220683"
     },
     {
+      "route": "/services/birthday-hotel-room-decorations-for-her-memphis",
+      "rendered_file": "services/birthday-hotel-room-decorations-for-her-memphis.html",
+      "status": "admitted",
+      "family": "services",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "e73a9cf189cae1f7c919e4d946c9071b49a3a5b15a50c09046c5daca9bc5f356"
+    },
+    {
+      "route": "/services/birthday-hotel-room-decorations-for-him-memphis",
+      "rendered_file": "services/birthday-hotel-room-decorations-for-him-memphis.html",
+      "status": "admitted",
+      "family": "services",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "ff66a5b68aea1947f84114c489a0eca368de2f83e203d8a0dff097bf3c1af489"
+    },
+    {
       "route": "/services/birthday-party-decor-memphis",
       "rendered_file": "services/birthday-party-decor-memphis.html",
       "status": "admitted",
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "dc513cff068d6474be0e6597f1c31bdfe2ba0cad6caeac8a3dfc7df18dc59f24"
+      "content_sha256": "5fdbfb0564a8e4751e2d8aa48f369ecc796249d0eb669f46c2dd652e70f5638d"
     },
     {
       "route": "/services/birthday-party-planner-memphis",
@@ -55,7 +100,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "f4299ace316df7a44de7d39c215d39db1b0add79a97a550e1698a4b54a298999"
+      "content_sha256": "2d6095096ef601ef75b80ddeac7e8123e484f22d9e786df35a49c36dac6694af"
     },
     {
       "route": "/services/bridal-shower-decor-memphis",
@@ -64,7 +109,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "7050fdf940abd6573f69c402a9d10e12d6defbb9c722bfedafaaf1ddc46bffad"
+      "content_sha256": "a68d36a39157629eea248de1724815534203e7436f80cca190317c6578baaaf6"
     },
     {
       "route": "/services/budget-party-decor-memphis",
@@ -73,7 +118,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "38440a4fedf799f8f11d290ce13444bfb6b808eeecd0b47d19f469a970ece774"
+      "content_sha256": "06da898f6337739ab16ea8c12cb87680e42ba1423c640837ce37d353dd163819"
     },
     {
       "route": "/services/celebration-setups-memphis",
@@ -82,7 +127,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "dcd365ee05465b3bbb39b364ad880f20f90a78e9fa7744cd3f6eb4cd46a6d348"
+      "content_sha256": "7a99ae30654ccaa30783d8678905f6e0e1114e5a62e18b508712d40b7a0de3cd"
     },
     {
       "route": "/services/celebration-setups",
@@ -91,7 +136,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "1fc463f569c27c36df0f74f4fe5e2f5aa5e249061e0f65c0f5733c986bc29bd5"
+      "content_sha256": "cd1c026bbeb5503dc74e48cd82d67f0504637a876bcda7cc8e19e129eb31bbcb"
     },
     {
       "route": "/services/christmas-porch-decorating",
@@ -145,7 +190,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "b88431290c5ff6f382703d799458c2ba549423453595e978fb29ef86d4be7ee3"
+      "content_sha256": "58bf0faf5d5491947ef619aaeee712affd8beee9f4c369f735b42e722b0d808a"
     },
     {
       "route": "/services/index",
@@ -154,7 +199,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "31cefdacceaa7c42d681f8c7b1cee6d0a44c64eb5f4388adc8d619bd071b4cad"
+      "content_sha256": "84d2b5c3737feb175ce81cb92cef1d480cd1524b52d956e3db27678816c49f7f"
     },
     {
       "route": "/services/luxury-party-decor-memphis",
@@ -163,7 +208,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "f0ee3964e1053a16d3947d10d3bb57b8e2a376bbb2ba5161cf2272c9c59ff827"
+      "content_sha256": "7126d987e9125c580981195557bea0394626f37249b9af8934fd2f94b509ef00"
     },
     {
       "route": "/services/party-decor-memphis",
@@ -172,7 +217,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "d11854b5bb34ae56323834881b1937148f0e6de529a32669e40c028fca219d73"
+      "content_sha256": "6f709810b5f4e99bdb7c2e3952bb7ccaa2208b89b4de31f8931639ea465bad06"
     },
     {
       "route": "/services/porch-decorating",
@@ -184,6 +229,15 @@
       "content_sha256": "81049a9d690c70ae2b1086f25f8fcdf8ded0965d88114ea8689418b7f9e71168"
     },
     {
+      "route": "/services/proposal-hotel-room-setup-memphis",
+      "rendered_file": "services/proposal-hotel-room-setup-memphis.html",
+      "status": "admitted",
+      "family": "services",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "4d25f99c61c58a1c9929bc48fe39f65374ba76523eabb04c48f06054c49ed7f0"
+    },
+    {
       "route": "/services/small-porch-decorating",
       "rendered_file": "services/small-porch-decorating.html",
       "status": "admitted",
@@ -191,6 +245,15 @@
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
       "content_sha256": "d3d616446d588074bfecc3b81ab9533c560c51d3171563792b77fb177fd511f0"
+    },
+    {
+      "route": "/services/valentines-day-hotel-room-setup-memphis",
+      "rendered_file": "services/valentines-day-hotel-room-setup-memphis.html",
+      "status": "admitted",
+      "family": "services",
+      "source": "legacy_public_authority_baseline",
+      "admitted_at": "2026-07-24",
+      "content_sha256": "5fc69d16d49640f14b023bc65f68b029b33a254748390d66705b1ff6b2651a4b"
     }
   ]
 }
