@@ -108,6 +108,24 @@
           "Amazonbot": 5
         }
       }
+    },
+    "2026-11-08": {
+      "ai_visitors": {
+        "total": 0,
+        "by_engine": {},
+        "by_path": {},
+        "source": "web-analytics"
+      },
+      "ai_bot_hits": {
+        "total": 33,
+        "by_bot": {
+          "OAI-SearchBot (ChatGPT search)": 14,
+          "ClaudeBot": 6,
+          "GPTBot (OpenAI training)": 1,
+          "ChatGPT-User (ChatGPT fetch)": 6,
+          "Amazonbot": 6
+        }
+      }
     }
   }
 }
