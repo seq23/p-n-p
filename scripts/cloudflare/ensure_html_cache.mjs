@@ -32,11 +32,11 @@ import { pathToFileURL } from 'node:url';
 
 export const ZONE = 'porchandparty901.com';
 export const EDGE_TTL_SECONDS = 600;
-export const UNCACHED_PREFIXES = ['/admin', '/api/', '/request', '/r/', '/cdn-cgi/'];
+export const UNCACHED_PREFIXES = ['/admin', '/designs', '/api/', '/request', '/r/', '/cdn-cgi/'];
 
 export const RULE = {
   ref: 'public_html_edge_cache',
-  description: 'Public pages from the edge cache, 10 min; never /admin, /api/, /request, /r/, /cdn-cgi/ (scripts/cloudflare/ensure_html_cache.mjs)',
+  description: 'Public pages from the edge cache, 10 min; never /admin, /designs, /api/, /request, /r/, /cdn-cgi/ (scripts/cloudflare/ensure_html_cache.mjs)',
   expression: `(http.host eq "${ZONE}" and http.request.method eq "GET" and ${UNCACHED_PREFIXES.map((p) => `not starts_with(http.request.uri.path, "${p}")`).join(' and ')})`,
   action: 'set_cache_settings',
   action_parameters: {
