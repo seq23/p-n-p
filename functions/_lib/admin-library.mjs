@@ -1,14 +1,14 @@
-// The Design Library (/admin/library; owner-approved 22 Oct 2026). Behind the one admin guard
+// The Design Library (/designs; owner-approved 22 Oct 2026). Behind the one admin guard
 // (functions/admin/_middleware.js: session + noindex + no-store), like every /admin page.
-//   GET /admin/library                         home: sections, fresh ideas, collections
-//   GET /admin/library/<section>               porches | rooms | balloons | grazing | colors | tips | shopping
-//   GET /admin/library/<design section>/<slug> one design (Pinterest pins first)
-//   GET /admin/library/colors/<slug>           one color set
-//   GET /admin/library/tips/<slug>             one tips group
-//   GET /admin/library/collections/<key>       one collection across the four design sections
-//   GET /admin/library/data.json               the data (data/admin/design-library/library.json, bundled)
-//   GET /admin/library/app.js | app.css        the page code (functions/_lib/assets/design-library.*.txt)
-//   GET /admin/library/img/<name>.webp         an AI fallback picture, read from the Pages assets
+//   GET /designs                         home: sections, fresh ideas, collections
+//   GET /designs/<section>               porches | rooms | balloons | grazing | colors | tips | shopping
+//   GET /designs/<design section>/<slug> one design (Pinterest pins first)
+//   GET /designs/colors/<slug>           one color set
+//   GET /designs/tips/<slug>             one tips group
+//   GET /designs/collections/<key>       one collection across the four design sections
+//   GET /designs/data.json               the data (data/admin/design-library/library.json, bundled)
+//   GET /designs/app.js | app.css        the page code (functions/_lib/assets/design-library.*.txt)
+//   GET /designs/img/<name>.webp         an AI fallback picture, read from the Pages assets
 //                                              (scripts/assemble_pages_output.js copies them to
 //                                              admin/library/img/, which only this route reaches)
 // Pinterest's pinit.js is loaded on design pages only. Data refresh: npm run library:sync.
@@ -20,7 +20,7 @@ import { tip } from './helptext.mjs';
 import { esc, htmlResponse } from './util.mjs';
 import LIBRARY_ASSETS from '../../scripts/lib/library_assets.js';
 
-export const LIBRARY_HOME = '/admin/library';
+export const LIBRARY_HOME = '/designs'; // owner 8 Nov 2026: "it needs to be in /designs"; /designs forwards here
 export const LIBRARY_TITLE = 'Design Library';
 export const SECTIONS = [
   ['porches', 'Porches'], ['rooms', 'Party & Room Decor'], ['balloons', 'Balloons'], ['grazing', 'Grazing Tables'],
@@ -93,4 +93,19 @@ export async function libraryRoute(env, request, url, segs) {
     return page({ view: 'tipgroup', sec: a, key: t.slug, title: t.name, where: 'Tips & Tricks', back: secBack, screen: 'library' });
   }
   return notFound('No such page in the Design Library.');
+}
+
+// /designs/* (functions/designs/[[path]].js, behind the same admin guard): the library's own address.
+export function handleDesigns(context) {
+  const url = new URL(context.request.url);
+  const method = context.request.method.toUpperCase();
+  if (method !== 'GET' && method !== 'HEAD') return new Response('not allowed', { status: 405 });
+  const segs = ['library', ...url.pathname.split('/').filter(Boolean).slice(1)];
+  return libraryRoute(context.env, context.request, url, segs);
+}
+
+// The old address: /admin/library[/...] forwards to /designs[/...], query kept.
+export function oldLibraryRedirect(url) {
+  const rest = url.pathname.replace(/^\/admin\/library/, '');
+  return new Response(null, { status: 301, headers: { Location: `${LIBRARY_HOME}${rest}${url.search}` } });
 }

@@ -41,7 +41,7 @@ must(designs.length >= 212, `only ${designs.length} designs in library.json`);
 const slugs = new Set();
 for (const d of designs) {
   must(/^[a-z0-9]+(-[a-z0-9]+)*$/.test(d.slug || ''), `${d.sec}.${d.id} has no clean page slug (${d.slug})`);
-  must(!slugs.has(`${d.sec}/${d.slug}`), `two designs share /admin/library/${d.sec}/${d.slug}`);
+  must(!slugs.has(`${d.sec}/${d.slug}`), `two designs share /designs/${d.sec}/${d.slug}`);
   slugs.add(`${d.sec}/${d.slug}`);
   const want = (PINS.groups[d.pg] || []).slice().sort().join(',');
   must(want && (d.pins || []).slice().sort().join(',') === want, `${d.sec}.${d.id}: its pins are not its group's pins in pins.json (group ${d.pg}); run npm run library:sync`);
@@ -73,16 +73,16 @@ const L = await mod('functions/_lib/admin-library.mjs');
 const s = await session();
 let routes = 0;
 const firstImg = designs.find((d) => d.img).img;
-for (const p of ['/admin/library', '/admin/library/balloons', `/admin/library/porches/${designs.find((d) => d.sec === 'porches').slug}`, '/admin/library/data.json', '/admin/library/app.js', `/admin/library/img/${firstImg}`]) {
+for (const p of ['/designs', '/designs/balloons', `/designs/porches/${designs.find((d) => d.sec === 'porches').slug}`, '/designs/data.json', '/designs/app.js', `/designs/img/${firstImg}`]) {
   const r = await s.get(p, { auth: false });
   routes += 1;
   must(r.status === 303 && r.location === '/admin', `signed out, ${p} must send to sign-in (got ${r.status} ${r.location})`);
 }
-const pages = [['/admin/library', 'library', false], ...L.SECTIONS.map(([k]) => [`/admin/library/${k}`, k === 'shopping' ? 'libraryTrip' : 'library', false])];
-for (const k of L.DESIGN_SECTIONS) for (const d of designs.filter((x) => x.sec === k).slice(0, 3)) pages.push([`/admin/library/${k}/${d.slug}`, 'libraryDesign', true]);
-for (const p of LIB.palettes) pages.push([`/admin/library/colors/${p.slug}`, 'library', false]);
-for (const t of LIB.tips) pages.push([`/admin/library/tips/${t.slug}`, 'library', false]);
-for (const c of LIB.collections) pages.push([`/admin/library/collections/${c.k}`, 'library', false]);
+const pages = [['/designs', 'library', false], ...L.SECTIONS.map(([k]) => [`/designs/${k}`, k === 'shopping' ? 'libraryTrip' : 'library', false])];
+for (const k of L.DESIGN_SECTIONS) for (const d of designs.filter((x) => x.sec === k).slice(0, 3)) pages.push([`/designs/${k}/${d.slug}`, 'libraryDesign', true]);
+for (const p of LIB.palettes) pages.push([`/designs/colors/${p.slug}`, 'library', false]);
+for (const t of LIB.tips) pages.push([`/designs/tips/${t.slug}`, 'library', false]);
+for (const c of LIB.collections) pages.push([`/designs/collections/${c.k}`, 'library', false]);
 for (const [p, steps, isDesign] of pages) {
   const r = await s.get(p);
   routes += 1;
@@ -91,31 +91,31 @@ for (const [p, steps, isDesign] of pages) {
   const nav = (r.text.match(/<nav aria-label="Main">([\s\S]*?)<\/nav>/) || ['', ''])[1];
   const links = [...nav.matchAll(/<a href="([^"]+)"[^>]*>([^<]+)<\/a>/g)].map((m) => m[2]);
   must(links[3] === 'Inventory' && links[4] === 'Design Library', `${p}: Design Library is not in the menu right after Inventory (${links.join(' · ')})`);
-  if (p === '/admin/library') must(/<a href="\/admin\/library" aria-current="page"/.test(nav), '/admin/library does not mark Design Library as the current screen');
+  if (p === '/designs') must(/<a href="\/designs" aria-current="page"/.test(nav), '/designs does not mark Design Library as the current screen');
   must(/data-back/.test(r.text), `${p} has no ← Back`);
   must(new RegExp(`data-steps="${steps}"`).test(r.text), `${p} lacks its numbered steps (${steps})`);
-  must(r.text.includes(`id="dl-app"`) && r.text.includes('/admin/library/app.js?v='), `${p} does not load the library page code`);
+  must(r.text.includes(`id="dl-app"`) && r.text.includes('/designs/app.js?v='), `${p} does not load the library page code`);
   must(isDesign === r.text.includes(L.PINIT_SRC), `${p}: Pinterest's pinit.js must load on design pages only`);
 }
-for (const p of ['/admin/library/porches/no-such-design', '/admin/library/nope', '/admin/library/colors/zz', '/admin/library/tips/zz', '/admin/library/collections/zz', '/admin/library/balloons/a/b']) {
+for (const p of ['/designs/porches/no-such-design', '/designs/nope', '/designs/colors/zz', '/designs/tips/zz', '/designs/collections/zz', '/designs/balloons/a/b']) {
   const r = await s.get(p); routes += 1;
   must(r.status === 404, `${p} answered ${r.status}, not 404`);
 }
 {
-  const r = await s.get('/admin/library/data.json'); routes += 1;
+  const r = await s.get('/designs/data.json'); routes += 1;
   must(r.status === 200 && /application\/json/.test(r.headers.get('Content-Type') || ''), `data.json answered ${r.status} ${r.headers.get('Content-Type')}`);
   let same = false; try { same = JSON.stringify(JSON.parse(r.text)) === JSON.stringify(LIB); } catch { same = false; }
   must(same, 'data.json is not data/admin/design-library/library.json');
   must(/private/.test(r.headers.get('Cache-Control') || ''), 'data.json may be cached by shared caches');
-  for (const [p, type] of [['/admin/library/app.js', 'text/javascript'], ['/admin/library/app.css', 'text/css']]) {
+  for (const [p, type] of [['/designs/app.js', 'text/javascript'], ['/designs/app.css', 'text/css']]) {
     const x = await s.get(p); routes += 1;
     must(x.status === 200 && (x.headers.get('Content-Type') || '').startsWith(type), `${p} answered ${x.status} ${x.headers.get('Content-Type')}`);
   }
-  const img = await s.get(`/admin/library/img/${firstImg}`); routes += 1;
+  const img = await s.get(`/designs/img/${firstImg}`); routes += 1;
   const bytes = fs.statSync(path.join(ROOT, LIB_ASSETS.SOURCE, firstImg)).size;
   must(img.status === 200 && img.headers.get('Content-Type') === 'image/webp' && Buffer.byteLength(img.text, 'latin1') > 0, `the picture ${firstImg} answered ${img.status} ${img.headers.get('Content-Type')}`);
   must(bytes > 1000, `${firstImg} is suspiciously small`);
-  for (const bad of ['../../wrangler.toml', 'x.png', 'a%2Fb.webp']) { const x = await s.get(`/admin/library/img/${bad}`); routes += 1; must(x.status === 404 || x.status === 303, `/admin/library/img/${bad} answered ${x.status}`); }
+  for (const bad of ['../../wrangler.toml', 'x.png', 'a%2Fb.webp']) { const x = await s.get(`/designs/img/${bad}`); routes += 1; must(x.status === 404 || x.status === 303, `/designs/img/${bad} answered ${x.status}`); }
 }
 must(routes >= 40, `only ${routes} library routes checked`);
 
@@ -144,14 +144,14 @@ async function render(view, sec = '', key = '', { trip = [], search = '' } = {})
   };
   const ctx = {
     document, window: {}, console, URLSearchParams, Math, JSON, Object, Array, String, Number, Infinity, encodeURIComponent, decodeURIComponent, setTimeout: () => 0, clearTimeout() {}, setInterval: () => 0, clearInterval() {},
-    location: { search, pathname: '/admin/library' }, history: { replaceState() {} }, scrollY: 0, scrollTo() {}, addEventListener() {}, matchMedia: () => ({ matches: false }),
+    location: { search, pathname: '/designs' }, history: { replaceState() {} }, scrollY: 0, scrollTo() {}, addEventListener() {}, matchMedia: () => ({ matches: false }),
     localStorage: { getItem: (k) => store[k] ?? null, setItem: (k, v) => { store[k] = v; } }, btoa: (x) => Buffer.from(x, 'binary').toString('base64'), unescape, confirm: () => true,
     fetch: async (u) => { fetched = u; return { ok: true, json: async () => JSON.parse(JSON.stringify(LIB)) }; },
   };
   ctx.window = ctx; ctx.DL_DEBUG = process.env.DL_DEBUG === "1";
   vm.runInNewContext(APP_JS, ctx);
   for (let i = 0; i < 5; i += 1) await new Promise((r) => setImmediate(r));
-  must(fetched.startsWith('/admin/library/data.json'), `${view}: the page code did not fetch /admin/library/data.json`);
+  must(fetched.startsWith('/designs/data.json'), `${view}: the page code did not fetch /designs/data.json`);
   return { main: els['dl-main'].innerHTML, aside: els['dl-aside'].innerHTML, body: body.innerHTML, root };
 }
 const count = (h, re) => (h.match(re) || []).length;
@@ -191,15 +191,15 @@ for (const k of L.DESIGN_SECTIONS) {
   const withImg = LIB.designs.find((d) => d.img); const noImg = LIB.designs.find((d) => !d.img && d.sec === withImg.sec);
   withImg.pins = []; noImg.pins = [];
   const h = await render('section', withImg.sec, '', { search: withImg.sec === 'porches' ? `?tab=${encodeURIComponent(withImg.g)}` : '' });
-  must(/Idea picture \(AI\)/.test(h.main) && h.main.includes(`/admin/library/img/${withImg.img}`), 'a design with no pin does not fall back to its AI picture');
+  must(/Idea picture \(AI\)/.test(h.main) && h.main.includes(`/designs/img/${withImg.img}`), 'a design with no pin does not fall back to its AI picture');
   const h2 = await render('design', noImg.sec, noImg.slug);
   must(/Picture coming/.test(h2.main) && !/data-pin-do/.test(h2.main), 'a design with no pin and no AI picture does not say "Picture coming"');
   Object.assign(LIB, saved); LIB.designs = saved.designs;
 }
 {
-  const h = await render('colors'); must(count(h.main, /class="dl-pal" href="\/admin\/library\/colors\//g) === LIB.palettes.length, 'colors: not a link to every color set');
+  const h = await render('colors'); must(count(h.main, /class="dl-pal" href="\/designs\/colors\//g) === LIB.palettes.length, 'colors: not a link to every color set');
   const p = await render('palette', 'colors', LIB.palettes[0].slug); must(/class="dl-sw"/.test(p.main) && /What to buy/.test(p.main), 'a color set page has no swatch or what to buy');
-  const t = await render('tips'); must(count(t.main, /href="\/admin\/library\/tips\//g) === LIB.tips.length, 'tips: not a link to every tips group');
+  const t = await render('tips'); must(count(t.main, /href="\/designs\/tips\//g) === LIB.tips.length, 'tips: not a link to every tips group');
   const g = await render('tipgroup', 'tips', LIB.tips[0].slug); must(count(g.main, /class="dl-tip"/g) >= (LIB.tips[0].tips || []).length, 'a tips group page does not list its tips');
   const c = await render('collection', '', LIB.collections[0].k); must(count(c.main, /class="dl-card"/g) === designs.filter((d) => (d.cl || []).includes(LIB.collections[0].k)).length, 'a collection page does not show its designs');
   const two = designs.filter((d) => d.sec === 'balloons').slice(0, 2).map((d) => `${d.sec}.${d.id}`);
@@ -207,6 +207,14 @@ for (const k of L.DESIGN_SECTIONS) {
   must(/Trip total/.test(sh.main) && count(sh.main, /class="dl-store"/g) >= 1 && /Clear the whole trip list/.test(sh.main) && /class="dl-apart"/.test(sh.main), 'shopping: the trip list is not combined by store with a separate, labelled Clear');
   const empty = await render('shopping', 'shopping');
   must(/Your trip list is empty/.test(empty.main) && count(empty.main, /class="dl-row"/g) === designs.length, 'shopping: no empty message or no list for every design');
+}
+
+// Moved 8 Nov 2026 (owner): an old /admin/library link forwards to /designs, path and query kept.
+{
+  const r = await s.get('/admin/library/balloons?x=1');
+  must(r.status === 301 && r.location === '/designs/balloons?x=1', `/admin/library/balloons must forward to /designs/balloons (got ${r.status} ${r.location})`);
+  const h = await s.get('/admin/library');
+  must(h.status === 301 && h.location === '/designs', `/admin/library must forward to /designs (got ${h.status} ${h.location})`);
 }
 
 // ---- Wiring --------------------------------------------------------------------------------
@@ -219,3 +227,4 @@ if (errors.length) {
   process.exit(1);
 }
 console.log(`VALIDATION PASS: admin design library (${designs.length} designs, ${groups.length} pin groups, ${Object.keys(PINS.pins).length} pins, ${routes} routes, ${designs.filter((d) => d.img).length} AI fallback pictures)`);
+
