@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-10-08..2026-11-04",
-  "coverage_collected_at": "2026-11-07T16:05:56.210392+00:00",
+  "gsc_window": "2026-10-09..2026-11-05",
+  "coverage_collected_at": "2026-11-08T16:05:55.999916+00:00",
   "url_count": 41,
   "roles": {
     "candidate": 13,
@@ -110,8 +110,8 @@
       "url": "https://porchandparty901.com/",
       "file": "index.html",
       "role": "root",
-      "impressions_28d": 1,
-      "clicks_28d": 0,
+      "impressions_28d": 93,
+      "clicks_28d": 5,
       "word_count": 1982,
       "coverage_state": "Submitted and indexed",
       "fold_into_if_crawled_not_indexed": null,
@@ -145,7 +145,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1190,
+      "word_count": 1139,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
@@ -156,7 +156,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1083,
+      "word_count": 956,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
@@ -167,7 +167,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1066,
+      "word_count": 1000,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
@@ -178,7 +178,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1657,
+      "word_count": 1637,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-decor-memphis",
       "fold_rule": "/birthday|balloon/"
@@ -200,7 +200,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1214,
+      "word_count": 1151,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"

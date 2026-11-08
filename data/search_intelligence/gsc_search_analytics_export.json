@@ -8,20 +8,29 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-08",
-  "end_date": "2026-11-04",
-  "collected_at": "2026-11-07T16:05:18.513773+00:00",
+  "start_date": "2026-10-09",
+  "end_date": "2026-11-05",
+  "collected_at": "2026-11-08T16:05:17.373559+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
     {
       "keys": [
-        "balloon party"
+        "baby birthday party"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
       "position": 19
+    },
+    {
+      "keys": [
+        "bachelorette party ideas"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 5
     },
     {
       "keys": [
@@ -106,12 +115,30 @@
     },
     {
       "keys": [
+        "host birthday party near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 8
+    },
+    {
+      "keys": [
         "local event planners"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
       "position": 2
+    },
+    {
+      "keys": [
+        "party planner"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 1
     },
     {
       "keys": [
@@ -128,10 +155,10 @@
       "keys": [
         "https://porchandparty901.com/"
       ],
-      "clicks": 4,
-      "impressions": 86,
-      "ctr": 0.046511627906976744,
-      "position": 5.9186046511627906
+      "clicks": 5,
+      "impressions": 93,
+      "ctr": 0.053763440860215055,
+      "position": 5.860215053763441
     },
     {
       "keys": [
@@ -144,24 +171,117 @@
     },
     {
       "keys": [
-        "https://www.porchandparty901.com/"
+        "https://porchandparty901.com/request?gsas=1&ahbb=1&rwg_token=ALcMQYYGAEtn7Qnhso1ij-ezciQ2lx0TbwJiwBqGi-UNqk4xhS56NBxVb-2FF-zti3ECJrAoybHXbpDJe-hKeQe-oiiVE2Ag7w%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 5
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYZ5ECWJcmPBm5AUVhUsaHhbnaPDQ1Qf4d7o2BgtbdYU7F1yhvArRkoqCbEfIfL-6xDpyk81yQXBEcHRhDXHZTYiWLdytg%3D%3D"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
       "position": 19
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYZNCCcqHkCy1lpNBmo84hWP22-XReRWAdelVPznh4HkzRoY7ep0Dwrqad8vD1oHsMdnfu56lGCtuciM_9wMjJMtUh630A%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYaFm3osaidorn5zVgT13Wc4ERzM-176TFubrsk1vFGax6wDyNVAILwtB3vB55dvffnMAkcwdZvWe9ipMTtm425k4WXDaQ%3D%3D&source=cat"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYb6CpsZo5CeFJB0NELEn2-H06Whyb5rV5nRhyuPDAZ1LveI0b6n8ivqf2_S3-Zmn_R8d3gQqJWQYYImslJCymy0djnSRA%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 8
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYbIe1knRfBuWB6lv_n5KYpjrhBH3VqmtwuCX9NEO1OSDBn7LthXetvBhPqITKAONAr2tGNtuG4V3lij9jMzyGgtWs7GQw%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYbhCmhdv_eHEDTPhcPtdhC71xdqaF3Z3A6DGoaANP4EC0RytdA20_uJopL-iLSxETlzM-zZKx9LNatpAaNA7xRupjZIEg%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYbtSnsARDfz3K-W2MFZLvsxBcpC1VntYYxkIbLq72NMvoQ7oCvVsOFruE-oNM_iGv64a-snuU0GFhHpIcDpDzaMGudcEA%3D%3D&source=cat"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
     }
   ],
   "by_query_page": [
     {
       "keys": [
-        "balloon party",
-        "https://www.porchandparty901.com/"
+        "baby birthday party",
+        "https://porchandparty901.com/"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
       "position": 19
+    },
+    {
+      "keys": [
+        "baby birthday party",
+        "https://porchandparty901.com/request?rwg_token=ALcMQYZ5ECWJcmPBm5AUVhUsaHhbnaPDQ1Qf4d7o2BgtbdYU7F1yhvArRkoqCbEfIfL-6xDpyk81yQXBEcHRhDXHZTYiWLdytg%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 19
+    },
+    {
+      "keys": [
+        "bachelorette party ideas",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 5
+    },
+    {
+      "keys": [
+        "bachelorette party ideas",
+        "https://porchandparty901.com/request?gsas=1&ahbb=1&rwg_token=ALcMQYYGAEtn7Qnhso1ij-ezciQ2lx0TbwJiwBqGi-UNqk4xhS56NBxVb-2FF-zti3ECJrAoybHXbpDJe-hKeQe-oiiVE2Ag7w%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 5
     },
     {
       "keys": [
@@ -255,6 +375,26 @@
     },
     {
       "keys": [
+        "host birthday party near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 8
+    },
+    {
+      "keys": [
+        "host birthday party near me",
+        "https://porchandparty901.com/request?rwg_token=ALcMQYb6CpsZo5CeFJB0NELEn2-H06Whyb5rV5nRhyuPDAZ1LveI0b6n8ivqf2_S3-Zmn_R8d3gQqJWQYYImslJCymy0djnSRA%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 8
+    },
+    {
+      "keys": [
         "local event planners",
         "https://porchandparty901.com/"
       ],
@@ -262,6 +402,56 @@
       "impressions": 1,
       "ctr": 0,
       "position": 2
+    },
+    {
+      "keys": [
+        "party planner",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planner",
+        "https://porchandparty901.com/request?rwg_token=ALcMQYZNCCcqHkCy1lpNBmo84hWP22-XReRWAdelVPznh4HkzRoY7ep0Dwrqad8vD1oHsMdnfu56lGCtuciM_9wMjJMtUh630A%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planner",
+        "https://porchandparty901.com/request?rwg_token=ALcMQYaFm3osaidorn5zVgT13Wc4ERzM-176TFubrsk1vFGax6wDyNVAILwtB3vB55dvffnMAkcwdZvWe9ipMTtm425k4WXDaQ%3D%3D&source=cat"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planner",
+        "https://porchandparty901.com/request?rwg_token=ALcMQYbIe1knRfBuWB6lv_n5KYpjrhBH3VqmtwuCX9NEO1OSDBn7LthXetvBhPqITKAONAr2tGNtuG4V3lij9jMzyGgtWs7GQw%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planner",
+        "https://porchandparty901.com/request?rwg_token=ALcMQYbtSnsARDfz3K-W2MFZLvsxBcpC1VntYYxkIbLq72NMvoQ7oCvVsOFruE-oNM_iGv64a-snuU0GFhHpIcDpDzaMGudcEA%3D%3D&source=cat"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
     },
     {
       "keys": [
@@ -275,9 +465,9 @@
     }
   ],
   "counts": {
-    "by_query": 12,
-    "by_page": 3,
-    "by_query_page": 12
+    "by_query": 15,
+    "by_page": 10,
+    "by_query_page": 22
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }

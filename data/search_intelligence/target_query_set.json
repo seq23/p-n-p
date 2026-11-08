@@ -9,17 +9,17 @@
   "max_targets": 500,
   "measurement_rule": "Every target carries a source (gsc_export | measured_demand) and a positive measured number. Anything unmeasured is dropped, not kept with a null.",
   "gsc_window": {
-    "start_date": "2026-10-08",
-    "end_date": "2026-11-04",
-    "collected_at": "2026-11-07T16:05:18.513773+00:00"
+    "start_date": "2026-10-09",
+    "end_date": "2026-11-05",
+    "collected_at": "2026-11-08T16:05:17.373559+00:00"
   },
-  "target_count": 14,
+  "target_count": 17,
   "targets_by_source": {
     "measured_demand": 2,
-    "gsc_export": 12
+    "gsc_export": 15
   },
-  "party_planner_family_count": 5,
-  "anchored_to_admitted_route_count": 14,
+  "party_planner_family_count": 6,
+  "anchored_to_admitted_route_count": 17,
   "truth_boundary": "A target query is something this loop intends to observe. Its number is the measurement that admitted it, not evidence of ranking, indexing, surfacing, or citation.",
   "dropped_count": 12,
   "dropped": [
@@ -114,8 +114,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 44,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -152,8 +152,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 3,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -162,8 +162,28 @@
       "owned_route_is_admitted": true
     },
     {
-      "target_id": "pnp_sq_6df17b9434e5",
-      "query": "balloon party",
+      "target_id": "pnp_sq_a9b02f5fcc37",
+      "query": "party planner",
+      "source": "gsc_export",
+      "family": "party_planner",
+      "impressions": 2,
+      "clicks": 0,
+      "average_position": 1,
+      "measurement": {
+        "metric": "impressions_28d",
+        "value": 2,
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_gsc_query",
+      "expected_owned_route": "/services/birthday-party-planner-memphis",
+      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "owned_route_is_admitted": true
+    },
+    {
+      "target_id": "pnp_sq_773b4dc6372c",
+      "query": "baby birthday party",
       "source": "gsc_export",
       "family": "other_measured",
       "impressions": 1,
@@ -172,13 +192,33 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
-      "expected_owned_route": "/faq/how-much-does-a-balloon-garland-cost-in-memphis",
-      "expected_owned_url": "https://porchandparty901.com/faq/how-much-does-a-balloon-garland-cost-in-memphis",
+      "expected_owned_route": "/services/birthday-party-planner-memphis",
+      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "owned_route_is_admitted": true
+    },
+    {
+      "target_id": "pnp_sq_8e1909246e02",
+      "query": "bachelorette party ideas",
+      "source": "gsc_export",
+      "family": "other_measured",
+      "impressions": 1,
+      "clicks": 0,
+      "average_position": 5,
+      "measurement": {
+        "metric": "impressions_28d",
+        "value": 1,
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_gsc_query",
+      "expected_owned_route": "/services/party-decor-memphis",
+      "expected_owned_url": "https://porchandparty901.com/services/party-decor-memphis",
       "owned_route_is_admitted": true
     },
     {
@@ -192,8 +232,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -212,8 +252,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -232,8 +272,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -252,8 +292,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -272,8 +312,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -292,8 +332,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -312,13 +352,33 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
       "expected_owned_route": "/",
       "expected_owned_url": "https://porchandparty901.com/",
+      "owned_route_is_admitted": true
+    },
+    {
+      "target_id": "pnp_sq_80356c37d536",
+      "query": "host birthday party near me",
+      "source": "gsc_export",
+      "family": "other_measured",
+      "impressions": 1,
+      "clicks": 0,
+      "average_position": 8,
+      "measurement": {
+        "metric": "impressions_28d",
+        "value": 1,
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_gsc_query",
+      "expected_owned_route": "/services/birthday-party-planner-memphis",
+      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
       "owned_route_is_admitted": true
     },
     {
@@ -332,8 +392,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -352,8 +412,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-08..2026-11-04",
-        "collected_at": "2026-11-07T16:05:18.513773+00:00"
+        "window": "2026-10-09..2026-11-05",
+        "collected_at": "2026-11-08T16:05:17.373559+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
