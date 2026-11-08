@@ -9,7 +9,9 @@
   "description": "Porch & Party is a Memphis-based company for porch decorating, party planning & decor, grazing tables, and party game rentals.",
   "sameAs": [
     "https://www.facebook.com/porchandparty901",
-    "https://www.google.com/maps?cid=1437103205402862394"
+    "https://www.google.com/maps?cid=1437103205402862394",
+    "https://www.tiktok.com/@porch.party.901",
+    "https://www.instagram.com/porchandparty901/"
   ],
   "profiles_pending": [
     {
@@ -21,16 +23,6 @@
       "platform": "Nextdoor business page",
       "url": null,
       "owner_action": "Create the free Nextdoor business page for Porch & Party with website https://porchandparty901.com, then put its URL here."
-    },
-    {
-      "platform": "Instagram",
-      "url": null,
-      "owner_action": "None until the Instagram account exists per the Oct 2026 growth plan; then put its profile URL here."
-    },
-    {
-      "platform": "TikTok",
-      "url": null,
-      "owner_action": "None until the TikTok account exists per the Oct 2026 growth plan; then put its profile URL here."
     }
   ],
   "parentOrganization": {
