@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * npm run library:sync — re-copies the Design Library data from the research build
- * (~/claude-work/design-library/build/index.html, or LIBRARY_SRC=<dir>) into
+ * (~/Work/claude-work/design-library/build/index.html, or LIBRARY_SRC=<dir>) into
  * data/admin/design-library/library.json, which /admin/library serves behind the admin guard.
  *
  * Pictures: real Pinterest pins are the pictures (owner, 22 Oct 2026). Each design gets its
@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const DIR = path.join(ROOT, 'data/admin/design-library');
-const SRC = process.env.LIBRARY_SRC || path.join(os.homedir(), 'claude-work/design-library/build');
+const SRC = process.env.LIBRARY_SRC || path.join(os.homedir(), 'Work/claude-work/design-library/build');
 const page = path.join(SRC, 'index.html');
 if (!fs.existsSync(page)) { console.error(`library:sync: no build at ${page} (set LIBRARY_SRC=<build dir>)`); process.exit(1); }
 

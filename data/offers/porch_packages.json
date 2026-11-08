@@ -1,5 +1,5 @@
 {
-  "_why": "THE one source of the porch packages (owner-approved 18 Oct 2026; spec ~/porch-and-party/porch-packages.md, read to the end). Every surface reads this file through scripts/lib/porch_packages.js: the FAQ Price my porch calculator, the full grid + Offer schema on the porch service pages, /pricing and the porch articles (scripts/install_porch_packages.js), the /request porch question (no tier prices there, only the from-price and range lines), the admin card line, the invoice prefill and the admin Porch packages reference grid. A price typed anywhere else fails npm run validate:porch-packages.",
+  "_why": "THE one source of the porch packages (owner-approved 18 Oct 2026; spec ~/Work/porch-and-party/porch-packages.md, read to the end). Every surface reads this file through scripts/lib/porch_packages.js: the FAQ Price my porch calculator, the full grid + Offer schema on the porch service pages, /pricing and the porch articles (scripts/install_porch_packages.js), the /request porch question (no tier prices there, only the from-price and range lines), the admin card line, the invoice prefill and the admin Porch packages reference grid. A price typed anywhere else fails npm run validate:porch-packages.",
   "currency": "USD",
   "tierOrder": [
     "stoop",

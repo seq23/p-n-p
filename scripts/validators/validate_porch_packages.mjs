@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Porch packages (owner-approved 18 Oct 2026; spec ~/porch-and-party/porch-packages.md).
+ * Porch packages (owner-approved 18 Oct 2026; spec ~/Work/porch-and-party/porch-packages.md).
  * data/offers/porch_packages.json is the one source; scripts/lib/porch_packages.js renders
  * every surface from it. This fails when:
  *

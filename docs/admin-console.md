@@ -1179,7 +1179,7 @@ one, or any image under `assets/` has those bytes. The frozen pages were refroze
   page code: `functions/_lib/assets/design-library.{js,css}.txt`, served as `/admin/library/app.{js,css}`.
 - **Data**: `data/admin/design-library/library.json`, bundled into the Functions and served only as
   `/admin/library/data.json` behind the guard (`data/` is never published). Refresh from the research
-  build with `npm run library:sync` (reads `~/claude-work/design-library/build/index.html`, or
+  build with `npm run library:sync` (reads `~/Work/claude-work/design-library/build/index.html`, or
   `LIBRARY_SRC=<dir>`), then `npm run validate:admin-design-library` and a PR.
 - **Pictures = real Pinterest pins** (owner, 22 Oct 2026). `data/admin/design-library/pins.json` holds
   3–6 pins per design group (65 groups), found by web search and checked through Pinterest's public
