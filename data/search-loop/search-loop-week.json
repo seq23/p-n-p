@@ -1,14 +1,14 @@
 {
   "schema": "search-loop-week-v1",
-  "week": "2026-W45",
+  "week": "2026-W46",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-08T13:32:19.979Z",
+  "generated_at": "2026-11-09T13:32:30.049Z",
   "state": "running",
-  "published": 5,
+  "published": 8,
   "indexed": "not read: no page old enough to inspect yet (14 days)",
   "pace": 10,
   "ai_visitors": 0,
-  "ai_bot_hits": 555,
+  "ai_bot_hits": 714,
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
   "wins": 0,
   "undone": 0,
@@ -104,16 +104,43 @@
       "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
       "matched_by": "same 3 intent words plus modifiers",
       "at": "2026-11-06"
+    },
+    {
+      "query": "party planning near me",
+      "strengthen": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-09"
+    },
+    {
+      "query": "local party planners",
+      "strengthen": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-09"
+    },
+    {
+      "query": "event planners for birthday parties",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-09"
+    },
+    {
+      "query": "baby birthday party",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-09"
     }
   ],
   "cap": {
-    "max_live_pages": 22,
-    "live": 5,
+    "max_live_pages": 25,
+    "live": 8,
     "room": 17,
-    "why": "up from 20 to 22: Google impressions 87 in the last 28 days beat 77 in the 28 before"
+    "why": "up from 22 to 25: Google impressions 100 in the last 28 days beat 66 in the 28 before"
   },
   "notes": [
-    "BUILD published 0 of quota 10: 0 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
+    "cap: up from 22 to 25: Google impressions 100 in the last 28 days beat 66 in the 28 before",
+    "BUILD distinct gate: 4 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
+    "BUILD gate notes (not blocking): 2 published page(s) are outside a length or style aim; each is listed under gate_notes in pages.json",
+    "IndexNow: 3 new page(s) not live yet; submitted when they answer 200"
   ],
   "lanes": {
     "ratio": {
@@ -121,13 +148,13 @@
       "striking": 1
     },
     "can_be_one": {
-      "pages": 0,
+      "pages": 2,
       "measured": 0,
       "top3": 0,
       "hit_rate": "not read: no page in this lane has reached its 2-week check yet"
     },
     "striking": {
-      "pages": 5,
+      "pages": 6,
       "measured": 0,
       "top3": 0,
       "hit_rate": "not read: no page in this lane has reached its 2-week check yet"
@@ -139,7 +166,7 @@
       "demand": 10
     },
     "weight_changes": [],
-    "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+    "competition": "ok: 15 top-10 read(s) via brave"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42485418498"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42626338406"
 }

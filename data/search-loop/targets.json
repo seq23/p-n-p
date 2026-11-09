@@ -1,109 +1,343 @@
 {
   "schema": "search-loop-targets-v1",
   "site": "porchandparty901.com",
-  "week": "2026-W45",
-  "generated_at": "2026-11-02T13:33:04.043Z",
+  "week": "2026-W46",
+  "generated_at": "2026-11-09T13:32:30.049Z",
   "sources": {
-    "search_console": "ok: 12 rows",
-    "bing_webmaster": "ok: 14 rows",
+    "search_console": "ok: 24 rows",
+    "bing_webmaster": "ok: 15 rows",
+    "easy_wins": "ok: 7 easy win(s) in Search Console",
     "suggestqueries.google.com": "ok",
     "api.bing.com": "ok",
-    "relevance_screen": "ok: kept 27 of 137 (free model)"
+    "relevance_screen": "ok: kept 16 of 74 (free model)",
+    "top10": "ok: 15 top-10 read(s) via brave"
   },
   "targets": [
     {
-      "query": "birthday party planner near me",
-      "variants": [
-        "birthday party planning near me",
-        "birthday party planners near me",
-        "best birthday party planners near me"
-      ],
+      "query": "local event planners near me",
+      "variants": [],
       "signals": {
         "words": 5,
         "question": false,
-        "gsc_position": 21,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "neighbour": {
+          "sim": 0.75,
+          "of": "event planning for parties near me",
+          "why": "top 1 with 1 impressions"
+        },
+        "unanswered": {
+          "words": 4,
+          "covered": 0.25,
+          "parts_best_position": 1,
+          "parts_rows": 4
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.77,
+          "counts": {
+            "results": 10,
+            "directories": 7,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 1
+          },
+          "reasons": [
+            "top 10: 7 directories, 0 forums, 0 off-target national, 0 thin or old, 1 answer the exact question"
+          ]
+        }
+      },
+      "scores": {
+        "striking": 40,
+        "can_be_one": 97.1
+      },
+      "score": 97.1,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "easy-win neighbour of \"event planning for parties near me\" (top 1 with 1 impressions)",
+        "no site page answers this 4-word question, and the site holds its parts at position 1",
+        "weak top 10 (0.77): 7 directories, 0 forums, 0 off-target national, 0 thin or old, 1 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
+    },
+    {
+      "query": "host birthday party near me",
+      "variants": [],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "gsc_position": 8,
         "gsc_impressions": 1,
-        "gsc_page": "https://www.porchandparty901.com/",
-        "google_suggest": true,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+        "gsc_page": "https://porchandparty901.com/request?rwg_token=ALcMQYb6CpsZo5CeFJB0NELEn2-H06Whyb5rV5nRhyuPDAZ1LveI0b6n8ivqf2_S3-Zmn_R8d3gQqJWQYYImslJCymy0djnSRA%3D%3D",
+        "unanswered": {
+          "words": 4,
+          "covered": 0.25,
+          "parts_best_position": 8,
+          "parts_rows": 2
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.62,
+          "counts": {
+            "results": 10,
+            "directories": 6,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 6 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question"
+          ]
+        }
       },
-      "score": 60.4,
-      "kind": "new"
+      "scores": {
+        "striking": 54,
+        "can_be_one": 64.8
+      },
+      "score": 54,
+      "kind": "new",
+      "lane": "striking",
+      "reasons": [
+        "already ranks 8 in Search Console (1 impressions)",
+        "can-be-#1 score 64.8 too (taken by the striking lane's turn)"
+      ]
     },
     {
-      "query": "birthday party",
-      "variants": [
-        "birthday party ideas",
-        "how to birthday party",
-        "what is birthday party",
-        "why birthday party",
-        "is birthday party",
-        "the birthday party",
-        "what to do at a birthday party",
-        "good ideas for a birthday party",
-        "ideas for birthday party"
-      ],
-      "signals": {
-        "words": 2,
-        "question": false,
-        "gsc_position": 22.5,
-        "gsc_impressions": 2,
-        "gsc_page": "https://porchandparty901.com/",
-        "google_suggest": true,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 50,
-      "kind": "new"
-    },
-    {
-      "query": "kids party planner near me",
-      "variants": [
-        "kids party planning near me",
-        "party planners near me for kids"
-      ],
+      "query": "local party planners near me",
+      "variants": [],
       "signals": {
         "words": 5,
         "question": false,
         "google_suggest": true,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+        "neighbour": {
+          "sim": 0.5,
+          "of": "event planning for parties near me",
+          "why": "top 1 with 1 impressions"
+        },
+        "unanswered": {
+          "words": 4,
+          "covered": 0.25,
+          "parts_best_position": 1,
+          "parts_rows": 10
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.92,
+          "counts": {
+            "results": 10,
+            "directories": 9,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 9 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question"
+          ]
+        }
       },
-      "score": 40,
-      "kind": "new"
+      "scores": {
+        "striking": 25,
+        "can_be_one": 94.3
+      },
+      "score": 94.3,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "easy-win neighbour of \"event planning for parties near me\" (top 1 with 1 impressions)",
+        "no site page answers this 4-word question, and the site holds its parts at position 1",
+        "weak top 10 (0.92): 9 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
     },
     {
-      "query": "birthday party event planner near me",
+      "query": "event management near me for birthday party",
       "variants": [
-        "birthday party event planners near me",
+        "event management for birthday party near me"
+      ],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "google_suggest": true,
+        "neighbour": {
+          "sim": 0.6,
+          "of": "event management near me",
+          "why": "top 1 with 1 impressions"
+        },
+        "unanswered": {
+          "words": 5,
+          "covered": 0.2,
+          "parts_best_position": 1,
+          "parts_rows": 4
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.69,
+          "counts": {
+            "results": 10,
+            "directories": 6,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 6 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "scores": {
+        "striking": 25,
+        "can_be_one": 88.6
+      },
+      "score": 88.6,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "easy-win neighbour of \"event management near me\" (top 1 with 1 impressions)",
+        "no site page answers this 5-word question, and the site holds its parts at position 1",
+        "weak top 10 (0.69): 6 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
+    },
+    {
+      "query": "halloween rentals near me",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "gsc_position": 9,
+        "gsc_impressions": 1,
+        "gsc_page": "https://porchandparty901.com/",
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.31,
+          "counts": {
+            "results": 10,
+            "directories": 2,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 1,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 2 directories, 0 forums, 0 off-target national, 1 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "scores": {
+        "striking": 52.2,
+        "can_be_one": 22.4
+      },
+      "score": 52.2,
+      "kind": "new",
+      "lane": "striking",
+      "reasons": [
+        "already ranks 9 in Search Console (1 impressions)",
+        "can-be-#1 score 22.4 too (taken by the striking lane's turn)"
+      ]
+    },
+    {
+      "query": "local event planning companies",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "neighbour": {
+          "sim": 0.75,
+          "of": "local event planners",
+          "why": "top 2 with 1 impressions"
+        },
+        "unanswered": {
+          "words": 4,
+          "covered": 0.25,
+          "parts_best_position": 1,
+          "parts_rows": 3
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.54,
+          "counts": {
+            "results": 10,
+            "directories": 3,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 1,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 3 directories, 0 forums, 0 off-target national, 1 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "scores": {
+        "striking": 25,
+        "can_be_one": 87.9
+      },
+      "score": 87.9,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "easy-win neighbour of \"local event planners\" (top 2 with 1 impressions)",
+        "no site page answers this 4-word question, and the site holds its parts at position 1",
+        "weak top 10 (0.54): 3 directories, 0 forums, 0 off-target national, 1 thin or old, 0 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
+    },
+    {
+      "query": "event planner for birthday party near me",
+      "variants": [
         "event planner near me for birthday party"
       ],
       "signals": {
-        "words": 6,
+        "words": 7,
         "question": false,
         "google_suggest": true,
         "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+        "neighbour": {
+          "sim": 0.6,
+          "of": "event planning for parties near me",
+          "why": "top 1 with 1 impressions"
+        },
+        "unanswered": {
+          "words": 5,
+          "covered": 0.4,
+          "parts_best_position": 1,
+          "parts_rows": 12
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.62,
+          "counts": {
+            "results": 10,
+            "directories": 5,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 1,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 5 directories, 0 forums, 0 off-target national, 1 thin or old, 0 answer the exact question"
+          ]
+        }
       },
-      "score": 40,
-      "kind": "new"
-    },
-    {
-      "query": "kid birthday party planner near me",
-      "variants": [
-        "kids birthday party planner near me",
-        "birthday party planners near me for kids"
-      ],
-      "signals": {
-        "words": 6,
-        "question": false,
-        "google_suggest": true,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+      "scores": {
+        "striking": 40,
+        "can_be_one": 85.8
       },
-      "score": 40,
-      "kind": "new"
+      "score": 85.8,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "easy-win neighbour of \"event planning for parties near me\" (top 1 with 1 impressions)",
+        "no site page answers this 5-word question, and the site holds its parts at position 1",
+        "weak top 10 (0.62): 5 directories, 0 forums, 0 off-target national, 1 thin or old, 0 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
     },
     {
       "query": "event planner for small parties",
@@ -115,10 +349,127 @@
         "question": false,
         "google_suggest": true,
         "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+        "neighbour": {
+          "sim": 0.75,
+          "of": "event planning for parties",
+          "why": "top 1 with 1 impressions"
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.31,
+          "counts": {
+            "results": 10,
+            "directories": 2,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 1,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 2 directories, 0 forums, 0 off-target national, 1 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "scores": {
+        "striking": 40,
+        "can_be_one": 48.7
       },
       "score": 40,
-      "kind": "new"
+      "kind": "new",
+      "lane": "striking",
+      "reasons": [
+        "autocomplete demand (google/bing)",
+        "can-be-#1 score 48.7 too (taken by the striking lane's turn)"
+      ]
+    },
+    {
+      "query": "event management near me for baby shower",
+      "variants": [],
+      "signals": {
+        "words": 7,
+        "question": false,
+        "google_suggest": true,
+        "neighbour": {
+          "sim": 0.6,
+          "of": "event management near me",
+          "why": "top 1 with 1 impressions"
+        },
+        "unanswered": {
+          "words": 5,
+          "covered": 0.4,
+          "parts_best_position": 1,
+          "parts_rows": 2
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.46,
+          "counts": {
+            "results": 10,
+            "directories": 5,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 5 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "scores": {
+        "striking": 25,
+        "can_be_one": 79.4
+      },
+      "score": 79.4,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "easy-win neighbour of \"event management near me\" (top 1 with 1 impressions)",
+        "no site page answers this 5-word question, and the site holds its parts at position 1",
+        "weak top 10 (0.46): 5 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
+    },
+    {
+      "query": "party planning near me",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "bing_suggest": true,
+        "neighbour": {
+          "sim": 0.67,
+          "of": "graduation party planning",
+          "why": "top 1 with 44 impressions"
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.92,
+          "counts": {
+            "results": 10,
+            "directories": 9,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 3
+          },
+          "reasons": [
+            "top 10: 9 directories, 0 forums, 0 off-target national, 0 thin or old, 3 answer the exact question"
+          ]
+        }
+      },
+      "scores": {
+        "striking": 20,
+        "can_be_one": 70.3
+      },
+      "score": 70.3,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "easy-win neighbour of \"graduation party planning\" (top 1 with 44 impressions)",
+        "weak top 10 (0.92): 9 directories, 0 forums, 0 off-target national, 0 thin or old, 3 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
     },
     {
       "query": "halloween events southaven ms",
@@ -129,404 +480,254 @@
         "gsc_position": 18,
         "gsc_impressions": 1,
         "gsc_page": "https://porchandparty901.com/",
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.31,
+          "counts": {
+            "results": 10,
+            "directories": 3,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 3
+          },
+          "reasons": [
+            "top 10: 3 directories, 0 forums, 0 off-target national, 0 thin or old, 3 answer the exact question"
+          ]
+        }
+      },
+      "scores": {
+        "striking": 35.8,
+        "can_be_one": 22.4
       },
       "score": 35.8,
-      "kind": "new"
+      "kind": "new",
+      "lane": "striking",
+      "reasons": [
+        "already ranks 18 in Search Console (1 impressions)",
+        "can-be-#1 score 22.4 too (taken by the striking lane's turn)"
+      ]
     },
     {
-      "query": "party rentals memphis",
+      "query": "local party planners",
       "variants": [],
       "signals": {
         "words": 3,
         "question": false,
-        "gsc_position": 14,
+        "google_suggest": true,
+        "neighbour": {
+          "sim": 0.67,
+          "of": "graduation party planning",
+          "why": "top 1 with 44 impressions"
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.62,
+          "counts": {
+            "results": 10,
+            "directories": 5,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 5 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "scores": {
+        "striking": 15,
+        "can_be_one": 58.3
+      },
+      "score": 58.3,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "easy-win neighbour of \"graduation party planning\" (top 1 with 44 impressions)",
+        "weak top 10 (0.62): 5 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
+    },
+    {
+      "query": "halloween party near me",
+      "variants": [],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "gsc_position": 20,
         "gsc_impressions": 1,
         "gsc_page": "https://porchandparty901.com/",
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.92,
+          "counts": {
+            "results": 10,
+            "directories": 9,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 1
+          },
+          "reasons": [
+            "top 10: 9 directories, 0 forums, 0 off-target national, 0 thin or old, 1 answer the exact question"
+          ]
+        }
       },
-      "score": 33.1,
-      "kind": "new"
+      "scores": {
+        "striking": 32.2,
+        "can_be_one": 46.8
+      },
+      "score": 46.8,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "weak top 10 (0.92): 9 directories, 0 forums, 0 off-target national, 0 thin or old, 1 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
     },
     {
-      "query": "birthday party decorations",
-      "variants": [
-        "what is birthday party decoration"
-      ],
-      "signals": {
-        "words": 3,
-        "question": false,
-        "google_suggest": true,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 30,
-      "kind": "new"
-    },
-    {
-      "query": "how to book birthday party",
-      "variants": [],
-      "signals": {
-        "words": 5,
-        "question": true,
-        "google_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 30,
-      "kind": "new"
-    },
-    {
-      "query": "balloon party decorations near me",
-      "variants": [],
-      "signals": {
-        "words": 5,
-        "question": false,
-        "google_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 25,
-      "kind": "new"
-    },
-    {
-      "query": "birthday party organisers near me",
-      "variants": [
-        "best birthday party organisers near me"
-      ],
-      "signals": {
-        "words": 5,
-        "question": false,
-        "google_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 25,
-      "kind": "new"
-    },
-    {
-      "query": "birthday party coordinator near me",
-      "variants": [],
-      "signals": {
-        "words": 5,
-        "question": false,
-        "google_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 25,
-      "kind": "new"
-    },
-    {
-      "query": "first birthday party planner near me",
-      "variants": [],
-      "signals": {
-        "words": 6,
-        "question": false,
-        "google_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 25,
-      "kind": "new"
-    },
-    {
-      "query": "baby birthday party planner near me",
-      "variants": [],
-      "signals": {
-        "words": 6,
-        "question": false,
-        "google_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 25,
-      "kind": "new"
-    },
-    {
-      "query": "adult birthday party planners near me",
-      "variants": [],
-      "signals": {
-        "words": 6,
-        "question": false,
-        "google_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 25,
-      "kind": "new"
-    },
-    {
-      "query": "balloon party",
+      "query": "birthday party",
       "variants": [],
       "signals": {
         "words": 2,
         "question": false,
-        "gsc_position": 19,
-        "gsc_impressions": 1,
-        "gsc_page": "https://www.porchandparty901.com/",
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+        "gsc_position": 16.7,
+        "gsc_impressions": 3,
+        "gsc_page": "https://porchandparty901.com/",
+        "neighbour": {
+          "sim": 0.5,
+          "of": "engagement party",
+          "why": "top 3 with 1 impressions"
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.08,
+          "counts": {
+            "results": 10,
+            "directories": 0,
+            "forums": 1,
+            "off_target_national": 0,
+            "thin_or_old": 1,
+            "exact_answer": 6
+          },
+          "reasons": [
+            "top 10: 0 directories, 1 forums, 0 off-target national, 1 thin or old, 6 answer the exact question"
+          ]
+        }
       },
-      "score": 24,
-      "kind": "new"
+      "scores": {
+        "striking": 32.2,
+        "can_be_one": 30.7
+      },
+      "score": 32.2,
+      "kind": "new",
+      "lane": "striking",
+      "reasons": [
+        "already ranks 16.7 in Search Console (3 impressions)",
+        "can-be-#1 score 30.7 too (taken by the striking lane's turn)"
+      ]
     },
     {
-      "query": "balloon party decor near me delivery",
+      "query": "event planners for birthday parties",
       "variants": [],
-      "signals": {
-        "words": 6,
-        "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 20,
-      "kind": "new"
-    },
-    {
-      "query": "balloon party decor near me reviews",
-      "variants": [],
-      "signals": {
-        "words": 6,
-        "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 20,
-      "kind": "new"
-    },
-    {
-      "query": "birthday party planner near me reviews",
-      "variants": [
-        "birthday party planning near me reviews"
-      ],
-      "signals": {
-        "words": 6,
-        "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 20,
-      "kind": "new"
-    },
-    {
-      "query": "birthday party planner near me packages",
-      "variants": [],
-      "signals": {
-        "words": 6,
-        "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 20,
-      "kind": "new"
-    },
-    {
-      "query": "birthday event planners near me",
-      "variants": [
-        "birthday event planner near me"
-      ],
       "signals": {
         "words": 5,
         "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+        "google_suggest": true,
+        "neighbour": {
+          "sim": 0.75,
+          "of": "event planning for parties",
+          "why": "top 1 with 1 impressions"
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.23,
+          "counts": {
+            "results": 10,
+            "directories": 1,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 1,
+            "exact_answer": 1
+          },
+          "reasons": [
+            "top 10: 1 directories, 0 forums, 0 off-target national, 1 thin or old, 1 answer the exact question"
+          ]
+        }
       },
-      "score": 20,
-      "kind": "new"
+      "scores": {
+        "striking": 25,
+        "can_be_one": 45.5
+      },
+      "score": 45.5,
+      "kind": "new",
+      "lane": "can_be_one",
+      "reasons": [
+        "easy-win neighbour of \"event planning for parties\" (top 1 with 1 impressions)",
+        "weak top 10 (0.23): 1 directories, 0 forums, 0 off-target national, 1 thin or old, 1 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ]
     },
     {
-      "query": "birthday party planners near me rates",
-      "variants": [],
-      "signals": {
-        "words": 6,
-        "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 20,
-      "kind": "new"
-    },
-    {
-      "query": "birthday party event planner",
-      "variants": [
-        "best event planning for a birthday party"
-      ],
-      "signals": {
-        "words": 4,
-        "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 20,
-      "kind": "new"
-    },
-    {
-      "query": "kids birthday party planner",
-      "variants": [
-        "party planner for kids birthday"
-      ],
-      "signals": {
-        "words": 4,
-        "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 20,
-      "kind": "new"
-    },
-    {
-      "query": "fall party event planning",
-      "variants": [],
-      "signals": {
-        "words": 4,
-        "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
-      },
-      "score": 20,
-      "kind": "new"
-    },
-    {
-      "query": "birthday party games",
+      "query": "baby birthday party",
       "variants": [],
       "signals": {
         "words": 3,
         "question": false,
-        "bing_suggest": true,
-        "competition": "not read: no free, ToS-safe competition signal (SERP scraping is not used)"
+        "gsc_position": 19,
+        "gsc_impressions": 1,
+        "gsc_page": "https://porchandparty901.com/request?rwg_token=ALcMQYZ5ECWJcmPBm5AUVhUsaHhbnaPDQ1Qf4d7o2BgtbdYU7F1yhvArRkoqCbEfIfL-6xDpyk81yQXBEcHRhDXHZTYiWLdytg%3D%3D",
+        "top10": "not read: outside this run's top-10 budget"
       },
-      "score": 10,
-      "kind": "new"
+      "scores": {
+        "striking": 24,
+        "can_be_one": 0
+      },
+      "score": 24,
+      "kind": "new",
+      "lane": "striking",
+      "reasons": [
+        "already ranks 19 in Search Console (1 impressions)"
+      ]
     }
   ],
   "strengthen": [
     {
-      "query": "birthday event planners near me",
+      "query": "baby birthday party",
       "page": "/services/birthday-party-planner-memphis",
       "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 20,
-      "from": "distinct-gate",
-      "matched_by": "same 3 intent words plus modifiers",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "birthday party planner near me packages",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 20,
+      "score": 24,
       "from": "distinct-gate",
       "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-06"
+      "at": "2026-11-09"
     },
     {
-      "query": "birthday party planner near me reviews",
-      "page": "/questions/birthday-party-organisers-near-me",
-      "url": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
-      "score": 20,
+      "query": "event planners for birthday parties",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 45.5,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-09"
+    },
+    {
+      "query": "local party planners",
+      "page": "/questions/local-party-planners-near-me",
+      "url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "score": 58.3,
       "from": "distinct-gate",
       "matched_by": "high token overlap (0.67 >= 0.6)",
-      "at": "2026-11-06"
+      "at": "2026-11-09"
     },
     {
-      "query": "balloon party decor near me reviews",
-      "page": "/questions/balloon-party-decorations-near-me",
-      "url": "https://porchandparty901.com/questions/balloon-party-decorations-near-me",
-      "score": 20,
-      "from": "distinct-gate",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "adult birthday party planners near me",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 25,
-      "from": "distinct-gate",
-      "matched_by": "high token overlap (0.75 >= 0.6)",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "baby birthday party planner near me",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 25,
-      "from": "distinct-gate",
-      "matched_by": "same 3 intent words plus modifiers",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "first birthday party planner near me",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 25,
-      "from": "distinct-gate",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "birthday party coordinator near me",
-      "page": "/questions/birthday-party-organisers-near-me",
-      "url": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
-      "score": 25,
+      "query": "party planning near me",
+      "page": "/questions/local-party-planners-near-me",
+      "url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "score": 70.3,
       "from": "distinct-gate",
       "matched_by": "high token overlap (0.67 >= 0.6)",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "kid birthday party planner near me",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 40,
-      "from": "distinct-gate",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "birthday party event planner near me",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 40,
-      "from": "distinct-gate",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "birthday party",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 50,
-      "from": "distinct-gate",
-      "matched_by": "same wording",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "birthday party planner near me",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 60.4,
-      "from": "distinct-gate",
-      "matched_by": "high token overlap (0.75 >= 0.6)",
-      "at": "2026-11-06"
-    },
-    {
-      "query": "kids birthday party planner",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 20,
-      "from": "distinct-gate",
-      "matched_by": "same 3 intent words plus modifiers",
-      "at": "2026-11-03"
-    },
-    {
-      "query": "birthday party event planner",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 20,
-      "from": "distinct-gate",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-03"
-    },
-    {
-      "query": "birthday party planners near me rates",
-      "page": "/services/birthday-party-planner-memphis",
-      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "score": 20,
-      "from": "distinct-gate",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-03"
+      "at": "2026-11-09"
     }
   ]
 }

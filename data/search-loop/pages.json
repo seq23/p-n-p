@@ -220,6 +220,200 @@
       ],
       "checks": {},
       "indexnow_at": "2026-11-08"
+    },
+    {
+      "slug": "local-party-planners-near-me",
+      "query": "local party planners near me",
+      "lane": "can_be_one",
+      "score": 94.3,
+      "scores": {
+        "striking": 25,
+        "can_be_one": 94.3
+      },
+      "reasons": [
+        "easy-win neighbour of \"event planning for parties near me\" (top 1 with 1 impressions)",
+        "no site page answers this 4-word question, and the site holds its parts at position 1",
+        "weak top 10 (0.92): 9 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "neighbour": {
+          "sim": 0.5,
+          "of": "event planning for parties near me",
+          "why": "top 1 with 1 impressions"
+        },
+        "unanswered": {
+          "words": 4,
+          "covered": 0.25,
+          "parts_best_position": 1,
+          "parts_rows": 10
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.92,
+          "counts": {
+            "results": 10,
+            "directories": 9,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 9 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "rel": "questions/local-party-planners-near-me.html",
+      "route": "/questions/local-party-planners-near-me",
+      "url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "published_at": "2026-11-09",
+      "status": "live",
+      "hash": "b81beb01f245f999fc98f5738a964db9a44f954b3c4db5bca7e7e8541c6deeec",
+      "model": "free-route",
+      "facts": [
+        "https://www.census.gov/",
+        "https://en.wikipedia.org/wiki/Germantown,_Tennessee"
+      ],
+      "linked_from": [],
+      "checks": {},
+      "extra_queries": [
+        "party planning near me",
+        "local party planners"
+      ]
+    },
+    {
+      "slug": "local-event-planning-companies",
+      "query": "local event planning companies",
+      "lane": "can_be_one",
+      "score": 87.9,
+      "scores": {
+        "striking": 25,
+        "can_be_one": 87.9
+      },
+      "reasons": [
+        "easy-win neighbour of \"local event planners\" (top 2 with 1 impressions)",
+        "no site page answers this 4-word question, and the site holds its parts at position 1",
+        "weak top 10 (0.54): 3 directories, 0 forums, 0 off-target national, 1 thin or old, 0 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "neighbour": {
+          "sim": 0.75,
+          "of": "local event planners",
+          "why": "top 2 with 1 impressions"
+        },
+        "unanswered": {
+          "words": 4,
+          "covered": 0.25,
+          "parts_best_position": 1,
+          "parts_rows": 3
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.54,
+          "counts": {
+            "results": 10,
+            "directories": 3,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 1,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 3 directories, 0 forums, 0 off-target national, 1 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "rel": "questions/local-event-planning-companies.html",
+      "route": "/questions/local-event-planning-companies",
+      "url": "https://porchandparty901.com/questions/local-event-planning-companies",
+      "published_at": "2026-11-09",
+      "status": "live",
+      "hash": "48a353483f6b010f34b1af8fd781368b96fac04a4df176f1b72d3cad83d8732d",
+      "model": "free-route",
+      "facts": [
+        "https://www.census.gov/",
+        "https://www.wikipedia.org/"
+      ],
+      "linked_from": [],
+      "checks": {},
+      "gate_notes": [
+        "b5 FAQ answer is 39 words (aim 40-60): \"What areas do you serve for event planning and dec\"",
+        "b5 FAQ answer is 39 words (aim 40-60): \"How do I find out the exact cost for my event?\""
+      ]
+    },
+    {
+      "slug": "event-planner-for-small-parties",
+      "query": "event planner for small parties",
+      "lane": "striking",
+      "score": 40,
+      "scores": {
+        "striking": 40,
+        "can_be_one": 48.7
+      },
+      "reasons": [
+        "autocomplete demand (google/bing)",
+        "can-be-#1 score 48.7 too (taken by the striking lane's turn)"
+      ],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "neighbour": {
+          "sim": 0.75,
+          "of": "event planning for parties",
+          "why": "top 1 with 1 impressions"
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0.31,
+          "counts": {
+            "results": 10,
+            "directories": 2,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 1,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 2 directories, 0 forums, 0 off-target national, 1 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "rel": "questions/event-planner-for-small-parties.html",
+      "route": "/questions/event-planner-for-small-parties",
+      "url": "https://porchandparty901.com/questions/event-planner-for-small-parties",
+      "published_at": "2026-11-09",
+      "status": "live",
+      "hash": "9e98dec3bbef1b9554e808125d372f90bf5d6282d28030c3cb20724fe2f557d0",
+      "model": "free-route",
+      "facts": [
+        "https://www.census.gov/",
+        "https://en.wikipedia.org/wiki/Shelby_County,_Tennessee"
+      ],
+      "linked_from": [
+        {
+          "rel": "services/birthday-party-planner-memphis.html",
+          "route": "/services/birthday-party-planner-memphis",
+          "before_hash": "2d6095096ef601ef75b80ddeac7e8123e484f22d9e786df35a49c36dac6694af",
+          "after_hash": "309708378ae2b1b664a7bc0ca8d9759daad42a189952d74c40728490c7de6c0d"
+        }
+      ],
+      "checks": {},
+      "gate_notes": [
+        "b5 FAQ answer is 37 words (aim 40-60): \"What areas do you serve for event planning?\"",
+        "b5 FAQ answer is 37 words (aim 40-60): \"How does the setup process work for my party?\"",
+        "b5 FAQ answer is 30 words (aim 40-60): \"Are party games delivered to my location?\"",
+        "b5 FAQ answer is 39 words (aim 40-60): \"What is included in our grazing tables?\""
+      ]
     }
   ],
   "dropped": [
@@ -525,6 +719,62 @@
         "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)",
         "invented: a named person or quote \"Memphis Request a quote from \""
       ]
+    },
+    {
+      "query": "local event planners near me",
+      "at": "2026-11-09",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 29 words (aim 40-60): \"How do I find out what your services cost?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)"
+      ]
+    },
+    {
+      "query": "event management near me for birthday party",
+      "at": "2026-11-09",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)",
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
+    },
+    {
+      "query": "event management near me for baby shower",
+      "at": "2026-11-09",
+      "gate": 2,
+      "reason": [
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
+    },
+    {
+      "query": "halloween party near me",
+      "at": "2026-11-09",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 29 words (aim 40-60): \"Where can I pick up party game rentals?\"",
+        "b5 FAQ answer is 18 words (aim 40-60): \"What areas do you serve for decorating?\"",
+        "b5 FAQ answer is 29 words (aim 40-60): \"How do I find out the cost of my party?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)"
+      ]
+    },
+    {
+      "query": "host birthday party near me",
+      "at": "2026-11-09",
+      "gate": 2,
+      "reason": [
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
+    },
+    {
+      "query": "halloween rentals near me",
+      "at": "2026-11-09",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 29 words (aim 40-60): \"Do you decorate porches for Halloween?\"",
+        "b5 FAQ answer is 26 words (aim 40-60): \"What areas do you serve?\"",
+        "b5 FAQ answer is 27 words (aim 40-60): \"How do I find out the cost of your services?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)"
+      ]
     }
   ],
   "redirected": [
@@ -675,6 +925,46 @@
       "route": "/services/birthday-party-planner-memphis",
       "kind": "page",
       "matched_by": "same 3 intent words plus modifiers",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "party planning near me",
+      "at": "2026-11-09",
+      "url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "route": "/questions/local-party-planners-near-me",
+      "kind": "engine",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "matched_text": "local party planners near me",
+      "stage": "search"
+    },
+    {
+      "query": "local party planners",
+      "at": "2026-11-09",
+      "url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "route": "/questions/local-party-planners-near-me",
+      "kind": "engine",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "matched_text": "local party planners near me",
+      "stage": "search"
+    },
+    {
+      "query": "event planners for birthday parties",
+      "at": "2026-11-09",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "baby birthday party",
+      "at": "2026-11-09",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
       "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
       "stage": "draft"
     }
