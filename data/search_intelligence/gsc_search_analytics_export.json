@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-09",
-  "end_date": "2026-11-05",
-  "collected_at": "2026-11-08T16:05:17.373559+00:00",
+  "start_date": "2026-10-10",
+  "end_date": "2026-11-06",
+  "collected_at": "2026-11-09T16:06:13.118762+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -49,6 +49,15 @@
       "impressions": 3,
       "ctr": 0,
       "position": 16.666666666666664
+    },
+    {
+      "keys": [
+        "engagement party"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 3
     },
     {
       "keys": [
@@ -156,9 +165,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 5,
-      "impressions": 93,
-      "ctr": 0.053763440860215055,
-      "position": 5.860215053763441
+      "impressions": 100,
+      "ctr": 0.05,
+      "position": 5.64
     },
     {
       "keys": [
@@ -177,6 +186,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 5
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?gsas=1&ahbb=1&rwg_token=ALcMQYbUT0qJ3Cc0G62SgDj-pkb5DGVS7E5U0rAzTcJv64dpCFGj4QHkLCOCbFUali6VU140infSbElWfcbZaJRExXiG9bYOaw%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 3
     },
     {
       "keys": [
@@ -204,6 +222,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 1
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYaSqUEHN6rDijO_5ypK5_zhmwOyc1Rr3psTtQc-S4EYb3Gf7ipfFlcp41qSDoBokiu5sPvl71esXshsH1mJF_-7baTDSw%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 7
     },
     {
       "keys": [
@@ -240,6 +267,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 1
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYbttDHywkq8rJPEPRZZZQYs1xi75L_Xh_fxa0HYqftHylR-BBYtKXKdlcxtfuFwkiT9ymiTE7rbBB3Ht75Q17iLFdrJWQ%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 12
     }
   ],
   "by_query_page": [
@@ -302,6 +338,26 @@
       "impressions": 3,
       "ctr": 0,
       "position": 16.666666666666664
+    },
+    {
+      "keys": [
+        "engagement party",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 3
+    },
+    {
+      "keys": [
+        "engagement party",
+        "https://porchandparty901.com/request?gsas=1&ahbb=1&rwg_token=ALcMQYbUT0qJ3Cc0G62SgDj-pkb5DGVS7E5U0rAzTcJv64dpCFGj4QHkLCOCbFUali6VU140infSbElWfcbZaJRExXiG9bYOaw%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 3
     },
     {
       "keys": [
@@ -465,9 +521,9 @@
     }
   ],
   "counts": {
-    "by_query": 15,
-    "by_page": 10,
-    "by_query_page": 22
+    "by_query": 16,
+    "by_page": 13,
+    "by_query_page": 24
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }

@@ -2,20 +2,21 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-10-09..2026-11-05",
-  "coverage_collected_at": "2026-11-08T16:05:55.999916+00:00",
-  "url_count": 41,
+  "gsc_window": "2026-10-10..2026-11-06",
+  "coverage_collected_at": "2026-11-09T16:06:59.787935+00:00",
+  "url_count": 54,
   "roles": {
-    "candidate": 13,
+    "candidate": 21,
     "section_index": 5,
     "root": 6,
-    "hub": 17
+    "hub": 22
   },
   "candidates_with_impressions": 1,
   "candidates_by_hub": {
-    "/services/celebration-setups-memphis": 8,
+    "/services/celebration-setups-memphis": 9,
+    "/services/hotel-room-decor-memphis": 5,
     "/services/birthday-party-decor-memphis": 4,
-    "/services/hotel-room-decor-memphis": 1
+    "/services/birthday-party-planner-memphis": 3
   },
   "rows": [
     {
@@ -74,6 +75,17 @@
       "fold_rule": null
     },
     {
+      "url": "https://porchandparty901.com/guides/couples-staycation-ideas-memphis",
+      "file": "guides/couples-staycation-ideas-memphis.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 766,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
+      "fold_rule": "/./"
+    },
+    {
       "url": "https://porchandparty901.com/guides/graduation-party-decorations-at-home-memphis",
       "file": "guides/graduation-party-decorations-at-home-memphis.html",
       "role": "candidate",
@@ -83,6 +95,17 @@
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
+    },
+    {
+      "url": "https://porchandparty901.com/guides/memphis-hotels-with-jacuzzi-in-room",
+      "file": "guides/memphis-hotels-with-jacuzzi-in-room.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 861,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
+      "fold_rule": "/hotel|romantic|anniversary|proposal/"
     },
     {
       "url": "https://porchandparty901.com/hotels",
@@ -110,7 +133,7 @@
       "url": "https://porchandparty901.com/",
       "file": "index.html",
       "role": "root",
-      "impressions_28d": 93,
+      "impressions_28d": 100,
       "clicks_28d": 5,
       "word_count": 1982,
       "coverage_state": "Submitted and indexed",
@@ -173,6 +196,39 @@
       "fold_rule": "/birthday|balloon/"
     },
     {
+      "url": "https://porchandparty901.com/questions/can-you-use-rose-petals-and-candles-in-a-hotel",
+      "file": "questions/can-you-use-rose-petals-and-candles-in-a-hotel.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 681,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
+      "fold_rule": "/hotel|romantic|anniversary|proposal/"
+    },
+    {
+      "url": "https://porchandparty901.com/questions/event-planner-for-small-parties",
+      "file": "questions/event-planner-for-small-parties.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 916,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
+      "fold_rule": "/planner|planning|event-management/"
+    },
+    {
+      "url": "https://porchandparty901.com/questions/how-many-rose-petals-for-a-hotel-room",
+      "file": "questions/how-many-rose-petals-for-a-hotel-room.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 743,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
+      "fold_rule": "/hotel|romantic|anniversary|proposal/"
+    },
+    {
       "url": "https://porchandparty901.com/questions/how-to-book-birthday-party",
       "file": "questions/how-to-book-birthday-party.html",
       "role": "candidate",
@@ -184,15 +240,48 @@
       "fold_rule": "/birthday|balloon/"
     },
     {
+      "url": "https://porchandparty901.com/questions/how-to-set-up-a-hotel-room-for-a-romantic-night",
+      "file": "questions/how-to-set-up-a-hotel-room-for-a-romantic-night.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 678,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
+      "fold_rule": "/hotel|romantic|anniversary|proposal/"
+    },
+    {
       "url": "https://porchandparty901.com/questions/",
       "file": "questions/index.html",
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 575,
+      "word_count": 930,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
+    },
+    {
+      "url": "https://porchandparty901.com/questions/local-event-planning-companies",
+      "file": "questions/local-event-planning-companies.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 973,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
+      "fold_rule": "/planner|planning|event-management/"
+    },
+    {
+      "url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "file": "questions/local-party-planners-near-me.html",
+      "role": "candidate",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 819,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
+      "fold_rule": "/planner|planning|event-management/"
     },
     {
       "url": "https://porchandparty901.com/questions/party-rentals-memphis",
@@ -250,12 +339,45 @@
       "fold_rule": "/./"
     },
     {
+      "url": "https://porchandparty901.com/services/anniversary-hotel-room-setup-memphis",
+      "file": "services/anniversary-hotel-room-setup-memphis.html",
+      "role": "hub",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 804,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": null,
+      "fold_rule": null
+    },
+    {
       "url": "https://porchandparty901.com/services/baby-shower-decor-memphis",
       "file": "services/baby-shower-decor-memphis.html",
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 678,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": null,
+      "fold_rule": null
+    },
+    {
+      "url": "https://porchandparty901.com/services/birthday-hotel-room-decorations-for-her-memphis",
+      "file": "services/birthday-hotel-room-decorations-for-her-memphis.html",
+      "role": "hub",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 756,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": null,
+      "fold_rule": null
+    },
+    {
+      "url": "https://porchandparty901.com/services/birthday-hotel-room-decorations-for-him-memphis",
+      "file": "services/birthday-hotel-room-decorations-for-him-memphis.html",
+      "role": "hub",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 736,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -277,7 +399,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1915,
+      "word_count": 1922,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -387,7 +509,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1109,
+      "word_count": 1523,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -398,7 +520,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1000,
+      "word_count": 1189,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -437,12 +559,34 @@
       "fold_rule": null
     },
     {
+      "url": "https://porchandparty901.com/services/proposal-hotel-room-setup-memphis",
+      "file": "services/proposal-hotel-room-setup-memphis.html",
+      "role": "hub",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 718,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": null,
+      "fold_rule": null
+    },
+    {
       "url": "https://porchandparty901.com/services/small-porch-decorating",
       "file": "services/small-porch-decorating.html",
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 733,
+      "coverage_state": "URL is unknown to Google",
+      "fold_into_if_crawled_not_indexed": null,
+      "fold_rule": null
+    },
+    {
+      "url": "https://porchandparty901.com/services/valentines-day-hotel-room-setup-memphis",
+      "file": "services/valentines-day-hotel-room-setup-memphis.html",
+      "role": "hub",
+      "impressions_28d": 0,
+      "clicks_28d": 0,
+      "word_count": 707,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
