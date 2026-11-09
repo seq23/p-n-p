@@ -276,7 +276,9 @@ const SECTIONS = [
     h1: 'Porch &amp; Party answers to common planning questions',
     title: 'Porch &amp; Party Questions | Memphis Porch, Party &amp; Grazing Answers',
     description: 'Answers to the questions Memphis-area hosts ask before booking porch decorating, party decor, grazing tables or party game rentals with Porch & Party.',
-    lead: 'Short, direct answers to the questions people ask before booking porch decorating, party planning and decor, grazing tables or party game rentals. Every page ends with a quote request, because the exact price depends on your date, your place and the setup you want.',
+    lead: SHAPE.assertLead(
+      "These pages are Porch &amp; Party's short, direct answers to the questions people ask before booking porch decorating, party planning and decor, grazing tables or party game rentals. Every page ends with a quote request, because the exact price depends on your date, your place and the setup you want.",
+      'questions/index lead'),
     summary: 'Open the question closest to yours. For an exact quote, send a request with your date, city and the setup you have in mind.',
     minPages: 1,
     group: (pages) => (pages.length ? [{ heading: 'Questions and answers', blurb: '', pages }] : []),
@@ -410,7 +412,7 @@ function groupedFaqHtml(groups) {
           <div class="answer-block"><span class="eyebrow">${esc(g.eyebrow)}</span><h2>${esc(g.title)}</h2><p>${esc(g.intro)}</p></div>${tool}
           <div class="faq-list">${g.qa.map(([q, a], j) => `<details class="faq-item"${j === 0 ? ' open' : ''}><summary><h3>${esc(q)}</h3></summary><p>${esc(a)}</p>${priceNextStep(q)}</details>`).join('')}</div>
           <p class="faq-cta"><a ${QUOTE_LINK} class="btn-primary">Request a Quote</a></p>
-          <p class="faq-next"><a href="#top">&uarr; Back to top</a>${next ? `<a href="#${next.id}">Next: ${esc(next.title)} &rarr;</a>` : ''}</p>
+          <p class="faq-next"><a href="#top">↑ Back to top</a>${next ? `<a href="#${next.id}">Next: ${esc(next.title)} &rarr;</a>` : ''}</p>
         </section>`;
   }).join('');
   return `${jump}${sections}
@@ -648,11 +650,11 @@ function htmlSitemapBody(indexRoutes) {
   const indexes = [...new Set([...indexRoutes, ...extra])].filter((r) => r !== '/services/index.html' && r !== '/faq/index.html').sort()
     .map((r) => [r.replace(/index\.html$/, ''), esc(readPage(r.slice(1)).h1)]);
   return '<span class="eyebrow">Sitemap</span><h1>Sitemap</h1>'
-    + '<p>Every section of the Porch &amp; Party website in one place.</p>'
-    + '<h2>Services and booking</h2>' + ul([['/', 'Home'], ['/services/', 'Services'], ['/rentals/', 'Party Game Rentals'], ['/pricing', 'Pricing'],
+    + `<p>${SHAPE.assertLead("This sitemap is the list of every page on the Porch &amp; Party website, in one place: the four Memphis services and how to book them, the guides and question pages, and the legal pages. Search engines read the same pages as a file, sitemap.xml, and every section below links straight to its pages.", 'sitemap lead')}</p>`
+    + '<h2>Where are the services and booking pages?</h2>' + ul([['/', 'Home'], ['/services/', 'Services'], ['/rentals/', 'Party Game Rentals'], ['/pricing', 'Pricing'],
       ['/faq/', 'Frequently asked questions'], ['/how-it-works', 'How It Works'], ['/contact', 'Contact']])
-    + '<h2>Guides and answers</h2>' + ul(indexes)
-    + '<h2>Legal</h2>' + ul(siteChrome.LEGAL_LINKS.filter((l) => l.href !== '/sitemap').map((l) => [l.href, l.label]))
+    + '<h2>Where are the guides and answers?</h2>' + ul(indexes)
+    + '<h2>Where are the legal pages?</h2>' + ul(siteChrome.LEGAL_LINKS.filter((l) => l.href !== '/sitemap').map((l) => [l.href, l.label]))
     + '<p class="muted">For search engines: <a href="/sitemap.xml">sitemap.xml</a>.</p>';
 }
 if (!CHECK) {

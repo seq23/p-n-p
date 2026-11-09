@@ -10,7 +10,7 @@
  * every field, prices, booking links, the intro, the "best for" summary and the
  * disclaimer) but with NO third-party photo embedded or hotlinked: the room photos
  * belong to the hotels and booking sites (risk rule R-REPO-04, images only with a
- * licence). Each hotel's photo becomes a "See the room photos" link to the same
+ * licence). Each hotel's photo becomes a "See <hotel> photos" link to the same
  * original URL the guide used, opening in a new tab, and the photo credit is kept.
  *
  * EVERY WORD OF THE GUIDE COMES FROM data/guides/memphis_romantic_hotels.json,
@@ -61,7 +61,11 @@ if (!HERO || HERO.source !== 'owner') throw new Error('hotels hero: owner-romant
 const L = guide.labels;
 // The answer-first line (content-pattern contract: a quotable lead under the h1). Ours, not the
 // guide's: it only names what the guide holds, so the guide's own words follow unchanged.
-const LEAD = `Porch & Party's guide to ${guide.hotels.length} romantic hotel rooms in Memphis, downtown and nearby neighborhoods first: for each one, the room to request, why it works, price guidance and the official booking page.`;
+// It is the page's definition (Search Readiness b4, 40-60 words "X are ...") and answers the
+// title in the first 100 words (d1).
+const LEAD = require(path.join(ROOT, 'scripts/lib/page_shape.js')).assertLead(
+  `Romantic Memphis hotel rooms are the rooms worth requesting for an anniversary, a proposal or a birthday night away. This Porch & Party guide lists ${guide.hotels.length} of them, downtown and nearby neighborhoods first, with the room to ask for, why it works, price guidance and each hotel's official booking page.`,
+  'hotels lead');
 const NEW_TAB = 'target="_blank" rel="noopener"';
 const label = (t) => `<h3 style="font-size:13px;letter-spacing:0.08em;margin:18px 0 4px;">${esc(t)}</h3>`;
 
@@ -75,7 +79,7 @@ function hotelCard(h, i) {
 ${label(L.roomToRequest)}<p>${esc(h.roomToRequest)}</p>
 ${label(L.whyItWorks)}<p>${esc(h.whyItWorks)}</p>
 ${label(L.priceGuidance)}<p>${esc(h.priceGuidance)}</p>
-<div class="btn-row" style="margin-top:18px;"><a class="btn-primary" href="${esc(h.bookingUrl)}" ${NEW_TAB} data-hotel-booking>${esc(L.booking)}</a><a class="btn-secondary" href="${esc(h.photoUrl)}" ${NEW_TAB} data-hotel-photo>See the room photos ↗</a></div>
+<div class="btn-row" style="margin-top:18px;"><a class="btn-primary" href="${esc(h.bookingUrl)}" ${NEW_TAB} data-hotel-booking>${esc(L.booking)}</a><a class="btn-secondary" href="${esc(h.photoUrl)}" ${NEW_TAB} data-hotel-photo>See ${esc(h.name)} photos ↗</a></div>
 <p class="muted" style="font-size:13px;margin-top:10px;">${esc(h.photoCredit)}</p>
 </article>`;
 }

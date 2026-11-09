@@ -1,8 +1,8 @@
 {
-  "measured_at": "2026-11-08",
-  "pages_total": 52,
-  "sampled": 52,
-  "median_template_share": 0.0381,
+  "measured_at": "2026-11-09",
+  "pages_total": 55,
+  "sampled": 55,
+  "median_template_share": 0.0363,
   "ceiling": 0.4,
   "pages_over_ceiling": 1,
   "worst": [
@@ -12,15 +12,15 @@
     },
     {
       "file": "sitemap.html",
-      "share": 0.248
+      "share": 0.17
     },
     {
       "file": "accessibility.html",
-      "share": 0.14
+      "share": 0.117
     },
     {
       "file": "contact.html",
-      "share": 0.079
+      "share": 0.073
     },
     {
       "file": "services/party-decor-memphis.html",

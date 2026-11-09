@@ -87,7 +87,37 @@ function resolve(text, P, rel) {
 // (data-page-dates, data-page-byline, scripts/lib/page_provenance.js).
 const LEAD_RE = /(<\/h1>\s*)(<p(?![^>]*\bdata-page-)[^>]*>)([\s\S]*?)(<\/p>)/i;
 
+/**
+ * A lead entry is a string (a service page: the lead, the shared heading map and
+ * the business-sources line) or an object for a page that is not a service page
+ * (a legal, contact or utility page), which takes only what it names:
+ *   { lead, headings: { "Old h2": "Question?" }, replace: [[oldHtml, newHtml]] }
+ * `replace` says a repeated sentence once (the weekly sample's template filler);
+ * an old string with a non-empty replacement must be on the page or already replaced.
+ */
+function entryOf(value) {
+  return typeof value === 'string' ? { lead: value, service: true, headings: {}, replace: [] } : { service: false, headings: {}, replace: [], ...value };
+}
+
+function applyReplace(html, replace, rel) {
+  let out = html;
+  for (const [from, to] of replace || []) {
+    if (out.includes(from)) out = out.split(from).join(to);
+    else if (to && !out.includes(to)) throw new Error(`${rel}: replace target is on neither side of the page: ${from.slice(0, 80)}`);
+  }
+  return out;
+}
+
+function installPlain(html, entry, rel) {
+  if (!LEAD_RE.test(html)) throw new Error(`${rel}: no paragraph under the h1 to put the definition in`);
+  let out = html.replace(LEAD_RE, (_, afterH1) => `${afterH1}<p>${entry.lead}</p>`);
+  out = out.replace(/<h2([^>]*)>([^<]+)<\/h2>/g, (whole, attrs, title) => (entry.headings[title] ? `<h2${attrs}>${entry.headings[title]}</h2>` : whole));
+  return applyReplace(out, entry.replace, rel);
+}
+
 function install(html, lead, rel) {
+  if (typeof lead === 'object' && !lead.service) return installPlain(html, lead, rel);
+  if (typeof lead === 'object') return applyReplace(install(html, lead.lead, rel), lead.replace, rel);
   const m = LEAD_RE.exec(html);
   if (!m) throw new Error(`${rel}: no paragraph under the h1 to put the definition in`);
   let out = html.replace(LEAD_RE, (_, afterH1) => `${afterH1}<p>${lead}</p>`);
@@ -128,10 +158,11 @@ function main() {
       console.error(`definition-leads FAILED: ${rel} is listed but not published`);
       process.exit(1);
     }
-    const lead = SHAPE.assertLead(resolve(leads[rel], P, rel), `${rel} lead (data/content/definition_leads.json)`);
+    const entry = entryOf(leads[rel]);
+    const lead = SHAPE.assertLead(resolve(entry.lead, P, rel), `${rel} lead (data/content/definition_leads.json)`);
     checked += 1;
     const before = fs.readFileSync(abs, 'utf8');
-    const after = install(before, lead, rel);
+    const after = install(before, { ...entry, lead }, rel);
     if (after === before) continue;
     if (CHECK) { stale.push(rel); continue; }
     fs.writeFileSync(abs, after);
@@ -146,5 +177,5 @@ function main() {
   console.log(`definition leads: ${checked} authored lead(s), ${written.length} page(s) written`);
 }
 
-module.exports = { install, prices, resolve, LEAD_RE };
+module.exports = { install, entryOf, prices, resolve, LEAD_RE };
 if (require.main === module) main();

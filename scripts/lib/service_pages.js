@@ -75,7 +75,9 @@ const PAGES = [
       'services/porch-decorating answer'),
     sections: () => [
       { id: 'seasonal-porch-decor', h2: 'Fall, Halloween and Christmas porch decor in Memphis',
-        body: `<p>Pick the season and the size: ${PK.tierOrder.map((t) => PK.tiers[t].name).join(', ')}. ${esc(PK.estimateLine)} ${esc(PK.bundle.line)}</p><p>${esc(faq('porch', 'Which seasons do you decorate?')[1])} ${esc(faq('porch', 'Will it hold up in weather?')[1])}</p>` },
+        // The fall + Christmas bundle line is said by the porch calculator and the FAQ on this page; a
+        // fourth time here was template filler in the weekly quality sample (9 Nov 2026).
+        body: `<p>Pick the season and the size: ${PK.tierOrder.map((t) => PK.tiers[t].name).join(', ')}. ${esc(PK.estimateLine)}</p><p>${esc(faq('porch', 'Which seasons do you decorate?')[1])} ${esc(faq('porch', 'Will it hold up in weather?')[1])}</p>` },
     ],
     faq: () => [
       faq('porch', 'What does a porch setup include?'),

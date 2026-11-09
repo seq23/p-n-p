@@ -112,10 +112,17 @@ const faqSection = () => '<section class="section section-soft" data-retrofit="r
   + siteFaqs.map((f) => `<div class="faq-item"><h3>${esc(f.question)}</h3><p>${esc(f.answer)}</p></div>`).join('')
   + '</div></div></section>\n';
 
-/** A service's notes plus the takedown add-on line where it applies (services.json addOns.takedown). */
+/**
+ * The takedown add-on (services.json addOns.takedown) is said ONCE under the panels, naming the
+ * services it applies to, not repeated inside each panel: the page already says it in its intro
+ * and its FAQ, and the weekly quality sample (9 Nov 2026) read the line four times on
+ * /how-it-works as template filler.
+ */
 const TAKEDOWN = (offers.addOns || {}).takedown;
-const scopeNotes = (key, s) => (TAKEDOWN && TAKEDOWN.appliesTo.includes(key) && !s.notes.includes(TAKEDOWN.line)
-  ? [...s.notes, TAKEDOWN.line] : s.notes);
+const scopeNotes = (key, s) => (TAKEDOWN ? s.notes.filter((n) => n !== TAKEDOWN.line) : s.notes);
+const takedownNote = () => (TAKEDOWN
+  ? `<p class="muted">${esc(TAKEDOWN.line)} It applies to ${TAKEDOWN.appliesTo.map((k) => esc(offers.services[k].name)).join(' and ')}; party game rentals have no takedown.</p>`
+  : '');
 
 const scopeSection = () => '<section class="section" data-retrofit="root-scope">'
   + '<div class="container"><div class="answer-block"><span class="eyebrow">Scope</span>'
@@ -125,7 +132,7 @@ const scopeSection = () => '<section class="section" data-retrofit="root-scope">
     + `<h3><a href="${s.slug}">${esc(s.name)}</a> &mdash; from ${esc(s.price)}</h3>`
     + `<p>${esc(s.summary)}</p><ul>${s.includes.map((i) => `<li>${esc(i)}</li>`).join('')}</ul>`
     + `<p class="muted">${esc(scopeNotes(key, s).join(' '))}</p></div>`).join('')
-  + '</div></div></section>\n';
+  + `</div>${takedownNote()}</div></section>\n`;
 
 const MARK = '\u0000retrofit-slot\u0000';
 const LD = /<script type="application\/ld\+json">([\s\S]*?)<\/script>(\n?)/g;

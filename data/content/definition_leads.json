@@ -5,7 +5,16 @@
   "leads": {
     "services/baby-shower-decor-memphis.html": "Baby shower decor in Memphis is the styling Porch &amp; Party brings and sets up for a home shower or a brunch: a balloon display, a backdrop, a styled gift or cake table and soft colour direction. Setups start at {celebFrom}, quoted on the date and the scope.",
     "services/birthday-party-decor-memphis.html": "Birthday party decor in Memphis is a balloon display, a backdrop and styled tables that Porch &amp; Party designs, brings and sets up for a home celebration or a hotel-room surprise. Setups start at {celebFrom} and are quoted on the date, the occasion and how much of the room is styled.",
-    "services/birthday-party-planner-memphis.html": "A birthday party planner in Memphis, in the way most hosts mean it, is someone who styles the room rather than runs the day. Porch &amp; Party designs the look, brings everything and sets it up for kids', adult and hotel-room birthdays. Setups start at {celebFrom}.",
+    "services/birthday-party-planner-memphis.html": {
+      "service": true,
+      "lead": "A birthday party planner in Memphis, in the way most hosts mean it, is someone who styles the room rather than runs the day. Porch &amp; Party designs the look, brings everything and sets it up for kids', adult and hotel-room birthdays. Setups start at {celebFrom}.",
+      "replace": [
+        [
+          "<p class=\"muted\">Home, hotel-room, and small-venue birthday setups for Memphis, Germantown, Collierville, Bartlett, Lakeland, Arlington, Southaven, and Olive Branch.</p>",
+          "<p class=\"muted\">Home, hotel-room, and small-venue birthday setups across the Memphis area.</p>"
+        ]
+      ]
+    },
     "services/bridal-shower-decor-memphis.html": "Bridal shower decor in Memphis is the room, table and focal styling Porch &amp; Party sets up before guests arrive: a balloon display, a backdrop, a styled dessert or gift table, and colour direction taken from the wedding. Setups start at {celebFrom}, quoted on the date and the scope.",
     "services/budget-party-decor-memphis.html": "Budget-aware party decor in Memphis is one strong focal setup instead of a fully styled room. Porch &amp; Party puts the balloons, the backdrop or the table where they will actually be photographed, with clear colour direction. Setups start at {celebFrom} and are quoted before anything is booked.",
     "services/celebration-setups-memphis.html": "A celebration setup in Memphis is party decor Porch &amp; Party designs, brings and installs for you: balloons, a backdrop and styled tables, in a home, a hotel room or a small event space, for birthdays, showers and romantic surprises. Setups start at {celebFrom}.",
@@ -16,7 +25,40 @@
     "services/luxury-party-decor-memphis.html": "Luxury party decor in Memphis is a fuller version of the same service: Porch &amp; Party styles more of the room, with a stronger focal setup, a richer balloon direction and more layered tables. Elevated setups are quoted on their scope and start at {celebFrom}.",
     "services/party-decor-memphis.html": "Memphis party decor is balloon work, a backdrop and styled tables that Porch &amp; Party designs, brings and sets up for birthdays, showers, hotel-room surprises and home celebrations. Setups start at {celebFrom} and are quoted on the date, the occasion and how much of the room is styled.",
     "services/small-porch-decorating.html": "Small porch decorating in Memphis is a seasonal setup sized to a stoop or a narrow entry. Porch &amp; Party styles the door, the step and a planter or two rather than a full porch and walkway. Fall packages start at {fallFrom} and Christmas at {christmasFrom}.",
-    "pricing.html": "Porch &amp; Party's starting prices are the lowest each service begins at: porch decorating from {porchFrom}, celebration setups from {celebFrom}, grazing-table styling from {grazeFrom} and party games at {rentalDay} a day. Every final quote depends on the date, the city and how much is being styled.",
-    "how-it-works.html": "Working with Porch &amp; Party is four steps: you send the date and what you are planning, we quote it, a deposit holds the date, and we bring everything and set it up on the day. Decor and grazing tables are quoted; party games are booked online at {rentalDay} a day."
-  }
+    "pricing.html": {
+      "service": true,
+      "lead": "Porch &amp; Party's starting prices are the lowest each service begins at: porch decorating from {porchFrom}, celebration setups from {celebFrom}, grazing-table styling from {grazeFrom} and party games at {rentalDay} a day. Every final quote depends on the date, the city and how much is being styled.",
+      "replace": [
+        [
+          "<p class=\"muted\">Final pricing depends on location, setup size, and visual complexity.</p><p class=\"muted\">Takedown starts at $75, quoted with your setup.</p>",
+          "<p class=\"muted\">Final pricing depends on location, setup size, and visual complexity.</p>"
+        ]
+      ]
+    },
+    "how-it-works.html": "Working with Porch &amp; Party is four steps: you send the date and what you are planning, we quote it, a deposit holds the date, and we bring everything and set it up on the day. Decor and grazing tables are quoted; party games are booked online at {rentalDay} a day.",
+    "accessibility.html": {
+      "lead": "This accessibility statement is Porch &amp; Party's promise that everyone can use this website, read our prices and request a quote or a rental, whatever device or assistive technology they use. It names the standard we build to, the limits we know about, and how to tell us when something does not work for you.",
+      "headings": {
+        "Our target": "What standard does this site aim for?",
+        "Known limits": "What are the known limits?",
+        "Tell us about a problem": "How do you tell us about a problem?"
+      }
+    },
+    "contact.html": {
+      "lead": "Contacting Porch &amp; Party is a short request: tell us the date, the place and what you are planning, whether that is a seasonal porch install, a celebration setup, a grazing table or party game rentals. We review it and follow up with next steps and pricing, and you can also call, text or email us."
+    },
+    "privacy-policy.html": {
+      "lead": "This Privacy Policy is the notice in which Kerseta LLC (\"Porch &amp; Party\", \"we\", \"us\") explains what information it collects on this website and through our quote and rental request forms, why it collects it, how it is used and kept, and the choices you have about it."
+    },
+    "terms-and-conditions.html": {
+      "lead": "These Terms &amp; Conditions are an agreement between you and Kerseta LLC (\"Porch &amp; Party\", \"we\", \"us\"). They cover this website, quote requests, decor and grazing bookings, and party game rentals in the Memphis metro area. The short, plain-English version of the same rules is our Rules &amp; Responsibilities page.",
+      "headings": {
+        "Services and quotes": "How do services and quotes work?",
+        "Deposits and payment": "How do deposits and payment work?",
+        "Text messages": "When do we send text messages?",
+        "Governing law": "Which law governs these terms?"
+      }
+    }
+  },
+  "_entries": "A lead is a string for a service page (the lead, the shared question headings and the business-sources line). A page that is not a service page (a legal, contact or utility page) takes an object: {\"lead\", \"headings\": {\"Old h2\": \"Question?\"}, \"replace\": [[oldHtml, newHtml]]}, and only what it names is changed. An object with \"service\": true is a service page that also takes \"replace\". \"replace\" says a repeated sentence once: the weekly quality sample (9 Nov 2026) read the same 8-word sentence more than three times on these pages as template filler."
 }

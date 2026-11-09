@@ -250,7 +250,7 @@ for (const rel of ['llms.txt', 'llms-full.txt', 'llms-entities.txt', 'llms-answe
       const photo = card.match(/<a\b[^>]*data-hotel-photo[^>]*>/);
       if (!card.includes(`<h2>${String(h.name).replace(/&/g, '&amp;')}</h2>`)) fail(`hotels.html card ${i + 1} is not ${h.name}`);
       if (!booking || !/^https:\/\/[^/]+\//.test(h.bookingUrl || '') || decode((booking[0].match(/href="([^"]+)"/) || [])[1] || '') !== h.bookingUrl) fail(`hotels.html: ${h.name} has no official booking link to ${h.bookingUrl}`);
-      if (!photo || decode((photo[0].match(/href="([^"]+)"/) || [])[1] || '') !== h.photoUrl) fail(`hotels.html: ${h.name} has no "See the room photos" link to its original photo`);
+      if (!photo || decode((photo[0].match(/href="([^"]+)"/) || [])[1] || '') !== h.photoUrl) fail(`hotels.html: ${h.name} has no photo link to its original photo`);
       for (const a of [booking, photo]) if (a && !(/target="_blank"/.test(a[0]) && /rel="noopener"/.test(a[0]))) fail(`hotels.html: a link for ${h.name} does not open in a new tab with rel="noopener"`);
     });
     for (const m of hotelsHtml.matchAll(/<img\b[^>]*\bsrc="([^"]*)"/g)) if (!m[1].startsWith('/') || m[1].startsWith('//')) fail(`hotels.html embeds an off-site picture (${m[1]}); hotel photos are linked, never shown (R-REPO-04)`);
