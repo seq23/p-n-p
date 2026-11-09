@@ -105,6 +105,11 @@ async function renderRequest(F, table) {
 `;
 }
 
+// The definition under the h1 (Search Readiness b4): what this page is, in 40-60 words.
+const RULES_LEAD = require(path.join(ROOT, 'scripts/lib/page_shape.js')).assertLead(
+  "Porch &amp; Party's Rules &amp; Responsibilities are the plain-English rules you agree to when you send a request: how a booking is confirmed, paid for and cancelled, how game rentals are picked up and returned, what happens to the decor afterwards, and how we handle your photo ID. Our Terms &amp; Conditions say the same things in full.",
+  'rules lead');
+
 function renderRules(F, table) {
   const url = `${DOMAIN}/rules`;
   const title = 'Rules & Responsibilities | Porch & Party';
@@ -112,7 +117,7 @@ function renderRules(F, table) {
   const td = offers.addOns.takedown;
   const d = (n) => `$${n}`;
   const sections = [
-    ['everyone', 'For everyone', [
+    ['everyone', 'What applies to every booking?', [
       'A booking is confirmed only when we confirm it and your deposit is paid. Quotes are custom and can change with the scope, materials, food, guest count, location and timing.',
       `Porch, party and room decor and grazing dates are held by ${offers.payment.decorHold}; the rest is due ${offers.payment.decorBalanceDue}. Game rentals are held by a ${d(games.damageDeposit)} refundable damage deposit plus ${games.holdPercent}% of the rental; the rest is paid at pickup.`,
       `You pay by ${offers.payment.methods} from your invoice. We do not take cash.`,
@@ -120,7 +125,7 @@ function renderRules(F, table) {
       `Weather: if rain or a storm is forecast for your date, we move your setup or rental to a new date free within ${offers.payment.weatherRescheduleDays} days.`,
       'Give us correct details for your date, place and what you want. Hotel rooms and venues may need us to coordinate with the property first.',
     ]],
-    ['rentals', 'Party game rentals', [
+    ['rentals', 'What are the rules for party game rentals?', [
       `Pickup and return are at ${PLACE}, a safe exchange zone. Home and personal rentals are picked up and returned there. ${BDL} The pickup time is set by text or call to ${C.telephoneDisplay} after payment.`,
       `A rental booked on our request form is held for ${offers.rentalHolds.defaultHours} hours while you pay the deposit. If the deposit has not come in by then, the hold ends and the games are offered to others.`,
       'One day: pick up the day before your event or that morning, and bring everything back the day after or 2 days after. The entire weekend (Friday, Saturday and Sunday): pick up Thursday or Friday, and bring everything back Monday or Tuesday. A late return is charged as quoted with your booking.',
@@ -128,20 +133,20 @@ function renderRules(F, table) {
       `Everything is checked at return. A missing bag, ring, card or piece is $5 each; a broken board, frame or screen is charged at replacement cost. The ${d(games.damageDeposit)} damage deposit is refunded when everything comes back complete.`,
       'We check the photo ID on your request against the name on the invoice at hand-off. Party game rentals have no takedown: you return them yourself.',
     ]],
-    ['porch', 'Porch decorating', [
+    ['porch', 'What are the rules for porch decorating?', [
       `Takedown is optional and starts at ${d(td.fromPrice)}, quoted with your setup.`,
       'The decor, props and stands we bring stay Porch & Party\'s until takedown, unless your quote says a piece is yours to keep. Please leave them in place until we take them down or collect them.',
     ]],
-    ['party', 'Party planning & decor', [
+    ['party', 'What are the rules for party planning & decor?', [
       `Takedown is optional and starts at ${d(td.fromPrice)}, quoted with your setup.`,
       'The decor, props and stands we bring stay Porch & Party\'s until takedown, unless your quote says a piece is yours to keep.',
       'For a hotel room or venue, check that the property allows the setup; we coordinate with them where needed.',
     ]],
-    ['grazing', 'Grazing tables', [
+    ['grazing', 'What are the rules for grazing tables?', [
       'Food is not included in grazing-table styling unless it is quoted and confirmed. When you ask us to source it, it is added to your quote.',
       'The boards and stands stay Porch & Party\'s; we collect them after your event when your quote includes it.',
     ]],
-    ['photo-id', 'Your photo ID', [
+    ['photo-id', 'How do we handle your photo ID?', [
       F.ID_NOTE,
       'We ask every customer for a government photo ID on the request form. Only Porch & Party sees it. It is kept in private storage that is not on the public internet, and we delete it by hand after your final payment (for a rental, once the games are back).',
     ]],
@@ -156,9 +161,10 @@ function renderRules(F, table) {
         <div class="content-wrap" data-rules-version="${F.RULES_VERSION}">
           <span class="eyebrow">Rules</span>
           <h1>Rules &amp; Responsibilities</h1>
+          <p>${RULES_LEAD}</p>
           <p class="muted">Version ${F.RULES_VERSION}. When you send a request, you agree to these rules and to our <a href="/terms-and-conditions">Terms &amp; Conditions</a>, which say the same things in full.</p>
           ${sections.map(([id, h, items]) => `<h2 id="${id}">${esc(h)}</h2><ul>${items.map((t) => `<li>${esc(t)}</li>`).join('')}</ul>`).join('\n          ')}
-          <h2 id="questions">Questions</h2>
+          <h2 id="questions">Who do you ask a question?</h2>
           <p>Call or text <a href="${C.telHref}">${C.telephoneDisplay}</a> or email <a href="mailto:hello@porchandparty901.com">hello@porchandparty901.com</a>. Ready? <a href="/request">Request a quote or book games</a>.</p>
         </div>
       </div>

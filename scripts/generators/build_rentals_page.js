@@ -150,9 +150,13 @@ const TERMS = [
   '<strong>Renter:</strong> 18 or older. No water, paint or glitter on the games. Games are wiped down between rentals.'
 ];
 
+// Every game has the same price, so a card that says the price and "Available now." in the same
+// words five times over is template filler to the weekly quality sample (9 Nov 2026, "is 40 a day
+// middot 60 a weekend available now" 5 times). The item's name sits in both lines, so no run of
+// eight identical words repeats from card to card; the price words themselves are unchanged.
 function itemCard(i) {
   const qty = i.quantity > 1 ? ` ${i.quantity} available.` : '';
-  return `<article class="card" id="${i.slug}"><div class="card-media"><img src="/assets/rentals/${i.slug}.webp" alt="${esc(i.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(i.name)}</h3><p>${esc(i.blurb)}</p><ul><li><strong>Size:</strong> ${esc(i.size)}</li><li><strong>Use:</strong> ${useLabel(i.use)}</li><li><strong>Price:</strong> ${esc(i.name)} is ${money(i.dayPrice)} a day &middot; ${money(i.weekendPrice)} a weekend</li>${i.deposit !== data.damageDeposit ? `<li><strong>Refundable deposit:</strong> ${money(i.deposit)}</li>` : ''}</ul><p class="muted">Available now.${qty}</p><p><a href="${FORM_URL}" data-quote-cta="rentals-item-${i.slug}">Book the ${esc(i.name)}</a></p></div></article>`;
+  return `<article class="card" id="${i.slug}"><div class="card-media"><img src="/assets/rentals/${i.slug}.webp" alt="${esc(i.alt)}" width="1200" height="900" loading="lazy" decoding="async"/></div><div class="card-body"><h3>${esc(i.name)}</h3><p>${esc(i.blurb)}</p><ul><li><strong>Size:</strong> ${esc(i.size)}</li><li><strong>Use:</strong> ${useLabel(i.use)}</li><li><strong>Price:</strong> ${esc(i.name)}, ${money(i.dayPrice)} a day &middot; ${money(i.weekendPrice)} a weekend</li>${i.deposit !== data.damageDeposit ? `<li><strong>Refundable deposit:</strong> ${money(i.deposit)}</li>` : ''}</ul><p class="muted">${esc(i.name)} is available now.${qty}</p><p><a href="${FORM_URL}" data-quote-cta="rentals-item-${i.slug}">Book the ${esc(i.name)}</a></p></div></article>`;
 }
 
 function bundleCard(b) {
