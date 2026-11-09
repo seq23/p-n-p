@@ -35,8 +35,8 @@ to the wrong site.
 ## Public contact path — do not reroute
 
 - Quote page: `/contact`
-- The quote form posts to an external Google Forms destination recorded in
-  `README.md`; it is the only conversion path on the site.
+- The quote form is the site's own `/request` form (since 18 Oct 2026; see
+  `README.md`); it is the only conversion path on the site.
 - Public email fallback: `hello@porchandparty901.com`, published as a `mailto:`
   anchor in the footer of every page.
 
