@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-10",
-  "end_date": "2026-11-06",
-  "collected_at": "2026-11-09T16:06:13.118762+00:00",
+  "start_date": "2026-10-11",
+  "end_date": "2026-11-07",
+  "collected_at": "2026-11-10T16:06:32.764779+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -164,10 +164,10 @@
       "keys": [
         "https://porchandparty901.com/"
       ],
-      "clicks": 5,
-      "impressions": 100,
-      "ctr": 0.05,
-      "position": 5.64
+      "clicks": 7,
+      "impressions": 103,
+      "ctr": 0.06796116504854369,
+      "position": 5.310679611650485
     },
     {
       "keys": [
@@ -195,6 +195,33 @@
       "impressions": 1,
       "ctr": 0,
       "position": 3
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYY7mnqurFul8IcJXK0oAVIeTO_A33-rheBwX-sm-0ied6vMA52mL0rTOnVioGmUWVA37oY9iqsxW7Zd0JkY7nBZgJJmuQ%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 3
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYYUj6RTplMZQa-szxhtesny_mmzFbN2skkXC0ZAdUNTmfvDxHsPdtgwgCqAA-J6ZLRYpr7iokgLBiL0F8v0bIBXhfxWcg%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 3
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYYa6Wi0kHsqngMBbzf7wXJkdsQKf-Udv6NwQiZg0qPrnpCCqLHmEh2UWG3pAun0rf7G79__aMRD286oHiaank_lWomKzA%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
     },
     {
       "keys": [
@@ -231,6 +258,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 7
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYaam8xW9m5_g4o3lJcaVHSJABeD7lNmv_l7mKqx1I03rb239X95A_loAUvtL6oI_d5b2U-a_dIp_-OK0O5by3B5ZlFnMg%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 3
     },
     {
       "keys": [
@@ -522,7 +558,7 @@
   ],
   "counts": {
     "by_query": 16,
-    "by_page": 13,
+    "by_page": 17,
     "by_query_page": 24
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."

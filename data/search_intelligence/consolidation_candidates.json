@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-10-10..2026-11-06",
-  "coverage_collected_at": "2026-11-09T16:06:59.787935+00:00",
+  "gsc_window": "2026-10-11..2026-11-07",
+  "coverage_collected_at": "2026-11-10T16:07:17.026198+00:00",
   "url_count": 54,
   "roles": {
     "candidate": 21,
@@ -36,7 +36,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 169,
+      "word_count": 202,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -58,7 +58,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 335,
+      "word_count": 362,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -113,7 +113,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1544,
+      "word_count": 1584,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
@@ -124,7 +124,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 565,
+      "word_count": 572,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -133,8 +133,8 @@
       "url": "https://porchandparty901.com/",
       "file": "index.html",
       "role": "root",
-      "impressions_28d": 100,
-      "clicks_28d": 5,
+      "impressions_28d": 103,
+      "clicks_28d": 7,
       "word_count": 1982,
       "coverage_state": "Submitted and indexed",
       "fold_into_if_crawled_not_indexed": null,
@@ -146,7 +146,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1302,
+      "word_count": 1294,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -157,7 +157,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 520,
+      "word_count": 541,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -245,7 +245,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 678,
+      "word_count": 682,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/hotel-room-decor-memphis",
       "fold_rule": "/hotel|romantic|anniversary|proposal/"
@@ -256,7 +256,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 930,
+      "word_count": 940,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -311,7 +311,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1952,
+      "word_count": 1973,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -333,7 +333,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 680,
+      "word_count": 770,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -399,7 +399,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1922,
+      "word_count": 1915,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -520,7 +520,7 @@
       "role": "section_index",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1189,
+      "word_count": 1162,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -553,7 +553,7 @@
       "role": "hub",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 1621,
+      "word_count": 1609,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
@@ -597,7 +597,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 82,
+      "word_count": 136,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
@@ -608,7 +608,7 @@
       "role": "root",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 612,
+      "word_count": 639,
       "coverage_state": "Crawled - currently not indexed",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
