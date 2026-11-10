@@ -20,7 +20,7 @@
       "url": "https://porchandparty901.com/questions/party-rentals-memphis",
       "published_at": "2026-11-06",
       "status": "live",
-      "hash": "ccd2839e484a8e102abb443cf62bf88225604aa4cee7f9bb303e4683a9bec31f",
+      "hash": "33407564af453f158ed8bf36b25d7fd6c3c894cda064178fe5ab8579dce88e94",
       "model": "free-route",
       "facts": [
         "https://en.wikipedia.org/wiki/Memphis,_Tennessee",
@@ -47,7 +47,16 @@
         "b5 FAQ answer is 34 words (aim 40-60): \"How do I find out the cost of party planning servi\"",
         "b5 FAQ answer is 36 words (aim 40-60): \"What is included in a seasonal porch decorating se\""
       ],
-      "indexnow_at": "2026-11-07"
+      "indexnow_at": "2026-11-07",
+      "reshaped": {
+        "v": 2,
+        "at": "2026-11-09",
+        "fixed": [
+          "lead"
+        ],
+        "before_hash": "ede79ed3b628de2a5dcf3d707a769a04f71f61413f8bf4c38b48c7dbd14b9e3a",
+        "after_hash": "33407564af453f158ed8bf36b25d7fd6c3c894cda064178fe5ab8579dce88e94"
+      }
     },
     {
       "slug": "how-to-book-birthday-party",
@@ -283,7 +292,8 @@
       "extra_queries": [
         "party planning near me",
         "local party planners"
-      ]
+      ],
+      "indexnow_at": "2026-11-09"
     },
     {
       "slug": "local-event-planning-companies",
@@ -347,7 +357,8 @@
       "gate_notes": [
         "b5 FAQ answer is 39 words (aim 40-60): \"What areas do you serve for event planning and dec\"",
         "b5 FAQ answer is 39 words (aim 40-60): \"How do I find out the exact cost for my event?\""
-      ]
+      ],
+      "indexnow_at": "2026-11-09"
     },
     {
       "slug": "event-planner-for-small-parties",
@@ -413,7 +424,8 @@
         "b5 FAQ answer is 37 words (aim 40-60): \"How does the setup process work for my party?\"",
         "b5 FAQ answer is 30 words (aim 40-60): \"Are party games delivered to my location?\"",
         "b5 FAQ answer is 39 words (aim 40-60): \"What is included in our grazing tables?\""
-      ]
+      ],
+      "indexnow_at": "2026-11-09"
     }
   ],
   "dropped": [

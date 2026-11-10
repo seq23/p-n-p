@@ -2,7 +2,7 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W46",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-09T13:32:30.049Z",
+  "generated_at": "2026-11-10T00:04:12.591Z",
   "state": "running",
   "published": 8,
   "indexed": "not read: no page old enough to inspect yet (14 days)",
@@ -137,10 +137,7 @@
     "why": "up from 22 to 25: Google impressions 100 in the last 28 days beat 66 in the 28 before"
   },
   "notes": [
-    "cap: up from 22 to 25: Google impressions 100 in the last 28 days beat 66 in the 28 before",
-    "BUILD distinct gate: 4 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
-    "BUILD gate notes (not blocking): 2 published page(s) are outside a length or style aim; each is listed under gate_notes in pages.json",
-    "IndexNow: 3 new page(s) not live yet; submitted when they answer 200"
+    "reshape: /questions/party-rentals-memphis re-rendered (lead)"
   ],
   "lanes": {
     "ratio": {
@@ -168,5 +165,5 @@
     "weight_changes": [],
     "competition": "ok: 15 top-10 read(s) via brave"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42626338406"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42725387176"
 }
