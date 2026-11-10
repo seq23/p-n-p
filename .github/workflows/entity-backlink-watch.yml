@@ -68,7 +68,7 @@ jobs:
           {
             echo "## SELF-HEAL READY"
             echo '```diff'; git diff -- config/entity.json; echo '```'
-            echo "Apply on a branch: \`npm run watch:entity-backlinks -- --apply\`, then \`npm run authority:scale:prepare-scope -- <every route>\`, \`npm run contact:install\`, \`npm run authority:scale:freeze\`, \`npm run authority:scale:clear-scope\`, \`npm run validate:release\`; if the Facebook Page or Maps URL itself changed, update data/offers/services.json contact and validate_business_entity.js with it. Land the PR."
+            echo "Apply on a branch: \`npm run watch:entity-backlinks -- --apply\`, then \`npm run authority:scale:prepare-scope -- <every route>\`, \`npm run contact:install\`, \`npm run authority:scale:freeze\`, \`npm run authority:scale:clear-scope\`, \`npm run validate:release\`; if the Facebook Page or Maps URL itself changed, update data/offers/services.json contact with it. Land the PR."
           } >> "$GITHUB_STEP_SUMMARY"
           echo "::error::SELF-HEAL READY: config/entity.json sameAs changed; see the job summary"
           exit 1

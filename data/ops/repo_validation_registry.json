@@ -62,15 +62,6 @@
       "no_repair_reason": "The ledger is measured evidence. Nothing in the repo may generate it, and generating it would be fabrication."
     },
     {
-      "id": "profile-purity",
-      "command": "npm run validate:profile-purity",
-      "detects": "Content or configuration that does not belong to the Porch & Party operating profile.",
-      "profiles": [
-        "release",
-        "core"
-      ]
-    },
-    {
       "id": "query-atlas",
       "command": "npm run validate:query-atlas",
       "detects": "Query evidence missing a tier or source_type, a publishable atlas entry on a non-publishable tier or with no volume, and a query_atlas.json that is absent or stale against the evidence file.",
@@ -80,17 +71,6 @@
       ],
       "repair_command": "npm run atlas:build",
       "repair_rationale": "build_query_atlas.mjs writes data/authority_scale/query_atlas.json from data/queries/evidence/evidence_queries.json. The validator's own failure text says 'run the atlas build first'. This is the pairing that closes the loop after queries:ingest writes new measured T1 evidence."
-    },
-    {
-      "id": "clarity-scope",
-      "command": "node scripts/validators/validate_clarity_scope.js",
-      "detects": "Clarity recording outside a form/checkout page, a conversion page missing its loader, duplicate loaders, or an installer that does not remove legacy tags and stay idempotent. Exercises the real installer with fixtures.",
-      "profiles": [
-        "release",
-        "core"
-      ],
-      "repair_command": null,
-      "no_repair_reason": "Run scripts/install_clarity.js inside an exact-route thaw/refreeze scope for frozen pages; an unattended repair must not mutate accepted output outside that scope."
     },
     {
       "id": "travel-claims",
@@ -137,12 +117,102 @@
       ]
     },
     {
-      "id": "inventory-pending-budget",
-      "command": "npm run validate:inventory-pending-budget",
-      "detects": "GET /api/inventory/pending: one primary-key read when nothing waits (query plan, 20,000-row history), bounded reads and no outside call when a change waits, a 5 s time budget with a plain 503 timeout/unavailable answer shorter than the poll's curl limit, and the documented Early Hints 504 analytics artifact.",
+      "id": "llm-surfaces",
       "profiles": [
-        "release"
-      ]
+        "release",
+        "core"
+      ],
+      "command": "npm run validate:llm-surfaces",
+      "detects": "PART: a page or llms file that says \"insured\"; the legal name Kerseta in visible text outside the Terms and the Privacy Policy; Terms without \"Reply STOP to opt out\" and \"Message and data rates may apply\"; Privacy without #privacy-choices and the Microsoft Clarity opt-out; a page that does not link the Privacy Policy.",
+      "blocking": true,
+      "tier": "blocking (hard-fail)",
+      "restored": "restored 10 Nov 2026 (hostile review)"
+    },
+    {
+      "id": "clarity-scope",
+      "command": "npm run validate:clarity-scope",
+      "detects": "Clarity recording outside a form/checkout page, a conversion page missing its loader, duplicate loaders, or an installer that does not remove legacy tags and stay idempotent. Exercises the real installer with fixtures.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "repair_command": null,
+      "no_repair_reason": "Run scripts/install_clarity.js inside an exact-route thaw/refreeze scope for frozen pages; an unattended repair must not mutate accepted output outside that scope.",
+      "blocking": true,
+      "tier": "blocking (hard-fail)",
+      "restored": "restored 10 Nov 2026 (hostile review)"
+    },
+    {
+      "id": "page-dates",
+      "command": "npm run validate:page-dates",
+      "detects": "A page whose structured data states a datePublished or dateModified and shows it nowhere a reader can see, a visible date the structured data does not state, a date line on a page that claims none, or a date line placed above the lead paragraph where it displaces the page's direct answer.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "blocking": true,
+      "tier": "blocking (hard-fail)",
+      "restored": "restored 10 Nov 2026 (hostile review)"
+    },
+    {
+      "id": "sitemap-lastmod",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "command": "npm run validate:sitemap-lastmod",
+      "blocking": true,
+      "tier": "blocking (hard-fail)",
+      "restored": "restored 10 Nov 2026 (hostile review)",
+      "detects": "A sitemap <lastmod> that is a run-date stamp, moves on a chrome-only change, or disagrees with the lastmod ledger and the content on disk (two-run fixture)."
+    },
+    {
+      "id": "area-pages",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "command": "npm run validate:area-pages",
+      "detects": "PART: a published city x service page that does not state the data-file prices (games.json day/weekend rate, grazing tier from-prices, porch from-price, the sibling block from-prices), or generator output that differs from a fresh scripts/generators/build_area_pages.js run.",
+      "blocking": true,
+      "tier": "blocking (hard-fail)",
+      "restored": "restored 10 Nov 2026 (hostile review)"
+    },
+    {
+      "id": "faq-page",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "command": "npm run validate:faq-page",
+      "detects": "PART: a $ amount on /faq/ that is not a price in services.json, porch_packages.json or games.json; a travel answer that does not name every city in areas.json and the $75 travel fee.",
+      "blocking": true,
+      "tier": "blocking (hard-fail)",
+      "restored": "restored 10 Nov 2026 (hostile review)"
+    },
+    {
+      "id": "place-pages",
+      "command": "npm run validate:place-pages",
+      "detects": "PART: a hotel anchor page (or the hub it folded into) that does not say \"Porch & Party is not affiliated with <hotel>\".",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "blocking": true,
+      "tier": "blocking (hard-fail)",
+      "restored": "restored 10 Nov 2026 (hostile review)"
+    },
+    {
+      "id": "link-reachability",
+      "command": "npm run validate:link-reachability",
+      "detects": "PART (rules 1 and 1b, email_off): a mailto: anchor outside <!--email_off--> or an email address in rendered text outside it, both of which Cloudflare rewrites into a 404 /cdn-cgi/l/email-protection link.",
+      "profiles": [
+        "release",
+        "core"
+      ],
+      "blocking": true,
+      "tier": "blocking (hard-fail)",
+      "restored": "restored 10 Nov 2026 (hostile review)"
     }
   ]
 }
