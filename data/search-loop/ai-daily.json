@@ -151,6 +151,30 @@
           "ChatGPT-User (ChatGPT fetch)": 20
         }
       }
+    },
+    "2026-11-10": {
+      "ai_visitors": {
+        "total": 0,
+        "by_engine": {},
+        "by_path": {},
+        "source": "web-analytics"
+      },
+      "ai_bot_hits": {
+        "total": 261,
+        "by_bot": {
+          "OAI-SearchBot (ChatGPT search)": 43,
+          "PerplexityBot": 8,
+          "ClaudeBot": 19,
+          "Claude-User": 19,
+          "Amazonbot": 38,
+          "CCBot (Common Crawl)": 22,
+          "GPTBot (OpenAI training)": 18,
+          "DuckAssistBot": 24,
+          "Perplexity-User": 10,
+          "Bytespider": 34,
+          "ChatGPT-User (ChatGPT fetch)": 26
+        }
+      }
     }
   }
 }

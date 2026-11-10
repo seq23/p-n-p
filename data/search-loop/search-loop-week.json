@@ -2,37 +2,19 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W46",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-10T00:04:12.591Z",
+  "generated_at": "2026-11-10T13:32:18.195Z",
   "state": "running",
   "published": 8,
   "indexed": "not read: no page old enough to inspect yet (14 days)",
   "pace": 10,
   "ai_visitors": 0,
-  "ai_bot_hits": 714,
+  "ai_bot_hits": 951,
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
   "wins": 0,
   "undone": 0,
   "merged": 0,
   "held_by_cap": 0,
   "redirected": [
-    {
-      "query": "birthday party planners near me rates",
-      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-03"
-    },
-    {
-      "query": "birthday party event planner",
-      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-03"
-    },
-    {
-      "query": "kids birthday party planner",
-      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "matched_by": "same 3 intent words plus modifiers",
-      "at": "2026-11-03"
-    },
     {
       "query": "birthday party planner near me",
       "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
@@ -137,7 +119,7 @@
     "why": "up from 22 to 25: Google impressions 100 in the last 28 days beat 66 in the 28 before"
   },
   "notes": [
-    "reshape: /questions/party-rentals-memphis re-rendered (lead)"
+    "BUILD published 0 of quota 10: 0 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
   ],
   "lanes": {
     "ratio": {
@@ -165,5 +147,5 @@
     "weight_changes": [],
     "competition": "ok: 15 top-10 read(s) via brave"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42725387176"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/42825384447"
 }
