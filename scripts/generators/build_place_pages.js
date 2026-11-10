@@ -36,7 +36,6 @@
  * contact block). --force overrides and is greppable.
  *
  * Usage: node scripts/generators/build_place_pages.js [--check] [--force]
- * Guarded by npm run validate:place-pages.
  */
 const fs = require('fs');
 const HC = require('../lib/hub_consolidation');

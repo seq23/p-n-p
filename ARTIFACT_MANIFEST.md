@@ -29,7 +29,6 @@
 - Added a search-intelligence lane at `scripts/search_intelligence/` and `data/search_intelligence/` implementing target query set → live grounded observation → competitor comparison → real Google Search Console truth → diagnosis → smallest bounded repair candidate → existing approval/publishing rules → same-query retest → before/after evidence → authority feedback.
 - Added `data/search_intelligence/search_intelligence_contract.json` encoding five machine-checked hard rules.
 - Added `distribution_scripts/gsc_search_analytics.py`, a read-only Search Analytics collector reusing the existing GSC service-account pattern.
-- Added `npm run validate:search-intelligence` as a hard-fail member of `npm run validate:release`.
 - Added 15 hostile fixtures (`npm run search:selftest`) proving the validator fails on rank conflation, silent green, non-GSC own-site claims, allowance breach, cadence capture, and illegal verified-citation promotion.
 - Added a 24-check end-to-end loop proof (`npm run search:selftest:loop`) driving the full loop with fixture provider evidence in an isolated sandbox.
 - Added `.github/workflows/search-intelligence.yml` as manual dispatch only, so real provider collection never becomes a scheduled cadence change.

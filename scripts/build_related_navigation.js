@@ -400,7 +400,6 @@ for (const page of pages) {
 const unclassified = pages.filter((p) => p.slug !== 'index' && !p.territories.length)
   .map((p) => p.rel);
 
-// --check is the currency gate (npm run validate:related-nav-current). A page
 // whose related-pages block differs from a fresh build is out of date: a page it
 // should link to was renamed, added or removed after the block was written. The
 // marker-presence check in validate_retrofit_integrity.js cannot see that - on

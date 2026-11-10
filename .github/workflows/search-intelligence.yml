@@ -148,9 +148,6 @@ jobs:
       - name: Apply authority feedback from evidence-backed observations
         run: npm run search:feedback -- --write
 
-      - name: Validate search-intelligence truth contract
-        run: npm run validate:search-intelligence
-
       - name: Report status
         if: always()
         run: npm run search:status

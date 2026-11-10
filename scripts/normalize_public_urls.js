@@ -22,7 +22,6 @@
  * `build_related_navigation.js` — decides the public form, from the single
  * definition in `scripts/lib/site_url.js`.
  *
- * `npm run validate:canonical-resolves` then asserts the result independently,
  * so this pass is guarded rather than trusted.
  *
  * It is idempotent: running it twice changes nothing the second time, which is

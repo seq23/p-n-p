@@ -17,7 +17,6 @@
  *
  * Idempotent. Hard-fails when the plan names zero hubs, a hub file is missing, or a hub has no
  * anchor to insert before. --check exits 1 when any file would change.
- * Guarded by npm run validate:hub-consolidation.
  */
 const fs = require('fs');
 const path = require('path');

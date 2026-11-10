@@ -24,7 +24,6 @@
  * Rule 0: this never exits 0 having silently done nothing. Every run prints what
  * it queued and names every row still waiting for a draft, with its age. A row
  * past the cadence week without a draft is a hard failure in
- * `npm run validate:backlog-reaches-builder`, which validate:release runs.
  */
 import fs from 'node:fs';
 import path from 'node:path';

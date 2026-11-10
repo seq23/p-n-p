@@ -4,7 +4,6 @@
  * pending ones or naming a missing link-back. Each case is a negative proof:
  * a watch that skipped the rule would leave a visible difference this fails on.
  *
- * Run: npm run self-test:entity-backlink-watch
  */
 import fs from 'node:fs';
 import os from 'node:os';
