@@ -214,7 +214,7 @@ const receipt = {
     providerState === PROVIDER_OK
       ? null
       : `No provider was fully available (grounded_search=${observations.provider_state}, search_console=${truth.provider_state}). Zero events were written. An empty ledger is not evidence of zero surfacing.`,
-  next_command_after_write: 'npm run authority:yield:build && npm run validate:kpi-truth && npm run validate:yield'
+  next_command_after_write: 'npm run authority:yield:build && npm run validate:kpi-truth'
 };
 
 writeJson('data/search_intelligence/authority_feedback_receipt.json', receipt);

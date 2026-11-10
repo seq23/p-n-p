@@ -25,7 +25,6 @@
  *
  * Idempotent: a second run writes nothing. Runs last in build:all, after the
  * generators and the other install passes, so nothing re-renders over it.
- * Guarded by npm run validate:social-tags.
  */
 const fs = require('fs');
 const path = require('path');

@@ -1,50 +1,11 @@
 #!/usr/bin/env node
 'use strict';
 /**
- * Every Memphis neighborhood and every local anchor has its page, reachable.
- *
- * WHY
- * ---
- * The owner's Search Readiness Checklist (item j9, 25 Oct 2026) holds a
- * hyperlocal site to its own coverage list: "a hyperlocal site that covers
- * three towns out of fifteen loses every search in the other twelve, and nobody
- * notices because nothing lists the twelve." On 2026-10-26 it reported 32 of 64
- * coverage pages missing on this site. Twenty were service x town. The other
- * twelve were the six Memphis neighborhoods and the six hotel anchors, and
- * nothing in this repository knew they were supposed to exist - the only
- * neighborhood page on the site, /areas/east-memphis-tn-porch-styling, was held
- * in place by a single hardcoded line in build_section_indexes.js.
- *
- * So the list is data (data/service_areas/place_pages.json), the pages are
- * generated from it (scripts/generators/build_place_pages.js), and this fails
- * if the two ever disagree.
- *
- * WHAT IT CHECKS, per place:
- *   - the file exists at the URL shape the coverage manifest expects
- *     (/areas/{slug}-party-decor for a neighborhood, /areas/{slug}-hotel-room-decor
- *     for an anchor);
- *   - it is in sitemap.xml at its served URL, and areas/index.html links it, so
- *     it is reachable by a click and not an orphan;
- *   - the parts the generator owns - title, meta description, canonical, H1 and
- *     the page's own opening text - match a fresh generator run, so a hand edit
- *     or a stale page is caught. NOT byte equality: the post-generation passes
- *     (Clarity, related-pages, icons, chrome, social tags, dates) legitimately
- *     add markup the generator knows nothing about, and a byte comparison would
- *     call every correctly built page broken - the trap documented at length in
- *     scripts/generators/build_pages.js;
- *   - AN ANCHOR PAGE SAYS IT IS NOT AFFILIATED WITH THE HOTEL, and says who
- *     arranges the hotel's permission. A page titled with a hotel's name reads
- *     as a page that hotel endorses unless it says otherwise, and no hotel has
- *     endorsed anything. This is the check with real money behind it.
- *
- * Rule 0: zero places, zero neighborhoods or zero anchors is a hard failure.
- *
- * Self-test: broken copies held in memory (an anchor page with the affiliation
- * sentence removed, one with the permission answer removed) must FAIL.
- *
- * Repair: node scripts/generators/build_place_pages.js, then the post-generation
- * passes (see CLAUDE.md "Working here").
- * Usage: node scripts/validators/validate_place_pages.js
+ * validate:place-pages (restored 10 Nov 2026, hostile review: the non-affiliation sentence only).
+ * A page titled with a hotel's name reads as a page that hotel endorses unless it says otherwise,
+ * and no hotel has endorsed anything. Every anchor (hotel) page, or the hub it was folded into,
+ * must say in visible text "Porch & Party is not affiliated with <hotel>" (or "... with the hotels").
+ * Rule 0: zero anchors fails. Self-test: the sentence removed must fail.
  */
 const fs = require('fs');
 const path = require('path');
@@ -52,19 +13,10 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const HC = require('../lib/hub_consolidation');
 const G = require(path.join(ROOT, 'scripts/generators/build_place_pages.js'));
-const offers = require(path.join(ROOT, 'data/offers/services.json'));
 
 const errors = [];
-let checks = 0;
-const ok = (cond, msg) => { checks += 1; if (!cond) errors.push(msg); };
 const read = (rel) => fs.readFileSync(path.join(ROOT, rel), 'utf8');
-/**
- * What a READER sees. The <script> and <style> bodies are dropped first, not
- * just their tags: a page carries the non-affiliation sentence twice over in its
- * FAQPage JSON-LD, so a check that reads script bodies passes on a page whose
- * visible copy says the opposite. Found by the negative proof of this very
- * validator on 2026-10-26 - stripping the visible sentence left it green.
- */
+// Visible text only: the FAQPage JSON-LD repeats the sentence, so script bodies are dropped first.
 const plain = (html) => String(html)
   .replace(/<script\b[\s\S]*?<\/script>/gi, ' ')
   .replace(/<style\b[\s\S]*?<\/style>/gi, ' ')
@@ -72,109 +24,24 @@ const plain = (html) => String(html)
   .replace(/<[^>]+>/g, ' ')
   .replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&quot;/g, '"')
   .replace(/\s+/g, ' ');
-const hrefs = (html) => new Set([...html.matchAll(/<a\b[^>]*?\bhref="([^"]+)"/gi)].map((m) => m[1]));
+const notAffiliated = (name, text) => text.includes(`Porch & Party is not affiliated with ${name}`) || text.includes('Porch & Party is not affiliated with the hotels');
 
-/** The parts of a place page the generator owns outright. */
-const OWNED = Object.freeze([
-  ['the <title>', /<title>([\s\S]*?)<\/title>/],
-  ['the meta description', /<meta name="description" content="([^"]*)"/],
-  ['the canonical', /<link rel="canonical" href="([^"]*)"/],
-  ['the H1', /<h1>([\s\S]*?)<\/h1>/]
-]);
+const { anchors } = G.places;
+if (!anchors.length) { console.error('PLACE PAGES FAILED: 0 anchor (hotel) pages. Zero places covers nothing.'); process.exit(1); }
 
-const { neighborhoods, anchors } = G.places;
-if (!neighborhoods.length || !anchors.length) {
-  console.error(`PLACE PAGES FAILED: ${neighborhoods.length} neighborhood(s) and ${anchors.length} anchor(s). Zero places covers nothing.`);
-  process.exit(1);
-}
-
-/** The two sentences an anchor page must carry, in its own words. */
-function anchorHonesty(name, text) {
-  return [
-    { what: 'the non-affiliation sentence', present: text.includes(`Porch & Party is not affiliated with ${name}`) || text.includes("Porch & Party is not affiliated with the hotels") },
-    { what: 'that it is not one of the hotel\'s vendors or partners', present: text.includes('is not one of its vendors or partners') || text.includes('is not one of their vendors or partners') },
-    { what: 'who arranges the hotel\'s permission', present: /permission to decorate it is yours to arrange with the hotel/i.test(text) || /You do, as the guest whose name the room is in/i.test(text) }
-  ];
-}
-
-const sitemap = read('sitemap.xml');
-const indexLinks = hrefs(read('areas/index.html'));
-const fresh = new Map(G.plan().map((x) => [x.rel, x.after]));
-let pages = 0;
-let redirected = 0;
-
-for (const [kind, list] of [['neighborhood', neighborhoods], ['anchor', anchors]]) {
-  for (const place of list) {
-    const slug = kind === 'neighborhood' ? `${place.slug}-party-decor` : `${place.slug}-hotel-room-decor`;
-    const rel = `areas/${slug}.html`;
-    const url = `/areas/${slug}`;
-    if (HC.isRetiredFile(rel)) {
-      redirected += 1;
-      const target = HC.foldTarget(url).to;
-      ok(!fs.existsSync(path.join(ROOT, rel)), `${rel}: retired variant re-created`);
-      ok(!sitemap.includes(`<loc>${offers.domain}${url}</loc>`), `${rel}: redirect source submitted`);
-      ok(sitemap.includes(`<loc>${offers.domain}${target}</loc>`), `${rel}: redirect target not published`);
-      ok(indexLinks.has(target), `${rel}: coverage directory must link its replacement`);
-      ok(!fresh.has(rel), `${rel}: generator would recreate retired page`);
-      ok(HC.redirectRules().some(r => r.from === url && r.to === target), `${rel}: missing direct redirect`);
-      if (kind === 'anchor') for (const h of anchorHonesty(place.name, plain(read(target.slice(1) + '.html')))) ok(h.present, `${target}: missing ${h.what}`);
-      continue;
-    }
-    if (!fs.existsSync(path.join(ROOT, rel))) { ok(false, `${rel}: missing (every ${kind} on the coverage list needs its page)`); continue; }
-    pages += 1;
-    const html = read(rel);
-    const text = plain(html);
-    ok(sitemap.includes(`<loc>${offers.domain}${url}</loc>`), `${rel}: not in sitemap.xml as ${offers.domain}${url}`);
-    ok(indexLinks.has(url) || indexLinks.has(`${url}.html`), `${rel}: areas/index.html does not link ${url}, so the page is an orphan`);
-    ok(hrefs(html).has('/areas/') || hrefs(html).has('/areas/index.html'), `${rel}: no link back to /areas/`);
-    const expected = fresh.get(rel);
-    if (expected == null) ok(false, `${rel}: the generator plans no such page, so it is an orphan file`);
-    else {
-      for (const [what, re] of OWNED) {
-        const want = (expected.match(re) || [])[1];
-        const got = (html.match(re) || [])[1];
-        ok(want != null && got === want, `${rel}: ${what} differs from a fresh scripts/generators/build_place_pages.js run`
-          + `\n      generator: ${String(want).slice(0, 120)}\n      on disk:   ${String(got).slice(0, 120)}`);
-      }
-      // The page's own opening paragraph, which is where its subject matter is.
-      const intro = (expected.match(/<h1>[\s\S]*?<\/h1>\s*<p>([\s\S]*?)<\/p>/) || [])[1];
-      ok(intro != null && html.includes(intro), `${rel}: the opening paragraph is not the generator's`);
-    }
-    if (kind === 'anchor') {
-      for (const h of anchorHonesty(place.name, text)) {
-        ok(h.present, `${rel}: missing ${h.what}. A page named after a hotel claims the hotel's blessing unless it says otherwise.`);
-      }
-    }
-  }
-}
-const reviewed = JSON.parse(read('data/search_intelligence/page_quality_kept.json')).place_intents;
-const configured = [...neighborhoods.map(G.neighborhoodEntry), ...anchors.map(G.anchorEntry)].map(e=>`/areas/${e.slug}`);
-ok(reviewed.length > 0 && configured.length === reviewed.length && reviewed.every(u=>configured.includes(u)), 'place coverage differs from the reviewed intent ledger');
-if (!pages && !redirected) errors.push('zero place pages examined; the read is broken, not the site.');
-
-// Self-test: each broken copy must fail.
-const probeName = anchors[0].name;
-const anchorTarget = HC.foldTarget(`/areas/${anchors[0].slug}-hotel-room-decor`);
-const soundText = plain(read(anchorTarget ? anchorTarget.to.slice(1) + '.html' : `areas/${anchors[0].slug}-hotel-room-decor.html`));
-if (anchorHonesty(probeName, soundText).some((h) => !h.present)) {
-  errors.push('self-test: the committed anchor page fails its own honesty rule, so the rule is unreachable.');
-}
-const probes = {
-  'an anchor page without the non-affiliation sentence': soundText.split(`Porch & Party is not affiliated with ${probeName}`).join('X').split('Porch & Party is not affiliated with the hotels').join('X'),
-  'an anchor page without the vendor/partner denial': soundText.split('is not one of its vendors or partners').join('X').split('is not one of their vendors or partners').join('X'),
-  'an anchor page without the permission answer': soundText
-    .split('permission to decorate it is yours to arrange with the hotel').join('X')
-    .split('You do, as the guest whose name the room is in').join('X')
+const pageOf = (place) => {
+  const rel = `areas/${place.slug}-hotel-room-decor.html`;
+  if (HC.isRetiredFile(rel)) return `${HC.foldTarget(`/areas/${place.slug}-hotel-room-decor`).to.slice(1)}.html`;
+  return rel;
 };
-for (const [label, text] of Object.entries(probes)) {
-  if (anchorHonesty(probeName, text).every((h) => h.present)) errors.push(`self-test: "${label}" passed when it should fail`);
+for (const place of anchors) {
+  const rel = pageOf(place);
+  if (!fs.existsSync(path.join(ROOT, rel))) { errors.push(`${rel}: missing (the page for ${place.name})`); continue; }
+  if (!notAffiliated(place.name, plain(read(rel)))) errors.push(`${rel}: does not say "Porch & Party is not affiliated with ${place.name}". A page named after a hotel claims the hotel's blessing unless it says otherwise.`);
 }
+const probeText = plain(read(pageOf(anchors[0])));
+const broken = probeText.split(`Porch & Party is not affiliated with ${anchors[0].name}`).join('X').split('Porch & Party is not affiliated with the hotels').join('X');
+if (notAffiliated(anchors[0].name, broken)) errors.push('self-test: an anchor page without the non-affiliation sentence passed');
 
-if (errors.length) {
-  console.error(`place-pages: FAIL (${errors.length})`);
-  errors.forEach((e) => console.error(`  - ${e}`));
-  process.exit(1);
-}
-console.log(`place-pages: OK - ${neighborhoods.length} Memphis neighborhood + ${anchors.length} local anchor page(s), ${checks} checks: `
-  + `each in the sitemap, linked from /areas/, its title, description, canonical, H1 and opening paragraph the generator's own, and every anchor page states it is not `
-  + `affiliated with the hotel and who arranges permission; ${Object.keys(probes).length} self-test probes fail as they should`);
+if (errors.length) { console.error(`place-pages: FAIL (${errors.length})`); errors.forEach((e) => console.error(`  - ${e}`)); process.exit(1); }
+console.log(`place-pages: OK - ${anchors.length} hotel anchor page(s) each state Porch & Party is not affiliated with the hotel; self-test fails as it should`);

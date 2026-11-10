@@ -31,7 +31,6 @@
  *
  * Usage: node scripts/generators/build_area_pages.js
  * Re-running it and then the build:all passes is byte-identical (checked 21 Oct 2026).
- * Guarded by npm run validate:area-pages.
  */
 const fs = require('fs');
 const path = require('path');

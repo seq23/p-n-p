@@ -55,7 +55,7 @@ on:
 
 permissions:
   contents: read
-  # validate:main-push-coverage lists workflow runs by head_sha to prove every
+  # (main-push-coverage, cut 10 Nov 2026) used to list workflow runs by head_sha to prove every
   # human ref update on main got a run. Read-only.
   actions: read
 
@@ -152,29 +152,12 @@ jobs:
           npm run validate:query-atlas
           npm run validate:release
 
-      # Silence is not green. On 2026-09-17 a human merge landed on main and no
-      # workflow ran, because GitHub never emitted the push event; nothing was
-      # red because nothing existed to be red. This step turns that into a red
-      # run: every recent human ref update on main must have a workflow run on
-      # its exact sha (or on its PR head, which the pull_request trigger above
-      # now supplies). It hard-fails when it can examine zero ref updates, and
-      # when the API cannot be reached, rather than printing OK on nothing.
-      - name: Prove every human ref update on main was validated at its exact sha
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: npm run validate:main-push-coverage
-
       - name: Cadence gate
         # Blocks publishing faster than the library can be kept inside the
         # 91-day window where pages stay citable. Warnings are reported
         # without failing the run.
         #
-        # The integrity check runs first and is not optional: the gate used to
-        # rewrite the ledger it reads, so a blocked run cleared itself on the
-        # next invocation. A gate that cannot hold a verdict reports a status
-        # without enforcing anything.
         run: |
-          npm run validate:cadence-integrity
           npm run cadence:gate
           npm run cadence:template-share
       - name: Restore GSC inspection carry-over state

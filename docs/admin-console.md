@@ -962,7 +962,6 @@ Password. Every form, field and button that was there is still there and saves t
   analytics are not the poll timing out**: they carry user agent `nginx-ssl early hints` (Cloudflare's
   own Early Hints probe, one beside every poll, 143 in the 24 h to 31 Oct 2026) while the poll's
   `curl` requests answered 200 every time. Filter by user agent before calling this endpoint slow.
-  Guard: `npm run validate:inventory-pending-budget`.
   The workflow reports back to `POST /api/inventory/report` (HMAC, `PNP_INVENTORY_REPORT_KEY` on both
   GitHub and Pages). Inventory (and Settings) show "Website updating…", then "Live ✓" only when
   porchandparty901.com/rentals/ carries the new `<meta name="pnp-inventory">` version; a failure

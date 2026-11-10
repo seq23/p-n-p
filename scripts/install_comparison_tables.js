@@ -44,7 +44,6 @@
  * writing nothing and reporting OK.
  *
  * Usage: node scripts/install_comparison_tables.js
- * Guarded by npm run validate:comparison-tables.
  */
 const fs = require('fs');
 const path = require('path');
