@@ -322,7 +322,7 @@ Facebook Page: https://www.facebook.com/porchandparty901
 
 ## Game Night bundle
 
-**Title:** RENTAL ONLY: Game Night Bundle, card table + 2 games, $85/day, Memphis pickup  
+**Title:** RENTAL ONLY: Game Night, card table + any 2 games (Uno, Grab the Mic), $85/day, Memphis pickup  
 **Category:** Party Supplies  
 **Price:** $85 (per day)  
 **Photo:** `assets/rentals/bundles/bundle-game-night.jpg`
