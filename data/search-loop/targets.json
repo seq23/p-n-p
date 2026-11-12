@@ -694,6 +694,15 @@
   ],
   "strengthen": [
     {
+      "query": "local event planners near me",
+      "page": "/questions/local-party-planners-near-me",
+      "url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "score": 97.1,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "at": "2026-11-12"
+    },
+    {
       "query": "baby birthday party",
       "page": "/services/birthday-party-planner-memphis",
       "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",

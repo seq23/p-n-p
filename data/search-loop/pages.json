@@ -291,7 +291,8 @@
       "checks": {},
       "extra_queries": [
         "party planning near me",
-        "local party planners"
+        "local party planners",
+        "local event planners near me"
       ],
       "indexnow_at": "2026-11-09"
     },
@@ -787,6 +788,26 @@
         "b5 FAQ answer is 27 words (aim 40-60): \"How do I find out the cost of your services?\"",
         "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)"
       ]
+    },
+    {
+      "query": "halloween party near me",
+      "at": "2026-11-12",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 18 words (aim 40-60): \"What areas do you serve for Halloween party decora\"",
+        "b5 FAQ answer is 23 words (aim 40-60): \"How does the setup process work for my event?\"",
+        "b5 FAQ answer is 19 words (aim 40-60): \"Can you decorate our office lobby for Halloween?\"",
+        "b5 FAQ answer is 20 words (aim 40-60): \"Where do I pick up party game rentals?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)"
+      ]
+    },
+    {
+      "query": "halloween rentals near me",
+      "at": "2026-11-12",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)"
+      ]
     }
   ],
   "redirected": [
@@ -979,6 +1000,16 @@
       "matched_by": "high token overlap (0.60 >= 0.6)",
       "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
       "stage": "draft"
+    },
+    {
+      "query": "local event planners near me",
+      "at": "2026-11-12",
+      "url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "route": "/questions/local-party-planners-near-me",
+      "kind": "engine",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "matched_text": "local party planners near me",
+      "stage": "search"
     }
   ]
 }

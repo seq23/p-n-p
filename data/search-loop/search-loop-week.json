@@ -2,13 +2,13 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W46",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-11T13:32:22.892Z",
+  "generated_at": "2026-11-12T13:32:29.008Z",
   "state": "running",
   "published": 8,
   "indexed": "not read: no page old enough to inspect yet (14 days)",
   "pace": 10,
   "ai_visitors": 0,
-  "ai_bot_hits": 936,
+  "ai_bot_hits": 805,
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
   "wins": 0,
   "undone": 0,
@@ -110,6 +110,12 @@
       "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
       "matched_by": "high token overlap (0.60 >= 0.6)",
       "at": "2026-11-09"
+    },
+    {
+      "query": "local event planners near me",
+      "strengthen": "https://porchandparty901.com/questions/local-party-planners-near-me",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "at": "2026-11-12"
     }
   ],
   "cap": {
@@ -119,7 +125,8 @@
     "why": "up from 22 to 25: Google impressions 100 in the last 28 days beat 66 in the 28 before"
   },
   "notes": [
-    "BUILD published 0 of quota 10: 0 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
+    "BUILD distinct gate: 1 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
+    "BUILD published 0 of quota 10: 2 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
   ],
   "lanes": {
     "ratio": {
@@ -147,5 +154,5 @@
     "weight_changes": [],
     "competition": "ok: 15 top-10 read(s) via brave"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/43030006255"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/43228237910"
 }
