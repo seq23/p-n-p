@@ -190,7 +190,7 @@
       "family": "services",
       "source": "legacy_public_authority_baseline",
       "admitted_at": "2026-07-24",
-      "content_sha256": "58bf0faf5d5491947ef619aaeee712affd8beee9f4c369f735b42e722b0d808a"
+      "content_sha256": "70d3de1e160123cf29fe7de69e96e8c6e3c5a029a6fe876fcd6d81783767ed3c"
     },
     {
       "route": "/services/index",
