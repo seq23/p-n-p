@@ -59,7 +59,7 @@ const PAGES = [
     key: 'hotel', file: 'services/hotel-room-decor-memphis.html', url: SP.FOCUS.hotel, parent: 'party', anchor: 'hotel-room-setups',
     request: 'party', areaService: 'party-decor', from: SP.partyFrom,
     title: 'Hotel Room Setups in Memphis | Porch &amp; Party',
-    description: `Hotel room decoration service in Memphis and nearby: romantic, anniversary, proposal and birthday setups from ${money(SP.partyFrom)}, with rose petals, LED candles and balloons, ready before you arrive.`,
+    description: `Memphis hotel room setups from ${money(SP.partyFrom)} for anniversaries, proposals and birthdays, with rose petals, LED candles and balloons ready before you arrive.`,
     eyebrow: 'Hotel Room Setups', h1: 'Hotel room setups in Memphis',
     crumb: 'Hotel Room Setups',
     targets: ['hotel room decoration memphis', 'hotel room decoration service near me', 'romantic hotel room setup memphis', 'anniversary hotel room decor memphis', 'proposal hotel room decor memphis', 'birthday hotel room decor memphis'],
