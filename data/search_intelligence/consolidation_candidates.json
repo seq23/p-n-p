@@ -2,8 +2,8 @@
   "schema_version": "1.0",
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
-  "gsc_window": "2026-10-11..2026-11-07",
-  "coverage_collected_at": "2026-11-10T16:07:17.026198+00:00",
+  "gsc_window": "2026-10-13..2026-11-09",
+  "coverage_collected_at": "2026-11-12T16:07:11.132233+00:00",
   "url_count": 54,
   "roles": {
     "candidate": 21,
@@ -133,7 +133,7 @@
       "url": "https://porchandparty901.com/",
       "file": "index.html",
       "role": "root",
-      "impressions_28d": 103,
+      "impressions_28d": 128,
       "clicks_28d": 7,
       "word_count": 1982,
       "coverage_state": "Submitted and indexed",
@@ -609,7 +609,7 @@
       "impressions_28d": 0,
       "clicks_28d": 0,
       "word_count": 639,
-      "coverage_state": "Crawled - currently not indexed",
+      "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": null,
       "fold_rule": null
     }

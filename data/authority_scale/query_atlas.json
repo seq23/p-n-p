@@ -53,7 +53,7 @@
       "photo-ready-event-styling"
     ]
   },
-  "evidence_backed_count": 39,
+  "evidence_backed_count": 42,
   "rejected_policy": "A query whose disposition begins REJECTED_ in data/demand/measured_demand.json, or on its own evidence row, is excluded from this atlas entirely. It is recorded below so the exclusion is visible, and it is never publishable.",
   "rejected_count": 3,
   "rejected": [
@@ -96,7 +96,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 77,
+      "impressions_90d": 44,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -113,7 +113,7 @@
         "format": null,
         "semantic_cluster": "party-decor"
       },
-      "rank_score": 38.5,
+      "rank_score": 22,
       "publishable": true
     },
     {
@@ -121,7 +121,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 24,
+      "impressions_90d": 27,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -138,7 +138,7 @@
         "format": null,
         "semantic_cluster": "birthday-party-decor"
       },
-      "rank_score": 12,
+      "rank_score": 13.5,
       "publishable": true
     },
     {
@@ -146,7 +146,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 18,
+      "impressions_90d": 19,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -163,7 +163,7 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 9,
+      "rank_score": 9.5,
       "publishable": true
     },
     {
@@ -171,7 +171,7 @@
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 18,
+      "impressions_90d": 19,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -188,15 +188,15 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 9,
+      "rank_score": 9.5,
       "publishable": true
     },
     {
-      "query": "event planning services",
+      "query": "birthday party planner near me",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 15,
+      "impressions_90d": 16,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -206,14 +206,14 @@
       "target_domain": "porchandparty901.com",
       "inherited": {
         "taxonomy_source": "fanout_dimensions",
-        "topic": "event decorator",
-        "topic_confidence": 0.431,
-        "audience": "event hosts",
+        "topic": "birthday party decor",
+        "topic_confidence": 0.749,
+        "audience": "birthday hosts",
         "modifier": null,
         "format": null,
-        "semantic_cluster": "event-decorator"
+        "semantic_cluster": "birthday-party-decor"
       },
-      "rank_score": 7.5,
+      "rank_score": 8,
       "publishable": true
     },
     {
@@ -267,7 +267,7 @@
       "publishable": true
     },
     {
-      "query": "birthday party planner near me",
+      "query": "party planners",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
@@ -281,12 +281,12 @@
       "target_domain": "porchandparty901.com",
       "inherited": {
         "taxonomy_source": "fanout_dimensions",
-        "topic": "birthday party decor",
-        "topic_confidence": 0.749,
-        "audience": "birthday hosts",
+        "topic": "party decor",
+        "topic_confidence": 0.57,
+        "audience": null,
         "modifier": null,
         "format": null,
-        "semantic_cluster": "birthday-party-decor"
+        "semantic_cluster": "party-decor"
       },
       "rank_score": 7,
       "publishable": true
@@ -317,36 +317,11 @@
       "publishable": true
     },
     {
-      "query": "party planners",
+      "query": "event planning services",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
       "impressions_90d": 13,
-      "demand_basis": "impressions_90d",
-      "rank_band": "own_impressions",
-      "keyword_difficulty": null,
-      "weak_incumbent_score": 0.5,
-      "intent": null,
-      "intent_method": null,
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "party decor",
-        "topic_confidence": 0.57,
-        "audience": null,
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "party-decor"
-      },
-      "rank_score": 6.5,
-      "publishable": true
-    },
-    {
-      "query": "event management near me",
-      "evidence_tier": "T1",
-      "source_type": "gsc_search_analytics",
-      "search_volume": null,
-      "impressions_90d": 10,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -363,11 +338,36 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 5,
+      "rank_score": 6.5,
       "publishable": true
     },
     {
-      "query": "event planning services near me",
+      "query": "event management near me",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 11,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "event decorator",
+        "topic_confidence": 0.431,
+        "audience": "event hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "event-decorator"
+      },
+      "rank_score": 5.5,
+      "publishable": true
+    },
+    {
+      "query": "event planner near me",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
@@ -417,36 +417,11 @@
       "publishable": true
     },
     {
-      "query": "event planner near me",
-      "evidence_tier": "T1",
-      "source_type": "gsc_search_analytics",
-      "search_volume": null,
-      "impressions_90d": 9,
-      "demand_basis": "impressions_90d",
-      "rank_band": "own_impressions",
-      "keyword_difficulty": null,
-      "weak_incumbent_score": 0.5,
-      "intent": null,
-      "intent_method": null,
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "event decorator",
-        "topic_confidence": 0.431,
-        "audience": "event hosts",
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "event-decorator"
-      },
-      "rank_score": 4.5,
-      "publishable": true
-    },
-    {
       "query": "party planners memphis",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 9,
+      "impressions_90d": 10,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -463,15 +438,15 @@
         "format": null,
         "semantic_cluster": "party-decor"
       },
-      "rank_score": 4.5,
+      "rank_score": 5,
       "publishable": true
     },
     {
-      "query": "event management services near me",
+      "query": "event planning services near me",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
       "search_volume": null,
-      "impressions_90d": 5,
+      "impressions_90d": 9,
       "demand_basis": "impressions_90d",
       "rank_band": "own_impressions",
       "keyword_difficulty": null,
@@ -488,7 +463,32 @@
         "format": null,
         "semantic_cluster": "event-decorator"
       },
-      "rank_score": 2.5,
+      "rank_score": 4.5,
+      "publishable": true
+    },
+    {
+      "query": "event management services near me",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 6,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "event decorator",
+        "topic_confidence": 0.431,
+        "audience": "event hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "event-decorator"
+      },
+      "rank_score": 3,
       "publishable": true
     },
     {
@@ -567,31 +567,6 @@
       "publishable": true
     },
     {
-      "query": "balloon artist near me",
-      "evidence_tier": "T1",
-      "source_type": "gsc_search_analytics",
-      "search_volume": null,
-      "impressions_90d": 2,
-      "demand_basis": "impressions_90d",
-      "rank_band": "own_impressions",
-      "keyword_difficulty": null,
-      "weak_incumbent_score": 0.5,
-      "intent": null,
-      "intent_method": null,
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "balloon and backdrop styling",
-        "topic_confidence": 0.373,
-        "audience": null,
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "balloon-and-backdrop-styling"
-      },
-      "rank_score": 1,
-      "publishable": true
-    },
-    {
       "query": "corporate party",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
@@ -609,6 +584,31 @@
         "topic": "party decor",
         "topic_confidence": 0.57,
         "audience": "corporate teams",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "party-decor"
+      },
+      "rank_score": 1,
+      "publishable": true
+    },
+    {
+      "query": "party planner memphis",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 2,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "party decor",
+        "topic_confidence": 0.57,
+        "audience": null,
         "modifier": null,
         "format": null,
         "semantic_cluster": "party-decor"
@@ -687,6 +687,31 @@
         "modifier": null,
         "format": null,
         "semantic_cluster": "party-decor"
+      },
+      "rank_score": 0.5,
+      "publishable": true
+    },
+    {
+      "query": "balloon artist near me",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 1,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "balloon and backdrop styling",
+        "topic_confidence": 0.373,
+        "audience": null,
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "balloon-and-backdrop-styling"
       },
       "rank_score": 0.5,
       "publishable": true
@@ -792,6 +817,31 @@
       "publishable": true
     },
     {
+      "query": "birthday party planner memphis",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 1,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "birthday party decor",
+        "topic_confidence": 0.749,
+        "audience": "birthday hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "birthday-party-decor"
+      },
+      "rank_score": 0.5,
+      "publishable": true
+    },
+    {
       "query": "engagement party",
       "evidence_tier": "T1",
       "source_type": "gsc_search_analytics",
@@ -812,6 +862,56 @@
         "modifier": null,
         "format": null,
         "semantic_cluster": "party-decor"
+      },
+      "rank_score": 0.5,
+      "publishable": true
+    },
+    {
+      "query": "event management",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 1,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "event decorator",
+        "topic_confidence": 0.431,
+        "audience": "event hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "event-decorator"
+      },
+      "rank_score": 0.5,
+      "publishable": true
+    },
+    {
+      "query": "event planning for parties memphis",
+      "evidence_tier": "T1",
+      "source_type": "gsc_search_analytics",
+      "search_volume": null,
+      "impressions_90d": 1,
+      "demand_basis": "impressions_90d",
+      "rank_band": "own_impressions",
+      "keyword_difficulty": null,
+      "weak_incumbent_score": 0.5,
+      "intent": null,
+      "intent_method": null,
+      "target_domain": "porchandparty901.com",
+      "inherited": {
+        "taxonomy_source": "fanout_dimensions",
+        "topic": "event decorator",
+        "topic_confidence": 0.431,
+        "audience": "event hosts",
+        "modifier": null,
+        "format": null,
+        "semantic_cluster": "event-decorator"
       },
       "rank_score": 0.5,
       "publishable": true
@@ -937,31 +1037,6 @@
         "modifier": null,
         "format": null,
         "semantic_cluster": "event-decorator"
-      },
-      "rank_score": 0.5,
-      "publishable": true
-    },
-    {
-      "query": "party planner memphis",
-      "evidence_tier": "T1",
-      "source_type": "gsc_search_analytics",
-      "search_volume": null,
-      "impressions_90d": 1,
-      "demand_basis": "impressions_90d",
-      "rank_band": "own_impressions",
-      "keyword_difficulty": null,
-      "weak_incumbent_score": 0.5,
-      "intent": null,
-      "intent_method": null,
-      "target_domain": "porchandparty901.com",
-      "inherited": {
-        "taxonomy_source": "fanout_dimensions",
-        "topic": "party decor",
-        "topic_confidence": 0.57,
-        "audience": null,
-        "modifier": null,
-        "format": null,
-        "semantic_cluster": "party-decor"
       },
       "rank_score": 0.5,
       "publishable": true

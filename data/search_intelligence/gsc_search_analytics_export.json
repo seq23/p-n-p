@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-11",
-  "end_date": "2026-11-07",
-  "collected_at": "2026-11-10T16:06:32.764779+00:00",
+  "start_date": "2026-10-13",
+  "end_date": "2026-11-09",
+  "collected_at": "2026-11-12T16:06:25.616377+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -52,6 +52,33 @@
     },
     {
       "keys": [
+        "birthday party planner"
+      ],
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "birthday party planner memphis"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "birthday party planner near me"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "engagement party"
       ],
       "clicks": 0,
@@ -61,7 +88,34 @@
     },
     {
       "keys": [
+        "event management"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "event management near me"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "event management services near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "event planner near me"
       ],
       "clicks": 0,
       "impressions": 1,
@@ -71,6 +125,15 @@
     {
       "keys": [
         "event planning for parties"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 1.5
+    },
+    {
+      "keys": [
+        "event planning for parties memphis"
       ],
       "clicks": 0,
       "impressions": 1,
@@ -145,6 +208,51 @@
         "party planner"
       ],
       "clicks": 0,
+      "impressions": 3,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planner memphis"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planner near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planners"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planners memphis"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planners near me"
+      ],
+      "clicks": 0,
       "impressions": 2,
       "ctr": 0,
       "position": 1
@@ -157,6 +265,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 14
+    },
+    {
+      "keys": [
+        "porch"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 6
     }
   ],
   "by_page": [
@@ -165,9 +282,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 7,
-      "impressions": 103,
-      "ctr": 0.06796116504854369,
-      "position": 5.310679611650485
+      "impressions": 128,
+      "ctr": 0.0546875,
+      "position": 5.078125
     },
     {
       "keys": [
@@ -198,12 +315,30 @@
     },
     {
       "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYY1Cbw97V_87_iNoeG8IB1JzUjiXnPFj5lFFUmYxTzGRto4VWNOHmtpXS8sYxkJVWCBcXSzV9AvXBOY8rxFYDWuFnzNAg%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 4
+    },
+    {
+      "keys": [
         "https://porchandparty901.com/request?rwg_token=ALcMQYY7mnqurFul8IcJXK0oAVIeTO_A33-rheBwX-sm-0ied6vMA52mL0rTOnVioGmUWVA37oY9iqsxW7Zd0JkY7nBZgJJmuQ%3D%3D"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
       "position": 3
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYY82AGgmIND4J0NhG72PlZQH_0byzvN-rgam7WCkEF7j6U6Y5xNHv8GaejX2CeqrNxevwrbtC9cQjIM44g9Rsi1mEcv-A%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 41
     },
     {
       "keys": [
@@ -270,6 +405,24 @@
     },
     {
       "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYahHUzuxZj2J8m6ea1SdE9pl8Dzqy2PprAAC6UUSO9M6oWDOixTNVMorx5wggD8ezqt_o-y__ehcv6aEw9klvJF3jH8yg%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 17
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYalTw722wVCcBzh_0wQaBWawUBgDbFhUggGXPqXp6B3LSVEgtB2ELAwl9cnnaQU6Q8cfVuE02QLxZ7VaICyKK8ms5V3Yw%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 14
+    },
+    {
+      "keys": [
         "https://porchandparty901.com/request?rwg_token=ALcMQYb6CpsZo5CeFJB0NELEn2-H06Whyb5rV5nRhyuPDAZ1LveI0b6n8ivqf2_S3-Zmn_R8d3gQqJWQYYImslJCymy0djnSRA%3D%3D"
       ],
       "clicks": 0,
@@ -312,6 +465,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 12
+    },
+    {
+      "keys": [
+        "https://porchandparty901.com/request?rwg_token=ALcMQYbudI-aZ-uC8QkaoYBgVhxpA0dpFntZJIGhjwzaFkw0abyUiSkLB22POncmqifbz1vzjlVWfQiodF_PKMHkiYTP7QCR9A%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 6
     }
   ],
   "by_query_page": [
@@ -377,6 +539,36 @@
     },
     {
       "keys": [
+        "birthday party planner",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 4,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "birthday party planner memphis",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "birthday party planner near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "engagement party",
         "https://porchandparty901.com/"
       ],
@@ -397,7 +589,37 @@
     },
     {
       "keys": [
+        "event management",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "event management near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "event management services near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "event planner near me",
         "https://porchandparty901.com/"
       ],
       "clicks": 0,
@@ -408,6 +630,16 @@
     {
       "keys": [
         "event planning for parties",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 1.5
+    },
+    {
+      "keys": [
+        "event planning for parties memphis",
         "https://porchandparty901.com/"
       ],
       "clicks": 0,
@@ -501,7 +733,7 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 3,
       "ctr": 0,
       "position": 1
     },
@@ -547,6 +779,56 @@
     },
     {
       "keys": [
+        "party planner memphis",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planner near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planners",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planners memphis",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "party planners near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 2,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "party rentals memphis",
         "https://porchandparty901.com/"
       ],
@@ -554,12 +836,32 @@
       "impressions": 1,
       "ctr": 0,
       "position": 14
+    },
+    {
+      "keys": [
+        "porch",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 6
+    },
+    {
+      "keys": [
+        "porch",
+        "https://porchandparty901.com/request?rwg_token=ALcMQYbudI-aZ-uC8QkaoYBgVhxpA0dpFntZJIGhjwzaFkw0abyUiSkLB22POncmqifbz1vzjlVWfQiodF_PKMHkiYTP7QCR9A%3D%3D"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 6
     }
   ],
   "counts": {
-    "by_query": 16,
-    "by_page": 17,
-    "by_query_page": 24
+    "by_query": 29,
+    "by_page": 22,
+    "by_query_page": 38
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
