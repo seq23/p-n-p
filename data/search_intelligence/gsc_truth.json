@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "provider_truth",
-  "generated_at": "2026-11-12T16:06:25.616Z",
+  "generated_at": "2026-11-13T16:07:36.768Z",
   "own_site_google_performance_authority": "google_search_console",
   "provider_state": "OK",
   "provider_states": [
@@ -11,7 +11,7 @@
       "provider_id": "google_search_console",
       "state": "OK",
       "reason": "REAL_EXPORT_INGESTED",
-      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-11-12T16:06:25.616377+00:00 rows={\"by_query\":29,\"by_page\":22,\"by_query_page\":38}"
+      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-11-13T16:07:36.768121+00:00 rows={\"by_query\":29,\"by_page\":22,\"by_query_page\":38}"
     }
   ],
   "overall_status": "OK",
@@ -19,24 +19,24 @@
   "export_path": "data/search_intelligence/gsc_search_analytics_export.json",
   "export_problem": null,
   "export_window": {
-    "start_date": "2026-10-13",
-    "end_date": "2026-11-09"
+    "start_date": "2026-10-14",
+    "end_date": "2026-11-10"
   },
-  "export_collected_at": "2026-11-12T16:06:25.616377+00:00",
+  "export_collected_at": "2026-11-13T16:07:36.768121+00:00",
   "export_counts": {
     "by_query": 29,
     "by_page": 22,
     "by_query_page": 38
   },
-  "requested_for_date": "2026-11-12",
+  "requested_for_date": "2026-11-13",
   "target_count": 31,
   "targets_with_gsc_rows": 29,
-  "total_impressions": 149,
+  "total_impressions": 151,
   "total_clicks": 7,
   "site_totals": {
     "basis": "by_page rows of the Search Console export (complete; by_query omits anonymised queries)",
     "clicks": 7,
-    "impressions": 149,
+    "impressions": 151,
     "pages_with_impressions": 22,
     "queries_with_impressions": 29,
     "query_row_impressions": 83,
@@ -244,9 +244,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 7,
-        "impressions": 128,
-        "ctr": 0.0546875,
-        "gsc_average_position": 5.078125
+        "impressions": 130,
+        "ctr": 0.05384615384615385,
+        "gsc_average_position": 5.207692307692308
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -295,9 +295,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 7,
-        "impressions": 128,
-        "ctr": 0.0546875,
-        "gsc_average_position": 5.078125
+        "impressions": 130,
+        "ctr": 0.05384615384615385,
+        "gsc_average_position": 5.207692307692308
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -318,9 +318,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 7,
-        "impressions": 128,
-        "ctr": 0.0546875,
-        "gsc_average_position": 5.078125
+        "impressions": 130,
+        "ctr": 0.05384615384615385,
+        "gsc_average_position": 5.207692307692308
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -528,9 +528,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 7,
-        "impressions": 128,
-        "ctr": 0.0546875,
-        "gsc_average_position": 5.078125
+        "impressions": 130,
+        "ctr": 0.05384615384615385,
+        "gsc_average_position": 5.207692307692308
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -596,9 +596,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 7,
-        "impressions": 128,
-        "ctr": 0.0546875,
-        "gsc_average_position": 5.078125
+        "impressions": 130,
+        "ctr": 0.05384615384615385,
+        "gsc_average_position": 5.207692307692308
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -619,9 +619,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 7,
-        "impressions": 128,
-        "ctr": 0.0546875,
-        "gsc_average_position": 5.078125
+        "impressions": 130,
+        "ctr": 0.05384615384615385,
+        "gsc_average_position": 5.207692307692308
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -642,9 +642,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 7,
-        "impressions": 128,
-        "ctr": 0.0546875,
-        "gsc_average_position": 5.078125
+        "impressions": 130,
+        "ctr": 0.05384615384615385,
+        "gsc_average_position": 5.207692307692308
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
