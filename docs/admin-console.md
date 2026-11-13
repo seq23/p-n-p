@@ -1125,7 +1125,8 @@ email's last box (`todo-email.mjs`). Proof: `npm run validate:admin-id-auto-dele
   "detail","due","link"}]}`, kinds deadline / money / renewal / id_delete / mark_done / post / other.
   The items are the 7 AM to-do email's own list (`functions/_lib/owner-feed.mjs` maps `todoData()`
   from `todo-email.mjs`, never a second copy); `week` adds the "Your week" figures, the jobs of the
-  next 7 days and any Marketplace renewal day. 401 without the right token (constant-time compare),
+  next 7 days (no Marketplace renew item: Facebook does not offer Renew on these listings, removed
+  13 Nov 2026). 401 without the right token (constant-time compare),
   no CORS, never cached. Validator: `validate:owner-feed` (proves the feed and the email match for
   one fixture).
 - **Source tags:** `/request?src=<tag>` (mailer-38117, hotel, hoa, school, facebook, instagram,

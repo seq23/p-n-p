@@ -17,13 +17,14 @@
 //               "title": str, "detail": str, "due": ISO|null, "link": url|null,
 //               "actions"?: [{"label": str, "href": url}]}]}
 // range=day : the 7 AM email's list for today (red "check these first", sections 1-5, Tomorrow,
-//             Tidy up, the IDs box) + the Marketplace renewal when today is a renew day.
+//             Tidy up, the IDs box).
 // range=week: the day list + the "Your week" figures (the Monday box, shown every day here) + the
 //             jobs of the next 7 days after tomorrow (weekly.mjs, the same 14-day list the Monday
-//             box counts) + every Marketplace renewal day in the next 7 days.
+//             box counts).
+// No Marketplace "renew" item (removed 13 Nov 2026): Facebook does not offer "Renew listing" on
+// these listings, so nobody could carry it out. The kind 'renewal' stays in the contract, unused.
 import { todoData, WEEK_ROWS } from './todo-email.mjs';
 import { weeklyData } from './weekly.mjs';
-import { isRenewDay, LISTINGS } from './marketplace-renew.mjs';
 import { chicagoDate, dayWords, timeWords } from './reminders.mjs';
 import { b64urlText } from './util.mjs';
 import { addDays } from './calendar.mjs';
@@ -34,7 +35,6 @@ export const FEED_KINDS = ['deadline', 'money', 'renewal', 'id_delete', 'mark_do
 export const FEED_RANGES = ['day', 'week'];
 export const TOKEN_NAME = 'OWNER_FEED_TOKEN';
 const SECTION_KIND = { 1: 'deadline', 2: 'other', 3: 'deadline', 4: 'other', 5: 'money' };
-const SELLING = 'https://www.facebook.com/marketplace/you/selling';
 
 const abs = (href) => (href && href.startsWith('/') ? `${SITE}${href}` : (/^https:\/\//.test(href || '') ? href : null));
 // Money opens its payment confirmation; other items keep their Open card link.
@@ -73,8 +73,6 @@ export function feedItemsFromTodo(d) {
   return out;
 }
 
-const renewItem = (day) => item('renewal', 'Renew the Facebook Marketplace listings', `Tap "Renew listing" on each of the ${LISTINGS.length} listings (never delete and re-add)`, day, SELLING);
-
 // The whole feed from D1. now = the request time.
 export async function buildOwnerFeed(env, range, now = new Date()) {
   await useInventory(env);
@@ -95,8 +93,6 @@ export async function buildOwnerFeed(env, range, now = new Date()) {
       }
     }
   }
-  const days = week ? Array.from({ length: 7 }, (_, i) => addDays(today, i)) : [today];
-  for (const day of days) if (isRenewDay(day)) items.push(renewItem(day));
   return { generated_at: now.toISOString(), range: week ? 'week' : 'day', items };
 }
 

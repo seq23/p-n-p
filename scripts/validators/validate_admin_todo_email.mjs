@@ -334,6 +334,10 @@ must(todos().length === 1 && /already sent/.test(r2.todo && r2.todo.skipped), 'a
 await mailer.runReminders(env, new Date('2026-10-20T13:00:00Z'));
 await mailer.runReminders(env, new Date('2026-10-20T23:00:00Z'));
 must(todos().length === 1, 'another hour of the same day sent the to-do email');
+// 4 PM Memphis on a 7th day from 16 Oct (CDT 30 Oct, CST 6 Nov): no Marketplace renew reminder (removed 13 Nov 2026).
+{ const n = sent.length;
+  const r4 = [await mailer.runReminders(env, new Date('2026-10-30T21:00:00Z')), await mailer.runReminders(env, new Date('2026-11-06T22:00:00Z'))];
+  must(sent.length === n && !sent.some((m) => /renew|marketplace/i.test(`${m.subject} ${m.text}`)) && r4.every((r) => !('marketplaceRenew' in r)), 'the 4 PM cron on a 7th day sent a Marketplace renew reminder'); }
 failNext = true;
 const rf = await mailer.runReminders(env, new Date('2026-10-21T12:00:00Z'));
 must(rf.todo && !rf.todo.ok && !(await s.one("SELECT value FROM settings WHERE key = 'todo_email_day' AND value = '2026-10-21'")), 'a failed send did not release the day\'s claim');

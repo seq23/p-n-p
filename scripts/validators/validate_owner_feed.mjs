@@ -9,7 +9,8 @@
  *     a kind outside deadline|money|renewal|id_delete|mark_done|post|other, a due that is not ISO
  *     or null, a link that is not an https URL or null;
  *  3. range=week lacks the "Your week" figures the Monday email shows (same rows), the jobs of the
- *     next 7 days, or the Marketplace renewal day; range=day shows a renewal on a non-renew day;
+ *     next 7 days; any range, on any day (every 7th day from 16 Oct 2026 included), carries a
+ *     Marketplace "renew" item (Facebook does not offer Renew on these listings: removed 13 Nov 2026);
  *  4. auth drifts: no header, a wrong token, a token with the secret unset, or a Basic header gets
  *     anything but 401; the compare is not constant-time (hashed + XOR); any CORS header is sent;
  *     POST / OPTIONS are not 405; a bad range is not 400; the feed writes to the database;
@@ -69,7 +70,7 @@ const countsBefore = await counts();
 const feed = await OF.buildOwnerFeed(env, 'day', NOW);
 const parts = { missed: d.missed.length, s1: d.sections[1].length, s2: d.sections[2].length, s3: d.sections[3].length, s4: d.sections[4].length, s5: d.sections[5].length, tomorrow: d.tomorrowJobs.length, tidy: d.tidy.length, ids: d.ids.length };
 for (const [k, n] of Object.entries(parts)) must(n > 0, `Rule 0: the fixture has no "${k}" items, so the parity check cannot see that part (${JSON.stringify(parts)})`);
-const listed = feed.items.filter((x) => x.kind !== 'renewal');
+const listed = feed.items;
 const tidyTitles = new Set(d.tidy.map((t) => t.t));
 const dashLines = mail.split('\n').filter((l) => l.startsWith('- ')).map((l) => l.slice(2));
 const nonTidy = listed.filter((x) => !(x.kind === 'mark_done' && tidyTitles.has(x.title)));
@@ -90,7 +91,6 @@ must(listed.filter((x) => d.sections[1].some((m) => m.t === x.title)).every((x) 
 must(listed.filter((x) => d.tomorrowJobs.some((m) => m.t === x.title)).every((x) => x.due === addDays(TODAY, 1)), 'Tomorrow is not due tomorrow');
 const hold = listed.find((x) => /Waiting for deposit/.test(x.title));
 must(hold && hold.due === '2026-10-20T20:00:00.000Z', `the hold's due is not its end time (${hold && hold.due})`);
-must(feed.items.filter((x) => x.kind === 'renewal').length === 0, 'range=day shows a Marketplace renewal on a non-renew day');
 // Static: owner-feed.mjs maps todoData, never its own queries.
 const ofSrc = fs.readFileSync(path.join(ROOT, 'functions/_lib/owner-feed.mjs'), 'utf8');
 must(/import \{ todoData, WEEK_ROWS \} from '\.\/todo-email\.mjs'/.test(ofSrc) && !/\.prepare\(|SELECT |INSERT |UPDATE |DELETE /.test(ofSrc), 'owner-feed.mjs queries the database itself instead of mapping todoData() (two lists)');
@@ -116,10 +116,12 @@ const mon = T.renderTodo(await T.todoData(db, '2026-10-26', Date.parse('2026-10-
 must(T.WEEK_ROWS(dw.week).every(([k]) => mon.text.includes(`- ${k}: `)), 'the Monday email does not carry the same Your week rows');
 must(wk.items.some((x) => x.kind === 'deadline' && /Wes W\./.test(x.title) && x.due === '2026-10-24'), 'range=week lacks a job 4 days ahead');
 must(wk.items.filter((x) => /Tia T\./.test(x.title)).length === 1, 'range=week lists tomorrow\'s job twice');
-must(wk.items.filter((x) => x.kind === 'renewal').length === 1 && wk.items.find((x) => x.kind === 'renewal').due === '2026-10-23', 'range=week lacks the 23 Oct Marketplace renewal');
 must(JSON.stringify(wk.items.slice(0, listed.length)) === JSON.stringify(listed), 'range=week does not start with the day list');
-const fri = await OF.buildOwnerFeed(env, 'day', new Date('2026-10-23T12:00:00Z'));
-must(fri.items.some((x) => x.kind === 'renewal' && x.due === '2026-10-23' && /facebook\.com\/marketplace/.test(x.link)), 'range=day on a renew day lacks the renewal');
+// No Marketplace renew ask, ever: the week holding a 7th day (23 Oct), and the 7th days themselves.
+const isRenewAsk = (x) => x.kind === 'renewal' || /renew|facebook\.com/i.test(JSON.stringify(x));
+const seventh = [];
+for (const iso of ['2026-10-23T12:00:00Z', '2026-10-30T21:00:00Z', '2026-11-13T13:00:00Z']) for (const range of ['day', 'week']) seventh.push(...(await OF.buildOwnerFeed(env, range, new Date(iso))).items);
+must(seventh.length > 0 && ![...feed.items, ...wk.items, ...seventh].some(isRenewAsk), 'the feed asks someone to renew the Marketplace listings (Facebook does not offer Renew on them)');
 must(await counts() === countsBefore && JSON.stringify(await s.all("SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name")) === before, 'building the feed changed the database');
 
 // ---- 4. auth and the route ---------------------------------------------------------------------
@@ -152,4 +154,4 @@ if (errors.length) {
   for (const e of errors) console.error(`- ${e}`);
   process.exit(1);
 }
-console.log(`validate_owner_feed: OK (${checks} checks: the feed is the 7 AM email's list in order for one fixture, exact shape, week = Your week + next 7 days + renewal, 401 without the token, constant-time compare, no CORS, read-only)`);
+console.log(`validate_owner_feed: OK (${checks} checks: the feed is the 7 AM email's list in order for one fixture, exact shape, week = Your week + next 7 days, never a Marketplace renew item, 401 without the token, constant-time compare, no CORS, read-only)`);
