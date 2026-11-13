@@ -14,14 +14,11 @@
 //                "Your week" box, so Monday is ONE email (no separate weekly summary);
 //   every hour   the ID clock and the 90-day delete (functions/_lib/id-auto.mjs): website-form IDs
 //                delete themselves 90 days after they are ready (R2 binding IDS); Google-form
-//                IDs (Drive) never. Runs before the 7 AM email so its last box is current;
-//   4 PM Memphis every 7th day from 16 Oct 2026 - the owner's Marketplace "Renew listing"
-//                reminder (functions/_lib/marketplace-renew.mjs), claimed per due date.
+//                IDs (Drive) never. Runs before the 7 AM email so its last box is current.
 import { sendEmailReminders, chicagoHour } from '../../../functions/_lib/reminders.mjs';
 import { expireHolds } from '../../../functions/_lib/holds.mjs';
 import { sendThankYous, sendHoldReminders } from '../../../functions/_lib/customer-messages.mjs';
 import { sendTodoEmail, isTodoHour } from '../../../functions/_lib/todo-email.mjs';
-import { sendMarketplaceRenew } from '../../../functions/_lib/marketplace-renew.mjs';
 import { receiveOutreach } from '../../../functions/_lib/outreach-inbound.mjs';
 import { autoDeleteIds } from '../../../functions/_lib/id-auto.mjs';
 import { mailerCallerOk } from '../../../functions/_lib/mailer-auth.mjs';
@@ -47,7 +44,6 @@ export async function runReminders(env, now = new Date()) {
   const hourly = { expiredHolds: await expireHolds(env.DB, now.getTime()), holdReminders: await sendHoldReminders(mailEnv(env), now.getTime()) };
   try { hourly.ids = await autoDeleteIds(env, { now: now.getTime() }); } catch (e) { hourly.ids = { ok: false, error: String(e && e.message ? e.message : e) }; }
   if (isTodoHour(now)) hourly.todo = await sendTodoEmail(env, { now, send: (m) => sendOne(env, m) });
-  hourly.marketplaceRenew = await sendMarketplaceRenew(env, { now, send: (m) => sendOne(env, m) });
   if (chicagoHour(now) !== 10) return { ...hourly, daily: `not 10 AM in Memphis (hour ${chicagoHour(now)})` };
   const reminders = await sendEmailReminders(env.DB, (m) => sendOne(env, m), now, FROM.email);
   const thankYous = await sendThankYous(mailEnv(env), now);
