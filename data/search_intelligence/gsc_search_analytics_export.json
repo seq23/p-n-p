@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-14",
-  "end_date": "2026-11-10",
-  "collected_at": "2026-11-13T16:07:36.768121+00:00",
+  "start_date": "2026-10-15",
+  "end_date": "2026-11-11",
+  "collected_at": "2026-11-14T16:05:40.429189+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -274,6 +274,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 6
+    },
+    {
+      "keys": [
+        "spa party near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 9
     }
   ],
   "by_page": [
@@ -281,19 +290,19 @@
       "keys": [
         "https://porchandparty901.com/"
       ],
-      "clicks": 7,
-      "impressions": 130,
-      "ctr": 0.05384615384615385,
-      "position": 5.207692307692308
+      "clicks": 8,
+      "impressions": 136,
+      "ctr": 0.058823529411764705,
+      "position": 5.154411764705882
     },
     {
       "keys": [
         "https://porchandparty901.com/request"
       ],
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "ctr": 0,
-      "position": 3
+      "position": 5.5
     },
     {
       "keys": [
@@ -856,12 +865,22 @@
       "impressions": 1,
       "ctr": 0,
       "position": 6
+    },
+    {
+      "keys": [
+        "spa party near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 9
     }
   ],
   "counts": {
-    "by_query": 29,
+    "by_query": 30,
     "by_page": 22,
-    "by_query_page": 38
+    "by_query_page": 39
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
