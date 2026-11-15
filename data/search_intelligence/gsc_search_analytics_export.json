@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-15",
-  "end_date": "2026-11-11",
-  "collected_at": "2026-11-14T16:05:40.429189+00:00",
+  "start_date": "2026-10-16",
+  "end_date": "2026-11-12",
+  "collected_at": "2026-11-15T16:05:17.162170+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -277,12 +277,30 @@
     },
     {
       "keys": [
+        "rentals for birthday parties"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 12
+    },
+    {
+      "keys": [
         "spa party near me"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
       "position": 9
+    },
+    {
+      "keys": [
+        "the porch"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 7
     }
   ],
   "by_page": [
@@ -291,18 +309,18 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 8,
-      "impressions": 136,
-      "ctr": 0.058823529411764705,
-      "position": 5.154411764705882
+      "impressions": 141,
+      "ctr": 0.05673758865248227,
+      "position": 5.141843971631205
     },
     {
       "keys": [
         "https://porchandparty901.com/request"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 3,
       "ctr": 0,
-      "position": 5.5
+      "position": 4.333333333333334
     },
     {
       "keys": [
@@ -868,6 +886,16 @@
     },
     {
       "keys": [
+        "rentals for birthday parties",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 12
+    },
+    {
+      "keys": [
         "spa party near me",
         "https://porchandparty901.com/"
       ],
@@ -875,12 +903,22 @@
       "impressions": 1,
       "ctr": 0,
       "position": 9
+    },
+    {
+      "keys": [
+        "the porch",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 7
     }
   ],
   "counts": {
-    "by_query": 30,
+    "by_query": 32,
     "by_page": 22,
-    "by_query_page": 39
+    "by_query_page": 41
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
