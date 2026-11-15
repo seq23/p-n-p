@@ -808,6 +808,26 @@
       "reason": [
         "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1)"
       ]
+    },
+    {
+      "query": "halloween party near me",
+      "at": "2026-11-15",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1); these failed the check, replace each with a page that exists: https://www.census.gov/library/stories/state-by-state/tennessee-population-change.html (HTTP 404)"
+      ]
+    },
+    {
+      "query": "halloween rentals near me",
+      "at": "2026-11-15",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 24 words (aim 40-60): \"What areas do you serve?\"",
+        "b5 FAQ answer is 25 words (aim 40-60): \"How does porch decorating work?\"",
+        "b5 FAQ answer is 21 words (aim 40-60): \"How do I find out the exact cost?\"",
+        "b5 FAQ answer is 23 words (aim 40-60): \"How do game rentals work?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.loc.gov/item/today-in-history/october-31/ (HTTP 403: this site refuses automated checks, so cite a different publisher); https://www.noaa.gov/jetstream/synoptic/seasons (HTTP 404)"
+      ]
     }
   ],
   "redirected": [
