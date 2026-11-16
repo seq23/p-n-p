@@ -1,14 +1,14 @@
 {
   "schema": "search-loop-week-v1",
-  "week": "2026-W46",
+  "week": "2026-W47",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-15T13:32:20.609Z",
+  "generated_at": "2026-11-16T13:49:34.201Z",
   "state": "running",
   "published": 3,
   "indexed": "not read: no page old enough to inspect yet (14 days)",
   "pace": 10,
   "ai_visitors": 0,
-  "ai_bot_hits": 996,
+  "ai_bot_hits": 853,
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
   "wins": 0,
   "undone": 0,
@@ -16,44 +16,65 @@
   "held_by_cap": 0,
   "redirected": [
     {
-      "query": "party planning near me",
-      "strengthen": "https://porchandparty901.com/questions/local-party-planners-near-me",
-      "matched_by": "high token overlap (0.67 >= 0.6)",
-      "at": "2026-11-09"
-    },
-    {
-      "query": "local party planners",
-      "strengthen": "https://porchandparty901.com/questions/local-party-planners-near-me",
-      "matched_by": "high token overlap (0.67 >= 0.6)",
-      "at": "2026-11-09"
-    },
-    {
-      "query": "event planners for birthday parties",
-      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-09"
-    },
-    {
-      "query": "baby birthday party",
-      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-09"
-    },
-    {
       "query": "local event planners near me",
       "strengthen": "https://porchandparty901.com/questions/local-party-planners-near-me",
       "matched_by": "high token overlap (0.75 >= 0.6)",
       "at": "2026-11-12"
+    },
+    {
+      "query": "grazing table for graduation party",
+      "strengthen": "https://porchandparty901.com/services/grazing-and-event-styling",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-16"
+    },
+    {
+      "query": "grazing table for engagement party",
+      "strengthen": "https://porchandparty901.com/services/grazing-and-event-styling",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-16"
+    },
+    {
+      "query": "rentals for birthday parties",
+      "strengthen": "https://porchandparty901.com/services/party-decor-memphis",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-16"
+    },
+    {
+      "query": "grazing table for party",
+      "strengthen": "https://porchandparty901.com/services/grazing-and-event-styling",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-16"
+    },
+    {
+      "query": "grazing table for christmas party",
+      "strengthen": "https://porchandparty901.com/services/grazing-and-event-styling",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-16"
+    },
+    {
+      "query": "giant lawn game rentals",
+      "strengthen": "https://porchandparty901.com/questions/giant-yard-game-rentals",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-16"
+    },
+    {
+      "query": "giant outdoor game hire",
+      "strengthen": "https://porchandparty901.com/questions/giant-yard-game-rentals",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-16"
     }
   ],
   "cap": {
-    "max_live_pages": 25,
-    "live": 8,
+    "max_live_pages": 28,
+    "live": 11,
     "room": 17,
-    "why": "up from 22 to 25: Google impressions 100 in the last 28 days beat 66 in the 28 before"
+    "why": "up from 25 to 28: Google impressions 147 in the last 28 days beat 53 in the 28 before"
   },
   "notes": [
-    "BUILD published 0 of quota 10: 2 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
+    "cap: up from 25 to 28: Google impressions 147 in the last 28 days beat 53 in the 28 before",
+    "BUILD distinct gate: 7 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
+    "BUILD gate notes (not blocking): 1 published page(s) are outside a length or style aim; each is listed under gate_notes in pages.json",
+    "IndexNow: 3 new page(s) not live yet; submitted when they answer 200"
   ],
   "lanes": {
     "ratio": {
@@ -61,13 +82,13 @@
       "striking": 1
     },
     "can_be_one": {
-      "pages": 2,
+      "pages": 3,
       "measured": 0,
       "top3": 0,
       "hit_rate": "not read: no page in this lane has reached its 2-week check yet"
     },
     "striking": {
-      "pages": 6,
+      "pages": 8,
       "measured": 0,
       "top3": 0,
       "hit_rate": "not read: no page in this lane has reached its 2-week check yet"
@@ -81,5 +102,5 @@
     "weight_changes": [],
     "competition": "ok: 15 top-10 read(s) via brave"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/43719501987"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/43879486832"
 }

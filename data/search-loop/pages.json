@@ -427,6 +427,162 @@
         "b5 FAQ answer is 39 words (aim 40-60): \"What is included in our grazing tables?\""
       ],
       "indexnow_at": "2026-11-09"
+    },
+    {
+      "slug": "party-rental-games-near-me",
+      "query": "party rental games near me",
+      "lane": "can_be_one",
+      "score": 57.5,
+      "scores": {
+        "striking": 25,
+        "can_be_one": 57.5
+      },
+      "reasons": [
+        "easy-win neighbour of \"birthday party planner near me\" (top 1 with 2 impressions)",
+        "no site page answers this 4-word question, and the site holds its parts at position 1",
+        "weak top 10 (0): 0 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question",
+        "people search it (autocomplete or impressions)"
+      ],
+      "signals": {
+        "words": 5,
+        "question": false,
+        "bing_suggest": true,
+        "local": true,
+        "neighbour": {
+          "sim": 0.5,
+          "of": "birthday party planner near me",
+          "why": "top 1 with 2 impressions"
+        },
+        "unanswered": {
+          "words": 4,
+          "covered": 0.25,
+          "parts_best_position": 1,
+          "parts_rows": 7
+        },
+        "top10": {
+          "provider": "brave",
+          "weakness": 0,
+          "counts": {
+            "results": 10,
+            "directories": 0,
+            "forums": 0,
+            "off_target_national": 0,
+            "thin_or_old": 0,
+            "exact_answer": 0
+          },
+          "reasons": [
+            "top 10: 0 directories, 0 forums, 0 off-target national, 0 thin or old, 0 answer the exact question"
+          ]
+        }
+      },
+      "rel": "questions/party-rental-games-near-me.html",
+      "route": "/questions/party-rental-games-near-me",
+      "url": "https://porchandparty901.com/questions/party-rental-games-near-me",
+      "published_at": "2026-11-16",
+      "status": "live",
+      "hash": "8eacfb6d04d91ea28d087384539ed1966d037503ccdfe3dbc0f30f7eb6f052d8",
+      "model": "free-route",
+      "facts": [
+        "https://en.wikipedia.org/wiki/Shelby_Farms",
+        "https://www.memphistn.gov/government/engineering/"
+      ],
+      "linked_from": [],
+      "checks": {}
+    },
+    {
+      "slug": "giant-yard-game-rentals",
+      "query": "giant yard game rentals",
+      "lane": "striking",
+      "score": 40,
+      "scores": {
+        "striking": 40,
+        "can_be_one": 0
+      },
+      "reasons": [
+        "autocomplete demand (google/bing)"
+      ],
+      "signals": {
+        "words": 4,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "top10": "not read: outside this run's top-10 budget"
+      },
+      "rel": "questions/giant-yard-game-rentals.html",
+      "route": "/questions/giant-yard-game-rentals",
+      "url": "https://porchandparty901.com/questions/giant-yard-game-rentals",
+      "published_at": "2026-11-16",
+      "status": "live",
+      "hash": "76e5012eec14dd7fe127741409302d1c4a8d9a741bdddc652d7e92945d0dc83b",
+      "model": "free-route",
+      "facts": [
+        "https://en.wikipedia.org/wiki/Cornhole",
+        "https://www.nrpa.org/blog/the-importance-of-play-for-adults/"
+      ],
+      "linked_from": [
+        {
+          "rel": "services/index.html",
+          "route": "/services/",
+          "before_hash": "bd38ff90a57fee82cf9582a854d51091eff679eab01f8affd7545e7d442f7952",
+          "after_hash": "faa6e58a05d48ca56802029147d024f027ee7b5bcfb360b40bd8a4516da06009"
+        }
+      ],
+      "checks": {},
+      "extra_queries": [
+        "giant lawn game rentals",
+        "giant outdoor game hire"
+      ]
+    },
+    {
+      "slug": "party-decor-services",
+      "query": "party decor services",
+      "lane": "striking",
+      "score": 30,
+      "scores": {
+        "striking": 30,
+        "can_be_one": 0
+      },
+      "reasons": [
+        "autocomplete demand (google/bing)"
+      ],
+      "signals": {
+        "words": 3,
+        "question": false,
+        "google_suggest": true,
+        "bing_suggest": true,
+        "top10": "not read: outside this run's top-10 budget"
+      },
+      "rel": "questions/party-decor-services.html",
+      "route": "/questions/party-decor-services",
+      "url": "https://porchandparty901.com/questions/party-decor-services",
+      "published_at": "2026-11-16",
+      "status": "live",
+      "hash": "757aa057b081218310c20b6cd894db9f3ee33fe21e8912b889966f9e8c51aefb",
+      "model": "free-route",
+      "facts": [
+        "https://www.census.gov/",
+        "https://www.wikipedia.org/"
+      ],
+      "linked_from": [
+        {
+          "rel": "services/birthday-party-decor-memphis.html",
+          "route": "/services/birthday-party-decor-memphis",
+          "before_hash": "5fdbfb0564a8e4751e2d8aa48f369ecc796249d0eb669f46c2dd652e70f5638d",
+          "after_hash": "c316f3e27a5550c95f47b3f9c6f2f1139b52f11693357509f1748e9d7be198a9"
+        },
+        {
+          "rel": "services/budget-party-decor-memphis.html",
+          "route": "/services/budget-party-decor-memphis",
+          "before_hash": "06da898f6337739ab16ea8c12cb87680e42ba1423c640837ce37d353dd163819",
+          "after_hash": "c82bccb6d5f01c9e714048a07d338aa6045f23244e6c3cde7e65446559cf0c03"
+        }
+      ],
+      "checks": {},
+      "gate_notes": [
+        "b5 FAQ answer is 39 words (aim 40-60): \"Where can I pick up party game rentals?\"",
+        "b5 FAQ answer is 33 words (aim 40-60): \"Do you offer exterior styling for homes?\"",
+        "b5 FAQ answer is 39 words (aim 40-60): \"How do I find out the cost of your decor services?\""
+      ]
     }
   ],
   "dropped": [
@@ -828,6 +984,70 @@
         "b5 FAQ answer is 23 words (aim 40-60): \"How do game rentals work?\"",
         "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.loc.gov/item/today-in-history/october-31/ (HTTP 403: this site refuses automated checks, so cite a different publisher); https://www.noaa.gov/jetstream/synoptic/seasons (HTTP 404)"
       ]
+    },
+    {
+      "query": "party planners near me within 5 mi",
+      "at": "2026-11-16",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 20 words (aim 40-60): \"What areas do you serve for event planning and por\"",
+        "b5 FAQ answer is 23 words (aim 40-60): \"How do I get an exact quote for my upcoming celebr\"",
+        "b5 FAQ answer is 24 words (aim 40-60): \"Do you deliver rental games to my party location?\"",
+        "b5 FAQ answer is 23 words (aim 40-60): \"What happens on the day of my party setup?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.history.com/topics/us-states/memphis-tennessee (HTTP 404); https://www.library.nashville.org/events/exhibits/tennessee-encyclopedia-history-and-culture (HTTP 403: this site refuses automated checks, so cite a different publisher)"
+      ]
+    },
+    {
+      "query": "party decor services near me",
+      "at": "2026-11-16",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.tn.gov/about-tn/cities.html (HTTP 403: this site refuses automated checks, so cite a different publisher); https://www.germantown-tn.gov/about-us (HTTP 403: this site refuses automated checks, so cite a different publisher)"
+      ]
+    },
+    {
+      "query": "grazing table for birthday party",
+      "at": "2026-11-16",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.merriam-webster.com/dictionary/charcuterie (HTTP 403: this site refuses automated checks, so cite a different publisher); https://www.history.com/news/cheese-history-origins (HTTP 404)",
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
+    },
+    {
+      "query": "party planner memphis tn",
+      "at": "2026-11-16",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1); these failed the check, replace each with a page that exists: https://www.britannica.com/place/Germantown-Tennessee (HTTP 403: this site refuses automated checks, so cite a different publisher); https://www.census.gov/quickfacts/colliervilletowntennessee (HTTP 403: this site refuses automated checks, so cite a different publisher)",
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
+    },
+    {
+      "query": "event planner memphis tn",
+      "at": "2026-11-16",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1); these failed the check, replace each with a page that exists: https://www.tn.gov/content/dam/tn/statewidedashboard/documents/County_Profiles_Shelby.pdf (no answer); https://www.germantown-tn.gov/about-us/city-information (HTTP 403: this site refuses automated checks, so cite a different publisher)",
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
+    },
+    {
+      "query": "spa party near me",
+      "at": "2026-11-16",
+      "gate": 2,
+      "reason": [
+        "off-audience: The search term 'spa party near me' requests spa treatments or cosmetic services, which are outside the four event and d"
+      ]
+    },
+    {
+      "query": "grazing table for kids party",
+      "at": "2026-11-16",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.encyclopedia.com/places/united-states-and-canada/us-states/memphis (HTTP 404); https://tnhistoryforall.org/places/collierville/ (no answer)",
+        "invented: a named person or quote \"Memphis Request a quote from \""
+      ]
     }
   ],
   "redirected": [
@@ -1030,6 +1250,76 @@
       "matched_by": "high token overlap (0.75 >= 0.6)",
       "matched_text": "local party planners near me",
       "stage": "search"
+    },
+    {
+      "query": "grazing table for graduation party",
+      "at": "2026-11-16",
+      "url": "https://porchandparty901.com/services/grazing-and-event-styling",
+      "route": "/services/grazing-and-event-styling",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Grazing & Charcuterie Tables in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "grazing table for engagement party",
+      "at": "2026-11-16",
+      "url": "https://porchandparty901.com/services/grazing-and-event-styling",
+      "route": "/services/grazing-and-event-styling",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Grazing & Charcuterie Tables in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "rentals for birthday parties",
+      "at": "2026-11-16",
+      "url": "https://porchandparty901.com/services/party-decor-memphis",
+      "route": "/services/party-decor-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Memphis Party Decor | Celebration Setups | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "grazing table for party",
+      "at": "2026-11-16",
+      "url": "https://porchandparty901.com/services/grazing-and-event-styling",
+      "route": "/services/grazing-and-event-styling",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Grazing & Charcuterie Tables in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "grazing table for christmas party",
+      "at": "2026-11-16",
+      "url": "https://porchandparty901.com/services/grazing-and-event-styling",
+      "route": "/services/grazing-and-event-styling",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Grazing & Charcuterie Tables in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "giant lawn game rentals",
+      "at": "2026-11-16",
+      "url": "https://porchandparty901.com/questions/giant-yard-game-rentals",
+      "route": "/questions/giant-yard-game-rentals",
+      "kind": "engine",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "giant yard game rentals",
+      "stage": "search"
+    },
+    {
+      "query": "giant outdoor game hire",
+      "at": "2026-11-16",
+      "url": "https://porchandparty901.com/questions/giant-yard-game-rentals",
+      "route": "/questions/giant-yard-game-rentals",
+      "kind": "engine",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "matched_text": "Giant Yard Game Rentals in Memphis",
+      "stage": "draft"
     }
   ]
 }

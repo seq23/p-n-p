@@ -1,8 +1,8 @@
 {
   "schema": "search-loop-discovery-v1",
   "site": "porchandparty901.com",
-  "week": "2026-W46",
-  "generated_at": "2026-11-09T13:32:30.049Z",
+  "week": "2026-W47",
+  "generated_at": "2026-11-16T13:49:34.201Z",
   "paid_calls": 0,
   "cost_usd": 0,
   "hosts": {
@@ -38,16 +38,24 @@
     }
   },
   "sources": {
-    "search_console": "ok: 24 rows",
-    "bing_webmaster": "ok: 15 rows",
-    "easy_wins": "ok: 7 easy win(s) in Search Console",
+    "search_console": "ok: 42 rows",
+    "bing_webmaster": "ok: 18 rows",
+    "easy_wins": "ok: 19 easy win(s) in Search Console",
     "suggestqueries.google.com": "ok",
     "api.bing.com": "ok",
-    "relevance_screen": "ok: kept 16 of 74 (free model)",
+    "relevance_screen": "ok: kept 27 of 150 (free model)",
     "top10": "ok: 15 top-10 read(s) via brave"
   },
+  "seeds": {
+    "planned": 798,
+    "asked": 40,
+    "topics": 13,
+    "topics_asked": 13,
+    "priority_topics": 0,
+    "priority_targets": 0
+  },
   "notes": [
-    "autocomplete stopped at its budget of 80 calls"
+    "autocomplete stopped at its budget of 80 calls (40 of 798 planned questions asked)"
   ],
   "competition": "ok: 15 top-10 read(s) via brave",
   "lanes": {
@@ -55,8 +63,8 @@
       "can_be_one": 2,
       "striking": 1
     },
-    "can_be_one": 10,
-    "striking": 6,
+    "can_be_one": 13,
+    "striking": 14,
     "weights": {
       "neighbour": 35,
       "unanswered": 30,
@@ -65,9 +73,9 @@
     }
   },
   "counts": {
-    "candidates": 75,
-    "targets": 16,
-    "strengthen_candidates": 0,
+    "candidates": 383,
+    "targets": 27,
+    "strengthen_candidates": 5,
     "dropped_shared_audience": 0
   }
 }
