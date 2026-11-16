@@ -25,9 +25,9 @@
       "route": "/guides/couples-staycation-ideas-memphis",
       "rendered_file": "guides/couples-staycation-ideas-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "bc9d7d9970b5b89c7d77f810b98712c02576d5788c913e0c202544cac8139cbd",
-      "cache_file": "data/release/frozen_accepted_outputs/bc9d7d9970b5b89c7d77f810b98712c02576d5788c913e0c202544cac8139cbd.html.gz",
-      "cache_sha256": "03b07850da87b2ddc998aaefe4166f3f099beca29ca99289560030e12c1ed374",
+      "accepted_sha256": "b5b278da331602328f129616ffbd5999fb570de8cf017a11b2ab0e2761fc27b6",
+      "cache_file": "data/release/frozen_accepted_outputs/b5b278da331602328f129616ffbd5999fb570de8cf017a11b2ab0e2761fc27b6.html.gz",
+      "cache_sha256": "98b29b9b6f0a1734159afb928de3ee19aac1b1033264a2d6318ba0f286033c6c",
       "accepted_at": "2026-07-24"
     },
     {
@@ -43,9 +43,9 @@
       "route": "/guides/memphis-hotels-with-jacuzzi-in-room",
       "rendered_file": "guides/memphis-hotels-with-jacuzzi-in-room.html",
       "state": "FROZEN",
-      "accepted_sha256": "f27d80eb89b6054bc2b977df55e87de895e62102795473b7a8d437e51571df33",
-      "cache_file": "data/release/frozen_accepted_outputs/f27d80eb89b6054bc2b977df55e87de895e62102795473b7a8d437e51571df33.html.gz",
-      "cache_sha256": "4dcfd24d6bbcd8fd9bb2114d9dd50ce6aeee5b2fc75ba8da8c50afe19de81b46",
+      "accepted_sha256": "2c97943125250a41c27725acae87865a83423b384b34aebf73a99e2dabee58df",
+      "cache_file": "data/release/frozen_accepted_outputs/2c97943125250a41c27725acae87865a83423b384b34aebf73a99e2dabee58df.html.gz",
+      "cache_sha256": "4c1fc3312376b74f6ca7f078d9039c056cb26ffa7c94ba3c30ee02f1135ed762",
       "accepted_at": "2026-07-24"
     },
     {
