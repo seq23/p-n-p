@@ -84,11 +84,17 @@ export function porchQuestions(pk, td) {
   const decorHelp = `<span class="rq-range">${PP.formRangeLines(pk).map((l) => esc(l)).join('<br>')}</span><br>${esc(pk.finalQuoteLine)} <a href="${esc(pk.form.examplesHref)}" target="_blank" rel="noopener" data-porch-examples>${esc(pk.form.examplesLink)}</a>`;
   return [
     { name: 'porch_season', label: 'What season or occasion?', type: 'radio', required: true, group: 'decor', choices: [...seasons, 'Spring / Easter', 'Birthday or special moment', 'Other'] },
-    { name: 'porch_decor', label: pk.form.question, type: 'radio', group: 'decor', helpHtml: decorHelp, choices: PP.decorChoices(pk) },
+    { name: 'porch_decor', label: pk.form.question, type: 'radio', required: true, group: 'decor', helpHtml: decorHelp, choices: PP.decorChoices(pk) },
+    // Owner, 16 Nov 2026: the porch form asks for the address and enough about the porch to size the decor.
+    // No group: the address is saved as the request's Location answer, the one every card, calendar and edit reads.
+    { name: 'porch_address', label: 'Street address of the home', type: 'text', required: true, help: 'Where we decorate. Street, city and ZIP.' },
+    { name: 'porch_size', label: 'How big is your porch?', type: 'radio', required: true, group: 'decor', choices: ['A small stoop by the door', 'A standard front porch', 'A wide or wraparound porch', 'Not sure'] },
+    { name: 'porch_steps', label: 'How many steps up to the door?', type: 'radio', required: true, group: 'decor', choices: ['None', '1 to 3', '4 or more'] },
+    { name: 'porch_features', label: 'What else is there? (tick all that apply)', type: 'checks', group: 'decor', choices: ['Columns or railings', 'A double front door', 'A walkway we can decorate', 'A yard or lawn we can decorate'] },
     { name: 'porch_both', label: pk.bundle.checkbox, type: 'check', group: 'decor', help: pk.form.bothSeasonsHelp },
     { name: 'porch_addons', label: 'Add-ons', type: 'checks', group: 'decor', help: 'Want more? Tick anything you would like us to add. We price add-ons with your quote.', choices: pk.addOns.formItems },
     { name: 'porch_takedown', label: 'Want us to take it down afterwards?', type: 'radio', group: 'decor', choices: TAKEDOWN(td) },
-    { name: 'porch_notes', label: 'Notes about your porch or the look you want', type: 'textarea', group: 'decor', help: 'Steps, columns, colors, a link to a photo. Optional.' },
+    { name: 'porch_notes', label: 'Notes about your porch or the look you want', type: 'textarea', group: 'decor', help: 'Colors, the look you want, anything we should know. A photo of your porch helps us most: add one under Inspiration photos below. We don\'t put up Christmas lights.' },
   ];
 }
 
@@ -231,6 +237,13 @@ export function validateSubmission(fields, { offers, table, today, file = null }
   answers.push({ group: 'other', label: 'Who is this for?', value: clean.corporate ? 'Business' : 'Personal' });
   for (const k of services.filter((s) => s !== 'rentals')) for (const q of Q[k]) if (!q.companyOnly || clean.corporate) clean[q.name] = ask(q);
   if (services.some((s) => s !== 'rentals')) for (const q of Q.event) clean[q.name] = ask(q);
+  if (clean.porch_address) {
+    clean.location = clean.porch_address;
+    const locQ = Q.event.find((q) => q.name === 'location');
+    const i = answers.findIndex((x) => x.label === locQ.label);
+    const loc = { group: locQ.group, label: locQ.label, value: clean.porch_address };
+    if (i >= 0) answers[i] = loc; else answers.push(loc);
+  }
   if (services.includes('rentals')) {
     const items = rentalItems(table);
     const games = (Array.isArray(fields.games) ? fields.games : [fields.games]).filter(Boolean).map(String).filter((g) => items.some((i) => i.slug === g));

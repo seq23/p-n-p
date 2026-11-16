@@ -190,14 +190,14 @@ for (const sAns of ['Fall / Halloween', 'Christmas & holidays']) {
 // ---- 5. end to end ------------------------------------------------------------------
 const s = await session();
 const plus = (n) => { const d = new Date(`${F.chicagoToday()}T12:00:00Z`); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
-const sent = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', porch_both: 'yes', porch_addons: ['Lighting', 'A lamp post'], porch_notes: 'Two columns', event_date: plus(10), location: 'Germantown', name: 'Paula Package', phone: '901-555-0410', email: 'paula@example.com' });
+const sent = await s.siteRequest({ service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'classic', porch_both: 'yes', porch_addons: ['Lanterns or lit accents', 'A lamp post'], porch_notes: 'Two columns', event_date: plus(10), location: 'Germantown', name: 'Paula Package', phone: '901-555-0410', email: 'paula@example.com' });
 if (sent.status !== 303) fail(`a porch package request did not go through (${sent.status}) ${text(sent.text).slice(0, 200)}`);
 else {
   const home = text((await s.get('/admin/')).text);
   const want = `Porch: ${PP.cardLine(pk, { season: 'Fall / Halloween', decor: pk.tiers.classic.formAnswer, both: true })}`;
   if (!home.includes(want)) fail(`the card does not read "${want}"`);
   if (!home.includes(`Fall · picturing a full porch (Classic, from ${money(PP.priceOf(pk, 'fall', 'classic'))})`)) fail('the card does not read "Fall · picturing a full porch (Classic, from $…)"');
-  if (!home.includes('Add-ons: Lighting, A lamp post')) fail('the card does not list the add-ons');
+  if (!home.includes('Add-ons: Lanterns or lit accents, A lamp post')) fail('the card does not list the add-ons');
   const inv = (await s.get(`/admin/invoices/new?r=${s.rk(sent.row.request_key)}`)).text;
   const descs = [...inv.matchAll(/name="line_desc" value="([^"]*)"/g)].map((m) => m[1]);
   const prices = [...inv.matchAll(/name="line_price" type="number" step="0.01" inputmode="decimal" value="([^"]*)"/g)].map((m) => m[1]);

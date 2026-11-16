@@ -49,7 +49,10 @@ export async function session({ db = makeDb() } = {}) {
   let ipN = 0;
   async function siteRequest(fields, { file = new Uint8Array([0xff, 0xd8, 0xff, 0xda, 0, 2, 0xff, 0xd9]), cookie: c = '' } = {}) {
     const fd = new FormData();
-    const all = { ts: await RS.signTs(env, Date.now() - 10000), website: '', agree: 'yes', dob: '1990-02-03', ...fields };
+    // A porch request carries the porch questions the form requires (owner, 16 Nov 2026); a scenario may override any of them.
+    const porchy = fields.service === 'porch' || (fields.service === 'multi' && [].concat(fields.multi || []).includes('porch'));
+    const porchDefaults = porchy ? { porch_decor: 'not_sure', porch_address: fields.location || '123 Test Lane, Germantown, TN 38138', porch_size: 'A standard front porch', porch_steps: '1 to 3' } : {};
+    const all = { ts: await RS.signTs(env, Date.now() - 10000), website: '', agree: 'yes', dob: '1990-02-03', ...porchDefaults, ...fields };
     for (const [k, v] of Object.entries(all)) (Array.isArray(v) ? v : [v]).forEach((x) => { if (x !== undefined && x !== null) fd.append(k, x); });
     if (file) fd.append('id_photo', new File([file], 'id.jpg', { type: 'image/jpeg' }));
     ipN += 1;
