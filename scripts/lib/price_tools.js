@@ -83,7 +83,7 @@ function partyToolHtml() {
     + `<p class="pt-incl">${esc(PARTY.HOTEL_WINDOW)}</p>`
     + `<p class="pt-incl">For a business, ask for: ${lobby}.</p>`
     + `<p class="pt-money">${esc(DEPOSIT_LINE)}</p>`
-    + `<a class="btn-primary pt-go" href="/request?service=party#request-form" data-quote-cta="price-my-party-room">Price my party or hotel room &rsaquo;</a></article>`;
+    + `<a class="btn-primary pt-go" href="/request?service=party#request-form" data-quote-cta="price-my-party-room">Request a quote &rsaquo;</a></article>`;
 }
 
 // One small script for both tools. Plain words, the same numbers as the data above.

@@ -308,7 +308,7 @@ const ALL = () => [...PAGES.map((p) => ({ file: p.file, url: p.url, label: p.h1 
 /** The done-for-you block (owner ruling 8 Nov 2026), twice on every hotel page. */
 function doneForYou(where, lead) {
   const text = lead || 'Rather have it done for you? Porch &amp; Party brings everything and sets up the whole hotel room while you are out: petals, LED candles, balloons and a sign, ready when you walk in.';
-  return `<aside class="dfy-block" data-done-for-you="${where}"><p>${text}</p><p class="dfy-links"><a href="${PRICE_TOOL}" data-dfy-price>Price my party or hotel room &rsaquo;</a> <a href="${REQUEST}" data-dfy-request>Check my date &rsaquo;</a></p></aside>`;
+  return `<aside class="dfy-block" data-done-for-you="${where}"><p>${text}</p><p class="dfy-links"><a href="${REQUEST}" data-dfy-request>Request a quote &rsaquo;</a></p></aside>`;
 }
 
 module.exports = { PAGES, QUESTIONS, JACUZZI, ALL, HUB, CITIES, cityList, doneForYou, packagesTable, packagesLine, ledLine, takedownLine, windowLine, hotelsLine, blankHotel, PRESETS, TAKEDOWN, REQUEST, PRICE_TOOL, PHOTO, HOTEL_WINDOW: PARTY.HOTEL_WINDOW };

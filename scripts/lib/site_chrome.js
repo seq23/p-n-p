@@ -103,7 +103,7 @@ const FOOTER_GUIDES_RE = /<div data-site-chrome="footer-guides"><div class="foot
 const PRICE_TOOLS = Object.freeze({
   porch: { href: '/pricing#price-my-porch', label: 'Price my porch' },
   grazing: { href: '/pricing#price-my-grazing-table', label: 'Price my grazing table' },
-  party: { href: '/pricing#price-my-party-room', label: 'Price my party or hotel room' }
+  party: { href: '/request?service=party#request-form', label: 'Request a quote' }
 });
 function priceToolsFor(rel) {
   const r = String(rel).replace(/\\/g, '/');
