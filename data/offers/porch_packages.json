@@ -72,7 +72,7 @@
       "rangeNoun": "Christmas porches",
       "tiers": {
         "stoop": {
-          "from": 450,
+          "from": 350,
           "includes": "Wreath and door accent."
         },
         "classic": {
@@ -88,17 +88,17 @@
           "includes": "The full porch: lit garland everywhere, windows, statement pieces."
         }
       },
-      "customLine": "Every porch is a custom design. We add accents like garland, wreaths, lit trees, lanterns, ribbon and poinsettias to fit your porch and your style.",
+      "customLine": "Every porch is a custom design. We add accents like garland, wreaths, lit trees, lanterns, ribbon and poinsettias to fit your porch and your style. We don't put up Christmas lights.",
       "image": "/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg",
       "imageAlt": "A Collierville front door decorated for Christmas with a wreath and garland"
     }
   ],
   "addOns": {
-    "line": "Want more? Ask about add-ons: takedown, extra pumpkins or accents, a Thanksgiving refresh, lighting, matching windows or a lamp post.",
+    "line": "Want more? Ask about add-ons: takedown, extra pumpkins or accents, a Thanksgiving refresh, lanterns or lit accents, matching windows or a lamp post. We don't put up Christmas lights.",
     "formItems": [
       "Extra pumpkins or accents",
       "A Thanksgiving refresh",
-      "Lighting",
+      "Lanterns or lit accents",
       "Matching windows",
       "A lamp post"
     ],

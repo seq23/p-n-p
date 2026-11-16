@@ -121,7 +121,7 @@ async function send(fields, { file = JPEG_EXIF, type = 'image/jpeg', ip = null, 
 }
 const contact = (n) => ({ name: `Casey Path${n}`, phone: '(901) 555-01' + String(10 + n).slice(-2), email: `path${n}@example.com`, dob: '1990-02-03', heard: 'Google', notes: 'Blue and gold' });
 const PATHS = {
-  porch: { service: 'porch', porch_season: 'Fall / Halloween', porch_takedown: 'not_sure', event_date: plus(14), location: 'Germantown' },
+  porch: { service: 'porch', porch_season: 'Fall / Halloween', porch_decor: 'not_sure', porch_address: '88 Elm St, Germantown, TN 38138', porch_size: 'A wide or wraparound porch', porch_steps: '4 or more', porch_features: ['Columns or railings', 'A walkway we can decorate'], porch_takedown: 'not_sure', event_date: plus(14), location: 'Germantown' },
   party: { service: 'party', party_event: 'Birthday', party_where: 'Hotel room', party_takedown: 'yes', event_date: plus(15), location: 'The Peabody' },
   grazing: { service: 'grazing', grazing_event: 'Graduation', grazing_guests: '15–40', grazing_food: 'Yes, include food in my quote', event_date: plus(16), location: 'Cordova' },
   rentals: { service: 'rentals', games: ['giant-connect-four', 'giant-uno'], duration: 'day', rental_date: plus(9), pickup_when: 'morning', return_when: 'after'},
@@ -129,6 +129,11 @@ const PATHS = {
 };
 
 // ---- 2/3. Every path: ID required, rules required, complete path accepted ---------------
+// Owner, 16 Nov 2026: a porch request needs the street address and the porch size and steps.
+for (const k of ['porch_address', 'porch_size', 'porch_steps', 'porch_decor']) {
+  const miss = await send({ ...PATHS.porch, ...contact(40), [k]: '' });
+  must(miss.status === 400 && miss.text.includes('Please answer'), `porch: accepted without ${k}`);
+}
 let n = 0;
 const made = {};
 for (const [p, fields] of Object.entries(PATHS)) {
@@ -194,6 +199,7 @@ for (const [p, fields] of Object.entries(PATHS)) {
   const pg = await (await handler({ request: new Request('https://porchandparty901.com/request'), env, params: {} })).text();
   must(/<div data-lobby-q hidden><fieldset class="rq-q" id="q-party_lobby"/.test(pg) && pg.includes("querySelectorAll('[data-lobby-q]')"), 'the lobby question is not hidden until Business is picked');
 }
+must(made.porch && /88 Elm St/.test(made.porch.answers) && /wraparound/.test(made.porch.answers) && /Columns or railings/.test(made.porch.answers), 'the porch address, size and features are not stored with the request');
 must(made.porch && made.party && made.porch.takedown_plan === 'not_sure' && made.party.takedown_plan === 'scheduled', 'the takedown answer does not map into takedown_plan');
 must(made.multi && JSON.stringify(JSON.parse(made.multi.services)) === JSON.stringify(['party', 'rentals']), 'the "more than one" path did not store both services');
 // ---- Channel source tags (owner, 22 Oct 2026; migration 0023, request-form.mjs cleanSrc) ------

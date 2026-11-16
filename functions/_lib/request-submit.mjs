@@ -84,7 +84,7 @@ async function formPage(env, url, { values = {}, errors = {}, status = 200, refe
 }
 
 // Fields where a customer can tick more than one box; every other field keeps one value.
-const MULTI_FIELDS = new Set(['multi', 'games', 'porch_addons']);
+const MULTI_FIELDS = new Set(['multi', 'games', 'porch_addons', 'porch_features']);
 
 function fieldsOf(form) {
   const out = {};

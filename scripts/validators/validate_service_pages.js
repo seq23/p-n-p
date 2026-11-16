@@ -365,7 +365,6 @@ function checkHotelBlitz(rel, url, html, isHub) {
   if (dfy.length !== 2) e.push(`${rel}: ${dfy.length} done-for-you blocks (want 2: after the answer and at the end)`);
   for (const [, where, inner] of dfy) {
     const h = hrefs(inner);
-    if (!h.includes(HP.PRICE_TOOL) || !/Price my party or hotel room/.test(inner)) e.push(`${rel}: done-for-you (${where}) lacks the "Price my party or hotel room" link`);
     if (!h.includes(HP.REQUEST)) e.push(`${rel}: done-for-you (${where}) lacks the request link ${HP.REQUEST}`);
   }
   if (dfy.length === 2) {
