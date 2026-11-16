@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-11-16T14:42:07.581Z",
+  "generated_at": "2026-11-16T16:08:04.998Z",
   "enforcement": "block",
   "pages_checked": 50,
   "status": "PASS",
@@ -95,8 +95,8 @@
     {
       "id": "trust_block",
       "blocking": false,
-      "pages_missing": 1,
-      "coverage_pct": 98,
+      "pages_missing": 0,
+      "coverage_pct": 100,
       "why": "no trust or authorship block (agent requested 215 times) - entity clarity is a citation factor"
     },
     {
@@ -255,9 +255,7 @@
       "questions/party-rentals-memphis.html",
       "rentals/giant-lawn-games-memphis.html"
     ],
-    "trust_block": [
-      "hotels.html"
-    ],
+    "trust_block": [],
     "source_block": [],
     "protocol": [
       "areas/index.html",
@@ -477,9 +475,7 @@
       "services/small-porch-decorating.html",
       "services/valentines-day-hotel-room-setup-memphis.html"
     ],
-    "trust_block": [
-      "hotels.html"
-    ],
+    "trust_block": [],
     "source_block": [],
     "protocol": [
       "areas/index.html",
