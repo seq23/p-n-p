@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-16",
-  "end_date": "2026-11-12",
-  "collected_at": "2026-11-15T16:05:17.162170+00:00",
+  "start_date": "2026-10-17",
+  "end_date": "2026-11-13",
+  "collected_at": "2026-11-16T16:06:27.784514+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -22,6 +22,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 19
+    },
+    {
+      "keys": [
+        "baby shower"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 7
     },
     {
       "keys": [
@@ -309,9 +318,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 8,
-      "impressions": 141,
-      "ctr": 0.05673758865248227,
-      "position": 5.141843971631205
+      "impressions": 147,
+      "ctr": 0.05442176870748299,
+      "position": 5.414965986394558
     },
     {
       "keys": [
@@ -523,6 +532,16 @@
       "impressions": 1,
       "ctr": 0,
       "position": 19
+    },
+    {
+      "keys": [
+        "baby shower",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 7
     },
     {
       "keys": [
@@ -916,9 +935,9 @@
     }
   ],
   "counts": {
-    "by_query": 32,
+    "by_query": 33,
     "by_page": 22,
-    "by_query_page": 41
+    "by_query_page": 42
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
