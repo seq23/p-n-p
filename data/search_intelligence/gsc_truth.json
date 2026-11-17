@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "provider_truth",
-  "generated_at": "2026-11-16T16:06:27.784Z",
+  "generated_at": "2026-11-17T16:07:16.272Z",
   "own_site_google_performance_authority": "google_search_console",
   "provider_state": "OK",
   "provider_states": [
@@ -11,7 +11,7 @@
       "provider_id": "google_search_console",
       "state": "OK",
       "reason": "REAL_EXPORT_INGESTED",
-      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-11-16T16:06:27.784514+00:00 rows={\"by_query\":33,\"by_page\":22,\"by_query_page\":42}"
+      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-11-17T16:07:16.272950+00:00 rows={\"by_query\":37,\"by_page\":22,\"by_query_page\":47}"
     }
   ],
   "overall_status": "OK",
@@ -19,27 +19,27 @@
   "export_path": "data/search_intelligence/gsc_search_analytics_export.json",
   "export_problem": null,
   "export_window": {
-    "start_date": "2026-10-17",
-    "end_date": "2026-11-13"
+    "start_date": "2026-10-18",
+    "end_date": "2026-11-14"
   },
-  "export_collected_at": "2026-11-16T16:06:27.784514+00:00",
+  "export_collected_at": "2026-11-17T16:07:16.272950+00:00",
   "export_counts": {
-    "by_query": 33,
+    "by_query": 37,
     "by_page": 22,
-    "by_query_page": 42
+    "by_query_page": 47
   },
-  "requested_for_date": "2026-11-16",
-  "target_count": 35,
-  "targets_with_gsc_rows": 33,
-  "total_impressions": 170,
+  "requested_for_date": "2026-11-17",
+  "target_count": 39,
+  "targets_with_gsc_rows": 37,
+  "total_impressions": 176,
   "total_clicks": 8,
   "site_totals": {
     "basis": "by_page rows of the Search Console export (complete; by_query omits anonymised queries)",
     "clicks": 8,
-    "impressions": 170,
+    "impressions": 176,
     "pages_with_impressions": 22,
-    "queries_with_impressions": 33,
-    "query_row_impressions": 87,
+    "queries_with_impressions": 37,
+    "query_row_impressions": 92,
     "query_row_clicks": 0,
     "top_queries": [
       {
@@ -85,6 +85,12 @@
         "gsc_average_position": 1.5
       },
       {
+        "query": "party planner memphis",
+        "impressions": 2,
+        "clicks": 0,
+        "gsc_average_position": 1
+      },
+      {
         "query": "party planners near me",
         "impressions": 2,
         "clicks": 0,
@@ -95,17 +101,11 @@
         "impressions": 1,
         "clicks": 0,
         "gsc_average_position": 19
-      },
-      {
-        "query": "baby shower",
-        "impressions": 1,
-        "clicks": 0,
-        "gsc_average_position": 7
       }
     ]
   },
-  "target_impressions": 87,
-  "target_clicks": 88,
+  "target_impressions": 92,
+  "target_clicks": 112,
   "unavailable_note": null,
   "truth_boundary": "Google Search Console is the only authority for own-site Google impressions, clicks, CTR, average position, and indexation in this repo.",
   "per_target": [
@@ -244,9 +244,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -295,9 +295,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -318,9 +318,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -375,9 +375,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -408,7 +408,7 @@
       "query_metrics": {
         "gsc_query": "party planner memphis",
         "clicks": 0,
-        "impressions": 1,
+        "impressions": 2,
         "ctr": 0,
         "gsc_average_position": 1
       },
@@ -441,6 +441,23 @@
       "truth_state": "GSC_ROW_PRESENT",
       "query_metrics": {
         "gsc_query": "bachelorette party ideas",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "gsc_average_position": 5
+      },
+      "page_metrics": null,
+      "own_site_performance_basis": "google_search_console",
+      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
+    },
+    {
+      "target_id": "pnp_sq_9333e6f3c0dd",
+      "query": "party planning",
+      "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "truth_source": "google_search_console",
+      "truth_state": "GSC_ROW_PRESENT",
+      "query_metrics": {
+        "gsc_query": "party planning",
         "clicks": 0,
         "impressions": 1,
         "ctr": 0,
@@ -534,9 +551,78 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
+      },
+      "own_site_performance_basis": "google_search_console",
+      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
+    },
+    {
+      "target_id": "pnp_sq_b4a1ba603498",
+      "query": "party rental places near me",
+      "expected_owned_url": "https://porchandparty901.com/",
+      "truth_source": "google_search_console",
+      "truth_state": "GSC_ROW_PRESENT",
+      "query_metrics": {
+        "gsc_query": "party rental places near me",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "gsc_average_position": 19
+      },
+      "page_metrics": {
+        "url": "https://porchandparty901.com/",
+        "clicks": 8,
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
+      },
+      "own_site_performance_basis": "google_search_console",
+      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
+    },
+    {
+      "target_id": "pnp_sq_bbddadd768a2",
+      "query": "party rentals near me",
+      "expected_owned_url": "https://porchandparty901.com/",
+      "truth_source": "google_search_console",
+      "truth_state": "GSC_ROW_PRESENT",
+      "query_metrics": {
+        "gsc_query": "party rentals near me",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "gsc_average_position": 42
+      },
+      "page_metrics": {
+        "url": "https://porchandparty901.com/",
+        "clicks": 8,
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
+      },
+      "own_site_performance_basis": "google_search_console",
+      "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
+    },
+    {
+      "target_id": "pnp_sq_c37bc50b3c05",
+      "query": "christmas rentals near me",
+      "expected_owned_url": "https://porchandparty901.com/",
+      "truth_source": "google_search_console",
+      "truth_state": "GSC_ROW_PRESENT",
+      "query_metrics": {
+        "gsc_query": "christmas rentals near me",
+        "clicks": 0,
+        "impressions": 1,
+        "ctr": 0,
+        "gsc_average_position": 1
+      },
+      "page_metrics": {
+        "url": "https://porchandparty901.com/",
+        "clicks": 8,
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -574,9 +660,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -642,9 +728,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -665,9 +751,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -688,9 +774,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -711,9 +797,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -734,9 +820,9 @@
       "page_metrics": {
         "url": "https://porchandparty901.com/",
         "clicks": 8,
-        "impressions": 147,
-        "ctr": 0.05442176870748299,
-        "gsc_average_position": 5.414965986394558
+        "impressions": 152,
+        "ctr": 0.05263157894736842,
+        "gsc_average_position": 5.684210526315789
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."

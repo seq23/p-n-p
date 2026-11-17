@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-17",
-  "end_date": "2026-11-13",
-  "collected_at": "2026-11-16T16:06:27.784514+00:00",
+  "start_date": "2026-10-18",
+  "end_date": "2026-11-14",
+  "collected_at": "2026-11-17T16:07:16.272950+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -83,6 +83,15 @@
       ],
       "clicks": 0,
       "impressions": 2,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "christmas rentals near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
       "ctr": 0,
       "position": 1
     },
@@ -226,7 +235,7 @@
         "party planner memphis"
       ],
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "ctr": 0,
       "position": 1
     },
@@ -268,12 +277,39 @@
     },
     {
       "keys": [
+        "party planning"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 5
+    },
+    {
+      "keys": [
+        "party rental places near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 19
+    },
+    {
+      "keys": [
         "party rentals memphis"
       ],
       "clicks": 0,
       "impressions": 1,
       "ctr": 0,
       "position": 14
+    },
+    {
+      "keys": [
+        "party rentals near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 42
     },
     {
       "keys": [
@@ -318,18 +354,18 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 8,
-      "impressions": 147,
-      "ctr": 0.05442176870748299,
-      "position": 5.414965986394558
+      "impressions": 152,
+      "ctr": 0.05263157894736842,
+      "position": 5.684210526315789
     },
     {
       "keys": [
         "https://porchandparty901.com/request"
       ],
       "clicks": 0,
-      "impressions": 3,
+      "impressions": 4,
       "ctr": 0,
-      "position": 4.333333333333334
+      "position": 8
     },
     {
       "keys": [
@@ -615,6 +651,16 @@
     },
     {
       "keys": [
+        "christmas rentals near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "engagement party",
         "https://porchandparty901.com/"
       ],
@@ -829,7 +875,7 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "ctr": 0,
       "position": 1
     },
@@ -875,6 +921,36 @@
     },
     {
       "keys": [
+        "party planning",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 5
+    },
+    {
+      "keys": [
+        "party rental places near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 19
+    },
+    {
+      "keys": [
+        "party rental places near me",
+        "https://porchandparty901.com/request"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 19
+    },
+    {
+      "keys": [
         "party rentals memphis",
         "https://porchandparty901.com/"
       ],
@@ -882,6 +958,16 @@
       "impressions": 1,
       "ctr": 0,
       "position": 14
+    },
+    {
+      "keys": [
+        "party rentals near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 42
     },
     {
       "keys": [
@@ -935,9 +1021,9 @@
     }
   ],
   "counts": {
-    "by_query": 33,
+    "by_query": 37,
     "by_page": 22,
-    "by_query_page": 42
+    "by_query_page": 47
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
