@@ -21,6 +21,8 @@ const CANDIDATES = ['#recommendation-summary', '.service-answer', '.porch-faq', 
 const SHELL_DEFAULT = ['#recommendation-summary', '.porch-faq'];
 // What the focus / hotel pages always render.
 const FOCUS_DEFAULT = ['.service-answer', '.faq-list'];
+// What the /rentals/ page renders (scripts/generators/build_rentals_page.js): its FAQ list.
+const RENTALS_DEFAULT = ['.faq-list'];
 
 const ARTICLE_TYPES = ['Article', 'BlogPosting', 'NewsArticle'];
 const PAGE_TYPES = ['WebPage', 'CollectionPage', 'AboutPage', 'ItemPage', 'ProfilePage'];
@@ -73,4 +75,4 @@ function applySpeakable(html, rel) {
   return html;
 }
 
-module.exports = { CANDIDATES, SHELL_DEFAULT, FOCUS_DEFAULT, resolves, selectorsFor, applySpeakable };
+module.exports = { CANDIDATES, SHELL_DEFAULT, FOCUS_DEFAULT, RENTALS_DEFAULT, resolves, selectorsFor, applySpeakable };

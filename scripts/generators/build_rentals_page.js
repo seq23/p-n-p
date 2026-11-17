@@ -28,6 +28,7 @@ const offers = require(path.join(ROOT, 'data/offers/services.json'));
 const BD = require(path.join(ROOT, 'scripts/lib/business_delivery.js'));
 const BDL = BD.businessDeliveryLine(offers); // business delivery, priced from services.json (19 Oct 2026)
 const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js'));
+const SPEAKABLE = require(path.join(ROOT, 'scripts/lib/speakable.js'));
 const siteIcons = require(path.join(ROOT, 'scripts/lib/site_icons.js'));
 const INV = require(path.join(ROOT, 'scripts/lib/inventory.js'));
 const SP = require(path.join(ROOT, 'scripts/lib/service_pages.js'));
@@ -174,7 +175,7 @@ function jsonLd() {
   const daySpec = (price) => ({ '@type': 'UnitPriceSpecification', price, priceCurrency: 'USD', unitCode: 'DAY', referenceQuantity: { '@type': 'QuantitativeValue', value: 1, unitCode: 'DAY' } });
   const blocks = [
     { '@context': 'https://schema.org', '@type': 'WebPage', name: TITLE, description: DESCRIPTION, url: URL,
-      primaryImageOfPage: `${DOMAIN}${data.hero.file}` },
+      primaryImageOfPage: `${DOMAIN}${data.hero.file}`, speakable: { '@type': 'SpeakableSpecification', cssSelector: SPEAKABLE.RENTALS_DEFAULT } },
     { '@context': 'https://schema.org', '@type': 'Service', name: 'Party game rentals', serviceType: 'Party equipment rental',
       description: `${INV.joinAnd(['Giant yard game', ...EXTRAS.map((x) => INV.extraPhrase(x).replace(/^(a|an) /, ''))])} rentals for backyard parties, birthdays, reunions, church and school events. Pickup and return at ${PICK.place}, ${PICK.address}.`,
       url: URL, provider, areaServed: AREAS,
