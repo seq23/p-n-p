@@ -19,6 +19,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const { applyArticleSchema, applyPageDates, savePublished } = require('./lib/article_schema');
 const { publishedPages } = require('./install_contact_surface');
+const { applySpeakable } = require('./lib/speakable');
 
 const ROOT = path.resolve(__dirname, '..');
 const CONTRACT = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/release/accepted_output_freeze_contract.json'), 'utf8'));
@@ -44,7 +45,8 @@ function main() {
     // dateModified on its own WebPage-family node, so checklist item d4 has a
     // date to show on a page that is not an article (/pricing, /about, the two
     // focus pages). Both read the same two date sources.
-    const out = applyPageDates(applyArticleSchema(html, rel), rel);
+    // Then speakable (checklist c4) on the page's own node, from scripts/lib/speakable.js.
+    const out = applySpeakable(applyPageDates(applyArticleSchema(html, rel), rel), rel);
     if (out === html) continue;
     if (frozen.has(rel) && withoutJsonLd(out) !== withoutJsonLd(html)) { refused.push(rel); continue; }
     fs.writeFileSync(abs, out);
