@@ -44,22 +44,22 @@
       "tiers": {
         "stoop": {
           "from": 350,
-          "includes": "8–10 pumpkins and gourds, door accent."
+          "includes": "Your entry, fully dressed for fall. The door is finished and a full pumpkin and gourd display fills the step, in mixed sizes and colors."
         },
         "classic": {
           "from": 550,
-          "includes": "A fuller porch display: more pumpkins and gourds in mixed sizes, door accent, layered height."
+          "includes": "The whole porch, not just the door. A fuller display with real height, color on both sides of the entry, and the door finished to match."
         },
         "grand": {
           "from": 750,
-          "includes": "A large display across the porch and steps with a statement piece."
+          "includes": "Everything in Classic, carried down the steps, with a statement piece your neighbors notice from the street."
         },
         "showstopper": {
           "from": 1200,
-          "includes": "Porch, steps and walkway, fully layered, our most dramatic look."
+          "includes": "Porch, steps and walkway, layered all the way from the street to the door. Our most dramatic look."
         }
       },
-      "customLine": "Every porch is a custom design. We add accents like mums, hay, cornstalks, lanterns, wreaths and lighting to fit your porch and your style.",
+      "customLine": "Every package includes a design made for your porch, all the decor brought to you, and setup by us; we clear away the packaging when we leave. Every porch is a custom design. We add accents like mums, hay, cornstalks, lanterns, wreaths and lighting to fit your porch and your style.",
       "image": "/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg",
       "imageAlt": "A Memphis-area front porch decorated for fall with pumpkins and layered seasonal styling"
     },
@@ -73,22 +73,22 @@
       "tiers": {
         "stoop": {
           "from": 350,
-          "includes": "Wreath and door accent."
+          "includes": "Your entry, fully dressed. The door is framed and finished, with a matching piece on each side so it looks complete from the curb."
         },
         "classic": {
           "from": 750,
-          "includes": "Wreath, door garland and a pair of porch accents."
+          "includes": "The whole porch, not just the door. Greenery frames the entry and the posts, with fuller pieces anchoring each end of the porch."
         },
         "grand": {
           "from": 1050,
-          "includes": "Garland across the door and railings, wreaths, lit accents, steps styled."
+          "includes": "Everything in Classic, carried along the railings and down the steps, with warm glow added so it shines after dark."
         },
         "showstopper": {
           "from": 1600,
-          "includes": "The full porch: lit garland everywhere, windows, statement pieces."
+          "includes": "The whole front of your home: porch, steps, windows and walkway, layered and glowing from the street to the door. Our most dramatic look."
         }
       },
-      "customLine": "Every porch is a custom design. We add accents like garland, wreaths, lit trees, lanterns, ribbon and poinsettias to fit your porch and your style. We don't put up Christmas lights.",
+      "customLine": "Every package includes a design made for your porch, all the decor brought to you, and setup by us; we clear away the packaging when we leave. Every porch is a custom design. We add accents like garland, wreaths, lit trees, lanterns, ribbon and poinsettias to fit your porch and your style. We don't put up Christmas lights.",
       "image": "/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg",
       "imageAlt": "A Collierville front door decorated for Christmas with a wreath and garland"
     }
