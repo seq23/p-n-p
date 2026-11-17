@@ -83,7 +83,7 @@ const SECTIONS = [
       ['Do I need to be home?',
         'No. We can work from the street side with your okay. Christmas lights that need an outlet need the outlet switched on.'],
       ['Do I keep the decor?',
-        `Yes, everything we install is yours to keep. If you want it gone after the season, ${TD.line.charAt(0).toLowerCase()}${TD.line.slice(1)}`],
+        "Fall: yes, the pumpkins and mums are yours, and takedown is a flat $75 if you want it cleared away. Christmas: January takedown is included and the decor goes back with us. To keep your Christmas decor, add $150 (Stoop), $300 (Classic), $500 (Grand) or $850 (Showstopper)."],
       ['Will it hold up in weather?',
         'Pumpkins, faux florals and lanterns are chosen to sit outside for the season. Real mums need watering; we tell you how much.'],
       ['How far ahead should I book a porch?',
