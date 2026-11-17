@@ -26,7 +26,7 @@ function allowedPrices() {
   const n = new Set();
   const add = (v) => { if (v == null) return; const m = String(v).match(/\d[\d,]*/g); if (m) m.forEach((x) => n.add(Number(x.replace(/,/g, '')))); };
   for (const k of Object.keys(S)) { add(S[k].price); (S[k].tiers || []).forEach((t) => add(t.from)); }
-  porchPackages.seasons.forEach((x) => Object.values(x.tiers).forEach((t) => add(t.from)));
+  porchPackages.seasons.forEach((x) => Object.values(x.tiers).forEach((t) => { add(t.from); add(t.keepDecor); }));
   add(S.grazing.foodPerHead.low); add(S.grazing.foodPerHead.high);
   add(offers.addOns.takedown.fromPrice); add(offers.travel.extendedFee);
   add(offers.invoiceQuickAdds.deliveryFee);

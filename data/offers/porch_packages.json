@@ -59,7 +59,7 @@
           "includes": "Porch, steps and walkway, layered all the way from the street to the door. Our most dramatic look."
         }
       },
-      "customLine": "Every package includes a design made for your porch, all the decor brought to you, and setup by us; we clear away the packaging when we leave. Every porch is a custom design. We add accents like mums, hay, cornstalks, lanterns, wreaths and lighting to fit your porch and your style.",
+      "customLine": "Every package includes a design made for your porch, all the decor brought to you, and setup by us; we clear away the packaging when we leave. The pumpkins and mums are yours; takedown is a flat $75 if you want it all cleared away. Every porch is a custom design. We add accents like mums, hay, cornstalks, lanterns, wreaths and lighting to fit your porch and your style.",
       "image": "/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg",
       "imageAlt": "A Memphis-area front porch decorated for fall with pumpkins and layered seasonal styling"
     },
@@ -72,29 +72,33 @@
       "rangeNoun": "Christmas porches",
       "tiers": {
         "stoop": {
-          "from": 350,
-          "includes": "Your entry, fully dressed. The door is framed and finished, with a matching piece on each side so it looks complete from the curb."
+          "from": 450,
+          "includes": "Your entry, fully dressed. The door is framed and finished, with a matching piece on each side so it looks complete from the curb.",
+          "keepDecor": 150
         },
         "classic": {
           "from": 750,
-          "includes": "The whole porch, not just the door. Greenery frames the entry and the posts, with fuller pieces anchoring each end of the porch."
+          "includes": "The whole porch, not just the door. Greenery frames the entry and the posts, with fuller pieces anchoring each end of the porch.",
+          "keepDecor": 300
         },
         "grand": {
           "from": 1050,
-          "includes": "Everything in Classic, carried along the railings and down the steps, with warm glow added so it shines after dark."
+          "includes": "Everything in Classic, carried along the railings and down the steps, with warm glow added so it shines after dark.",
+          "keepDecor": 500
         },
         "showstopper": {
           "from": 1600,
-          "includes": "The whole front of your home: porch, steps, windows and walkway, layered and glowing from the street to the door. Our most dramatic look."
+          "includes": "The whole front of your home: porch, steps, windows and walkway, layered and glowing from the street to the door. Our most dramatic look.",
+          "keepDecor": 850
         }
       },
-      "customLine": "Every package includes a design made for your porch, all the decor brought to you, and setup by us; we clear away the packaging when we leave. Every porch is a custom design. We add accents like garland, wreaths, lit trees, lanterns, ribbon and poinsettias to fit your porch and your style. We don't put up Christmas lights.",
+      "customLine": "Every package includes a design made for your porch, all the decor brought to you, and setup by us; we clear away the packaging when we leave, and in January we take it all down; the decor goes back with us. Want to keep it? Add $150 (Stoop), $300 (Classic), $500 (Grand) or $850 (Showstopper). Every porch is a custom design. We add accents like garland, wreaths, lit trees, lanterns, ribbon and poinsettias to fit your porch and your style. We don't put up Christmas lights.",
       "image": "/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg",
       "imageAlt": "A Collierville front door decorated for Christmas with a wreath and garland"
     }
   ],
   "addOns": {
-    "line": "Want more? Ask about add-ons: takedown, extra pumpkins or accents, a Thanksgiving refresh, lanterns or lit accents, matching windows or a lamp post. We don't put up Christmas lights.",
+    "line": "Want more? Ask about add-ons: extra pumpkins or accents, a Thanksgiving refresh, lanterns or lit accents, matching windows or a lamp post. We don't put up Christmas lights.",
     "formItems": [
       "Extra pumpkins or accents",
       "A Thanksgiving refresh",
@@ -130,7 +134,7 @@
     "pricing.html"
   ],
   "pagesWhy": "Every page that carries the full porch package grid + Offer schema (scripts/install_porch_packages.js stamps it; validate:porch-packages checks each one). New porch articles add their path here.",
-  "provenance": "Owner, 18 Oct 2026: FINAL prices fall 350/550/750/1,200 and Christmas 450/750/1,050/1,600, seasonal, shown as from-prices. Full grid on website pages and articles (corrected ruling); the request form carries no tier prices, only the from-price + range lines; add-ons named, never priced; 10% off the Christmas package when fall and Christmas are booked together. Replaces the 17 Oct small stoop / standard porch / large porch tiers ($350/$600/$800).",
+  "provenance": "Owner, 18 Oct 2026: FINAL prices fall 350/550/750/1,200 and Christmas 450/750/1,050/1,600, seasonal, shown as from-prices. Full grid on website pages and articles (corrected ruling); the request form carries no tier prices, only the from-price + range lines; add-ons named, never priced; 10% off the Christmas package when fall and Christmas are booked together. Replaces the 17 Oct small stoop / standard porch / large porch tiers ($350/$600/$800). Owner, 16 Nov 2026: Christmas decor is ours and reused, so January takedown is included in every Christmas package and Christmas Stoop is back to $450 (it was $350 for part of 16 Nov); keeping the Christmas decor adds a flat $150 / $300 / $500 / $850 by package; fall decor stays with the customer and fall takedown is a flat $75.",
   "articles": [],
   "foldedArticles": [
     {
@@ -151,5 +155,6 @@
     }
   ],
   "foldedArticlesWhy": "Porch price articles folded into a porch hub on 26 Oct 2026 (data/search_intelligence/hub_consolidation.json). Each still counts as a checked article: validate:porch-packages holds that the file is gone, its URL resolves to the hub, and the hub carries the full grid (it is in pages).",
-  "articlesWhy": "The porch price articles (owner-approved 18 Oct 2026). Each published one carries the full grid + Offer schema and is linked from every page in `pages`, every other published article and the FAQ porch section (scripts/install_porch_packages.js). An article not yet published waits in data/publish_queue/publish_queue.json and publishes one a week through scripts/authority_scale/publish_governed_queue.mjs, only while data/search_intelligence/target_query_set.json names its route with a measured number (cadence policy: measured_target_only). The Christmas cost article is the Christmas porch cost page; no second one is drafted."
+  "articlesWhy": "The porch price articles (owner-approved 18 Oct 2026). Each published one carries the full grid + Offer schema and is linked from every page in `pages`, every other published article and the FAQ porch section (scripts/install_porch_packages.js). An article not yet published waits in data/publish_queue/publish_queue.json and publishes one a week through scripts/authority_scale/publish_governed_queue.mjs, only while data/search_intelligence/target_query_set.json names its route with a measured number (cadence policy: measured_target_only). The Christmas cost article is the Christmas porch cost page; no second one is drafted.",
+  "keepDecorWhy": "Christmas decor is ours and reused; January takedown is included. tiers.<tier>.keepDecor is the flat add-on when the customer keeps the Christmas decor (owner, 16 Nov 2026). Fall has none: fall decor is the customer's, and fall takedown is a flat $75."
 }
