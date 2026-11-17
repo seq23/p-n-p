@@ -25,9 +25,9 @@
       "route": "/guides/couples-staycation-ideas-memphis",
       "rendered_file": "guides/couples-staycation-ideas-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "88498b4ed7aba022772b7dda1704f5e7dcae63062d2910d78e14467a2abada19",
-      "cache_file": "data/release/frozen_accepted_outputs/88498b4ed7aba022772b7dda1704f5e7dcae63062d2910d78e14467a2abada19.html.gz",
-      "cache_sha256": "539137b05a605c66517ac6bf49658cff9becae07587f564a71f7905384a58df0",
+      "accepted_sha256": "ccd8b209d8dd1b35fc63ad224f27019390b0e438641e30dea18d968c85ddf6a9",
+      "cache_file": "data/release/frozen_accepted_outputs/ccd8b209d8dd1b35fc63ad224f27019390b0e438641e30dea18d968c85ddf6a9.html.gz",
+      "cache_sha256": "a78a66529ffe2caf0383c719fc6b0d761bfc4ba656c93045262875ecc9fd7edb",
       "accepted_at": "2026-07-24"
     },
     {
@@ -43,18 +43,18 @@
       "route": "/guides/memphis-hotels-with-jacuzzi-in-room",
       "rendered_file": "guides/memphis-hotels-with-jacuzzi-in-room.html",
       "state": "FROZEN",
-      "accepted_sha256": "4b4f7a703e3c779e8d706176fb8d1c6e995a485f00bfc9acc88799f811f10cb2",
-      "cache_file": "data/release/frozen_accepted_outputs/4b4f7a703e3c779e8d706176fb8d1c6e995a485f00bfc9acc88799f811f10cb2.html.gz",
-      "cache_sha256": "fc14f9b8015118909f10abff472baa4e49846556c274ed78989a16b5224939d0",
+      "accepted_sha256": "f713f6049b49a834188bc3b30cbe3c5c64872be832421a36e35b614e9a6fd233",
+      "cache_file": "data/release/frozen_accepted_outputs/f713f6049b49a834188bc3b30cbe3c5c64872be832421a36e35b614e9a6fd233.html.gz",
+      "cache_sha256": "4c8dab9b02f41277621e1a8caa8fb9c5e921e5315b8a732bdf3c4f6fca3be9d3",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/anniversary-hotel-room-setup-memphis",
       "rendered_file": "services/anniversary-hotel-room-setup-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "a9da345e8637e5955400383b21b51cfdaaacad9262a2a34c36d6a378f5624336",
-      "cache_file": "data/release/frozen_accepted_outputs/a9da345e8637e5955400383b21b51cfdaaacad9262a2a34c36d6a378f5624336.html.gz",
-      "cache_sha256": "197b7ded3f170b46cb05f2739b0d2861427c9d04e9ba2801df4bee8cf56c5da4",
+      "accepted_sha256": "3ec4f6f550cbfb56d4533b2e3e9d73f767b3af448bddb34f8600a765fb6153fa",
+      "cache_file": "data/release/frozen_accepted_outputs/3ec4f6f550cbfb56d4533b2e3e9d73f767b3af448bddb34f8600a765fb6153fa.html.gz",
+      "cache_sha256": "2381c2c3a43f8a4eab97bc5448bc88b93324994abaede3d0d75a6e2f9f56cfda",
       "accepted_at": "2026-07-24"
     },
     {
@@ -70,18 +70,18 @@
       "route": "/services/birthday-hotel-room-decorations-for-her-memphis",
       "rendered_file": "services/birthday-hotel-room-decorations-for-her-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "71d6a0cb3f27230fdd2dde0caa7cf97e4fe8a4de7c0240309a993040a92916ae",
-      "cache_file": "data/release/frozen_accepted_outputs/71d6a0cb3f27230fdd2dde0caa7cf97e4fe8a4de7c0240309a993040a92916ae.html.gz",
-      "cache_sha256": "1c9b7abe5431150c8cd4a6d8da4b0ec94e97428711dc928f262a1b43d2636d11",
+      "accepted_sha256": "fe0e69d962429a2dbecba4bfff82b5cbdecb48bf643a701758ad95877c92773e",
+      "cache_file": "data/release/frozen_accepted_outputs/fe0e69d962429a2dbecba4bfff82b5cbdecb48bf643a701758ad95877c92773e.html.gz",
+      "cache_sha256": "970643cad48ee73e999eb6c83622be0ec3bf70295b7f787e06f3472e3c2a7bfc",
       "accepted_at": "2026-07-24"
     },
     {
       "route": "/services/birthday-hotel-room-decorations-for-him-memphis",
       "rendered_file": "services/birthday-hotel-room-decorations-for-him-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "135db03990032f1632a833acc3b5c8facac9ac722555fd9c3266589986735736",
-      "cache_file": "data/release/frozen_accepted_outputs/135db03990032f1632a833acc3b5c8facac9ac722555fd9c3266589986735736.html.gz",
-      "cache_sha256": "8023745e58d14323cc29c6f7f014ee1683aa9d7ba76a77eb8e19ca775e80ad5e",
+      "accepted_sha256": "bc604f492ddc1a081ce92a8e6bf7ddbc2af15c6dca50843fc0df9cac2e69277a",
+      "cache_file": "data/release/frozen_accepted_outputs/bc604f492ddc1a081ce92a8e6bf7ddbc2af15c6dca50843fc0df9cac2e69277a.html.gz",
+      "cache_sha256": "749eb8de104f8bee764d00c3c61ee08a724adaea9893e45344e802ac4ebbac68",
       "accepted_at": "2026-07-24"
     },
     {
@@ -187,9 +187,9 @@
       "route": "/services/hotel-room-decor-memphis",
       "rendered_file": "services/hotel-room-decor-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "7a32e5551213856cd4af22aa80f0c7477e0b1903a9e754d240eaafbdf05535db",
-      "cache_file": "data/release/frozen_accepted_outputs/7a32e5551213856cd4af22aa80f0c7477e0b1903a9e754d240eaafbdf05535db.html.gz",
-      "cache_sha256": "21146ba61c351f082ac03819d8f5f7d755b11312e87d292293820a7e91535788",
+      "accepted_sha256": "5cbd0a67685fcb9f60d763cd9418546cc7535b5f46d140d2cb888932e40de091",
+      "cache_file": "data/release/frozen_accepted_outputs/5cbd0a67685fcb9f60d763cd9418546cc7535b5f46d140d2cb888932e40de091.html.gz",
+      "cache_sha256": "fb9f84fd45c8d7c526fbb3ecbe5fef7a78ec2ca24168d44fd83c9bf865edfd70",
       "accepted_at": "2026-07-24"
     },
     {
@@ -232,9 +232,9 @@
       "route": "/services/proposal-hotel-room-setup-memphis",
       "rendered_file": "services/proposal-hotel-room-setup-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "87d19813986603d15c18c9c928311000bfd3a7ab957928e5c8c8726cdd7b932c",
-      "cache_file": "data/release/frozen_accepted_outputs/87d19813986603d15c18c9c928311000bfd3a7ab957928e5c8c8726cdd7b932c.html.gz",
-      "cache_sha256": "e0651ad0c980b2daa0551ad289b189b89d74a03625b6cadb8b6db208bd7d4cbb",
+      "accepted_sha256": "b3352c3e032ffdc81e4573647592092b77412e740309b3ecf259ff50dff50f64",
+      "cache_file": "data/release/frozen_accepted_outputs/b3352c3e032ffdc81e4573647592092b77412e740309b3ecf259ff50dff50f64.html.gz",
+      "cache_sha256": "5fcbc632e6c274b876ae489957106ab9c6ddea9454cb6f92dd952c8a6df6ff54",
       "accepted_at": "2026-07-24"
     },
     {
@@ -250,9 +250,9 @@
       "route": "/services/valentines-day-hotel-room-setup-memphis",
       "rendered_file": "services/valentines-day-hotel-room-setup-memphis.html",
       "state": "FROZEN",
-      "accepted_sha256": "b41a44f42e57d23262d2cfc5ae0217a6995199db9386efcc9964f9ea91d9be0b",
-      "cache_file": "data/release/frozen_accepted_outputs/b41a44f42e57d23262d2cfc5ae0217a6995199db9386efcc9964f9ea91d9be0b.html.gz",
-      "cache_sha256": "963f9a8415461b0730812392893c3f4fc083f0e08b1b35d05bb75214717a8d66",
+      "accepted_sha256": "4d4ec3bfbe1fd5a6b5c60da9235a783ac5c36a7fc5e6f3dd334ef9371f5d54f1",
+      "cache_file": "data/release/frozen_accepted_outputs/4d4ec3bfbe1fd5a6b5c60da9235a783ac5c36a7fc5e6f3dd334ef9371f5d54f1.html.gz",
+      "cache_sha256": "4eddd3a595980382d02ed8dac59af8d561b56402f0dbc438684a6a197bab3889",
       "accepted_at": "2026-07-24"
     }
   ]
