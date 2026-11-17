@@ -26,6 +26,7 @@ const contactSurface = require(path.join(ROOT, 'scripts/lib/contact_surface.js')
 const siteIcons = require(path.join(ROOT, 'scripts/lib/site_icons.js'));
 const SP = require(path.join(ROOT, 'scripts/lib/service_pages.js'));
 const FP = require(path.join(ROOT, 'scripts/lib/focus_pages.js'));
+const SPEAKABLE = require(path.join(ROOT, 'scripts/lib/speakable.js'));
 const HP = require(path.join(ROOT, 'scripts/lib/hotel_pages.js'));
 
 // Every page this generator renders: the two focused pages and the hotel blitz pages
@@ -82,7 +83,7 @@ function render(p) {
   ${siteChromeBrand.fontsLink()}
   <link rel="stylesheet" href="/assets/css/styles.css" />
   <link rel="stylesheet" href="/assets/css/site-nav.css" data-site-chrome="css" />${siteChromeBrand.brandLink()}
-  ${ld({ '@context': 'https://schema.org', '@type': 'WebPage', name: p.title.replace(/&amp;/g, '&'), description: p.description.replace(/&amp;/g, '&'), url, primaryImageOfPage: `${DOMAIN}/${og.file}`, publisher: { '@id': `${DOMAIN}/#business` } })}
+  ${ld({ '@context': 'https://schema.org', '@type': 'WebPage', name: p.title.replace(/&amp;/g, '&'), description: p.description.replace(/&amp;/g, '&'), url, primaryImageOfPage: `${DOMAIN}/${og.file}`, publisher: { '@id': `${DOMAIN}/#business` }, speakable: { '@type': 'SpeakableSpecification', cssSelector: SPEAKABLE.FOCUS_DEFAULT } })}
   ${ld(p.kind === 'guide' ? articleJsonLd(p, og) : FP.serviceJsonLd(p))}
   ${ld(FP.faqJsonLd(p))}
   ${ld(FP.breadcrumbJsonLd(p))}

@@ -5,6 +5,7 @@ const siteChrome = require('../scripts/lib/site_chrome');
 const areas = require('../data/service_areas/areas.json');
 const PP = require('../scripts/lib/porch_packages');
 const SocialImage = require('../scripts/lib/social_image');
+const SPEAKABLE = require('../scripts/lib/speakable');
 
 const fs = require('fs');
 const path = require('path');
@@ -167,8 +168,11 @@ function pageJsonLd(url, title, description, faqQuestion, faqAnswer, pathUrl, im
     description,
     url
   };
-  // Speakable (opt-in per entry): the answer-first blocks a voice assistant may read aloud.
-  if (Array.isArray(extra.speakable) && extra.speakable.length) webPage.speakable = { '@type': 'SpeakableSpecification', cssSelector: extra.speakable };
+  // Speakable (checklist c4): the answer-first blocks a voice assistant may read aloud.
+  // On by default with the two blocks this shell always renders; an entry may name its
+  // own selectors, or pass [] to opt out.
+  const speakable = extra.speakable === undefined ? SPEAKABLE.SHELL_DEFAULT : extra.speakable;
+  if (Array.isArray(speakable) && speakable.length) webPage.speakable = { '@type': 'SpeakableSpecification', cssSelector: speakable };
   const blocks = [
     webPage,
     {
