@@ -288,6 +288,31 @@
           "Amazonbot": 3
         }
       }
+    },
+    "2026-11-17": {
+      "ai_visitors": {
+        "total": 0,
+        "by_engine": {},
+        "by_path": {},
+        "source": "web-analytics"
+      },
+      "ai_bot_hits": {
+        "total": 606,
+        "by_bot": {
+          "OAI-SearchBot (ChatGPT search)": 87,
+          "PerplexityBot": 36,
+          "ClaudeBot": 68,
+          "Claude-User": 56,
+          "Amazonbot": 61,
+          "CCBot (Common Crawl)": 44,
+          "GPTBot (OpenAI training)": 60,
+          "DuckAssistBot": 55,
+          "Meta-ExternalAgent": 3,
+          "Perplexity-User": 43,
+          "Bytespider": 53,
+          "ChatGPT-User (ChatGPT fetch)": 40
+        }
+      }
     }
   }
 }
