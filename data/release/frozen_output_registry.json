@@ -142,9 +142,9 @@
       "route": "/services/christmas-porch-decorating",
       "rendered_file": "services/christmas-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "d8f0229abef116e5d4da4d6f4ae1e09a9e87f9ab8b1ed253e89e245e12dc75f3",
-      "cache_file": "data/release/frozen_accepted_outputs/d8f0229abef116e5d4da4d6f4ae1e09a9e87f9ab8b1ed253e89e245e12dc75f3.html.gz",
-      "cache_sha256": "6b2f2f4d9e4933ec42ef5614c3abffd9b1749416f2249e1aab758e1276fb29e4",
+      "accepted_sha256": "9fb91c2c0b13ad430eb07267db9c76d6ba1009b49e5f60533a8637600bb2608c",
+      "cache_file": "data/release/frozen_accepted_outputs/9fb91c2c0b13ad430eb07267db9c76d6ba1009b49e5f60533a8637600bb2608c.html.gz",
+      "cache_sha256": "af704a36b7e1b41ce0a0520e91c212c2120ee7214421c5ff350b25678bdfbcca",
       "accepted_at": "2026-07-24"
     },
     {
@@ -223,9 +223,9 @@
       "route": "/services/porch-decorating",
       "rendered_file": "services/porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "432f5b63450773d620ad231a3cf603a065b7b1330cc6d0a8622415b24639d951",
-      "cache_file": "data/release/frozen_accepted_outputs/432f5b63450773d620ad231a3cf603a065b7b1330cc6d0a8622415b24639d951.html.gz",
-      "cache_sha256": "d9d7052f7ee3b934fb56adf7886c9d378fc15888196d98bd113913c1285fb8fb",
+      "accepted_sha256": "b8ebaec1ed4a969641a65984dad582d1586d40cb797c59ad6c26b75064b50632",
+      "cache_file": "data/release/frozen_accepted_outputs/b8ebaec1ed4a969641a65984dad582d1586d40cb797c59ad6c26b75064b50632.html.gz",
+      "cache_sha256": "3be13123a59377f3d3b04e41e777c53b5149a345ddab300fa791436ba6b0a4c7",
       "accepted_at": "2026-07-24"
     },
     {
@@ -241,9 +241,9 @@
       "route": "/services/small-porch-decorating",
       "rendered_file": "services/small-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "da73df4499b74a5290363b46d44d2e323728d551bcce29d1bc2c3a9e0ce9273c",
-      "cache_file": "data/release/frozen_accepted_outputs/da73df4499b74a5290363b46d44d2e323728d551bcce29d1bc2c3a9e0ce9273c.html.gz",
-      "cache_sha256": "50f77e06ad036eb2ca81299a4159948f5ab9041ad9b368d72504b4d26a776771",
+      "accepted_sha256": "3a74d47fdd9effb4eb8f525c530effc8338508606cd8ecaa579f173ed8f97181",
+      "cache_file": "data/release/frozen_accepted_outputs/3a74d47fdd9effb4eb8f525c530effc8338508606cd8ecaa579f173ed8f97181.html.gz",
+      "cache_sha256": "8692974a5c2da45b95104248901ecf8d2e5e8b709c287239b1c1605464aa832b",
       "accepted_at": "2026-07-24"
     },
     {
