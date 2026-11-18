@@ -2,7 +2,7 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W47",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-17T13:32:22.950Z",
+  "generated_at": "2026-11-18T13:32:23.833Z",
   "state": "running",
   "published": 3,
   "indexed": "not read: no page old enough to inspect yet (14 days)",
@@ -99,5 +99,5 @@
     "weight_changes": [],
     "competition": "ok: 15 top-10 read(s) via brave"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/44093693490"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/44314700849"
 }
