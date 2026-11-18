@@ -213,6 +213,17 @@
       "blocking": true,
       "tier": "blocking (hard-fail)",
       "restored": "restored 10 Nov 2026 (hostile review)"
+    },
+    {
+      "id": "workflow-push",
+      "command": "npm run validate:workflow-push",
+      "detects": "A git push from CI with no pull --rebase and retry loop (18 Nov 2026: the Daily Authority Cycle went red on a bare push after main moved, 'rejected, fetch first'; citation-probe and search-intelligence had the same shape). Force pushes to a job's own branch and tag pushes are exempt; the check proves itself on the pre-fix shape every run.",
+      "profiles": [
+        "release"
+      ],
+      "blocking": true,
+      "tier": "blocking (hard-fail)",
+      "restored": "added 18 Nov 2026"
     }
   ]
 }
