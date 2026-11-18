@@ -13,6 +13,13 @@ on:
   schedule:
     - cron: "29 7 * * *"  # America/Chicago, all year
       timezone: America/Chicago
+  # A change to the engine's config or routing is checked on the PR (search-loop v1.12.0
+  # stage validate: config + model-routing checks only, no network, no model call; peace-be-still
+  # 18 Nov 2026 failed every scheduled run on a routing file nothing checked before merge).
+  pull_request:
+    paths:
+      - search-loop.config.json
+      - .github/workflows/search-loop.yml
   workflow_dispatch:
     inputs:
       stage:
@@ -27,7 +34,7 @@ permissions:
   models: read
 
 concurrency:
-  group: search-loop
+  group: ${{ github.event_name == 'pull_request' && format('search-loop-pr-{0}', github.ref) || 'search-loop' }}
   cancel-in-progress: false
 
 jobs:
@@ -36,7 +43,7 @@ jobs:
     with:
       open_loops_business: porch-and-party
       engine_ref: v1
-      stage: ${{ inputs.stage || 'auto' }}
+      stage: ${{ github.event_name == 'pull_request' && 'validate' || inputs.stage || 'auto' }}
       setup_command: npm ci
       post_build_command: bash .github/scripts/search_loop_post_build.sh
     secrets:
