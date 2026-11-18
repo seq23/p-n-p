@@ -126,7 +126,8 @@ jobs:
             echo "NAMED STOP: Search Console returned no change to measured evidence; nothing to commit."
           else
             git commit -m "chore: ingest measured Search Console demand"
-            git push
+            # main can move while this job runs: rebase onto it and retry, fail loudly if it still cannot push
+            for i in 1 2 3; do git pull --rebase -q origin main && git push && break; [ "$i" = 3 ] && exit 1; sleep $((i*10)); done
           fi
 
       # Now the gate. validate:query-atlas is what stops a query rejected for this
@@ -197,5 +198,6 @@ jobs:
             echo "No governed authority changes to commit."
           else
             git commit -m "chore: run governed authority cycle"
-            git push
+            # main can move while this job runs: rebase onto it and retry, fail loudly if it still cannot push
+            for i in 1 2 3; do git pull --rebase -q origin main && git push && break; [ "$i" = 3 ] && exit 1; sleep $((i*10)); done
           fi
