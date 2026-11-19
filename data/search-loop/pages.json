@@ -585,7 +585,10 @@
         "b5 FAQ answer is 33 words (aim 40-60): \"Do you offer exterior styling for homes?\"",
         "b5 FAQ answer is 39 words (aim 40-60): \"How do I find out the cost of your decor services?\""
       ],
-      "indexnow_at": "2026-11-17"
+      "indexnow_at": "2026-11-17",
+      "extra_queries": [
+        "party decor services near me"
+      ]
     }
   ],
   "dropped": [
@@ -1051,6 +1054,14 @@
         "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.encyclopedia.com/places/united-states-and-canada/us-states/memphis (HTTP 404); https://tnhistoryforall.org/places/collierville/ (no answer)",
         "invented: a named person or quote \"Memphis Request a quote from \""
       ]
+    },
+    {
+      "query": "party planners near me within 5 mi",
+      "at": "2026-11-19",
+      "gate": 2,
+      "reason": [
+        "off-audience: Porch & Party focuses on custom party planning, porch styling, and local game pickups rather than a five-mile radius res"
+      ]
     }
   ],
   "redirected": [
@@ -1323,6 +1334,16 @@
       "matched_by": "high token overlap (0.67 >= 0.6)",
       "matched_text": "Giant Yard Game Rentals in Memphis",
       "stage": "draft"
+    },
+    {
+      "query": "party decor services near me",
+      "at": "2026-11-19",
+      "url": "https://porchandparty901.com/questions/party-decor-services",
+      "route": "/questions/party-decor-services",
+      "kind": "engine",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "matched_text": "party decor services",
+      "stage": "search"
     }
   ]
 }

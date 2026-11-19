@@ -994,6 +994,15 @@
   ],
   "strengthen": [
     {
+      "query": "party decor services near me",
+      "page": "/questions/party-decor-services",
+      "url": "https://porchandparty901.com/questions/party-decor-services",
+      "score": 79.1,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-19"
+    },
+    {
       "query": "giant outdoor game hire",
       "page": "/questions/giant-yard-game-rentals",
       "url": "https://porchandparty901.com/questions/giant-yard-game-rentals",
