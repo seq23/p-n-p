@@ -2,13 +2,13 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W47",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-20T21:24:02.169Z",
+  "generated_at": "2026-11-21T20:11:43.077Z",
   "state": "running",
   "published": 3,
   "indexed": 0,
   "pace": 10,
   "ai_visitors": 0,
-  "ai_bot_hits": 770,
+  "ai_bot_hits": 745,
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
   "wins": 0,
   "undone": 0,
@@ -86,7 +86,7 @@
     },
     "striking": {
       "pages": 8,
-      "measured": 4,
+      "measured": 5,
       "top3": 0,
       "hit_rate": 0
     },
@@ -99,5 +99,5 @@
     "weight_changes": [],
     "competition": "ok: 15 top-10 read(s) via brave"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/44819938957"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/44944955380"
 }
