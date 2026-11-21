@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-21",
-  "end_date": "2026-11-17",
-  "collected_at": "2026-11-20T22:28:24.529849+00:00",
+  "start_date": "2026-10-22",
+  "end_date": "2026-11-18",
+  "collected_at": "2026-11-21T21:24:58.090461+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -371,10 +371,10 @@
       "keys": [
         "https://porchandparty901.com/"
       ],
-      "clicks": 8,
-      "impressions": 203,
-      "ctr": 0.03940886699507389,
-      "position": 4.45320197044335
+      "clicks": 7,
+      "impressions": 187,
+      "ctr": 0.0374331550802139,
+      "position": 4.016042780748663
     },
     {
       "keys": [

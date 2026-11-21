@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "contract": "PNP_SEARCH_INTELLIGENCE_CONTRACT",
   "stage": "provider_truth",
-  "generated_at": "2026-11-20T22:28:24.529Z",
+  "generated_at": "2026-11-21T21:24:58.090Z",
   "own_site_google_performance_authority": "google_search_console",
   "provider_state": "OK",
   "provider_states": [
@@ -11,7 +11,7 @@
       "provider_id": "google_search_console",
       "state": "OK",
       "reason": "REAL_EXPORT_INGESTED",
-      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-11-20T22:28:24.529849+00:00 rows={\"by_query\":39,\"by_page\":22,\"by_query_page\":49}"
+      "evidence": "data/search_intelligence/gsc_search_analytics_export.json collected_at=2026-11-21T21:24:58.090461+00:00 rows={\"by_query\":39,\"by_page\":22,\"by_query_page\":49}"
     }
   ],
   "overall_status": "OK",
@@ -19,24 +19,24 @@
   "export_path": "data/search_intelligence/gsc_search_analytics_export.json",
   "export_problem": null,
   "export_window": {
-    "start_date": "2026-10-21",
-    "end_date": "2026-11-17"
+    "start_date": "2026-10-22",
+    "end_date": "2026-11-18"
   },
-  "export_collected_at": "2026-11-20T22:28:24.529849+00:00",
+  "export_collected_at": "2026-11-21T21:24:58.090461+00:00",
   "export_counts": {
     "by_query": 39,
     "by_page": 22,
     "by_query_page": 49
   },
-  "requested_for_date": "2026-11-20",
+  "requested_for_date": "2026-11-21",
   "target_count": 41,
   "targets_with_gsc_rows": 39,
-  "total_impressions": 227,
-  "total_clicks": 8,
+  "total_impressions": 211,
+  "total_clicks": 7,
   "site_totals": {
     "basis": "by_page rows of the Search Console export (complete; by_query omits anonymised queries)",
-    "clicks": 8,
-    "impressions": 227,
+    "clicks": 7,
+    "impressions": 211,
     "pages_with_impressions": 22,
     "queries_with_impressions": 39,
     "query_row_impressions": 139,
@@ -105,7 +105,7 @@
     ]
   },
   "target_impressions": 139,
-  "target_clicks": 120,
+  "target_clicks": 105,
   "unavailable_note": null,
   "truth_boundary": "Google Search Console is the only authority for own-site Google impressions, clicks, CTR, average position, and indexation in this repo.",
   "per_target": [
@@ -243,10 +243,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -311,10 +311,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -334,10 +334,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -357,10 +357,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -414,10 +414,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -590,10 +590,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -613,10 +613,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -636,10 +636,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -659,10 +659,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -699,10 +699,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -767,10 +767,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -790,10 +790,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -813,10 +813,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -836,10 +836,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
@@ -859,10 +859,10 @@
       },
       "page_metrics": {
         "url": "https://porchandparty901.com/",
-        "clicks": 8,
-        "impressions": 203,
-        "ctr": 0.03940886699507389,
-        "gsc_average_position": 4.45320197044335
+        "clicks": 7,
+        "impressions": 187,
+        "ctr": 0.0374331550802139,
+        "gsc_average_position": 4.016042780748663
       },
       "own_site_performance_basis": "google_search_console",
       "truth_boundary": "Real Google Search Console metrics for the verified property. gsc_average_position is Google averaged position, not a single observed SERP rank."
