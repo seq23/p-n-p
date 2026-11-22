@@ -275,6 +275,33 @@ for (const abs of pub) {
 }
 if (xmasPages < 5) fail(`Rule 0: only ${xmasPages} published files mention Christmas; the Christmas price check saw nothing`);
 
+// ---- 6c. the admin Design Library (/designs) quotes the data (21 Nov 2026) ----------
+// Valerie quotes from it. Its research copy carried the retired 17 Oct tiers and a $350 Christmas
+// Stoop; functions/_lib/library-prices.mjs renders every porch package line from the data at serve
+// time. Each porch design names only its own season's package prices, follows a perturbed copy,
+// and no retired tier name survives.
+const LP = await mod('functions/_lib/library-prices.mjs');
+const rawLib = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/admin/design-library/library.json'), 'utf8'));
+function libraryErrors(lib, data, price = LP.pricedLibrary) {
+  const bad = [];
+  const priced = price(lib, data);
+  // Package lines and the pricing note only: design names ("Grand Porch Cluster Set") are names.
+  const txt = JSON.stringify([priced.designs.map((d) => d.pkg), (priced.porchRules || []).map((r) => r.how)]);
+  for (const re of [/Standard \(from/, /Large \(from/, /Grand Holiday/, /Grand Porch\b/, /P&P stoop/]) if (re.test(txt)) bad.push(`a retired porch tier: "${txt.match(re)[0]}"`);
+  const porches = priced.designs.filter((d) => d.sec === 'porches');
+  if (porches.length < 20) bad.push(`Rule 0: only ${porches.length} porch designs read`);
+  for (const d of porches) {
+    const s = LP.seasonOf(d, data);
+    const ok = new Set(Object.values(s.tiers).map((t) => money(t.from)));
+    const named = d.pkg.match(/\$[\d,]+/g) || [];
+    if (!named.length) bad.push(`${d.id}: "${d.pkg}" names no package price`);
+    for (const m of named) if (!ok.has(m)) bad.push(`${d.id} (${s.name}): "${d.pkg}"`);
+  }
+  return bad;
+}
+for (const b of libraryErrors(rawLib, pk)) fail(`admin Design Library: ${b}`);
+for (const b of libraryErrors(rawLib, pk2)) fail(`admin Design Library (perturbed data): ${b}`);
+
 // ---- 7. porch price articles (owner-approved 18 Oct 2026) ---------------------------
 // Each article in porch_packages.json `articles` is either published (grid + schema + the
 // article links current) or queued for the cadence gate with a measured target naming its
@@ -362,6 +389,7 @@ probe('a price tool with the old $350 Christmas Stoop', () => christmasPriceErro
 probe('an llms line with the price in the next sentence', () => christmasPriceErrors('- Christmas Porch Decorating: Holiday front porch styling with wreaths. Starts at $350+.').length > 0);
 probe('a Christmas page panel with the seasonal floor', () => christmasPriceErrors('<p>Seasonal porch decorating starts at $350+. Final quotes depend on materials.</p>', pk, { christmasPage: true }).length > 0);
 probe('a hub answer saying Christmas starts at $350', () => christmasPriceErrors('seasonal porch decorating, which covers Christmas porch installs in the Memphis metro area, starts at $350.').length > 0);
+probe('the Design Library served as copied, with its typed porch prices', () => libraryErrors(rawLib, pk, (lib) => lib).length > 0);
 probe('a page without the grid', () => { const h = fs.readFileSync(path.join(ROOT, pk.pages[0]), 'utf8').replace(/<!--porch-packages-->[\s\S]*?<!--\/porch-packages-->/, ''); return !h.includes(PP.pageBlockHtml(pk)); });
 {
   const d = drafts[0];

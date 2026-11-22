@@ -159,6 +159,37 @@ for (const rel of ['services/christmas-porch-decorating.html']) {
   if (!/January takedown is included/.test(t)) fail(`${rel} does not say January takedown is included`);
   if (TD_QUOTE.test(t)) fail(`${rel} still quotes Christmas takedown from $${TD_PRICE}`);
 }
+// No $75 takedown line in a Christmas section without the Christmas line beside it (owner, 16 Nov
+// 2026: January takedown is included in every Christmas package). A section is an HTML <section>,
+// a FAQPage Question node, or one line of an llms*.txt file.
+if (!/January takedown is included/.test(TD.christmasLine || '')) fail('services.json addOns.takedown.christmasLine does not say January takedown is included');
+const TD_ANY = new RegExp(`(Takedown starts at|takedown, from|Optional takedown, from) \\$${TD_PRICE}\\b`, 'g');
+const sectionsOf = (src, rel) => (rel.endsWith('.txt') ? src.split('\n')
+  : [...src.matchAll(/<section\b[\s\S]*?<\/section>/g), ...src.matchAll(/\{"@type":"Question"[\s\S]*?\}\}/g)].map((m) => m[0]));
+function christmasTakedownErrors(src, rel) {
+  const bad = [];
+  for (const sec of sectionsOf(src, rel)) {
+    if (!/(?<![-/\w])Christmas\b/.test(sec.replace(/<[^>]+>/g, ' '))) continue;
+    for (const m of sec.matchAll(TD_ANY)) if (!sec.slice(m.index, m.index + 300).includes(TD.christmasLine.replace(/\.$/, ''))) bad.push(sec.slice(Math.max(0, m.index - 80), m.index + 60).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+  }
+  return bad;
+}
+let xmasTdSections = 0;
+for (const rel of [...pages, 'llms.txt', 'llms-full.txt', 'llms-services.txt', 'llms-answers.txt']) {
+  const t = read(rel);
+  if (!t) continue;
+  xmasTdSections += sectionsOf(t, rel).filter((x) => /Christmas/.test(x) && TD_ANY.test(x)).length; TD_ANY.lastIndex = 0;
+  for (const b of christmasTakedownErrors(t, rel)) fail(`${rel}: a Christmas section quotes takedown from $${TD_PRICE} without "${TD.christmasLine}": "${b}"`);
+}
+if (xmasTdSections < 3) fail(`Rule 0: only ${xmasTdSections} Christmas sections with a takedown line were read`);
+{
+  const before = errors.length;
+  const caught = christmasTakedownErrors('<section><p>Custom porch installs for fall, Halloween, Christmas. Starting at $350+. Takedown starts at $75, quoted with your setup.</p></section>', 'probe.html').length > 0
+    && christmasTakedownErrors('- Christmas porches. Takedown starts at $75, quoted with your setup.', 'probe.txt').length > 0
+    && christmasTakedownErrors(`<section><p>Christmas porches. Takedown starts at $75, quoted with your setup. ${TD.christmasLine}</p></section>`, 'probe.html').length === 0;
+  errors.length = before;
+  if (!caught) fail('self-test: the Christmas takedown check passed a Christmas section with the $75 line alone, or failed a fixed one');
+}
 for (const rel of ['pricing.html', 'how-it-works.html']) if (!(read(rel) || '').includes(TD.line)) fail(`${rel} lacks the exact takedown line`);
 const UNPRICED = /take-?down (service )?(is )?available for an additional fee|take-?down when quoted separately|take-?down for seasonal porch installs is available/i;
 let tdScanned = 0;

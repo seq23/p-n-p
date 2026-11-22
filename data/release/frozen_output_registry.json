@@ -160,9 +160,9 @@
       "route": "/services/front-door-styling",
       "rendered_file": "services/front-door-styling.html",
       "state": "FROZEN",
-      "accepted_sha256": "063390cc1b85a9e7d911b139467c549088213f5214b88147e3d83d8c40cd6299",
-      "cache_file": "data/release/frozen_accepted_outputs/063390cc1b85a9e7d911b139467c549088213f5214b88147e3d83d8c40cd6299.html.gz",
-      "cache_sha256": "e081b46af8cf89f1031355567e9fcc83cedf278275799f0fbb67cfa82cd42bc9",
+      "accepted_sha256": "4cb377ca5882b6fe33a372087984456375ee00a6e973e41441eda2ffb50f99e2",
+      "cache_file": "data/release/frozen_accepted_outputs/4cb377ca5882b6fe33a372087984456375ee00a6e973e41441eda2ffb50f99e2.html.gz",
+      "cache_sha256": "54079631ca061c899283e3166c4cd8bf57de18587d9f7334d023b0c7021be28b",
       "accepted_at": "2026-07-24"
     },
     {
@@ -196,9 +196,9 @@
       "route": "/services/index",
       "rendered_file": "services/index.html",
       "state": "FROZEN",
-      "accepted_sha256": "544c28154cf39b7f61ba87bd01a73eee6c480bc3f5f54db8341c3ad83fee7126",
-      "cache_file": "data/release/frozen_accepted_outputs/544c28154cf39b7f61ba87bd01a73eee6c480bc3f5f54db8341c3ad83fee7126.html.gz",
-      "cache_sha256": "a77bbff99345912196097900bd07179b60e627100ddfcc9b0a8c84b6e7e16d24",
+      "accepted_sha256": "d2611553c57afbfa4aab8d79934ac40d4cbb9ba87ed0e86b00b835acf82bc424",
+      "cache_file": "data/release/frozen_accepted_outputs/d2611553c57afbfa4aab8d79934ac40d4cbb9ba87ed0e86b00b835acf82bc424.html.gz",
+      "cache_sha256": "823358f4ebd7c01b0a12f9d4c79cb29829014cad4091e1cc57bd73a046307155",
       "accepted_at": "2026-07-24"
     },
     {
@@ -223,9 +223,9 @@
       "route": "/services/porch-decorating",
       "rendered_file": "services/porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "25a2ab39381677435faac590a78f1c4fccec5c9b30e6282193fb418b5ab8943b",
-      "cache_file": "data/release/frozen_accepted_outputs/25a2ab39381677435faac590a78f1c4fccec5c9b30e6282193fb418b5ab8943b.html.gz",
-      "cache_sha256": "ec795fcaae526aa741c826b43fd8968ee09cda8a4810346ec76dd23693dce547",
+      "accepted_sha256": "560966450ef51cdebdccf7f7d75de0b7795bda800438708826d520fcaae34650",
+      "cache_file": "data/release/frozen_accepted_outputs/560966450ef51cdebdccf7f7d75de0b7795bda800438708826d520fcaae34650.html.gz",
+      "cache_sha256": "aa2df426f4862fd6f619d86f59a99b2ea3183ae10dd5ec5f5a80de910ef64922",
       "accepted_at": "2026-07-24"
     },
     {
@@ -241,9 +241,9 @@
       "route": "/services/small-porch-decorating",
       "rendered_file": "services/small-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "b706ae6d895c4f9ea83696258dd860442a3031dabac4bc001b2706092e5590ec",
-      "cache_file": "data/release/frozen_accepted_outputs/b706ae6d895c4f9ea83696258dd860442a3031dabac4bc001b2706092e5590ec.html.gz",
-      "cache_sha256": "49d65fb62d8cc0c745ace89c70bc1cc753dbd9185f9e2ee07cbb1eaef23f51bb",
+      "accepted_sha256": "ade9e8f558d2dc239b9c1cdf9433424ec2fb16abd46969056f9600656b879e7e",
+      "cache_file": "data/release/frozen_accepted_outputs/ade9e8f558d2dc239b9c1cdf9433424ec2fb16abd46969056f9600656b879e7e.html.gz",
+      "cache_sha256": "ef5f39f7b7e1d15477daf682582c417fef83ff8da9ff32fa628a29789707cb9c",
       "accepted_at": "2026-07-24"
     },
     {

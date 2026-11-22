@@ -74,6 +74,9 @@ function prices() {
     grazeFrom: money(Math.min(...offers.services.grazing.tiers.map((t) => t.from))),
     rentalDay: money(RENTALS.rates.day),
     rentalWeekend: money(RENTALS.rates.weekend),
+    // Not a price: the Christmas takedown sentence (owner, 16 Nov 2026), said beside every
+    // porch-context $75 takedown line.
+    takedownChristmas: offers.addOns.takedown.christmasLine,
   };
 }
 
@@ -93,6 +96,7 @@ const LEAD_RE = /(<\/h1>\s*)(<p(?![^>]*\bdata-page-)[^>]*>)([\s\S]*?)(<\/p>)/i;
  * the business-sources line) or an object for a page that is not a service page
  * (a legal, contact or utility page), which takes only what it names:
  *   { lead, headings: { "Old h2": "Question?" }, replace: [[oldHtml, newHtml]] }
+ * or { replace: [...] } alone for a page whose lead another generator owns;
  * `replace` says a repeated sentence once (the weekly sample's template filler); its new
  * text takes the same price tokens as a lead;
  * an old string with a non-empty replacement must be on the page or already replaced.
@@ -118,6 +122,7 @@ function installPlain(html, entry, rel) {
 }
 
 function install(html, lead, rel) {
+  if (typeof lead === 'object' && lead.lead === undefined) return applyReplace(html, lead.replace, rel);
   if (typeof lead === 'object' && !lead.service) return installPlain(html, lead, rel);
   if (typeof lead === 'object') return applyReplace(install(html, lead.lead, rel), lead.replace, rel);
   const m = LEAD_RE.exec(html);
@@ -161,7 +166,8 @@ function main() {
       process.exit(1);
     }
     const entry = entryOf(leads[rel]);
-    const lead = SHAPE.assertLead(resolve(entry.lead, P, rel), `${rel} lead (data/content/definition_leads.json)`);
+    // A replace-only entry ({ replace: [...] }, no lead) edits a page whose lead another generator owns.
+    const lead = entry.lead === undefined ? undefined : SHAPE.assertLead(resolve(entry.lead, P, rel), `${rel} lead (data/content/definition_leads.json)`);
     checked += 1;
     const before = fs.readFileSync(abs, 'utf8');
     const replace = entry.replace.map(([from, to]) => [from, resolve(to, P, rel)]);
