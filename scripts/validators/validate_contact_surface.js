@@ -184,8 +184,12 @@ const PORCH_TERMS = [...new Set([
   ...PORCH_PK.tierOrder.map((k) => `${PORCH_PK.tiers[k].name} package`),
 ].map(stem))];
 const PORCH_HREFS = PORCH_PK.pages.map((rel) => `href="/${rel.replace(/\.html$/, '')}"`);
-const offersPorches = (block) => {
-  const t = block.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').toLowerCase();
+// The brand ("Porch & Party", config/entity.json) is not a porch offer, so it is taken out first.
+const BRAND = JSON.parse(fs.readFileSync(path.join(ROOT, 'config/entity.json'), 'utf8')).name.toLowerCase();
+const PORCH_PAGES = new Set(PORCH_PK.pages);
+const offersPorches = (block, rel = '') => {
+  if (PORCH_PAGES.has(rel)) return true; // every takedown block on a porch package page is about porches
+  const t = block.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').toLowerCase().split(BRAND).join(' ');
   return PORCH_TERMS.some((w) => new RegExp(`(?<![-/\\w])${w.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}`).test(t)) || PORCH_HREFS.some((h) => block.includes(h));
 };
 function christmasTakedownErrors(src, rel) {
@@ -193,7 +197,7 @@ function christmasTakedownErrors(src, rel) {
   const said = TD.christmasLine.replace(/\.$/, '');
   for (const sec of sectionsOf(src, rel)) {
     if (sec.split(said).length > 2) bad.push(`the Christmas takedown line twice: ${sec.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120)}`);
-    if (!offersPorches(sec.split(said).join(''))) continue;
+    if (!offersPorches(sec.split(said).join(''), rel)) continue;
     for (const m of sec.matchAll(TD_ANY)) if (!sec.slice(m.index, m.index + 300).includes(said)) bad.push(sec.slice(Math.max(0, m.index - 80), m.index + 60).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
   }
   return bad;
@@ -203,7 +207,7 @@ let xmasTdSections = 0;
 for (const rel of [...pages, 'llms.txt', 'llms-full.txt', 'llms-services.txt', 'llms-answers.txt'].filter((r) => r !== 'terms-and-conditions.html')) {
   const t = read(rel);
   if (!t) continue;
-  xmasTdSections += sectionsOf(t, rel).filter((x) => offersPorches(x) && TD_ANY.test(x)).length; TD_ANY.lastIndex = 0;
+  xmasTdSections += sectionsOf(t, rel).filter((x) => offersPorches(x, rel) && TD_ANY.test(x)).length; TD_ANY.lastIndex = 0;
   for (const b of christmasTakedownErrors(t, rel)) fail(`${rel}: a Christmas section quotes takedown from $${TD_PRICE} without "${TD.christmasLine}": "${b}"`);
 }
 if (xmasTdSections < 3) fail(`Rule 0: only ${xmasTdSections} Christmas sections with a takedown line were read`);
@@ -214,6 +218,8 @@ if (xmasTdSections < 3) fail(`Rule 0: only ${xmasTdSections} Christmas sections 
     && christmasTakedownErrors(`<section><p>Christmas porches. Takedown starts at $75, quoted with your setup. ${TD.christmasLine}</p></section>`, 'probe.html').length === 0
     && christmasTakedownErrors(`<section><details><p>Christmas porches.</p></details><details><p>Party decor. Takedown starts at $75, quoted with your setup.</p></details></section>`, 'probe.html').length === 0
     && christmasTakedownErrors(`<section><p>Christmas. Takedown starts at $75, quoted with your setup. ${TD.christmasLine}</p><p>${TD.christmasLine}</p></section>`, 'probe.html').length > 0
+    && christmasTakedownErrors('<div class="info-panel"><h2>What is included in the setup?</h2><ul><li>Front-entry visual styling</li><li>Optional takedown, from $75, quoted with your setup</li></ul></div>', PORCH_PK.pages[0]).length > 0
+    && christmasTakedownErrors('<section><details><p>Party decor from Porch &amp; Party. Takedown starts at $75, quoted with your setup.</p></details></section>', 'probe.html').length === 0
     && christmasTakedownErrors('<div class="faq-item"><h3>Do you offer take-down for seasonal porch decorating?</h3><p>Yes. Takedown starts at $75, quoted with your setup.</p></div>', 'probe.html').length > 0
     && christmasTakedownErrors(`<div class="info-panel"><h3>Materials and add-ons</h3><p class="muted">Takedown starts at $75, quoted with your setup. It applies to ${offers.services.porch.name} and ${offers.services.celebration.name}.</p></div>`, 'probe.html').length > 0;
   errors.length = before;
