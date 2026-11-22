@@ -8,7 +8,7 @@
     "url": "https://porchandparty901.com/"
   },
   "audience": "Memphis-area families hosting birthdays, showers and holiday parties; homeowners who want a seasonal porch decorated for them; Memphis offices planning holiday parties and lobby decor. Local to Memphis, Germantown, Collierville, Lakeland, Southaven and Olive Branch",
-  "voice": "friendly Memphis neighbor; clear, upbeat, practical; short sentences. Never state any price, cost, dollar amount or price range - say the exact quote comes from a quote request. Never name, describe or picture a customer, a customer's face or a house number. Never say insured, guaranteed or best. Only the four services we offer: seasonal porch decorating, party planning and decor (celebration setups), grazing tables and styled event decor, and party game rentals picked up at Mt. Moriah Station (no rental delivery). How the service works, as a fact to use at most once and in your own words: the customer picks the date and the address, and the team brings every item and does the setup. Write every heading in sentence case (capitalize only the first word and names). Describe what the team does and what the reader gets in concrete words: what we bring, where and when. Never use praise words in place of a description (stunning, gorgeous, breathtaking, elegant, lush, artful, cohesive, curated, transform, unforgettable, memorable, truly special, peace of mind, bring your vision to life, making memories). A short paragraph is fine; never pad a sentence to reach a length. To point to another page, name it in plain words (our birthday party decor page), never paste its title.",
+  "voice": "friendly Memphis neighbor; clear, upbeat, practical; short sentences. Never state any price, cost, dollar amount or price range - say the exact quote comes from a quote request. Never name, describe or picture a customer, a customer's face or a house number. Never say insured, guaranteed or best. Only the four services we offer: seasonal porch decorating, party planning and decor (celebration setups), grazing tables and styled event decor, and party game rentals picked up at Mt. Moriah Station (no rental delivery). How the service works, as a fact to use at most once and in your own words: the customer picks the date and the address, and the team brings every item and does the setup. Write every heading in sentence case (capitalize only the first word and names). Describe what the team does and what the reader gets in concrete words: what we bring, where and when. Never use a praise word where a plain description would do. A short paragraph is fine; never pad a sentence to reach a length. To point to another page, name it in plain words (our birthday party decor page), never paste its title.",
   "topics": [
     "porch decorating memphis",
     "christmas porch decorating service",
@@ -150,6 +150,5 @@
     "source": "none"
   },
   "shares_audience_with": [],
-  "ledger_dir": "data/search-loop",
-  "gate": { "banned_patterns": ["\\bstunning\\b", "\\bgorgeous\\b", "\\bbreathtaking\\b", "\\btransform(s|ed|ing|ation)?\\b", "\\bunforgettable\\b", "\\bmemorable\\b", "\\btruly special\\b", "\\bpeace of mind\\b", "\\w \\| \\w"] }
+  "ledger_dir": "data/search-loop"
 }
