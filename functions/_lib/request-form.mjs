@@ -341,7 +341,8 @@ function section(key, title, body, { hidden = false } = {}) {
 }
 
 // The whole form. values/errors after a failed POST; ts = the server-signed render time.
-// Channel source tag (owner, 22 Oct 2026): /request?src=<tag> says where a request came from
+// Channel source tag (owner, 22 Oct 2026; 21 Nov 2026: also ?utm_source= and the sending site, see
+// source-tag.mjs): /request?src=<tag> says where a request came from
 // (mailer-38117, hotel, hoa, school, facebook, instagram, tiktok, pinterest, google ...). Lower
 // case, only a-z 0-9 and "-", at most 40 characters; anything else is dropped. Carried in a hidden
 // field and stored on the request (requests.source_tag, migration 0023). Not shown in /admin yet.

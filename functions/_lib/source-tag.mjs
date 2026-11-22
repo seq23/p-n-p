@@ -41,7 +41,12 @@ export function tagFromReferer(referer) {
   return cleanSrc(host.replace(/^www\./, '').replace(/\./g, '-'));
 }
 
+// Short utm_source spellings some apps add on their own (Instagram's link in bio sends "ig"), so one
+// channel is never counted under two names.
+const UTM_ALIASES = { ig: 'instagram', insta: 'instagram', fb: 'facebook', meta: 'facebook', tt: 'tiktok', pin: 'pinterest', yt: 'youtube', twitter: 'x', li: 'linkedin' };
+const utmTag = (raw) => { const t = cleanSrc(raw); return UTM_ALIASES[t] || t; };
+
 // The tag this one request carries, or '' when it carries none.
 export function sourceOf(url, referer) {
-  return cleanSrc(url.searchParams.get('src')) || cleanSrc(url.searchParams.get('utm_source')) || tagFromReferer(referer);
+  return cleanSrc(url.searchParams.get('src')) || utmTag(url.searchParams.get('utm_source')) || tagFromReferer(referer);
 }

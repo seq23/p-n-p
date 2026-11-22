@@ -224,6 +224,7 @@ const ST = await mod('functions/_lib/source-tag.mjs');
 const hidden = async (url, headers = {}) => (await (await handler({ request: new Request(url, { headers }), env, params: {} })).text()).match(/name="src" value="([^"]*)"/)[1];
 must(await hidden('https://porchandparty901.com/request?utm_source=Instagram&utm_medium=social') === 'instagram', 'GET /request?utm_source=Instagram does not carry "instagram"');
 must(await hidden('https://porchandparty901.com/request?src=hotel&utm_source=facebook') === 'hotel', '?src= does not win over ?utm_source=');
+must(await hidden('https://porchandparty901.com/request?utm_source=ig') === 'instagram' && await hidden('https://porchandparty901.com/request?utm_source=FB') === 'facebook', 'utm_source=ig / FB is not counted as instagram / facebook');
 must(await hidden('https://porchandparty901.com/request', { Referer: 'https://l.facebook.com/l.php?u=x' }) === 'facebook', 'a visit sent by facebook.com is not tagged facebook');
 must(await hidden('https://porchandparty901.com/request', { Referer: 'https://www.google.com/' }) === 'google', 'a visit sent by Google search is not tagged google');
 must(await hidden('https://porchandparty901.com/request', { Referer: 'https://porchandparty901.com/parties' }) === '', 'a click inside our own site was tagged as a source');
