@@ -2,7 +2,8 @@
 // (an sms: link from Valerie's phone, 901-355-1518); email goes from hello@ through the
 // pnp-mailer Worker. Every customer message is built here and sent through ONE seam,
 // sendMessage(channel, template, ctx), so a paid SMS provider could be switched on later
-// without changing a single button. No template ever asks for a review or offers a discount.
+// without changing a single button. A review ask and the referral reward ($25 off for both people)
+// are allowed (owner, 21 Nov 2026), but no template asks for either on its own.
 import { esc, FROM_EMAIL, ownerCopy } from './util.mjs';
 import { smsLink, hasEmail, BUSINESS_PHONE } from './reminders.mjs';
 
@@ -66,7 +67,8 @@ Object.assign(TEMPLATES, {
   setTime: (ctx) => ({ subject: 'What time works? — Porch & Party', lines: [`Hi ${first(ctx.name)}, it's Porch & Party. What time works for your ${ctx.job} on ${ctx.day}?`] }),
   // "Not paid yet" on Money: a friendly balance reminder (Text a reminder / Email a reminder).
   paymentReminder: (ctx) => ({ subject: `Friendly reminder: ${ctx.amount} still due — Porch & Party`, lines: [`Hi ${first(ctx.name)}, this is Valerie with Porch & Party. Friendly reminder: ${ctx.amount} is still due on invoice ${ctx.number}${ctx.due ? (ctx.late ? `, which was due ${ctx.due}` : `, due ${ctx.due}`) : ''}. It is the invoice I emailed or texted you; you can pay by Zelle or Cash App as it shows. Text me here with any questions. Thank you!`] }),
-  // After the job (owner: no review ask, no discount, ever).
+  // After the job. A review ask and the referral reward are allowed (owner, 21 Nov 2026); this
+  // template still never asks on its own.
   thankyou: (ctx) => {
     const name = first(ctx.name);
     const line = {
@@ -79,7 +81,8 @@ Object.assign(TEMPLATES, {
   },
 });
 
-// The referral block in the thank-you email (owner, 18 Oct 2026; no reward, no discount). Pictures:
+// The referral block in the thank-you email (owner, 18 Oct 2026). A referral reward ($25 off for both
+// people) is allowed since 21 Nov 2026; this block still never offers it on its own. Pictures:
 // 128 px copies of the site's own photos (npm run build:form-pictures), never a placeholder drawing.
 export const REFERRAL_SERVICES = [
   { key: 'porch', label: 'Porch decorating', line: 'Seasonal and holiday porches, styled and installed.', img: '/assets/img/form/porch-email.jpg', type: 'image/jpeg' },

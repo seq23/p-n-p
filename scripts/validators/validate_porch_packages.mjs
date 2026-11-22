@@ -236,6 +236,38 @@ const keptFiles = kept.map(u => path.join(ROOT, u === '/' ? 'index.html' : u.end
 if (!kept.length || keptFiles.some(f => !pub.includes(f))) fail(`Rule 0: only ${pub.length} published files scanned for retired wording`);
 for (const abs of pub) { const h = fs.readFileSync(abs, 'utf8'); for (const re of RETIRED) if (re.test(h)) fail(`${path.relative(ROOT, abs)}: still says "${h.match(re)[0]}" (retired porch tiers)`); }
 
+// ---- 6b. Christmas from-prices on every published page match the data (21 Nov 2026) ----
+// A Christmas Stoop at $350 sat on /pricing, /faq/ and the Christmas hub for five days after the
+// owner put it back to $450 (16 Nov): pages that were hand-patched, not re-rendered. Every
+// "Christmas ... from/starts at $N", "$N Christmas" and every price-tool data-config on a published
+// page or llms*.txt (JSON-LD included) must name a price the data holds for that season.
+const xmas = pk.seasons.find((x) => x.key === 'christmas');
+/** The wrong Christmas from-prices in one published file's source, as "said: ..." strings. */
+function christmasPriceErrors(src, data = pk) {
+  const season = data.seasons.find((x) => x.key === 'christmas');
+  const ok = new Set(Object.values(season.tiers).map((t) => t.from));
+  const flat = String(src).replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&ndash;|&#8211;/g, '–').replace(/\s+/g, ' ');
+  const bad = [];
+  const num = (x) => Number(x.replace(/,/g, ''));
+  for (const m of flat.matchAll(/(?<![-/\w])Christmas\b[^.$]{0,80}?\b(?:from|starts? at)\s+\$([\d,]+)/g)) if (!ok.has(num(m[1]))) bad.push(m[0]);
+  for (const m of flat.matchAll(/\$([\d,]+)\)? (?:for )?Christmas\b/g)) if (!ok.has(num(m[1]))) bad.push(m[0]);
+  for (const m of String(src).matchAll(/data-config='(\{"seasons"[^']*)'/g)) {
+    let cfg; try { cfg = JSON.parse(m[1].replace(/&#39;/g, "'")); } catch { bad.push('an unreadable price-tool data-config'); continue; }
+    for (const s of cfg.seasons || []) {
+      const want = data.seasons.find((x) => x.key === s.key);
+      for (const [k, t] of Object.entries(s.tiers || {})) if (!want || !want.tiers[k] || want.tiers[k].from !== t.from) bad.push(`price tool ${s.name} ${k} from ${money(t.from)}`);
+    }
+  }
+  return bad;
+}
+let xmasPages = 0;
+for (const abs of pub) {
+  const h = fs.readFileSync(abs, 'utf8');
+  if (/Christmas/.test(h)) xmasPages += 1;
+  for (const b of christmasPriceErrors(h)) fail(`${path.relative(ROOT, abs)}: a Christmas price that is not in data/offers/porch_packages.json: "${b.slice(0, 140)}" (Christmas from-prices are ${Object.values(xmas.tiers).map((t) => money(t.from)).join(' / ')}; re-render the page from the data)`);
+}
+if (xmasPages < 5) fail(`Rule 0: only ${xmasPages} published files mention Christmas; the Christmas price check saw nothing`);
+
 // ---- 7. porch price articles (owner-approved 18 Oct 2026) ---------------------------
 // Each article in porch_packages.json `articles` is either published (grid + schema + the
 // article links current) or queued for the cadence gate with a measured target naming its
@@ -318,6 +350,9 @@ probe('a form with a tier price', () => checkForm(formHtml.replace('Not sure yet
 probe('a form without the bundle box', () => checkForm(formHtml.replace(/<input type="checkbox" name="porch_both"[^>]*>/, ''), 'probe'));
 probe('a form with reworded answers', () => checkForm(formHtml.replace('A full porch (our Classic package)', 'A full porch (Classic)'), 'probe'));
 probe('a calculator with a typed price', () => { const real = PP.calculatorHtml; const fake = (d) => real(d).replace(money(d.seasons[0].tiers.classic.from), '$550'); const before = errors.length; const out = fake(pk2); for (const m of origOnly) if (out.includes(m)) errors.push('x'); return errors.length > before; });
+probe('a page with the old $350 Christmas Stoop', () => christmasPriceErrors('<p>Winter / Christmas: Stoop from $350, Classic from $750.</p>').length > 0);
+probe('a price tool with the old $350 Christmas Stoop', () => christmasPriceErrors(`<article data-config='${JSON.stringify({ seasons: [{ key: 'christmas', name: 'Winter / Christmas', tiers: { stoop: { from: 350 } } }] })}'>`).length > 0);
+probe('a hub answer saying Christmas starts at $350', () => christmasPriceErrors('seasonal porch decorating, which covers Christmas porch installs in the Memphis metro area, starts at $350.').length > 0);
 probe('a page without the grid', () => { const h = fs.readFileSync(path.join(ROOT, pk.pages[0]), 'utf8').replace(/<!--porch-packages-->[\s\S]*?<!--\/porch-packages-->/, ''); return !h.includes(PP.pageBlockHtml(pk)); });
 {
   const d = drafts[0];

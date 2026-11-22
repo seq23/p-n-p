@@ -16,9 +16,9 @@
       "route": "/faq/index",
       "rendered_file": "faq/index.html",
       "state": "FROZEN",
-      "accepted_sha256": "39f1681df50d446b008f4374b77efd966f94248821d931658ebb464641a96acf",
-      "cache_file": "data/release/frozen_accepted_outputs/39f1681df50d446b008f4374b77efd966f94248821d931658ebb464641a96acf.html.gz",
-      "cache_sha256": "e9e7f07d011bda34d834bcaf3b647c10457445c7972519055b6ee67efa0dc903",
+      "accepted_sha256": "1ba1f91c801764c676734a24beff3049f729d9eb602bef7649d179b6d68badf6",
+      "cache_file": "data/release/frozen_accepted_outputs/1ba1f91c801764c676734a24beff3049f729d9eb602bef7649d179b6d68badf6.html.gz",
+      "cache_sha256": "15cdce84c7d64e838f307c29a9168e837145cd9c49570b91cdb70e77bf23a8fc",
       "accepted_at": "2026-07-24"
     },
     {
@@ -142,9 +142,9 @@
       "route": "/services/christmas-porch-decorating",
       "rendered_file": "services/christmas-porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "6fa58a4e613faee2a549c8ca9153b6ca3a102e5b2489b0b9a64b6ed3efbafe06",
-      "cache_file": "data/release/frozen_accepted_outputs/6fa58a4e613faee2a549c8ca9153b6ca3a102e5b2489b0b9a64b6ed3efbafe06.html.gz",
-      "cache_sha256": "329f443e1f0afbf645ce78d6d89e1d5a257a9583cdb9622abbff601bac084949",
+      "accepted_sha256": "6b44a5fd4658eb46eba62993b18c096b8ee1a3776b68f5d97d5a16efd21c8754",
+      "cache_file": "data/release/frozen_accepted_outputs/6b44a5fd4658eb46eba62993b18c096b8ee1a3776b68f5d97d5a16efd21c8754.html.gz",
+      "cache_sha256": "541162ec6bbc2ce965645b4ad5c06704de55bf709346bf7f27ede51313ff220b",
       "accepted_at": "2026-07-24"
     },
     {

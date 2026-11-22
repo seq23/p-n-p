@@ -399,6 +399,18 @@ dash = await s.get('/admin/');
 must(dash.text.includes('Referred by</dt><dd>Casey Path2'), 'the card does not say "Referred by <name>"');
 const fake = await send({ ...PATHS.porch, ...contact(31), event_date: plus(31) }, { cookie: 'pnp_ref=zzzzzzzz' });
 must(fake.status === 303 && (await s.one("SELECT referred_by FROM requests WHERE email = 'path31@example.com'")).referred_by === null, 'an unknown referral code was stored');
+// A customer who taps her own /r/<code> link and books for herself is not her own referrer
+// (owner, 21 Nov 2026: the $25 reward is for two people). The referrer is Casey Path2: the same
+// email, phone digits or name on a new request stores no referral; a real friend (above) still does.
+const self = contact(2);
+for (const [n, who, how] of [[32, { email: self.email }, 'email'], [33, { phone: `+1 ${self.phone}` }, 'phone'], [34, { name: `  ${self.name.toUpperCase()} ` }, 'name']]) {
+  // The request key is site|second|email, so the same email needs a new second.
+  if (who.email) await new Promise((r) => setTimeout(r, 1100));
+  const mine = await send({ ...PATHS.porch, ...contact(n), ...who, event_date: plus(n) }, { cookie: `pnp_ref=${code}` });
+  const row = await s.one('SELECT referred_by FROM requests WHERE email = ?1 OR name = ?2', `path${n}@example.com`, `Casey Path${n}`);
+  must(mine.status === 303 && row && row.referred_by === null, `a self-referral (same ${how} as the referrer) was stored as a referral`);
+}
+must(RS.isSelfReferral({ email: 'a@x.com', phone: '9015550111', name: 'Ann Lee' }, { email: 'b@x.com', phone: '9015550112', name: 'Bea Lee' }) === false, 'a friend with different details counts as a self-referral');
 
 // ---- 7. Spam protection ----------------------------------------------------------------
 const before = (await s.one('SELECT COUNT(*) AS n FROM requests')).n;

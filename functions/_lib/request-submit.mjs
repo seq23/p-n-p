@@ -30,6 +30,20 @@ const MIN_SECONDS = 3;
 const MAX_AGE_SECONDS = 2 * 86400;
 export const RATE = { perHour: 5, perHourNoJs: 3 };
 const REF_COOKIE = 'pnp_ref';
+
+/**
+ * True when the request that owns a referral code is the same person booking now: the same phone
+ * digits, email or normalised name. A customer who taps her own /r/<code> link and books for herself
+ * is never her own referrer (the $25 referral reward, owner 21 Nov 2026, is for two people).
+ */
+export function isSelfReferral(referrer, me) {
+  if (!referrer) return false;
+  const phone = (r) => C.digitsOf(r.phone_digits || r.phone || '').slice(-10);
+  const name = (r) => r.name_norm || C.normName(r.name || '');
+  const email = (r) => String(r.email || '').trim().toLowerCase();
+  const same = (a, b) => Boolean(a) && a === b;
+  return same(phone(referrer), phone(me)) || same(email(referrer), email(me)) || same(name(referrer), name(me));
+}
 const CODE_RE = /^[a-hjkmnp-z2-9]{8}$/;
 const ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
 
@@ -224,7 +238,10 @@ async function submit(context) {
   }
   const refIn = [fields.ref, cookie(request, REF_COOKIE)].find((c) => CODE_RE.test(String(c || ''))) || '';
   let referredBy = null;
-  if (refIn) { const who = await env.DB.prepare('SELECT request_key FROM requests WHERE referral_code = ?1').bind(refIn).first(); if (who) referredBy = refIn; }
+  if (refIn) {
+    const who = await env.DB.prepare('SELECT request_key, name, email, phone, name_norm, phone_digits FROM requests WHERE referral_code = ?1').bind(refIn).first();
+    if (who && !isSelfReferral(who, { name: clean.name, email: clean.email, phone: clean.phone })) referredBy = refIn;
+  }
   const receipt = randomId();
   const code = randomCode();
   const extra = [];

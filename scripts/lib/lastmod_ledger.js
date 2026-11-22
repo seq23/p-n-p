@@ -49,7 +49,8 @@ const NOTE =
 function buildDate() {
   const override = String(process.env.BUILD_DATE || '').trim();
   if (DATE.test(override)) return override;
-  return new Date().toISOString().slice(0, 10);
+  // The business's own day (Memphis), not UTC: an evening build in Central must not date a page tomorrow.
+  return new Date().toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
 }
 
 /**
