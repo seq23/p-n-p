@@ -44,7 +44,24 @@
         ]
       ]
     },
-    "services/fall-porch-decorating.html": "Fall porch decorating in Memphis is a seasonal front-entry install Porch &amp; Party designs, brings and sets up for you: pumpkins and gourds in mixed sizes, a door accent, planters and layered height across the porch and the steps. Fall packages start at {fallFrom}.",
+    "services/fall-porch-decorating.html": {
+      "service": true,
+      "lead": "Fall porch decorating in Memphis is a seasonal front-entry install Porch &amp; Party designs, brings and sets up for you: pumpkins and gourds in mixed sizes, a door accent, planters and layered height across the porch and the steps. Fall packages start at {fallFrom}.",
+      "replace": [
+        [
+          "Takedown starts at $75, quoted with your setup.</p></div><div class=\"info-pan",
+          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p></div><div class=\"info-pan"
+        ],
+        [
+          "Takedown starts at $75, quoted with your setup.</p></div></div></div></section",
+          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p></div></div></div></section"
+        ],
+        [
+          "<li>Optional takedown, from $75, quoted with your setup</li>",
+          "<li>Optional takedown, from $75, quoted with your setup. {takedownChristmas}</li>"
+        ]
+      ]
+    },
     "services/front-door-styling.html": {
       "service": true,
       "lead": "Front door styling in Memphis is the smallest of the seasonal porch setups. Porch &amp; Party brings and hangs a wreath or door accent and styles the step in front of it, with no full porch display. The Stoop package it comes from starts at {fallFrom}.",
@@ -52,6 +69,10 @@
         [
           "location. Takedown starts at $75, quoted with your setup.</p>",
           "location. Takedown starts at $75, quoted with your setup. {takedownChristmas}</p>"
+        ],
+        [
+          "<li>Optional takedown, from $75, quoted with your setup</li>",
+          "<li>Optional takedown, from $75, quoted with your setup. {takedownChristmas}</li>"
         ]
       ]
     },
@@ -65,6 +86,10 @@
         [
           "location. Takedown starts at $75, quoted with your setup.</p>",
           "location. Takedown starts at $75, quoted with your setup. {takedownChristmas}</p>"
+        ],
+        [
+          "<li>Optional takedown, from $75, quoted with your setup</li>",
+          "<li>Optional takedown, from $75, quoted with your setup. {takedownChristmas}</li>"
         ]
       ]
     },

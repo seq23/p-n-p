@@ -24,6 +24,9 @@ const path = require('path');
 const HC = require('./lib/hub_consolidation');
 const PP = require('./lib/porch_packages');
 const PK = require('../data/offers/porch_packages.json');
+const TAKEDOWN = require('../data/offers/services.json').addOns.takedown;
+// {{takedownChristmas}} is the Christmas takedown sentence (services.json addOns.takedown.christmasLine).
+const fill = (str, pk) => PP.fillTokens(String(str).split('{{takedownChristmas}}').join(TAKEDOWN.christmasLine), pk);
 
 const ROOT = path.resolve(__dirname, '..');
 const CHECK = process.argv.includes('--check');
@@ -41,7 +44,7 @@ function block(items, pk = PK) {
     const id = path.basename(item.from);
     const idAttr = ids.has(id) ? '' : ` id="${id}"`;
     ids.add(id);
-    return `<div class="faq-item"${idAttr}><h3>${esc(PP.fillTokens(item.q, pk))}</h3><p>${esc(PP.fillTokens(item.a, pk))}</p></div>`;
+    return `<div class="faq-item"${idAttr}><h3>${esc(fill(item.q, pk))}</h3><p>${esc(fill(item.a, pk))}</p></div>`;
   }).join('');
   return `<!--hub-folds--><section class="section" id="${HC.SECTION_ID}" data-hub-folds="${items.length}"><div class="container"><div class="answer-block"><span class="eyebrow">More answers</span><h2>More questions, answered</h2></div><div class="faq-list hub-folds">${faq}</div></div></section><!--/hub-folds-->`;
 }
