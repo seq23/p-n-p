@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "truth_source": "google_search_console_url_inspection",
   "site_url": "sc-domain:porchandparty901.com",
-  "collected_at": "2026-11-21T21:25:49.310919+00:00",
+  "collected_at": "2026-11-22T21:28:05.990566+00:00",
   "state": "OK",
   "named_stop": null,
   "sitemap_url_count": 57,
@@ -13,9 +13,9 @@
   },
   "summary": {
     "by_coverage_state": {
-      "Crawled - currently not indexed": 15,
+      "Crawled - currently not indexed": 17,
       "Submitted and indexed": 1,
-      "URL is unknown to Google": 41
+      "URL is unknown to Google": 39
     },
     "by_verdict": {
       "NEUTRAL": 56,
@@ -23,9 +23,9 @@
     },
     "buckets": {
       "indexed": 1,
-      "crawled_not_indexed": 15,
+      "crawled_not_indexed": 17,
       "discovered_not_indexed": 0,
-      "other": 41,
+      "other": 39,
       "not_inspected": 0
     }
   },
@@ -42,7 +42,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/accessibility",
@@ -55,7 +55,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/areas/",
@@ -68,7 +68,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/contact",
@@ -81,7 +81,7 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/contact",
       "userCanonical": "https://porchandparty901.com/contact",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/faq/",
@@ -94,7 +94,7 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/faq/",
       "userCanonical": "https://porchandparty901.com/faq/",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/guides/couples-staycation-ideas-memphis",
@@ -107,7 +107,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/guides/graduation-party-decorations-at-home-memphis",
@@ -120,7 +120,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/guides/memphis-hotels-with-jacuzzi-in-room",
@@ -133,7 +133,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/hotels",
@@ -146,7 +146,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/how-it-works",
@@ -159,7 +159,7 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/how-it-works",
       "userCanonical": "https://porchandparty901.com/how-it-works",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/",
@@ -172,7 +172,7 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/",
       "userCanonical": "https://porchandparty901.com/",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/pricing",
@@ -185,7 +185,7 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/pricing",
       "userCanonical": "https://porchandparty901.com/pricing",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/privacy-policy",
@@ -198,7 +198,7 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/privacy-policy",
       "userCanonical": "https://porchandparty901.com/privacy-policy",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/balloon-party-decorations-near-me",
@@ -211,7 +211,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/birthday-party-games",
@@ -224,7 +224,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/birthday-party-organisers-near-me",
@@ -237,7 +237,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/can-you-use-rose-petals-and-candles-in-a-hotel",
@@ -250,7 +250,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/event-planner-for-small-parties",
@@ -263,7 +263,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/giant-yard-game-rentals",
@@ -276,7 +276,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/how-many-rose-petals-for-a-hotel-room",
@@ -289,7 +289,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/how-to-book-birthday-party",
@@ -302,7 +302,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/how-to-set-up-a-hotel-room-for-a-romantic-night",
@@ -315,7 +315,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/",
@@ -328,7 +328,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/local-event-planning-companies",
@@ -341,7 +341,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/local-party-planners-near-me",
@@ -354,7 +354,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/party-decor-services",
@@ -367,7 +367,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/party-rental-games-near-me",
@@ -380,7 +380,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/questions/party-rentals-memphis",
@@ -393,7 +393,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/rentals/giant-lawn-games-memphis",
@@ -406,7 +406,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/rentals/",
@@ -419,7 +419,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/request",
@@ -432,7 +432,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/rules",
@@ -445,7 +445,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/anniversary-hotel-room-setup-memphis",
@@ -458,7 +458,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/baby-shower-decor-memphis",
@@ -471,7 +471,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/birthday-hotel-room-decorations-for-her-memphis",
@@ -484,7 +484,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/birthday-hotel-room-decorations-for-him-memphis",
@@ -497,33 +497,33 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/birthday-party-decor-memphis",
       "verdict": "NEUTRAL",
       "coverageState": "Crawled - currently not indexed",
-      "lastCrawlTime": "2026-11-16T22:48:17Z",
+      "lastCrawlTime": "2026-11-21T21:35:07Z",
       "indexingState": "INDEXING_ALLOWED",
       "indexing_allowed": true,
       "robotsTxtState": "ALLOWED",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/birthday-party-decor-memphis",
       "userCanonical": "https://porchandparty901.com/services/birthday-party-decor-memphis",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
       "verdict": "NEUTRAL",
-      "coverageState": "URL is unknown to Google",
-      "lastCrawlTime": null,
-      "indexingState": "INDEXING_STATE_UNSPECIFIED",
-      "indexing_allowed": false,
-      "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
-      "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
-      "googleCanonical": null,
-      "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "coverageState": "Crawled - currently not indexed",
+      "lastCrawlTime": "2026-11-22T14:35:18Z",
+      "indexingState": "INDEXING_ALLOWED",
+      "indexing_allowed": true,
+      "robotsTxtState": "ALLOWED",
+      "pageFetchState": "SUCCESSFUL",
+      "googleCanonical": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "userCanonical": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/bridal-shower-decor-memphis",
@@ -536,20 +536,20 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/bridal-shower-decor-memphis",
       "userCanonical": "https://porchandparty901.com/services/bridal-shower-decor-memphis",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/budget-party-decor-memphis",
       "verdict": "NEUTRAL",
       "coverageState": "Crawled - currently not indexed",
-      "lastCrawlTime": "2026-11-12T20:00:51Z",
+      "lastCrawlTime": "2026-11-22T09:35:17Z",
       "indexingState": "INDEXING_ALLOWED",
       "indexing_allowed": true,
       "robotsTxtState": "ALLOWED",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/budget-party-decor-memphis",
       "userCanonical": "https://porchandparty901.com/services/budget-party-decor-memphis",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/celebration-setups-memphis",
@@ -562,20 +562,20 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/celebration-setups-memphis",
       "userCanonical": "https://porchandparty901.com/services/celebration-setups-memphis",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/celebration-setups",
       "verdict": "NEUTRAL",
       "coverageState": "Crawled - currently not indexed",
-      "lastCrawlTime": "2026-11-05T13:29:31Z",
+      "lastCrawlTime": "2026-11-22T11:05:15Z",
       "indexingState": "INDEXING_ALLOWED",
       "indexing_allowed": true,
       "robotsTxtState": "ALLOWED",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/celebration-setups",
       "userCanonical": "https://porchandparty901.com/services/celebration-setups",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/christmas-porch-decorating",
@@ -588,7 +588,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/fall-porch-decorating",
@@ -601,7 +601,7 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/fall-porch-decorating",
       "userCanonical": "https://porchandparty901.com/services/fall-porch-decorating",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/front-door-styling",
@@ -614,7 +614,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/grazing-and-event-styling",
@@ -627,20 +627,20 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/grazing-and-event-styling",
       "userCanonical": "https://porchandparty901.com/services/grazing-and-event-styling",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/grazing-tables-memphis",
       "verdict": "NEUTRAL",
       "coverageState": "Crawled - currently not indexed",
-      "lastCrawlTime": "2026-11-03T16:15:49Z",
+      "lastCrawlTime": "2026-11-22T04:35:14Z",
       "indexingState": "INDEXING_ALLOWED",
       "indexing_allowed": true,
       "robotsTxtState": "ALLOWED",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/grazing-tables-memphis",
       "userCanonical": "https://porchandparty901.com/services/grazing-tables-memphis",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/hotel-room-decor-memphis",
@@ -653,7 +653,7 @@
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/hotel-room-decor-memphis",
       "userCanonical": "https://porchandparty901.com/services/hotel-room-decor-memphis",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/",
@@ -666,7 +666,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/luxury-party-decor-memphis",
@@ -679,33 +679,33 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/party-decor-memphis",
       "verdict": "NEUTRAL",
-      "coverageState": "URL is unknown to Google",
-      "lastCrawlTime": null,
-      "indexingState": "INDEXING_STATE_UNSPECIFIED",
-      "indexing_allowed": false,
-      "robotsTxtState": "ROBOTS_TXT_STATE_UNSPECIFIED",
-      "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
-      "googleCanonical": null,
-      "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "coverageState": "Crawled - currently not indexed",
+      "lastCrawlTime": "2026-11-22T12:35:15Z",
+      "indexingState": "INDEXING_ALLOWED",
+      "indexing_allowed": true,
+      "robotsTxtState": "ALLOWED",
+      "pageFetchState": "SUCCESSFUL",
+      "googleCanonical": "https://porchandparty901.com/services/party-decor-memphis",
+      "userCanonical": "https://porchandparty901.com/services/party-decor-memphis",
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/porch-decorating",
       "verdict": "NEUTRAL",
       "coverageState": "Crawled - currently not indexed",
-      "lastCrawlTime": "2026-11-16T07:44:31Z",
+      "lastCrawlTime": "2026-11-22T00:20:14Z",
       "indexingState": "INDEXING_ALLOWED",
       "indexing_allowed": true,
       "robotsTxtState": "ALLOWED",
       "pageFetchState": "SUCCESSFUL",
       "googleCanonical": "https://porchandparty901.com/services/porch-decorating",
       "userCanonical": "https://porchandparty901.com/services/porch-decorating",
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/proposal-hotel-room-setup-memphis",
@@ -718,7 +718,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/small-porch-decorating",
@@ -731,7 +731,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/services/valentines-day-hotel-room-setup-memphis",
@@ -744,7 +744,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/sitemap",
@@ -757,7 +757,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     },
     {
       "url": "https://porchandparty901.com/terms-and-conditions",
@@ -770,7 +770,7 @@
       "pageFetchState": "PAGE_FETCH_STATE_UNSPECIFIED",
       "googleCanonical": null,
       "userCanonical": null,
-      "inspected_at": "2026-11-21T21:25:49.310672+00:00"
+      "inspected_at": "2026-11-22T21:28:05.990294+00:00"
     }
   ]
 }

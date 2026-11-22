@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-22",
-  "end_date": "2026-11-18",
-  "collected_at": "2026-11-21T21:24:58.090461+00:00",
+  "start_date": "2026-10-23",
+  "end_date": "2026-11-19",
+  "collected_at": "2026-11-22T21:27:15.873082+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -31,6 +31,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 7
+    },
+    {
+      "keys": [
+        "bachelorette party"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 6
     },
     {
       "keys": [
@@ -232,6 +241,15 @@
     },
     {
       "keys": [
+        "party coordination"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "party planner"
       ],
       "clicks": 0,
@@ -371,19 +389,19 @@
       "keys": [
         "https://porchandparty901.com/"
       ],
-      "clicks": 7,
+      "clicks": 6,
       "impressions": 187,
-      "ctr": 0.0374331550802139,
-      "position": 4.016042780748663
+      "ctr": 0.03208556149732621,
+      "position": 4.021390374331551
     },
     {
       "keys": [
         "https://porchandparty901.com/request"
       ],
       "clicks": 0,
-      "impressions": 4,
+      "impressions": 3,
       "ctr": 0,
-      "position": 8
+      "position": 9.666666666666666
     },
     {
       "keys": [
@@ -596,6 +614,16 @@
       "impressions": 1,
       "ctr": 0,
       "position": 7
+    },
+    {
+      "keys": [
+        "bachelorette party",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 6
     },
     {
       "keys": [
@@ -849,6 +877,16 @@
     },
     {
       "keys": [
+        "party coordination",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "party planner",
         "https://porchandparty901.com/"
       ],
@@ -1059,9 +1097,9 @@
     }
   ],
   "counts": {
-    "by_query": 39,
+    "by_query": 41,
     "by_page": 22,
-    "by_query_page": 49
+    "by_query_page": 51
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
