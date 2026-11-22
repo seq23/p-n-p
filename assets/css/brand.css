@@ -100,13 +100,13 @@ main p a:not([class]) strong { font-weight: 700; }
 }
 
 /* ---------- buttons: the marigold porch sign, and the quiet secondary ---------- */
-.btn-primary, .rq-submit, .nf-home {
+.btn-primary, .rq-submit, .nf-home, .search-loop-page .site-action .button {
   background: var(--marigold); color: var(--on-marigold); border: 2px solid var(--edge); box-shadow: var(--shadow-sign);
   border-radius: var(--radius-md); font: 700 18px/1.1 var(--font-body); min-height: 52px; padding: 0 22px;
   display: inline-flex; align-items: center; justify-content: center; text-decoration: none;
 }
-.btn-primary:hover, .rq-submit:hover { background: var(--marigold); color: var(--on-marigold); }
-.btn-primary:active, .rq-submit:active { transform: translateY(2px); box-shadow: none; }
+.btn-primary:hover, .rq-submit:hover, .search-loop-page .site-action .button:hover { background: var(--marigold); color: var(--on-marigold); }
+.btn-primary:active, .rq-submit:active, .search-loop-page .site-action .button:active { transform: translateY(2px); box-shadow: none; }
 .btn-secondary {
   background: var(--card); color: var(--plum); border: 1.5px solid var(--line-strong); border-radius: var(--radius-md);
   font: 700 18px/1.1 var(--font-body); min-height: 52px; padding: 0 22px;

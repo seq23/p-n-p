@@ -9,6 +9,8 @@ const allowedRootFiles = new Set([
   '.gitignore',
   // The shared search engine's site config (seq23/search-loop, 1 Nov 2026).
   'search-loop.config.json',
+  // What the shared ship-ready baseline renders (seq23/seq-bin ship-ready-baseline, 20 Nov 2026).
+  'ship-ready.json',
   // Cloudflare Pages serves this for unmatched paths. Without it Pages
   // falls back to index.html under a 200, so every nonexistent URL became
   // an indexable duplicate of the homepage.
