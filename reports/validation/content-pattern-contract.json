@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "validator": "content-pattern-contract",
   "spec": ".clarity/content-pattern-spec.json",
-  "generated_at": "2026-11-22T01:30:12.434Z",
+  "generated_at": "2026-11-22T21:28:49.970Z",
   "enforcement": "block",
   "pages_checked": 50,
   "status": "PASS",
@@ -53,8 +53,8 @@
     {
       "id": "concrete_numbers",
       "blocking": false,
-      "pages_missing": 11,
-      "coverage_pct": 78,
+      "pages_missing": 10,
+      "coverage_pct": 80,
       "why": "no concrete cost or timeline figures (agent request #5, 365 occurrences)"
     },
     {
@@ -109,8 +109,8 @@
     {
       "id": "protocol",
       "blocking": false,
-      "pages_missing": 35,
-      "coverage_pct": 30,
+      "pages_missing": 36,
+      "coverage_pct": 28,
       "why": "no ordered protocol - ordered steps are what gets lifted for \"how do I\""
     },
     {
@@ -186,7 +186,6 @@
       "questions/balloon-party-decorations-near-me.html",
       "questions/birthday-party-games.html",
       "questions/birthday-party-organisers-near-me.html",
-      "questions/event-planner-for-small-parties.html",
       "questions/giant-yard-game-rentals.html",
       "questions/how-to-book-birthday-party.html",
       "questions/index.html",
@@ -268,6 +267,7 @@
       "questions/birthday-party-games.html",
       "questions/birthday-party-organisers-near-me.html",
       "questions/can-you-use-rose-petals-and-candles-in-a-hotel.html",
+      "questions/event-planner-for-small-parties.html",
       "questions/giant-yard-game-rentals.html",
       "questions/index.html",
       "questions/local-event-planning-companies.html",
@@ -281,8 +281,7 @@
       "services/birthday-hotel-room-decorations-for-her-memphis.html",
       "services/birthday-party-decor-memphis.html",
       "services/bridal-shower-decor-memphis.html",
-      "services/budget-party-decor-memphis.html",
-      "services/celebration-setups-memphis.html"
+      "services/budget-party-decor-memphis.html"
     ],
     "cta_callout": [
       "questions/balloon-party-decorations-near-me.html",
@@ -377,7 +376,6 @@
       "questions/balloon-party-decorations-near-me.html",
       "questions/birthday-party-games.html",
       "questions/birthday-party-organisers-near-me.html",
-      "questions/event-planner-for-small-parties.html",
       "questions/giant-yard-game-rentals.html",
       "questions/how-to-book-birthday-party.html",
       "questions/index.html",
@@ -488,6 +486,7 @@
       "questions/birthday-party-games.html",
       "questions/birthday-party-organisers-near-me.html",
       "questions/can-you-use-rose-petals-and-candles-in-a-hotel.html",
+      "questions/event-planner-for-small-parties.html",
       "questions/giant-yard-game-rentals.html",
       "questions/index.html",
       "questions/local-event-planning-companies.html",
