@@ -243,13 +243,20 @@ for (const abs of pub) { const h = fs.readFileSync(abs, 'utf8'); for (const re o
 // page or llms*.txt (JSON-LD included) must name a price the data holds for that season.
 const xmas = pk.seasons.find((x) => x.key === 'christmas');
 /** The wrong Christmas from-prices in one published file's source, as "said: ..." strings. */
-function christmasPriceErrors(src, data = pk) {
+function christmasPriceErrors(src, data = pk, { christmasPage = false } = {}) {
   const season = data.seasons.find((x) => x.key === 'christmas');
   const ok = new Set(Object.values(season.tiers).map((t) => t.from));
   const flat = String(src).replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&#39;/g, "'").replace(/&ndash;|&#8211;/g, '–').replace(/\s+/g, ' ');
   const bad = [];
   const num = (x) => Number(x.replace(/,/g, ''));
-  for (const m of flat.matchAll(/(?<![-/\w])Christmas\b[^.$]{0,80}?\b(?:from|starts? at)\s+\$([\d,]+)/g)) if (!ok.has(num(m[1]))) bad.push(m[0]);
+  // A price up to ~two sentences after "Christmas" (a list line, then "Starts at $N+."), unless another
+  // season or service is named first.
+  const OTHER = '(?:Fall|fall|Halloween|Thanksgiving|[Pp]arty|[Gg]razing|[Cc]elebration|[Rr]ental|[Bb]irthday|[Hh]otel|[Tt]akedown)';
+  // A line naming several seasons ("Christmas, spring, and seasonal ...") states the overall floor.
+  const near = new RegExp(`(?<![-/\\w])Christmas\\b(?:(?!${OTHER}|[Ss]pring|[Ss]easonal)[^$]){0,160}?\\b(?:[Ff]rom|[Ss]tarts? at)\\s+\\$([\\d,]+)`, 'g');
+  for (const m of flat.matchAll(near)) if (!ok.has(num(m[1]))) bad.push(m[0]);
+  // On a Christmas page every unqualified starting price is a Christmas price.
+  if (christmasPage) for (const m of flat.matchAll(new RegExp(`[^.]{0,80}\\b(?:[Ss]tarts? at|[Ff]rom)\\s+\\$([\\d,]+)\\+?`, 'g'))) if (!new RegExp(OTHER).test(m[0]) && !ok.has(num(m[1]))) bad.push(m[0].trim());
   for (const m of flat.matchAll(/\$([\d,]+)\)? (?:for )?Christmas\b/g)) if (!ok.has(num(m[1]))) bad.push(m[0]);
   for (const m of String(src).matchAll(/data-config='(\{"seasons"[^']*)'/g)) {
     let cfg; try { cfg = JSON.parse(m[1].replace(/&#39;/g, "'")); } catch { bad.push('an unreadable price-tool data-config'); continue; }
@@ -264,7 +271,7 @@ let xmasPages = 0;
 for (const abs of pub) {
   const h = fs.readFileSync(abs, 'utf8');
   if (/Christmas/.test(h)) xmasPages += 1;
-  for (const b of christmasPriceErrors(h)) fail(`${path.relative(ROOT, abs)}: a Christmas price that is not in data/offers/porch_packages.json: "${b.slice(0, 140)}" (Christmas from-prices are ${Object.values(xmas.tiers).map((t) => money(t.from)).join(' / ')}; re-render the page from the data)`);
+  for (const b of christmasPriceErrors(h, pk, { christmasPage: /christmas/i.test(path.basename(abs)) })) fail(`${path.relative(ROOT, abs)}: a Christmas price that is not in data/offers/porch_packages.json: "${b.slice(0, 140)}" (Christmas from-prices are ${Object.values(xmas.tiers).map((t) => money(t.from)).join(' / ')}; re-render the page from the data)`);
 }
 if (xmasPages < 5) fail(`Rule 0: only ${xmasPages} published files mention Christmas; the Christmas price check saw nothing`);
 
@@ -352,6 +359,8 @@ probe('a form with reworded answers', () => checkForm(formHtml.replace('A full p
 probe('a calculator with a typed price', () => { const real = PP.calculatorHtml; const fake = (d) => real(d).replace(money(d.seasons[0].tiers.classic.from), '$550'); const before = errors.length; const out = fake(pk2); for (const m of origOnly) if (out.includes(m)) errors.push('x'); return errors.length > before; });
 probe('a page with the old $350 Christmas Stoop', () => christmasPriceErrors('<p>Winter / Christmas: Stoop from $350, Classic from $750.</p>').length > 0);
 probe('a price tool with the old $350 Christmas Stoop', () => christmasPriceErrors(`<article data-config='${JSON.stringify({ seasons: [{ key: 'christmas', name: 'Winter / Christmas', tiers: { stoop: { from: 350 } } }] })}'>`).length > 0);
+probe('an llms line with the price in the next sentence', () => christmasPriceErrors('- Christmas Porch Decorating: Holiday front porch styling with wreaths. Starts at $350+.').length > 0);
+probe('a Christmas page panel with the seasonal floor', () => christmasPriceErrors('<p>Seasonal porch decorating starts at $350+. Final quotes depend on materials.</p>', pk, { christmasPage: true }).length > 0);
 probe('a hub answer saying Christmas starts at $350', () => christmasPriceErrors('seasonal porch decorating, which covers Christmas porch installs in the Memphis metro area, starts at $350.').length > 0);
 probe('a page without the grid', () => { const h = fs.readFileSync(path.join(ROOT, pk.pages[0]), 'utf8').replace(/<!--porch-packages-->[\s\S]*?<!--\/porch-packages-->/, ''); return !h.includes(PP.pageBlockHtml(pk)); });
 {

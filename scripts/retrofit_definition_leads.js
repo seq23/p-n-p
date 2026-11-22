@@ -25,7 +25,7 @@
  * already use on these same pages.
  *
  * NO PRICE IS TYPED IN THE DATA FILE. A lead names a price with a token
- * ({celebFrom}, {grazeFrom}, {fallFrom}, {christmasFrom}, {porchFrom},
+ * ({celebFrom}, {grazeFrom}, {fallFrom}, {christmasFrom}, {christmasFromNumber}, {porchFrom},
  * {rentalDay}, {rentalWeekend}) resolved here from data/offers/services.json,
  * data/offers/porch_packages.json and data/rentals/games.json - the only places
  * prices live (CLAUDE.md). A price that moves in the data moves on the next
@@ -69,6 +69,7 @@ function prices() {
     porchFrom: money(porchFrom),
     fallFrom: money(seasonFrom('fall')),
     christmasFrom: money(seasonFrom('christmas')),
+    christmasFromNumber: String(seasonFrom('christmas')), // a schema.org Offer price
     celebFrom: money(Number(String(offers.services.celebration.price).replace(/[^0-9]/g, ''))),
     grazeFrom: money(Math.min(...offers.services.grazing.tiers.map((t) => t.from))),
     rentalDay: money(RENTALS.rates.day),
@@ -92,7 +93,8 @@ const LEAD_RE = /(<\/h1>\s*)(<p(?![^>]*\bdata-page-)[^>]*>)([\s\S]*?)(<\/p>)/i;
  * the business-sources line) or an object for a page that is not a service page
  * (a legal, contact or utility page), which takes only what it names:
  *   { lead, headings: { "Old h2": "Question?" }, replace: [[oldHtml, newHtml]] }
- * `replace` says a repeated sentence once (the weekly sample's template filler);
+ * `replace` says a repeated sentence once (the weekly sample's template filler); its new
+ * text takes the same price tokens as a lead;
  * an old string with a non-empty replacement must be on the page or already replaced.
  */
 function entryOf(value) {
@@ -162,7 +164,8 @@ function main() {
     const lead = SHAPE.assertLead(resolve(entry.lead, P, rel), `${rel} lead (data/content/definition_leads.json)`);
     checked += 1;
     const before = fs.readFileSync(abs, 'utf8');
-    const after = install(before, { ...entry, lead }, rel);
+    const replace = entry.replace.map(([from, to]) => [from, resolve(to, P, rel)]);
+    const after = install(before, { ...entry, lead, replace }, rel);
     if (after === before) continue;
     if (CHECK) { stale.push(rel); continue; }
     fs.writeFileSync(abs, after);
