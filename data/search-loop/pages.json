@@ -487,7 +487,7 @@
       "url": "https://porchandparty901.com/questions/event-planner-for-small-parties",
       "published_at": "2026-11-09",
       "status": "live",
-      "hash": "e0769bbe6060fdf965d9e933e6d63f16ac895f0355e2ef028c01eec0b192e21a",
+      "hash": "9a9cdfbd8dd36e96fc0930ebf4ea1a2a068c95a75b714cb13f9dc33f4048a35b",
       "model": "free-route",
       "facts": [
         "https://www.census.gov/",
@@ -509,7 +509,7 @@
         "b5 FAQ answer is 39 words (aim 40-60): \"What is included in our grazing tables?\""
       ],
       "indexnow_at": "2026-11-09",
-      "modified_at": "2026-11-20"
+      "modified_at": "2026-11-21"
     },
     {
       "slug": "party-rental-games-near-me",
@@ -644,7 +644,7 @@
       "url": "https://porchandparty901.com/questions/party-decor-services",
       "published_at": "2026-11-16",
       "status": "live",
-      "hash": "c106805a17addef8c0ed1e223f299f5ad0a2e6e129f693c67f37dd1abe4da05e",
+      "hash": "2a09b2783e5c3dc29855b818341c0f9a23573f10621d814132eed3c1937381e3",
       "model": "free-route",
       "facts": [
         "https://www.census.gov/",
@@ -674,7 +674,7 @@
       "extra_queries": [
         "party decor services near me"
       ],
-      "modified_at": "2026-11-20"
+      "modified_at": "2026-11-21"
     }
   ],
   "dropped": [
