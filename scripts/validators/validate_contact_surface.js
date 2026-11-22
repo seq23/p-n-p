@@ -143,7 +143,7 @@ if (offers.services.porch.notes[0] !== TD.line) fail('services.json porch notes[
 const faqTd = require(path.join(ROOT, 'data/faqs/faqs.json')).find((q) => /take-?down/i.test(q.question));
 if (!faqTd || !faqTd.answer.includes(TD.line)) fail('data/faqs/faqs.json takedown answer does not quote the takedown line');
 const TD_PAGES = ['pricing.html', 'how-it-works.html', 'contact.html', 'index.html', 'terms-and-conditions.html', 'services/index.html',
-  'services/porch-decorating.html', 'services/christmas-porch-decorating.html', 'services/fall-porch-decorating.html',
+  'services/porch-decorating.html', 'services/fall-porch-decorating.html',
   'services/small-porch-decorating.html', 'services/front-door-styling.html',
   'llms.txt', 'llms-full.txt', 'llms-services.txt', 'llms-answers.txt'];
 const TD_QUOTE = new RegExp(`(Takedown starts at|takedown, from|takedown for seasonal porch installs and event decor starts at) \\$${TD_PRICE}\\b`);
@@ -151,6 +151,13 @@ for (const rel of TD_PAGES) {
   const t = read(rel);
   if (!t) { fail(`${rel} is missing`); continue; }
   if (!TD_QUOTE.test(t)) fail(`${rel} does not quote takedown from $${TD_PRICE}`);
+}
+// The Christmas page says January takedown is included instead (owner, 16 Nov 2026: Christmas decor
+// is ours and reused; data/offers/porch_packages.json christmas customLine).
+for (const rel of ['services/christmas-porch-decorating.html']) {
+  const t = read(rel) || '';
+  if (!/January takedown is included/.test(t)) fail(`${rel} does not say January takedown is included`);
+  if (TD_QUOTE.test(t)) fail(`${rel} still quotes Christmas takedown from $${TD_PRICE}`);
 }
 for (const rel of ['pricing.html', 'how-it-works.html']) if (!(read(rel) || '').includes(TD.line)) fail(`${rel} lacks the exact takedown line`);
 const UNPRICED = /take-?down (service )?(is )?available for an additional fee|take-?down when quoted separately|take-?down for seasonal porch installs is available/i;
