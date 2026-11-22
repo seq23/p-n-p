@@ -490,8 +490,8 @@
       "hash": "cbae1347250cc86c4c03223ec9a31e992c620e0b93a83a0c00cd77f1cf162a42",
       "model": "free-route",
       "facts": [
-        "https://www.census.gov/",
-        "https://en.wikipedia.org/wiki/Shelby_County,_Tennessee"
+        "https://www.cdc.gov/food-safety/prevention/index.html",
+        "https://www.nfpa.org/education-and-research/home-fire-safety/candles"
       ],
       "linked_from": [
         {
@@ -647,8 +647,8 @@
       "hash": "6753bca162b462db9947458bdfbd47e5bff171ea393b8d7231ac0c05f3578b1c",
       "model": "free-route",
       "facts": [
-        "https://www.census.gov/",
-        "https://www.wikipedia.org/"
+        "https://www.nfpa.org/education-and-research/home-fire-safety/candles",
+        "https://www.fda.gov/food/buy-store-serve-safe-food/serving-safe-buffets"
       ],
       "linked_from": [
         {

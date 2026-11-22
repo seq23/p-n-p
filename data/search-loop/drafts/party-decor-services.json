@@ -80,18 +80,19 @@
   ],
   "facts": [
     {
-      "claim": "Southaven is a city in DeSoto County, Mississippi, and the largest suburb of Memphis by population.",
-      "source_url": "https://en.wikipedia.org/wiki/Southaven,_Mississippi",
-      "source_name": "Wikipedia",
+      "claim": "Keep lit candles at least 12 inches from anything that can burn, the NFPA says.",
+      "source_url": "https://www.nfpa.org/education-and-research/home-fire-safety/candles",
+      "source_name": "NFPA",
       "verified": true,
       "checked_status": 200
     },
     {
-      "claim": "Germantown is a city in Shelby County, Tennessee.",
-      "source_url": "https://en.wikipedia.org/wiki/Germantown,_Tennessee",
-      "source_name": "Wikipedia",
+      "claim": "If cold food will sit on the table longer than 2 hours, the FDA says to set those plates on ice.",
+      "source_url": "https://www.fda.gov/food/buy-store-serve-safe-food/serving-safe-buffets",
+      "source_name": "FDA",
       "verified": true,
       "checked_status": 200
     }
-  ]
+  ],
+  "facts_heading": "Two safety notes for the candles and the food table"
 }

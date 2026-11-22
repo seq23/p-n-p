@@ -68,18 +68,19 @@
   ],
   "facts": [
     {
-      "claim": "Olive Branch is a city in DeSoto County, Mississippi, and a suburb of Memphis.",
-      "source_url": "https://en.wikipedia.org/wiki/Olive_Branch,_Mississippi",
-      "source_name": "Wikipedia",
+      "claim": "Never leave perishable food out for more than 2 hours, or 1 hour when it is above 90°F, the CDC says.",
+      "source_url": "https://www.cdc.gov/food-safety/prevention/index.html",
+      "source_name": "CDC",
       "verified": true,
       "checked_status": 200
     },
     {
-      "claim": "Collierville is a town in Shelby County, Tennessee, in the Memphis metropolitan area.",
-      "source_url": "https://en.wikipedia.org/wiki/Collierville,_Tennessee",
-      "source_name": "Wikipedia",
+      "claim": "Keep lit candles at least 12 inches from anything that can burn, the NFPA says.",
+      "source_url": "https://www.nfpa.org/education-and-research/home-fire-safety/candles",
+      "source_name": "NFPA",
       "verified": true,
       "checked_status": 200
     }
-  ]
+  ],
+  "facts_heading": "Two things to plan around on the day"
 }
