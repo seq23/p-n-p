@@ -159,18 +159,26 @@ for (const rel of ['services/christmas-porch-decorating.html']) {
   if (!/January takedown is included/.test(t)) fail(`${rel} does not say January takedown is included`);
   if (TD_QUOTE.test(t)) fail(`${rel} still quotes Christmas takedown from $${TD_PRICE}`);
 }
-// No $75 takedown line in a Christmas section without the Christmas line beside it (owner, 16 Nov
-// 2026: January takedown is included in every Christmas package). A section is an HTML <section>,
-// a FAQPage Question node, or one line of an llms*.txt file.
+// No $75 takedown line in a Christmas block without the Christmas line beside it, and the Christmas
+// line said once per block (owner, 16 Nov 2026: January takedown is included in every Christmas
+// package). A block is the smallest panel, card, FAQ item, list item group or <details> around the
+// line (else its <section>), a FAQPage Question node, or one line of an llms*.txt file.
 if (!/January takedown is included/.test(TD.christmasLine || '')) fail('services.json addOns.takedown.christmasLine does not say January takedown is included');
 const TD_ANY = new RegExp(`(Takedown starts at|takedown, from|Optional takedown, from) \\$${TD_PRICE}\\b`, 'g');
-const sectionsOf = (src, rel) => (rel.endsWith('.txt') ? src.split('\n')
-  : [...src.matchAll(/<section\b[\s\S]*?<\/section>/g), ...src.matchAll(/\{"@type":"Question"[\s\S]*?\}\}/g)].map((m) => m[0]));
+const BLOCK_RES = [/<details\b[\s\S]*?<\/details>/g, /<article\b[\s\S]*?<\/article>/g, /<div class="(?:info-panel|pricing-card|faq-item|card-body)[^"]*">[\s\S]*?<\/div>/g, /<section\b[\s\S]*?<\/section>/g, /\{"@type":"Question"[\s\S]*?\}\}/g];
+function blockAt(src, at) {
+  let best = null;
+  for (const re of BLOCK_RES) for (const m of src.matchAll(re)) if (m.index <= at && at < m.index + m[0].length && (!best || m[0].length < best.length)) best = m[0];
+  return best;
+}
+const sectionsOf = (src, rel) => (rel.endsWith('.txt') ? src.split('\n') : [...new Set([...src.matchAll(TD_ANY)].map((m) => blockAt(src, m.index)).filter(Boolean))]);
 function christmasTakedownErrors(src, rel) {
   const bad = [];
+  const said = TD.christmasLine.replace(/\.$/, '');
   for (const sec of sectionsOf(src, rel)) {
-    if (!/(?<![-/\w])Christmas\b/.test(sec.replace(/<[^>]+>/g, ' '))) continue;
-    for (const m of sec.matchAll(TD_ANY)) if (!sec.slice(m.index, m.index + 300).includes(TD.christmasLine.replace(/\.$/, ''))) bad.push(sec.slice(Math.max(0, m.index - 80), m.index + 60).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+    if (sec.split(said).length > 2) bad.push(`the Christmas takedown line twice: ${sec.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120)}`);
+    if (!/(?<![-/\w])Christmas\b/.test(sec.replace(/<[^>]+>/g, ' ').split(said).join(''))) continue;
+    for (const m of sec.matchAll(TD_ANY)) if (!sec.slice(m.index, m.index + 300).includes(said)) bad.push(sec.slice(Math.max(0, m.index - 80), m.index + 60).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
   }
   return bad;
 }
@@ -186,7 +194,9 @@ if (xmasTdSections < 3) fail(`Rule 0: only ${xmasTdSections} Christmas sections 
   const before = errors.length;
   const caught = christmasTakedownErrors('<section><p>Custom porch installs for fall, Halloween, Christmas. Starting at $350+. Takedown starts at $75, quoted with your setup.</p></section>', 'probe.html').length > 0
     && christmasTakedownErrors('- Christmas porches. Takedown starts at $75, quoted with your setup.', 'probe.txt').length > 0
-    && christmasTakedownErrors(`<section><p>Christmas porches. Takedown starts at $75, quoted with your setup. ${TD.christmasLine}</p></section>`, 'probe.html').length === 0;
+    && christmasTakedownErrors(`<section><p>Christmas porches. Takedown starts at $75, quoted with your setup. ${TD.christmasLine}</p></section>`, 'probe.html').length === 0
+    && christmasTakedownErrors(`<section><details><p>Christmas porches.</p></details><details><p>Party decor. Takedown starts at $75, quoted with your setup.</p></details></section>`, 'probe.html').length === 0
+    && christmasTakedownErrors(`<section><p>Christmas. Takedown starts at $75, quoted with your setup. ${TD.christmasLine}</p><p>${TD.christmasLine}</p></section>`, 'probe.html').length > 0;
   errors.length = before;
   if (!caught) fail('self-test: the Christmas takedown check passed a Christmas section with the $75 line alone, or failed a fixed one');
 }

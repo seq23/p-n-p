@@ -50,12 +50,8 @@
       "lead": "Front door styling in Memphis is the smallest of the seasonal porch setups. Porch &amp; Party brings and hangs a wreath or door accent and styles the step in front of it, with no full porch display. The Stoop package it comes from starts at {fallFrom}.",
       "replace": [
         [
-          "Takedown starts at $75, quoted with your setup.</p",
-          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p"
-        ],
-        [
-          "<li>Optional takedown, from $75, quoted with your setup</li>",
-          "<li>Optional takedown, from $75, quoted with your setup; January takedown is included with Christmas porches</li>"
+          "location. Takedown starts at $75, quoted with your setup.</p>",
+          "location. Takedown starts at $75, quoted with your setup. {takedownChristmas}</p>"
         ]
       ]
     },
@@ -67,12 +63,8 @@
       "lead": "Small porch decorating in Memphis is a seasonal setup sized to a stoop or a narrow entry. Porch &amp; Party styles the door, the step and a planter or two rather than a full porch and walkway. Fall packages start at {fallFrom} and Christmas at {christmasFrom}.",
       "replace": [
         [
-          "Takedown starts at $75, quoted with your setup.</p",
-          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p"
-        ],
-        [
-          "<li>Optional takedown, from $75, quoted with your setup</li>",
-          "<li>Optional takedown, from $75, quoted with your setup; January takedown is included with Christmas porches</li>"
+          "location. Takedown starts at $75, quoted with your setup.</p>",
+          "location. Takedown starts at $75, quoted with your setup. {takedownChristmas}</p>"
         ]
       ]
     },
@@ -164,20 +156,16 @@
           "Takedown starts at $75, quoted with your setup. {takedownChristmas}\"}}"
         ],
         [
-          "Takedown starts at $75, quoted with your setup.</p><p",
-          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p><p"
+          "Takedown starts at $75, quoted with your setup.</p><p><a href=\"/services/porc",
+          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p><p><a href=\"/services/porc"
         ],
         [
-          "Takedown starts at $75, quoted with your setup.</p></d",
-          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p></d"
+          "Takedown starts at $75, quoted with your setup.</p></div><div class=\"pricing-",
+          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p></div><div class=\"pricing-"
         ],
         [
-          "Takedown starts at $75, quoted with your setup.</p></a",
-          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p></a"
-        ],
-        [
-          "Takedown starts at $75, quoted with your setup.</li></ul><p class=\"know-links",
-          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</li></ul><p class=\"know-links"
+          "Takedown starts at $75, quoted with your setup.</p></article><article class=\"",
+          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p></article><article class=\""
         ]
       ]
     },
@@ -192,12 +180,12 @@
     "services/porch-decorating.html": {
       "replace": [
         [
-          "Takedown starts at $75, quoted with your setup. Fi",
-          "Takedown starts at $75, quoted with your setup. {takedownChristmas} Fi"
+          "Takedown starts at $75, quoted with your setup. Final pricing depends on porch size",
+          "Takedown starts at $75, quoted with your setup. {takedownChristmas} Final pricing depends on porch size"
         ],
         [
-          "Takedown starts at $75, quoted with your setup.</p",
-          "Takedown starts at $75, quoted with your setup. {takedownChristmas}</p"
+          "complexity.</p><p class=\"muted\">Takedown starts at $75, quoted with your setup.</p></div>",
+          "complexity.</p></div>"
         ],
         [
           "Everything installed is yours to keep.",

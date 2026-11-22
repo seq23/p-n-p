@@ -209,7 +209,7 @@ const SECTIONS = [
       ['Which service family covers the setup I need?',
         `Front-entry and seasonal work sits under ${offers.services.porch.name} from ${offers.services.porch.price}. Anything styled inside a home or hotel room sits under ${offers.services.celebration.name} from ${offers.services.celebration.price}. Table presentation for showers, corporate gatherings, and small events sits under ${offers.services.grazing.name} from ${offers.services.grazing.price}.`],
       ['Do the starting prices include take-down or food?',
-        `No. ${offers.services.porch.notes[0]} ${offers.addOns.takedown.christmasLine} ${offers.services.grazing.notes[0]} ${offers.services.grazing.notes[1]}`]
+        `Not by default. ${offers.services.porch.notes[0]} ${offers.addOns.takedown.christmasLine} ${offers.services.grazing.notes[0]} ${offers.services.grazing.notes[1]}`]
     ],
     related: ['/faq/index.html', '/areas/index.html', '/rentals/index.html', '/pricing.html']
   },
