@@ -218,6 +218,21 @@ must(tagged.status === 303 && taggedRow && taggedRow.source_tag === 'mailer-3811
 const longTag = await send({ ...PATHS.party, ...contact(13), src: `facebook-${'x'.repeat(80)}` });
 const longRow = await s.one('SELECT source_tag FROM requests WHERE email = ?1', 'path13@example.com');
 must(longTag.status === 303 && longRow && longRow.source_tag === `facebook-${'x'.repeat(31)}`, 'a long source tag is not cut to 40 characters');
+// ---- utm_source and the sending site (owner, 21 Nov 2026; source-tag.mjs) ----
+// The Studio tags links ?utm_source=<platform>, and a tap from an app sends its site as the Referer.
+const ST = await mod('functions/_lib/source-tag.mjs');
+const hidden = async (url, headers = {}) => (await (await handler({ request: new Request(url, { headers }), env, params: {} })).text()).match(/name="src" value="([^"]*)"/)[1];
+must(await hidden('https://porchandparty901.com/request?utm_source=Instagram&utm_medium=social') === 'instagram', 'GET /request?utm_source=Instagram does not carry "instagram"');
+must(await hidden('https://porchandparty901.com/request?src=hotel&utm_source=facebook') === 'hotel', '?src= does not win over ?utm_source=');
+must(await hidden('https://porchandparty901.com/request?utm_source=ig') === 'instagram' && await hidden('https://porchandparty901.com/request?utm_source=FB') === 'facebook', 'utm_source=ig / FB is not counted as instagram / facebook');
+must(await hidden('https://porchandparty901.com/request', { Referer: 'https://l.facebook.com/l.php?u=x' }) === 'facebook', 'a visit sent by facebook.com is not tagged facebook');
+must(await hidden('https://porchandparty901.com/request', { Referer: 'https://www.google.com/' }) === 'google', 'a visit sent by Google search is not tagged google');
+must(await hidden('https://porchandparty901.com/request', { Referer: 'https://porchandparty901.com/parties' }) === '', 'a click inside our own site was tagged as a source');
+must(ST.tagFromReferer('https://www.memphisparent.com/x') === 'memphisparent-com' && ST.tagFromReferer('not a url') === '', 'an unknown outside site is not named by its host');
+const viaUtm = await send({ ...PATHS.porch, ...contact(91), src: await hidden('https://porchandparty901.com/request?utm_source=tiktok') });
+const utmRow = await s.one('SELECT source_tag FROM requests WHERE email = ?1', 'path91@example.com');
+must(viaUtm.status === 303 && utmRow && utmRow.source_tag === 'tiktok', `a request opened from ?utm_source=tiktok stored "${utmRow && utmRow.source_tag}" (want tiktok)`);
+
 const srcKept = await send({ ...PATHS.porch, ...contact(14), porch_season: '', src: 'hoa' });
 must(srcKept.status === 400 && srcKept.text.includes('<input type="hidden" name="src" value="hoa">'), 'a form re-shown with an error drops its source tag');
 const mig = fs.readFileSync(path.join(ROOT, 'migrations/0023_request_source_tag.sql'), 'utf8').replace(/--.*$/gm, '');

@@ -12,6 +12,7 @@ import games from '../../data/rentals/games.json';
 import { useInventory } from './inventory.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 import * as F from './request-form.mjs';
+import { sourceOf } from './source-tag.mjs';
 import * as C from './calendar.mjs';
 import { getSettings, esc, sha256Hex, b64url, safeEqual } from './util.mjs';
 import { availabilityFor } from './availability.mjs';
@@ -138,7 +139,8 @@ export async function handleRequestPage(context) {
     if (season) { values.service = values.service || 'porch'; values.porch_season = season.formChoice; }
     const decor = url.searchParams.get('decor');
     if (pk && (pk.tierOrder.includes(decor) || decor === 'not_sure')) { values.service = values.service || 'porch'; values.porch_decor = decor; }
-    const src = F.cleanSrc(url.searchParams.get('src'));
+    // ?src=, then ?utm_source=, then the site that sent the visit (source-tag.mjs).
+    const src = sourceOf(url, request.headers.get('Referer'));
     if (src) values.src = src;
     return formPage(env, url, { values, referral: ref });
   }
