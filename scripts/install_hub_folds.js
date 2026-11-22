@@ -8,7 +8,8 @@
  *   <!--hub-folds--><section ... id="more-questions"> ... <!--/hub-folds-->
  *
  * holding the questions, answers and prices that used to sit on the hub's thin satellite pages,
- * read from data/content/hub_folds.json (text only, one copy of each question per hub). The first
+ * read from data/content/hub_folds.json (text only, one copy of each question per hub; porch package
+ * prices as {{tokens}} filled from data/offers/porch_packages.json). The first
  * question from each folded page carries that page's basename as its id, which is where
  * scripts/lib/site_url.js now sends every link that used to point at the folded page.
  *
@@ -21,6 +22,11 @@
 const fs = require('fs');
 const path = require('path');
 const HC = require('./lib/hub_consolidation');
+const PP = require('./lib/porch_packages');
+const PK = require('../data/offers/porch_packages.json');
+const TAKEDOWN = require('../data/offers/services.json').addOns.takedown;
+// {{takedownChristmas}} is the Christmas takedown sentence (services.json addOns.takedown.christmasLine).
+const fill = (str, pk) => PP.fillTokens(String(str).split('{{takedownChristmas}}').join(TAKEDOWN.christmasLine), pk);
 
 const ROOT = path.resolve(__dirname, '..');
 const CHECK = process.argv.includes('--check');
@@ -30,13 +36,15 @@ const FOCUS_END = '<!--/focus-page-->';
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
-function block(items) {
+// A porch package price in a folded answer is a {{token}} (scripts/lib/porch_packages.js fillTokens),
+// never a typed number: a typed Christmas Stoop price survived two price changes on 16 Nov 2026.
+function block(items, pk = PK) {
   const ids = new Set();
   const faq = items.map((item) => {
     const id = path.basename(item.from);
     const idAttr = ids.has(id) ? '' : ` id="${id}"`;
     ids.add(id);
-    return `<div class="faq-item"${idAttr}><h3>${esc(item.q)}</h3><p>${esc(item.a)}</p></div>`;
+    return `<div class="faq-item"${idAttr}><h3>${esc(fill(item.q, pk))}</h3><p>${esc(fill(item.a, pk))}</p></div>`;
   }).join('');
   return `<!--hub-folds--><section class="section" id="${HC.SECTION_ID}" data-hub-folds="${items.length}"><div class="container"><div class="answer-block"><span class="eyebrow">More answers</span><h2>More questions, answered</h2></div><div class="faq-list hub-folds">${faq}</div></div></section><!--/hub-folds-->`;
 }

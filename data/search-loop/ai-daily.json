@@ -348,6 +348,41 @@
           "Amazonbot": 3
         }
       }
+    },
+    "2026-11-20": {
+      "ai_visitors": {
+        "total": 0,
+        "by_engine": {},
+        "by_path": {},
+        "source": "web-analytics"
+      },
+      "ai_bot_hits": {
+        "total": 23,
+        "by_bot": {
+          "OAI-SearchBot (ChatGPT search)": 13,
+          "GPTBot (OpenAI training)": 3,
+          "DuckAssistBot": 1,
+          "ChatGPT-User (ChatGPT fetch)": 4,
+          "Amazonbot": 2
+        }
+      }
+    },
+    "2026-11-21": {
+      "ai_visitors": {
+        "total": 0,
+        "by_engine": {},
+        "by_path": {},
+        "source": "web-analytics"
+      },
+      "ai_bot_hits": {
+        "total": 20,
+        "by_bot": {
+          "OAI-SearchBot (ChatGPT search)": 12,
+          "GPTBot (OpenAI training)": 1,
+          "ChatGPT-User (ChatGPT fetch)": 4,
+          "Amazonbot": 3
+        }
+      }
     }
   }
 }

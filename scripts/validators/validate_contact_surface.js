@@ -143,7 +143,7 @@ if (offers.services.porch.notes[0] !== TD.line) fail('services.json porch notes[
 const faqTd = require(path.join(ROOT, 'data/faqs/faqs.json')).find((q) => /take-?down/i.test(q.question));
 if (!faqTd || !faqTd.answer.includes(TD.line)) fail('data/faqs/faqs.json takedown answer does not quote the takedown line');
 const TD_PAGES = ['pricing.html', 'how-it-works.html', 'contact.html', 'index.html', 'terms-and-conditions.html', 'services/index.html',
-  'services/porch-decorating.html', 'services/christmas-porch-decorating.html', 'services/fall-porch-decorating.html',
+  'services/porch-decorating.html', 'services/fall-porch-decorating.html',
   'services/small-porch-decorating.html', 'services/front-door-styling.html',
   'llms.txt', 'llms-full.txt', 'llms-services.txt', 'llms-answers.txt'];
 const TD_QUOTE = new RegExp(`(Takedown starts at|takedown, from|takedown for seasonal porch installs and event decor starts at) \\$${TD_PRICE}\\b`);
@@ -151,6 +151,79 @@ for (const rel of TD_PAGES) {
   const t = read(rel);
   if (!t) { fail(`${rel} is missing`); continue; }
   if (!TD_QUOTE.test(t)) fail(`${rel} does not quote takedown from $${TD_PRICE}`);
+}
+// The Christmas page says January takedown is included instead (owner, 16 Nov 2026: Christmas decor
+// is ours and reused; data/offers/porch_packages.json christmas customLine).
+for (const rel of ['services/christmas-porch-decorating.html']) {
+  const t = read(rel) || '';
+  if (!/January takedown is included/.test(t)) fail(`${rel} does not say January takedown is included`);
+  if (TD_QUOTE.test(t)) fail(`${rel} still quotes Christmas takedown from $${TD_PRICE}`);
+}
+// No $75 takedown line in a Christmas block without the Christmas line beside it, and the Christmas
+// line said once per block (owner, 16 Nov 2026: January takedown is included in every Christmas
+// package). A block is the smallest panel, card, FAQ item, list item group or <details> around the
+// line (else its <section>), a FAQPage Question node, or one line of an llms*.txt file.
+if (!/January takedown is included/.test(TD.christmasLine || '')) fail('services.json addOns.takedown.christmasLine does not say January takedown is included');
+const TD_ANY = new RegExp(`(Takedown starts at|takedown, from|Optional takedown, from) \\$${TD_PRICE}\\b`, 'g');
+const BLOCK_RES = [/<details\b[\s\S]*?<\/details>/g, /<article\b[\s\S]*?<\/article>/g, /<div class="(?:info-panel|pricing-card|faq-item|card-body)[^"]*">[\s\S]*?<\/div>/g, /<section\b[\s\S]*?<\/section>/g, /\{"@type":"Question"[\s\S]*?\}\}/g];
+function blockAt(src, at) {
+  let best = null;
+  for (const re of BLOCK_RES) for (const m of src.matchAll(re)) if (m.index <= at && at < m.index + m[0].length && (!best || m[0].length < best.length)) best = m[0];
+  return best;
+}
+const sectionsOf = (src, rel) => (rel.endsWith('.txt') ? src.split('\n') : [...new Set([...src.matchAll(TD_ANY)].map((m) => blockAt(src, m.index)).filter(Boolean))]);
+// A block offers porches for the holiday season when it names the porch service, links a porch
+// page, or names a porch season, what it covers or its package grid, all read from the data
+// (services.json porch, porch_packages.json seasons, pages and tiers), not a hand-kept word list.
+const PORCH_PK = JSON.parse(fs.readFileSync(path.join(ROOT, 'data/offers/porch_packages.json'), 'utf8'));
+const stem = (w) => w.toLowerCase().replace(/s$/, '');
+const PORCH_TERMS = [...new Set([
+  // the porch service by its name and by its key in services.json ("porch and event decor")
+  offers.services.porch.name, ...Object.keys(offers.services).filter((k) => offers.addOns.takedown.appliesTo.includes(k) && offers.services[k].packages),
+  ...PORCH_PK.seasons.flatMap((x) => [x.name, x.short, x.rangeNoun, ...x.covers.split(/[^A-Za-z]+/).filter((w) => w.length > 4)]),
+  ...PORCH_PK.tierOrder.map((k) => `${PORCH_PK.tiers[k].name} package`),
+].map(stem))];
+const PORCH_HREFS = PORCH_PK.pages.map((rel) => `href="/${rel.replace(/\.html$/, '')}"`);
+// The brand ("Porch & Party", config/entity.json) is not a porch offer, so it is taken out first.
+const BRAND = JSON.parse(fs.readFileSync(path.join(ROOT, 'config/entity.json'), 'utf8')).name.toLowerCase();
+const PORCH_PAGES = new Set(PORCH_PK.pages);
+const offersPorches = (block, rel = '') => {
+  if (PORCH_PAGES.has(rel)) return true; // every takedown block on a porch package page is about porches
+  const t = block.replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/\s+/g, ' ').toLowerCase().split(BRAND).join(' ');
+  return PORCH_TERMS.some((w) => new RegExp(`(?<![-/\\w])${w.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}`).test(t)) || PORCH_HREFS.some((h) => block.includes(h));
+};
+function christmasTakedownErrors(src, rel) {
+  const bad = [];
+  const said = TD.christmasLine.replace(/\.$/, '');
+  for (const sec of sectionsOf(src, rel)) {
+    if (sec.split(said).length > 2) bad.push(`the Christmas takedown line twice: ${sec.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 120)}`);
+    if (!offersPorches(sec.split(said).join(''), rel)) continue;
+    for (const m of sec.matchAll(TD_ANY)) if (!sec.slice(m.index, m.index + 300).includes(said)) bad.push(sec.slice(Math.max(0, m.index - 80), m.index + 60).replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+  }
+  return bad;
+}
+let xmasTdSections = 0;
+// Terms and conditions are legal copy, changed only with the owner (her ruling on legal work).
+for (const rel of [...pages, 'llms.txt', 'llms-full.txt', 'llms-services.txt', 'llms-answers.txt'].filter((r) => r !== 'terms-and-conditions.html')) {
+  const t = read(rel);
+  if (!t) continue;
+  xmasTdSections += sectionsOf(t, rel).filter((x) => offersPorches(x, rel) && TD_ANY.test(x)).length; TD_ANY.lastIndex = 0;
+  for (const b of christmasTakedownErrors(t, rel)) fail(`${rel}: a Christmas section quotes takedown from $${TD_PRICE} without "${TD.christmasLine}": "${b}"`);
+}
+if (xmasTdSections < 3) fail(`Rule 0: only ${xmasTdSections} Christmas sections with a takedown line were read`);
+{
+  const before = errors.length;
+  const caught = christmasTakedownErrors('<section><p>Custom porch installs for fall, Halloween, Christmas. Starting at $350+. Takedown starts at $75, quoted with your setup.</p></section>', 'probe.html').length > 0
+    && christmasTakedownErrors('- Christmas porches. Takedown starts at $75, quoted with your setup.', 'probe.txt').length > 0
+    && christmasTakedownErrors(`<section><p>Christmas porches. Takedown starts at $75, quoted with your setup. ${TD.christmasLine}</p></section>`, 'probe.html').length === 0
+    && christmasTakedownErrors(`<section><details><p>Christmas porches.</p></details><details><p>Party decor. Takedown starts at $75, quoted with your setup.</p></details></section>`, 'probe.html').length === 0
+    && christmasTakedownErrors(`<section><p>Christmas. Takedown starts at $75, quoted with your setup. ${TD.christmasLine}</p><p>${TD.christmasLine}</p></section>`, 'probe.html').length > 0
+    && christmasTakedownErrors('<div class="info-panel"><h2>What is included in the setup?</h2><ul><li>Front-entry visual styling</li><li>Optional takedown, from $75, quoted with your setup</li></ul></div>', PORCH_PK.pages[0]).length > 0
+    && christmasTakedownErrors('<section><details><p>Party decor from Porch &amp; Party. Takedown starts at $75, quoted with your setup.</p></details></section>', 'probe.html').length === 0
+    && christmasTakedownErrors('<div class="faq-item"><h3>Do you offer take-down for seasonal porch decorating?</h3><p>Yes. Takedown starts at $75, quoted with your setup.</p></div>', 'probe.html').length > 0
+    && christmasTakedownErrors(`<div class="info-panel"><h3>Materials and add-ons</h3><p class="muted">Takedown starts at $75, quoted with your setup. It applies to ${offers.services.porch.name} and ${offers.services.celebration.name}.</p></div>`, 'probe.html').length > 0;
+  errors.length = before;
+  if (!caught) fail('self-test: the Christmas takedown check passed a Christmas section with the $75 line alone, or failed a fixed one');
 }
 for (const rel of ['pricing.html', 'how-it-works.html']) if (!(read(rel) || '').includes(TD.line)) fail(`${rel} lacks the exact takedown line`);
 const UNPRICED = /take-?down (service )?(is )?available for an additional fee|take-?down when quoted separately|take-?down for seasonal porch installs is available/i;

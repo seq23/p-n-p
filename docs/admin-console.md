@@ -1131,7 +1131,10 @@ email's last box (`todo-email.mjs`). Proof: `npm run validate:admin-id-auto-dele
   one fixture).
 - **Source tags:** `/request?src=<tag>` (mailer-38117, hotel, hoa, school, facebook, instagram,
   tiktok, pinterest, google ...) rides a hidden field into `requests.source_tag`, cleaned to a-z 0-9
-  "-", at most 40 characters (`request-form.mjs cleanSrc`). Stored only; /admin does not show it yet
+  "-", at most 40 characters (`request-form.mjs cleanSrc`). With no `?src=`, the tag comes from
+  `?utm_source=` (short spellings like `ig` mapped to `instagram`), then the site that sent the visit
+  (Referer host only, never its path; `functions/_lib/source-tag.mjs`, 21 Nov 2026); the privacy policy
+  says so. Not yet counted: a visitor who lands on another page first (browser-side follow-up). Stored only; /admin does not show it yet
   (that waits for an approved mock-up). Checked in `validate:request-form`.
 
 ## Where things live

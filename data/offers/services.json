@@ -316,6 +316,8 @@
       "name": "Takedown",
       "fromPrice": 75,
       "line": "Takedown starts at $75, quoted with your setup.",
+      "christmasLine": "January takedown is included with Christmas porches.",
+      "christmasWhy": "Owner, 16 Nov 2026: Christmas decor is ours and reused, so January takedown is included in every Christmas package (data/offers/porch_packages.json). Said beside the $75 line wherever it covers porches; party decor and fall keep the $75 line alone.",
       "appliesTo": [
         "porch",
         "celebration"

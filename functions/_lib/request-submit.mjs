@@ -12,6 +12,7 @@ import games from '../../data/rentals/games.json';
 import { useInventory } from './inventory.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 import * as F from './request-form.mjs';
+import { sourceOf } from './source-tag.mjs';
 import * as C from './calendar.mjs';
 import { getSettings, esc, sha256Hex, b64url, safeEqual } from './util.mjs';
 import { availabilityFor } from './availability.mjs';
@@ -29,6 +30,20 @@ const MIN_SECONDS = 3;
 const MAX_AGE_SECONDS = 2 * 86400;
 export const RATE = { perHour: 5, perHourNoJs: 3 };
 const REF_COOKIE = 'pnp_ref';
+
+/**
+ * True when the request that owns a referral code is the same person booking now: the same phone
+ * digits, email or normalised name. A customer who taps her own /r/<code> link and books for herself
+ * is never her own referrer (the $25 referral reward, owner 21 Nov 2026, is for two people).
+ */
+export function isSelfReferral(referrer, me) {
+  if (!referrer) return false;
+  const phone = (r) => C.digitsOf(r.phone_digits || r.phone || '').slice(-10);
+  const name = (r) => r.name_norm || C.normName(r.name || '');
+  const email = (r) => String(r.email || '').trim().toLowerCase();
+  const same = (a, b) => Boolean(a) && a === b;
+  return same(phone(referrer), phone(me)) || same(email(referrer), email(me)) || same(name(referrer), name(me));
+}
 const CODE_RE = /^[a-hjkmnp-z2-9]{8}$/;
 const ALPHABET = 'abcdefghjkmnpqrstuvwxyz23456789';
 
@@ -138,7 +153,8 @@ export async function handleRequestPage(context) {
     if (season) { values.service = values.service || 'porch'; values.porch_season = season.formChoice; }
     const decor = url.searchParams.get('decor');
     if (pk && (pk.tierOrder.includes(decor) || decor === 'not_sure')) { values.service = values.service || 'porch'; values.porch_decor = decor; }
-    const src = F.cleanSrc(url.searchParams.get('src'));
+    // ?src=, then ?utm_source=, then the site that sent the visit (source-tag.mjs).
+    const src = sourceOf(url, request.headers.get('Referer'));
     if (src) values.src = src;
     return formPage(env, url, { values, referral: ref });
   }
@@ -222,7 +238,10 @@ async function submit(context) {
   }
   const refIn = [fields.ref, cookie(request, REF_COOKIE)].find((c) => CODE_RE.test(String(c || ''))) || '';
   let referredBy = null;
-  if (refIn) { const who = await env.DB.prepare('SELECT request_key FROM requests WHERE referral_code = ?1').bind(refIn).first(); if (who) referredBy = refIn; }
+  if (refIn) {
+    const who = await env.DB.prepare('SELECT request_key, name, email, phone, name_norm, phone_digits FROM requests WHERE referral_code = ?1').bind(refIn).first();
+    if (who && !isSelfReferral(who, { name: clean.name, email: clean.email, phone: clean.phone })) referredBy = refIn;
+  }
   const receipt = randomId();
   const code = randomCode();
   const extra = [];

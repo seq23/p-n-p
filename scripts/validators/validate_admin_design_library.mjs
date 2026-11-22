@@ -104,8 +104,10 @@ for (const p of ['/designs/porches/no-such-design', '/designs/nope', '/designs/c
 {
   const r = await s.get('/designs/data.json'); routes += 1;
   must(r.status === 200 && /application\/json/.test(r.headers.get('Content-Type') || ''), `data.json answered ${r.status} ${r.headers.get('Content-Type')}`);
-  let same = false; try { same = JSON.stringify(JSON.parse(r.text)) === JSON.stringify(LIB); } catch { same = false; }
-  must(same, 'data.json is not data/admin/design-library/library.json');
+  // Served with every porch package price rendered from data/offers/porch_packages.json (library-prices.mjs).
+  const LP = await mod('functions/_lib/library-prices.mjs');
+  let same = false; try { same = JSON.stringify(JSON.parse(r.text)) === JSON.stringify(LP.pricedLibrary(LIB)); } catch { same = false; }
+  must(same, 'data.json is not data/admin/design-library/library.json with its porch prices from porch_packages.json');
   must(/private/.test(r.headers.get('Cache-Control') || ''), 'data.json may be cached by shared caches');
   for (const [p, type] of [['/designs/app.js', 'text/javascript'], ['/designs/app.css', 'text/css']]) {
     const x = await s.get(p); routes += 1;

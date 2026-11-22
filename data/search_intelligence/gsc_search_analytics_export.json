@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-20",
-  "end_date": "2026-11-16",
-  "collected_at": "2026-11-19T22:52:30.237747+00:00",
+  "start_date": "2026-10-22",
+  "end_date": "2026-11-18",
+  "collected_at": "2026-11-21T21:24:58.090461+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -331,6 +331,15 @@
     },
     {
       "keys": [
+        "princess rental near me"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "rentals for birthday parties"
       ],
       "clicks": 0,
@@ -362,10 +371,10 @@
       "keys": [
         "https://porchandparty901.com/"
       ],
-      "clicks": 8,
-      "impressions": 200,
-      "ctr": 0.04,
-      "position": 4.495
+      "clicks": 7,
+      "impressions": 187,
+      "ctr": 0.0374331550802139,
+      "position": 4.016042780748663
     },
     {
       "keys": [
@@ -1010,6 +1019,16 @@
     },
     {
       "keys": [
+        "princess rental near me",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "rentals for birthday parties",
         "https://porchandparty901.com/"
       ],
@@ -1040,9 +1059,9 @@
     }
   ],
   "counts": {
-    "by_query": 38,
+    "by_query": 39,
     "by_page": 22,
-    "by_query_page": 48
+    "by_query_page": 49
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
