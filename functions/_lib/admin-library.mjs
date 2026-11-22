@@ -12,7 +12,8 @@
 //                                              (scripts/assemble_pages_output.js copies them to
 //                                              admin/library/img/, which only this route reaches)
 // Pinterest's pinit.js is loaded on design pages only. Data refresh: npm run library:sync.
-import LIB from '../../data/admin/design-library/library.json';
+import RAW_LIB from '../../data/admin/design-library/library.json';
+import { pricedLibrary } from './library-prices.mjs';
 import APP_JS from './assets/design-library.js.txt';
 import APP_CSS from './assets/design-library.css.txt';
 import { layout } from './views.mjs';
@@ -29,6 +30,8 @@ export const SECTIONS = [
 export const DESIGN_SECTIONS = ['porches', 'rooms', 'balloons', 'grazing'];
 export const PINIT_SRC = 'https://assets.pinterest.com/js/pinit.js';
 const SECTION_NAME = Object.fromEntries(SECTIONS);
+// Every porch package price in the library comes from data/offers/porch_packages.json (library-prices.mjs).
+const LIB = pricedLibrary(RAW_LIB);
 
 function hash(s) { let h = 5381; for (let i = 0; i < s.length; i += 1) h = ((h * 33) ^ s.charCodeAt(i)) >>> 0; return h.toString(36); }
 const DATA_TEXT = JSON.stringify(LIB);

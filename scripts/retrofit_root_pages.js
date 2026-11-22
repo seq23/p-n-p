@@ -121,7 +121,7 @@ const faqSection = () => '<section class="section section-soft" data-retrofit="r
 const TAKEDOWN = (offers.addOns || {}).takedown;
 const scopeNotes = (key, s) => (TAKEDOWN ? s.notes.filter((n) => n !== TAKEDOWN.line) : s.notes);
 const takedownNote = () => (TAKEDOWN
-  ? `<p class="muted">${esc(TAKEDOWN.line)} It applies to ${TAKEDOWN.appliesTo.map((k) => esc(offers.services[k].name)).join(' and ')}; party game rentals have no takedown.</p>`
+  ? `<p class="muted">${esc(TAKEDOWN.line)} ${esc(TAKEDOWN.christmasLine)} It applies to ${TAKEDOWN.appliesTo.map((k) => esc(offers.services[k].name)).join(' and ')}; party game rentals have no takedown.</p>`
   : '');
 
 const scopeSection = () => '<section class="section" data-retrofit="root-scope">'
