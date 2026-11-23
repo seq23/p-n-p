@@ -396,7 +396,7 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
     <ul class="rq-legal-links"><li><a href="${RULES_PATH}" target="_blank" rel="noopener">Rules &amp; Responsibilities<span class="rq-newtab" aria-hidden="true"> ↗</span><span class="rq-sr"> (opens in a new tab)</span></a></li><li><a href="${TERMS_PATH}" target="_blank" rel="noopener">Terms &amp; Conditions<span class="rq-newtab" aria-hidden="true"> ↗</span><span class="rq-sr"> (opens in a new tab)</span></a></li></ul>
     <label class="rq-choice rq-agree"><input type="checkbox" name="agree" value="yes" required${values.agree === 'yes' ? ' checked' : ''}> <span>I have read and agree to Porch &amp; Party's Rules &amp; Responsibilities and Terms &amp; Conditions${req}</span></label>
     <input type="hidden" name="rules_version" value="${RULES_VERSION}"></div>
-    ${sitekey ? `<div class="cf-turnstile" data-sitekey="${esc(sitekey)}" data-size="flexible"></div>` : ''}
+    ${sitekey ? `<div class="cf-turnstile" data-sitekey="${esc(sitekey)}" data-size="flexible" data-theme="light"></div>` : ''}
     <button type="submit" class="btn-primary rq-submit" data-quote-cta="request-form">Send my request</button>
     <p class="rq-help">Takes about 3 minutes. No account needed. We usually reply within a day. Questions? Call or text <a href="tel:+19013551518">901-355-1518</a>.</p>`);
   return `<!--request-form--><div class="rq-wrap" id="request-form">${summary}
