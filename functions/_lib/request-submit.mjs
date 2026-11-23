@@ -42,6 +42,7 @@ const TURNSTILE_VERIFY = 'https://challenges.cloudflare.com/turnstile/v0/sitever
 // Logged on the card when a request is kept without the confirmation email and the hold. The
 // "request received" page reads it, so it never claims an email or a hold that did not happen.
 export const HELD_BACK = 'Kept for Valerie without the confirmation email or a hold';
+// Matched as a prefix with substr(), never LIKE: D1 refuses a LIKE pattern over 50 bytes, and this one is longer.
 export const HELD_BACK_WHY = {
   missing: 'the robot check did not run in their browser',
   unavailable: 'the robot check could not be reached',
@@ -175,7 +176,7 @@ const emailCount = (env, now, email) => count(env, "SELECT COUNT(*) AS n FROM re
 // Website requests in the last 24 hours that got the full flow (a confirmation email), this one
 // included once it is stored: a flood of held-back requests never uses up real customers' emails.
 const fullFlowCount = (env, now) => count(env, `SELECT COUNT(*) AS n FROM requests r WHERE r.source = 'site' AND r.submitted_at >= ?1
-  AND NOT EXISTS (SELECT 1 FROM request_events e WHERE e.request_key = r.request_key AND e.what LIKE ?2)`, sqlTime(now - 86400000), `${HELD_BACK}%`);
+  AND NOT EXISTS (SELECT 1 FROM request_events e WHERE e.request_key = r.request_key AND substr(e.what, 1, length(?2)) = ?2)`, sqlTime(now - 86400000), HELD_BACK);
 const ownerNoticeCount = (env, now) => count(env, 'SELECT COUNT(*) AS n FROM requests WHERE owner_emailed_at >= ?1', sqlTime(now - 86400000));
 const tooMany = () => new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Please call us | Porch &amp; Party</title><p style="font:18px/1.5 sans-serif;max-width:560px;margin:40px auto;padding:0 16px">We got a lot of requests from this connection in the last hour, so the form is paused here. Please call or text <a href="tel:+19013551518">901-355-1518</a> and we will help you right away.</p>', { status: 429, headers: HEADERS });
 
@@ -393,7 +394,7 @@ export async function handleReceived({ request, env }) {
     const services = JSON.parse(row.services || '[]');
     const first = String(row.name || '').trim().split(/\s+/)[0] || 'there';
     // A held-back request got no confirmation email and no hold (submit): the page never claims either.
-    const heldBack = await env.DB.prepare('SELECT 1 AS y FROM request_events WHERE request_key = ?1 AND what LIKE ?2').bind(row.request_key, `${HELD_BACK}%`).first();
+    const heldBack = await env.DB.prepare('SELECT 1 AS y FROM request_events WHERE request_key = ?1 AND substr(what, 1, length(?2)) = ?2').bind(row.request_key, HELD_BACK).first();
     const parts = [`<h2>Thank you, ${esc(first)}!</h2><p data-copy>Your request came through. ${heldBack ? 'Valerie will text you shortly.' : 'We sent a copy to your email.'}</p>`];
     if (services.includes('rentals')) {
       const hold = await env.DB.prepare('SELECT * FROM holds WHERE request_key = ?1').bind(row.request_key).first();

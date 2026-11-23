@@ -475,6 +475,13 @@ let invA;
   must(r1.includes('José Núñez') && r2.includes('José Núñez') && r3.includes('José Núñez'), 'search misses accent/case/partial/phone matches');
   const r4 = (await s.get('/admin/search?partial=1&q=Jnae')).text;
   must(r4.includes('Jnae') && !/data-reqcard/.test(r4), 'search empty state does not echo the search (or shows cards)');
+  // A long search (pasted address or notes, up to the 100 characters the route keeps) still answers:
+  // D1 refuses a LIKE pattern over 50 bytes, which once made every long search a Cloudflare error page.
+  const longQ = `jose@example.com ${'x'.repeat(80)}`;
+  const r4b = await s.get(`/admin/search?partial=1&q=${encodeURIComponent(longQ)}`);
+  const r4c = await s.get(`/admin/search?partial=1&q=${'9015557788'.repeat(6)}`);
+  const r4d = (await s.get(`/admin/search?partial=1&q=${encodeURIComponent('jose@example.com')}`)).text;
+  must(r4b.status === 200 && !/data-reqcard/.test(r4b.text) && r4c.status === 200 && r4d.includes('José Núñez'), 'a search longer than 48 characters fails (or an email search misses)');
   await s.post('/admin/requests/archive', { r: s.rk(reqA.key) });
   const r5 = (await s.get('/admin/search?partial=1&q=test%20renter')).text;
   must(r5.includes('Put away'), 'search does not label an archived customer');

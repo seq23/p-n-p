@@ -84,7 +84,7 @@ async function world({ keys = true } = {}) {
     const count = async (sql) => (await s.one(sql, key)).n;
     return {
       row,
-      heldBack: row ? Boolean(await s.one('SELECT 1 AS y FROM request_events WHERE request_key = ?1 AND what LIKE ?2', key, `${s.RS.HELD_BACK}%`)) : false,
+      heldBack: row ? Boolean(await s.one('SELECT 1 AS y FROM request_events WHERE request_key = ?1 AND substr(what, 1, length(?2)) = ?2', key, s.RS.HELD_BACK)) : false,
       holds: await count('SELECT COUNT(*) AS n FROM holds WHERE request_key = ?1'),
       bookings: await count('SELECT COUNT(*) AS n FROM bookings WHERE request_key = ?1'),
       drafts: await count('SELECT COUNT(*) AS n FROM invoices WHERE request_key = ?1'),
@@ -216,7 +216,7 @@ const porch = (n, extra = {}) => ({ service: 'porch', porch_season: 'Fall / Hall
   // 25 held-back requests (one IP, past its limit) never eat into real customers' confirmations.
   for (let i = 0; i < w.s.RS.RATE.perIpHour; i += 1) await w.send(porch(400 + i), { ip: '203.0.113.200' });
   for (let i = w.s.RS.RATE.perIpHour; i < 8; i += 1) await w.send(porch(400 + i), { ip: '203.0.113.200' });
-  const held = (await w.s.one('SELECT COUNT(*) AS n FROM request_events WHERE what LIKE ?1', `${w.s.RS.HELD_BACK}%`)).n;
+  const held = (await w.s.one('SELECT COUNT(*) AS n FROM request_events WHERE substr(what, 1, length(?1)) = ?1', w.s.RS.HELD_BACK)).n;
   must(held === 8 - w.s.RS.RATE.perIpHour, `the IP flood was not held back (${held})`);
   // Real customers, each from their own IP and address: confirmations up to the cap (the 3 above
   // count), then held back.

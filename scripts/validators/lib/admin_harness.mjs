@@ -65,6 +65,9 @@ class Stmt {
 
 export function makeDb({ upTo = Infinity } = {}) {
   const raw = new sqlite.DatabaseSync(':memory:');
+  // D1 refuses a LIKE/GLOB pattern over 50 bytes ("LIKE or GLOB pattern too complex"); SQLite allows
+  // 50,000. Same cap here, so a query that only breaks on Cloudflare breaks in every validator too.
+  raw.limits.likePatternLength = 50;
   const d1 = {
     raw,
     prepare: (sql) => new Stmt(raw, sql),

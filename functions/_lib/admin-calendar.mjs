@@ -629,10 +629,10 @@ export async function searchData(env, q) {
   const needle = C.normName(q);
   const digits = C.digitsOf(q);
   if (needle.length < 2) return { groups: [], capped: false };
-  const like = `%${needle.replace(/[%_]/g, '')}%`;
+  // instr(), not LIKE: D1 refuses a LIKE pattern over 50 bytes, and a search may be 100 characters.
   const { results } = await env.DB.prepare(`SELECT b.* FROM bookings b
-    WHERE b.name_norm LIKE ?1 OR lower(b.email) LIKE ?1 OR (?2 <> '' AND length(?2) >= 3 AND b.phone_digits LIKE '%' || ?2 || '%')
-    ORDER BY b.date DESC, b.id DESC LIMIT 51`).bind(like, digits).all();
+    WHERE instr(b.name_norm, ?1) > 0 OR instr(lower(b.email), ?1) > 0 OR (?2 <> '' AND length(?2) >= 3 AND instr(b.phone_digits, ?2) > 0)
+    ORDER BY b.date DESC, b.id DESC LIMIT 51`).bind(needle, digits).all();
   const rows = results || [];
   const capped = rows.length > 50;
   const bookings = rows.slice(0, 50);
