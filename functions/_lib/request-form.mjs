@@ -346,6 +346,12 @@ function section(key, title, body, { hidden = false } = {}) {
 // (mailer-38117, hotel, hoa, school, facebook, instagram, tiktok, pinterest, google ...). Lower
 // case, only a-z 0-9 and "-", at most 40 characters; anything else is dropped. Carried in a hidden
 // field and stored on the request (requests.source_tag, migration 0023). Not shown in /admin yet.
+// A visitor who landed on another page first (23 Nov 2026): the header script remembered that visit
+// in this tab (sessionStorage "pnp_src", scripts/lib/site_chrome.js FIRST_TOUCH); FIRST_TOUCH_FILL
+// copies it into the hidden first_touch field, which the server reads as hostile (source-tag.mjs
+// firstTouchOf). Never echoed back: the field is always rendered empty. Storage blocked -> it stays
+// empty and the request is tagged from src as before.
+export const FIRST_TOUCH_FILL = 'try{document.getElementById("rq-ft").value=sessionStorage.getItem("pnp_src")||""}catch(e){}';
 export const SRC_MAX = 40;
 export function cleanSrc(raw) {
   return String(raw == null ? '' : raw).toLowerCase().replace(/[^a-z0-9-]/g, '').slice(0, SRC_MAX);
@@ -402,7 +408,7 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
   return `<!--request-form--><div class="rq-wrap" id="request-form">${summary}
   <form class="rq-form" method="post" action="/request" enctype="multipart/form-data" novalidate data-today="${esc(today)}">
     <div class="rq-hp" aria-hidden="true"><label for="f-website">Leave this empty</label><input type="text" id="f-website" name="website" tabindex="-1" autocomplete="off"></div>
-    <input type="hidden" name="ts" value="${esc(ts)}"><input type="hidden" name="ref" value="${esc(referral)}"><input type="hidden" name="src" value="${esc(cleanSrc(values.src))}">
+    <input type="hidden" name="ts" value="${esc(ts)}"><input type="hidden" name="ref" value="${esc(referral)}"><input type="hidden" name="src" value="${esc(cleanSrc(values.src))}"><input type="hidden" name="first_touch" id="rq-ft" value=""><script>${FIRST_TOUCH_FILL}</script>
     ${page1}${sections}${contact}${id}${agree}
   </form></div>
   ${sitekey ? '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>' : ''}

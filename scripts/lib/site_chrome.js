@@ -189,9 +189,26 @@ const EXPLORE_LEGAL_RE = /<a href="\/(?:privacy-policy|terms-and-conditions)(?:\
 const PHONE_SVG = '<svg class="pnp-ico" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false"><path fill="currentColor" d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.1.37 2.3.57 3.6.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1z"/></svg>';
 const BURGER_SVG = '<svg class="pnp-burger" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path class="pnp-burger-open" d="M4 7h16M4 12h16M4 17h16"/><path class="pnp-burger-close" d="M6 6l12 12M18 6L6 18"/></svg>';
 
+// Where a visitor came from, remembered for the request form (owner's Open Loops row, 23 Nov 2026:
+// "A booking request is credited to Instagram or Facebook even when the visitor first landed on
+// another page"). Rule: a visit that arrives from OUTSIDE the site (another site's referrer, or none)
+// and carries a source (?src=, ?utm_source=, or that other site's host name) replaces what is kept;
+// a page view inside the site, a reload from inside or a direct visit with no tag never does, so an
+// Instagram landing survives browsing and a later bookmark visit, while a newer tagged or outside
+// visit (the last touch that brought them back) wins. Kept in sessionStorage "pnp_src": first-party,
+// gone when the tab closes, never sent anywhere by itself (the form copies it into a hidden field,
+// request-form.mjs FIRST_TOUCH_FILL), and only channel names, never a page path or anything personal.
+// Storage blocked (private mode) -> the try swallows it and the request is tagged as before.
+const FIRST_TOUCH = '(function(){try{var w=function(x){return String(x||"").toLowerCase().replace(/^www\\./,"");},r="";'
+  + 'try{r=document.referrer?new URL(document.referrer).hostname:"";}catch(e){}'
+  + 'if(r&&w(r)===w(location.hostname))return;'
+  + 'var q=new URLSearchParams(location.search),s=q.get("src")||"",u=q.get("utm_source")||"";'
+  + 'if(s||u||r)sessionStorage.setItem("pnp_src",JSON.stringify({s:s.slice(0,60),u:u.slice(0,60),r:r.slice(0,120)}));'
+  + '}catch(e){}})();';
+
 // Kept small and dependency-free; it ships inside <header>, so the chrome pass
 // carries it to every page exactly as it carries the markup.
-const SCRIPT = '(function(){var h=document.currentScript&&document.currentScript.parentNode;if(!h)return;'
+const SCRIPT = FIRST_TOUCH + '(function(){var h=document.currentScript&&document.currentScript.parentNode;if(!h)return;'
   + 'var b=h.querySelector("button.pnp-toggle"),a=h.querySelector("a.pnp-toggle"),p=h.querySelector("#site-menu"),k=h.querySelector(".pnp-backdrop"),r=document.documentElement;'
   + 'if(!b||!p)return;b.hidden=false;if(a)a.parentNode.removeChild(a);h.classList.add("pnp-js");'
   + 'function s(o){h.classList.toggle("is-open",o);r.classList.toggle("pnp-lock",o);b.setAttribute("aria-expanded",o?"true":"false");b.setAttribute("aria-label",o?"Close menu":"Open menu");}'
@@ -388,7 +405,7 @@ function withoutChrome(html) {
 }
 
 module.exports = {
-  NAV_ITEMS, QUOTE, QUOTE_ATTRS, RETIRED_FORM_RE, CALL_LABEL, MARK, LEGAL_LINKS, LEGAL_YEAR, footerAbout, legal, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, ABOUT_FOOTER, HEADER_RE, EXPLORE_RE,
+  FIRST_TOUCH, NAV_ITEMS, QUOTE, QUOTE_ATTRS, RETIRED_FORM_RE, CALL_LABEL, MARK, LEGAL_LINKS, LEGAL_YEAR, footerAbout, legal, CSS_HREF, RENTALS_FOOTER, FAQ_FOOTER, ABOUT_FOOTER, HEADER_RE, EXPLORE_RE,
   header, cssLink, fontsLink, brandLink, brandHead, GUIDES, PRICE_TOOLS, priceToolsFor, footerGuides, withPriceTools, FONTS_HREF, BRAND_CSS_HREF, sitePathOf, isCurrent, applySiteChrome, withoutChrome,
   isQuoteCta, retargetQuoteCtas
 };

@@ -1145,7 +1145,12 @@ email's last box (`todo-email.mjs`). Proof: `npm run validate:admin-id-auto-dele
   "-", at most 40 characters (`request-form.mjs cleanSrc`). With no `?src=`, the tag comes from
   `?utm_source=` (short spellings like `ig` mapped to `instagram`), then the site that sent the visit
   (Referer host only, never its path; `functions/_lib/source-tag.mjs`, 21 Nov 2026); the privacy policy
-  says so. Not yet counted: a visitor who lands on another page first (browser-side follow-up). Stored only; /admin does not show it yet
+  says so. A visitor who lands on another page first is counted too (23 Nov 2026): the header script on
+  every page (`scripts/lib/site_chrome.js` FIRST_TOUCH) keeps the last visit that came from outside the site
+  in sessionStorage `pnp_src` (gone when the tab closes; a page view inside the site or a direct visit with
+  no tag never replaces it, a newer tagged or outside visit does), the form copies it into the hidden
+  `first_touch` field, and the server reads that first (`firstTouchOf`, capped and cleaned like `?src=`),
+  then the /request visit's own tag. Storage blocked or no JavaScript: tagged as before. Stored only; /admin does not show it yet
   (that waits for an approved mock-up). Checked in `validate:request-form`.
 
 ## Where things live

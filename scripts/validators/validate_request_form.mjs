@@ -232,6 +232,87 @@ must(ST.tagFromReferer('https://www.memphisparent.com/x') === 'memphisparent-com
 const viaUtm = await send({ ...PATHS.porch, ...contact(91), src: await hidden('https://porchandparty901.com/request?utm_source=tiktok') });
 const utmRow = await s.one('SELECT source_tag FROM requests WHERE email = ?1', 'path91@example.com');
 must(viaUtm.status === 303 && utmRow && utmRow.source_tag === 'tiktok', `a request opened from ?utm_source=tiktok stored "${utmRow && utmRow.source_tag}" (want tiktok)`);
+// ---- First touch: the visitor landed on another page first (owner's Open Loops row, 23 Nov 2026) ----
+// Runs the scripts people really get, in a small browser stand-in with its own per-tab sessionStorage:
+// the header script from the published index.html (site_chrome.js FIRST_TOUCH, put on every page by
+// chrome:install) on each page view, then the fill script inside the /request page the real handler
+// serves, then the real submit. Rule: a visit from outside the site that carries a source replaces
+// what is kept; a page view inside the site or a direct visit never does.
+{
+  const vm = await import('node:vm');
+  const headerOf = (html) => { const h = /<header\b[^>]*class="site-header[\s\S]*?<\/header>/.exec(html); const m = h && /<script>([\s\S]*?)<\/script>/.exec(h[0]); return m ? m[1] : ''; };
+  const HEADER_JS = headerOf(fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8'));
+  const tab = ({ blocked = false } = {}) => {
+    const store = new Map();
+    const ctx = { URL, URLSearchParams, location: {}, document: {} };
+    if (blocked) Object.defineProperty(ctx, 'sessionStorage', { get() { throw new Error('SecurityError: The operation is insecure.'); } });
+    else ctx.sessionStorage = { getItem: (k) => (store.has(k) ? store.get(k) : null), setItem: (k, v) => { store.set(k, String(v)); } };
+    vm.createContext(ctx);
+    const fields = {};
+    const run = (js) => { try { vm.runInContext(js, ctx); return true; } catch { return false; } };
+    const visit = (url, referrer = '') => {
+      const u = new URL(url);
+      ctx.location = { href: url, hostname: u.hostname, search: u.search };
+      ctx.document = { referrer, currentScript: null, getElementById: (id) => (fields[id] = fields[id] || { value: '' }) };
+      return run(HEADER_JS);
+    };
+    // Opens /request in this tab: the header script, the server's page, then its fill script.
+    const openRequest = async (url, referrer = '') => {
+      const ran = visit(url, referrer);
+      const html = await (await handler({ request: new Request(url, { headers: referrer ? { Referer: referrer } : {} }), env, params: {} })).text();
+      const fill = /id="rq-ft" value=""><script>([\s\S]*?)<\/script>/.exec(html);
+      const filled = Boolean(fill) && run(fill[1]);
+      return { ran, filled, src: (html.match(/name="src" value="([^"]*)"/) || [])[1], first_touch: (fields['rq-ft'] || { value: '' }).value };
+    };
+    return { visit, openRequest };
+  };
+  const SITE = 'https://porchandparty901.com';
+  const tagOfRow = async (n) => ((await s.one('SELECT source_tag FROM requests WHERE email = ?1', `path${n}@example.com`)) || {}).source_tag;
+
+  // Instagram link to a service page, then a page inside the site, then a direct visit, then the form.
+  const ig = tab();
+  ig.visit(`${SITE}/services/porch-decorating?utm_source=instagram&utm_medium=social`, 'https://l.instagram.com/');
+  ig.visit(`${SITE}/pricing`, `${SITE}/services/porch-decorating?utm_source=instagram&utm_medium=social`);
+  ig.visit(`${SITE}/`, '');
+  const igForm = await ig.openRequest(`${SITE}/request`, `${SITE}/`);
+  const igSent = await send({ ...PATHS.porch, ...contact(92), src: igForm.src, first_touch: igForm.first_touch });
+  must(igForm.filled && igSent.status === 303 && await tagOfRow(92) === 'instagram', `landed from Instagram on a service page, browsed, then sent the form: stored "${await tagOfRow(92)}" (want instagram)`);
+
+  // Facebook app tap to the home page (no utm), then www/apex pages inside the site, then the form.
+  const fb = tab();
+  fb.visit(`${SITE}/`, 'https://l.facebook.com/');
+  fb.visit('https://www.porchandparty901.com/rentals/', `${SITE}/`);
+  const fbForm = await fb.openRequest(`${SITE}/request?service=rentals`, 'https://www.porchandparty901.com/rentals/');
+  const fbSent = await send({ ...PATHS.party, ...contact(93), src: fbForm.src, first_touch: fbForm.first_touch });
+  must(fbSent.status === 303 && await tagOfRow(93) === 'facebook', `landed from the Facebook app on the home page, then sent the form: stored "${await tagOfRow(93)}" (want facebook)`);
+
+  // A newer outside visit that carries a source replaces the kept one (the last touch that brought them back).
+  const again = tab();
+  again.visit(`${SITE}/?utm_source=instagram`, 'https://l.instagram.com/');
+  again.visit(`${SITE}/hotels?utm_source=fb`, 'https://m.facebook.com/');
+  again.visit(`${SITE}/faq/`, `${SITE}/hotels?utm_source=fb`);
+  must(ST.firstTouchOf((await again.openRequest(`${SITE}/request`, `${SITE}/faq/`)).first_touch) === 'facebook', 'a newer Facebook visit did not replace the earlier Instagram one');
+  // A tagged /request visit is the newest touch and is kept for the next form too.
+  const direct = tab();
+  direct.visit(`${SITE}/`, '');
+  must((await direct.openRequest(`${SITE}/request`, '')).first_touch === '', 'a direct visit with no tag was remembered as a source');
+
+  // Storage blocked (private mode): nothing throws, the form still sends, tagged as before (#225).
+  const priv = tab({ blocked: true });
+  const privRan = priv.visit(`${SITE}/pricing?utm_source=instagram`, 'https://l.instagram.com/');
+  const privForm = await priv.openRequest(`${SITE}/request?utm_source=instagram`, 'https://l.instagram.com/');
+  const privSent = await send({ ...PATHS.grazing, ...contact(94), src: privForm.src, first_touch: privForm.first_touch });
+  must(privRan && privForm.ran && privForm.filled && privForm.first_touch === '' && privSent.status === 303 && await tagOfRow(94) === 'instagram', `with storage blocked the scripts threw or the request was not tagged as before (stored "${await tagOfRow(94)}")`);
+
+  // first_touch is client-sent: hostile values are cleaned like ?src=, refused, never echoed.
+  must(ST.firstTouchOf('{"u":"<script>alert(1)</script>"}') === 'scriptalert1script' && ST.firstTouchOf(JSON.stringify({ u: `instagram${'x'.repeat(700)}` })) === ''
+    && ST.firstTouchOf('{"r":"evil.com/<b>"}') === '' && ST.firstTouchOf('not json') === '' && ST.firstTouchOf('["instagram"]') === '' && ST.firstTouchOf('{"s":{"a":1}}') === '' && ST.firstTouchOf(null) === ''
+    && ST.firstTouchOf('{"r":"l.instagram.com"}') === 'instagram' && ST.firstTouchOf('{"r":"porchandparty901.com"}') === '', 'first_touch is not cleaned, capped and read like a visit to /request');
+  const evil = await send({ ...PATHS.porch, ...contact(95), porch_season: '', src: 'hoa', first_touch: '{"u":"\\"><img src=x onerror=alert(7731)>"}' });
+  must(evil.status === 400 && !evil.text.includes('alert(7731)') && evil.text.includes('id="rq-ft" value=""'), 'a re-shown form echoes the client-sent first_touch');
+  const long = await send({ ...PATHS.porch, ...contact(95), src: 'hoa', first_touch: JSON.stringify({ u: 'instagram', pad: 'x'.repeat(5000) }) });
+  must(long.status === 303 && await tagOfRow(95) === 'hoa', `an oversized first_touch was not ignored (stored "${await tagOfRow(95)}", want the page's own "hoa")`);
+}
 
 const srcKept = await send({ ...PATHS.porch, ...contact(14), porch_season: '', src: 'hoa' });
 must(srcKept.status === 400 && srcKept.text.includes('<input type="hidden" name="src" value="hoa">'), 'a form re-shown with an error drops its source tag');
