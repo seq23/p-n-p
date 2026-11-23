@@ -8,7 +8,14 @@ import { esc, FROM_EMAIL, ownerCopy } from './util.mjs';
 import { smsLink, hasEmail, BUSINESS_PHONE } from './reminders.mjs';
 
 import { mailerHeaders } from './mailer-auth.mjs';
-const first = (name) => String(name || '').trim().split(/\s+/)[0] || 'there';
+// The customer's first name as it goes into an email (owner, 23 Nov 2026: the form's name must not
+// let a stranger put words or links in a Porch & Party email). Plain letters only: a first word
+// with anything else in it (a dot, slash, @, digit or tag), or longer than 30 letters, becomes
+// "there". wrapEmail escapes it as well.
+export const first = (name) => {
+  const w = String(name || '').trim().split(/\s+/)[0] || '';
+  return w.length <= 30 && /^[\p{L}\p{M}][\p{L}\p{M}'’-]*$/u.test(w) ? w : 'there';
+};
 const C = { cream: '#faf7f2', ink: '#3b302a', accent: '#b85f40', line: '#e8dfd4', muted: '#5f5148' };
 const SANS = "Inter, 'Helvetica Neue', Arial, sans-serif";
 const SERIF = "'Cormorant Garamond', Georgia, 'Times New Roman', serif";
