@@ -421,8 +421,14 @@ must(fast.status === 400, 'a submission faster than a person was accepted');
 const forged = await send({ ...PATHS.porch, ...contact(42) }, { ts: `${Math.floor(Date.now() / 1000) - 60}.forged` });
 must(forged.status === 400, 'a forged render time was accepted');
 let last = null;
-for (let i = 0; i < RS.RATE.perHourNoJs + 1; i += 1) last = await send({ ...PATHS.porch, ...contact(50 + i), event_date: plus(40 + i) }, { ip: '203.0.113.9' });
-must(last.status === 429, `the per-IP limit did not stop request ${RS.RATE.perHourNoJs + 1} (got ${last.status})`);
+// Past the per-IP limit a request is KEPT for Valerie (never refused) but gets no confirmation email
+// (the rest of the spam rules: validate_request_spam.mjs).
+for (let i = 0; i < RS.RATE.perIpHour + 1; i += 1) last = await send({ ...PATHS.porch, ...contact(50 + i), event_date: plus(40 + i) }, { ip: '203.0.113.9' });
+const overIp = `path${50 + RS.RATE.perIpHour}@example.com`;
+const overRow = await s.one('SELECT request_key, robot_check FROM requests WHERE email = ?1', overIp);
+must(last.status === 303 && overRow && overRow.robot_check === 'no-js', `request ${RS.RATE.perIpHour + 1} from one IP was not kept and flagged (status ${last.status})`);
+must(await s.one('SELECT 1 AS y FROM request_events WHERE request_key = ?1 AND what = ?2', overRow.request_key, RS.heldBackNote('ip')), `request ${RS.RATE.perIpHour + 1} from one IP has no "too many from one address" note on its card`);
+must(!env.sent.some((m) => m.to === overIp), `request ${RS.RATE.perIpHour + 1} from one IP still got a confirmation email`);
 must((await s.one("SELECT robot_check FROM requests WHERE email = 'path50@example.com'")).robot_check === 'no-js', 'a request without Turnstile is not marked "sent without the robot check"');
 
 // ---- 8. Emails and templates -----------------------------------------------------------

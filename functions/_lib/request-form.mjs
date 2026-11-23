@@ -396,7 +396,7 @@ export function renderForm({ offers, table, values = {}, errors = {}, ts = '', s
     <ul class="rq-legal-links"><li><a href="${RULES_PATH}" target="_blank" rel="noopener">Rules &amp; Responsibilities<span class="rq-newtab" aria-hidden="true"> ↗</span><span class="rq-sr"> (opens in a new tab)</span></a></li><li><a href="${TERMS_PATH}" target="_blank" rel="noopener">Terms &amp; Conditions<span class="rq-newtab" aria-hidden="true"> ↗</span><span class="rq-sr"> (opens in a new tab)</span></a></li></ul>
     <label class="rq-choice rq-agree"><input type="checkbox" name="agree" value="yes" required${values.agree === 'yes' ? ' checked' : ''}> <span>I have read and agree to Porch &amp; Party's Rules &amp; Responsibilities and Terms &amp; Conditions${req}</span></label>
     <input type="hidden" name="rules_version" value="${RULES_VERSION}"></div>
-    ${sitekey ? `<div class="cf-turnstile" data-sitekey="${esc(sitekey)}" data-size="flexible"></div>` : ''}
+    ${sitekey ? `<div class="cf-turnstile" data-sitekey="${esc(sitekey)}" data-size="flexible" data-theme="light"></div>` : ''}
     <button type="submit" class="btn-primary rq-submit" data-quote-cta="request-form">Send my request</button>
     <p class="rq-help">Takes about 3 minutes. No account needed. We usually reply within a day. Questions? Call or text <a href="tel:+19013551518">901-355-1518</a>.</p>`);
   return `<!--request-form--><div class="rq-wrap" id="request-form">${summary}
@@ -458,7 +458,10 @@ src.forEach(function(s,ix){var url=URL.createObjectURL(s),img=new Image();img.on
 function done(){n+=1;if(n<src.length)return;var dt=new DataTransfer();out.forEach(function(x){if(x)dt.items.add(x);});ins.files=dt.files;ist.textContent=out.length+(out.length===1?' photo':' photos')+' ready ✓';}});
 f.addEventListener('submit',function(e){var bad=null;[].slice.call(f.querySelectorAll('[required]')).forEach(function(i){if(bad)return;var s=i.closest('[data-section]');if(s&&s.hidden)return;if(i.type==='radio'||i.type==='checkbox'){if(i.type==='radio'&&!f.querySelector('input[name='+i.name+']:checked'))bad=i;if(i.type==='checkbox'&&!i.checked)bad=i;}else if(!i.value)bad=i;});
 if(picked().indexOf('rentals')>=0&&!f.querySelector('input[name=games]:checked'))bad=bad||f.querySelector('input[name=games]');if(bad){e.preventDefault();var q=bad.closest('.rq-q');if(q){q.classList.add('rq-bad');q.scrollIntoView({block:'center'});}try{bad.focus({preventScroll:true});}catch(x){}return;}
-var b=f.querySelector('.rq-submit');if(b){b.disabled=true;b.textContent='Sending…';}});
+var b=f.querySelector('.rq-submit');
+if(f.querySelector('.cf-turnstile')&&!tok()&&!f.hasAttribute('data-waited')){e.preventDefault();f.setAttribute('data-waited','1');if(b){b.disabled=true;b.textContent='Checking…';}var t0=Date.now();(function w(){if(tok()||Date.now()-t0>8000){if(b)b.textContent='Sending…';HTMLFormElement.prototype.submit.call(f);}else setTimeout(w,250);})();return;}
+if(b){b.disabled=true;b.textContent='Sending…';}});
+function tok(){var t=f.querySelector('input[name="cf-turnstile-response"]');return !!(t&&t.value);}
 function biz(){var c=f.querySelector('input[name=audience][value=corporate]');var on=!!(c&&c.checked);[].slice.call(f.querySelectorAll('[data-lobby-q]')).forEach(function(d){d.hidden=!on;if(!on)[].slice.call(d.querySelectorAll('input')).forEach(function(i){i.checked=false;});});}
 [].slice.call(f.querySelectorAll('input[name=audience]')).forEach(function(i){i.addEventListener('change',biz);});biz();
 var es=document.getElementById('rq-errors');if(es)es.focus();lens();sync();})();`;

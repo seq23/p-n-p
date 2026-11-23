@@ -3,10 +3,15 @@
 // functions/request/index.js, functions/request/received.js, functions/api/request/availability.js,
 // functions/r/[code].js. Spec: docs/admin-console.md "Site request form".
 //
-// $0 spam protection: a honeypot field, a server-signed render time (too fast = a bot), Cloudflare
-// Turnstile (free) when its keys are set, and a per-IP rate limit. A visitor without JavaScript
-// cannot run Turnstile, so a submission with no Turnstile token is still taken (honeypot + timing
-// + a tighter rate limit) and the admin card says "sent without the robot check".
+// $0 spam protection (owner, 23 Nov 2026: "anyone can trigger them and use up your quota"; a real
+// customer is never turned away): a honeypot field, a server-signed render time (too fast = a bot),
+// Cloudflare Turnstile verified at the server once its keys exist, and limits read from the D1 the
+// form already writes. A request gets the FULL flow (customer confirmation email + rental hold) only
+// when the robot check passed (or no keys are set: the named note TURNSTILE_NOT_CONFIGURED) AND it is
+// under every limit: 3 per IP per hour, 3 per email address per 24 hours, 20 confirmation emails per
+// 24 hours across the site. Otherwise it is KEPT for Valerie, flagged "sent without the robot check",
+// with her notice and the draft invoice, but no email to the typed address and no hold (HELD_BACK).
+// A forged token is the only refusal; past IP_HARD_HOUR from one address the form asks them to call.
 import offers from '../../data/offers/services.json';
 import games from '../../data/rentals/games.json';
 import { useInventory } from './inventory.mjs';
@@ -28,7 +33,24 @@ import { syncSafely } from './admin-money.mjs';
 const HEADERS = { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'strict-origin-when-cross-origin', 'X-Content-Type-Options': 'nosniff' };
 const MIN_SECONDS = 3;
 const MAX_AGE_SECONDS = 2 * 86400;
-export const RATE = { perHour: 5, perHourNoJs: 3 };
+// ipHardHour: past it the form stops storing and asks for a call (no person sends 20 an hour; it
+// bounds the photos and rows one address can pile up). ownerNoticesDay: Valerie's own "New request"
+// emails per 24 hours, so a flood cannot spend the mail quota through her notice either.
+export const RATE = { perIpHour: 3, perEmailDay: 3, confirmationsDay: 20, ipHardHour: 20, ownerNoticesDay: 40 };
+export const TURNSTILE_TIMEOUT_MS = 4000;
+const TURNSTILE_VERIFY = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+// Logged on the card when a request is kept without the confirmation email and the hold. The
+// "request received" page reads it, so it never claims an email or a hold that did not happen.
+export const HELD_BACK = 'Kept for Valerie without the confirmation email or a hold';
+export const HELD_BACK_WHY = {
+  missing: 'the robot check did not run in their browser',
+  unavailable: 'the robot check could not be reached',
+  expired: 'the robot check had expired or was used twice',
+  ip: `more than ${RATE.perIpHour} website requests from one internet address in an hour`,
+  email: `more than ${RATE.perEmailDay} website requests for this email address in 24 hours`,
+  site: `more than ${RATE.confirmationsDay} confirmation emails in 24 hours`,
+};
+export const heldBackNote = (why) => `${HELD_BACK}: ${HELD_BACK_WHY[why]} (a safety limit against spam). Check it looks real, then text or email them yourself.`;
 const REF_COOKIE = 'pnp_ref';
 
 /**
@@ -111,22 +133,54 @@ function fieldsOf(form) {
   return out;
 }
 
-async function turnstile(env, token, ip) {
-  if (!env.TURNSTILE_SECRET) return { ok: true, used: false };
-  if (!token) return { ok: true, used: false };
+/**
+ * The robot check, at the server -> 'ok' | 'missing' | 'bad' | 'unavailable' | 'not_configured'.
+ * Only 'ok' (or 'not_configured', the named note) can earn the full flow; 'bad' is refused;
+ * 'missing' / 'unavailable' are kept without the email and hold. Never trusts the browser: the
+ * token is checked with Cloudflare (env.FETCH is the test seam messages.mjs already uses), with a
+ * time limit, and anything but an explicit success: true is not 'ok'.
+ */
+export async function verifyTurnstile(env, token, ip) {
+  if (!env.TURNSTILE_SECRET || !env.TURNSTILE_SITEKEY) return 'not_configured';
+  if (!token) return 'missing';
+  if (token.length > 2048) return 'bad'; // Cloudflare tokens are at most 2048 characters
   try {
-    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', { method: 'POST', body: new URLSearchParams({ secret: env.TURNSTILE_SECRET, response: token, remoteip: ip }) });
+    const res = await (env.FETCH || fetch)(TURNSTILE_VERIFY, { method: 'POST', body: new URLSearchParams({ secret: env.TURNSTILE_SECRET, response: token, remoteip: ip }), signal: AbortSignal.timeout(TURNSTILE_TIMEOUT_MS) });
+    if (!res.ok) return 'unavailable';
     const j = await res.json();
-    return { ok: Boolean(j.success), used: true };
-  } catch { return { ok: false, used: true }; }
+    if (j && j.success === true) return 'ok';
+    const codes = (j && Array.isArray(j['error-codes'])) ? j['error-codes'] : [];
+    // Our own key being wrong is never the customer's fault: kept, never refused, and named.
+    if (codes.some((c) => /input-secret/.test(c))) { console.error('TURNSTILE_SECRET_REJECTED: Cloudflare refused TURNSTILE_SECRET; website requests are kept without the confirmation email or hold until it is fixed.'); return 'unavailable'; }
+    if (codes.includes('internal-error')) return 'unavailable';
+    // A real token used twice or left too long (a double tap, the back button): kept, not refused.
+    if (codes.includes('timeout-or-duplicate')) return 'expired';
+    return 'bad';
+  } catch { return 'unavailable'; }
 }
 
-async function rateLimited(env, ipHash, limit) {
-  const since = Math.floor(Date.now() / 1000) - 3600;
-  await env.DB.prepare('DELETE FROM form_attempts WHERE ts < ?1').bind(since - 86400).run();
-  const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM form_attempts WHERE ip_hash = ?1 AND ts >= ?2').bind(ipHash, since).first();
-  return (row ? row.n : 0) >= limit;
+const hourAgo = (now) => Math.floor(now / 1000) - 3600;
+// Requests from this (hashed) address in the last hour, all kinds counted.
+async function ipCount(env, ipHash, now) {
+  await env.DB.prepare('DELETE FROM form_attempts WHERE ts < ?1').bind(hourAgo(now) - 86400).run();
+  const row = await env.DB.prepare('SELECT COUNT(*) AS n FROM form_attempts WHERE ip_hash = ?1 AND ts >= ?2').bind(ipHash, hourAgo(now)).first();
+  return row ? row.n : 0;
 }
+async function count(env, sql, ...args) {
+  const row = await env.DB.prepare(sql).bind(...args).first();
+  return row ? Number(row.n) : 0;
+}
+// Website requests for one email address in the last 24 hours, kept ones included.
+const emailCount = (env, now, email) => count(env, "SELECT COUNT(*) AS n FROM requests WHERE source = 'site' AND submitted_at >= ?1 AND lower(email) = ?2", sqlTime(now - 86400000), email.toLowerCase());
+// Website requests in the last 24 hours that got the full flow (a confirmation email), this one
+// included once it is stored: a flood of held-back requests never uses up real customers' emails.
+const fullFlowCount = (env, now) => count(env, `SELECT COUNT(*) AS n FROM requests r WHERE r.source = 'site' AND r.submitted_at >= ?1
+  AND NOT EXISTS (SELECT 1 FROM request_events e WHERE e.request_key = r.request_key AND e.what LIKE ?2)`, sqlTime(now - 86400000), `${HELD_BACK}%`);
+const ownerNoticeCount = (env, now) => count(env, 'SELECT COUNT(*) AS n FROM requests WHERE owner_emailed_at >= ?1', sqlTime(now - 86400000));
+const tooMany = () => new Response('<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Please call us | Porch &amp; Party</title><p style="font:18px/1.5 sans-serif;max-width:560px;margin:40px auto;padding:0 16px">We got a lot of requests from this connection in the last hour, so the form is paused here. Please call or text <a href="tel:+19013551518">901-355-1518</a> and we will help you right away.</p>', { status: 429, headers: HEADERS });
+
+// TURNSTILE_NOT_CONFIGURED is named once per isolate (each submission still runs on the limits).
+let noKeyNoted = false;
 
 // "Sun 26 Oct, 3:00 PM" in Memphis for a UTC instant (ms).
 export function chicagoWords(ms) {
@@ -175,17 +229,19 @@ async function submit(context) {
   if (String(fields.website || '').trim()) return Response.redirect(new URL('/request/received?k=thanks', url).toString(), 303);
   const ip = request.headers.get('CF-Connecting-IP') || 'local';
   const ipHash = (await sha256Hex(`${formKey(env)}|${ip}`)).slice(0, 32);
-  const token = String(fields['cf-turnstile-response'] || '');
-  const robot = await turnstile(env, token, ip);
-  const ts = await checkTs(env, fields.ts);
   const values = { ...fields };
   delete values.ts; delete values['cf-turnstile-response'];
-  if (!robot.ok) return formPage(env, url, { values, errors: { agree: 'The robot check did not pass. Please tick the box again and resend.' }, status: 400 });
+  // The robot check comes first. Only 'ok' (or no keys yet: the named note) can earn the full flow;
+  // a forged token is refused; anything else is kept for Valerie without the email and the hold.
+  const robot = await verifyTurnstile(env, String(fields['cf-turnstile-response'] || ''), ip);
+  if (robot === 'not_configured' && !noKeyNoted) { noKeyNoted = true; console.warn('TURNSTILE_NOT_CONFIGURED: TURNSTILE_SITEKEY / TURNSTILE_SECRET are not set on this deployment; website requests run on the limits alone (docs/admin-console.md "Spam").'); }
+  if (robot === 'bad') return formPage(env, url, { values, errors: { agree: 'The robot check did not pass. Please tick the box again and send again, or call or text 901-355-1518.' }, status: 400 });
+  const ts = await checkTs(env, fields.ts);
   if (ts !== 'ok') return formPage(env, url, { values, errors: { agree: ts === 'old' ? 'This page was open a long time. Please check your answers and send again.' : 'Please check your answers and send again.' }, status: 400 });
-  if (await rateLimited(env, ipHash, robot.used ? RATE.perHour : RATE.perHourNoJs)) {
-    return new Response('<!doctype html><meta charset="utf-8"><title>Please wait</title><p style="font:18px/1.5 sans-serif;max-width:560px;margin:40px auto;padding:0 16px">We got several requests from here in the last hour. Please call or text <a href="tel:+19013551518">901-355-1518</a> and we will help you right away.</p>', { status: 429, headers: HEADERS });
-  }
-  await env.DB.prepare('INSERT INTO form_attempts (ip_hash, ts) VALUES (?1, ?2)').bind(ipHash, Math.floor(Date.now() / 1000)).run();
+  const fromIp = await ipCount(env, ipHash, Date.now());
+  if (fromIp >= RATE.ipHardHour) return tooMany();
+  let heldBack = robot === 'ok' || robot === 'not_configured' ? null : robot;
+  if (!heldBack && fromIp >= RATE.perIpHour) heldBack = 'ip';
 
   const file = form.get('id_photo');
   const fileInfo = file && typeof file === 'object' ? { size: file.size, type: file.type || 'application/octet-stream' } : null;
@@ -222,9 +278,11 @@ async function submit(context) {
   }
   if (Object.keys(errors).length) { delete values.id_photo; return formPage(env, url, { values, errors, status: 400 }); }
 
-  // ---- Store it -------------------------------------------------------------------------
-  const settings = await getSettings(env.DB);
+  // ---- Limits, then store it -----------------------------------------------------------------
   const now = Date.now();
+  if (!heldBack && await emailCount(env, now, clean.email) >= RATE.perEmailDay) heldBack = 'email';
+  await env.DB.prepare('INSERT INTO form_attempts (ip_hash, ts) VALUES (?1, ?2)').bind(ipHash, Math.floor(now / 1000)).run();
+  const settings = await getSettings(env.DB);
   const submitted = sqlTime(now);
   const key = `site|${submitted}|${clean.email.toLowerCase()}`;
   const ext = image.type === 'image/png' ? 'png' : 'jpg';
@@ -251,15 +309,21 @@ async function submit(context) {
     VALUES (?1, 'site', ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?2, ?14, ?4, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)`)
     .bind(key, submitted, JSON.stringify(services), clean.name, clean.email, clean.phone, clean.dob, clean.social || '', clean.heard || '',
       JSON.stringify([...answers, ...extra]), idObject, image.type, image.bytes.length, F.RULES_VERSION, ip, clean.takedown_plan || null, code, referredBy, receipt,
-      robot.used ? 'turnstile' : 'no-js', C.normName(clean.name), C.digitsOf(clean.phone), F.cleanSrc(fields.src), clean.corporate ? 1 : 0, inspoObjects.length ? JSON.stringify(inspoObjects) : null).run();
+      robot === 'ok' ? 'turnstile' : 'no-js', C.normName(clean.name), C.digitsOf(clean.phone), F.cleanSrc(fields.src), clean.corporate ? 1 : 0, inspoObjects.length ? JSON.stringify(inspoObjects) : null).run();
   await logEvent(env.DB, key, `Agreed to the Rules & Responsibilities (version ${F.RULES_VERSION}) and the Terms & Conditions, as "${clean.name}"`, 'website form');
+  // The site-wide cap counts this request, now stored. A held-back request says why on its card at
+  // once (the count above reads that note), and gets no confirmation email, hold, rental bookings or
+  // takedown: Valerie books those with the normal Schedule step once she has checked it is real.
+  if (!heldBack && await fullFlowCount(env, now) > RATE.confirmationsDay) heldBack = 'site';
+  if (heldBack) await logEvent(env.DB, key, heldBackNote(heldBack), 'website form');
   // A takedown date on the request books the takedown at once (takedown.mjs autoTakedownRow:
   // porch/party, "yes", a real date, never a duplicate). "Not sure" / "No" book nothing.
-  const stored = await env.DB.prepare('SELECT * FROM requests WHERE request_key = ?1').bind(key).first();
+  const stored = heldBack ? null : await env.DB.prepare('SELECT * FROM requests WHERE request_key = ?1').bind(key).first();
   if (stored) await autoBookTakedown(env.DB, fromRow(stored), { who: 'website form' });
 
   let rentals = null;
-  if (quote) {
+  if (quote && heldBack) await autoDraft(env, key, { lines: quote.lines, depositCents: quote.dueNow, dueDate: clean.pickup_date });
+  if (quote && !heldBack) {
     const hold = await createHold(env.DB, key, { now, settings });
     const items = quote.picked.map((i) => i.name).join(', ');
     const base = { request_key: key, invoice_id: null, time: null, customer_name: clean.name, phone: clean.phone, email: clean.email, place: PRICE_TABLE.pickupPlace };
@@ -277,10 +341,12 @@ async function submit(context) {
       total: F.money(rentals.quote.total), damage: F.money(rentals.quote.damage), dueNow: F.money(rentals.quote.dueNow), atPickup: F.money(rentals.quote.atPickup) } : null,
     pay: { zelle: settings.zelle || '', cashapp: settings.cashapp || '' },
   };
-  later(sendMessage(env, 'email', 'requestReceived', ctx).then((r) => (r.ok ? logEvent(env.DB, key, 'Confirmation email sent', 'website form') : logEvent(env.DB, key, `Confirmation email did not go out (${r.error})`, 'website form'))));
+  if (!heldBack) later(sendMessage(env, 'email', 'requestReceived', ctx).then((r) => (r.ok ? logEvent(env.DB, key, 'Confirmation email sent', 'website form') : logEvent(env.DB, key, `Confirmation email did not go out (${r.error})`, 'website form'))));
   // Valerie's own "New request" email with every answer (owner, 19 Oct 2026). Once per request,
   // website requests only; a failure is logged on the card and never blocks the submission.
-  later(sendNewRequestEmail(env, key, { log: (what) => logEvent(env.DB, key, what, 'website form') }));
+  // Past ownerNoticesDay in 24 hours a flood cannot spend the mail quota: the card is still there.
+  if (await ownerNoticeCount(env, now) >= RATE.ownerNoticesDay) await logEvent(env.DB, key, `New-request email to Valerie not sent: more than ${RATE.ownerNoticesDay} in 24 hours (a safety limit against spam). The request is on /admin.`, 'website form');
+  else later(sendNewRequestEmail(env, key, { log: (what) => logEvent(env.DB, key, what, 'website form') }));
   later(syncSafely(env));
   await Promise.all(pending);
   return new Response(null, { status: 303, headers: { Location: `/request/received?k=${receipt}`, 'Cache-Control': 'no-store' } });
@@ -322,7 +388,9 @@ export async function handleReceived({ request, env }) {
   } else {
     const services = JSON.parse(row.services || '[]');
     const first = String(row.name || '').trim().split(/\s+/)[0] || 'there';
-    const parts = [`<h2>Thank you, ${esc(first)}!</h2><p>Your request came through. We sent a copy to your email.</p>`];
+    // A held-back request got no confirmation email and no hold (submit): the page never claims either.
+    const heldBack = await env.DB.prepare('SELECT 1 AS y FROM request_events WHERE request_key = ?1 AND what LIKE ?2').bind(row.request_key, `${HELD_BACK}%`).first();
+    const parts = [`<h2>Thank you, ${esc(first)}!</h2><p data-copy>Your request came through. ${heldBack ? 'Valerie will text you shortly.' : 'We sent a copy to your email.'}</p>`];
     if (services.includes('rentals')) {
       const hold = await env.DB.prepare('SELECT * FROM holds WHERE request_key = ?1').bind(row.request_key).first();
       const answers = JSON.parse(row.answers || '[]');
@@ -330,7 +398,7 @@ export async function handleReceived({ request, env }) {
       const slugs = F.rentalItems(PRICE_TABLE).filter((i) => get(/^which games/i).split(/,\s*/).includes(i.choice)).map((i) => i.slug);
       const q = F.rentalQuote(slugs, /weekend/i.test(get(/^how long/i)) ? 'weekend' : 'day', PRICE_TABLE, games.holdPercent);
       const ends = hold && hold.until ? chicagoWords(Date.parse(`${hold.until.replace(' ', 'T')}Z`)) : '';
-      parts.push(`<div class="rq-idnote" data-hold>${hold && hold.state === 'held' ? (ends ? `Your games are held until <strong>${esc(ends)}</strong>.` : 'Your games are held while Valerie confirms with you.') : 'Your games request is in.'}</div>`);
+      parts.push(`<div class="rq-idnote" data-hold>${hold && hold.state === 'held' ? (ends ? `Your games are held until <strong>${esc(ends)}</strong>.` : 'Your games are held while Valerie confirms with you.') : 'Your games request is in. Valerie checks the dates and texts you.'}</div>`);
       if (q) parts.push(`<div class="rq-total">${quoteTable(q)}</div>`);
       const pay = [settings.zelle ? `Zelle: <strong>${esc(settings.zelle)}</strong>` : '', settings.cashapp ? `Cash App: <strong>$${esc(String(settings.cashapp).replace(/^\$/, ''))}</strong>` : ''].filter(Boolean).join(' · ');
       parts.push(`<h3>How to pay</h3><ol><li>Valerie sends your invoice by email or text.</li><li>Pay the amount due now by Zelle or Cash App${pay ? ` (${pay})` : ''}, with your invoice number in the note${ends ? `, before ${esc(ends)}` : ''}.</li><li>Your games are booked. Text or call <a href="tel:+19013551518">901-355-1518</a> to set your pickup time at ${esc(PRICE_TABLE.pickupPlace)}.</li></ol>`);

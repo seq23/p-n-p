@@ -530,7 +530,7 @@ const SHOWN_ELSEWHERE = /^(business delivery|business name|delivery address)$/i;
 function detailsGroupBody(r, rk, { referrers = {}, used = new Set(), archived = false, st = {}, answers = true } = {}) {
   const other = [...r.rentals, ...r.decor, ...r.other].filter((x) => !used.has(x.label) && !SHOWN_ELSEWHERE.test(String(x.label || '')));
   const rules = rulesLine(r);
-  const robot = r.robotCheck === 'no-js' ? '<p class="gl warnline" data-robot-check>⚠ Sent without the robot check (their phone had JavaScript off). Check it looks real.</p>' : '';
+  const robot = r.robotCheck === 'no-js' ? '<p class="gl warnline" data-robot-check>⚠ Sent without the robot check. Check it looks real before you book anything.</p>' : '';
   const asked = `<p class="gl muted" data-asked>${esc(friendlyWhen(r))}${archived && st.archived_at ? ` · put away ${esc(prettyDate(String(st.archived_at).slice(0, 10)))}` : ''}</p>`;
   return `<div data-details-body>${kv([
       ['Phone', r.phone ? `<a href="tel:${esc(r.phone.replace(/[^\d+]/g, ''))}" data-detail-phone${tip('card.phone')}>${esc(r.phone)}</a>` : '', true],
