@@ -40,7 +40,7 @@ jobs:
       - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
-          node-version: "22"
+          node-version: "26"
       - name: Prove the self-heal rules before trusting them
         run: node scripts/entity/self_test_entity_backlink_watch.mjs
       - name: Check every profile

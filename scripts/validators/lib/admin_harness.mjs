@@ -65,6 +65,11 @@ class Stmt {
 
 export function makeDb({ upTo = Infinity } = {}) {
   const raw = new sqlite.DatabaseSync(':memory:');
+  // D1 refuses a LIKE/GLOB pattern over 50 bytes ("LIKE or GLOB pattern too complex"); SQLite allows
+  // 50,000. Same cap here, so a query that only breaks on Cloudflare breaks in every validator too.
+  // database.limits needs Node 25.8+ (the workflows pin 26); refuse to run without the cap rather than pass on SQLite's.
+  if (!raw.limits) throw new Error(`NODE_TOO_OLD: node:sqlite limits need Node 25.8+ to hold D1's 50-byte LIKE cap (this is ${process.version})`);
+  raw.limits.likePatternLength = 50;
   const d1 = {
     raw,
     prepare: (sql) => new Stmt(raw, sql),
