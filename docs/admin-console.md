@@ -489,9 +489,20 @@ another tab/retry queue, the cron hook).
   other metadata stripped (`functions/_lib/image-clean.mjs`), random object names. Read only by
   the signed-in `/admin/requests/id` route; deleted by "Delete this ID" / "Delete now", or by the
   pnp-mailer hourly cron 90 days after the ID is ready (`functions/_lib/id-auto.mjs`).
-- **Spam ($0)**: honeypot, a server-signed render time (under 3 s is refused), Cloudflare Turnstile
-  when `TURNSTILE_SITEKEY` / `TURNSTILE_SECRET` are set, 5 requests per IP per hour (3 without the
-  robot check). A request sent with JavaScript off is taken and marked on its card.
+- **Spam ($0; owner, 23 Nov 2026: strangers must not send branded email or hold games, real
+  customers are never turned away)**: honeypot, a server-signed render time (under 3 s is refused),
+  Cloudflare Turnstile verified at the server once `TURNSTILE_SITEKEY` / `TURNSTILE_SECRET` are set
+  (unset = the named note `TURNSTILE_NOT_CONFIGURED` in the logs, and the limits alone apply). A
+  request gets the confirmation email and its rental hold only when the robot check passed (or is
+  not set up) AND it is under every limit (`RATE` in `request-submit.mjs`): 3 per IP per hour, 3
+  per email address per 24 hours, 20 confirmation emails per 24 hours site-wide. Otherwise (no
+  token, Cloudflare unreachable or slow past 4 s, an expired token, any limit) it is still KEPT:
+  marked "Sent without the robot check", a card note saying why, Valerie's notice and the draft
+  invoice, but no email to the typed address, no hold, no bookings; she books it with Schedule once
+  she has checked it is real, and the "received" page says Valerie will text. Only a forged token is
+  refused (with a retry and the phone number). Past 20 an hour from one IP the form stops storing
+  and asks them to call; past 40 owner notices in 24 hours the notice waits on /admin. The
+  customer's name in the confirmation email is plain letters only (`first()` in `messages.mjs`).
 - **Rentals are a booking**: live availability (`/api/request/availability`, counts only) greys
   booked games; the exact total, due-now (damage deposit + 50%) and at-pickup amounts are shown;
   submitting holds the games 24 hours (`holds`, Settings `hold_hours`, `hold_auto_expire`), puts
