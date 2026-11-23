@@ -17,7 +17,7 @@ import games from '../../data/rentals/games.json';
 import { useInventory } from './inventory.mjs';
 import { PRICE_TABLE } from './prices.mjs';
 import * as F from './request-form.mjs';
-import { sourceOf } from './source-tag.mjs';
+import { sourceOf, firstTouchOf } from './source-tag.mjs';
 import * as C from './calendar.mjs';
 import { getSettings, esc, sha256Hex, b64url, safeEqual } from './util.mjs';
 import { availabilityFor } from './availability.mjs';
@@ -300,6 +300,10 @@ async function submit(context) {
     const who = await env.DB.prepare('SELECT request_key, name, email, phone, name_norm, phone_digits FROM requests WHERE referral_code = ?1').bind(refIn).first();
     if (who && !isSelfReferral(who, { name: clean.name, email: clean.email, phone: clean.phone })) referredBy = refIn;
   }
+  // Where the request came from: the last visit from outside the site that this browser tab
+  // remembered (first_touch), else the /request visit's own tag (src, set at GET; also what a browser
+  // with storage blocked or no JavaScript sends). source-tag.mjs.
+  const sourceTag = firstTouchOf(fields.first_touch) || F.cleanSrc(fields.src);
   const receipt = randomId();
   const code = randomCode();
   const extra = [];
@@ -309,7 +313,7 @@ async function submit(context) {
     VALUES (?1, 'site', ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?2, ?14, ?4, ?15, ?16, ?17, ?18, ?19, ?20, ?21, ?22, ?23, ?24, ?25)`)
     .bind(key, submitted, JSON.stringify(services), clean.name, clean.email, clean.phone, clean.dob, clean.social || '', clean.heard || '',
       JSON.stringify([...answers, ...extra]), idObject, image.type, image.bytes.length, F.RULES_VERSION, ip, clean.takedown_plan || null, code, referredBy, receipt,
-      robot === 'ok' ? 'turnstile' : 'no-js', C.normName(clean.name), C.digitsOf(clean.phone), F.cleanSrc(fields.src), clean.corporate ? 1 : 0, inspoObjects.length ? JSON.stringify(inspoObjects) : null).run();
+      robot === 'ok' ? 'turnstile' : 'no-js', C.normName(clean.name), C.digitsOf(clean.phone), sourceTag, clean.corporate ? 1 : 0, inspoObjects.length ? JSON.stringify(inspoObjects) : null).run();
   await logEvent(env.DB, key, `Agreed to the Rules & Responsibilities (version ${F.RULES_VERSION}) and the Terms & Conditions, as "${clean.name}"`, 'website form');
   // The site-wide cap counts this request, now stored. A held-back request says why on its card at
   // once (the count above reads that note), and gets no confirmation email, hold, rental bookings or
