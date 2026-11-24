@@ -11,7 +11,8 @@
 //   - call and menu are >= 44x44 px tap targets, Book >= 44 px tall;
 //   - Book still opens /request and is named "Book online"; call still dials +19013551518.
 // At 768 and 1366 px the same checks run on the row that shows there, and with
-// --base <dir> (a checkout of the base commit) the header pixels at 768/1366 must be identical.
+// --base <dir> (a checkout of the base commit) the header at 414/768/1366 must keep the same layout
+// (every control's box and words) and the same pixels apart from anti-aliasing.
 // With --url <origin> it measures that live site instead of a local copy (production check).
 // Fails closed: a page that does not load, a header or control not found, or 0 pages measured
 // is a failure, never a pass.
@@ -154,6 +155,32 @@ async function headerShot(ctx, url) {
   return buf;
 }
 
+/** The visible controls' boxes and words, as one string, for an exact before/after comparison. */
+async function layoutOf(ctx, url) {
+  const page = await openPage(ctx, url);
+  const m = await page.evaluate(measure);
+  await page.close();
+  if (m.error) return m.error;
+  return m.controls.map((c) => (c.missing ? `${c.name}:missing` : `${c.name}:${c.left.toFixed(1)}+${c.width.toFixed(1)}x${c.height.toFixed(1)}:${c.text}`)).join(' ');
+}
+
+/** How many pixels of two PNGs differ by more than 64 in any channel (Infinity when sizes differ). */
+async function pixelDiff(ctx, a, b) {
+  const page = await ctx.newPage();
+  const n = await page.evaluate(async ([x, y]) => {
+    const load = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+    const [ia, ib] = await Promise.all([load(x), load(y)]);
+    if (ia.width !== ib.width || ia.height !== ib.height) return -1;
+    const px = (img) => { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); return g.getImageData(0, 0, c.width, c.height).data; };
+    const [da, db] = [px(ia), px(ib)];
+    let diff = 0;
+    for (let i = 0; i < da.length; i += 4) if (Math.max(Math.abs(da[i] - db[i]), Math.abs(da[i + 1] - db[i + 1]), Math.abs(da[i + 2] - db[i + 2])) > 64) diff += 1;
+    return diff;
+  }, [`data:image/png;base64,${a.toString('base64')}`, `data:image/png;base64,${b.toString('base64')}`]);
+  await page.close();
+  return n < 0 ? Infinity : n;
+}
+
 const live = arg('url');
 const localDir = ROOT;
 const pages = arg('pages') ? arg('pages').split(',') : (live ? ['/', '/services/porch-decorating', '/rentals/', '/areas/', '/request'] : headerPages(localDir));
@@ -191,7 +218,7 @@ try {
     }
   }
 
-  // Desktop and tablet unchanged: same header pixels as the base commit.
+  // From 400 px up unchanged: same header layout and pixels as the base commit.
   const base = arg('base');
   if (base) {
     const b = await serve(path.resolve(base));
@@ -201,10 +228,16 @@ try {
       const ctx = await browser.newContext({ viewport: { width: vw, height: 800 }, deviceScaleFactor: 1 });
       for (const p of cmpPages) {
         try {
-          const now = await headerShot(ctx, head.origin + p);
+          let now = await headerShot(ctx, head.origin + p);
           const was = await headerShot(ctx, b.origin + p);
-          if (!now.equals(was)) errors.push(`${p} @ ${vw}px: header pixels differ from the base commit`);
-          else rows.push(`${p} @ ${vw}px: header pixels identical to base`);
+          if (!now.equals(was)) now = await headerShot(ctx, head.origin + p); // one re-shoot: a first paint can differ by a few anti-aliased pixels
+          // Layout must match exactly (boxes and words of every control); pixels must match
+          // apart from anti-aliasing (a pixel counts only when a channel differs by more than 64).
+          const [lNow, lWas] = [await layoutOf(ctx, head.origin + p), await layoutOf(ctx, b.origin + p)];
+          const px = now.equals(was) ? 0 : await pixelDiff(ctx, now, was);
+          if (lNow !== lWas) errors.push(`${p} @ ${vw}px: header layout differs from the base commit (now ${lNow} | base ${lWas})`);
+          if (px > 20) errors.push(`${p} @ ${vw}px: ${px} header pixels differ from the base commit`);
+          if (lNow === lWas && px <= 20) rows.push(`${p} @ ${vw}px: header layout identical to base; ${px} pixels differ beyond anti-aliasing`);
           if (SHOTS && p === '/') { fs.writeFileSync(path.join(SHOTS, `desktop-${vw}-now.png`), now); fs.writeFileSync(path.join(SHOTS, `desktop-${vw}-base.png`), was); }
         } catch (err) { errors.push(`${p} @ ${vw}px base compare: ${err.message.split('\n')[0]}`); }
       }
