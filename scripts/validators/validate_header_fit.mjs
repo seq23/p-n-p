@@ -5,7 +5,9 @@
 //
 // For every page carrying the shared header, at 320/360/375/390/414 px, light and dark:
 //   - the page and the header scroll no wider than the screen;
-//   - logo, Book, call and menu are each rendered, fully on screen, in that order, not overlapping;
+//   - logo, Book, call and menu are each rendered, fully on screen, in that order, not overlapping,
+//     with a right gutter no narrower than the left (nothing jammed against the edge);
+//   - Book shows "Book" under 400 px and "Book online" from 400 px up;
 //   - call and menu are >= 44x44 px tap targets, Book >= 44 px tall;
 //   - Book still opens /request and is named "Book online"; call still dials +19013551518.
 // At 768 and 1366 px the same checks run on the row that shows there, and with
@@ -109,12 +111,21 @@ function check(m, where) {
     if (prev && c.left < prev.right - 0.5) e.push(`${where}: ${c.name} overlaps ${prev.name} (${c.left.toFixed(1)} < ${prev.right.toFixed(1)})`);
     prev = c;
   }
+  // Nothing jammed against the edge: the right gutter is at least the left one (the row pads
+  // both sides alike), so a control touching the screen edge fails, not only one cut off.
+  const shownC = m.controls.filter((c) => !c.missing);
+  if (shownC.length) {
+    const leftGap = shownC[0].left, rightGap = m.vw - shownC[shownC.length - 1].right;
+    if (rightGap < leftGap - 0.5) e.push(`${where}: right gutter ${rightGap.toFixed(1)} px is narrower than the left ${leftGap.toFixed(1)} px`);
+  }
   const by = Object.fromEntries(m.controls.filter((c) => !c.missing).map((c) => [c.name, c]));
   if (m.phone) {
     for (const n of ['call', 'menu']) if (by[n] && (by[n].width < 44 || by[n].height < 44)) e.push(`${where}: ${n} tap target is ${by[n].width}x${by[n].height}, under 44x44`);
     if (by.book && by.book.height < 44) e.push(`${where}: Book is ${by.book.height} px tall, under 44`);
     if (by.book && (by.book.label || by.book.text) !== 'Book online') e.push(`${where}: Book is named "${by.book.label || by.book.text}", not "Book online"`);
-    if (by.book && !['Book', 'Book online'].includes(by.book.text)) e.push(`${where}: Book shows "${by.book.text}"`);
+    // Under 400 px the button shows "Book"; from 400 px up it keeps the full "Book online".
+    const shows = m.vw < 400 ? 'Book' : 'Book online';
+    if (by.book && by.book.text !== shows) e.push(`${where}: Book shows "${by.book.text}", expected "${shows}"`);
     if (by.call && by.call.href !== TEL) e.push(`${where}: call dials ${by.call.href}, not ${TEL}`);
   } else {
     if (by.book && by.book.text !== 'Book online') e.push(`${where}: desktop Book reads "${by.book.text}"`);
@@ -207,6 +218,9 @@ const total = pages.length * SCHEMES.length * (PHONES.length + DESKTOP.length);
 if (measured < total) errors.push(`measured ${measured} of ${total} page views`);
 if (errors.length) {
   console.error(`header-fit: FAIL - ${errors.length} problem(s):`);
+  const per = {};
+  for (const e of errors) { const k = (e.match(/@ (\d+px(?: \w+)?)/) || [, 'other'])[1]; per[k] = (per[k] || 0) + 1; }
+  console.error(`  by screen: ${Object.entries(per).map(([k, n]) => `${k} ${n}`).join(' · ')}`);
   for (const e of errors.slice(0, 60)) console.error(`  ${e}`);
   process.exit(1);
 }
