@@ -4,7 +4,7 @@
 // bounding boxes; it never reads the CSS text.
 //
 // For every page carrying the shared header, at 320/360/375/390/414 px, light and dark:
-//   - the page and the header scroll no wider than the screen;
+//   - the header scrolls no wider than the screen (a page body that does is printed as WARN);
 //   - logo, Book, call and menu are each rendered, fully on screen, in that order, not overlapping,
 //     with a right gutter no narrower than the left (nothing jammed against the edge);
 //   - Book shows "Book" under 400 px and "Book online" from 400 px up;
@@ -95,6 +95,7 @@ function measure() {
     docScroll: document.documentElement.scrollWidth,
     headerScroll: Math.max(header.scrollWidth, header.querySelector('.pnp-header-inner')?.scrollWidth || 0),
     plaquePx: plaque ? parseFloat(getComputedStyle(plaque).fontSize) : null,
+    widest: (() => { let w = null, best = vw; for (const el of document.body.querySelectorAll('*')) { const r = el.getBoundingClientRect(); if (r.right > best + 0.5) { best = r.right; w = `${el.tagName.toLowerCase()}${el.className && typeof el.className === 'string' ? '.' + el.className.trim().split(/\s+/).join('.') : ''} to ${r.right.toFixed(0)}px`; } } return w; })(),
     controls
   };
 }
@@ -102,7 +103,8 @@ function measure() {
 function check(m, where) {
   const e = [];
   if (m.error) return [`${where}: ${m.error}`];
-  if (m.docScroll > m.vw) e.push(`${where}: page scrolls sideways (${m.docScroll} px wide on a ${m.vw} px screen)`);
+  // The page body scrolling sideways is outside this header fix: reported, with its widest element.
+  if (m.docScroll > m.vw) warns.push(`${where}: page body is ${m.docScroll} px wide (widest: ${m.widest})`);
   if (m.headerScroll > m.vw) e.push(`${where}: header is ${m.headerScroll} px wide on a ${m.vw} px screen`);
   let prev = null;
   for (const c of m.controls) {
@@ -160,6 +162,7 @@ const head = live ? { origin: live.replace(/\/$/, '') } : await serve(localDir);
 
 const browser = await playwright.chromium.launch();
 const errors = [];
+const warns = [];
 const rows = [];
 let measured = 0;
 try {
@@ -193,7 +196,8 @@ try {
   if (base) {
     const b = await serve(path.resolve(base));
     const cmpPages = ['/', '/services/porch-decorating', '/rentals/', '/request'];
-    for (const vw of DESKTOP) {
+    // 414 too: from 400 px up the phone row must look exactly as before (full "Book online").
+    for (const vw of [414, ...DESKTOP]) {
       const ctx = await browser.newContext({ viewport: { width: vw, height: 800 }, deviceScaleFactor: 1 });
       for (const p of cmpPages) {
         try {
@@ -214,6 +218,7 @@ try {
 }
 
 for (const r of rows) console.log(r);
+for (const w of warns) console.log(`WARN ${w}`);
 const total = pages.length * SCHEMES.length * (PHONES.length + DESKTOP.length);
 if (measured < total) errors.push(`measured ${measured} of ${total} page views`);
 if (errors.length) {

@@ -240,7 +240,9 @@ function header(currentPath) {
     + `<a href="${C.telHref}" class="header-call pnp-call" data-contact="header-call">${PHONE_SVG}<span class="pnp-call-lead">Call or text </span><span class="pnp-call-num">${C.telephoneDisplay}</span></a></div>`
     // Under 400 px the phone-row button shows "Book" (the CSS hides " online"); the aria-label keeps
     // its spoken name "Book online", and the link is the same /request (24 Nov 2026, header fit at 320 px).
-    + `<a href="${QUOTE.href}" class="pnp-book-m" aria-label="${QUOTE.label}"${QUOTE_ATTRS}>${QUOTE_SHORT}<span class="pnp-book-rest">${QUOTE.label.slice(QUOTE_SHORT.length)}</span></a>`
+    // The outer <span> is one flex item: as two items of the inline-flex button, the space before
+    // "online" was dropped ("Bookonline", caught by the 414/768 px pixel comparison).
+    + `<a href="${QUOTE.href}" class="pnp-book-m" aria-label="${QUOTE.label}"${QUOTE_ATTRS}><span>${QUOTE_SHORT}<span class="pnp-book-rest">${QUOTE.label.slice(QUOTE_SHORT.length)}</span></span></a>`
     + `<a href="${C.telHref}" class="pnp-icon-call" aria-label="${CALL_LABEL}">${PHONE_SVG}</a>`
     + `<a href="#site-menu" class="pnp-toggle" aria-controls="site-menu" aria-label="Open menu">${BURGER_SVG}</a>`
     + `<button type="button" class="pnp-toggle" aria-expanded="false" aria-controls="site-menu" aria-label="Open menu" hidden>${BURGER_SVG}</button>`
