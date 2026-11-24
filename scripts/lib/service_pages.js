@@ -13,7 +13,7 @@
  * Every price comes from data/offers/services.json, data/offers/porch_packages.json and
  * data/rentals/games.json; every FAQ answer is the owner-approved /faq/ answer
  * (scripts/lib/faq_content.js), so the service pages cannot contradict the FAQ, the pricing page
- * or the invoices. The AI pictures (Workers AI flux-1-schnell, free allowance) are registered one
+ * or the invoices. The AI pictures (each entry names the model that made it) are registered one
  * by one, with their hash, in data/offers/service_ai_images.json.
  *
  * Who uses it: scripts/install_service_pages.js (the three hand-maintained pages),

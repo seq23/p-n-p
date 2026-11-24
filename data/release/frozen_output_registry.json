@@ -223,9 +223,9 @@
       "route": "/services/porch-decorating",
       "rendered_file": "services/porch-decorating.html",
       "state": "FROZEN",
-      "accepted_sha256": "ad70e6540c84370705fbd682d9b24a1b29d788e9f617ade988730b295d4c7432",
-      "cache_file": "data/release/frozen_accepted_outputs/ad70e6540c84370705fbd682d9b24a1b29d788e9f617ade988730b295d4c7432.html.gz",
-      "cache_sha256": "bcfc398f081e6633c35337ec275be2b927e5a0b87b4c5452f39f5c80f49e246d",
+      "accepted_sha256": "6acad9a1910fed2447a9fa7ca69990b209cd1b1a28ad33d2a37d9e92e1b8b4ce",
+      "cache_file": "data/release/frozen_accepted_outputs/6acad9a1910fed2447a9fa7ca69990b209cd1b1a28ad33d2a37d9e92e1b8b4ce.html.gz",
+      "cache_sha256": "f70068375dd0979e7c75e90b2891f5de621e4a0652aad15cca701100eb0e87bb",
       "accepted_at": "2026-07-24"
     },
     {

@@ -1,65 +1,91 @@
 {
-  "_why": "Owner ruling 21 Oct 2026: AI-generated photorealistic pictures on the four service pages, no captions (owner ruling 21 Oct 2026: no \"Example styling\" caption), descriptive alt text, never presented as a past customer job. Generated at $0 with Workers AI @cf/black-forest-labs/flux-1-schnell (free allowance, the same model as assets/rentals) by scripts/generators/build_service_ai_images.mjs, center-cropped to 1024x768 WebP. Each picture was checked by eye: no faces, no text, no logos; rental pictures show only availableNow items (owner ruling 21 Oct 2026), listed in items. sha1 pins the approved bytes: scripts/validators/validate_no_placeholder_images.mjs and validate_service_pages.js fail on any ai-*.webp that is not registered here with its hash. Owner ruling 21 Oct 2026: the party page's AI pictures \"are not good enough\" and were replaced by five owner-provided photos (source \"owner\", assets/img/<service>/owner-*.webp, registered by sha1 like the AI ones; \"pages\" lists every page that shows one); the hotel room setups page shows the bedroom, hallway and anniversary photos and the baby shower pages the shower + teddy pair. The grazing page's first two AI pictures were regenerated the same day (owner: \"not good\").",
-  "model": "@cf/black-forest-labs/flux-1-schnell",
+  "_why": "Owner ruling 21 Oct 2026: AI-generated photorealistic pictures on the four service pages, no captions (owner ruling 21 Oct 2026: no \"Example styling\" caption), descriptive alt text, never presented as a past customer job. Each entry names the model that made it (\"model\"). The pictures up to 21 Oct 2026 came from Workers AI flux-schnell; on 24 Nov 2026 the owner rejected seven of them (\"looks fake\", \"never use this\") and moved picture-making to OpenAI images (top-level \"model\" is the default, gpt-image-1-mini; chatgpt-image-latest for hard scenes) inside her $2 budget for the rest of 2026, read from ~/.boss-os/image-budget-2026.json before every call by scripts/generators/build_service_ai_images.mjs, which center-crops to 1024x768 WebP. Entries with \"pages\": [] are on no page: they are the social shelf Noelle reads (assets/img/<service>/). \"reference\" names the site photo a picture was styled from (her own photos only, never a competitor's); \"original\" names the file a crop was cut from. Each picture was checked by eye: no faces, no text, no logos; rental pictures show only availableNow items (owner ruling 21 Oct 2026), listed in items. sha1 pins the approved bytes: scripts/validators/validate_no_placeholder_images.mjs and validate_service_pages.js fail on any ai-*.webp that is not registered here with its hash. Owner ruling 21 Oct 2026: the party page's AI pictures \"are not good enough\" and were replaced by five owner-provided photos (source \"owner\", assets/img/<service>/owner-*.webp, registered by sha1 like the AI ones; \"pages\" lists every page that shows one); the hotel room setups page shows the bedroom, hallway and anniversary photos and the baby shower pages the shower + teddy pair. The grazing page's first two AI pictures were regenerated the same day (owner: \"not good\").",
+  "model": "gpt-image-1-mini",
+  "rejected": {
+    "_why": "Owner ruling 24 Nov 2026 on these seven: \"Do not like this looks fake\", \"Never use this\". Deleted that day; validate:image-budget fails if any of these files, or a page or script naming them, comes back. The one allowed mention is the edge 301 for the old fall URL in scripts/cloudflare/ensure_www_redirect.mjs.",
+    "files": [
+      "assets/img/porch/ai-christmas-porch.webp",
+      "assets/img/porch/ai-fall-porch.webp",
+      "assets/img/porch/ai-halloween-porch.webp",
+      "assets/img/porch/ai-spring-porch.webp",
+      "assets/img/porch/seasonal-exterior-fall.jpg",
+      "assets/img/rentals/ai-connect-four-backyard.webp",
+      "assets/img/rentals/ai-lawn-cornhole-string-lights.webp"
+    ]
+  },
   "images": [
     {
-      "file": "assets/img/porch/ai-christmas-porch.webp",
+      "file": "assets/img/porch/ai-midtown-christmas-porch-columns.webp",
       "page": "porch",
-      "alt": "Front door framed in lit evergreen garland with a red-bow wreath, lanterns, small potted trees and wrapped gifts for Christmas",
-      "sha1": "d857aab7ababc79d3d80e5996f354f23fdf1fd0c",
-      "prompt": "Photorealistic photo of a front porch decorated for Christmas: lush evergreen garland with warm white lights framing the front door, a large wreath with a red velvet bow, lit lanterns, small potted evergreen trees, wrapped gift boxes, evening blue hour, no people, no text"
+      "alt": "Covered front porch with white columns decorated for Christmas: lit garland along the railing, matching wreaths on the double front doors, urns of red ornaments and lanterns on the brick steps at dusk",
+      "sha1": "37c72bdef79f279db6779cb6d41a6050cb2a3a86",
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. Same professional styling quality as the reference. A Midtown Memphis house with a wide wooden porch and white columns, decorated for Christmas: garland swagged along the porch railing with warm lights, matching wreaths on double front doors, oversized red ornaments in urns, a wooden bench with a throw blanket. Early evening, soft blue sky.",
+      "model": "chatgpt-image-latest",
+      "reference": "assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg",
+      "prompt_note": "As sent, less one house-style word that did not match the picture, which shows a colonial-style porch with white columns."
     },
     {
-      "file": "assets/img/porch/ai-fall-porch.webp",
+      "file": "assets/img/porch/ai-germantown-fall-porch.webp",
       "page": "porch",
-      "alt": "Brick front porch styled for fall with stacked orange and white pumpkins, mums, cornstalks, lanterns and an autumn wreath",
-      "sha1": "7019508f97acf0f85e81ccb67c5497423bb6b13d",
-      "prompt": "Photorealistic photo of a southern brick home front porch decorated for fall: stacked orange and white pumpkins of varied sizes on the steps, mums in planters, a eucalyptus and autumn leaf wreath on the front door, lanterns, cornstalks, warm late afternoon light, no people, no text"
+      "alt": "Front porch styled for fall with white, orange and green pumpkins on brick steps, rust mums, black lanterns, urns of autumn stems and a leaf wreath on a wooden front door",
+      "sha1": "9b82c91692e09e145b828b09d588fd65486e367a",
+      "model": "unrecorded (on the site since the May 2026 baseline; the owner reads it as AI-made and picked it, 24 Nov 2026)",
+      "original": "assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg"
     },
     {
-      "file": "assets/img/porch/ai-halloween-porch.webp",
+      "file": "assets/img/porch/ai-memphis-halloween-porch.webp",
       "page": "porch",
-      "alt": "Black front door with a black wreath, white pumpkins and candle lanterns styled for Halloween",
-      "sha1": "911cd3ebd54751eaf27d130c470312f55edf3f89",
-      "prompt": "Photorealistic photo of a front porch decorated for Halloween in an elegant way: black and white pumpkins, lanterns with candles, black wreath on the door, autumn branches, dusk lighting, no people, no text"
+      "alt": "Red-brick front porch styled for Halloween with a carved jack-o'-lantern, orange, white and green pumpkins, hay bales, rust mums, black lanterns, two black crows and a black and orange wreath",
+      "sha1": "7a017c5e6a9056d3c5a012d2540cc35a43765195",
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. A Memphis red-brick home front porch decorated for Halloween by a decorating company: real pumpkins with natural blemishes and varied curly stems in orange, white and green, stacked on the steps, one carved jack-o'-lantern, rust mums, two small hay bales, two black lanterns, a black and orange wreath on the door, two black crows each perched whole on a hay bale with feet visible; nothing gory. Golden late-afternoon light.",
+      "model": "chatgpt-image-latest"
     },
     {
-      "file": "assets/img/porch/ai-spring-porch.webp",
+      "file": "assets/img/porch/ai-memphis-spring-porch.webp",
       "page": "porch",
-      "alt": "White front door with a greenery wreath, hanging ferns, potted tulips and a white rocking chair styled for spring",
-      "sha1": "f57b49b6ae762016d2c39b5a14bb57b8e622bbd1",
-      "prompt": "Photorealistic photo of a front porch styled for spring: white painted door, hanging ferns, terracotta pots of tulips and hydrangeas, a fresh greenery wreath, a white rocking chair, painted wood porch floor, soft morning light, no doormat, no people, no text"
+      "alt": "Front porch styled for spring with a white-flower wreath on a black door, potted ferns, white tulips and hydrangeas, and a wooden bench with pastel pillows on a striped rug",
+      "sha1": "f03f399c423b418cf97c663c6e220656e612d3c2",
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. Same clean styling as the reference, for spring: a Memphis home front porch with a fresh greenery and white-flower wreath, potted ferns, tulips and hydrangeas in planters, a striped outdoor rug, a wooden bench with two pastel pillows. Bright soft morning light.",
+      "model": "gpt-image-1-mini",
+      "reference": "assets/img/porch/bartlett-small-front-porch-styling-under-500.jpg"
     },
     {
       "file": "assets/img/grazing/ai-grazing-shower-table.webp",
       "page": "grazing",
       "alt": "Long wooden grazing table for a home shower with cheeses, folded charcuterie, grapes, figs, strawberries and crackers along a eucalyptus and flower runner",
       "sha1": "348ff20af08e047ca275f2ffb4ecce1e6c53c506",
-      "prompt": "Professional catering photograph of an abundant styled grazing table at an elegant home baby shower: long wooden table covered with wooden boards of artisan cheeses, folded charcuterie, fresh grapes, strawberries, figs, crackers and sliced baguette, a eucalyptus greenery runner down the center, white and blush florals, small candles, soft natural window light, shallow depth of field, editorial food photography, high-end caterer, no people, no hands, no text, no signs, no logos"
+      "prompt": "Professional catering photograph of an abundant styled grazing table at an elegant home baby shower: long wooden table covered with wooden boards of artisan cheeses, folded charcuterie, fresh grapes, strawberries, figs, crackers and sliced baguette, a eucalyptus greenery runner down the center, white and blush florals, small candles, soft natural window light, shallow depth of field, editorial food photography, high-end caterer, no people, no hands, no text, no signs, no logos",
+      "model": "@cf/black-forest-labs/flux-1-schnell"
     },
     {
       "file": "assets/img/grazing/ai-grazing-candlelit-event.webp",
       "page": "grazing",
       "alt": "Candlelit grazing table for a small evening event with brie, aged cheeses, charcuterie roses, olives, berries, orange slices and bread on wooden boards",
       "sha1": "1bc84ba4425b0cc3ecea5e1ba3edf225d6a8e9bf",
-      "prompt": "Professional catering photograph of a luxurious grazing table for a small evening event at home: rustic wooden boards overflowing with brie and aged cheeses, charcuterie rosettes, honeycomb, berries, citrus, olives, breads and crackers, greenery and roses woven along the table, glowing taper candles, warm natural light, shallow depth of field, editorial food photography from a high-end caterer, realistic food, no people, no hands, no text, no logos"
+      "prompt": "Professional catering photograph of a luxurious grazing table for a small evening event at home: rustic wooden boards overflowing with brie and aged cheeses, charcuterie rosettes, honeycomb, berries, citrus, olives, breads and crackers, greenery and roses woven along the table, glowing taper candles, warm natural light, shallow depth of field, editorial food photography from a high-end caterer, realistic food, no people, no hands, no text, no logos",
+      "model": "@cf/black-forest-labs/flux-1-schnell"
     },
     {
       "file": "assets/img/grazing/ai-grazing-table.webp",
       "page": "grazing",
       "alt": "Grazing table spread of cheeses, cured meats, crackers, grapes, figs, berries, nuts and edible flowers on parchment",
       "sha1": "20492ea91da8e3ae6e4094a426b05130e4bfebe4",
-      "prompt": "Photorealistic close-up photo of an abundant grazing table spread: cheeses, cured meat folds, crackers, grapes, strawberries, figs, nuts and edible flowers arranged on brown parchment over a wooden table, natural window light, food only filling the whole frame, no people, no hands, no utensils, no text"
+      "prompt": "Photorealistic close-up photo of an abundant grazing table spread: cheeses, cured meat folds, crackers, grapes, strawberries, figs, nuts and edible flowers arranged on brown parchment over a wooden table, natural window light, food only filling the whole frame, no people, no hands, no utensils, no text",
+      "model": "@cf/black-forest-labs/flux-1-schnell"
     },
     {
-      "file": "assets/img/rentals/ai-connect-four-backyard.webp",
-      "page": "rentals",
-      "alt": "Giant Connect Four with red and yellow discs standing on a backyard lawn by a wooden fence",
-      "sha1": "917619b641c912af83ee987a2c57fb45b8da9245",
-      "prompt": "Photorealistic photo of a giant connect four game, a large blue plastic vertical grid frame about four feet tall with red and yellow discs, standing on a green lawn in a suburban Memphis backyard with a wooden fence and string lights, sunny afternoon, no people, no text",
+      "file": "assets/img/rentals/ai-lawn-connect-four-close.webp",
+      "pages": [
+        "rentals",
+        "lawn"
+      ],
+      "alt": "Four-foot Giant Connect Four with a blue frame and red and yellow discs standing on a sunny backyard lawn by a wooden fence",
+      "sha1": "39d273672cbc651a3bd2c69016bdf07342d0beb4",
       "items": [
         "giant-connect-four"
-      ]
+      ],
+      "prompt": "Photorealistic photo of a four-foot tall giant connect four game with a blue frame and red and yellow discs standing on a green backyard lawn, wooden privacy fence and trees behind, sunny afternoon, no people, no hands, no other games, no text, no logos",
+      "model": "@cf/black-forest-labs/flux-1-schnell"
     },
     {
       "file": "assets/img/rentals/ai-cornhole-backyard.webp",
@@ -69,7 +95,8 @@
       "prompt": "Photorealistic photo of two wooden cornhole boards with round holes facing each other on a green lawn in a suburban backyard, red and blue bean bags on the grass, string lights and shade trees, golden hour, no people, no text, no logos",
       "items": [
         "cornhole"
-      ]
+      ],
+      "model": "@cf/black-forest-labs/flux-1-schnell"
     },
     {
       "file": "assets/img/rentals/ai-movie-screen-backyard.webp",
@@ -79,7 +106,8 @@
       "prompt": "Photorealistic photo of a white inflatable outdoor movie screen set up in a suburban backyard at dusk, blank glowing screen, blankets and pillows on the lawn, string lights, no people, no text",
       "items": [
         "inflatable-movie-screen"
-      ]
+      ],
+      "model": "@cf/black-forest-labs/flux-1-schnell"
     },
     {
       "file": "assets/img/rentals/ai-yard-games-party.webp",
@@ -90,17 +118,8 @@
       "items": [
         "giant-connect-four",
         "cornhole"
-      ]
-    },
-    {
-      "file": "assets/img/rentals/ai-lawn-connect-four-close.webp",
-      "page": "lawn",
-      "alt": "Four-foot Giant Connect Four with a blue frame and red and yellow discs standing on a sunny backyard lawn by a wooden fence",
-      "sha1": "39d273672cbc651a3bd2c69016bdf07342d0beb4",
-      "items": [
-        "giant-connect-four"
       ],
-      "prompt": "Photorealistic photo of a four-foot tall giant connect four game with a blue frame and red and yellow discs standing on a green backyard lawn, wooden privacy fence and trees behind, sunny afternoon, no people, no hands, no other games, no text, no logos"
+      "model": "@cf/black-forest-labs/flux-1-schnell"
     },
     {
       "file": "assets/img/rentals/ai-lawn-cornhole-bags.webp",
@@ -110,18 +129,19 @@
       "items": [
         "cornhole"
       ],
-      "prompt": "Photorealistic close photo of a plain natural wood cornhole board on green grass with red and blue bean bags resting on the board and one bag near the hole, a second board in the soft background, sunny backyard, no people, no other games, no printing, no logos, no text"
+      "prompt": "Photorealistic close photo of a plain natural wood cornhole board on green grass with red and blue bean bags resting on the board and one bag near the hole, a second board in the soft background, sunny backyard, no people, no other games, no printing, no logos, no text",
+      "model": "@cf/black-forest-labs/flux-1-schnell"
     },
     {
-      "file": "assets/img/rentals/ai-lawn-cornhole-string-lights.webp",
+      "file": "assets/img/rentals/ai-cornhole-string-lights-backyard.webp",
       "page": "lawn",
-      "alt": "Two wooden cornhole boards on a backyard lawn at dusk under string lights, with a Giant Connect Four in red and yellow behind them",
-      "sha1": "92c32e3d1557534c5ccf22f2d05e691725fd572e",
+      "alt": "Two plain wooden cornhole boards facing each other on a backyard lawn at dusk under string lights, with red and blue bean bags on the grass",
+      "sha1": "33053f2f518a2750fa7cd3ec85d58686f23c8c94",
       "items": [
-        "cornhole",
-        "giant-connect-four"
+        "cornhole"
       ],
-      "prompt": "Photorealistic photo of two plain wooden cornhole boards set up on a backyard lawn at dusk under glowing string lights, bean bags on the grass, a giant connect four game with red and yellow discs in the background, no people, no other games, no printing, no logos, no text"
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. Two plain wooden cornhole boards (no logos, no text, no painted designs) set up facing each other on a green Memphis backyard lawn at dusk, red and blue bean bags beside them, café string lights overhead on poles, a patio table in the background. No people.",
+      "model": "gpt-image-1-mini"
     },
     {
       "file": "assets/img/celebrations/owner-birthday-bedroom.webp",
@@ -199,6 +219,69 @@
       "height": 1402,
       "sha1": "4e62206b913ab6a1c63fe1b2eca694a716b53c04",
       "original": "owner-provided homepage-bed.jpeg (21 Oct 2026)"
+    },
+    {
+      "file": "assets/img/porch/ai-memphis-christmas-porch-brick-ranch.webp",
+      "pages": [],
+      "alt": "Red-brick ranch house front porch decorated for Christmas with lit garland around an arched door, a red-bow wreath, two lit potted trees, lanterns and a plaid rug at dusk",
+      "width": 1024,
+      "height": 1536,
+      "sha1": "0a83e818a38df7a2c87dc49e37071e2b02775c2d",
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. Same professional styling quality as the reference. A Memphis red-brick ranch house front porch decorated for Christmas by a decorating company: fresh evergreen garland with warm white lights around the door, a full wreath with a red velvet bow, two potted spruce trees with lights, lanterns, a plaid outdoor rug, a few wrapped gift boxes. Dusk, warm porch light glowing.",
+      "model": "chatgpt-image-latest",
+      "reference": "assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg"
+    },
+    {
+      "file": "assets/img/porch/ai-germantown-christmas-porch-colonial.webp",
+      "pages": [],
+      "alt": "Colonial front porch decorated for Christmas with a lit evergreen and magnolia garland around the door, a wreath, two urns of small evergreens and lanterns on brick steps at dusk",
+      "width": 1024,
+      "height": 1536,
+      "sha1": "39dba7306c0be1c2bca1fbd1e6ae7d9b41690469",
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. Same restrained styling quality as the reference. A Germantown, Tennessee colonial-style home's covered front porch decorated for Christmas, restrained: one evergreen-and-magnolia garland with warm white lights around the door, one wreath, two urns with small evergreens, at most four lanterns spaced apart on the steps; no poinsettias, no ornaments in the garland. Natural dusk colour, not orange.",
+      "model": "chatgpt-image-latest",
+      "reference": "assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg"
+    },
+    {
+      "file": "assets/img/porch/ai-bartlett-small-christmas-porch.webp",
+      "pages": [],
+      "alt": "Small front stoop decorated for Christmas with a lit garland around a black door, a red-bow wreath, two small potted evergreens, a lantern and a red and white doormat",
+      "width": 1024,
+      "height": 1536,
+      "sha1": "bc591ca52591981535182b810a702371c827535a",
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. Same small-porch styling as the reference. A small Bartlett, Tennessee suburban front stoop decorated for Christmas on a budget: one lit garland around the door, a simple wreath, two small potted evergreens, one lantern, a red and white doormat. Daytime, clean and inviting.",
+      "model": "chatgpt-image-latest",
+      "reference": "assets/img/porch/bartlett-small-front-porch-styling-under-500.jpg"
+    },
+    {
+      "file": "assets/img/grazing/ai-holiday-office-party-grazing-table.webp",
+      "pages": [],
+      "alt": "Long holiday grazing table for an office party with cheeses, cured meats, figs, berries, grapes, nuts, rosemary and small gold ornaments on a wooden runner over a white tablecloth",
+      "width": 1024,
+      "height": 1536,
+      "sha1": "948e1327e5b27d7073379464746f55d8c7b889aa",
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. A long holiday grazing table set up for an office Christmas party in a bright modern Memphis office break room: cheeses, cured meats, crackers, fresh grapes, figs, berries, nuts, rosemary sprigs, small gold ornaments and evergreen accents on a wooden board runner over a white tablecloth, small chalk-free place cards with no writing, stacks of small plates and napkins. Overhead lighting plus window light, three-quarter angle.",
+      "model": "chatgpt-image-latest"
+    },
+    {
+      "file": "assets/img/grazing/ai-christmas-family-grazing-board.webp",
+      "pages": [],
+      "alt": "Christmas grazing board on a kitchen island with brie and blue cheese, sliced cured meats, crackers, a cut pomegranate, grapes, mozzarella balls and gingerbread cookies, a lit tree behind",
+      "width": 1024,
+      "height": 1536,
+      "sha1": "e7d6a9c67b49e19a3f85b592ad03c53ebf37750d",
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. A Christmas family gathering grazing board on a kitchen island in a Memphis home: brie and blue cheese as separate wedges, sliced cured meats, crackers, a cut pomegranate tightly packed with real seeds and thin pale membrane, cranberries, rosemary, mozzarella balls of slightly different sizes loosely placed, a few gingerbread cookies; a small lit tree blurred in the background. Warm cozy light, close three-quarter angle.",
+      "model": "chatgpt-image-latest"
+    },
+    {
+      "file": "assets/img/grazing/ai-new-years-eve-grazing-table.webp",
+      "pages": [],
+      "alt": "New Year's Eve grazing board with cheeses, charcuterie, grapes and crackers, chocolate-dipped strawberries and macarons on side plates, two champagne flutes and gold candles",
+      "width": 1024,
+      "height": 1536,
+      "sha1": "ac0b47c37150f99c7c940132d1f49d89ce24a084",
+      "prompt": "Photorealistic photo, natural light, shot on a full-frame camera at eye level, sharp, true-to-life colours. No people, no faces, no hands, no text, no letters, no signs, no house numbers, no logos, no watermarks. Everything physically plausible: real materials, correct shadows, nothing melted or fused. One styled New Year's Eve grazing board on a wood dining table in a Memphis home: cheeses, charcuterie, grapes, crackers, with chocolate-dipped strawberries and macarons on separate small plates; every food clearly identifiable; two champagne flutes, three candles, a few gold accents, soft plain background.",
+      "model": "chatgpt-image-latest"
     }
   ]
 }

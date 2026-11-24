@@ -63,7 +63,8 @@ Settings rows can be written directly:
   neighborhood and hotel variants redirect directly to service hubs; the existing
   consolidation registry prevents the area/place generators recreating them.
 - **Service pictures** are registered in `data/offers/service_ai_images.json` (made by
-  `scripts/generators/build_service_ai_images.mjs`, Workers AI, $0); the file's `_why` holds the
+  `scripts/generators/build_service_ai_images.mjs`, OpenAI images inside the owner's $2 picture
+  budget for 2026, see `docs/cost/zero-paid-llm.md`); the file's `_why` holds the
   picture rules, and owner photos are registered there by hash too.
 
 ## Search loop (shared engine, 1 Nov 2026)

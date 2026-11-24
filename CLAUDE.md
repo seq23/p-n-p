@@ -21,6 +21,14 @@ paid probes (`scripts/llm_citation_probe.mjs`,
 dispatch-only, gated by a `confirm_paid` input defaulting to false, and they print
 the named stop `PAID_LANE_REFUSED` without `CONFIRM_PAID`.
 
+**The one exception: site pictures** (owner ruling 24 Nov 2026: "use ChatGPT or
+runware or something that even costs cents"). `scripts/generators/build_service_ai_images.mjs`
+calls OpenAI images inside her **$2 picture budget for the rest of 2026**, shared with
+Noelle's social pictures. It reads `~/.boss-os/image-budget-2026.json` before every call and
+refuses (named stop, no call) when the ledger is missing or unreadable or the call could cross
+the cap; it is declared in `config/llm_routing.json` `budget_lanes`, runs only on her Mac, and no
+workflow may reach it. `npm run validate:image-budget` proves the refusals.
+
 The full policy, what used to be paid, and how to refresh the free model list are
 in **[`docs/cost/zero-paid-llm.md`](docs/cost/zero-paid-llm.md)**.
 
