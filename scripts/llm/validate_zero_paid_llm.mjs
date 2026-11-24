@@ -118,11 +118,13 @@ function reached(cmd, seen = new Set()) {
   }
   return files;
 }
-function withImports(files) {
+// skipFrom: files whose imports are not followed (tests that import a lane to drive it with a fake).
+function withImports(files, skipFrom = null) {
   const out = new Set(files);
   const queue = [...files];
   while (queue.length) {
     const f = queue.shift();
+    if (skipFrom && skipFrom.test(f)) continue;
     const abs = path.join(ROOT, f);
     if (!/\.(m?js|cjs)$/.test(f) || !fs.existsSync(abs)) continue;
     const text = fs.readFileSync(abs, 'utf8');
@@ -139,7 +141,9 @@ let routerSteps = 0;
 for (const wf of workflows) {
   const text = fs.readFileSync(path.join(WF_DIR, wf), 'utf8');
   for (const step of steps(text)) {
-    const hits = [...withImports(reached(step))].filter((f) => budgetScripts.has(f));
+    // A validator imports the lane to drive run() against a fake OpenAI; only running the lane
+    // itself, or importing it from non-test code, reaches the budget.
+    const hits = [...withImports(reached(step), /^scripts\/validators\//)].filter((f) => budgetScripts.has(f));
     if (hits.length) errors.push(`workflow ${wf} reaches budget lane script(s) ${hits.join(', ')}; the picture budget runs only on the owner's Mac`);
   }
   if (!isScheduled(text)) continue;
