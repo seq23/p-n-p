@@ -24,7 +24,7 @@ import os from 'node:os';
 import path from 'node:path';
 import { spawnSync, execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import { run, Stop, estimateUsd, MODELS } from '../generators/build_service_ai_images.mjs';
+import { run, Stop, estimateUsd, MODELS, takeLock, LOCK_STALE_MS } from '../generators/build_service_ai_images.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..');
 const GEN = 'scripts/generators/build_service_ai_images.mjs';
@@ -83,6 +83,25 @@ const stopped = (r, name) => r.err instanceof Stop && r.err.stop === name;
   must(stopped(r, 'IMAGE_BUDGET_CAP'), `ledger at $1.99 of $2: expected NAMED STOP IMAGE_BUDGET_CAP, got ${r.err ? r.err.message : 'no refusal'}`);
   must(r.calls.length === 0, 'ledger at $1.99 of $2: OpenAI was called');
   must(r.after.ledger === r.before.ledger, 'ledger at $1.99 of $2: the ledger changed');
+}
+// Two runs at once: a fresh lock refuses the second before any call; a stale one is taken back; the lock is released.
+{
+  const box = sandbox(ledgerAt(0));
+  fs.mkdirSync(`${box.ledgerPath}.lock`);
+  let err = null; const calls = [];
+  try { await run({ argv: [TARGET], env: { OPENAI_API_KEY: 'sk-test', IMAGE_BUDGET_LEDGER: box.ledgerPath }, fetchImpl: async (u) => { calls.push(u); throw new Error('no'); }, root: box.dir, home: box.home, log: () => {}, crop: () => {} }); } catch (e) { err = e; }
+  must(err instanceof Stop && err.stop === 'IMAGE_BUDGET_BUSY', `a picture already being made: expected NAMED STOP IMAGE_BUDGET_BUSY, got ${err ? err.message : 'no refusal'}`);
+  must(calls.length === 0, 'a picture already being made: OpenAI was called');
+  const old = new Date(Date.now() - LOCK_STALE_MS - 60000);
+  fs.utimesSync(`${box.ledgerPath}.lock`, old, old);
+  const release = takeLock(box.ledgerPath);
+  must(typeof release === 'function', 'a stale lock was not taken back');
+  release();
+  must(!fs.existsSync(`${box.ledgerPath}.lock`), 'the lock was not released');
+}
+{
+  const r = await attempt({ ledger: ledgerAt(0) });
+  must(!fs.existsSync(`${r.box.ledgerPath}.lock`), 'the lock is left behind after a run');
 }
 // Missing, unreadable, NaN, negative, missing numbers, expired, no key: refused, no call.
 for (const [label, ledger, name, extra = {}] of [

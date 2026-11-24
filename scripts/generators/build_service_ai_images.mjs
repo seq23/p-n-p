@@ -88,6 +88,23 @@ export function realUsd(usage, model, estimate) {
   return Number.isFinite(usd) && usd >= 0 ? usd : estimate;
 }
 
+// One picture at a time across every caller of the ledger (this generator, Noelle): check, call and
+// charge happen under one lock, so two runs can never both pass the cap on the same spent_usd
+// (eng check 24 Nov 2026). A lock left by a crashed run is taken back after LOCK_STALE_MS.
+export const LOCK_STALE_MS = 10 * 60 * 1000;
+export function takeLock(ledgerPath, nowMs = Date.now()) {
+  const dir = `${ledgerPath}.lock`;
+  try { fs.mkdirSync(dir); } catch (e) {
+    if (e.code !== 'EEXIST') throw new Stop('IMAGE_BUDGET_LOCK', `${dir} cannot be made (${e.code}); no picture is made without the lock`);
+    let age = 0;
+    try { age = nowMs - fs.statSync(dir).mtimeMs; } catch { age = 0; }
+    if (age < LOCK_STALE_MS) throw new Stop('IMAGE_BUDGET_BUSY', `another picture is being made (${dir}); try again in a few minutes`);
+    fs.rmSync(dir, { recursive: true, force: true });
+    try { fs.mkdirSync(dir); } catch { throw new Stop('IMAGE_BUDGET_BUSY', `another picture is being made (${dir})`); }
+  }
+  return () => fs.rmSync(dir, { recursive: true, force: true });
+}
+
 function writeLedgerAtomic(file, led) {
   const tmp = `${file}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, `${JSON.stringify(led, null, 1)}\n`);
@@ -155,6 +172,12 @@ export async function run({ argv = process.argv.slice(2), env = process.env, fet
     const portrait = (img.height || 768) > (img.width || 1024);
     const size = portrait ? '1024x1536' : '1536x1024';
     const est = estimateUsd({ model: args.model, size, prompt: img.prompt, hasRef: !!refPath });
+    let res;
+    let json;
+    let usd;
+    let fresh;
+    const release = takeLock(ledgerPath);
+    try {
     const led = readLedger(ledgerPath, now);
     if (led.spent_usd + est > led.cap_usd) throw new Stop('IMAGE_BUDGET_CAP', `$${led.spent_usd.toFixed(3)} spent of $${led.cap_usd.toFixed(2)}; this picture could cost up to $${est.toFixed(3)}`);
     const body = { model: args.model, prompt: img.prompt, size, quality: QUALITY, n: 1 };
@@ -168,8 +191,6 @@ export async function run({ argv = process.argv.slice(2), env = process.env, fet
       init = { method: 'POST', headers: { Authorization: `Bearer ${env.OPENAI_API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) };
     }
     const url = `https://api.openai.com/v1/images/${refPath ? 'edits' : 'generations'}`;
-    let res;
-    let json;
     try {
       res = await fetchImpl(url, { ...init, signal: AbortSignal.timeout(300000) });
       json = await res.json();
@@ -178,11 +199,12 @@ export async function run({ argv = process.argv.slice(2), env = process.env, fet
     }
     if (!res.ok) throw new Error(`${key}: OpenAI answered ${res.status} ${JSON.stringify(json && json.error ? json.error.message : json).slice(0, 300)}; nothing charged, nothing written`);
     // An answer means the money was spent: charge it before anything else can fail.
-    const usd = realUsd(json.usage, args.model, est);
-    const fresh = readLedger(ledgerPath, now);
+    usd = realUsd(json.usage, args.model, est);
+    fresh = readLedger(ledgerPath, now);
     fresh.spent_usd = Math.round((fresh.spent_usd + usd) * 1e6) / 1e6;
     fresh.log.push(`${now.toISOString().slice(0, 10)} p-n-p ${key} ${args.model}${refPath ? ' +ref' : ''} $${usd.toFixed(4)} total now $${fresh.spent_usd.toFixed(3)}`);
     writeLedgerAtomic(ledgerPath, fresh);
+    } finally { release(); }
     const b64 = json.data && json.data[0] && json.data[0].b64_json;
     if (!b64) throw new Error(`${key}: OpenAI answered without an image ($${usd.toFixed(4)} charged); nothing written`);
     const rawDir = path.join(root, '.build/ai-images');
