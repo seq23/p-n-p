@@ -55,6 +55,8 @@ const NAV_ITEMS = Object.freeze([
 const QUOTE = Object.freeze({ href: offers.quoteUrl, label: 'Book online', attrs: '' });
 /** QUOTE.attrs with its leading space ('' when none), for `<a href="..." class="x"${QUOTE_ATTRS}>`. */
 const QUOTE_ATTRS = QUOTE.attrs ? ` ${QUOTE.attrs}` : '';
+/** The first word of QUOTE.label: all a phone under 400 px shows of the header's phone-row button. */
+const QUOTE_SHORT = QUOTE.label.split(' ')[0];
 // The retired Google Form (owner, 2026-10-18): kept as the owner's fallback, linked nowhere.
 const RETIRED_FORM_RE = /^https:\/\/(?:forms\.gle\/vHjfKtRRAnGV3HxFA|docs\.google\.com\/forms\/d\/e\/1FAIpQLSfI4EWhRQaR1xYs0QLBIilqyfqn9mvvMkDLybczfFVvhu5gjA\/viewform[^"]*)$/;
 const CONTACT_HREF_RE = /^\/contact(?:\.html)?\/?(?:[?#].*)?$/;
@@ -236,7 +238,11 @@ function header(currentPath) {
     + `<nav class="site-nav pnp-nav" aria-label="Primary navigation">${items}</nav>`
     + `<div class="pnp-actions">${quote('btn-primary pnp-quote')}`
     + `<a href="${C.telHref}" class="header-call pnp-call" data-contact="header-call">${PHONE_SVG}<span class="pnp-call-lead">Call or text </span><span class="pnp-call-num">${C.telephoneDisplay}</span></a></div>`
-    + `${quote('pnp-book-m')}`
+    // Under 400 px the phone-row button shows "Book" (the CSS hides " online"); the aria-label keeps
+    // its spoken name "Book online", and the link is the same /request (24 Nov 2026, header fit at 320 px).
+    // The outer <span> is one flex item: as two items of the inline-flex button, the space before
+    // "online" was dropped ("Bookonline", caught by the 414/768 px pixel comparison).
+    + `<a href="${QUOTE.href}" class="pnp-book-m" aria-label="${QUOTE.label}"${QUOTE_ATTRS}><span>${QUOTE_SHORT}<span class="pnp-book-rest">${QUOTE.label.slice(QUOTE_SHORT.length)}</span></span></a>`
     + `<a href="${C.telHref}" class="pnp-icon-call" aria-label="${CALL_LABEL}">${PHONE_SVG}</a>`
     + `<a href="#site-menu" class="pnp-toggle" aria-controls="site-menu" aria-label="Open menu">${BURGER_SVG}</a>`
     + `<button type="button" class="pnp-toggle" aria-expanded="false" aria-controls="site-menu" aria-label="Open menu" hidden>${BURGER_SVG}</button>`

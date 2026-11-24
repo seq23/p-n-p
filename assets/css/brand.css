@@ -98,6 +98,12 @@ main p a:not([class]) strong { font-weight: 700; }
   .pnp-header-inner { gap: 6px; }
   .pnp-header .pnp-book-m { font-size: 14px; padding: 0 10px; }
 }
+/* Phone header fit (24 Nov 2026): under 400 px "Book online" reads "Book" (same /request link;
+   its aria-label keeps "Book online"), and under 360 px the row tightens by 10 px, so logo, Book,
+   call and menu all fit at 320 px with an even gutter. The logo is not resized.
+   Proven by scripts/validators/validate_header_fit.mjs (.github/workflows/header-fit.yml). */
+@media (max-width: 399px) { .pnp-header .pnp-book-rest { display: none; } }
+@media (max-width: 359px) { .pnp-header-inner { gap: 4px; padding: 0 8px; } }
 
 /* ---------- buttons: the marigold porch sign, and the quiet secondary ---------- */
 .btn-primary, .rq-submit, .nf-home, .search-loop-page .site-action .button {

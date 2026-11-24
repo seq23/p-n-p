@@ -84,7 +84,13 @@ for (const rel of pages) {
   if (!(footer.includes(MARK.footerRoute) && footer.includes(routeHref))) fail(`${rel}: footer lacks the ${PRIMARY_ROUTE.footerLabel} link`);
   // Quote CTAs open the form directly (owner ruling 2026-10-15).
   if (header) {
-    const q = [...header.matchAll(/<a\b([^>]*)>Book online<\/a>/g)].map((m) => m[1]);
+    // The phone-row button carries "Book<span class=\"pnp-book-rest\"> online</span>" with
+    // aria-label="Book online" (24 Nov 2026: it reads "Book" under 400 px), so the words are read
+    // with their tags stripped; the phone-row one must keep its spoken name "Book online".
+    const quotes = [...header.matchAll(/<a\b([^>]*)>((?:(?!<\/a>)[\s\S])*)<\/a>/g)].filter((m) => m[2].replace(/<[^>]+>/g, '') === 'Book online');
+    const q = quotes.map((m) => m[1]);
+    const phone = quotes.filter((m) => /\bclass="pnp-book-m"/.test(m[1]));
+    if (phone.length !== 1 || !/\baria-label="Book online"/.test(phone[0][1])) fail(`${rel}: header phone-row Book button is missing or has no aria-label "Book online"`);
     if (QUOTE_URL !== '/request') fail(`services.json quoteUrl is ${QUOTE_URL}, expected /request (owner ruling 2026-10-18)`);
     if (q.length !== 3 || !q.every((a) => a.includes(`href="${QUOTE_URL}"`) && !a.includes('target="_blank"'))) fail(`${rel}: header Book online (desktop + phone row + menu, ${q.length} found) does not open ${QUOTE_URL} in the same tab`);
   }
