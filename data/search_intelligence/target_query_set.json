@@ -9,17 +9,17 @@
   "max_targets": 500,
   "measurement_rule": "Every target carries a source (gsc_export | measured_demand) and a positive measured number. Anything unmeasured is dropped, not kept with a null.",
   "gsc_window": {
-    "start_date": "2026-10-23",
-    "end_date": "2026-11-19",
-    "collected_at": "2026-11-22T21:27:15.873082+00:00"
+    "start_date": "2026-10-25",
+    "end_date": "2026-11-21",
+    "collected_at": "2026-11-24T02:43:11.664017+00:00"
   },
-  "target_count": 43,
+  "target_count": 45,
   "targets_by_source": {
     "measured_demand": 2,
-    "gsc_export": 41
+    "gsc_export": 43
   },
   "party_planner_family_count": 19,
-  "anchored_to_admitted_route_count": 43,
+  "anchored_to_admitted_route_count": 45,
   "truth_boundary": "A target query is something this loop intends to observe. Its number is the measurement that admitted it, not evidence of ranking, indexing, surfacing, or citation.",
   "dropped_count": 12,
   "dropped": [
@@ -114,8 +114,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 44,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -152,8 +152,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 17,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -172,8 +172,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 16,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -192,8 +192,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 6,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -212,8 +212,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 5,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -232,8 +232,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 4,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -252,8 +252,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 3,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -272,13 +272,33 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 3,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
       "expected_owned_route": "/services/birthday-party-planner-memphis",
       "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "owned_route_is_admitted": true
+    },
+    {
+      "target_id": "pnp_sq_be5f4b61f839",
+      "query": "bachelorette party",
+      "source": "gsc_export",
+      "family": "other_measured",
+      "impressions": 2,
+      "clicks": 0,
+      "average_position": 9.5,
+      "measurement": {
+        "metric": "impressions_28d",
+        "value": 2,
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_gsc_query",
+      "expected_owned_route": "/services/party-decor-memphis",
+      "expected_owned_url": "https://porchandparty901.com/services/party-decor-memphis",
       "owned_route_is_admitted": true
     },
     {
@@ -292,8 +312,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -312,8 +332,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -332,8 +352,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -352,8 +372,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -372,8 +392,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -392,8 +412,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -412,8 +432,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -432,8 +452,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -452,8 +472,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -472,8 +492,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 2,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -492,8 +512,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -512,33 +532,13 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
       "expected_owned_route": "/",
       "expected_owned_url": "https://porchandparty901.com/",
-      "owned_route_is_admitted": true
-    },
-    {
-      "target_id": "pnp_sq_be5f4b61f839",
-      "query": "bachelorette party",
-      "source": "gsc_export",
-      "family": "other_measured",
-      "impressions": 1,
-      "clicks": 0,
-      "average_position": 6,
-      "measurement": {
-        "metric": "impressions_28d",
-        "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
-      },
-      "intent_class": "commercial",
-      "query_kind": "measured_gsc_query",
-      "expected_owned_route": "/services/party-decor-memphis",
-      "expected_owned_url": "https://porchandparty901.com/services/party-decor-memphis",
       "owned_route_is_admitted": true
     },
     {
@@ -552,8 +552,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -572,8 +572,28 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_gsc_query",
+      "expected_owned_route": "/",
+      "expected_owned_url": "https://porchandparty901.com/",
+      "owned_route_is_admitted": true
+    },
+    {
+      "target_id": "pnp_sq_87d5d443caf3",
+      "query": "birthday ideas in memphis for adults",
+      "source": "gsc_export",
+      "family": "other_measured",
+      "impressions": 1,
+      "clicks": 0,
+      "average_position": 38,
+      "measurement": {
+        "metric": "impressions_28d",
+        "value": 1,
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -592,8 +612,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -612,8 +632,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -632,28 +652,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
-      },
-      "intent_class": "commercial",
-      "query_kind": "measured_gsc_query",
-      "expected_owned_route": "/",
-      "expected_owned_url": "https://porchandparty901.com/",
-      "owned_route_is_admitted": true
-    },
-    {
-      "target_id": "pnp_sq_6352f7223a31",
-      "query": "halloween events southaven ms",
-      "source": "gsc_export",
-      "family": "other_measured",
-      "impressions": 1,
-      "clicks": 0,
-      "average_position": 18,
-      "measurement": {
-        "metric": "impressions_28d",
-        "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -672,8 +672,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -692,8 +692,28 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_gsc_query",
+      "expected_owned_route": "/",
+      "expected_owned_url": "https://porchandparty901.com/",
+      "owned_route_is_admitted": true
+    },
+    {
+      "target_id": "pnp_sq_b5ed38f25c01",
+      "query": "hire someone to decorate for christmas",
+      "source": "gsc_export",
+      "family": "other_measured",
+      "impressions": 1,
+      "clicks": 0,
+      "average_position": 1,
+      "measurement": {
+        "metric": "impressions_28d",
+        "value": 1,
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -712,8 +732,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -732,13 +752,33 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
       "expected_owned_route": "/services/birthday-party-planner-memphis",
       "expected_owned_url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "owned_route_is_admitted": true
+    },
+    {
+      "target_id": "pnp_sq_1d0fea39ec33",
+      "query": "party",
+      "source": "gsc_export",
+      "family": "other_measured",
+      "impressions": 1,
+      "clicks": 0,
+      "average_position": 10,
+      "measurement": {
+        "metric": "impressions_28d",
+        "value": 1,
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
+      },
+      "intent_class": "commercial",
+      "query_kind": "measured_gsc_query",
+      "expected_owned_route": "/",
+      "expected_owned_url": "https://porchandparty901.com/",
       "owned_route_is_admitted": true
     },
     {
@@ -752,8 +792,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -772,8 +812,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -792,8 +832,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -812,8 +852,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -832,8 +872,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -852,8 +892,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -872,8 +912,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -892,8 +932,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -912,8 +952,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",
@@ -932,8 +972,8 @@
       "measurement": {
         "metric": "impressions_28d",
         "value": 1,
-        "window": "2026-10-23..2026-11-19",
-        "collected_at": "2026-11-22T21:27:15.873082+00:00"
+        "window": "2026-10-25..2026-11-21",
+        "collected_at": "2026-11-24T02:43:11.664017+00:00"
       },
       "intent_class": "commercial",
       "query_kind": "measured_gsc_query",

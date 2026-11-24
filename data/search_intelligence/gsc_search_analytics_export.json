@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-23",
-  "end_date": "2026-11-19",
-  "collected_at": "2026-11-22T21:27:15.873082+00:00",
+  "start_date": "2026-10-25",
+  "end_date": "2026-11-21",
+  "collected_at": "2026-11-24T02:43:11.664017+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -37,9 +37,9 @@
         "bachelorette party"
       ],
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "ctr": 0,
-      "position": 6
+      "position": 9.5
     },
     {
       "keys": [
@@ -58,6 +58,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 85
+    },
+    {
+      "keys": [
+        "birthday ideas in memphis for adults"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 38
     },
     {
       "keys": [
@@ -196,15 +205,6 @@
     },
     {
       "keys": [
-        "halloween events southaven ms"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 18
-    },
-    {
-      "keys": [
         "halloween party near me"
       ],
       "clicks": 0,
@@ -223,6 +223,15 @@
     },
     {
       "keys": [
+        "hire someone to decorate for christmas"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
         "host birthday party near me"
       ],
       "clicks": 0,
@@ -238,6 +247,15 @@
       "impressions": 1,
       "ctr": 0,
       "position": 2
+    },
+    {
+      "keys": [
+        "party"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 10
     },
     {
       "keys": [
@@ -389,19 +407,19 @@
       "keys": [
         "https://porchandparty901.com/"
       ],
-      "clicks": 6,
-      "impressions": 187,
-      "ctr": 0.03208556149732621,
-      "position": 4.021390374331551
+      "clicks": 8,
+      "impressions": 198,
+      "ctr": 0.04040404040404041,
+      "position": 4.126262626262626
     },
     {
       "keys": [
         "https://porchandparty901.com/request"
       ],
       "clicks": 0,
-      "impressions": 3,
+      "impressions": 6,
       "ctr": 0,
-      "position": 9.666666666666666
+      "position": 5.333333333333333
     },
     {
       "keys": [
@@ -621,9 +639,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "ctr": 0,
-      "position": 6
+      "position": 9.5
     },
     {
       "keys": [
@@ -654,6 +672,16 @@
       "impressions": 1,
       "ctr": 0,
       "position": 85
+    },
+    {
+      "keys": [
+        "birthday ideas in memphis for adults",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 38
     },
     {
       "keys": [
@@ -817,16 +845,6 @@
     },
     {
       "keys": [
-        "halloween events southaven ms",
-        "https://porchandparty901.com/"
-      ],
-      "clicks": 0,
-      "impressions": 1,
-      "ctr": 0,
-      "position": 18
-    },
-    {
-      "keys": [
         "halloween party near me",
         "https://porchandparty901.com/"
       ],
@@ -844,6 +862,26 @@
       "impressions": 1,
       "ctr": 0,
       "position": 9
+    },
+    {
+      "keys": [
+        "hire someone to decorate for christmas",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
+    },
+    {
+      "keys": [
+        "hire someone to decorate for christmas",
+        "https://porchandparty901.com/request"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 1
     },
     {
       "keys": [
@@ -874,6 +912,16 @@
       "impressions": 1,
       "ctr": 0,
       "position": 2
+    },
+    {
+      "keys": [
+        "party",
+        "https://porchandparty901.com/"
+      ],
+      "clicks": 0,
+      "impressions": 1,
+      "ctr": 0,
+      "position": 10
     },
     {
       "keys": [
@@ -1097,9 +1145,9 @@
     }
   ],
   "counts": {
-    "by_query": 41,
+    "by_query": 43,
     "by_page": 22,
-    "by_query_page": 51
+    "by_query_page": 54
   },
   "truth_boundary": "These are real Google Search Console rows for the verified property. average_position is Google's own averaged metric, not a single literal SERP rank observation."
 }
