@@ -42,10 +42,13 @@ const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR
 function sandbox(ledger) {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'img-budget-'));
   fs.mkdirSync(path.join(dir, 'data/offers'), { recursive: true });
-  fs.copyFileSync(path.join(ROOT, REG_FILE), path.join(dir, REG_FILE));
+  // Every row gets a prompt, so an owner photo or a crop of one is refused for what it is,
+  // not only for lacking a prompt.
+  fs.writeFileSync(path.join(dir, REG_FILE), JSON.stringify({ ...REG, images: REG.images.map((i) => ({ prompt: 'a forged prompt', ...i })) }, null, 2));
   for (const svc of ['porch', 'grazing', 'rentals', 'celebrations']) fs.mkdirSync(path.join(dir, 'assets/img', svc), { recursive: true });
   for (const i of REG.images) fs.writeFileSync(path.join(dir, i.file), `original ${i.file}`);
   fs.writeFileSync(path.join(dir, 'assets/img/porch/her-photo.jpg'), 'her photo');
+  fs.writeFileSync(path.join(dir, 'competitor.jpg'), 'someone else\'s photo');
   const ledgerPath = path.join(dir, 'image-budget-2026.json');
   if (ledger !== undefined) fs.writeFileSync(ledgerPath, typeof ledger === 'string' ? ledger : JSON.stringify(ledger));
   return { dir, ledgerPath, home: path.join(dir, 'home') };
@@ -144,8 +147,10 @@ for (const [label, argv, name] of [
   ['owner photo', ['celebrations/owner-birthday-bedroom'], 'IMAGE_TARGET_REFUSED'],
   ['crop of her photo', ['porch/ai-germantown-fall-porch'], 'IMAGE_TARGET_REFUSED'],
   ['unknown file', ['porch/ai-not-registered'], 'IMAGE_TARGET_REFUSED'],
-  ['ref outside the repo', [TARGET, '--ref', '/etc/hosts'], 'IMAGE_REF_REFUSED'],
-  ['ref climbing out', [TARGET, '--ref', 'assets/img/../../data/offers/service_ai_images.json'], 'IMAGE_REF_REFUSED'],
+  ['ref outside her photos', [TARGET, '--ref', 'competitor.jpg'], 'IMAGE_REF_REFUSED'],
+  ['ref climbing out', [TARGET, '--ref', 'assets/img/../competitor.jpg'], 'IMAGE_REF_REFUSED'],
+  ['ref not a picture', [TARGET, '--ref', 'assets/img/../data/offers/service_ai_images.json'], 'IMAGE_REF_REFUSED'],
+  ['ref missing', [TARGET, '--ref', 'assets/img/porch/nope.jpg'], 'IMAGE_REF_REFUSED'],
   ['unknown model', [TARGET, '--model', 'dall-e-3'], 'IMAGE_ARGS_REFUSED'],
   ['no picture named', [], 'IMAGE_ARGS_REFUSED'],
 ]) {
