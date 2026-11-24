@@ -2,13 +2,13 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W48",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-24T01:05:59.567Z",
+  "generated_at": "2026-11-24T23:10:15.514Z",
   "state": "running",
   "published": 0,
   "indexed": 0,
   "pace": 10,
   "ai_visitors": 0,
-  "ai_bot_hits": 759,
+  "ai_bot_hits": 169,
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
   "wins": 0,
   "undone": 0,
@@ -65,10 +65,8 @@
     "why": "up from 28 to 31: Google impressions 198 in the last 28 days beat 42 in the 28 before"
   },
   "notes": [
-    "not read: AI answer misses (Boss OS did not read AI answers in 2026-W47 (status not_read)); could not tell this run",
-    "cap: up from 28 to 31: Google impressions 198 in the last 28 days beat 42 in the 28 before",
-    "BUILD distinct gate: 6 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
-    "BUILD published 0 of quota 10: 11 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
+    "not read: AI answer misses (Boss OS did not read AI answers in 2026-W48 (status not_read)); could not tell this run",
+    "BUILD published 0 of quota 10: 0 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
   ],
   "lanes": {
     "ratio": {
@@ -97,14 +95,14 @@
     "competition": "ok: 15 top-10 read(s) via brave"
   },
   "ai_misses": {
-    "read": "not read: Boss OS did not read AI answers in 2026-W47 (status not_read)",
-    "week": "2026-W47",
+    "read": "not read: Boss OS did not read AI answers in 2026-W48 (status not_read)",
+    "week": "2026-W48",
     "misses": 0,
     "strengthened": [],
     "new_candidates": [],
     "skipped": [],
     "rejected": [],
-    "could_not_tell": 0
+    "could_not_tell": 2
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/45302402397"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/45507591347"
 }
