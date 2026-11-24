@@ -1,14 +1,14 @@
 {
   "schema": "search-loop-week-v1",
-  "week": "2026-W47",
+  "week": "2026-W48",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-22T20:25:58.469Z",
+  "generated_at": "2026-11-24T01:05:59.567Z",
   "state": "running",
-  "published": 3,
+  "published": 0,
   "indexed": 0,
   "pace": 10,
   "ai_visitors": 0,
-  "ai_bot_hits": 742,
+  "ai_bot_hits": 759,
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
   "wins": 0,
   "undone": 0,
@@ -16,62 +16,59 @@
   "held_by_cap": 0,
   "redirected": [
     {
-      "query": "grazing table for graduation party",
-      "strengthen": "https://porchandparty901.com/services/grazing-and-event-styling",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-16"
-    },
-    {
-      "query": "grazing table for engagement party",
-      "strengthen": "https://porchandparty901.com/services/grazing-and-event-styling",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-16"
-    },
-    {
-      "query": "rentals for birthday parties",
-      "strengthen": "https://porchandparty901.com/services/party-decor-memphis",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-16"
-    },
-    {
-      "query": "grazing table for party",
-      "strengthen": "https://porchandparty901.com/services/grazing-and-event-styling",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-16"
-    },
-    {
-      "query": "grazing table for christmas party",
-      "strengthen": "https://porchandparty901.com/services/grazing-and-event-styling",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-16"
-    },
-    {
-      "query": "giant lawn game rentals",
-      "strengthen": "https://porchandparty901.com/questions/giant-yard-game-rentals",
-      "matched_by": "high token overlap (0.60 >= 0.6)",
-      "at": "2026-11-16"
-    },
-    {
-      "query": "giant outdoor game hire",
-      "strengthen": "https://porchandparty901.com/questions/giant-yard-game-rentals",
-      "matched_by": "high token overlap (0.67 >= 0.6)",
-      "at": "2026-11-16"
-    },
-    {
       "query": "party decor services near me",
       "strengthen": "https://porchandparty901.com/questions/party-decor-services",
       "matched_by": "high token overlap (0.67 >= 0.6)",
       "at": "2026-11-19"
+    },
+    {
+      "query": "party rental places near me",
+      "strengthen": "https://porchandparty901.com/questions/party-rentals-memphis",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-23"
+    },
+    {
+      "query": "birthday party planner",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-23"
+    },
+    {
+      "query": "event planner for kids parties",
+      "strengthen": "https://porchandparty901.com/questions/event-planner-for-small-parties",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-23"
+    },
+    {
+      "query": "birthday party decorations",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-decor-memphis",
+      "matched_by": "high token overlap (0.71 >= 0.6)",
+      "at": "2026-11-23"
+    },
+    {
+      "query": "local event planners",
+      "strengthen": "https://porchandparty901.com/questions/local-event-planning-companies",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "at": "2026-11-23"
+    },
+    {
+      "query": "christmas porch decorating ideas",
+      "strengthen": "https://porchandparty901.com/services/christmas-porch-decorating",
+      "matched_by": "high token overlap (0.67 >= 0.6)",
+      "at": "2026-11-23"
     }
   ],
   "cap": {
-    "max_live_pages": 28,
+    "max_live_pages": 31,
     "live": 11,
-    "room": 17,
-    "why": "up from 25 to 28: Google impressions 147 in the last 28 days beat 53 in the 28 before"
+    "room": 20,
+    "why": "up from 28 to 31: Google impressions 198 in the last 28 days beat 42 in the 28 before"
   },
   "notes": [
-    "BUILD published 0 of quota 10: 0 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
+    "not read: AI answer misses (Boss OS did not read AI answers in 2026-W47 (status not_read)); could not tell this run",
+    "cap: up from 28 to 31: Google impressions 198 in the last 28 days beat 42 in the 28 before",
+    "BUILD distinct gate: 6 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
+    "BUILD published 0 of quota 10: 11 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
   ],
   "lanes": {
     "ratio": {
@@ -80,13 +77,13 @@
     },
     "can_be_one": {
       "pages": 3,
-      "measured": 0,
+      "measured": 2,
       "top3": 0,
-      "hit_rate": "not read: no page in this lane has reached its 2-week check yet"
+      "hit_rate": 0
     },
     "striking": {
       "pages": 8,
-      "measured": 5,
+      "measured": 6,
       "top3": 0,
       "hit_rate": 0
     },
@@ -99,5 +96,15 @@
     "weight_changes": [],
     "competition": "ok: 15 top-10 read(s) via brave"
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/45066347665"
+  "ai_misses": {
+    "read": "not read: Boss OS did not read AI answers in 2026-W47 (status not_read)",
+    "week": "2026-W47",
+    "misses": 0,
+    "strengthened": [],
+    "new_candidates": [],
+    "skipped": [],
+    "rejected": [],
+    "could_not_tell": 0
+  },
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/45302402397"
 }
