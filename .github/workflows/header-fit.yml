@@ -1,0 +1,50 @@
+# The shared header fits every phone from 320 px up (24 Nov 2026). Renders the real pages in
+# Chromium and measures the header's boxes: scripts/validators/validate_header_fit.mjs.
+# pull_request: every header page, local build, plus desktop/tablet pixels vs the base commit.
+# push to main: every header page, local build.
+# workflow_dispatch with url: the live site (the after-deploy production check).
+name: header-fit
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "Live origin to measure (empty = this commit's local pages)"
+        required: false
+        default: ""
+permissions:
+  contents: read
+jobs:
+  header-fit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out the base commit for the desktop comparison
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .header-fit-base
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Chromium
+        run: npm i --no-save --no-package-lock playwright@1.49.1 && npx playwright install --with-deps chromium
+      - name: Header fits at 320-414 px, light and dark
+        env:
+          LIVE_URL: ${{ github.event.inputs.url }}
+        run: |
+          args=(--shots header-fit-shots)
+          if [ -n "$LIVE_URL" ]; then args+=(--url "$LIVE_URL"); fi
+          if [ -d .header-fit-base ]; then args+=(--base .header-fit-base); fi
+          node scripts/validators/validate_header_fit.mjs "${args[@]}"
+      - name: Upload header captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: header-fit-shots
+          path: header-fit-shots
+          if-no-files-found: warn

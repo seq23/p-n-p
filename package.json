@@ -187,7 +187,8 @@
     "validate:area-pages": "node scripts/validators/validate_area_pages.js",
     "validate:place-pages": "node scripts/validators/validate_place_pages.js",
     "validate:link-reachability": "node scripts/validation/validate_link_reachability.js",
-    "validate:clarity-scope": "node scripts/validators/validate_clarity_scope.js"
+    "validate:clarity-scope": "node scripts/validators/validate_clarity_scope.js",
+    "validate:header-fit": "node scripts/validators/validate_header_fit.mjs"
   },
   "dependencies": {
     "pdf-lib": "^1.17.1",
