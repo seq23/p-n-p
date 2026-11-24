@@ -292,8 +292,8 @@ function porchContent(city, i) {
     primary: { href: '/request?service=porch#request-form', label: 'Request a porch quote' },
     secondary: { href: '/pricing', label: 'View Pricing' },
     panels: rotate(panels, i),
-    aside: [photoCard(pick(['/assets/img/porch/seasonal-exterior-fall.jpg', '/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg'], i), `Seasonal front porch decorating for a ${city.name} home`, `Packages from ${money(porchFrom)}`, esc(PK.finalQuoteLine))],
-    image: pick(['/assets/img/porch/seasonal-exterior-fall.jpg', '/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg'], i),
+    aside: [photoCard(pick(['/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg', '/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg'], i), `Seasonal front porch decorating for a ${city.name} home`, `Packages from ${money(porchFrom)}`, esc(PK.finalQuoteLine))],
+    image: pick(['/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg', '/assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg'], i),
     imageAlt: `Seasonal front porch decorating for a ${city.name} home`,
     faqs: [
       [`Does Porch & Party decorate porches in ${city.name}?`, travelAnswer(city)],

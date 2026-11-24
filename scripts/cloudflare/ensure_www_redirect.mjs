@@ -10,7 +10,13 @@
  * http_request_dynamic_redirect phase, next to the repository-files rule.
  * Idempotent: each rule is found by its ref and updated in place.
  *
- * Second rule: the three images re-encoded from multi-MB PNG to JPEG on
+ * First rule: the fall porch photo the owner rejected on 24 Nov 2026 ("looks
+ * fake") was deleted; its old URLs (.png from before 16 Oct 2026, then .jpg)
+ * were shared as og:image, so both go to her own pick, the Germantown porch.
+ * This file is the one place the old name may appear (validate_service_ai_image_budget
+ * allows only it).
+ *
+ * Second rule: the images re-encoded from multi-MB PNG to JPEG on
  * 2026-10-16 keep their old URLs alive as a 301 to the JPEG. The old URLs were
  * shared as og:image, and a purged PNG kept answering 200 from the edge, so the
  * move happens at the edge. (_redirects cannot do it: validate_link_reachability
@@ -21,9 +27,22 @@
  */
 const ZONE = 'porchandparty901.com';
 const RULES = [{
+  ref: 'retired_fall_porch_301',
+  description: 'Deleted fall porch photo (owner rejected 24 Nov 2026) -> her Germantown pick, one 301 (scripts/cloudflare/ensure_www_redirect.mjs)',
+  expression: '(http.request.uri.path in {"/assets/img/porch/seasonal-exterior-fall.png" "/assets/img/porch/seasonal-exterior-fall.jpg"})',
+  action: 'redirect',
+  action_parameters: {
+    from_value: {
+      status_code: 301,
+      preserve_query_string: false,
+      target_url: { value: 'https://porchandparty901.com/assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg' },
+    },
+  },
+  enabled: true,
+}, {
   ref: 'old_png_to_jpg_301',
   description: 'Re-encoded images: old .png URL -> .jpg, one 301 (scripts/cloudflare/ensure_www_redirect.mjs)',
-  expression: '(http.request.uri.path in {"/assets/img/celebrations/romantic-bedroom-experience.png" "/assets/img/celebrations/birthday-entry-celebration.png" "/assets/img/porch/seasonal-exterior-fall.png"})',
+  expression: '(http.request.uri.path in {"/assets/img/celebrations/romantic-bedroom-experience.png" "/assets/img/celebrations/birthday-entry-celebration.png"})',
   action: 'redirect',
   action_parameters: {
     from_value: {

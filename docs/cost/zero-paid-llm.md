@@ -11,6 +11,14 @@ Owner policy, 11 Oct 2026: "nothing should be paid … cut the probes and make t
 
 No content generation, rewriting, classification or outreach in this repo calls a model. Page building is template-driven.
 
+## The one capped lane: site pictures
+
+Owner ruling, 24 Nov 2026: "The image generator u r using sucks - use ChatGPT or runware or something that even costs cents"; "the $2 was for all pictures made here or by Noelle for rest of 2026 photos needed for social". The old free Workers AI picture path was removed that day.
+
+- `scripts/generators/build_service_ai_images.mjs` makes the pictures registered in `data/offers/service_ai_images.json` with OpenAI images (default `gpt-image-1-mini`, `--model chatgpt-image-latest` for hard scenes, `--ref` only from her own photos). The key comes from the Boss OS vault (`npm run -s vault:run -- node …`).
+- Before every call it reads the shared ledger `~/.boss-os/image-budget-2026.json` (`cap_usd`, `through`, `spent_usd`). It refuses with a named stop and no call when the ledger is missing or unreadable, a number is NaN or negative, the date has passed, or spent plus a conservative estimate would cross the cap. After an answer it adds the real cost from `usage` (the estimate when usage is missing or bad) and writes the ledger atomically. An OpenAI error charges nothing and writes nothing.
+- It is declared in `config/llm_routing.json` `budget_lanes`. `validate:zero-paid-llm` fails if any workflow reaches it or its entry runs without a ledger; `validate:image-budget` proves every refusal against a fake OpenAI.
+
 ## Now
 
 - **Both probes are off.** Neither is on any schedule. The citation probe moved to `citation-probe.yml`; the grounded observation stays in `search-intelligence.yml`. Both run only when someone dispatches them by hand with `confirm_paid: true`. Any other dispatch is the named stop `PAID_LANE_REFUSED`. The scripts also refuse on their own when `CONFIRM_PAID` is not `true` (exit 0, receipt, no network call).

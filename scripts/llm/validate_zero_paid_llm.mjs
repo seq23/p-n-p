@@ -14,7 +14,11 @@
 //   5. a paid-lane entry script, run without CONFIRM_PAID, does anything but a
 //      named stop with no network call;
 //   6. the router, exercised with a stubbed provider, falls back to paid, keeps
-//      a reported cost, or generates without a key.
+//      a reported cost, or generates without a key;
+//   7. a budget lane (config.budget_lanes: the owner's capped picture budget,
+//      24 Nov 2026) is reached by any workflow at all (its ledger lives on her
+//      Mac), or its entry, run without a ledger, exits 0, prints no named stop
+//      or touches the network.
 // Hard-fails on zero items at every stage.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -34,6 +38,8 @@ const ROUTER = 'scripts/llm/free_router.mjs';
 const SELF = 'scripts/llm/validate_zero_paid_llm.mjs';
 const lanes = Array.isArray(config.paid_lanes) ? config.paid_lanes : [];
 const laneScripts = new Set(lanes.flatMap((l) => l.scripts || []));
+const budgetLanes = Array.isArray(config.budget_lanes) ? config.budget_lanes : [];
+const budgetScripts = new Set(budgetLanes.flatMap((l) => l.scripts || []));
 const markers = (config.provider_endpoint_markers || []).map((m) => new RegExp(m, 'i'));
 if (markers.length < 5) errors.push('config.provider_endpoint_markers must list the provider endpoints (found fewer than 5)');
 
@@ -62,9 +68,10 @@ for (const f of codeFiles) {
   if (markers.some((m) => m.test(text))) callers.push(r);
 }
 for (const r of callers) {
-  if (r === ROUTER || laneScripts.has(r)) continue;
+  if (r === ROUTER || laneScripts.has(r) || budgetScripts.has(r)) continue;
   errors.push(`model/provider call outside the free router: ${r} (route it through ${ROUTER}, or declare it a paid lane)`);
 }
+for (const s of budgetScripts) if (!fs.existsSync(path.join(ROOT, s))) errors.push(`budget lane script ${s} does not exist`);
 for (const s of laneScripts) if (!fs.existsSync(path.join(ROOT, s))) errors.push(`paid lane script ${s} does not exist`);
 if (!callers.includes(ROUTER)) errors.push(`scan did not find the router's own endpoint marker in ${ROUTER}; the scan is not reaching code`);
 
@@ -131,6 +138,10 @@ let scheduledCount = 0;
 let routerSteps = 0;
 for (const wf of workflows) {
   const text = fs.readFileSync(path.join(WF_DIR, wf), 'utf8');
+  for (const step of steps(text)) {
+    const hits = [...withImports(reached(step))].filter((f) => budgetScripts.has(f));
+    if (hits.length) errors.push(`workflow ${wf} reaches budget lane script(s) ${hits.join(', ')}; the picture budget runs only on the owner's Mac`);
+  }
   if (!isScheduled(text)) continue;
   scheduledCount++;
   for (const step of steps(text)) {
@@ -181,6 +192,19 @@ for (const lane of lanes) {
   } else errors.push(`paid lane ${lane.id}: no entry declared to prove the refusal`);
 }
 
+// 7. Budget lanes: refuse with a named stop and no network when the ledger is missing.
+for (const lane of budgetLanes) {
+  if (lane.status !== 'owner_budget_2026') errors.push(`budget lane ${lane.id}: status must be owner_budget_2026`);
+  if (!lane.entry || !lane.refusal) { errors.push(`budget lane ${lane.id}: no entry or refusal declared to prove it`); continue; }
+  const env = { ...process.env, OPENAI_API_KEY: 'sk-validator-dummy', IMAGE_BUDGET_LEDGER: path.join(ROOT, '.no-such-image-budget-ledger.json') };
+  const preload = 'data:text/javascript,globalThis.fetch=()=>{process.stderr.write("FETCH_ATTEMPTED\\n");throw new Error("network blocked by validator")};';
+  const r = spawnSync(process.execPath, ['--import', preload, lane.entry, ...(lane.entry_args || [])], { cwd: ROOT, env, encoding: 'utf8', timeout: 30000 });
+  const out = `${r.stdout}\n${r.stderr}`;
+  if (r.status === 0) errors.push(`budget lane ${lane.id}: entry exited 0 without a ledger (expected a refusal)\n${out.slice(0, 400)}`);
+  if (!out.includes(lane.refusal)) errors.push(`budget lane ${lane.id}: entry did not print ${lane.refusal} without a ledger`);
+  if (/FETCH_ATTEMPTED/.test(out)) errors.push(`budget lane ${lane.id}: entry attempted a network call without a ledger`);
+}
+
 // 6. Router behaviour against a stubbed provider --------------------------------
 const policy = (() => { try { return loadPolicy(config); } catch { return null; } })();
 if (policy) {
@@ -227,4 +251,4 @@ if (errors.length) {
   for (const e of errors) console.error(` - ${e}`);
   process.exit(1);
 }
-console.log(`zero-paid-llm: PASS — ${policy.models.length} $0 models (snapshot ${config.pricing_snapshot.date}), ${codeFiles.length} code files scanned, provider callers: ${callers.join(', ')}; ${scheduledCount} scheduled workflows clear, ${routerSteps} free-router step(s); ${lanes.length} paid lane(s) dispatch-only behind confirm_paid and refusing without it; ${notes.join('; ')}`);
+console.log(`zero-paid-llm: PASS — ${policy.models.length} $0 models (snapshot ${config.pricing_snapshot.date}), ${codeFiles.length} code files scanned, provider callers: ${callers.join(', ')}; ${scheduledCount} scheduled workflows clear, ${routerSteps} free-router step(s); ${lanes.length} paid lane(s) dispatch-only behind confirm_paid and refusing without it; ${budgetLanes.length} budget lane(s) in no workflow and refusing without a ledger; ${notes.join('; ')}`);

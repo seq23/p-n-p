@@ -32,7 +32,7 @@ Do not add Catering: grazing-table pricing covers styling, not food, and a cater
 1. `assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg` — first photo
 2. `assets/img/porch/collierville-christmas-porch-decorating-front-door.jpg`
 3. `assets/img/porch/memphis-fall-front-porch-decorating-germantown.jpg`
-4. `assets/img/porch/seasonal-exterior-fall.jpg`
+4. `assets/img/porch/bartlett-small-front-porch-styling-under-500.jpg`
 5. `assets/img/celebrations/romantic-bedroom-experience.jpg`
 6. `assets/img/celebrations/romantic-bedroom-experience.jpg`
 7. `assets/img/celebrations/romantic-bedroom-experience.jpg`

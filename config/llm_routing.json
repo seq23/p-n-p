@@ -107,5 +107,22 @@
       ],
       "entry": "scripts/search_intelligence/observe_live_search.mjs"
     }
+  ],
+  "budget_lanes": [
+    {
+      "id": "site-pictures",
+      "status": "owner_budget_2026",
+      "owner_ruling": "24 Nov 2026: \"use ChatGPT or runware or something that even costs cents\"; \"the $2 was for all pictures made here or by Noelle for rest of 2026\"",
+      "purpose": "the site's AI pictures (data/offers/service_ai_images.json), OpenAI images, local only",
+      "ledger": "~/.boss-os/image-budget-2026.json (cap_usd, through, spent_usd), read before every call",
+      "scripts": [
+        "scripts/generators/build_service_ai_images.mjs"
+      ],
+      "entry": "scripts/generators/build_service_ai_images.mjs",
+      "entry_args": [
+        "porch/ai-memphis-spring-porch"
+      ],
+      "refusal": "NAMED STOP IMAGE_BUDGET_LEDGER_MISSING"
+    }
   ]
 }
