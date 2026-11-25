@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "validator": "no-internal-instruction-leak",
-  "generated_at": "2026-11-25T00:19:30.331Z",
+  "generated_at": "2026-11-25T23:59:01.045Z",
   "status": "PASS",
   "files_scanned": 58,
   "offender_count": 0,
