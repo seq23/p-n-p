@@ -1,8 +1,8 @@
 {
   "schema_version": "1.0",
   "profile": "release",
-  "generated_at": "2026-11-18T16:06:05.106Z",
-  "total": 19,
+  "generated_at": "2026-11-25T23:57:58.050Z",
+  "total": 20,
   "failed": 0,
   "results": [
     {
@@ -10,7 +10,7 @@
       "command": "npm run validate:about-page",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 158,
+      "duration_ms": 156,
       "repair_command": null,
       "output_tail": null
     },
@@ -19,7 +19,7 @@
       "command": "npm run validate:content-pattern",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 214,
+      "duration_ms": 216,
       "repair_command": null,
       "output_tail": null
     },
@@ -28,7 +28,7 @@
       "command": "npm run validate:all",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 597,
+      "duration_ms": 623,
       "repair_command": null,
       "output_tail": null
     },
@@ -37,7 +37,7 @@
       "command": "npm run validate:internal-links",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 191,
+      "duration_ms": 202,
       "repair_command": null,
       "output_tail": null
     },
@@ -46,7 +46,7 @@
       "command": "npm run validate:kpi-truth",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 137,
+      "duration_ms": 141,
       "repair_command": null,
       "output_tail": null
     },
@@ -55,7 +55,7 @@
       "command": "npm run validate:query-atlas",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 140,
+      "duration_ms": 145,
       "repair_command": "npm run atlas:build",
       "output_tail": null
     },
@@ -73,7 +73,7 @@
       "command": "npm run validate:tree-hygiene",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 137,
+      "duration_ms": 145,
       "repair_command": null,
       "output_tail": null
     },
@@ -82,7 +82,7 @@
       "command": "npm run validate:admin-deposit-paid",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 606,
+      "duration_ms": 573,
       "repair_command": null,
       "output_tail": null
     },
@@ -91,7 +91,7 @@
       "command": "npm run validate:corporate-outreach",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 1485,
+      "duration_ms": 1479,
       "repair_command": null,
       "output_tail": null
     },
@@ -100,7 +100,7 @@
       "command": "npm run validate:mailer-auth",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 214,
+      "duration_ms": 217,
       "repair_command": null,
       "output_tail": null
     },
@@ -109,7 +109,7 @@
       "command": "npm run validate:llm-surfaces",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 151,
+      "duration_ms": 156,
       "repair_command": null,
       "output_tail": null
     },
@@ -118,7 +118,7 @@
       "command": "npm run validate:clarity-scope",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 256,
+      "duration_ms": 264,
       "repair_command": null,
       "output_tail": null
     },
@@ -127,7 +127,7 @@
       "command": "npm run validate:page-dates",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 141,
+      "duration_ms": 149,
       "repair_command": null,
       "output_tail": null
     },
@@ -136,7 +136,7 @@
       "command": "npm run validate:sitemap-lastmod",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 166,
+      "duration_ms": 171,
       "repair_command": null,
       "output_tail": null
     },
@@ -145,7 +145,7 @@
       "command": "npm run validate:area-pages",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 150,
+      "duration_ms": 154,
       "repair_command": null,
       "output_tail": null
     },
@@ -154,7 +154,7 @@
       "command": "npm run validate:faq-page",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 140,
+      "duration_ms": 143,
       "repair_command": null,
       "output_tail": null
     },
@@ -163,7 +163,7 @@
       "command": "npm run validate:place-pages",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 151,
+      "duration_ms": 155,
       "repair_command": null,
       "output_tail": null
     },
@@ -172,7 +172,16 @@
       "command": "npm run validate:link-reachability",
       "status": "PASS",
       "exit_code": 0,
-      "duration_ms": 154,
+      "duration_ms": 161,
+      "repair_command": null,
+      "output_tail": null
+    },
+    {
+      "id": "workflow-push",
+      "command": "npm run validate:workflow-push",
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 145,
       "repair_command": null,
       "output_tail": null
     }

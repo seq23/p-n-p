@@ -4,10 +4,10 @@
   "profile": "release",
   "max_attempts": 3,
   "dry_run": false,
-  "generated_at": "2026-11-18T16:06:05.107Z",
+  "generated_at": "2026-11-25T23:57:58.051Z",
   "status": "CLEAN",
   "safe_to_push": true,
-  "validators_run": 19,
+  "validators_run": 20,
   "repairs_declared": 1,
   "attempts": [
     {
