@@ -8,9 +8,9 @@
     "average_position"
   ],
   "site_url": "sc-domain:porchandparty901.com",
-  "start_date": "2026-10-25",
-  "end_date": "2026-11-21",
-  "collected_at": "2026-11-24T02:43:11.664017+00:00",
+  "start_date": "2026-10-26",
+  "end_date": "2026-11-22",
+  "collected_at": "2026-11-25T00:17:30.581180+00:00",
   "row_limit": 5000,
   "provider_state": "OK",
   "by_query": [
@@ -37,9 +37,9 @@
         "bachelorette party"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 4,
       "ctr": 0,
-      "position": 9.5
+      "position": 9.25
     },
     {
       "keys": [
@@ -388,9 +388,9 @@
         "spa party near me"
       ],
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "ctr": 0,
-      "position": 9
+      "position": 8.5
     },
     {
       "keys": [
@@ -408,9 +408,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 8,
-      "impressions": 198,
-      "ctr": 0.04040404040404041,
-      "position": 4.126262626262626
+      "impressions": 203,
+      "ctr": 0.03940886699507389,
+      "position": 4.29064039408867
     },
     {
       "keys": [
@@ -639,9 +639,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 2,
+      "impressions": 4,
       "ctr": 0,
-      "position": 9.5
+      "position": 9.25
     },
     {
       "keys": [
@@ -1129,9 +1129,9 @@
         "https://porchandparty901.com/"
       ],
       "clicks": 0,
-      "impressions": 1,
+      "impressions": 2,
       "ctr": 0,
-      "position": 9
+      "position": 8.5
     },
     {
       "keys": [
