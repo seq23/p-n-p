@@ -15,6 +15,8 @@ concurrency:
 
 jobs:
   authority-cycle:
+    if: github.ref == 'refs/heads/main'
+    environment: reviewed-main
     # ~3x median 3.4m over 8 green runs, plus ~2-3 min for URL Inspection of every
     # sitemap URL (added 2026-10-10, ~1 s per call). Fault detector, not a budget.
     timeout-minutes: 16
