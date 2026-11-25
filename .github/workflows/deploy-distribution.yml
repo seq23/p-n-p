@@ -51,6 +51,7 @@ on:
   workflow_run:
     workflows:
       ["Daily Authority Cycle", "Bounded Self-Healing", "Search Intelligence Cycle", "Paid Citation Probe", "Inventory Publish", "Search Loop"]
+    branches: [main]
     types: [completed]
 
 permissions:
@@ -86,35 +87,10 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      # Python and the GSC client are here for the distribution step's URL
-      # inspection. The credential file written below is the one that step reads.
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-
-      - name: Install optional GSC dependencies
-        run: |
-          python -m pip install --upgrade pip
-          # pyyaml: validate:workflow-lanes parses every workflow file with a real
-          # parser through this interpreter (setup-python's build ships without it).
-          python -m pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib pyyaml
-
-      # Written outside the workspace on purpose: a service-account key at the
-      # repository root is one stray `git add` or one deploy-directory copy away
-      # from being published, and validate:tree-hygiene correctly fails the run
-      # when it appears there - which is exactly how this surfaced.
-      - name: Recreate GSC service account when configured
-        # A pull_request run validates; it never distributes, so it has no reason
-        # to write a credential to disk.
-        if: github.event_name != 'pull_request'
-        env:
-          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
-        run: |
-          if [ -n "$GSC_SERVICE_ACCOUNT_JSON" ]; then
-            printf '%s' "$GSC_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/gsc-service-account.json"
-            chmod 600 "$RUNNER_TEMP/gsc-service-account.json"
-          fi
+      - run: python -m pip install pyyaml
 
       # The Search Console ingest used to run here. It worked - one run measured 19
       # real T1 queries - but this job declares `permissions: contents: read` and has
@@ -160,6 +136,57 @@ jobs:
         run: |
           npm run cadence:gate
           npm run cadence:template-share
+      - uses: actions/upload-artifact@v7
+        with:
+          name: validated-distribution
+          path: .build/
+          include-hidden-files: true
+          if-no-files-found: error
+
+  distribute:
+    environment: reviewed-main
+    needs: validate-and-distribute
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v7
+        with:
+          name: validated-distribution
+          path: .build/
+      # Python and the GSC client are here for the distribution step's URL
+      # inspection. The credential file written below is the one that step reads.
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install optional GSC dependencies
+        run: |
+          python -m pip install --upgrade pip
+          # pyyaml: validate:workflow-lanes parses every workflow file with a real
+          # parser through this interpreter (setup-python's build ships without it).
+          python -m pip install google-api-python-client google-auth google-auth-httplib2 google-auth-oauthlib pyyaml
+
+      # Written outside the workspace on purpose: a service-account key at the
+      # repository root is one stray `git add` or one deploy-directory copy away
+      # from being published, and validate:tree-hygiene correctly fails the run
+      # when it appears there - which is exactly how this surfaced.
+      - name: Recreate GSC service account when configured
+        # A pull_request run validates; it never distributes, so it has no reason
+        # to write a credential to disk.
+        if: github.event_name != 'pull_request'
+        env:
+          GSC_SERVICE_ACCOUNT_JSON: ${{ secrets.GSC_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -n "$GSC_SERVICE_ACCOUNT_JSON" ]; then
+            printf '%s' "$GSC_SERVICE_ACCOUNT_JSON" > "$RUNNER_TEMP/gsc-service-account.json"
+            chmod 600 "$RUNNER_TEMP/gsc-service-account.json"
+          fi
+
       - name: Restore GSC inspection carry-over state
         # URLs Search Console answered 5xx for last run are recorded deferred and
         # inspected first this run; the same URL deferred 3 runs in a row fails.
