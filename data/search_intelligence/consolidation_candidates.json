@@ -3,7 +3,7 @@
   "status": "LEDGER_ONLY_NO_REDIRECTS",
   "decision_input_for": "Fold thin pages into their hub where URL Inspection reports \"Crawled - currently not indexed\", once index_coverage.json holds 7 days of data.",
   "gsc_window": "2026-10-28..2026-11-24",
-  "coverage_collected_at": "2026-11-27T00:16:04.570801+00:00",
+  "coverage_collected_at": "2026-11-27T23:53:21.817298+00:00",
   "url_count": 57,
   "roles": {
     "candidate": 24,
@@ -278,7 +278,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 958,
+      "word_count": 1137,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
       "fold_rule": "/planner|planning|event-management/"
@@ -289,7 +289,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 804,
+      "word_count": 979,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/birthday-party-planner-memphis",
       "fold_rule": "/planner|planning|event-management/"
@@ -300,7 +300,7 @@
       "role": "candidate",
       "impressions_28d": 0,
       "clicks_28d": 0,
-      "word_count": 950,
+      "word_count": 1152,
       "coverage_state": "URL is unknown to Google",
       "fold_into_if_crawled_not_indexed": "/services/celebration-setups-memphis",
       "fold_rule": "/./"
