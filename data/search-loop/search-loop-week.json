@@ -2,7 +2,7 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W48",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-27T18:08:33.238Z",
+  "generated_at": "2026-11-27T22:12:48.635Z",
   "state": "running",
   "published": 0,
   "indexed": 0,
@@ -77,11 +77,7 @@
     "why": "up from 28 to 31: Google impressions 198 in the last 28 days beat 42 in the 28 before"
   },
   "notes": [
-    "BUILD distinct gate: 3 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
-    "BUILD published 0 of quota 10: 7 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued",
-    "AI misses: strengthened /questions/local-event-planning-companies for 1 AI answer miss(es)",
-    "AI misses: strengthened /questions/local-party-planners-near-me for 1 AI answer miss(es)",
-    "AI misses: strengthened /questions/party-decor-services for 1 AI answer miss(es)"
+    "BUILD published 0 of quota 10: 0 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued"
   ],
   "lanes": {
     "ratio": {
@@ -137,5 +133,5 @@
   },
   "comparison": "not read: FIND has not run since v1.16.0",
   "seeds": "not read: this site has no seeds in its config",
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/46047145889"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/46075149673"
 }
