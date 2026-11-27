@@ -11,8 +11,8 @@
 //   - call and menu are >= 44x44 px tap targets, Book >= 44 px tall;
 //   - Book still opens /request and is named "Book online"; call still dials +19013551518.
 // At 768 and 1366 px the same checks run on the row that shows there, and with
-// --base <dir> (a checkout of the base commit) the header at 414/768/1366 must keep the same layout
-// (every control's box and words) and the same pixels apart from anti-aliasing.
+// --base <dir> (a checkout of the base commit) the header at 414/768/1366 must keep the same layout within 2 px
+// (every control's box and words) and, when the layout is identical, the same pixels apart from anti-aliasing.
 // With --url <origin> it measures that live site instead of a local copy (production check).
 // Fails closed: a page that does not load, a header or control not found, or 0 pages measured
 // is a failure, never a pass.
@@ -32,6 +32,63 @@ const DESKTOP = [768, 1366];
 const SCHEMES = ['light', 'dark'];
 const TEL = 'tel:+19013551518';
 const SHOTS = arg('shots');
+
+// Base comparison (27 Nov 2026): every control keeps its name, words and presence, and its box
+// moves or resizes by at most LAYOUT_TOLERANCE_PX. A sub-pixel shift is rendering noise
+// (PR #238 changed only search-loop.config.json, yet the nav at 1366 px came back 0.6 px left
+// and 1 px wider); a header that wraps (height doubles), loses a control, changes its words or
+// really moves still fails. Her rule (21 Nov 2026): the hard fail catches broken output, never
+// near-misses.
+const LAYOUT_TOLERANCE_PX = 2;
+const fmtLayout = (l) => (typeof l === 'string' ? l : l.map((c) => (c.missing ? `${c.name}:missing` : `${c.name}:${c.left.toFixed(1)}+${c.width.toFixed(1)}x${c.height.toFixed(1)}:${c.text}`)).join(' '));
+/** null when `now` keeps `was`'s layout within the tolerance, else the reason it does not. */
+function layoutDiff(now, was, tol = LAYOUT_TOLERANCE_PX) {
+  if (typeof now === 'string' || typeof was === 'string') return fmtLayout(now) === fmtLayout(was) ? null : 'a header could not be measured on one side';
+  if (now.length !== was.length) return `${now.length} controls, base has ${was.length}`;
+  for (let i = 0; i < now.length; i += 1) {
+    const [a, b] = [now[i], was[i]];
+    if (a.name !== b.name) return `control ${i + 1} is ${a.name}, base has ${b.name}`;
+    if (!!a.missing !== !!b.missing) return `${a.name} is ${a.missing ? 'missing' : 'shown'}, base has it ${b.missing ? 'missing' : 'shown'}`;
+    if (a.missing) continue;
+    if (a.text !== b.text) return `${a.name} says "${a.text}", base says "${b.text}"`;
+    for (const k of ['left', 'width', 'height']) if (Math.abs(a[k] - b[k]) > tol) return `${a.name} ${k} ${a[k].toFixed(1)} px, base ${b[k].toFixed(1)} px (more than ${tol} px apart)`;
+  }
+  return null;
+}
+const sameExactly = (now, was) => fmtLayout(now) === fmtLayout(was);
+
+if (process.argv.includes('--self-test')) {
+  // The comparison alone, no browser: each case is one way it must judge a header.
+  const row = (nav = {}, book = {}) => [
+    { name: 'logo', left: 47, width: 236.9, height: 44, text: 'Porch & Party 901' },
+    { name: 'nav', left: 350.5, width: 580, height: 44, text: 'Porch Celebrations Grazing Tables Rentals Pricing How It Works FAQ', ...nav },
+    { name: 'book', left: 973.7, width: 123.7, height: 42, text: 'Book online', ...book },
+  ];
+  const cases = [
+    ['PR #238 sub-pixel shift (nav 0.6 px left, 1 px wider) passes', row({ left: 351.1, width: 579 }), row(), true],
+    ['identical layout passes', row(), row(), true],
+    ['nav wraps to two lines (height 44 -> 88) fails', row({ height: 88 }), row(), false],
+    ['Book overflows: 3 px further right fails', row({}, { left: 976.7 }), row(), false],
+    ['Book words change fails', row({}, { text: 'Book' }), row(), false],
+    ['a control goes missing fails', row({}, { missing: true }), row(), false],
+    ['a control is dropped fails', row().slice(0, 2), row(), false],
+    ['an unmeasured side fails', 'header not found', row(), false],
+  ];
+  const bad = cases.filter(([, now, was, ok]) => (layoutDiff(now, was) === null) !== ok);
+  // The pixel compare, on tiny made-up pictures: a dark 1 px column on a light 8x3 picture.
+  const pic = (col, rgb = [20, 20, 20]) => { const d = new Array(8 * 3 * 4).fill(240); for (let y = 0; y < 3; y += 1) { const i = (y * 8 + col) * 4; d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; } return d; };
+  const px = [
+    ['pixels: the same picture differs by 0', countDiff(pic(3), pic(3), 8, 3) === 0],
+    ['pixels: text 1 px to the side differs by 0', countDiff(pic(4), pic(3), 8, 3) === 0],
+    ['pixels: a 3 px move counts', countDiff(pic(6), pic(3), 8, 3) > 0],
+    ['pixels: a colour change counts', countDiff(pic(3, [200, 20, 20]), pic(3), 8, 3) > 0],
+  ];
+  for (const [name, ok] of px) if (!ok) bad.push([name]);
+  cases.push(...px);
+  for (const [name] of bad) console.error(`header-fit self-test FAIL: ${name}`);
+  console.log(bad.length ? `header-fit self-test: FAIL - ${bad.length} of ${cases.length} cases` : `header-fit self-test: ${cases.length} cases passed`);
+  process.exit(bad.length ? 1 : 0);
+}
 
 let playwright;
 try { playwright = await import('playwright'); } catch {
@@ -150,7 +207,9 @@ async function openPage(ctx, url) {
 
 async function headerShot(ctx, url) {
   const page = await openPage(ctx, url);
-  const buf = await page.locator('header[data-site-chrome="header"] .pnp-header-inner').screenshot();
+  // A nav underline mid-transition (it scales in after load) or a text caret is not a header change:
+  // freeze both so the base commit and the PR are compared at rest.
+  const buf = await page.locator('header[data-site-chrome="header"] .pnp-header-inner').screenshot({ animations: 'disabled', caret: 'hide' });
   await page.close();
   return buf;
 }
@@ -161,24 +220,42 @@ async function layoutOf(ctx, url) {
   const m = await page.evaluate(measure);
   await page.close();
   if (m.error) return m.error;
-  return m.controls.map((c) => (c.missing ? `${c.name}:missing` : `${c.name}:${c.left.toFixed(1)}+${c.width.toFixed(1)}x${c.height.toFixed(1)}:${c.text}`)).join(' ');
+  return m.controls.map(({ name, missing, left, width, height, text }) => ({ name, missing, left, width, height, text }));
 }
 
-/** How many pixels of two PNGs differ by more than 64 in any channel (Infinity when sizes differ). */
+/**
+ * How many pixels differ between two RGBA buffers of the same size. A pixel differs only when NO pixel
+ * within 1 px of the same spot in the other picture matches it within 64 per channel, checked both ways:
+ * centred nav text landing 1 px apart between two builds is the same header, while a changed word or
+ * colour, or a move of 2 px or more, still counts (27 Nov 2026: a 1 px nav shift read as 1514 pixels).
+ */
+function countDiff(da, db, W, H) {
+  const close = (p, i, q, j) => Math.max(Math.abs(p[i] - q[j]), Math.abs(p[i + 1] - q[j + 1]), Math.abs(p[i + 2] - q[j + 2])) <= 64;
+  const unmatched = (p, q, x, y) => {
+    const i = (y * W + x) * 4;
+    for (let dy = -1; dy <= 1; dy += 1) for (let dx = -1; dx <= 1; dx += 1) {
+      const X = x + dx, Y = y + dy;
+      if (X >= 0 && Y >= 0 && X < W && Y < H && close(p, i, q, (Y * W + X) * 4)) return false;
+    }
+    return true;
+  };
+  let diff = 0;
+  for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) if (unmatched(da, db, x, y) || unmatched(db, da, x, y)) diff += 1;
+  return diff;
+}
+
+/** How many pixels of two PNGs differ (countDiff; Infinity when sizes differ). */
 async function pixelDiff(ctx, a, b) {
   const page = await ctx.newPage();
-  const n = await page.evaluate(async ([x, y]) => {
+  const got = await page.evaluate(async ([x, y]) => {
     const load = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
     const [ia, ib] = await Promise.all([load(x), load(y)]);
-    if (ia.width !== ib.width || ia.height !== ib.height) return -1;
-    const px = (img) => { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); return g.getImageData(0, 0, c.width, c.height).data; };
-    const [da, db] = [px(ia), px(ib)];
-    let diff = 0;
-    for (let i = 0; i < da.length; i += 4) if (Math.max(Math.abs(da[i] - db[i]), Math.abs(da[i + 1] - db[i + 1]), Math.abs(da[i + 2] - db[i + 2])) > 64) diff += 1;
-    return diff;
+    if (ia.width !== ib.width || ia.height !== ib.height) return null;
+    const px = (img) => { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); return Array.from(g.getImageData(0, 0, c.width, c.height).data); };
+    return { w: ia.width, h: ia.height, a: px(ia), b: px(ib) };
   }, [`data:image/png;base64,${a.toString('base64')}`, `data:image/png;base64,${b.toString('base64')}`]);
   await page.close();
-  return n < 0 ? Infinity : n;
+  return got ? countDiff(got.a, got.b, got.w, got.h) : Infinity;
 }
 
 const live = arg('url');
@@ -234,10 +311,15 @@ try {
           // Layout must match exactly (boxes and words of every control); pixels must match
           // apart from anti-aliasing (a pixel counts only when a channel differs by more than 64).
           const [lNow, lWas] = [await layoutOf(ctx, head.origin + p), await layoutOf(ctx, b.origin + p)];
-          const px = now.equals(was) ? 0 : await pixelDiff(ctx, now, was);
-          if (lNow !== lWas) errors.push(`${p} @ ${vw}px: header layout differs from the base commit (now ${lNow} | base ${lWas})`);
+          const why = layoutDiff(lNow, lWas);
+          // Pixels are compared only on an exactly identical layout: a sub-pixel shift moves every
+          // glyph, so a pixel count there measures the shift, not a visual change.
+          const exact = sameExactly(lNow, lWas);
+          const px = !exact || now.equals(was) ? 0 : await pixelDiff(ctx, now, was);
+          if (why) errors.push(`${p} @ ${vw}px: header layout differs from the base commit: ${why} (now ${fmtLayout(lNow)} | base ${fmtLayout(lWas)})`);
           if (px > 20) errors.push(`${p} @ ${vw}px: ${px} header pixels differ from the base commit`);
-          if (lNow === lWas && px <= 20) rows.push(`${p} @ ${vw}px: header layout identical to base; ${px} pixels differ beyond anti-aliasing`);
+          if (!why && exact && px <= 20) rows.push(`${p} @ ${vw}px: header layout identical to base; ${px} pixels differ beyond anti-aliasing`);
+          if (!why && !exact) rows.push(`${p} @ ${vw}px: header layout within ${LAYOUT_TOLERANCE_PX} px of base (now ${fmtLayout(lNow)} | base ${fmtLayout(lWas)})`);
           if (SHOTS && p === '/') { fs.writeFileSync(path.join(SHOTS, `desktop-${vw}-now.png`), now); fs.writeFileSync(path.join(SHOTS, `desktop-${vw}-base.png`), was); }
         } catch (err) { errors.push(`${p} @ ${vw}px base compare: ${err.message.split('\n')[0]}`); }
       }
