@@ -197,7 +197,9 @@ async function openPage(ctx, url) {
 
 async function headerShot(ctx, url) {
   const page = await openPage(ctx, url);
-  const buf = await page.locator('header[data-site-chrome="header"] .pnp-header-inner').screenshot();
+  // A nav underline mid-transition (it scales in after load) or a text caret is not a header change:
+  // freeze both so the base commit and the PR are compared at rest.
+  const buf = await page.locator('header[data-site-chrome="header"] .pnp-header-inner').screenshot({ animations: 'disabled', caret: 'hide' });
   await page.close();
   return buf;
 }
