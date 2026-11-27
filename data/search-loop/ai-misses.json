@@ -1,6 +1,24 @@
 {
   "schema": "search-loop-ai-misses-v1",
-  "weeks": {},
+  "weeks": {
+    "2026-W48": {
+      "041b014f9a85e9edc41e144e8e9e6d896cc60efd": {
+        "action": "strengthened",
+        "page_url": "https://porchandparty901.com/questions/local-event-planning-companies",
+        "at": "2026-11-27"
+      },
+      "a3c1c78c71b07cf3eab0f5b80280115d732a6ee0": {
+        "action": "strengthened",
+        "page_url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+        "at": "2026-11-27"
+      },
+      "af22753796548c4ce92b6b7ae6b59b01c5c62974": {
+        "action": "strengthened",
+        "page_url": "https://porchandparty901.com/questions/party-decor-services",
+        "at": "2026-11-27"
+      }
+    }
+  },
   "reads": [
     {
       "at": "2026-11-24T01:05:59.567Z",
@@ -23,6 +41,13 @@
       "at": "2026-11-26T22:29:01.572Z",
       "status": "could_not_tell",
       "reason": "no BOSS_OPEN_LOOPS_TOKEN in this run (pass it in the caller's secrets: block)"
+    },
+    {
+      "at": "2026-11-27T18:08:33.238Z",
+      "status": "read",
+      "week": "2026-W48",
+      "misses": 3,
+      "rejected": 0
     }
   ]
 }

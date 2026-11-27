@@ -70,7 +70,7 @@
         "before_hash": "ede79ed3b628de2a5dcf3d707a769a04f71f61413f8bf4c38b48c7dbd14b9e3a",
         "after_hash": "33407564af453f158ed8bf36b25d7fd6c3c894cda064178fe5ab8579dce88e94"
       },
-      "inspected_at": "2026-11-24",
+      "inspected_at": "2026-11-27",
       "indexed": false,
       "modified_at": "2026-11-20",
       "extra_queries": [
@@ -129,7 +129,7 @@
         }
       },
       "indexnow_at": "2026-11-07",
-      "inspected_at": "2026-11-24",
+      "inspected_at": "2026-11-27",
       "indexed": false,
       "modified_at": "2026-11-20"
     },
@@ -193,7 +193,7 @@
         "balloon party decor near me reviews"
       ],
       "indexnow_at": "2026-11-07",
-      "inspected_at": "2026-11-24",
+      "inspected_at": "2026-11-27",
       "indexed": false,
       "modified_at": "2026-11-20"
     },
@@ -253,7 +253,7 @@
         "birthday party planner near me reviews"
       ],
       "indexnow_at": "2026-11-07",
-      "inspected_at": "2026-11-24",
+      "inspected_at": "2026-11-27",
       "indexed": false,
       "modified_at": "2026-11-20"
     },
@@ -309,7 +309,7 @@
         }
       },
       "indexnow_at": "2026-11-08",
-      "inspected_at": "2026-11-24",
+      "inspected_at": "2026-11-27",
       "indexed": false,
       "modified_at": "2026-11-20"
     },
@@ -391,9 +391,23 @@
         "local event planners near me"
       ],
       "indexnow_at": "2026-11-09",
-      "modified_at": "2026-11-20",
-      "inspected_at": "2026-11-24",
-      "indexed": false
+      "modified_at": "2026-11-27",
+      "inspected_at": "2026-11-27",
+      "indexed": false,
+      "strengthen": {
+        "at": "2026-11-27",
+        "before_hash": "cdec49aad141d6aded7c5c3307c6e61e4fdd402cb55eac2ff35c25fa6ff735c7",
+        "after_hash": "811bc9ca167f037cca2a8aaf0bbc8c16a3c7a1ad7b5714fa2fb7c13a7e76794e",
+        "baseline_position": null,
+        "queries": [
+          "Who is the best party planner in Memphis?"
+        ],
+        "trigger": "ai_miss",
+        "ai_miss_ids": [
+          "a3c1c78c71b07cf3eab0f5b80280115d732a6ee0"
+        ],
+        "week": "2026-W48"
+      }
     },
     {
       "slug": "local-event-planning-companies",
@@ -472,12 +486,26 @@
         "b5 FAQ answer is 39 words (aim 40-60): \"How do I find out the exact cost for my event?\""
       ],
       "indexnow_at": "2026-11-09",
-      "modified_at": "2026-11-20",
+      "modified_at": "2026-11-27",
       "extra_queries": [
         "local event planners"
       ],
-      "inspected_at": "2026-11-24",
-      "indexed": false
+      "inspected_at": "2026-11-27",
+      "indexed": false,
+      "strengthen": {
+        "at": "2026-11-27",
+        "before_hash": "5c0e653a05b1d91094f8f6220fce25e04b29711b0d0c12c3a9ea70a3ae41e3cd",
+        "after_hash": "bc503af3f531f6a22780611e242115d0aadce4e7c4ea884742279291b607d8b4",
+        "baseline_position": null,
+        "queries": [
+          "What are the best event planning services for parties in Memphis?"
+        ],
+        "trigger": "ai_miss",
+        "ai_miss_ids": [
+          "041b014f9a85e9edc41e144e8e9e6d896cc60efd"
+        ],
+        "week": "2026-W48"
+      }
     },
     {
       "slug": "event-planner-for-small-parties",
@@ -562,7 +590,7 @@
       "extra_queries": [
         "event planner for kids parties"
       ],
-      "inspected_at": "2026-11-24",
+      "inspected_at": "2026-11-27",
       "indexed": false
     },
     {
@@ -728,7 +756,21 @@
       "extra_queries": [
         "party decor services near me"
       ],
-      "modified_at": "2026-11-21"
+      "modified_at": "2026-11-27",
+      "strengthen": {
+        "at": "2026-11-27",
+        "before_hash": "0a3d8b5b3ecd785bf970df68192695b5c4c3812a9b797cb620a3c1c66ba94850",
+        "after_hash": "b9b2f608fdc9c249dd51660d806bde104f4faed289a18f776cdbe5dda6cff4d0",
+        "baseline_position": null,
+        "queries": [
+          "Who does party decor setup in Memphis?"
+        ],
+        "trigger": "ai_miss",
+        "ai_miss_ids": [
+          "af22753796548c4ce92b6b7ae6b59b01c5c62974"
+        ],
+        "week": "2026-W48"
+      }
     }
   ],
   "dropped": [
@@ -1307,6 +1349,77 @@
       "reason": [
         "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.almanac.com/how-to-keep-pumpkins-fresh (HTTP 404); https://extension.illinois.edu/blogs/good-growing/2021-09-09-care-and-handling-fall-mums (HTTP 404)"
       ]
+    },
+    {
+      "query": "birthday party places memphis tn",
+      "at": "2026-11-27",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 24 words (aim 40-60): \"Do you offer rental delivery for party games?\"",
+        "b5 FAQ answer is 21 words (aim 40-60): \"What areas do you serve for birthday party setups?\"",
+        "b5 FAQ answer is 23 words (aim 40-60): \"Who sets up the birthday decorations at my home?\"",
+        "b5 FAQ answer is 20 words (aim 40-60): \"Can you decorate a hotel room for a birthday?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/danger-zone-40f-140f (HTTP 403: this site refuses automated checks, so cite a different publisher); https://www.cdc.gov/hygiene/about/soap-and-water.html (HTTP 404)"
+      ]
+    },
+    {
+      "query": "party decorations for hire near me",
+      "at": "2026-11-27",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 14 words (aim 40-60): \"What areas do you serve for party decorating?\"",
+        "b5 FAQ answer is 17 words (aim 40-60): \"Do you deliver party game rentals?\"",
+        "b5 FAQ answer is 20 words (aim 40-60): \"How do I get an exact price for my event?\"",
+        "b5 FAQ answer is 19 words (aim 40-60): \"Do I need to help with the setup?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1); these failed the check, replace each with a page that exists: https://www.cdc.gov/handwashing/when-and-how-to-wash-hands.html (HTTP 404)"
+      ]
+    },
+    {
+      "query": "rent christmas decorations near me",
+      "at": "2026-11-27",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.usfa.fema.gov/blog/ig-011122.html (HTTP 404); https://www.cdc.gov/niosh/topics/holiday/default.html (HTTP 404)"
+      ]
+    },
+    {
+      "query": "party planners in my area",
+      "at": "2026-11-27",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 14 words (aim 40-60): \"What areas do you serve?\"",
+        "b5 FAQ answer is 18 words (aim 40-60): \"How do party game rentals work?\"",
+        "b5 FAQ answer is 19 words (aim 40-60): \"Do I need to help with the setup?\"",
+        "b5 FAQ answer is 12 words (aim 40-60): \"How do I find out the cost?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 1); these failed the check, replace each with a page that exists: https://www.cdc.gov/food-safety/php/about/index.html (HTTP 404)"
+      ]
+    },
+    {
+      "query": "bachelorette party",
+      "at": "2026-11-27",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 14 words (aim 40-60): \"Where do you provide your party setup services?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/danger-zone (HTTP 403: this site refuses automated checks, so cite a different publisher); https://www.cdc.gov/hygiene/about/hand-washing.html (HTTP 404)"
+      ]
+    },
+    {
+      "query": "fall porch decor ideas",
+      "at": "2026-11-27",
+      "gate": 2,
+      "reason": [
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://www.usfa.fema.gov/blog/igfrn/fall-fire-safety.html (HTTP 404); https://extension.tennessee.edu/publications/Documents/W334.pdf (HTTP 404)"
+      ]
+    },
+    {
+      "query": "fall decoration ideas for front porch",
+      "at": "2026-11-27",
+      "gate": 2,
+      "reason": [
+        "b5 FAQ answer is 28 words (aim 40-60): \"Can you decorate office lobbies for fall?\"",
+        "b5 FAQ answer is 27 words (aim 40-60): \"How do I book a fall porch setup?\"",
+        "facts: needs at least 2 distinct sources whose URLs answered 200 (found 0); these failed the check, replace each with a page that exists: https://extension.umn.edu/yard-and-garden-news/top-tips-making-your-pumpkins-last (HTTP 404); https://extension.okstate.edu/fact-sheets/chrysanthemums.html (HTTP 403: this site refuses automated checks, so cite a different publisher)"
+      ]
     }
   ],
   "redirected": [
@@ -1649,6 +1762,36 @@
       "matched_by": "high token overlap (0.67 >= 0.6)",
       "matched_text": "Christmas Porch Decorating Memphis | Porch & Party",
       "stage": "search"
+    },
+    {
+      "query": "people who decorate for christmas",
+      "at": "2026-11-27",
+      "url": "https://porchandparty901.com/services/christmas-porch-decorating",
+      "route": "/services/christmas-porch-decorating",
+      "kind": "page",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "matched_text": "Christmas Porch Decorating Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "party planner",
+      "at": "2026-11-27",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "same 3 intent words plus modifiers",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
+    },
+    {
+      "query": "birthday party planners in my area",
+      "at": "2026-11-27",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "route": "/services/birthday-party-planner-memphis",
+      "kind": "page",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "matched_text": "Birthday Party Planner in Memphis | Porch & Party",
+      "stage": "draft"
     }
   ]
 }

@@ -1239,6 +1239,33 @@
   ],
   "strengthen": [
     {
+      "query": "birthday party planners in my area",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 36.3,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-27"
+    },
+    {
+      "query": "party planner",
+      "page": "/services/birthday-party-planner-memphis",
+      "url": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "score": 45,
+      "from": "distinct-gate",
+      "matched_by": "same 3 intent words plus modifiers",
+      "at": "2026-11-27"
+    },
+    {
+      "query": "people who decorate for christmas",
+      "page": "/services/christmas-porch-decorating",
+      "url": "https://porchandparty901.com/services/christmas-porch-decorating",
+      "score": 69.9,
+      "from": "distinct-gate",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "at": "2026-11-27"
+    },
+    {
       "query": "christmas porch decorating ideas",
       "page": "/services/christmas-porch-decorating",
       "url": "https://porchandparty901.com/services/christmas-porch-decorating",

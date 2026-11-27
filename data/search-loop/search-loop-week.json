@@ -2,13 +2,13 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W48",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-26T22:29:01.572Z",
-  "state": "stopped",
+  "generated_at": "2026-11-27T18:08:33.238Z",
+  "state": "running",
   "published": 0,
   "indexed": 0,
   "pace": 10,
   "ai_visitors": 0,
-  "ai_bot_hits": 111,
+  "ai_bot_hits": 100,
   "conversions": "not read: no conversion source configured for this site (form fills / checkouts)",
   "wins": 0,
   "undone": 0,
@@ -50,6 +50,24 @@
       "strengthen": "https://porchandparty901.com/services/christmas-porch-decorating",
       "matched_by": "high token overlap (0.67 >= 0.6)",
       "at": "2026-11-23"
+    },
+    {
+      "query": "people who decorate for christmas",
+      "strengthen": "https://porchandparty901.com/services/christmas-porch-decorating",
+      "matched_by": "high token overlap (0.75 >= 0.6)",
+      "at": "2026-11-27"
+    },
+    {
+      "query": "party planner",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "same 3 intent words plus modifiers",
+      "at": "2026-11-27"
+    },
+    {
+      "query": "birthday party planners in my area",
+      "strengthen": "https://porchandparty901.com/services/birthday-party-planner-memphis",
+      "matched_by": "high token overlap (0.60 >= 0.6)",
+      "at": "2026-11-27"
     }
   ],
   "cap": {
@@ -59,10 +77,11 @@
     "why": "up from 28 to 31: Google impressions 198 in the last 28 days beat 42 in the 28 before"
   },
   "notes": [
-    "not read: AI answer misses (no BOSS_OPEN_LOOPS_TOKEN in this run (pass it in the caller's secrets: block)); could not tell this run",
-    "NAMED STOP [FREE_MODEL_KEY_MISSING] no free model lane has a credential (GEMINI_API_KEY, OPENROUTER_API_KEY, CLOUDFLARE_*); BUILD wrote nothing, CHECK and the report still run",
-    "not read: Search Console page data (no Search Console property configured (gsc.site_url / its env var))",
-    "not read: index status for the pages 14-42 days old (URL Inspection: GSC_SERVICE_ACCOUNT_JSON is not set)"
+    "BUILD distinct gate: 3 search(es) had the same intent as an existing page and became strengthen briefs, not new pages (pages.json \"redirected\")",
+    "BUILD published 0 of quota 10: 7 draft(s) failed the gate and were dropped; 0 got no answer from the free model and stay queued",
+    "AI misses: strengthened /questions/local-event-planning-companies for 1 AI answer miss(es)",
+    "AI misses: strengthened /questions/local-party-planners-near-me for 1 AI answer miss(es)",
+    "AI misses: strengthened /questions/party-decor-services for 1 AI answer miss(es)"
   ],
   "lanes": {
     "ratio": {
@@ -91,14 +110,32 @@
     "competition": "ok: 15 top-10 read(s) via brave"
   },
   "ai_misses": {
-    "read": "not read: no BOSS_OPEN_LOOPS_TOKEN in this run (pass it in the caller's secrets: block)",
-    "week": null,
-    "misses": 0,
-    "strengthened": [],
+    "read": "ok",
+    "week": "2026-W48",
+    "misses": 3,
+    "strengthened": [
+      {
+        "id": "041b014f9a85e9edc41e144e8e9e6d896cc60efd",
+        "page_url": "https://porchandparty901.com/questions/local-event-planning-companies",
+        "at": "2026-11-27"
+      },
+      {
+        "id": "a3c1c78c71b07cf3eab0f5b80280115d732a6ee0",
+        "page_url": "https://porchandparty901.com/questions/local-party-planners-near-me",
+        "at": "2026-11-27"
+      },
+      {
+        "id": "af22753796548c4ce92b6b7ae6b59b01c5c62974",
+        "page_url": "https://porchandparty901.com/questions/party-decor-services",
+        "at": "2026-11-27"
+      }
+    ],
     "new_candidates": [],
     "skipped": [],
     "rejected": [],
     "could_not_tell": 4
   },
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/45905042492"
+  "comparison": "not read: FIND has not run since v1.16.0",
+  "seeds": "not read: this site has no seeds in its config",
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/46047145889"
 }
