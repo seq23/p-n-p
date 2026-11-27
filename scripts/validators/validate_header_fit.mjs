@@ -75,6 +75,16 @@ if (process.argv.includes('--self-test')) {
     ['an unmeasured side fails', 'header not found', row(), false],
   ];
   const bad = cases.filter(([, now, was, ok]) => (layoutDiff(now, was) === null) !== ok);
+  // The pixel compare, on tiny made-up pictures: a dark 1 px column on a light 8x3 picture.
+  const pic = (col, rgb = [20, 20, 20]) => { const d = new Array(8 * 3 * 4).fill(240); for (let y = 0; y < 3; y += 1) { const i = (y * 8 + col) * 4; d[i] = rgb[0]; d[i + 1] = rgb[1]; d[i + 2] = rgb[2]; } return d; };
+  const px = [
+    ['pixels: the same picture differs by 0', countDiff(pic(3), pic(3), 8, 3) === 0],
+    ['pixels: text 1 px to the side differs by 0', countDiff(pic(4), pic(3), 8, 3) === 0],
+    ['pixels: a 3 px move counts', countDiff(pic(6), pic(3), 8, 3) > 0],
+    ['pixels: a colour change counts', countDiff(pic(3, [200, 20, 20]), pic(3), 8, 3) > 0],
+  ];
+  for (const [name, ok] of px) if (!ok) bad.push([name]);
+  cases.push(...px);
   for (const [name] of bad) console.error(`header-fit self-test FAIL: ${name}`);
   console.log(bad.length ? `header-fit self-test: FAIL - ${bad.length} of ${cases.length} cases` : `header-fit self-test: ${cases.length} cases passed`);
   process.exit(bad.length ? 1 : 0);
@@ -213,21 +223,39 @@ async function layoutOf(ctx, url) {
   return m.controls.map(({ name, missing, left, width, height, text }) => ({ name, missing, left, width, height, text }));
 }
 
-/** How many pixels of two PNGs differ by more than 64 in any channel (Infinity when sizes differ). */
+/**
+ * How many pixels differ between two RGBA buffers of the same size. A pixel differs only when NO pixel
+ * within 1 px of the same spot in the other picture matches it within 64 per channel, checked both ways:
+ * centred nav text landing 1 px apart between two builds is the same header, while a changed word or
+ * colour, or a move of 2 px or more, still counts (27 Nov 2026: a 1 px nav shift read as 1514 pixels).
+ */
+function countDiff(da, db, W, H) {
+  const close = (p, i, q, j) => Math.max(Math.abs(p[i] - q[j]), Math.abs(p[i + 1] - q[j + 1]), Math.abs(p[i + 2] - q[j + 2])) <= 64;
+  const unmatched = (p, q, x, y) => {
+    const i = (y * W + x) * 4;
+    for (let dy = -1; dy <= 1; dy += 1) for (let dx = -1; dx <= 1; dx += 1) {
+      const X = x + dx, Y = y + dy;
+      if (X >= 0 && Y >= 0 && X < W && Y < H && close(p, i, q, (Y * W + X) * 4)) return false;
+    }
+    return true;
+  };
+  let diff = 0;
+  for (let y = 0; y < H; y += 1) for (let x = 0; x < W; x += 1) if (unmatched(da, db, x, y) || unmatched(db, da, x, y)) diff += 1;
+  return diff;
+}
+
+/** How many pixels of two PNGs differ (countDiff; Infinity when sizes differ). */
 async function pixelDiff(ctx, a, b) {
   const page = await ctx.newPage();
-  const n = await page.evaluate(async ([x, y]) => {
+  const got = await page.evaluate(async ([x, y]) => {
     const load = (src) => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
     const [ia, ib] = await Promise.all([load(x), load(y)]);
-    if (ia.width !== ib.width || ia.height !== ib.height) return -1;
-    const px = (img) => { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); return g.getImageData(0, 0, c.width, c.height).data; };
-    const [da, db] = [px(ia), px(ib)];
-    let diff = 0;
-    for (let i = 0; i < da.length; i += 4) if (Math.max(Math.abs(da[i] - db[i]), Math.abs(da[i + 1] - db[i + 1]), Math.abs(da[i + 2] - db[i + 2])) > 64) diff += 1;
-    return diff;
+    if (ia.width !== ib.width || ia.height !== ib.height) return null;
+    const px = (img) => { const c = document.createElement('canvas'); c.width = img.width; c.height = img.height; const g = c.getContext('2d'); g.drawImage(img, 0, 0); return Array.from(g.getImageData(0, 0, c.width, c.height).data); };
+    return { w: ia.width, h: ia.height, a: px(ia), b: px(ib) };
   }, [`data:image/png;base64,${a.toString('base64')}`, `data:image/png;base64,${b.toString('base64')}`]);
   await page.close();
-  return n < 0 ? Infinity : n;
+  return got ? countDiff(got.a, got.b, got.w, got.h) : Infinity;
 }
 
 const live = arg('url');
