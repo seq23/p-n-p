@@ -2,7 +2,7 @@
   "schema": "search-loop-week-v1",
   "week": "2026-W48",
   "site": "porchandparty901.com",
-  "generated_at": "2026-11-27T22:12:48.635Z",
+  "generated_at": "2026-11-28T21:09:29.510Z",
   "state": "running",
   "published": 0,
   "indexed": 0,
@@ -133,5 +133,5 @@
   },
   "comparison": "not read: FIND has not run since v1.16.0",
   "seeds": "not read: this site has no seeds in its config",
-  "run_url": "https://github.com/seq23/p-n-p/actions/runs/46075149673"
+  "run_url": "https://github.com/seq23/p-n-p/actions/runs/46190098948"
 }
