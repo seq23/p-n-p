@@ -2,6 +2,7 @@
 // the Resend API is called. Sends never go through pnp-mailer (docs/email-setup.md).
 import { tokenMatches } from './owner-feed.mjs';
 import { esc } from './util.mjs';
+import { outreachReplies } from './outreach-inbound.mjs';
 
 export const OUTREACH_FROM = 'sequoia@porchandparty901.com';
 export const RESEND_URL = 'https://api.resend.com/emails';
@@ -117,7 +118,9 @@ export async function handleOutreach({ request, env }, action, now = new Date())
       return reply(await sendOutreach(env, input, now));
     }
     const since = new URL(request.url).searchParams.get('since') || '2026-01-01';
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(since) || new Date(`${since}T00:00:00Z`).toISOString().slice(0,10) !== since) return reply({ ok: false, reason: 'since must be a real YYYY-MM-DD date.' }, 400);
+    const sinceDay = new Date(`${since}T00:00:00Z`);
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(since) || Number.isNaN(sinceDay.getTime()) || sinceDay.toISOString().slice(0,10) !== since) return reply({ ok: false, reason: 'since must be a real YYYY-MM-DD date.' }, 400);
+    if (action === 'replies') return reply(await outreachReplies(env, since));
     return reply(await outreachStatus(env.DB, since, now));
   } catch { return reply({ ok: false, reason: 'Outreach is unavailable. No retry should be sent until the owner checks.' }, 503); }
 }

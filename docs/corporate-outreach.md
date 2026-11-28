@@ -36,6 +36,19 @@ unchanged to the configured owner. Takeover is recorded before forwarding to pre
 send while a failed forward is retried. A storage outage attempts forwarding and surfaces
 the failure. No inbound record is added to the admin's customer-request or task lists.
 
+Replies reach the owner through Boss OS, not only the forward (owner, 28 Nov 2026: three office
+replies were "forwarded" and never seen). `GET /api/outreach/replies?since=YYYY-MM-DD` (same Bearer
+token) returns every stored `reply` row with its new words (quoted campaign text removed, at most
+2,000 characters), subject, sender name, Message-ID and `auth`: Cloudflare's own verdict on arrival,
+read from the FIRST `Authentication-Results` header (the one mx.cloudflare.net prepends; a forged one
+lower down is never read). `pass` is DMARC pass, or no DMARC policy with an aligned DKIM pass; `fail`
+is anything else Cloudflare judged; `unknown` is no Cloudflare verdict. The Pages route reads the copy
+through its `IDS` binding, the same private bucket the mailer writes as `OUTREACH_RAW`. Read-only: no
+row or copy is changed. A missing or unreadable copy is still returned with `text: null` and `unread`.
+Boss OS's Simone reads it on every tick and puts each reply in Decide and the morning email. The
+forward stays as a spare copy. `forward_handed_at` (column `forwarded_at`) is when Cloudflare accepted
+the forward, never proof it arrived: Boss OS's arrival check decides that.
+
 Sending: the send endpoint calls the Resend API (`https://api.resend.com/emails`) with the
 Pages secret `RESEND_OUTREACH_KEY`, never pnp-mailer (pnp-mailer does not allow the sequoia@
 sender). Every message is multipart text + HTML from and Reply-To `sequoia@porchandparty901.com`,
