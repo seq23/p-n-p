@@ -161,6 +161,8 @@ const outside = routeFiles.filter((f) => !guardedDirs.some((d) => f.startsWith(d
 const OUTREACH_ROUTES = {
   [path.join('functions', 'api', 'outreach', 'send.js')]: /export const onRequest = \(context\) => handleOutreach\(context, 'send'\);/,
   [path.join('functions', 'api', 'outreach', 'status.js')]: /export const onRequest = \(context\) => handleOutreach\(context, 'status'\);/,
+  // Every stored office reply with its words, read by Boss OS for her Decide list (28 Nov 2026).
+  [path.join('functions', 'api', 'outreach', 'replies.js')]: /export const onRequest = \(context\) => handleOutreach\(context, 'replies'\);/,
 };
 for (const [f, re] of Object.entries(OUTREACH_ROUTES)) {
   if (!fs.existsSync(path.join(ROOT, f))) { errors.push(`${f} is missing (the outreach route)`); continue; }

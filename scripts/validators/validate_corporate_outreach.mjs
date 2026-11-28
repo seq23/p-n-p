@@ -28,7 +28,7 @@ function setup() {
 const ADDRESS = '100 Fixture Street, Example City, ZZ 00000';
 const mid = (env, i) => env.resend[i].body.headers['Message-ID'];
 const api = (env, action, { body, auth = `Bearer ${token}`, method = action === 'send' ? 'POST' : 'GET', query = '' } = {}) => O.handleOutreach({ env, request: new Request(`https://example.com/api/outreach/${action}${query}`, { method, headers: { Authorization: auth }, ...(body ? { body: JSON.stringify(body) } : {}) }) }, action, now);
-for (const action of ['send','status']) {
+for (const action of ['send','status','replies']) {
   for (const auth of ['', 'Bearer wrong-token', `Basic ${token}`]) assert.equal((await api({}, action, { auth, body: action === 'send' ? input() : null })).status, 401);
   assert.equal((await api({ PNP_OUTREACH_TOKEN: '' }, action)).status, 401);
 }
@@ -258,4 +258,60 @@ for (const [text, opts, kind] of [
   const before = db.raw.prepare('SELECT * FROM invoice_sent_copies').get();
   await O.outreachStatus(db,undefined,now); assert.deepEqual(db.raw.prepare('SELECT * FROM invoice_sent_copies').get(),before);
 }
-console.log('validate_corporate_outreach: OK (auth, atomic quotas, campaign and payment gates, suppression and takeover, do-not-contact, one threaded follow-up, MIME classes, original forwarding, form storage, owner labels, signatures, Resend-only delivery with footer and List-Unsubscribe)');
+// GET /api/outreach/replies (owner, 28 Nov 2026): every stored reply with its words, read-only, for
+// Boss OS's Decide list. Real path: the Worker's email() files it, then the Pages route reads the copy.
+{
+  const CF_PASS = 'mx.cloudflare.net; dkim=pass header.d=fictional.example.com header.s=s1; dmarc=pass header.from=fictional.example.com policy.dmarc=quarantine; spf=pass';
+  const CF_FAIL = 'mx.cloudflare.net; dkim=fail header.d=fictional.example.com; dmarc=fail header.from=fictional.example.com policy.dmarc=reject; spf=fail';
+  const replySetup = () => { const s = inboundSetup(); s.env.OUTREACH_RAW.get = async (k) => s.raw.has(k) ? { arrayBuffer: async () => s.raw.get(k).slice().buffer } : null; return s; };
+  const list = async (env, query = '?since=2026-01-01') => { const r = await api(env, 'replies', { query }); assert.equal(r.status, 200); assert.equal(r.headers.get('Cache-Control'), 'no-store'); return r.json(); };
+  {
+    const { env, db } = replySetup();
+    await incoming(env, 'Yes please, what dates are open in December?\n\nOn Mon someone wrote:\n> Christmas decor for Fixture', { headers: { 'Authentication-Results': CF_PASS, 'Message-ID': '<reply-1@fictional.example.com>' }, subject: 'Re: Christmas decor for Fixture 0?' });
+    await incoming(env, 'No thanks', { from: 'other@fictional.example.com' });
+    await incoming(env, 'Away', { from: 'away@fictional.example.com', headers: { 'X-Autoreply': 'yes' } });
+    const before = JSON.stringify([db.raw.prepare('SELECT * FROM outreach_inbound ORDER BY id').all(), db.raw.prepare('SELECT * FROM outreach_blocks ORDER BY address').all()]);
+    const got = await list(env);
+    assert.equal(got.rows, 1); assert.equal(got.replies.length, 1, 'only real replies, never opt-outs or out-of-office');
+    const [r] = got.replies;
+    assert.equal(r.text, 'Yes please, what dates are open in December?', 'their new words only, never the quoted campaign');
+    assert.equal(r.subject, 'Re: Christmas decor for Fixture 0?'); assert.equal(r.email, 'reply@fictional.example.com');
+    assert.equal(r.message_id, '<reply-1@fictional.example.com>'); assert.equal(r.auth, 'pass'); assert.ok(r.forward_handed_at); assert.equal(r.unread, undefined);
+    assert.equal(JSON.stringify([db.raw.prepare('SELECT * FROM outreach_inbound ORDER BY id').all(), db.raw.prepare('SELECT * FROM outreach_blocks ORDER BY address').all()]), before, 'reading replies changes no row');
+    assert.equal((await list(env, '?since=2027-01-01')).replies.length, 0);
+    assert.equal((await api(env, 'replies', { query: '?since=2026-13-01' })).status, 400);
+  }
+  // A forged verdict below Cloudflare's own is never read; no Cloudflare verdict is "unknown".
+  {
+    const { env } = replySetup();
+    const mime = `Authentication-Results: ${CF_FAIL}\r\nAuthentication-Results: mx.cloudflare.net; dmarc=pass header.from=fictional.example.com\r\nFrom: reply@fictional.example.com\r\nSubject: Re: decor\r\nContent-Type: text/plain\r\n\r\nPlease call me about a quote`;
+    await incoming(env, '', { mime });
+    await incoming(env, '', { mime: 'Authentication-Results: evil.example; dmarc=pass\r\nFrom: reply@fictional.example.com\r\nSubject: Re: decor\r\nContent-Type: text/plain\r\n\r\nCan you quote?' });
+    assert.deepEqual(Object.fromEntries((await list(env)).replies.map((r) => [r.text, r.auth])), { 'Please call me about a quote': 'fail', 'Can you quote?': 'unknown' });
+  }
+  assert.equal(I.senderAuth('Authentication-Results: mx.cloudflare.net; dkim=pass header.d=sub.fictional.example.com; dmarc=none header.from=fictional.example.com\r\n\r\nx', 'a@fictional.example.com'), 'pass');
+  assert.equal(I.senderAuth('Authentication-Results: mx.cloudflare.net; dkim=pass header.d=mailer-host.example.net; dmarc=none header.from=fictional.example.com\r\n\r\nx', 'a@fictional.example.com'), 'fail');
+  assert.equal(I.senderAuth('Authentication-Results: mx.cloudflare.net;\r\n\tdkim=pass header.d=other.example.net;\r\n\tdmarc=fail (policy not aligned) header.from=fictional.example.com policy.dmarc=none\r\n\r\nx', 'a@fictional.example.com'), 'fail');
+  assert.equal(I.senderAuth('Authentication-Results: mx.cloudflare.net;\r\n\tdmarc=pass header.from=fictional.example.com\r\n\r\nx', 'a@fictional.example.com'), 'pass', 'a folded header is read whole');
+  // A missing or unreadable stored copy is still returned, never dropped.
+  {
+    const { env, raw } = replySetup();
+    await incoming(env, 'What is your price?'); await incoming(env, 'Can you do our lobby?', { from: 'two@fictional.example.com' });
+    const [first] = [...raw.keys()]; raw.delete(first);
+    const got = await list(env);
+    assert.equal(got.replies.length, 2); assert.equal(got.replies.filter((r) => r.text === null && r.unread).length, 1);
+    env.OUTREACH_RAW.get = async () => { throw new Error('storage outage'); };
+    const down = await list(env); assert.equal(down.replies.length, 2); assert.ok(down.replies.every((r) => r.text === null && r.unread && r.auth === 'unknown'));
+  }
+  // The Pages route reads the same private bucket the Worker writes, and never anything but a stored reply.
+  const bucketOf = (toml, binding) => new RegExp(`binding = "${binding}"\\s*\\nbucket_name = "([^"]+)"`).exec(toml)?.[1];
+  assert.equal(bucketOf(fs.readFileSync(`${ROOT}/wrangler.toml`,'utf8'), 'OUTREACH_RAW'), bucketOf(fs.readFileSync(`${ROOT}/workers/pnp-mailer/wrangler.toml`,'utf8'), 'OUTREACH_RAW'));
+  {
+    const { env, db, raw } = replySetup(); await incoming(env, 'Can you quote?');
+    const asked = []; const get = env.OUTREACH_RAW.get; env.OUTREACH_RAW.get = async (k) => { asked.push(k); return get(k); };
+    db.raw.prepare("UPDATE outreach_inbound SET raw_key = 'ids/request-photo.jpg'").run();
+    const got = await list(env); assert.equal(got.replies.length, 1); assert.equal(got.replies[0].text, null); assert.deepEqual(asked, [], 'an ID photo key is never read');
+    assert.equal(raw.size, 1);
+  }
+}
+console.log('validate_corporate_outreach: OK (auth, atomic quotas, campaign and payment gates, suppression and takeover, do-not-contact, one threaded follow-up, MIME classes, original forwarding, form storage, owner labels, signatures, Resend-only delivery with footer and List-Unsubscribe, stored replies with their words and the receiving server sender verdict)');

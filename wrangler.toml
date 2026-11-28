@@ -38,6 +38,13 @@ binding = "AI"
 binding = "IDS"
 bucket_name = "pnp-ids"
 
+# Stored office replies (the pnp-mailer Worker writes them under outreach/raw/ in the same private
+# bucket). Read only by GET /api/outreach/replies (functions/_lib/outreach-inbound.mjs), and only
+# keys under outreach/raw/: never an ID photo.
+[[r2_buckets]]
+binding = "OUTREACH_RAW"
+bucket_name = "pnp-ids"
+
 # Cloudflare Turnstile (free) on the request form. The site key is public by design.
 # Widget "porch-and-party-requests" (Managed; porchandparty901.com, www., p-n-p.pages.dev and its
 # previews). The secret is the Pages secret TURNSTILE_SECRET (production and preview; vault

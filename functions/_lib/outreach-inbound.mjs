@@ -27,6 +27,57 @@ export function classifyInbound(headers, parsed) {
   return 'reply';
 }
 
+// WHO REALLY SENT IT (owner, 28 Nov 2026: office replies must reach her, and a forged one must not
+// look real). Read from Cloudflare's own verdict on arrival: the FIRST Authentication-Results header,
+// which mx.cloudflare.net prepends above everything the sender wrote, so a forged "dmarc=pass" further
+// down is never read. 'pass' = DMARC passed, or no DMARC policy and an aligned DKIM pass; 'fail' =
+// Cloudflare judged it and it did not pass; 'unknown' = no Cloudflare verdict in the copy. Pure.
+export function senderAuth(rawText, fromAddress) {
+  const head = String(rawText || '').split(/\r?\n\r?\n/)[0].replace(/\r?\n[ \t]+/g, ' ');
+  const first = /^Authentication-Results:[ \t]*([^\r\n]*)$/im.exec(head);
+  if (!first || !/^mx\.cloudflare\.net\s*;/i.test(first[1].trim())) return 'unknown';
+  const verdict = first[1];
+  if (/\bdmarc=pass\b/i.test(verdict)) return 'pass';
+  const domain = emailOf(fromAddress) ? domainOf(emailOf(fromAddress)) : '';
+  const aligned = (d) => d === domain || domain.endsWith(`.${d}`) || d.endsWith(`.${domain}`);
+  const signed = [...verdict.matchAll(/\bdkim=pass\b[^;]*?\bheader\.d=([a-z0-9.-]+)/gi)].map((m) => m[1].toLowerCase());
+  if (domain && /\bdmarc=none\b/i.test(verdict) && signed.some(aligned)) return 'pass';
+  return 'fail';
+}
+
+const MAX_REPLY_CHARS = 2000;
+const htmlText = (html) => String(html || '').replace(/<(?:style|script|head)[\s\S]*?<\/(?:style|script|head)>/gi, ' ')
+  .replace(/<br\s*\/?>|<\/(?:p|div|li|tr|h\d)>/gi, '\n').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ')
+  .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/[ \t]+/g, ' ');
+
+// EVERY STORED REPLY, WITH ITS WORDS (owner, 28 Nov 2026: "P&P office replies never arrived").
+// Boss OS reads this (GET /api/outreach/replies) and puts each one in her Decide list and morning
+// email; the forward stays a spare copy. Read-only: rows and stored copies are never changed. A copy
+// that is missing or cannot be read is still returned, with text null and `unread` saying why, so
+// no reply is ever dropped on the way. `forward_handed_at` is when Cloudflare accepted the forward,
+// never proof that it arrived anywhere.
+export async function outreachReplies(env, since = '2026-01-01') {
+  const rows = (await env.DB.prepare("SELECT id, email, kind, at, forwarded_at, raw_key FROM outreach_inbound WHERE kind = 'reply' AND at >= ? ORDER BY at, id LIMIT 200").bind(since).all()).results || [];
+  const replies = [];
+  for (const row of rows) {
+    const base = { id: row.id, email: row.email, kind: row.kind, at: row.at, forward_handed_at: row.forwarded_at || null };
+    try {
+      // Only a stored reply is ever read through this binding, never another object in the bucket.
+      const obj = /^outreach\/raw\/[0-9a-f-]{36}\.eml$/.test(String(row.raw_key || '')) ? await env.OUTREACH_RAW.get(row.raw_key) : null;
+      if (!obj) { replies.push({ ...base, text: null, subject: null, from_name: null, message_id: null, auth: 'unknown', unread: 'The stored copy is missing.' }); continue; }
+      const raw = await obj.arrayBuffer();
+      const parsed = await PostalMime.parse(raw);
+      const text = replyText(parsed.text || htmlText(parsed.html));
+      replies.push({ ...base, subject: String(parsed.subject || '').slice(0, 300), from_name: String(parsed.from?.name || '').slice(0, 120) || null,
+        message_id: parsed.messageId || null, text: text.length > MAX_REPLY_CHARS ? `${text.slice(0, MAX_REPLY_CHARS).trimEnd()}…` : text,
+        auth: senderAuth(new TextDecoder().decode(raw), parsed.from?.address || row.email) });
+    } catch {
+      replies.push({ ...base, text: null, subject: null, from_name: null, message_id: null, auth: 'unknown', unread: 'The stored copy could not be read.' });
+    }
+  }
+  return { replies, rows: rows.length };
+}
+
 export async function receiveOutreach(message, env, now = new Date()) {
   // The owner's forward address is a Worker secret (PNP_OUTREACH_OWNER), never in this public repo.
   // Without it nothing could be forwarded, so the message is rejected back to the sender (never filed).
